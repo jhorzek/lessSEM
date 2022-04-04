@@ -4,6 +4,7 @@
 #include <RcppArmadillo.h>
 #include "dataset.hpp"
 #include "parameters.hpp"
+#include "derivativeStructure.hpp"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
@@ -11,14 +12,17 @@ class SEMCpp{
 public: 
   dataset data;
   arma::mat rawData;
-  Rcpp::CharacterVector manifestNames;
+  Rcpp::StringVector manifestNames;
   
-  // paramters
+  // parameters
   parameters parameterTable;
+  
+  // derivative elements
+  derivativeElements derivElements;
   
   // model matrices
   arma::mat Amatrix, Smatrix, Fmatrix;
-  arma::colvec mVector;
+  arma::colvec Mvector;
   
   // fit elements
   arma::mat impliedCovariance;
@@ -29,7 +33,7 @@ public:
   SEMCpp(){};
   
   // setter or change elements
-  void addRawData(arma::mat rawData_, Rcpp::CharacterVector manifestNames_);
+  void addRawData(arma::mat rawData_, Rcpp::StringVector manifestNames_);
   void addSubset(int N_,
                  int observed_, // number of variables without missings
                  arma::uvec notMissing_, // vector with indices of non-missing values
@@ -42,25 +46,31 @@ public:
   void setMatrix(std::string whichMatrix, arma::mat values);
   void setVector(std::string whichVector, arma::colvec values);
   
-  void initializeParameters(Rcpp::CharacterVector label_,
-                            Rcpp::CharacterVector location_,
+  void initializeParameters(Rcpp::StringVector label_,
+                            Rcpp::StringVector location_,
                             arma::uvec row_,
                             arma::uvec col_,
                             arma::vec value_,
                             arma::vec rawValue_);
-  void setParameters(Rcpp::CharacterVector label_,
+  void setParameters(Rcpp::StringVector label_,
                      arma::vec value_,
                      bool raw);
   
+  void addDerivativeElement(std::string label_, 
+                            std::string location_, 
+                            bool isVariance_, 
+                            arma::mat positionMatrix_);
+  
   // getter
   Rcpp::DataFrame getParameters();
+  Rcpp::StringVector getParameterLabels();
   
   // fit related functions
   void implied(); // compute implied means and covariance
   double fit();
-  arma::colvec gradients();
-  arma::mat scores();
-  arma::mat hessian();
+  arma::colvec getGradients();
+  arma::mat getScores(bool raw);
+  arma::mat getHessian();
 };
 
 #endif

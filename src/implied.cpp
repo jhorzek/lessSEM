@@ -13,10 +13,10 @@ arma::mat computeImpliedCovariance(const arma::mat& Fmatrix, const arma::mat& Am
 }
 
 // [[Rcpp::export]]
-arma::mat computeImpliedMeans(const arma::mat& Fmatrix, const arma::mat& Amatrix, const arma::colvec& mVector){
+arma::mat computeImpliedMeans(const arma::mat& Fmatrix, const arma::mat& Amatrix, const arma::colvec& Mvector){
   
   arma::mat I = arma::eye(arma::size(Amatrix));
-  arma::mat impliedMeans = Fmatrix*arma::inv(I-Amatrix)*mVector;
+  arma::mat impliedMeans = Fmatrix*arma::inv(I-Amatrix)*Mvector;
   
   return(impliedMeans);
 }

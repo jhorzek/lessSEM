@@ -55,15 +55,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // computeImpliedMeans
-arma::mat computeImpliedMeans(const arma::mat& Fmatrix, const arma::mat& Amatrix, const arma::colvec& mVector);
-RcppExport SEXP _aCV4SEM_computeImpliedMeans(SEXP FmatrixSEXP, SEXP AmatrixSEXP, SEXP mVectorSEXP) {
+arma::mat computeImpliedMeans(const arma::mat& Fmatrix, const arma::mat& Amatrix, const arma::colvec& Mvector);
+RcppExport SEXP _aCV4SEM_computeImpliedMeans(SEXP FmatrixSEXP, SEXP AmatrixSEXP, SEXP MvectorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type Fmatrix(FmatrixSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type Amatrix(AmatrixSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type mVector(mVectorSEXP);
-    rcpp_result_gen = Rcpp::wrap(computeImpliedMeans(Fmatrix, Amatrix, mVector));
+    Rcpp::traits::input_parameter< const arma::colvec& >::type Mvector(MvectorSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeImpliedMeans(Fmatrix, Amatrix, Mvector));
     return rcpp_result_gen;
 END_RCPP
 }

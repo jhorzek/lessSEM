@@ -7,19 +7,19 @@
 
 class parameters{
 public: 
-  Rcpp::CharacterVector label; // parameter label
-  Rcpp::CharacterVector location; // name of the matrix where the parameter is located
+  Rcpp::StringVector label; // parameter label
+  Rcpp::StringVector location; // name of the matrix where the parameter is located
   arma::uvec row; // row in the matrix 
   arma::uvec col; // col in the matrix
   arma::vec value; // parameter value
   arma::vec rawValue; // raw (untransformed) parameter value
-  
+
   // constructor
   parameters(){};
   
   //
-  void initialize(Rcpp::CharacterVector label_,
-             Rcpp::CharacterVector location_,
+  void initialize(Rcpp::StringVector label_,
+             Rcpp::StringVector location_,
              arma::uvec row_,
              arma::uvec col_,
              arma::vec value_,
@@ -29,7 +29,7 @@ public:
   Rcpp::DataFrame getParameters();
   
   // setter
-  void setParameters(Rcpp::CharacterVector label_,
+  void setParameters(Rcpp::StringVector label_,
                      arma::vec value_,
                      bool raw
                      );

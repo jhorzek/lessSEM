@@ -25,11 +25,9 @@ test_that("analytic scores work", {
   SEM <- SEMFromLavaan(model = model, rawData = PoliticalDemocracy)
   SEM <- fit(SEM)
   
-  scoresNumeric <- computeScores(SEM, raw = FALSE)
-  scoresAnalytic <- computeAnalyticScores(getParameters(SEM), SEM, raw = FALSE)
-  testthat::expect_equal(round(sum(abs(scoresAnalytic - scoresNumeric)),4),0)
-  
-  testthat::expect_equal(round(sum(abs(scoresNumeric - lavaanScores)),4),0)
+  scoresAnalytic <- getScores(SEM, raw = FALSE)
+
+  testthat::expect_equal(round(sum(abs(scoresAnalytic - lavaanScores)),4),0)
   
   PoliticalDemocracyWithNA <- PoliticalDemocracy
   

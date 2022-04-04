@@ -11,6 +11,6 @@ arma::mat computeImpliedCovariance(const arma::mat& Fmatrix,
 
 arma::mat computeImpliedMeans(const arma::mat& Fmatrix,
                               const arma::mat& Amatrix, 
-                              const arma::colvec& mVector);
+                              const arma::colvec& Mvector);
 
 #endif

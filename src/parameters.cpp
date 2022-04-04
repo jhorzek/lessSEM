@@ -3,12 +3,12 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-void parameters::initialize(Rcpp::CharacterVector label_,
-                       Rcpp::CharacterVector location_,
-                       arma::uvec row_,
-                       arma::uvec col_,
-                       arma::vec value_,
-                       arma::vec rawValue_){
+void parameters::initialize(Rcpp::StringVector label_,
+                            Rcpp::StringVector location_,
+                            arma::uvec row_,
+                            arma::uvec col_,
+                            arma::vec value_,
+                            arma::vec rawValue_){
   
   label = label_;
   location = location_;
@@ -16,7 +16,6 @@ void parameters::initialize(Rcpp::CharacterVector label_,
   col = col_;
   value = value_;
   rawValue = rawValue_;
-  
 }
 
 Rcpp::DataFrame parameters::getParameters(){
@@ -32,7 +31,7 @@ Rcpp::DataFrame parameters::getParameters(){
   return(parameterFrame);
 }
 
-void parameters::setParameters(Rcpp::CharacterVector label_,
+void parameters::setParameters(Rcpp::StringVector label_,
                                arma::vec value_,
                                bool raw){
   bool found = false;
@@ -70,6 +69,6 @@ void parameters::setParameters(Rcpp::CharacterVector label_,
     }
     if(!found){ Rcpp::stop("Parameter not found!"); }
   }
-
+  
   return;
 }

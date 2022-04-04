@@ -13,7 +13,7 @@ computeImpliedCovariance <- function(Fmatrix, Amatrix, Smatrix) {
     .Call(`_aCV4SEM_computeImpliedCovariance`, Fmatrix, Amatrix, Smatrix)
 }
 
-computeImpliedMeans <- function(Fmatrix, Amatrix, mVector) {
-    .Call(`_aCV4SEM_computeImpliedMeans`, Fmatrix, Amatrix, mVector)
+computeImpliedMeans <- function(Fmatrix, Amatrix, Mvector) {
+    .Call(`_aCV4SEM_computeImpliedMeans`, Fmatrix, Amatrix, Mvector)
 }
 

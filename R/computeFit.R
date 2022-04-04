@@ -1,6 +1,6 @@
 fit <- function(SEM){
-  
-  return(SEM$fit())
+  SEM$fit()
+  return(SEM)
   
 }
 

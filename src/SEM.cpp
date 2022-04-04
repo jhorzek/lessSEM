@@ -2,22 +2,23 @@
 #include "SEM.hpp"
 #include "implied.hpp"
 #include "fit.hpp"
+#include "scores.hpp"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-void SEMCpp::addRawData(arma::mat rawData_, Rcpp::CharacterVector manifestNames_){
+void SEMCpp::addRawData(arma::mat rawData_, Rcpp::StringVector manifestNames_){
   rawData = rawData_;
   manifestNames = manifestNames_;
 }
 
 void SEMCpp::addSubset(int N_,
-                    int observed_, // number of variables without missings
-                    arma::uvec notMissing_, // vector with indices of non-missing values
-                    // the following elements are only relevant for N>1
-                    arma::mat covariance_,
-                    arma::colvec means_,
-                    // raw data is required for N == 1
-                    arma::colvec dataNoMissing_){
+                       int observed_, // number of variables without missings
+                       arma::uvec notMissing_, // vector with indices of non-missing values
+                       // the following elements are only relevant for N>1
+                       arma::mat covariance_,
+                       arma::colvec means_,
+                       // raw data is required for N == 1
+                       arma::colvec dataNoMissing_){
   data.addSubset(N_,
                  observed_, // number of variables without missings
                  notMissing_, // vector with indices of non-missing values
@@ -36,7 +37,7 @@ void SEMCpp::removeSubset(int whichSubset){
 }
 
 void SEMCpp::setMatrix(std::string whichMatrix, arma::mat values){
-
+  
   if(whichMatrix.compare("A") == 0){
     Amatrix = values;
     return;
@@ -56,19 +57,19 @@ void SEMCpp::setMatrix(std::string whichMatrix, arma::mat values){
 void SEMCpp::setVector(std::string whichVector, arma::colvec values){
   
   if(whichVector.compare("m") == 0){
-    mVector = values;
+    Mvector = values;
     return;
   }
   
   Rcpp::stop("Unknown whichVector. Can only assign m.");
 }
 
-void SEMCpp::initializeParameters(Rcpp::CharacterVector label_,
-                               Rcpp::CharacterVector location_,
-                               arma::uvec row_,
-                               arma::uvec col_,
-                               arma::vec value_,
-                               arma::vec rawValue_){
+void SEMCpp::initializeParameters(Rcpp::StringVector label_,
+                                  Rcpp::StringVector location_,
+                                  arma::uvec row_,
+                                  arma::uvec col_,
+                                  arma::vec value_,
+                                  arma::vec rawValue_){
   parameterTable.initialize(label_,
                             location_,
                             row_,
@@ -78,30 +79,31 @@ void SEMCpp::initializeParameters(Rcpp::CharacterVector label_,
   return;
 }
 
-void SEMCpp::setParameters(Rcpp::CharacterVector label_,
-                        arma::vec value_,
-                        bool raw){
+void SEMCpp::setParameters(Rcpp::StringVector label_,
+                           arma::vec value_,
+                           bool raw){
   // step one: change parameters in parameterTable
   parameterTable.setParameters(label_, value_, raw);
   // step two: change parameters in model matrices
   
   for(int par = 0; par < parameterTable.label.length(); par++){
     
-    if(parameterTable.label.at(par) == "Amatrix"){
+    if(parameterTable.location.at(par) == "Amatrix"){
       Amatrix(parameterTable.row.at(par), 
               parameterTable.col.at(par)) = parameterTable.value.at(par);
       continue;
     }
-    if(parameterTable.label.at(par) == "Smatrix"){
+    if(parameterTable.location.at(par) == "Smatrix"){
       Smatrix(parameterTable.row.at(par), 
               parameterTable.col.at(par)) = parameterTable.value.at(par);
       continue;
     }
-    if(parameterTable.label.at(par) == "mVector"){
-      mVector(parameterTable.row.at(par), 
+    if(parameterTable.location.at(par) == "Mvector"){
+      Mvector(parameterTable.row.at(par), 
               parameterTable.col.at(par)) = parameterTable.value.at(par);
       continue;
     }
+    Rcpp::Rcout << parameterTable.label.at(par) << std::endl;
     Rcpp::stop("Could not find parameter in SEMCpp::setParameters");
   }
   
@@ -113,6 +115,16 @@ void SEMCpp::setParameters(Rcpp::CharacterVector label_,
 }
 
 
+void SEMCpp::addDerivativeElement(std::string label_, 
+                                  std::string location_, 
+                                  bool isVariance_, 
+                                  arma::mat positionMatrix_){
+  derivElements.addDerivativeElement(label_, 
+                                     location_, 
+                                     isVariance_, 
+                                     positionMatrix_);
+}
+
 // getter
 Rcpp::DataFrame SEMCpp::getParameters(){
   
@@ -120,6 +132,14 @@ Rcpp::DataFrame SEMCpp::getParameters(){
   
 }
 
+Rcpp::StringVector SEMCpp::getParameterLabels(){
+  Rcpp::StringVector uniqueParLabels(derivElements.uniqueLabels.size());
+  for(int i = 0; i < derivElements.uniqueLabels.size(); i++){
+    uniqueParLabels(i) = derivElements.uniqueLabels.at(i);
+  }
+  return(uniqueParLabels);
+  
+}
 // fit functions
 
 
@@ -129,7 +149,7 @@ void SEMCpp::implied(){
   
   // step one: compute implied mean and covariance
   impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
-  impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, mVector);
+  impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
   
   return;
 }
@@ -137,14 +157,14 @@ void SEMCpp::implied(){
 
 double SEMCpp::fit(){
   m2LL = 0.0;
-
+  
   // step one: compute implied mean and covariance
   implied();
   
   // step two: compute fit for each subset
-
+  
   for(int s = 0; s < data.nGroups; s++){
-
+    
     // convenient pointer to current subset:
     subset& currentSubset = data.dataSubsets.at(s);
     arma::mat currentImpliedCovariance = impliedCovariance.submat(currentSubset.notMissing, currentSubset.notMissing);
@@ -159,7 +179,7 @@ double SEMCpp::fit(){
       m2LL += currentSubset.m2LL;
       
     }else if(currentSubset.N > 1){
-
+      
       currentSubset.m2LL = computeGroupM2LL(currentSubset.N, 
                                             currentSubset.observed, 
                                             currentSubset.means, 
@@ -177,6 +197,13 @@ double SEMCpp::fit(){
   return(m2LL);
 }
 
+arma::mat SEMCpp::getScores(bool raw){
+
+  arma::mat scoresMat = scores(*this, raw);
+  
+  return(scoresMat);
+}
+
 RCPP_EXPOSED_CLASS(SEMCpp)
   RCPP_MODULE(SEM_cpp){
     using namespace Rcpp;
@@ -185,7 +212,7 @@ RCPP_EXPOSED_CLASS(SEMCpp)
       .field_readonly( "A", &SEMCpp::Amatrix, "Matrix with directed effects")
       .field_readonly( "S", &SEMCpp::Smatrix, "Matrix with undirected paths")
       .field_readonly( "F", &SEMCpp::Fmatrix, "Filter matrix to separate latent and observed variables")
-      .field_readonly( "m", &SEMCpp::mVector, "Vector with means of observed and latent variables")
+      .field_readonly( "m", &SEMCpp::Mvector, "Vector with means of observed and latent variables")
       .field_readonly( "impliedCovariance", &SEMCpp::impliedCovariance, "implied covariance matrix")
       .field_readonly( "impliedMeans", &SEMCpp::impliedMeans, "implied means vector")
       .field_readonly( "m2LL", &SEMCpp::m2LL, "minus 2 log-likelihood")
@@ -195,13 +222,16 @@ RCPP_EXPOSED_CLASS(SEMCpp)
     // methods
     .method( "setMatrix", &SEMCpp::setMatrix, "Fills the elements of a model matrix. Expects a char (A, S, or F), and a matrix with values")
     .method( "setVector", &SEMCpp::setVector, "Fills the elements of a model vector. Expects a char (m), and a vector with values")
-    .method( "initializeParameters", &SEMCpp::initializeParameters, "Initializes the parameters of the model. Expects CharacterVector with labels, CharacterVector with location, uvec with rows, uvec with columns, vec with values, and vec with rawValues")
-    .method( "setParameters", &SEMCpp::setParameters, "Changes the parameters of a model. Expects CharacterVector with labels, vec with values, and boolean indicating if the values are raw (TRUE) or transformed (FALSE).")
+    .method( "initializeParameters", &SEMCpp::initializeParameters, "Initializes the parameters of the model. Expects StringVector with labels, StringVector with location, uvec with rows, uvec with columns, vec with values, and vec with rawValues")
+    .method( "setParameters", &SEMCpp::setParameters, "Changes the parameters of a model. Expects StringVector with labels, vec with values, and boolean indicating if the values are raw (TRUE) or transformed (FALSE).")
+    .method( "addDerivativeElement", &SEMCpp::addDerivativeElement, "Add an element to the internal derivative structure. string label, string with location, and boolean indicating if it is a variance, matrix with positions.")
     .method( "addRawData", &SEMCpp::addRawData, "Adds a raw data set. Expects matrix and vector with labels of manifest variables.")
     .method( "addSubset", &SEMCpp::addSubset, "Adds a subset to the data. Expects the sample size N of the subset, the number of observed variables without missings, uvec with indices of notMissing values, matrix with covariance, colvec with means, raw data without missings.")
     .method( "implied", &SEMCpp::implied, "Computes implied means and covariance matrix")
     .method( "fit", &SEMCpp::fit, "Fits the model. Returns -2 log likelihood")
     .method( "getParameters", &SEMCpp::getParameters, "Returns a data frame with model parameters.")
+    .method( "getParameterLabels", &SEMCpp::getParameterLabels, "Returns a vector with unique parameter labels as used internally.")
+    .method( "getScores", &SEMCpp::getScores, "Returns a matrix with scores.")
     ;
   }
 

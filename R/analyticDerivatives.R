@@ -1,70 +1,8 @@
-computeAnalyticScores <- function(par, SEM, raw = FALSE){
-  
-  SEM <- setParameters(SEM, labels = names(par), values = par, raw = raw)
-  SEM <- computeExpected(SEM)
-  
-  parameters <- getParameters(SEM, raw = raw)
-  parameterList <- SEM$model$parameters
-  
-  IminusAInverse <- solve(diag(nrow(SEM$model$matrices$Amatrix))-SEM$model$matrices$Amatrix)
-  
-  # for convenience:
-  Amatrix <- SEM$model$matrices$Amatrix
-  Smatrix <- SEM$model$matrices$Smatrix
-  Fmatrix <- SEM$model$matrices$Fmatrix
-  Mvector <- SEM$model$matrices$Mvector
-  expectedCovariance <- SEM$model$expected$covariance
-  expectedMeans <- SEM$model$expected$means
-  
-  # For each parameter, compute the derivative of the expected covariance
-  derivativesOfCovariance <- computeExpectedCovarianceDerivatives(expectedCovariance = expectedCovariance, 
-                                                                  parameters = parameters, 
-                                                                  parameterList = parameterList, 
-                                                                  Amatrix = Amatrix, 
-                                                                  Smatrix = Smatrix, 
-                                                                  Fmatrix = Fmatrix, 
-                                                                  Mvector = Mvector, 
-                                                                  IminusAInverse = IminusAInverse,
-                                                                  raw = raw)
-  
-  # log-det-Sigma-derivative is independent of the person,
-  # but depends on the missing structure! 
-  logDetSigmas <- computeLogDetSigmas(uniqueMissingPatterns = SEM$data$internalData$uniqueMissingPatterns,
-                                      parameters = parameters,
-                                      parameterList = parameterList, 
-                                      expectedCovariance = expectedCovariance,
-                                      derivativesOfCovariance = derivativesOfCovariance)
-  expectedCovInverses <- logDetSigmas$expectedCovInverses
-  logDetSigmas <- logDetSigmas$logDetSigmas
-  
-  ## compute individual gradients
-  
-  N <- nrow(SEM$data$rawData)
-  individualGradients <- matrix(0, 
-                                nrow = N, 
-                                ncol = length(parameters),
-                                dimnames = list(paste0("person_", 1:N),
-                                                names(parameters)))
-  for(individual in 1:N){
-    x <- SEM$data$rawData[individual,]
-    isMissing <- SEM$data$internalData$uniqueMissingPatterns[SEM$data$internalData$individualMissingPatternID[individual],]
-    individualGradients[individual, ] <- computeSingleSubjectGradient_Internal(x = x[!isMissing], 
-                                                                               parameters = parameters, 
-                                                                               parameterList = parameterList, 
-                                                                               Amatrix = Amatrix, 
-                                                                               Smatrix = Smatrix, 
-                                                                               Fmatrix = Fmatrix, 
-                                                                               Mvector = Mvector, 
-                                                                               IminusAInverse = IminusAInverse,
-                                                                               isMissing = isMissing,
-                                                                               missingPattern = SEM$data$internalData$individualMissingPatternID[individual],
-                                                                               expectedCovInverses = expectedCovInverses,
-                                                                               expectedMeans = expectedMeans, 
-                                                                               logDetSigmas = logDetSigmas, 
-                                                                               derivativesOfCovariance = derivativesOfCovariance)
-    
-  }
-  return(individualGradients)
+getScores <- function(SEM, raw){
+  scores <- SEM$getScores(raw)
+  colnames(scores) <- SEM$getParameterLabels()
+  rownames(scores) <- paste0("person_",1:nrow(scores))
+  return(scores)
 }
 
 computeAnalyticGradients <- function(par, SEM, raw = FALSE){
@@ -75,21 +13,21 @@ computeAnalyticGradientsByGroup <- function(par, SEM, raw){
   SEM <- setParameters(SEM, labels = names(par), values = par, raw = raw)
   SEM <- computeExpected(SEM)
   
-  parameters <- getParameters(SEM)
-  parameterList <- SEM$model$parameters
+  parameters <- getParameters(SEM, raw = raw)
+  parameterList <- SEM$getParameters(raw)
   
-  IminusAInverse <- solve(diag(nrow(SEM$model$matrices$Amatrix))-SEM$model$matrices$Amatrix)
+  IminusAInverse <- solve(diag(nrow(SEM$A))-SEM$A)
   
   # for convenience:
-  Amatrix <- SEM$model$matrices$Amatrix
-  Smatrix <- SEM$model$matrices$Smatrix
-  Fmatrix <- SEM$model$matrices$Fmatrix
-  Mvector <- SEM$model$matrices$Mvector
-  expectedCovariance <- SEM$model$expected$covariance
-  expectedMeans <- SEM$model$expected$means
+  Amatrix <- SEM$A
+  Smatrix <- SEM$S
+  Fmatrix <- SEM$F
+  Mvector <- SEM$m
+  impliedCovariance <- SEM$impliedCovariance
+  impliedMeans <- SEM$impliedMeans
   
   # For each parameter, compute the derivative of the expected covariance
-  derivativesOfCovariance <- computeExpectedCovarianceDerivatives(expectedCovariance = expectedCovariance, 
+  derivativesOfCovariance <- computeimpliedCovarianceDerivatives(impliedCovariance = impliedCovariance, 
                                                                   parameters = parameters, 
                                                                   parameterList = parameterList, 
                                                                   Amatrix = Amatrix, 
@@ -104,7 +42,7 @@ computeAnalyticGradientsByGroup <- function(par, SEM, raw){
   logDetSigmas <- computeLogDetSigmas(uniqueMissingPatterns = SEM$data$internalData$uniqueMissingPatterns,
                                       parameters = parameters,
                                       parameterList = parameterList, 
-                                      expectedCovariance = expectedCovariance,
+                                      impliedCovariance = impliedCovariance,
                                       derivativesOfCovariance = derivativesOfCovariance)
   expectedCovInverses <- logDetSigmas$expectedCovInverses
   logDetSigmas <- logDetSigmas$logDetSigmas
@@ -132,7 +70,7 @@ computeAnalyticGradientsByGroup <- function(par, SEM, raw){
                                                                     isMissing = SEM$data$internalData$missingSubsets[[gr]]$missing,
                                                                     missingPattern = gr,
                                                                     expectedCovInverses = expectedCovInverses,
-                                                                    expectedMeans = expectedMeans, 
+                                                                    impliedMeans = impliedMeans, 
                                                                     logDetSigmas = logDetSigmas, 
                                                                     derivativesOfCovariance = derivativesOfCovariance)
       next
@@ -154,7 +92,7 @@ computeAnalyticGradientsByGroup <- function(par, SEM, raw){
         isMissing = SEM$data$internalData$missingSubsets[[gr]]$missing,
         missingPattern = gr,
         expectedCovInverses = expectedCovInverses,
-        expectedMeans = expectedMeans, 
+        impliedMeans = impliedMeans, 
         logDetSigmas = logDetSigmas, 
         derivativesOfCovariance = derivativesOfCovariance)
       
@@ -172,7 +110,7 @@ computeAnalyticGradientsByGroup <- function(par, SEM, raw){
 
 ## Helper Functions:
 
-computeExpectedCovarianceDerivatives <- function(expectedCovariance, 
+computeimpliedCovarianceDerivatives <- function(impliedCovariance, 
                                                  parameters, 
                                                  parameterList, 
                                                  Amatrix, Smatrix, Fmatrix, Mvector, 
@@ -180,8 +118,8 @@ computeExpectedCovarianceDerivatives <- function(expectedCovariance,
                                                  raw){
   if(is.null(IminusAInverse)) IminusAInverse <- solve(diag(nrow(Amatrix)) - Amatrix)
   
-  derivativesOfCovariance <- array(0, dim = c(nrow(expectedCovariance),
-                                              ncol(expectedCovariance),
+  derivativesOfCovariance <- array(0, dim = c(nrow(impliedCovariance),
+                                              ncol(impliedCovariance),
                                               length(parameters)))
   
   # pre-compute some repeatedly used elements
@@ -231,7 +169,7 @@ computeExpectedCovarianceDerivatives <- function(expectedCovariance,
   return(derivativesOfCovariance)
 }
 
-computeLogDetSigmas <- function(uniqueMissingPatterns,parameters,parameterList, expectedCovariance, derivativesOfCovariance){
+computeLogDetSigmas <- function(uniqueMissingPatterns,parameters,parameterList, impliedCovariance, derivativesOfCovariance){
   logDetSigmas <- matrix(0, 
                          nrow = nrow(uniqueMissingPatterns),
                          ncol = length(parameters),
@@ -240,8 +178,8 @@ computeLogDetSigmas <- function(uniqueMissingPatterns,parameters,parameterList, 
   expectedCovInverses <- vector("list", nrow(logDetSigmas))
   for(missingPattern in 1:nrow(logDetSigmas)){
     isMissing <- uniqueMissingPatterns[missingPattern,]
-    currentExpectedCovariance <- expectedCovariance[!isMissing, !isMissing]
-    expectedCovInverses[[missingPattern]] <- solve(currentExpectedCovariance)
+    currentimpliedCovariance <- impliedCovariance[!isMissing, !isMissing]
+    expectedCovInverses[[missingPattern]] <- solve(currentimpliedCovariance)
     
     for(p in 1:length(parameters)){
       # step 1: check location of parameter
@@ -272,7 +210,7 @@ computeSingleSubjectGradient_Internal <- function(x,
                                                   isMissing,
                                                   missingPattern,
                                                   expectedCovInverses,
-                                                  expectedMeans, 
+                                                  impliedMeans, 
                                                   logDetSigmas, 
                                                   derivativesOfCovariance){
   if(anyNA(x)) stop("x must be the data without NAs")
@@ -297,15 +235,15 @@ computeSingleSubjectGradient_Internal <- function(x,
       }
       individualGradient[names(parameters)[p]] <- 2*matrix(-(Fmatrix%*%IminusAInverse%*%Mderiv)[!isMissing], nrow = 1)%*%
         expectedCovInverses[[missingPattern]]%*%
-        matrix(x - expectedMeans[!isMissing], ncol = 1)
+        matrix(x - impliedMeans[!isMissing], ncol = 1)
       next
     }
     if(parIn == "Smatrix"){
-      individualGradient[names(parameters)[p]] <- logDetSigmas[missingPattern, p] + matrix(x - expectedMeans[!isMissing], nrow = 1)%*%
+      individualGradient[names(parameters)[p]] <- logDetSigmas[missingPattern, p] + matrix(x - impliedMeans[!isMissing], nrow = 1)%*%
         (-expectedCovInverses[[missingPattern]])%*%
         derivativesOfCovariance[,,p][!isMissing, !isMissing]%*%
         expectedCovInverses[[missingPattern]]%*%
-        matrix(x - expectedMeans[!isMissing], ncol = 1)
+        matrix(x - impliedMeans[!isMissing], ncol = 1)
       next
     }
     if(parIn == "Amatrix"){
@@ -319,12 +257,12 @@ computeSingleSubjectGradient_Internal <- function(x,
       individualGradient[names(parameters)[p]] <- logDetSigmas[missingPattern, p] +
         2*t((-Fmatrix%*%IminusAInverse %*%Aderiv%*%IminusAInverse%*%Mvector)[!isMissing])%*%
         expectedCovInverses[[missingPattern]]%*%
-        matrix(x - expectedMeans[!isMissing], ncol = 1) +
-        matrix(x - expectedMeans[!isMissing], nrow = 1)%*%
+        matrix(x - impliedMeans[!isMissing], ncol = 1) +
+        matrix(x - impliedMeans[!isMissing], nrow = 1)%*%
         (-expectedCovInverses[[missingPattern]])%*%
         derivativesOfCovariance[,,p][!isMissing, !isMissing]%*%
         expectedCovInverses[[missingPattern]]%*%
-        matrix(x - expectedMeans[!isMissing], ncol = 1)
+        matrix(x - impliedMeans[!isMissing], ncol = 1)
       next
     }
     stop("Encountered parameter in unknown location")
@@ -346,7 +284,7 @@ computeSubgroupGradient_Internal <- function(
   isMissing,
   missingPattern,
   expectedCovInverses,
-  expectedMeans, 
+  impliedMeans, 
   logDetSigmas, 
   derivativesOfCovariance){
   
@@ -368,7 +306,7 @@ computeSubgroupGradient_Internal <- function(
       }
       groupGradient[names(parameters)[p]] <- N*2*matrix(-(Fmatrix%*%IminusAInverse%*%Mderiv)[!isMissing], nrow = 1)%*%
         expectedCovInverses[[missingPattern]]%*%
-        matrix(means - expectedMeans[!isMissing], ncol = 1)
+        matrix(means - impliedMeans[!isMissing], ncol = 1)
       
       next
     }
@@ -380,9 +318,9 @@ computeSubgroupGradient_Internal <- function(
       groupGradient[names(parameters)[p]] <- N*logDetSigmas[missingPattern, p] + 
         N*sum(diag(covariance%*%B)) +
         N*
-        matrix(means - expectedMeans[!isMissing], nrow = 1)%*%
+        matrix(means - impliedMeans[!isMissing], nrow = 1)%*%
         B%*%
-        matrix(means - expectedMeans[!isMissing], ncol = 1)
+        matrix(means - impliedMeans[!isMissing], ncol = 1)
       
       next
     }
@@ -402,13 +340,13 @@ computeSubgroupGradient_Internal <- function(
         N*logDetSigmas[missingPattern, p] +
         N*2*t((-Fmatrix%*%IminusAInverse %*%Aderiv%*%IminusAInverse%*%Mvector)[!isMissing])%*%
         expectedCovInverses[[missingPattern]]%*%
-        matrix(means - expectedMeans[!isMissing], ncol = 1) +
+        matrix(means - impliedMeans[!isMissing], ncol = 1) +
         
         N*sum(diag(covariance%*%B)) + 
         
-        N*matrix(means - expectedMeans[!isMissing], nrow = 1)%*%
+        N*matrix(means - impliedMeans[!isMissing], nrow = 1)%*%
         B%*%
-        matrix(means - expectedMeans[!isMissing], ncol = 1)
+        matrix(means - impliedMeans[!isMissing], ncol = 1)
       
       next
     }
@@ -468,18 +406,18 @@ computeHessianFromAnalytic <- function (par, SEM, raw = FALSE, eps = 1e-7){
 #   parameters <- getParameters(SEM)
 #   parameterList <- SEM$model$parameters
 #   
-#   IminusAInverse <- solve(diag(nrow(SEM$model$matrices$Amatrix))-SEM$model$matrices$Amatrix)
+#   IminusAInverse <- solve(diag(nrow(SEM$A))-SEM$A)
 #   
 #   # for convenience:
-#   Amatrix <- SEM$model$matrices$Amatrix
-#   Smatrix <- SEM$model$matrices$Smatrix
-#   Fmatrix <- SEM$model$matrices$Fmatrix
-#   Mvector <- SEM$model$matrices$Mvector
-#   expectedCovariance <- SEM$model$expected$covariance
-#   expectedMeans <- SEM$model$expected$means
+#   Amatrix <- SEM$A
+#   Smatrix <- SEM$S
+#   Fmatrix <- SEM$F
+#   Mvector <- SEM$m
+#   impliedCovariance <- SEM$impliedCovariance
+#   impliedMeans <- SEM$impliedMeans
 #   
 #   # For each parameter, compute the derivative of the expected covariance
-#   derivativesOfCovariance <- computeExpectedCovarianceDerivatives(expectedCovariance = expectedCovariance, 
+#   derivativesOfCovariance <- computeimpliedCovarianceDerivatives(impliedCovariance = impliedCovariance, 
 #                                                                   parameters = parameters, 
 #                                                                   parameterList = parameterList, 
 #                                                                   Amatrix = Amatrix, 
@@ -493,21 +431,21 @@ computeHessianFromAnalytic <- function (par, SEM, raw = FALSE, eps = 1e-7){
 #   logDetSigmas <- computeLogDetSigmas(uniqueMissingPatterns = SEM$data$internalData$uniqueMissingPatterns,
 #                                       parameters = parameters,
 #                                       parameterList = parameterList, 
-#                                       expectedCovariance = expectedCovariance,
+#                                       impliedCovariance = impliedCovariance,
 #                                       derivativesOfCovariance = derivativesOfCovariance)
 #   expectedCovInverses <- logDetSigmas$expectedCovInverses
 #   logDetSigmas <- logDetSigmas$logDetSigmas
 #   
 #   ## compute individual gradients
 #   
-#   N <- nrow(SEM$data$rawData)
+#   N <- nrow(SEM$rawData)
 #   individualGradients <- matrix(0, 
 #                                 nrow = N, 
 #                                 ncol = length(parameters),
 #                                 dimnames = list(paste0("person_", 1:N),
 #                                                 names(parameters)))
 #   for(individual in 1:N){
-#     x <- SEM$data$rawData[individual,]
+#     x <- SEM$rawData[individual,]
 #     individualGradients[individual, ] <- computeSingleSubjectGradient_Internal(x = x[!isMissing], 
 #                                                                                parameters = parameters, 
 #                                                                                parameterList = parameterList, 
@@ -519,7 +457,7 @@ computeHessianFromAnalytic <- function (par, SEM, raw = FALSE, eps = 1e-7){
 #                                                                                missingPattern = SEM$data$internalData$individualMissingPatternID[individual], 
 #                                                                                uniqueMissingPatterns = SEM$data$internalData$uniqueMissingPatterns, 
 #                                                                                expectedCovInverses = expectedCovInverses,
-#                                                                                expectedMeans = expectedMeans, 
+#                                                                                impliedMeans = impliedMeans, 
 #                                                                                logDetSigmas = logDetSigmas, 
 #                                                                                derivativesOfCovariance = derivativesOfCovariance)
 #     
@@ -532,7 +470,7 @@ computeHessianFromAnalytic <- function (par, SEM, raw = FALSE, eps = 1e-7){
 # computeLogDetSigmasHessian <- function(uniqueMissingPatterns,
 #                                        parameters,
 #                                        parameterList, 
-#                                        expectedCovariance, 
+#                                        impliedCovariance, 
 #                                        derivativesOfCovariance){
 #   
 #   logDetSigmasHessian <- array(0, dim = c(length(parameters), # first derivative
@@ -542,8 +480,8 @@ computeHessianFromAnalytic <- function (par, SEM, raw = FALSE, eps = 1e-7){
 #   expectedCovInverses <- vector("list", nrow(logDetSigmasHessian))
 #   for(missingPattern in 1:nrow(logDetSigmasHessian)){
 #     isMissing <- uniqueMissingPatterns[missingPattern,]
-#     currentExpectedCovariance <- expectedCovariance[!isMissing, !isMissing]
-#     expectedCovInverses[[missingPattern]] <- solve(currentExpectedCovariance)
+#     currentimpliedCovariance <- impliedCovariance[!isMissing, !isMissing]
+#     expectedCovInverses[[missingPattern]] <- solve(currentimpliedCovariance)
 #     
 #     for(p1 in 1:length(parameters)){
 #       # step 1: check location of parameter

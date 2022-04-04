@@ -187,24 +187,56 @@ SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
   
   # set parameters
   SEMCpp$initializeParameters(parameterTable$label,
-                                parameterTable$location,
-                                parameterTable$row-1, # c++ starts at 0 
-                                parameterTable$col-1, # c++ starts at 0 
-                                parameterTable$value,
-                                parameterTable$rawValue)
+                              parameterTable$location,
+                              parameterTable$row-1, # c++ starts at 0 
+                              parameterTable$col-1, # c++ starts at 0 
+                              parameterTable$value,
+                              parameterTable$rawValue)
+  
+  # set derivative elements
+  for(p in unique(parameterTable$label)){
+    
+    select <- parameterTable$label == p
+    uniqueLocation <- unique(parameterTable$location[select])
+    if(length(uniqueLocation) != 1) stop("Any parameter can only be in either A, S, or m")
+    rows <- parameterTable$row[select]
+    cols <- parameterTable$col[select]
+
+    if(uniqueLocation == "Amatrix"){
+      positionMatrix <- modelMatrices$Amatrix
+      positionMatrix[] <- 0
+      positionMatrix[cbind(rows,cols)] <- 1
+      isVariance <- FALSE
+    }else if(uniqueLocation == "Smatrix"){
+      positionMatrix <- modelMatrices$Smatrix
+      positionMatrix[] <- 0
+      positionMatrix[cbind(rows,cols)] <- 1
+      if(all(rows == cols)) isVariance <- TRUE
+    }else if(uniqueLocation == "Mvector"){
+      positionMatrix <- modelMatrices$Mvector
+      positionMatrix[] <- 0
+      positionMatrix[cbind(rows,cols)] <- 1
+      isVariance <- FALSE
+    }
+    
+    SEMCpp$addDerivativeElement(p, 
+                                uniqueLocation, 
+                                isVariance, 
+                                positionMatrix)
+  }
   
   # set data
   SEMCpp$addRawData(rawData, manifestNames)
   
   for(s in 1:length(internalData$missingSubsets)){
     SEMCpp$addSubset(internalData$missingSubsets[[s]]$N,
-                       internalData$missingSubsets[[s]]$observed,
-                       internalData$missingSubsets[[s]]$notMissing,
-                       internalData$missingSubsets[[s]]$covariance,
-                       internalData$missingSubsets[[s]]$means,
-                       internalData$missingSubsets[[s]]$rawNoNA)
+                     internalData$missingSubsets[[s]]$observed,
+                     internalData$missingSubsets[[s]]$notMissing,
+                     internalData$missingSubsets[[s]]$covariance,
+                     internalData$missingSubsets[[s]]$means,
+                     internalData$missingSubsets[[s]]$rawNoNA)
   }
-
+  
   # check model
   if(round(SEMCpp$fit() - (-2*logLik(model)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
   
@@ -284,23 +316,5 @@ setMVector <- function(model, lavaanParameterTable, nLatent, nManifest, latentNa
   }
   
   return(list("Mvector" = Mvector, "MvectorParameters" = MvectorParameters))
-}
-
-SEMFromOpenMx <- function(model, rawData){
-  
-  # check if standard SEM
-  
-  # extract matrices and parameters
-  
-  
-}
-
-SEMFromRegsem <- function(model, rawData){}
-
-SEM <- function(Amatrix, Smatrix, Fmatrix, mVector, parameterTable){
-  
-  
-  
-  
 }
 
