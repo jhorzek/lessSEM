@@ -56,15 +56,15 @@ arma::mat scores(const SEMCpp& SEM, bool raw){
 
   for(int i = 0; i < N; i++){
     
-    int personInMissingGroup = SEM.data.personInSubset.at(i);
-
+    const int personInSubset = SEM.personInSubset.at(i);
+    
     currentGradients = computeSingleSubjectGradient_Internal(arma::trans(SEM.rawData.row(i)), 
                                                              SEM,
                                                              IminusAInverse,
-                                                             dataSubsets.at(personInMissingGroup-1).notMissing,
-                                                             personInMissingGroup-1,
-                                                             impliedCovInverses.at(personInMissingGroup-1),
-                                                             arma::trans(logDetSigmas.row(personInMissingGroup-1)), 
+                                                             dataSubsets.at(personInSubset).notMissing,
+                                                             personInSubset,
+                                                             impliedCovInverses.at(personInSubset),
+                                                             arma::trans(logDetSigmas.row(personInSubset)), 
                                                              derivativesOfCovariance);
     
     individualGradients.row(i) = arma::trans(currentGradients);

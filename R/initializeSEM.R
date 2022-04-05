@@ -1,10 +1,12 @@
-SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
-  
+SEMFromLavaan <- function(lavaanModel, rawData, transformVariances = TRUE){
+  if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
+  if(!is(rawData, "matrix") && !is(rawData, "data.frame")) stop("rawData must be of class matrix or data.frame.")
+
   # extract basic features
-  meanstructure <- model@Options$meanstructure
+  meanstructure <- lavaanModel@Options$meanstructure
   
-  latentNames <- lavNames(model, type = "lv")
-  manifestNames <- lavNames(model, type = "ov")
+  latentNames <- lavNames(lavaanModel, type = "lv")
+  manifestNames <- lavNames(lavaanModel, type = "ov")
   
   nLatent <- length(latentNames)
   nManifest <- length(manifestNames)
@@ -16,7 +18,7 @@ SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
   if(!is.numeric(rawData)) stop("rawData must be numeric")
   
   ## missing data
-  FIML <- model@Options$missing == "ml"
+  FIML <- lavaanModel@Options$missing == "ml"
   if(!FIML && anyNA(rawData)){
     
     warning("Deleting cases with missing values. Refit the lavaan object with missing = 'ML' to use full information maximum likelihood")
@@ -28,12 +30,12 @@ SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
   
   # Extract Model
   
-  lavaanParameterTable <- lavInspect(model, what = "parTable")
+  lavaanParameterTable <- lavInspect(lavaanModel, what = "parTable")
   
   # translate to RAM notation
   
   ## directed paths
-  AmatrixElements <- setAMatrix(model = model, 
+  AmatrixElements <- setAMatrix(model = lavaanModel, 
                                 lavaanParameterTable = lavaanParameterTable, 
                                 nLatent = nLatent, 
                                 nManifest = nManifest, 
@@ -41,7 +43,7 @@ SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
                                 manifestNames = manifestNames)
   
   ## undirected paths
-  SmatrixElements <- setSMatrix(model = model, 
+  SmatrixElements <- setSMatrix(model = lavaanModel, 
                                 lavaanParameterTable = lavaanParameterTable, 
                                 nLatent = nLatent, 
                                 nManifest = nManifest, 
@@ -50,7 +52,7 @@ SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
   
   
   ## Mean structure
-  MvectorElements <- setMVector(model = model, 
+  MvectorElements <- setMVector(model = lavaanModel, 
                                 lavaanParameterTable = lavaanParameterTable, 
                                 nLatent = nLatent, 
                                 nManifest = nManifest, 
@@ -82,20 +84,13 @@ SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
   }
   
   # extract parameters
-  parameterIDs <- model@ParTable$id[model@ParTable$free != 0]
-  ops <- model@ParTable$op
-  parameterLabels <- paste0(model@ParTable$lhs, ops, model@ParTable$rhs)
-  parameterLabels[model@ParTable$label!=""] <- model@ParTable$label[model@ParTable$label!=""]
-  parameterLabels <- parameterLabels[model@ParTable$free != 0]
-  parameterValues <- model@ParTable$est[model@ParTable$free != 0]
-  
-  opsAlternative <- model@ParTable$op
-  opsAlternative[opsAlternative == "=~"] <- "->"
-  alternativeLabels <- paste(model@ParTable$lhs, opsAlternative, model@ParTable$rhs)
-  alternativeLabels[opsAlternative == "~1"] <- paste("1 ->", model@ParTable$lhs[opsAlternative == "~1"])
-  alternativeLabels[model@ParTable$label!=""] <- model@ParTable$label[model@ParTable$label!=""]
-  alternativeLabels <- alternativeLabels[model@ParTable$free != 0]
-  
+  parameterIDs <- lavaanModel@ParTable$id[lavaanModel@ParTable$free != 0]
+  ops <- lavaanModel@ParTable$op
+  parameterLabels <- paste0(lavaanModel@ParTable$lhs, ops, lavaanModel@ParTable$rhs)
+  parameterLabels[lavaanModel@ParTable$label!=""] <- lavaanModel@ParTable$label[lavaanModel@ParTable$label!=""]
+  parameterLabels <- parameterLabels[lavaanModel@ParTable$free != 0]
+  parameterValues <- lavaanModel@ParTable$est[lavaanModel@ParTable$free != 0]
+
   # construct internal representation of parameters
   nParameters <- length(parameterLabels)
   parameterTable <- data.frame("label" = c(),
@@ -123,7 +118,6 @@ SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
             parameterTable <- rbind(parameterTable,
                                     data.frame(
                                       "label" = parameterLabels[parameter],
-                                      "alternativeLabel" = alternativeLabels[parameter],
                                       "location" = matrixName, 
                                       "row" = ro, 
                                       "col" = co,
@@ -143,7 +137,6 @@ SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
       parameterTable <- rbind(parameterTable,
                               data.frame(
                                 "label" = paste0("nu_", manifestName),
-                                "alternativeLabel" = paste0("nu_", manifestName),
                                 "location" = "Mvector", 
                                 "row" = which(rownames(MvectorElements$Mvector) == manifestName), 
                                 "col" = 1,
@@ -226,7 +219,7 @@ SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
   }
   
   # set data
-  SEMCpp$addRawData(rawData, manifestNames)
+  SEMCpp$addRawData(rawData, manifestNames, internalData$individualMissingPatternID-1)
   
   for(s in 1:length(internalData$missingSubsets)){
     SEMCpp$addSubset(internalData$missingSubsets[[s]]$N,
@@ -234,11 +227,11 @@ SEMFromLavaan <- function(model, rawData, transformVariances = TRUE){
                      internalData$missingSubsets[[s]]$notMissing,
                      internalData$missingSubsets[[s]]$covariance,
                      internalData$missingSubsets[[s]]$means,
-                     internalData$missingSubsets[[s]]$rawNoNA)
+                     internalData$missingSubsets[[s]]$rawData)
   }
   
   # check model
-  if(round(SEMCpp$fit() - (-2*logLik(model)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+  if(round(SEMCpp$fit() - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
   
   return(SEMCpp)
 }

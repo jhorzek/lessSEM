@@ -32,7 +32,7 @@ constructDataset <- function(rawData){
       missingSubsets[[mrow]]$notMissing <- which(!uniqueMissingPatterns[mrow,])-1
       missingSubsets[[mrow]]$covariance <- ((length(individuals)-1)/length(individuals))*cov(rawData[individuals,!uniqueMissingPatterns[mrow,]])
       missingSubsets[[mrow]]$means <- apply(rawData[individuals,!uniqueMissingPatterns[mrow,]], 2, mean)
-      missingSubsets[[mrow]]$rawNoNA <- matrix(NA, nrow = sum(!uniqueMissingPatterns[mrow,]), ncol = 1)
+      missingSubsets[[mrow]]$rawData <- matrix(NA, nrow = ncol(rawData), ncol = 1)
       missingSubsets[[mrow]]$m2LL <- NA
     }else{
       missingSubsets[[mrow]]$N <- length(individuals)
@@ -40,7 +40,7 @@ constructDataset <- function(rawData){
       missingSubsets[[mrow]]$notMissing <- which(!uniqueMissingPatterns[mrow,])-1
       missingSubsets[[mrow]]$covariance <- matrix(NA, nrow = sum(!uniqueMissingPatterns[mrow,]), ncol = sum(!uniqueMissingPatterns[mrow,]))
       missingSubsets[[mrow]]$means <-  matrix(NA, nrow = sum(!uniqueMissingPatterns[mrow,]), ncol = 1)
-      missingSubsets[[mrow]]$rawNoNA <- rawData[individuals,!uniqueMissingPatterns[mrow,]]
+      missingSubsets[[mrow]]$rawData <- rawData[individuals,]
       missingSubsets[[mrow]]$m2LL <- NA
     }
   }

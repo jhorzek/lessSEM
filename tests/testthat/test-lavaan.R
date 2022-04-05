@@ -20,8 +20,9 @@ test_that("lavaan works", {
 '
   
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = FALSE)
-  SEM <- SEMFromLavaan(model = model, rawData = PoliticalDemocracy)
+  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracy)
   show(SEM)
+  logLik(SEM)
   
   testthat::expect_equal(round(SEM$m2LL - (-2*as.numeric(logLik(model))),4),0)
 
@@ -50,7 +51,7 @@ test_that("lavaan works", {
   
   model <- sem(model1, data = dat, meanstructure = TRUE, missing = "ML")
   
-  SEM <- SEMFromLavaan(model = model, rawData = dat)
+  SEM <- SEMFromLavaan(lavaanModel = model, rawData = dat)
   fit(SEM)
   
   testthat::expect_equal(round(SEM$m2LL - (-2*as.numeric(logLik(model))),4),0)

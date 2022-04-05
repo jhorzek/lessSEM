@@ -10,8 +10,20 @@
 
 class SEMCpp{
 public: 
+  //flags
+  bool wasChecked = false; // true if the model was checked
+  bool wasFit = false; // true if fit was called
+  int currentStatus = 0; // 0 = initialized
+                     // 1 = matrices were defined
+                     // 2 = initializeParameters was called
+                     // 3 = addDerivativeElement was called
+                     // 4 = addRawData was called
+                     // 5 = addSubset was called
+  
+  // data
   dataset data;
   arma::mat rawData;
+  arma::uvec personInSubset;
   Rcpp::StringVector manifestNames;
   
   // parameters
@@ -32,8 +44,10 @@ public:
   // constructor
   SEMCpp(){};
   
+  bool checkModel();
+  
   // setter or change elements
-  void addRawData(arma::mat rawData_, Rcpp::StringVector manifestNames_);
+  void addRawData(arma::mat rawData_, Rcpp::StringVector manifestNames_, arma::uvec personInSubset_);
   void addSubset(int N_,
                  int observed_, // number of variables without missings
                  arma::uvec notMissing_, // vector with indices of non-missing values
@@ -41,7 +55,7 @@ public:
                  arma::mat covariance_,
                  arma::colvec means_,
                  // raw data is required for N == 1
-                 arma::colvec dataNoMissing_);
+                 arma::colvec rawData_);
   void removeSubset(int whichSubset);
   void setMatrix(std::string whichMatrix, arma::mat values);
   void setVector(std::string whichVector, arma::colvec values);
@@ -68,9 +82,9 @@ public:
   // fit related functions
   void implied(); // compute implied means and covariance
   double fit();
-  arma::colvec getGradients();
+  arma::rowvec getGradients(bool raw);
   arma::mat getScores(bool raw);
-  arma::mat getHessian();
+  arma::mat getHessian(bool raw);
 };
 
 #endif

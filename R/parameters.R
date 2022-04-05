@@ -13,7 +13,8 @@ getParameters <- function(SEM, raw = FALSE){
   return(values)
 }
 
-setParameters <- function(SEM, labels, values, raw, labelsFrom = "lavaan"){
+setParameters <- function(SEM, labels, values, raw){
   if(length(labels) != length(values)){stop("labels and values of different length!")}
   SEM$setParameters(labels, values, raw)
+  return(SEM)
 }

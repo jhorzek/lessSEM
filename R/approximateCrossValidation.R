@@ -1,36 +1,40 @@
-approximateCrossValidation <- function(SEM, k, penaltyScoreFunction = NULL, penaltyFunction = NULL, penaltyFunctionDerivative = NULL, raw = FALSE, ...){
-
-  if(sum(is.null(penaltyScoreFunction) + is.null(penaltyFunction)) == 1) stop("Both, penaltyScoreFunction and penaltyFunction must be provided.")
+approximateCrossValidation <- function(SEM, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+  
   additionalArguments <- list(...)
   
   parameters <- getParameters(SEM = SEM, raw = raw)
-  dataSet <- SEM$data$rawData
+  dataSet <- SEM$rawData
   N <- nrow(dataSet)
   
   # step 1: compute scores
-  scores <- computeAnalyticScores(par = parameters, SEM = SEM, raw = raw)
-  # compute penalty scores
-  if(!is.null(penaltyScoreFunction)) scores <- scores + do.call(what = penaltyScoreFunction, 
-                                                                args = c(list("par" = parameters),
-                                                                  additionalArguments
-                                                                  ))[,colnames(scores)]
+  scores <- getScores(SEM = SEM, raw = raw)
   
-  # compute Hessian
-  if(!is.null(penaltyScoreFunction)){
-    
-    hessian <- do.call(what = computeRegularizedHessian, 
-                       args = c(list("par" = parameters, 
-                                     "SEM" = SEM, 
-                                     "raw" = raw,
-                                     "penaltyFunction" = penaltyFunction, 
-                                     "penaltyFunctionDerivative" = penaltyFunctionDerivative),
-                                additionalArguments
-                       ))
-  }else{
-    hessian <- computeHessianFromAnalytic(par = parameters, raw = raw, SEM = SEM)
+  # compute penalty scores
+  
+  if(!is.null(individualPenaltyFunction)){
+    for(i in 1:N){
+      
+      scores[i,] <- scores[i,] + do.call(what = numDeriv::grad, 
+                                         args = c(list(
+                                           "func" = individualPenaltyFunction,
+                                           "x" = parameters[colnames(scores)]),
+                                           additionalArguments
+                                         ))
+      
+    }
   }
   
+  hessian <- getHessian(SEM = SEM, raw = raw)
   
+  if(!is.null(individualPenaltyFunction)){
+    hessian + N*do.call(what = numDeriv::hessian, 
+                        args = c(list(
+                          "func" = individualPenaltyFunction,
+                          "x" = parameters[rownames(hessian)]),
+                          additionalArguments
+                        ))
+  }
+
   # step 2: subgroup-parameters
   if(k < N){
     
@@ -61,15 +65,15 @@ approximateCrossValidation <- function(SEM, k, penaltyScoreFunction = NULL, pena
     steps <- 1
     while(steps<100){
       parameters_s <- parameters + stepLength*direction[,names(parameters)]
-      SEM_s <- setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
-      SEM_s <- try(computeExpected(SEM_s), silent = TRUE)
-      if(any(class(SEM_s) == "try-error")) {
+      SEM <- setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
+      SEM <- try(fit(SEM), silent = TRUE)
+      if(any(class(SEM) == "try-error")) {
         stepLength <- stepLength*.9
         steps <- steps + 1
         next
       }
       # check positive definiteness
-      tryChol <- try(chol(SEM_s$model$expected$covariance), silent = TRUE)
+      tryChol <- try(chol(SEM$impliedCovariance), silent = TRUE)
       if(any(class(tryChol) == "try-error")) {
         stepLength <- stepLength*.9
         steps <- steps + 1

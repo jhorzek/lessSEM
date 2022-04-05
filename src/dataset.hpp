@@ -24,7 +24,7 @@ public:
                  arma::mat covariance_,
                  arma::colvec means_,
                  // raw data is required for N == 1
-                 arma::colvec dataNoMissing_);
+                 arma::colvec rawData_);
   
   // remove
   void removeSubset(int whichSubset);

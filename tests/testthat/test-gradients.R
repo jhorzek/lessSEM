@@ -24,13 +24,11 @@ test_that("gradients work", {
   scores <- -2*lavScores(model)
   gradients <- apply(scores,2,sum)
   
-  SEM <- SEMFromLavaan(model = model, rawData = PoliticalDemocracy)
+  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracy)
   SEM <- fit(SEM)
   
-  gradientsNumeric <- computeGradients(SEM)
-  gradientsAnalytic <- computeAnalyticGradients(par = getParameters(SEM), SEM = SEM)
-  testthat::expect_equal(round(sum(abs(gradientsAnalytic - gradientsNumeric)),4),0)
-  
+  gradientsAnalytic <- getGradients(SEM = SEM, raw = FALSE)
+
   testthat::expect_equal(round(sum(abs(gradientsAnalytic - gradients)),4),0)
   
   PoliticalDemocracyWithNA <- PoliticalDemocracy
@@ -45,10 +43,12 @@ test_that("gradients work", {
   }
   
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
-  SEM <- SEMFromLavaan(model = model, rawData = PoliticalDemocracyWithNA)
+  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracyWithNA)
   SEM <- fit(SEM)
   
-  gradientsNumeric <- computeGradients(SEM)
-  gradientsAnalytic <- computeAnalyticGradients(par = getParameters(SEM), SEM = SEM)
-  testthat::expect_equal(round(sum(abs(gradientsAnalytic - gradientsNumeric)),4),0)
+  scores <- -2*lavScores(model)
+  gradients <- apply(scores,2,sum)
+  
+  gradientsAnalytic <- getGradients(SEM, raw = FALSE)
+  testthat::expect_equal(round(sum(abs(gradientsAnalytic - gradients)),4),0)
 })

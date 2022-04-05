@@ -22,38 +22,31 @@ test_that("optimization works", {
   modelSyntax <- paste0('f =~ 1*', yNames[1], ' + ', paste0(yNames[2:length(yNames)], collapse = " + "))
   modelFit = cfa(modelSyntax, y, meanstructure = TRUE)
   
-  CFA <- SEMFromLavaan(modelFit, rawData = y)
+  CFA <- SEMFromLavaan(lavaanModel = modelFit, rawData = y)
   CFA <- fit(CFA)
+  correctParameters <- getParameters(CFA, raw = FALSE)
   
   pars <- getParameters(CFA, raw  = TRUE)
-  pars <- pars + rnorm(length(pars), 0, .1)
-  CFA2 <- setParameters(CFA, names(pars), pars, raw = TRUE)
-  opt <- optimizeSEM(SEM = CFA2, raw = TRUE)
-  testthat::expect_equal(any(abs(getParameters(opt$SEM) - getParameters(CFA)) > .1), FALSE)
+  pars <- pars + rnorm(length(pars), 0, .3)
+  CFA <- setParameters(CFA, names(pars), pars, raw = TRUE)
+  opt <- optimizeSEM(SEM = CFA, raw = TRUE)
+  testthat::expect_equal(any(abs(getParameters(opt$SEM, raw = FALSE) - correctParameters) > .001), FALSE)
   
   # test lasso penalty
   
   lambda <- .1
   pars_pen = 5:24
   
-  regsem_cvFit1 <- regsem(model = modelFit, lambda = lambda, 
-                          pars_pen = pars_pen, gradFun="ram")
+  regsem_cvFit1 <- regsem(model = modelFit, 
+                          lambda = lambda, 
+                          pars_pen = pars_pen, 
+                          gradFun = "ram")
   
-  CFA2 <- setParameters(CFA, labels = names(regsem_cvFit1$coefficients), 
-                        values = unlist(regsem_cvFit1$coefficients), 
-                        labelsFrom = "regsem", 
-                        raw = FALSE)
-  regularizedParameters <- names(getParameters(CFA2))[pars_pen]
+  pars <- regsem2LavaanParameters(regsemModel = regsem_cvFit1, lavaanModel = modelFit)
+  regularizedParameters <- names(pars)[pars_pen]
   
-  optLasso <- optimizeLassoSEM(SEM = CFA, regularizedParameters = regularizedParameters, lambda = lambda)
-  testthat::expect_equal(any(abs(getParameters(optLasso$SEM) - getParameters(CFA2)) > .1),
+  optLasso <- optimizeSEMLASSO(SEM = CFA, regularizedParameters = regularizedParameters, lambda = lambda)
+  testthat::expect_equal(any(abs(getParameters(optLasso$SEM)[names(pars)] - pars) > .1),
                          FALSE)
-  # compare final fit
-  testthat::expect_equal(any(abs((
-    regsem_cvFit1$out$values[length(regsem_cvFit1$out$values)] - 
-      (likelihoodRatioFitRegsem(optLasso$SEM, par = optLasso$optimizer$par, raw = TRUE) + 
-         .5*lambda*sum(abs(getParameters(optLasso$SEM)[regularizedParameters])))
-  ) < .01)), TRUE
-  )
-  
+
 })

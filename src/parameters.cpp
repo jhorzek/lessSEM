@@ -49,7 +49,9 @@ void parameters::setParameters(Rcpp::StringVector label_,
           // if the parameter values were not provided in raw format,
           // all variances are assumed to be transformations 
           value.at(element2) = value_.at(element1);
-          if(row.at(element2) == col.at(element2) && location.at(element2) == "Fmatrix"){
+
+          if(row.at(element2) == col.at(element2) && location(element2) == "Smatrix"){
+
             rawValue.at(element2) = std::log(value_.at(element1));
           }else{
             rawValue.at(element2) = value_.at(element1);
@@ -59,7 +61,8 @@ void parameters::setParameters(Rcpp::StringVector label_,
           // all raw variances are assumed to be unbounded;
           // they will be transformed to get the actual variances
           rawValue.at(element2) = value_.at(element1);
-          if(row.at(element2) == col.at(element2) && location.at(element2) == "Fmatrix"){
+
+          if(row.at(element2) == col.at(element2) && location(element2) == "Smatrix"){
             value.at(element2) = std::exp(value_.at(element1));
           }else{
             value.at(element2) = value_.at(element1);
@@ -67,7 +70,10 @@ void parameters::setParameters(Rcpp::StringVector label_,
         }
       }
     }
-    if(!found){ Rcpp::stop("Parameter not found!"); }
+    if(!found){
+      Rcpp::Rcout << label_.at(element1) << std::endl;
+      Rcpp::stop("Parameter not found!"); 
+      }
   }
   
   return;

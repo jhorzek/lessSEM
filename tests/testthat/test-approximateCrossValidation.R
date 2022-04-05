@@ -8,12 +8,9 @@ test_that("approximate cross validation works", {
   mod <- 'f =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9'
   outt = cfa(mod, HS, meanstructure = TRUE)
   
-  CFA <- SEMFromLavaan(outt, rawData = HS)
-  CFA <- fit(CFA)
-  
-  hessian <- computeHessian(SEM = CFA, fitfunction = minus2LogLikelihood)
-  
-  aLOOCV <- approximateCrossValidation(SEM = CFA, k = nrow(HS), hessian = hessian, individualFitfunction = individualMinus2LogLikelihood)
+  CFA <- SEMFromLavaan(lavaanModel = outt, rawData = HS)
+
+  aLOOCV <- approximateCrossValidation(SEM = CFA, k = nrow(HS), raw = FALSE)
   
   
   exactLOOCV <- rep(NA, nrow(HS))
@@ -21,11 +18,11 @@ test_that("approximate cross validation works", {
     outt = cfa(mod, HS[-i,], meanstructure = TRUE)
     exactLOOCV[i] <- computeIndividualM2LL(nObservedVariables = ncol(HS), 
                                            rawData = as.numeric(HS[i,]),
-                                           expectedMeans = outt@implied$mean[[1]], 
-                                           expectedCovariance = outt@implied$cov[[1]])
+                                           impliedMeans = outt@implied$mean[[1]], 
+                                           impliedCovariance = outt@implied$cov[[1]])
   }
   
-  testthat::expect_equal(abs(sum(aLOOCV$leaveOutFits) - sum(exactLOOCV)) < 2, TRUE)
+  testthat::expect_equal(max(abs(aLOOCV$leaveOutFits -exactLOOCV)) < .1, TRUE)
   
   plot(exactLOOCV, exactLOOCV, type = "l",
        xlab = "exact loocv", ylab = "approximated loocv")
@@ -37,7 +34,7 @@ test_that("approximate cross validation works", {
   mod <- 'f =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9'
   outt = cfa(mod, HS, meanstructure = TRUE)
   
-  CFA <- SEMFromLavaan(outt, rawData = HS)
+  CFA <- SEMFromLavaan(lavaanModel = outt, rawData = HS)
   CFA <- fit(CFA)
   
   lambda_ <- 0.05
@@ -47,41 +44,34 @@ test_that("approximate cross validation works", {
                      lambda = lambda_,
                      gradFun = "ram",
                      round = 10)
-  CFA <- setParameters(CFA, labels = names(model_out$coefficients), 
-                       values = unlist(model_out$coefficients), 
-                       labelsFrom = "regsem", 
+  pars <- unlist(model_out$coefficients)
+  
+  # change labels to those of lavaan
+  labels <- lavaan2regsemLabels(lavaanModel = outt)
+  pars <- pars[labels$regsemLabels]
+  names(pars) <- labels$lavaanLabels
+  
+  CFA <- setParameters(CFA, 
+                       labels = names(pars), 
+                       values = pars, 
                        raw = FALSE)
-  likelihoodRatioFitRegsem(par = getParameters(CFA), SEM = CFA, raw = FALSE)
+  .5*(1/nrow(HS))*likelihoodRatioFit(par = getParameters(CFA), SEM = CFA, raw = FALSE)
   model_out$fit
   
   model_out$fit + .5*lambda_*sum(abs(model_out$coefficients[, model_out$pars_pen]))
   model_out$optim_fit
   
-  regularized <- names(getParameters(CFA))[model_out$pars_pen]
+  regularized <- names(pars)[model_out$pars_pen]
   
-  penaltyFunction <- function(par, lambda, regularizedParameters, Npen){
+  individualPenaltyFunction <- function(par, lambda, regularizedParameters){
     return(lambda*sum(sqrt((par[regularizedParameters])^2 + 1e-4)))
   }
   
-  penaltyScoreFunction <- function(par, lambda, regularized, Npen){
-    scores <- matrix(0, nrow = Npen, ncol = length(par))
-    colnames(scores) <- names(par)
-    for(p in regularized){
-      scores[,p] <- (1/Npen)*lambda*par[p]/(sqrt(par[p]^2 + 1e-4))
-    }
-    return(scores)
-  }
-  
-  Npen <- nrow(HS)
-  
-  
   aLOOCV2 <- approximateCrossValidation(SEM = CFA, 
-                                        k = Npen, 
-                                        penaltyScoreFunction = penaltyScoreFunction, 
-                                        penaltyFunction = penaltyFunction, 
-                                        lambda = Npen*lambda_, 
-                                        regularized = regularized, 
-                                        Npen = Npen)
+                                        k = nrow(HS), 
+                                        individualPenaltyFunction = individualPenaltyFunction,
+                                        lambda = lambda_, 
+                                        regularized = regularized)
 
   
   sum(aLOOCV2$leaveOutFits)
@@ -97,16 +87,21 @@ test_that("approximate cross validation works", {
                        gradFun = "ram",
                        round = 10)
     converged[i] <- model_out$convergence
+    pars <- unlist(model_out$coefficients)
+    
+    # change labels to those of lavaan
+    pars <- pars[labels$regsemLabels]
+    names(pars) <- labels$lavaanLabels
+    
     CFA <- fit(setParameters(CFA, 
-                             names(model_out$coefficients), 
-                             values = unlist(model_out$coefficients),
-                             labelsFrom = "regsem", 
+                             names(pars), 
+                             values = pars,
                              raw = FALSE))
     
     exactLOOCV2[i] <- computeIndividualM2LL(nObservedVariables = ncol(HS), 
                                            rawData = as.numeric(HS[i,]),
-                                           expectedMeans = CFA$model$expected$means, 
-                                           expectedCovariance = CFA$model$expected$covariance)
+                                           impliedMeans = CFA$impliedMeans, 
+                                           impliedCovariance = CFA$impliedCovariance)
     
   }
   

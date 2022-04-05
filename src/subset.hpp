@@ -13,8 +13,8 @@ public:
   // the following elements are only relevant for N>1
   arma::mat covariance;
   arma::colvec means;
-  // data without missings is required for N == 1
-  arma::colvec dataNoMissing;
+  // data (with missings) is required for N == 1
+  arma::colvec rawData;
   double m2LL; // minus 2 log-Likelihood for this subset
   
   // constructor

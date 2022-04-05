@@ -1,5 +1,6 @@
 test_that("analytic scores work", {
   library(lavaan)
+  set.seed(123)
 
   model1 <- ' 
   # latent variable definitions
@@ -22,7 +23,7 @@ test_that("analytic scores work", {
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE)
   lavaanScores <- -2*lavaan::lavScores(model)
   
-  SEM <- SEMFromLavaan(model = model, rawData = PoliticalDemocracy)
+  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracy)
   SEM <- fit(SEM)
   
   scoresAnalytic <- getScores(SEM, raw = FALSE)
@@ -43,11 +44,9 @@ test_that("analytic scores work", {
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
   lavaanScores <- -2*lavaan::lavScores(model)
   
-  SEM <- SEMFromLavaan(model = model, rawData = PoliticalDemocracyWithNA)
+  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracyWithNA)
   SEM <- fit(SEM)
   
-  scoresNumeric <- computeScores(SEM, raw = FALSE)
-  scoresAnalytic <- computeAnalyticScores(getParameters(SEM), SEM, raw = FALSE)
-  testthat::expect_equal(round(sum(abs(scoresAnalytic - scoresNumeric)),4),0)
-  testthat::expect_equal(round(sum(abs(scoresNumeric - lavaanScores)),4),0)
+  scoresAnalytic <- getScores(SEM, raw = FALSE)
+  testthat::expect_equal(round(sum(abs(scoresAnalytic - lavaanScores)),4),0)
 })

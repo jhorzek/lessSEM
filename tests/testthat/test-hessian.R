@@ -21,19 +21,35 @@ test_that("hessian works", {
   N <- nrow(PoliticalDemocracy)
   PoliticalDemocracy[1:4,2] <- NA
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE, missing = "ML")
-  parEst <- parameterEstimates(model, remove.nonfree = TRUE)
-  parLabels <- paste0(parEst$lhs, parEst$op, parEst$rhs)
-  parLabels[parEst$label != ""] <- parEst$label[parEst$label != ""]
-  
-  SEM <- SEMFromLavaan(model = model, rawData = PoliticalDemocracy)
+
+  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracy)
   SEM <- fit(SEM)
   
-  grad <- computeAnalyticGradients(par = getParameters(SEM), SEM = SEM)
+  hessian <- getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
   
-  hessian <- computeHessianFromAnalytic(par = getParameters(SEM), SEM = SEM, eps = 1e-8)
-  
-  hessian2 <- numDeriv::hessian(func = minus2LogLikelihood, x = getParameters(SEM), SEM = SEM, raw = FALSE)
+  hessian2 <- numDeriv::hessian(func = fitFunction, x = getParameters(SEM), SEM = SEM, raw = FALSE)
   
   testthat::expect_equal(abs(sum(hessian - hessian2)) < .001, TRUE)
   
+  
+  PoliticalDemocracyWithNA <- PoliticalDemocracy
+  rows <- 1:nrow(PoliticalDemocracyWithNA)
+  cols <- 1:ncol(PoliticalDemocracyWithNA)
+  combinations <- expand.grid(rows,cols)
+  
+  set.seed(123)
+  makeNA <- sample(1:nrow(combinations), 50)
+  for(i in 1:length(makeNA)){
+    PoliticalDemocracyWithNA[combinations[makeNA[i],1], combinations[makeNA[i],2]] <- NA
+  }
+  
+  model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
+  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracyWithNA)
+  SEM <- fit(SEM)
+  
+  hessian <- getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
+  
+  hessian2 <- numDeriv::hessian(func = fitFunction, x = getParameters(SEM), SEM = SEM, raw = FALSE)
+  
+  testthat::expect_equal(abs(sum(hessian - hessian2)) < .001, TRUE)
 })

@@ -1,28 +1,10 @@
 optimizeSEM <- function(SEM, raw = TRUE, ...){
-  # get parameters and check for variances -> these will get a lower bound
+  
   parameters <- getParameters(SEM, raw = raw)
   
-  fitfun <- function(par, 
-                     SEM,
-                     raw){
-    SEM <- setParameters(SEM, names(par), par, raw = raw)
-    SEM <- try(fit(SEM), silent = TRUE)
-    
-    if(any(class(SEM) == "try-error") || is.na(SEM$m2LL)) return(999999999999)
-    
-    return(SEM$m2LL)
-    
-  }
-  
-  fitDerivative <- function(par, SEM, raw){
-    tryDerivs <- try(computeAnalyticGradients(par, SEM, raw = raw), silent = TRUE)
-    if(any(class(tryDerivs) == "try-error")) return(rep(9999, length(par)))
-    return(tryDerivs)
-  }
-  
   optimized <- optim(par = parameters, 
-                     fn = fitfun, 
-                     gr = fitDerivative, 
+                     fn = fitFunction, 
+                     gr = derivativeFunction, 
                      SEM = SEM,
                      raw = raw,
                      method = "BFGS",
@@ -34,23 +16,32 @@ optimizeSEM <- function(SEM, raw = TRUE, ...){
               "optimizer" = optimized))
 }
 
-optimizeLassoSEM <- function(SEM, alternativeStartingValues = NULL, regularizedParameters, lambda, raw = TRUE, ...){
-  SEM_ <- SEM # save in case something brakes
-  # get parameters and check for variances -> these will get a lower bound
+optimizeSEMLASSO <- function(SEM, alternativeStartingValues = NULL, regularizedParameters, lambda, raw = TRUE, ...){
+  parameterBackup <- getParameters(SEM, raw = TRUE) # save in case something brakes
+  
+  # get parameters
   parameters <- getParameters(SEM, raw = raw)
-  parameterTable <- SEM$model$parameters
-  variances <- parameterTable$label[parameterTable$row == parameterTable$col & parameterTable$location == "Smatrix"]
   
   # check regularizedParameters
   if(any(!regularizedParameters %in% names(parameters))) stop(paste0("Could not find parameter ", 
-                                                                     regularizedParameters[!regularizedParameters %in% names(parameters)]))
+                                                                     paste0(regularizedParameters[!regularizedParameters %in% names(parameters)], collapse = ", "))
+  )
   
-  Nobs <- nrow(SEM$data$rawData)
+  # check if variances are regularized and the parameters are raw
+  if(raw){
+    parameterTable <- SEM$getParameters()
+    for(regularizedParmeter in regularizedParameters){
+      if(parameterTable$location[parameterTable$label == regularizedParmeter] != "Smatrix") next
+      if(parameterTable$row[parameterTable$label == regularizedParmeter] == parameterTable$col[parameterTable$label == regularizedParmeter]){
+        warning("Regularizing raw_value of variances (raw = TRUE). The actual variances are given by var = exp(raw_value).")
+      }
+    }
+  }
+  
+  Nobs <- nrow(SEM$rawData)
   
   penaltyFunction <- function(par, SEM, raw, lambda, regularizedParameters, Nobs){
-    SEM <- setParameters(SEM, names(par), par, raw = raw) # in case the parameters were raw
-    parTransformed <- getParameters(SEM, raw = FALSE)
-    return(lambda*sum(sqrt((parTransformed[regularizedParameters])^2 + 1e-10)))
+    return(Nobs*lambda*sum(sqrt((par[regularizedParameters])^2 + 1e-10)))
   }
   
   fitfun <- function(par, 
@@ -65,7 +56,7 @@ optimizeLassoSEM <- function(SEM, alternativeStartingValues = NULL, regularizedP
     
     if(any(class(SEM) == "try-error") || is.na(SEM$m2LL)) {
       return(9999999999)
-      }
+    }
     
     ff <- SEM$m2LL + penaltyFunction(par = par, 
                                      SEM = SEM, 
@@ -86,14 +77,13 @@ optimizeLassoSEM <- function(SEM, alternativeStartingValues = NULL, regularizedP
                                              lambda, 
                                              regularizedParameters,
                                              Nobs){
-    SEM <- setParameters(SEM, names(par), par, raw = raw) # in case the parameters were raw
-    parTransformed <- getParameters(SEM, raw = FALSE)
-    gradientsM2LL <- try(computeAnalyticGradients(par = par, SEM = SEM, raw = raw))
+
+    gradientsM2LL <- derivativeFunction(par, SEM, raw)
     if(any(class(gradientsM2LL) == "try-error")) return(rep(9999, length(par)))
     # add derivative of regularization function
     
     gradientsM2LL[regularizedParameters] <- gradientsM2LL[regularizedParameters] + 
-      lambda*parTransformed[regularizedParameters]/(sqrt(parTransformed[regularizedParameters]^2 + 1e-10))
+      Nobs*lambda*par[regularizedParameters]/(sqrt(par[regularizedParameters]^2 + 1e-10))
     
     return(gradientsM2LL)
   }
@@ -104,13 +94,13 @@ optimizeLassoSEM <- function(SEM, alternativeStartingValues = NULL, regularizedP
                      penaltyFunction = penaltyFunction,
                      SEM = SEM, 
                      raw = raw,
-                     lambda = Nobs*lambda, 
+                     lambda = lambda, 
                      regularizedParameters = regularizedParameters, 
                      Nobs = Nobs, 
                      method = "BFGS")
   
-
-
+  
+  
   SEM <- setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
   SEM <- try(fit(SEM), silent = TRUE)
   
@@ -122,7 +112,7 @@ optimizeLassoSEM <- function(SEM, alternativeStartingValues = NULL, regularizedP
                        penaltyFunction = penaltyFunction,
                        SEM = SEM_, 
                        raw = raw,
-                       lambda = Nobs*lambda, 
+                       lambda = lambda, 
                        regularizedParameters = regularizedParameters, 
                        Nobs = Nobs, 
                        method = "BFGS")
