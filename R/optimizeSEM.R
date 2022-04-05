@@ -16,9 +16,64 @@ optimizeSEM <- function(SEM, raw = TRUE, ...){
               "optimizer" = optimized))
 }
 
-optimizeSEMLASSO <- function(SEM, alternativeStartingValues = NULL, regularizedParameters, lambda, raw = TRUE, ...){
-  parameterBackup <- getParameters(SEM, raw = TRUE) # save in case something brakes
+optimizeRegularizedSEM <- function(SEM, raw = TRUE, individualPenaltyFunction, controlOptim = NULL, method = "BFGS", ...){
   
+  additionalArguments <- list(...)
+  
+  parameters <- getParameters(SEM, raw = raw)
+  
+  N <- nrow(SEM$rawData)
+  
+  fitFun <- function(par, SEM, raw, individualPenaltyFunction, ...){
+    m2LL <- fitFunction(par = par, SEM = SEM, raw = raw)
+    if(m2LL == 9999999999999) return(m2LL)
+    
+    m2LLRegularized <- m2LL + N*individualPenaltyFunction(par, ...)
+    
+    return(m2LLRegularized)
+  }
+  
+  gradFun <- function(par, SEM, raw, individualPenaltyFunction, ...){
+    gradients <- derivativeFunction(par = par, SEM = SEM, raw = raw)
+    if(all(gradients == 9999999999999)) return(gradients)
+    
+    gradients <- gradients + N*numDeriv::grad(func = individualPenaltyFunction, 
+                                              x = par, 
+                                              ...)
+    
+    return(gradients)
+  }
+  
+  if(is.null(controlOptim)) {
+    optimized <- optim(par = parameters, 
+                       fn = fitFun, 
+                       gr = gradFun, 
+                       SEM = SEM,
+                       raw = raw,
+                       individualPenaltyFunction = individualPenaltyFunction,
+                       method = method,
+                       ...)
+  }else{
+    optimized <- optim(par = parameters, 
+                       fn = fitFun, 
+                       gr = gradFun, 
+                       SEM = SEM,
+                       raw = raw,
+                       individualPenaltyFunction = individualPenaltyFunction,
+                       method = method,
+                       control = controlOptim,
+                       ...)
+  }
+  
+  SEM <- setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
+  SEM <- try(fit(SEM), silent = TRUE)
+  
+  return(list("SEM" = SEM,
+              "optimizer" = optimized))
+}
+
+optimizeSEMLASSO <- function(SEM, regularizedParameters, lambda, eps = 1e-4, raw = TRUE, ...){
+
   # get parameters
   parameters <- getParameters(SEM, raw = raw)
   
@@ -38,91 +93,17 @@ optimizeSEMLASSO <- function(SEM, alternativeStartingValues = NULL, regularizedP
     }
   }
   
-  Nobs <- nrow(SEM$rawData)
-  
-  penaltyFunction <- function(par, SEM, raw, lambda, regularizedParameters, Nobs){
-    return(Nobs*lambda*sum(sqrt((par[regularizedParameters])^2 + 1e-10)))
+  individualPenaltyFunction <- function(par, SEM, raw, lambda, regularizedParameters, eps){
+    return(lambda*sum(sqrt((par[regularizedParameters])^2 + eps)))
   }
   
-  fitfun <- function(par, 
-                     SEM, 
-                     raw,
-                     penaltyFunction,
-                     lambda, 
-                     regularizedParameters, 
-                     Nobs){
-    SEM <- setParameters(SEM, names(par), par, raw = raw)
-    SEM <- try(fit(SEM), silent = TRUE)
-    
-    if(any(class(SEM) == "try-error") || is.na(SEM$m2LL)) {
-      return(9999999999)
-    }
-    
-    ff <- SEM$m2LL + penaltyFunction(par = par, 
-                                     SEM = SEM, 
-                                     raw = raw, 
-                                     lambda = lambda, 
-                                     regularizedParameters = regularizedParameters, 
-                                     Nobs = Nobs)
-    
-    return(ff)
-    
-  }
+  out <- optimizeRegularizedSEM(SEM = SEM, 
+                                raw = raw, 
+                                individualPenaltyFunction = individualPenaltyFunction, 
+                                lambda = lambda,
+                                regularizedParameters = regularizedParameters, 
+                                eps = eps,
+                                method = "BFGS")
   
-  computeRegularizedDerivativesF <- function(par, 
-                                             SEM, 
-                                             raw,
-                                             penaltyFunction,
-                                             penaltyFunctionDerivative = NULL, 
-                                             lambda, 
-                                             regularizedParameters,
-                                             Nobs){
-
-    gradientsM2LL <- derivativeFunction(par, SEM, raw)
-    if(any(class(gradientsM2LL) == "try-error")) return(rep(9999, length(par)))
-    # add derivative of regularization function
-    
-    gradientsM2LL[regularizedParameters] <- gradientsM2LL[regularizedParameters] + 
-      Nobs*lambda*par[regularizedParameters]/(sqrt(par[regularizedParameters]^2 + 1e-10))
-    
-    return(gradientsM2LL)
-  }
-  
-  optimized <- optim(par = parameters, 
-                     fn = fitfun, 
-                     gr = computeRegularizedDerivativesF, 
-                     penaltyFunction = penaltyFunction,
-                     SEM = SEM, 
-                     raw = raw,
-                     lambda = lambda, 
-                     regularizedParameters = regularizedParameters, 
-                     Nobs = Nobs, 
-                     method = "BFGS")
-  
-  
-  
-  SEM <- setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
-  SEM <- try(fit(SEM), silent = TRUE)
-  
-  if(any(class(SEM) == "try-error" || is.na(SEM$m2LL)) && !is.null(alternativeStartingValues)){
-    print("Trying alternative starting values")
-    optimized <- optim(par = alternativeStartingValues, 
-                       fn = fitfun, 
-                       gr = computeRegularizedDerivativesF, 
-                       penaltyFunction = penaltyFunction,
-                       SEM = SEM_, 
-                       raw = raw,
-                       lambda = lambda, 
-                       regularizedParameters = regularizedParameters, 
-                       Nobs = Nobs, 
-                       method = "BFGS")
-    
-    
-    
-    SEM <- setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
-    SEM <- try(fit(SEM), silent = TRUE)
-  }
-  
-  return(list("SEM" = SEM,
-              "optimizer" = optimized))
+  return(out)
 }
