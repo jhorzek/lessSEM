@@ -8,9 +8,7 @@ test_that("approximate cross validation works", {
   mod <- 'f =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9'
   outt = cfa(mod, HS, meanstructure = TRUE)
   
-  CFA <- SEMFromLavaan(lavaanModel = outt, rawData = HS)
-
-  aLOOCV <- approximateCrossValidation(SEM = CFA, k = nrow(HS), raw = FALSE)
+  aLOOCV <- approximateCrossValidation(lavaanModel = outt, k = nrow(HS), raw = FALSE)
   
   
   exactLOOCV <- rep(NA, nrow(HS))
@@ -63,16 +61,13 @@ test_that("approximate cross validation works", {
   
   regularized <- names(pars)[model_out$pars_pen]
   
-  individualPenaltyFunction <- function(par, lambda, regularizedParameters){
-    return(lambda*sum(sqrt((par[regularizedParameters])^2 + 1e-4)))
-  }
-  
-  aLOOCV2 <- approximateCrossValidation(SEM = CFA, 
+  aLOOCV2 <- approximateCrossValidation(lavaanModel = outt,  
+                                        SEM = CFA, 
                                         k = nrow(HS), 
-                                        individualPenaltyFunction = individualPenaltyFunction,
+                                        individualPenaltyFunction = smoothLASSO,
                                         lambda = lambda_, 
-                                        regularized = regularized)
-
+                                        regularizedParameterLabels = regularized)
+  
   
   sum(aLOOCV2$leaveOutFits)
   
@@ -99,9 +94,9 @@ test_that("approximate cross validation works", {
                              raw = FALSE))
     
     exactLOOCV2[i] <- computeIndividualM2LL(nObservedVariables = ncol(HS), 
-                                           rawData = as.numeric(HS[i,]),
-                                           impliedMeans = CFA$impliedMeans, 
-                                           impliedCovariance = CFA$impliedCovariance)
+                                            rawData = as.numeric(HS[i,]),
+                                            impliedMeans = CFA$impliedMeans, 
+                                            impliedCovariance = CFA$impliedCovariance)
     
   }
   

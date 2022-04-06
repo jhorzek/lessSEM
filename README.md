@@ -25,9 +25,7 @@ The following example is adapted from the documentation of ?lavaan::cfa.
     
     fit <- cfa(HS.model, data = HS, meanstructure = TRUE)
     
-    CFA <- SEMFromLavaan(lavaanModel = fit, rawData = HS)
-    
-    aLOOCV <- approximateCrossValidation(SEM = CFA, k = nrow(HS), raw = FALSE)
+    aLOOCV <- approximateCrossValidation(lavaanModel = fit, k = nrow(HS))
     
     
     exactLOOCV <- rep(NA, nrow(HS))

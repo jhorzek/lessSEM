@@ -1,4 +1,20 @@
-approximateCrossValidation <- function(SEM = NULL, lavaanModel, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+approximateCrossValidation <- function(lavaanModel, SEM = NULL, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+  
+  if(is.null(SEM)){
+    return(approximateCrossValidationLavaan(lavaanModel = lavaanModel, 
+                                            k = k,
+                                            individualPenaltyFunction = individualPenaltyFunction, 
+                                            raw = raw, 
+                                            ... = ...))
+  }
+  
+  if(is(SEM, "Rcpp_SEMCpp")){
+    return(approximateCrossValidationRcpp_SEMCpp(SEM = SEM, 
+                                                 k = k,
+                                                 individualPenaltyFunction = individualPenaltyFunction, 
+                                                 raw = raw, 
+                                                 ... = ...))
+  }
   
   if(!is(lavaanModel, "lavaan")){
     stop("lavaanModel must be of class lavaan")
@@ -9,13 +25,6 @@ approximateCrossValidation <- function(SEM = NULL, lavaanModel, k, individualPen
   data <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
   
-  if(is(SEM, "lavaan")){
-    return(approximateCrossValidationLavaan(SEM = SEM, 
-                                            k = k,
-                                            individualPenaltyFunction = individualPenaltyFunction, 
-                                            raw = raw, 
-                                            ... = ...))
-  }
   
   if(is(SEM, "regsem")){
     return(approximateCrossValidationRegsem(SEM = SEM, 
