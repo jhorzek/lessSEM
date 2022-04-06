@@ -1,4 +1,52 @@
-approximateCrossValidation <- function(SEM, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+approximateCrossValidation <- function(SEM = NULL, lavaanModel, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+  
+  if(!is(lavaanModel, "lavaan")){
+    stop("lavaanModel must be of class lavaan")
+  }
+  
+  if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
+  
+  data <- try(lavaan::lavInspect(lavaanModel, "data"))
+  if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  
+  if(is(SEM, "lavaan")){
+    return(approximateCrossValidationLavaan(SEM = SEM, 
+                                            k = k,
+                                            individualPenaltyFunction = individualPenaltyFunction, 
+                                            raw = raw, 
+                                            ... = ...))
+  }
+  
+  if(is(SEM, "regsem")){
+    return(approximateCrossValidationRegsem(SEM = SEM, 
+                                            k = k,
+                                            individualPenaltyFunction = individualPenaltyFunction, 
+                                            raw = raw, 
+                                            ... = ...))
+  }
+  
+  if(is(SEM, "cvregsem")){
+    return(approximateCrossValidationCvregsem(SEM = SEM, 
+                                              k = k,
+                                              individualPenaltyFunction = individualPenaltyFunction, 
+                                              raw = raw, 
+                                              ... = ...))
+  }
+  
+  if(is(SEM, "lslx")){
+    return(approximateCrossValidationLslx(SEM = SEM, 
+                                          k = k,
+                                          individualPenaltyFunction = individualPenaltyFunction, 
+                                          raw = raw, 
+                                          ... = ...))
+  }
+  
+}
+
+approximateCrossValidationRcpp_SEMCpp <- function(SEM, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+  if(!is(SEM, "Rcpp_SEMCpp")){
+    stop("SEM must be of class Rcpp_SEMCpp")
+  }
   
   additionalArguments <- list(...)
   
@@ -34,7 +82,7 @@ approximateCrossValidation <- function(SEM, k, individualPenaltyFunction = NULL,
                           additionalArguments
                         ))
   }
-
+  
   # step 2: subgroup-parameters
   if(k < N){
     
@@ -105,3 +153,136 @@ approximateCrossValidation <- function(SEM, k, individualPenaltyFunction = NULL,
   
 }
 
+
+approximateCrossValidationLavaan <- function(lavaanModel, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+  if(!is(lavaanModel, "lavaan")){
+    stop("lavaanModel must be of class lavaan")
+  }
+  
+  if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
+  
+  data <- try(lavaan::lavInspect(lavaanModel, "data"))
+  if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  
+  aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = data, transformVariances = TRUE)
+  
+  return(approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
+                                               k = k,
+                                               individualPenaltyFunction = individualPenaltyFunction, 
+                                               raw = raw, 
+                                               ... = ...))
+}
+
+approximateCrossValidationRegsem <- function(regsemModel, lavaanModel, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+  if(!is(lavaanModel, "lavaan")){
+    stop("lavaanModel must be of class lavaan")
+  }
+  if(is.null(individualPenaltyFunction)) stop("approximateCrossValidationRegsem requires the individualPenaltyFunction to be specified.")
+  
+  if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
+  
+  data <- try(lavaan::lavInspect(lavaanModel, "data"))
+  if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  if(!is(regsemModel, "regsem")){stop("regsemModel must be of class regsem.")}
+  
+  aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = data, transformVariances = TRUE)
+  
+  regsemParameters <- regsem2LavaanParameters(regsemModel = regsemModel, lavaanModel = lavaanModel)
+  regularizedParameters <- names(regsemParameters)[regsemModel$pars_pen]
+  
+  message("aCV4SEM assumes that the following parameters were regularized: ", 
+          paste0(regularizedParameters, sep = ", "), 
+          ". Please make sure that this is correct.")
+  
+  stop("MISSING IMPLEMENTATION")
+  return(approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
+                                               k = k,
+                                               individualPenaltyFunction = individualPenaltyFunction, 
+                                               raw = raw, 
+                                               ... = ...))
+}
+
+approximateCrossValidationCvregsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
+  if(!is(lavaanModel, "lavaan")){
+    stop("lavaanModel must be of class lavaan")
+  }
+  if(!penalty %in% c("lasso", "ridge", "elasticNet")) stop("approximateCrossValidationCvregsem currently only supports lasso, ridge, or elastic net as penalty functions")
+  
+  if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
+  
+  data <- try(lavaan::lavInspect(lavaanModel, "data"))
+  if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  if(!is(regsemModel, "cvregsem")) stop("cvregsemModel must be of class regsem.")
+  
+  aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = data, transformVariances = TRUE)
+  
+  regsemParameters <- cvregsem2LavaanParameters(regsemModel = cvregsemModel, lavaanModel = lavaanModel)
+  regularizedParameters <- colnames(regsemParameters)[cvregsemModel$pars_pen]
+  
+  message("aCV4SEM assumes that the following parameters were regularized: ", 
+          paste0(regularizedParameters, sep = ", "), 
+          ". Please make sure that this is correct.")
+  
+  # extract tuning parameters
+  lambdas <- cvregsemModel$fits[,"lambda"]
+  if(penalty == "elasticNet") {
+    if(is.null(cvregsemModel$call$alpha)) stop("Cannot find the tuning parameter alpha in cvregsemModel. Please make sure to call cv_regsem with alpha explicitly specified")
+    alphas <- rep(cvregsemModel$call$alpha, length(lambdas)) # cv_regsem cannot use a grid of alphas
+  }
+  
+  aCVs <- matrix(NA,
+                 nrow = nrow(data), 
+                 ncol = nrow(regsemParameters),
+                 dimnames = list(
+                   paste0("person_", 1:nrow(data)),
+                   ifelse(penalty == "elasticNet",
+                          paste0("lambda=",lambdas, "; alpha=", alphas),
+                          paste0("lambda=",lambdas))
+                 ))
+  
+  for(p in 1:nrow(regsemParameters)){
+    if(anyNA(regsemParameters[p,])) next
+    aCVSEM <- setParameters(SEM = aCVSEM,
+                            labels = colnames(regsemParameters),
+                            values = regsemParameters[p,],
+                            raw = FALSE)
+    aCVSEM <- fit(aCVSEM)
+    
+    if(penalty == "elasticNet"){
+      aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
+                                                   k = k,
+                                                   individualPenaltyFunction = smoothElasticNet, 
+                                                   raw = FALSE, 
+                                                   regularizedParameterLabels = regularizedParameterLabels,
+                                                   lambda = lambdas[p],
+                                                   alpha = alphas[p],
+                                                   eps = eps)
+      
+    }
+    if(penalty == "ridge"){
+      aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
+                                                   k = k,
+                                                   individualPenaltyFunction = ridge, 
+                                                   raw = FALSE, 
+                                                   regularizedParameterLabels = regularizedParameterLabels,
+                                                   lambda = lambdas[p])
+      
+    }
+    if(penalty == "lasso"){
+      aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
+                                                   k = k,
+                                                   individualPenaltyFunction = smoothLASSO, 
+                                                   raw = FALSE, 
+                                                   regularizedParameterLabels = regularizedParameterLabels,
+                                                   lambda = lambdas[p],
+                                                   eps = eps)
+    }
+    
+    aCVs[i,p] <- leaveOutFits
+  }
+  
+  return(
+    "regsemParameters" = regsemParameters,
+    "approximateCV" = aCVs
+  )
+}

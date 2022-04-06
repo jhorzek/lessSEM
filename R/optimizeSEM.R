@@ -16,7 +16,7 @@ optimizeSEM <- function(SEM, raw = TRUE, ...){
               "optimizer" = optimized))
 }
 
-optimizeRegularizedSEM <- function(SEM, raw = TRUE, individualPenaltyFunction, controlOptim = NULL, method = "BFGS", ...){
+optimizeCustomRegularizedSEM <- function(SEM, individualPenaltyFunction, controlOptim = NULL, method = "BFGS", raw = TRUE, ...){
   
   additionalArguments <- list(...)
   
@@ -72,38 +72,118 @@ optimizeRegularizedSEM <- function(SEM, raw = TRUE, individualPenaltyFunction, c
               "optimizer" = optimized))
 }
 
-optimizeSEMLASSO <- function(SEM, regularizedParameters, lambda, eps = 1e-4, raw = TRUE, ...){
-
+optimizeRegularizedSEM <- function(lavaanModel, regularizedParameterLabels, penalty, lambda, alpha = NULL, eps = 1e-4, controlOptim = NULL, method = "BFGS", raw = TRUE){
+  inputArguments <- as.list(environment())
+  
+  if(eps < 1e-5) warning("Setting eps too small may result in very ragged parameter estimates. We recommend trying different values of eps.")
+  if(!penalty %in% c("lasso", "ridge", "adaptiveLasso", "elasticNet")) stop("Currently supported penalty functions are: lasso, ridge, adaptiveLasso, and elasticNet")
+  
+  if(!is(lavaanModel, "lavaan")){
+    stop("lavaanModel must be of class lavaan")
+  }
+  
+  if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
+  
+  rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
+  if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  
+  
+  SEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = rawData, transformVariances = TRUE)
+  
   # get parameters
   parameters <- getParameters(SEM, raw = raw)
+  checkRegularizedParameters(parameters = parameters, 
+                             regularizedParameterLabels = regularizedParameterLabels,
+                             SEM$getParameters(), 
+                             raw = raw)
   
-  # check regularizedParameters
-  if(any(!regularizedParameters %in% names(parameters))) stop(paste0("Could not find parameter ", 
-                                                                     paste0(regularizedParameters[!regularizedParameters %in% names(parameters)], collapse = ", "))
+  if(penalty == "ridge") {
+    result <- optimizeCustomRegularizedSEM(SEM = SEM, 
+                                           raw = raw, 
+                                           individualPenaltyFunction = ridge, 
+                                           lambda = lambda,
+                                           regularizedParameterLabels = regularizedParameterLabels, 
+                                           controlOptim = controlOptim,
+                                           method = method)
+    return(
+      list(
+        "parameters" = getParameters(result$SEM, raw = FALSE),
+        "result" = result,
+        "inputArguments" = inputArguments)
+    )
+  }
+  
+  if(penalty == "lasso"){ 
+    result <- optimizeCustomRegularizedSEM(SEM = SEM, 
+                                           raw = raw, 
+                                           individualPenaltyFunction = smoothLASSO, 
+                                           lambda = lambda,
+                                           regularizedParameterLabels = regularizedParameterLabels, 
+                                           eps = eps,
+                                           controlOptim = controlOptim,
+                                           method = method)
+    return(
+      list(
+        "parameters" = getParameters(result$SEM, raw = FALSE),
+        "result" = result,
+        "inputArguments" = inputArguments)
+    )
+  }
+  
+  if(penalty == "adaptiveLasso") {
+    if(length(lambda) != length(regularizedParameterLabels)) stop("adaptiveLasso requires a lambda value for each regularized parameter.")
+    if(any(!names(lambda) %in% regularizedParameterLabels)){stop("names of lambda do not match the regularizedParameterLabels vector.")}
+    result <- optimizeCustomRegularizedSEM(SEM = SEM, 
+                                           raw = raw, 
+                                           individualPenaltyFunction = smoothAdaptiveLASSO, 
+                                           lambda = lambda,
+                                           regularizedParameterLabels = regularizedParameterLabels, 
+                                           controlOptim = controlOptim,
+                                           method = method)
+    return(
+      list(
+        "parameters" = getParameters(result$SEM, raw = FALSE),
+        "result" = result,
+        "inputArguments" = inputArguments)
+    )
+  }
+  
+  if(penalty == "elasticNet") {
+    if(is.null(alpha)) stop("elasticNet requires specification of alpha.")
+    result <- optimizeCustomRegularizedSEM(SEM = SEM, 
+                                           raw = raw, 
+                                           individualPenaltyFunction = smoothElasticNet, 
+                                           lambda = lambda,
+                                           alpha = alpha,
+                                           regularizedParameterLabels = regularizedParameterLabels, 
+                                           eps = eps,
+                                           controlOptim = controlOptim,
+                                           method = method)
+    return(
+      list(
+        "parameters" = getParameters(result$SEM, raw = FALSE),
+        "result" = result,
+        "inputArguments" = inputArguments)
+    )
+  }
+  stop("Something went terribly wrong...")
+}
+
+checkRegularizedParameters <- function(parameters, regularizedParameterLabels, parameterTable, raw){
+  
+  
+  # check regularizedParameterLabels
+  if(any(!regularizedParameterLabels %in% names(parameters))) stop(paste0("Could not find parameter ", 
+                                                                          paste0(regularizedParameterLabels[!regularizedParameterLabels %in% names(parameters)], collapse = ", "))
   )
   
   # check if variances are regularized and the parameters are raw
   if(raw){
-    parameterTable <- SEM$getParameters()
-    for(regularizedParmeter in regularizedParameters){
+    for(regularizedParmeter in regularizedParameterLabels){
       if(parameterTable$location[parameterTable$label == regularizedParmeter] != "Smatrix") next
       if(parameterTable$row[parameterTable$label == regularizedParmeter] == parameterTable$col[parameterTable$label == regularizedParmeter]){
         warning("Regularizing raw_value of variances (raw = TRUE). The actual variances are given by var = exp(raw_value).")
       }
     }
   }
-  
-  individualPenaltyFunction <- function(par, SEM, raw, lambda, regularizedParameters, eps){
-    return(lambda*sum(sqrt((par[regularizedParameters])^2 + eps)))
-  }
-  
-  out <- optimizeRegularizedSEM(SEM = SEM, 
-                                raw = raw, 
-                                individualPenaltyFunction = individualPenaltyFunction, 
-                                lambda = lambda,
-                                regularizedParameters = regularizedParameters, 
-                                eps = eps,
-                                method = "BFGS")
-  
-  return(out)
 }

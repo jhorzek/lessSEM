@@ -34,7 +34,7 @@ test_that("optimization works", {
   
   # test lasso penalty
   
-  lambda <- .1
+  lambda <- .5
   pars_pen = 5:24
   
   regsem_cvFit1 <- regsem(model = modelFit, 
@@ -45,8 +45,11 @@ test_that("optimization works", {
   pars <- regsem2LavaanParameters(regsemModel = regsem_cvFit1, lavaanModel = modelFit)
   regularizedParameters <- names(pars)[pars_pen]
   
-  optLasso <- optimizeSEMLASSO(SEM = CFA, regularizedParameters = regularizedParameters, lambda = lambda)
-  testthat::expect_equal(any(abs(getParameters(optLasso$SEM)[names(pars)] - pars) > .1),
+  optLasso <- optimizeRegularizedSEM(lavaanModel = modelFit,
+                                     regularizedParameterLabels = regularizedParameters, 
+                                     lambda = lambda, 
+                                     penalty = "lasso")
+  testthat::expect_equal(any(abs(optLasso$parameters[names(pars)] - pars) > .1),
                          FALSE)
 
 })
