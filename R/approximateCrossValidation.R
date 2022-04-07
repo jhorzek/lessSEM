@@ -1,4 +1,4 @@
-approximateCrossValidation <- function(lavaanModel, SEM = NULL, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+approximateCrossValidation <- function(lavaanModel, SEM = NULL, k, individualPenaltyFunction = NULL, raw = FALSE, penalty = NULL, ...){
   
   if(is.null(SEM)){
     return(approximateCrossValidationLavaan(lavaanModel = lavaanModel, 
@@ -27,18 +27,19 @@ approximateCrossValidation <- function(lavaanModel, SEM = NULL, k, individualPen
   
   
   if(is(SEM, "regsem")){
+    if(is.null(penalty)){stop("Requires specification of penalty")}
     return(approximateCrossValidationRegsem(SEM = SEM, 
                                             k = k,
                                             individualPenaltyFunction = individualPenaltyFunction, 
-                                            raw = raw, 
                                             ... = ...))
   }
   
   if(is(SEM, "cvregsem")){
-    return(approximateCrossValidationCvregsem(SEM = SEM, 
+    if(is.null(penalty)){stop("Requires specification of penalty")}
+    return(approximateCrossValidationCvregsem(cvregsemModel = SEM, 
+                                              lavaanModel = lavaanModel,
                                               k = k,
-                                              individualPenaltyFunction = individualPenaltyFunction, 
-                                              raw = raw, 
+                                              penalty = penalty, 
                                               ... = ...))
   }
   
@@ -197,10 +198,10 @@ approximateCrossValidationRegsem <- function(regsemModel, lavaanModel, k, indivi
   aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = data, transformVariances = TRUE)
   
   regsemParameters <- regsem2LavaanParameters(regsemModel = regsemModel, lavaanModel = lavaanModel)
-  regularizedParameters <- names(regsemParameters)[regsemModel$pars_pen]
+  regularizedParameterLabels <- names(regsemParameters)[regsemModel$pars_pen]
   
   message("aCV4SEM assumes that the following parameters were regularized: ", 
-          paste0(regularizedParameters, sep = ", "), 
+          paste0(regularizedParameterLabels, sep = ", "), 
           ". Please make sure that this is correct.")
   
   stop("MISSING IMPLEMENTATION")
@@ -221,15 +222,15 @@ approximateCrossValidationCvregsem <- function(cvregsemModel, lavaanModel, k, pe
   
   data <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
-  if(!is(regsemModel, "cvregsem")) stop("cvregsemModel must be of class regsem.")
+  if(!is(cvregsemModel, "cvregsem")) stop("cvregsemModel must be of class regsem.")
   
   aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = data, transformVariances = TRUE)
   
-  regsemParameters <- cvregsem2LavaanParameters(regsemModel = cvregsemModel, lavaanModel = lavaanModel)
-  regularizedParameters <- colnames(regsemParameters)[cvregsemModel$pars_pen]
+  regsemParameters <- cvregsem2LavaanParameters(cvregsemModel = cvregsemModel, lavaanModel = lavaanModel)
+  regularizedParameterLabels <- colnames(regsemParameters)[cvregsemModel$pars_pen]
   
   message("aCV4SEM assumes that the following parameters were regularized: ", 
-          paste0(regularizedParameters, sep = ", "), 
+          paste0(regularizedParameterLabels, collapse = ", "), 
           ". Please make sure that this is correct.")
   
   # extract tuning parameters
@@ -239,14 +240,17 @@ approximateCrossValidationCvregsem <- function(cvregsemModel, lavaanModel, k, pe
     alphas <- rep(cvregsemModel$call$alpha, length(lambdas)) # cv_regsem cannot use a grid of alphas
   }
   
+  if(penalty == "elasticNet") {
+    coln <- paste0("lambda=",lambdas, "; alpha=", alphas)
+  }else{
+    coln <- paste0("lambda=",lambdas)
+  }
   aCVs <- matrix(NA,
-                 nrow = nrow(data), 
+                 nrow = k, 
                  ncol = nrow(regsemParameters),
                  dimnames = list(
-                   paste0("person_", 1:nrow(data)),
-                   ifelse(penalty == "elasticNet",
-                          paste0("lambda=",lambdas, "; alpha=", alphas),
-                          paste0("lambda=",lambdas))
+                   paste0("sample", 1:k),
+                   coln
                  ))
   
   for(p in 1:nrow(regsemParameters)){
@@ -287,11 +291,13 @@ approximateCrossValidationCvregsem <- function(cvregsemModel, lavaanModel, k, pe
                                                    eps = eps)
     }
     
-    aCVs[i,p] <- leaveOutFits
+    aCVs[paste0("sample", 1:k),p] <- aCV$leaveOutFits
   }
   
-  return(
+  return(list(
+    "lambda" = lambdas,
     "regsemParameters" = regsemParameters,
     "approximateCV" = aCVs
+  )
   )
 }
