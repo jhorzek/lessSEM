@@ -98,7 +98,7 @@ smoothAdaptiveLASSOHessian <- function(parameters,
 
 smoothElasticNet <- function(parameters, 
                              penaltyFunctionArguments){
-  # using the implementation from https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.ElasticNet.html
+  # using the implementation from https://github.com/psyphh/lslx/blob/ver.0.6.11/src/lslxOptimizer.cpp
   lassoPart <- smoothLASSO(parameters = parameters,
                            penaltyFunctionArguments = list("regularizedParameterLabels" = penaltyFunctionArguments$regularizedParameterLabels,
                                                            "lambda" = penaltyFunctionArguments$alpha*penaltyFunctionArguments$lambda,
@@ -106,7 +106,7 @@ smoothElasticNet <- function(parameters,
   )
   ridgePart <- ridge(parameters = parameters,
                      penaltyFunctionArguments = list("regularizedParameterLabels" = penaltyFunctionArguments$regularizedParameterLabels,
-                                                     "lambda" = 0.5*penaltyFunctionArguments$alpha*(1-penaltyFunctionArguments$lambda)
+                                                     "lambda" = 0.5*penaltyFunctionArguments$lambda*(1-penaltyFunctionArguments$alpha)
                      )
   )
   return(lassoPart + ridgePart)
@@ -122,7 +122,7 @@ smoothElasticNetGradient <- function(parameters,
   )
   ridgePart <- ridgeGradient(parameters = parameters,
                              penaltyFunctionArguments = list("regularizedParameterLabels" = penaltyFunctionArguments$regularizedParameterLabels,
-                                                             "lambda" = 0.5*penaltyFunctionArguments$alpha*(1-penaltyFunctionArguments$lambda)
+                                                             "lambda" = 0.5*penaltyFunctionArguments$lambda*(1-penaltyFunctionArguments$alpha)
                              )
   )
   return(lassoPart + ridgePart)
@@ -138,7 +138,7 @@ smoothElasticNetHessian <- function(parameters,
   )
   ridgePart <- ridgeHessian(parameters = parameters,
                              penaltyFunctionArguments = list("regularizedParameterLabels" = penaltyFunctionArguments$regularizedParameterLabels,
-                                                             "lambda" = 0.5*penaltyFunctionArguments$alpha*(1-penaltyFunctionArguments$lambda)
+                                                             "lambda" = 0.5*penaltyFunctionArguments$lambda*(1-penaltyFunctionArguments$alpha)
                              )
   )
   return(lassoPart + ridgePart)
