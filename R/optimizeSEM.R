@@ -16,7 +16,7 @@ optimizeSEM <- function(SEM, raw = TRUE, ...){
               "optimizer" = optimized))
 }
 
-optimizeCustomRegularizedSEM <- function(SEM, individualPenaltyFunction, controlOptim = NULL, method = "BFGS", raw = TRUE, ...){
+optimizeCustomRegularizedSEM <- function(SEM, individualPenaltyFunction, individualPenaltyFunctionGradient, penaltyFunctionArguments, controlOptim = NULL, method = "BFGS", raw = TRUE, ...){
   
   additionalArguments <- list(...)
   
@@ -24,22 +24,23 @@ optimizeCustomRegularizedSEM <- function(SEM, individualPenaltyFunction, control
   
   N <- nrow(SEM$rawData)
   
-  fitFun <- function(par, SEM, raw, individualPenaltyFunction, ...){
+  fitFun <- function(par, SEM, raw, individualPenaltyFunction, individualPenaltyFunctionGradient, penaltyFunctionArguments){
     m2LL <- fitFunction(par = par, SEM = SEM, raw = raw)
     if(m2LL == 9999999999999) return(m2LL)
-    
-    m2LLRegularized <- m2LL + N*individualPenaltyFunction(par, ...)
-    
+    m2LLRegularized <- m2LL 
+    for(i in 1:N){
+      m2LLRegularized <- m2LLRegularized + individualPenaltyFunction(par, penaltyFunctionArguments)
+    }
     return(m2LLRegularized)
   }
   
-  gradFun <- function(par, SEM, raw, individualPenaltyFunction, ...){
+  gradFun <- function(par, SEM, raw, individualPenaltyFunction, individualPenaltyFunctionGradient, penaltyFunctionArguments){
     gradients <- derivativeFunction(par = par, SEM = SEM, raw = raw)
     if(all(gradients == 9999999999999)) return(gradients)
     
-    gradients <- gradients + N*numDeriv::grad(func = individualPenaltyFunction, 
-                                              x = par, 
-                                              ...)
+    for(i in 1:N){
+      gradients <- gradients + individualPenaltyFunctionGradient(par, penaltyFunctionArguments)
+    }
     
     return(gradients)
   }
@@ -51,8 +52,10 @@ optimizeCustomRegularizedSEM <- function(SEM, individualPenaltyFunction, control
                        SEM = SEM,
                        raw = raw,
                        individualPenaltyFunction = individualPenaltyFunction,
-                       method = method,
-                       ...)
+                       individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
+                       penaltyFunctionArguments = penaltyFunctionArguments,
+                       method = method
+    )
   }else{
     optimized <- optim(par = parameters, 
                        fn = fitFun, 
@@ -60,9 +63,11 @@ optimizeCustomRegularizedSEM <- function(SEM, individualPenaltyFunction, control
                        SEM = SEM,
                        raw = raw,
                        individualPenaltyFunction = individualPenaltyFunction,
+                       individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
+                       penaltyFunctionArguments = penaltyFunctionArguments,
                        method = method,
                        control = controlOptim,
-                       ...)
+    )
   }
   
   SEM <- setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
@@ -72,7 +77,16 @@ optimizeCustomRegularizedSEM <- function(SEM, individualPenaltyFunction, control
               "optimizer" = optimized))
 }
 
-optimizeRegularizedSEM <- function(lavaanModel, regularizedParameterLabels, penalty, lambda, alpha = NULL, eps = 1e-4, controlOptim = NULL, method = "BFGS", raw = TRUE){
+optimizeRegularizedSEM <- function(lavaanModel, 
+                                   regularizedParameterLabels,
+                                   penalty, 
+                                   lambdas, 
+                                   alphas = NULL, 
+                                   eps = 1e-4, 
+                                   controlOptim = NULL, 
+                                   method = "BFGS", 
+                                   raw = TRUE){
+  
   inputArguments <- as.list(environment())
   
   if(eps < 1e-5) warning("Setting eps too small may result in very ragged parameter estimates. We recommend trying different values of eps.")
@@ -97,76 +111,107 @@ optimizeRegularizedSEM <- function(lavaanModel, regularizedParameterLabels, pena
                              SEM$getParameters(), 
                              raw = raw)
   
-  if(penalty == "ridge") {
-    result <- optimizeCustomRegularizedSEM(SEM = SEM, 
-                                           raw = raw, 
-                                           individualPenaltyFunction = ridge, 
-                                           lambda = lambda,
-                                           regularizedParameterLabels = regularizedParameterLabels, 
-                                           controlOptim = controlOptim,
-                                           method = method)
-    return(
-      list(
-        "parameters" = getParameters(result$SEM, raw = FALSE),
-        "result" = result,
-        "inputArguments" = inputArguments)
-    )
+  if(penalty == "adaptiveLasso"){
+    parameterWeights <- abs(parameters)^(-1)
   }
   
-  if(penalty == "lasso"){ 
-    result <- optimizeCustomRegularizedSEM(SEM = SEM, 
-                                           raw = raw, 
-                                           individualPenaltyFunction = smoothLASSO, 
-                                           lambda = lambda,
-                                           regularizedParameterLabels = regularizedParameterLabels, 
-                                           eps = eps,
-                                           controlOptim = controlOptim,
-                                           method = method)
-    return(
-      list(
-        "parameters" = getParameters(result$SEM, raw = FALSE),
-        "result" = result,
-        "inputArguments" = inputArguments)
-    )
+  if(!is.null(alphas) && penalty != "adaptiveLasso") {stop("non-null alpha parameter only valid for adaptiveLasso")}
+  if(is.null(alphas)) alphas <- 0
+  
+  parameterEstimates <- matrix(NA, 
+                              nrow = length(lambdas)*length(alphas), 
+                              ncol = length(parameters))
+  colnames(parameterEstimates) <- names(parameters)
+  if(all(alphas == 0)){
+    rownames(parameterEstimates) <- paste0("lambda=", lambdas)
+  }else{
+    rownames(parameterEstimates) <- paste0("lambda=", lambdas, ";", rep(paste0("alpha=", alphas), each = length(lambdas)))
   }
   
-  if(penalty == "adaptiveLasso") {
-    if(length(lambda) != length(regularizedParameterLabels)) stop("adaptiveLasso requires a lambda value for each regularized parameter.")
-    if(any(!names(lambda) %in% regularizedParameterLabels)){stop("names of lambda do not match the regularizedParameterLabels vector.")}
-    result <- optimizeCustomRegularizedSEM(SEM = SEM, 
-                                           raw = raw, 
-                                           individualPenaltyFunction = smoothAdaptiveLASSO, 
-                                           lambda = lambda,
-                                           regularizedParameterLabels = regularizedParameterLabels, 
-                                           controlOptim = controlOptim,
-                                           method = method)
-    return(
-      list(
-        "parameters" = getParameters(result$SEM, raw = FALSE),
-        "result" = result,
-        "inputArguments" = inputArguments)
-    )
+  optimResults <- vector("list", nrow(parameterEstimates))
+  names(optimResults) <- rownames(parameterEstimates)
+  
+  progressbar = txtProgressBar(min = 0, 
+                               max = nrow(parameterEstimates), 
+                               initial = 0, 
+                               style = 3)
+  
+  for(lambda in lambdas){
+    
+    for(alpha in alphas){
+      
+      if(penalty == "ridge") {
+        result <- optimizeCustomRegularizedSEM(SEM = SEM, 
+                                               raw = raw, 
+                                               individualPenaltyFunction = ridge, 
+                                               individualPenaltyFunctionGradient = ridgeGradient,
+                                               penaltyFunctionArguments = list("lambda" = lambda,
+                                                                               "regularizedParameterLabels" = regularizedParameterLabels
+                                               ),
+                                               controlOptim = controlOptim,
+                                               method = method)
+      }
+      
+      if(penalty == "lasso"){ 
+        result <- optimizeCustomRegularizedSEM(SEM = SEM, 
+                                               raw = raw, 
+                                               individualPenaltyFunction = smoothLASSO, 
+                                               individualPenaltyFunctionGradient = smoothLASSOGradient,
+                                               penaltyFunctionArguments = list("lambda" = lambda,
+                                                                               "regularizedParameterLabels" = regularizedParameterLabels,
+                                                                               "eps" = eps
+                                               ),
+                                               controlOptim = controlOptim,
+                                               method = method)
+      }
+      
+      if(penalty == "adaptiveLasso") {
+        if(length(lambda) != length(regularizedParameterLabels)) stop("adaptiveLasso requires a lambda value for each regularized parameter.")
+        if(any(!names(lambda) %in% regularizedParameterLabels)){stop("names of lambda do not match the regularizedParameterLabels vector.")}
+        result <- optimizeCustomRegularizedSEM(SEM = SEM, 
+                                               raw = raw, 
+                                               individualPenaltyFunction = smoothAdaptiveLASSO, 
+                                               individualPenaltyFunctionGradient = smoothAdaptiveLASSOGradient,
+                                               penaltyFunctionArguments = list("lambdas" = parameterWeights*lambda,
+                                                                               "regularizedParameterLabels" = regularizedParameterLabels,
+                                                                               "eps" = eps
+                                               ),
+                                               controlOptim = controlOptim,
+                                               method = method)
+      }
+      
+      if(penalty == "elasticNet") {
+        if(is.null(alpha)) stop("elasticNet requires specification of alpha.")
+        result <- optimizeCustomRegularizedSEM(SEM = SEM, 
+                                               raw = raw, 
+                                               individualPenaltyFunction = smoothElasticNet, 
+                                               individualPenaltyFunctionGradient = smoothElasticNetGradient,
+                                               penaltyFunctionArguments = list("lambda" = lambda,
+                                                                               "alpha" = alpha,
+                                                                               "regularizedParameterLabels" = regularizedParameterLabels,
+                                                                               "eps" = eps
+                                               ),
+                                               controlOptim = controlOptim,
+                                               method = method)
+      }
+      
+      whereTo <- ifelse(all(alphas == 0), paste0("lambda=",lambda), paste0("lambda=",lambda, ";", "alpha=",alpha))
+      optimResults[[whereTo]] <- result$optimized
+      parameterEstimates[whereTo,] <- getParameters(result$SEM, raw = FALSE)
+      
+      setTxtProgressBar(progressbar,which(rownames(parameterEstimates) == whereTo))
+    }
   }
   
-  if(penalty == "elasticNet") {
-    if(is.null(alpha)) stop("elasticNet requires specification of alpha.")
-    result <- optimizeCustomRegularizedSEM(SEM = SEM, 
-                                           raw = raw, 
-                                           individualPenaltyFunction = smoothElasticNet, 
-                                           lambda = lambda,
-                                           alpha = alpha,
-                                           regularizedParameterLabels = regularizedParameterLabels, 
-                                           eps = eps,
-                                           controlOptim = controlOptim,
-                                           method = method)
-    return(
-      list(
-        "parameters" = getParameters(result$SEM, raw = FALSE),
-        "result" = result,
-        "inputArguments" = inputArguments)
-    )
-  }
-  stop("Something went terribly wrong...")
+  results <- list(
+    "parameters" = parameterEstimates,
+    "optimResults" = optimResults,
+    "inputArguments" = inputArguments)
+  class(results) <- "regularizedSEM"
+  return(
+    results
+  )
+  
 }
 
 checkRegularizedParameters <- function(parameters, regularizedParameterLabels, parameterTable, raw){

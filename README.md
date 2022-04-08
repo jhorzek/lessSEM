@@ -25,7 +25,7 @@ The following example is adapted from the documentation of ?lavaan::cfa.
     
     fit <- cfa(HS.model, data = HS, meanstructure = TRUE)
     
-    aLOOCV <- approximateCrossValidation(lavaanModel = fit, k = nrow(HS))
+    aLOOCV <- aCV4lavaan(lavaanModel = fit, k = nrow(HS))
     
     
     exactLOOCV <- rep(NA, nrow(HS))
@@ -48,7 +48,7 @@ The following example is adapted from the documentation of ?lavaan::cfa.
     HS <- data.frame(scale(HolzingerSwineford1939[,7:15]))
     mod <- 'f =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9'
     outt = cfa(mod, HS, meanstructure = FALSE)
-    # increase to > 25
+
     cv.out = cv_regsem(outt,type="lasso", 
                        fit.ret = "AIC",
                        metric = "AIC",
@@ -57,12 +57,12 @@ The following example is adapted from the documentation of ?lavaan::cfa.
                        jump=0.001, 
                        round = 10)
     
-    aCV <- approximateCrossValidation(lavaanModel = outt, # lavaan model is always required as basis
-                                      SEM = cv.out, 
-                                      k = nrow(HS), # leave one out cross-validation
-                                      penalty = "lasso",
-                                      eps = 1e-3)
-    cvFits <- apply(aCV$approximateCV,2,sum)
+    aCV <- aCV4cv_regsem(cvregsemModel = cv.out,
+                     lavaanModel = outt, # lavaan model is always required as basis
+                     k = nrow(HS), # leave one out cross-validation
+                     penalty = "lasso",
+                     eps = 1e-3)
+    cvFits <- apply(aCV$leaveOutFits,2,sum)
     par(mfrow = c(1,2))
     plot(x = aCV$lambda, 
          y = cvFits,

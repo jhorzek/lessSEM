@@ -8,8 +8,7 @@ test_that("approximate cross validation works", {
   mod <- 'f =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9'
   outt = cfa(mod, HS, meanstructure = TRUE)
   
-  aLOOCV <- approximateCrossValidation(lavaanModel = outt, k = nrow(HS), raw = FALSE)
-  
+  aLOOCV <- aCV4lavaan(lavaanModel = outt, k = nrow(HS), raw = FALSE)
   
   exactLOOCV <- rep(NA, nrow(HS))
   for(i in 1:nrow(HS)){
@@ -61,12 +60,11 @@ test_that("approximate cross validation works", {
   
   regularized <- names(pars)[model_out$pars_pen]
   
-  aLOOCV2 <- approximateCrossValidation(lavaanModel = outt,  
-                                        SEM = CFA, 
-                                        k = nrow(HS), 
-                                        individualPenaltyFunction = smoothLASSO,
-                                        lambda = lambda_, 
-                                        regularizedParameterLabels = regularized)
+  aLOOCV2 <- aCV4regsem(lavaanModel = outt,  
+                        regsemModel = model_out,
+                        k = nrow(HS), 
+                        penalty = "lasso",
+                        lambda = lambda_)
   
   
   sum(aLOOCV2$leaveOutFits)
@@ -105,4 +103,37 @@ test_that("approximate cross validation works", {
   points(exactLOOCV2[converged==0], aLOOCV2$leaveOutFits[converged==0], col = "red")
   #testthat::expect_equal(abs(sum(aLOOCV2$leaveOutFits) - sum(exactLOOCV)) < 2, TRUE)
   
+  ## reset to test LASSO with aCV
+  HS <- data.frame(scale(HolzingerSwineford1939[,7:15]))
+  mod <- 'f =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9'
+  outt = cfa(mod, HS, meanstructure = FALSE)
+  
+  # increase to > 25
+  cv.out = cv_regsem(outt,type="lasso", 
+                     fit.ret = "AIC",
+                     metric = "AIC",
+                     pars_pen=c(1:2,6:8),
+                     n.lambda=50,
+                     jump=0.001, 
+                     round = 10)
+  cvregsemPars <- cvregsem2LavaanParameters(cvregsemModel = cv.out, lavaanModel = outt)
+  
+  regularizedParameterLabels <- paste0("f=~x", c(2:3, 7:9))
+  optLasso2 <- optimizeRegularizedSEM(lavaanModel = outt,
+                                      regularizedParameterLabels = regularizedParameterLabels, 
+                                      lambda = cv.out$fits[,"lambda"], 
+                                      penalty = "lasso", 
+                                      eps = 1e-4)
+  testthat::expect_equal(all(round(optLasso2$parameters[,colnames(cvregsemPars)] - cvregsemPars,1) == 0), TRUE)
+  matplot(optLasso2$inputArguments$lambdas, optLasso2$parameters, type = "l")
+  matplot(optLasso2$inputArguments$lambdas, cvregsemPars, type = "l")
+  cv <- aCV4regularizedSEM(regularizedSEM = optLasso2, k = nrow(HS), eps = 1e-4)
+  
+  plot(
+    x = cv$lambda,
+    y = apply(cv$leaveOutFits,2,sum),
+    xlab = "lambda",
+    ylab = "cv fit",
+    type = "l"
+    )
 })

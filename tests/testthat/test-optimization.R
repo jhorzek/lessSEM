@@ -37,19 +37,31 @@ test_that("optimization works", {
   lambda <- .5
   pars_pen = 5:24
   
-  regsem_cvFit1 <- regsem(model = modelFit, 
-                          lambda = lambda, 
-                          pars_pen = pars_pen, 
-                          gradFun = "ram")
+  regsem_fit <- regsem(model = modelFit, 
+                       lambda = lambda, 
+                       pars_pen = pars_pen, 
+                       gradFun = "ram")
   
-  pars <- regsem2LavaanParameters(regsemModel = regsem_cvFit1, lavaanModel = modelFit)
+  pars <- regsem2LavaanParameters(regsemModel = regsem_fit, lavaanModel = modelFit)
   regularizedParameters <- names(pars)[pars_pen]
   
   optLasso <- optimizeRegularizedSEM(lavaanModel = modelFit,
                                      regularizedParameterLabels = regularizedParameters, 
                                      lambda = lambda, 
                                      penalty = "lasso")
-  testthat::expect_equal(any(abs(optLasso$parameters[names(pars)] - pars) > .1),
+  testthat::expect_equal(any(abs(optLasso$parameters[,names(pars)] - pars) > .1),
+                         FALSE)
+  
+  regsem_cvFit <- cv_regsem(model = modelFit, 
+                            pars_pen = pars_pen, 
+                            gradFun = "ram")
+  pars_cvFit <- cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, lavaanModel = modelFit)
+  
+  optLasso2 <- optimizeRegularizedSEM(lavaanModel = modelFit,
+                                     regularizedParameterLabels = regularizedParameters, 
+                                     lambda = regsem_cvFit$fits[,"lambda"], 
+                                     penalty = "lasso")
+  testthat::expect_equal(any(abs(optLasso2$parameters[,names(pars)] - pars_cvFit[,names(pars)]) > .1),
                          FALSE)
 
 })
