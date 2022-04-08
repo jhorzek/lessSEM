@@ -1,8 +1,33 @@
 smoothLASSO <- function(parameters, 
-                        regularizedParameterLabels, 
-                        lambda, 
-                        eps = 1e-4){
-  return(lambda*sum(sqrt((parameters[regularizedParameterLabels])^2 + eps)))
+                        penaltyFunctionArguments
+                        ){
+  return(penaltyFunctionArguments$lambda*sum(sqrt((parameters[penaltyFunctionArguments$regularizedParameterLabels ])^2 + penaltyFunctionArguments$eps)))
+}
+
+smoothLASSOGradient <- function(parameters, 
+                                penaltyFunctionArguments){
+  gradients <- rep(0, length(parameters))
+  names(gradients) <- names(parameters)
+  gradients[penaltyFunctionArguments$regularizedParameterLabels] <- penaltyFunctionArguments$lambda*
+    parameters[penaltyFunctionArguments$regularizedParameterLabels]*
+    (1/sqrt((parameters[penaltyFunctionArguments$regularizedParameterLabels])^2 + penaltyFunctionArguments$eps))
+  return(gradients)
+}
+
+smoothLASSOHessian <- function(parameters, 
+                               penaltyFunctionArguments){
+  hessian <- matrix(0, 
+                    length(parameters),
+                    length(parameters),
+                    dimnames = list(names(parameters),
+                                    names(parameters)))
+  diag(hessian[penaltyFunctionArguments$regularizedParameterLabels,
+               penaltyFunctionArguments$regularizedParameterLabels]) <- -penaltyFunctionArguments$lambda*
+    (parameters[penaltyFunctionArguments$regularizedParameterLabels])^2*
+    ((parameters[penaltyFunctionArguments$regularizedParameterLabels])^2 + penaltyFunctionArguments$eps)^(-3/2) +
+    penaltyFunctionArguments$lambda*
+    (1/sqrt((parameters[penaltyFunctionArguments$regularizedParameterLabels])^2 + penaltyFunctionArguments$eps))
+  return(hessian)
 }
 
 ridge <- function(parameters, 

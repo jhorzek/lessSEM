@@ -53,12 +53,21 @@ approximateCrossValidation <- function(lavaanModel, SEM = NULL, k, individualPen
   
 }
 
-approximateCrossValidationRcpp_SEMCpp <- function(SEM, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+approximateCrossValidationRcpp_SEMCpp <- function(SEM, k, 
+                                                  individualPenaltyFunction = NULL, 
+                                                  individualPenaltyFunctionGradient = NULL, 
+                                                  individualPenaltyFunctionHessian = NULL, 
+                                                  raw = FALSE, 
+                                                  penaltyFunctionArguments = NULL){
+  if(!is.null(individualPenaltyFunction)){
+    if(is.null(individualPenaltyFunctionGradient) || is.null(individualPenaltyFunctionHessian)){
+      warning("You did not specify the individualPenaltyFunctionGradient and individualPenaltyFunctionHessian. We highly recommend that you do so for smooth approximations of non-differential penalties (lasso, adaptive lasso, etc.) as it may improve the results considerably")
+    }
+  }
+  
   if(!is(SEM, "Rcpp_SEMCpp")){
     stop("SEM must be of class Rcpp_SEMCpp")
   }
-  
-  additionalArguments <- list(...)
   
   parameters <- getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
@@ -72,12 +81,21 @@ approximateCrossValidationRcpp_SEMCpp <- function(SEM, k, individualPenaltyFunct
   if(!is.null(individualPenaltyFunction)){
     for(i in 1:N){
       
-      scores[i,] <- scores[i,] + do.call(what = numDeriv::grad, 
-                                         args = c(list(
-                                           "func" = individualPenaltyFunction,
-                                           "x" = parameters[colnames(scores)]),
-                                           additionalArguments
-                                         ))
+      if(is.null(individualPenaltyFunctionGradient)){
+        scores[i,] <- scores[i,] + do.call(what = numDeriv::grad, 
+                                           args = c(list(
+                                             "func" = individualPenaltyFunction,
+                                             "x" = parameters[colnames(scores)],
+                                             "method" = "simple",
+                                             "method.args" = list(eps = 1e-7),
+                                             "penaltyFunctionArguments" = penaltyFunctionArguments
+                                           )
+                                           ))
+      }else{
+        scores[i,] <- scores[i,] + individualPenaltyFunctionGradient(parameters = parameters[colnames(scores)],
+                                                                     penaltyFunctionArguments = penaltyFunctionArguments)
+        
+      }
       
     }
   }
@@ -85,12 +103,25 @@ approximateCrossValidationRcpp_SEMCpp <- function(SEM, k, individualPenaltyFunct
   hessian <- getHessian(SEM = SEM, raw = raw)
   
   if(!is.null(individualPenaltyFunction)){
-    hessian + N*do.call(what = numDeriv::hessian, 
-                        args = c(list(
-                          "func" = individualPenaltyFunction,
-                          "x" = parameters[rownames(hessian)]),
-                          additionalArguments
-                        ))
+    
+    if(is.null(individualPenaltyFunctionHessian)){
+      hessian + N*do.call(what = numDeriv::hessian, 
+                          args = list(
+                            "func" = individualPenaltyFunction,
+                            "x" = parameters[rownames(hessian)],
+                            "method.args" = list(eps = 1e-7),
+                            "penaltyFunctionArguments" = penaltyFunctionArguments)
+      )
+    }else{
+      for(i in 1:N){
+        hessian <- hessian + individualPenaltyFunctionHessian(
+          parameters = parameters[colnames(scores)],
+          penaltyFunctionArguments = penaltyFunctionArguments
+        )
+      }
+    }
+    
+    
   }
   
   # step 2: subgroup-parameters
@@ -164,12 +195,25 @@ approximateCrossValidationRcpp_SEMCpp <- function(SEM, k, individualPenaltyFunct
 }
 
 
-approximateCrossValidationLavaan <- function(lavaanModel, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+approximateCrossValidationLavaan <- function(lavaanModel, 
+                                             k, 
+                                             individualPenaltyFunction = NULL, 
+                                             individualPenaltyFunctionGradient = NULL, 
+                                             individualPenaltyFunctionHessian = NULL, 
+                                             raw = FALSE, 
+                                             penaltyFunctionArguments = NULL){
+  
   if(!is(lavaanModel, "lavaan")){
     stop("lavaanModel must be of class lavaan")
   }
   
   if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
+  
+  if(!is.null(individualPenaltyFunction)){
+    if(is.null(individualPenaltyFunctionGradient) || is.null(individualPenaltyFunctionHessian)){
+      warning("You did not specify the individualPenaltyFunctionGradient and individualPenaltyFunctionHessian. We highly recommend that you do so for smooth approximations of non-differential penalties (lasso, adaptive lasso, etc.) as it may improve the results considerably")
+    }
+  }
   
   data <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
@@ -179,17 +223,29 @@ approximateCrossValidationLavaan <- function(lavaanModel, k, individualPenaltyFu
   return(approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
                                                k = k,
                                                individualPenaltyFunction = individualPenaltyFunction, 
+                                               individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
+                                               individualPenaltyFunctionHessian = individualPenaltyFunctionHessian,
                                                raw = raw, 
-                                               ... = ...))
+                                               penaltyFunctionArguments = penaltyFunctionArguments))
 }
 
-approximateCrossValidationRegsem <- function(regsemModel, lavaanModel, k, individualPenaltyFunction = NULL, raw = FALSE, ...){
+approximateCrossValidationRegsem <- function(regsemModel, lavaanModel, k, individualPenaltyFunction = NULL, 
+                                             individualPenaltyFunctionGradient = NULL, 
+                                             individualPenaltyFunctionHessian = NULL, 
+                                             raw = FALSE, 
+                                             penaltyFunctionArguments = NULL){
   if(!is(lavaanModel, "lavaan")){
     stop("lavaanModel must be of class lavaan")
   }
   if(is.null(individualPenaltyFunction)) stop("approximateCrossValidationRegsem requires the individualPenaltyFunction to be specified.")
   
   if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
+  
+  if(!is.null(individualPenaltyFunction)){
+    if(is.null(individualPenaltyFunctionGradient) || is.null(individualPenaltyFunctionHessian)){
+      warning("You did not specify the individualPenaltyFunctionGradient and individualPenaltyFunctionHessian. We highly recommend that you do so for smooth approximations of non-differential penalties (lasso, adaptive lasso, etc.) as it may improve the results considerably")
+    }
+  }
   
   data <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
@@ -208,8 +264,10 @@ approximateCrossValidationRegsem <- function(regsemModel, lavaanModel, k, indivi
   return(approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
                                                k = k,
                                                individualPenaltyFunction = individualPenaltyFunction, 
+                                               individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
+                                               individualPenaltyFunctionHessian = individualPenaltyFunctionHessian,
                                                raw = raw, 
-                                               ... = ...))
+                                               penaltyFunctionArguments = penaltyFunctionArguments))
 }
 
 approximateCrossValidationCvregsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
@@ -262,33 +320,44 @@ approximateCrossValidationCvregsem <- function(cvregsemModel, lavaanModel, k, pe
     aCVSEM <- fit(aCVSEM)
     
     if(penalty == "elasticNet"){
+      penaltyFunctionArguments <- list(
+        "regularizedParameterLabels" = regularizedParameterLabels,
+        "lambda" = lambdas[p],
+        "alpha" = alphas[p],
+        "eps" = eps
+      )
       aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
                                                    k = k,
                                                    individualPenaltyFunction = smoothElasticNet, 
                                                    raw = FALSE, 
-                                                   regularizedParameterLabels = regularizedParameterLabels,
-                                                   lambda = lambdas[p],
-                                                   alpha = alphas[p],
-                                                   eps = eps)
+                                                   penaltyFunctionArguments = penaltyFunctionArguments)
       
     }
     if(penalty == "ridge"){
+      penaltyFunctionArguments <- list(
+        "regularizedParameterLabels" = regularizedParameterLabels,
+        "lambda" = lambdas[p],
+      )
       aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
                                                    k = k,
                                                    individualPenaltyFunction = ridge, 
                                                    raw = FALSE, 
-                                                   regularizedParameterLabels = regularizedParameterLabels,
-                                                   lambda = lambdas[p])
+                                                   penaltyFunctionArguments = penaltyFunctionArguments)
       
     }
     if(penalty == "lasso"){
+      penaltyFunctionArguments <- list(
+        "regularizedParameterLabels" = regularizedParameterLabels,
+        "lambda" = lambdas[p],
+        "eps" = eps
+      )
       aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
                                                    k = k,
                                                    individualPenaltyFunction = smoothLASSO, 
+                                                   individualPenaltyFunctionGradient = smoothLASSOGradient,
+                                                   individualPenaltyFunctionHessian = smoothLASSOHessian,
                                                    raw = FALSE, 
-                                                   regularizedParameterLabels = regularizedParameterLabels,
-                                                   lambda = lambdas[p],
-                                                   eps = eps)
+                                                   penaltyFunctionArguments = penaltyFunctionArguments)
     }
     
     aCVs[paste0("sample", 1:k),p] <- aCV$leaveOutFits
