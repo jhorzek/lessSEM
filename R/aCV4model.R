@@ -69,13 +69,13 @@ aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
         "alpha" = alpha,
         "eps" = eps
       )
-      aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
-                                                   k = k,
-                                                   individualPenaltyFunction = smoothElasticNet, 
-                                                   individualPenaltyFunctionGradient = smoothElasticNetGradient,
-                                                   individualPenaltyFunctionHessian = smoothElasticNetHessian,
-                                                   raw = FALSE, 
-                                                   penaltyFunctionArguments = penaltyFunctionArguments)
+      aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                  k = k,
+                                  individualPenaltyFunction = smoothElasticNet, 
+                                  individualPenaltyFunctionGradient = smoothElasticNetGradient,
+                                  individualPenaltyFunctionHessian = smoothElasticNetHessian,
+                                  raw = FALSE, 
+                                  penaltyFunctionArguments = penaltyFunctionArguments)
       
     }
     if(penalty == "ridge"){
@@ -83,13 +83,13 @@ aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
         "regularizedParameterLabels" = regularizedParameterLabels,
         "lambda" = lambda,
       )
-      aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
-                                                   k = k,
-                                                   individualPenaltyFunction = ridge, 
-                                                   individualPenaltyFunctionGradient = ridgeGradient,
-                                                   individualPenaltyFunctionHessian = ridgeHessian,
-                                                   raw = FALSE, 
-                                                   penaltyFunctionArguments = penaltyFunctionArguments)
+      aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                  k = k,
+                                  individualPenaltyFunction = ridge, 
+                                  individualPenaltyFunctionGradient = ridgeGradient,
+                                  individualPenaltyFunctionHessian = ridgeHessian,
+                                  raw = FALSE, 
+                                  penaltyFunctionArguments = penaltyFunctionArguments)
       
     }
     if(penalty == "lasso"){
@@ -98,13 +98,13 @@ aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
         "lambda" = lambda,
         "eps" = eps
       )
-      aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
-                                                   k = k,
-                                                   individualPenaltyFunction = smoothLASSO, 
-                                                   individualPenaltyFunctionGradient = smoothLASSOGradient,
-                                                   individualPenaltyFunctionHessian = smoothLASSOHessian,
-                                                   raw = FALSE, 
-                                                   penaltyFunctionArguments = penaltyFunctionArguments)
+      aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                  k = k,
+                                  individualPenaltyFunction = smoothLASSO, 
+                                  individualPenaltyFunctionGradient = smoothLASSOGradient,
+                                  individualPenaltyFunctionHessian = smoothLASSOHessian,
+                                  raw = FALSE, 
+                                  penaltyFunctionArguments = penaltyFunctionArguments)
     }
     
     aCVs[paste0("sample", 1:k),selectPars] <- aCV$leaveOutFits
@@ -137,13 +137,13 @@ aCV4lavaan <- function(lavaanModel,
   
   aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = data, transformVariances = TRUE)
   
-  return(aCV4SEM:::approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
-                                                         k = k,
-                                                         individualPenaltyFunction = NULL, 
-                                                         individualPenaltyFunctionGradient = NULL,
-                                                         individualPenaltyFunctionHessian = NULL,
-                                                         raw = raw, 
-                                                         penaltyFunctionArguments = NULL))
+  return(aCV4SEM:::smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                        k = k,
+                                        individualPenaltyFunction = NULL, 
+                                        individualPenaltyFunctionGradient = NULL,
+                                        individualPenaltyFunctionHessian = NULL,
+                                        raw = raw, 
+                                        penaltyFunctionArguments = NULL))
 }
 
 aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4){
@@ -186,13 +186,13 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
       "alpha" = alpha,
       "eps" = eps
     )
-    aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
-                                                 k = k,
-                                                 individualPenaltyFunction = smoothElasticNet, 
-                                                 individualPenaltyFunctionGradient = smoothElasticNetGradient,
-                                                 individualPenaltyFunctionHessian = smoothElasticNetHessian,
-                                                 raw = FALSE, 
-                                                 penaltyFunctionArguments = penaltyFunctionArguments)
+    aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                k = k,
+                                individualPenaltyFunction = smoothElasticNet, 
+                                individualPenaltyFunctionGradient = smoothElasticNetGradient,
+                                individualPenaltyFunctionHessian = smoothElasticNetHessian,
+                                raw = FALSE, 
+                                penaltyFunctionArguments = penaltyFunctionArguments)
     
   }
   if(penalty == "ridge"){
@@ -200,13 +200,13 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
       "regularizedParameterLabels" = regularizedParameterLabels,
       "lambda" = lambda,
     )
-    aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
-                                                 k = k,
-                                                 individualPenaltyFunction = ridge, 
-                                                 individualPenaltyFunctionGradient = ridgeGradient,
-                                                 individualPenaltyFunctionHessian = ridgeHessian,
-                                                 raw = FALSE, 
-                                                 penaltyFunctionArguments = penaltyFunctionArguments)
+    aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                k = k,
+                                individualPenaltyFunction = ridge, 
+                                individualPenaltyFunctionGradient = ridgeGradient,
+                                individualPenaltyFunctionHessian = ridgeHessian,
+                                raw = FALSE, 
+                                penaltyFunctionArguments = penaltyFunctionArguments)
     
   }
   if(penalty == "lasso"){
@@ -215,13 +215,13 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
       "lambda" = lambda,
       "eps" = eps
     )
-    aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
-                                                 k = k,
-                                                 individualPenaltyFunction = smoothLASSO, 
-                                                 individualPenaltyFunctionGradient = smoothLASSOGradient,
-                                                 individualPenaltyFunctionHessian = smoothLASSOHessian,
-                                                 raw = FALSE, 
-                                                 penaltyFunctionArguments = penaltyFunctionArguments)
+    aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                k = k,
+                                individualPenaltyFunction = smoothLASSO, 
+                                individualPenaltyFunctionGradient = smoothLASSOGradient,
+                                individualPenaltyFunctionHessian = smoothLASSOHessian,
+                                raw = FALSE, 
+                                penaltyFunctionArguments = penaltyFunctionArguments)
   }
   
   
@@ -235,7 +235,7 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
   )
 }
 
-aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
+aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, exact = FALSE, eps = 1e-4){
   if(!is(lavaanModel, "lavaan")){
     stop("lavaanModel must be of class lavaan")
   }
@@ -296,13 +296,13 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
         "alpha" = alphas[p],
         "eps" = eps
       )
-      aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
-                                                   k = k,
-                                                   individualPenaltyFunction = smoothElasticNet, 
-                                                   individualPenaltyFunctionGradient = smoothElasticNetGradient,
-                                                   individualPenaltyFunctionHessian = smoothElasticNetHessian,
-                                                   raw = FALSE, 
-                                                   penaltyFunctionArguments = penaltyFunctionArguments)
+      aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                  k = k,
+                                  individualPenaltyFunction = smoothElasticNet, 
+                                  individualPenaltyFunctionGradient = smoothElasticNetGradient,
+                                  individualPenaltyFunctionHessian = smoothElasticNetHessian,
+                                  raw = FALSE, 
+                                  penaltyFunctionArguments = penaltyFunctionArguments)
       
     }
     if(penalty == "ridge"){
@@ -310,28 +310,43 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
         "regularizedParameterLabels" = regularizedParameterLabels,
         "lambda" = lambdas[p],
       )
-      aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
-                                                   k = k,
-                                                   individualPenaltyFunction = ridge, 
-                                                   individualPenaltyFunctionGradient = ridgeGradient,
-                                                   individualPenaltyFunctionHessian = ridgeHessian,
-                                                   raw = FALSE, 
-                                                   penaltyFunctionArguments = penaltyFunctionArguments)
+      aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                  k = k,
+                                  individualPenaltyFunction = ridge, 
+                                  individualPenaltyFunctionGradient = ridgeGradient,
+                                  individualPenaltyFunctionHessian = ridgeHessian,
+                                  raw = FALSE, 
+                                  penaltyFunctionArguments = penaltyFunctionArguments)
       
     }
     if(penalty == "lasso"){
-      penaltyFunctionArguments <- list(
-        "regularizedParameterLabels" = regularizedParameterLabels,
-        "lambda" = lambdas[p],
-        "eps" = eps
-      )
-      aCV <- approximateCrossValidationRcpp_SEMCpp(SEM = aCVSEM, 
-                                                   k = k,
-                                                   individualPenaltyFunction = smoothLASSO, 
-                                                   individualPenaltyFunctionGradient = smoothLASSOGradient,
-                                                   individualPenaltyFunctionHessian = smoothLASSOHessian,
-                                                   raw = FALSE, 
-                                                   penaltyFunctionArguments = penaltyFunctionArguments)
+      
+      if(exact){
+        penaltyFunctionArguments <- list(
+          "regularizedParameterLabels" = regularizedParameterLabels,
+          "lambda" = lambdas[p]
+        )
+        aCV <- GLMNETACVRcpp_SEMCpp(SEM = aCVSEM,
+                                    k = k,
+                                    penalty = penalty,
+                                    raw = TRUE,
+                                    penaltyFunctionArguments = penaltyFunctionArguments)
+      }else{
+        penaltyFunctionArguments <- list(
+          "regularizedParameterLabels" = regularizedParameterLabels,
+          "lambda" = lambdas[p],
+          "eps" = eps
+        )
+        aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                    k = k,
+                                    individualPenaltyFunction = smoothLASSO, 
+                                    individualPenaltyFunctionGradient = smoothLASSOGradient,
+                                    individualPenaltyFunctionHessian = smoothLASSOHessian,
+                                    raw = FALSE, 
+                                    penaltyFunctionArguments = penaltyFunctionArguments)
+        
+      }
+      
     }
     
     aCVs[paste0("sample", 1:k),p] <- aCV$leaveOutFits

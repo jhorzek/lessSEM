@@ -44,7 +44,6 @@ The following example is adapted from the documentation of ?lavaan::cfa.
     
     ## Example for regularized model adapted from ?regsem::cv_regsem
     library(regsem)
-    # put variables on same scale for regsem
     HS <- data.frame(scale(HolzingerSwineford1939[,7:15]))
     mod <- 'f =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9'
     outt = cfa(mod, HS, meanstructure = FALSE)

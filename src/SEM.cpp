@@ -215,9 +215,9 @@ void SEMCpp::implied(){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(!wasFit){
-    Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
-  }
+  // if(!wasFit){
+  //   Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
+  // }
   // step one: compute implied mean and covariance
   impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
   impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
