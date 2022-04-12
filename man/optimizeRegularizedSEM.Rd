@@ -10,6 +10,7 @@ optimizeRegularizedSEM(
   penalty,
   lambdas,
   alphas = NULL,
+  adaptiveLassoWeights = NULL,
   eps = 1e-04,
   raw = TRUE,
   method = "BFGS",
@@ -27,6 +28,8 @@ optimizeRegularizedSEM(
 \item{lambdas}{vector with lambda values. Higher values = higher penalty}
 
 \item{alphas}{0<alpha<1. only required for elastic net. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge}
+
+\item{adaptiveLassoWeights}{vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO}
 
 \item{eps}{controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.}
 

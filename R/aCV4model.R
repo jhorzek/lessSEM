@@ -7,9 +7,8 @@
 #' 
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
-#' @param eps controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
 #' @export
-aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
+aCV4regularizedSEM <- function(regularizedSEM, k){
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
   }
@@ -24,16 +23,12 @@ aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
   lambdas <- regularizedSEM$inputArguments$lambdas
   alphas <- regularizedSEM$inputArguments$alphas
   
+  adaptiveLassoWeights <- regularizedSEM$inputArguments$adaptiveLassoWeights
+  
   if(penalty == "elasticNet"){
     tuningParameters <- expand.grid(lambda = lambdas, alpha = alphas)
   }else{
-    tuningParameters <- expand.grid(lambda = lambdas)
-  }
-  
-  if(penalty == "elasticNet") {
-    coln <- paste0("lambda=",tuningParameters$lambda, ";alpha=", tuningParameters$alpha)
-  }else{
-    coln <- paste0("lambda=",tuningParameters$lambda)
+    tuningParameters <- expand.grid(lambda = lambdas, alpha = ifelse(penalty == "ridge", 0, 1))
   }
   
   regularizedParameters <- regularizedSEM$parameters
@@ -44,7 +39,7 @@ aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
                  ncol = nrow(regularizedParameters),
                  dimnames = list(
                    paste0("sample", 1:k),
-                   coln
+                   rownames(regularizedParameters)
                  ))
   
   progressbar = txtProgressBar(min = 0,
@@ -54,18 +49,10 @@ aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
   
   for(ro in 1:nrow(tuningParameters)){
     
-    if(is.null(tuningParameters$alpha)){
-      
-      lambda <- tuningParameters$lambda[ro]
-      selectPars <- paste0("lambda=",lambda)
-      
-    }else{
-      
-      lambda <- tuningParameters$alpha[ro]
-      alpha <- tuningParameters$alpha[ro]
-      selectPars <- paste0("lambda=",lambda, ";alpha=", alpha)
-      
-    }
+    lambda <- tuningParameters$lambda[ro]
+    alpha <- tuningParameters$alpha[ro]
+    selectPars <- paste0("lambda=",lambda, ";alpha=", alpha)
+    
     
     aCVSEM <- setParameters(SEM = aCVSEM,
                             labels = colnames(regularizedParameters),
@@ -73,26 +60,10 @@ aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
                             raw = FALSE)
     aCVSEM <- fit(aCVSEM)
     
-    if(penalty == "elasticNet"){
-      penaltyFunctionArguments <- list(
-        "regularizedParameterLabels" = regularizedParameterLabels,
-        "lambda" = lambda,
-        "alpha" = alpha,
-        "eps" = eps
-      )
-      aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                  k = k,
-                                  individualPenaltyFunction = smoothElasticNet, 
-                                  individualPenaltyFunctionGradient = smoothElasticNetGradient,
-                                  individualPenaltyFunctionHessian = smoothElasticNetHessian,
-                                  raw = FALSE, 
-                                  penaltyFunctionArguments = penaltyFunctionArguments)
-      
-    }
     if(penalty == "ridge"){
       penaltyFunctionArguments <- list(
         "regularizedParameterLabels" = regularizedParameterLabels,
-        "lambda" = lambda,
+        "lambda" = lambda
       )
       aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
                                   k = k,
@@ -102,20 +73,16 @@ aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
                                   raw = FALSE, 
                                   penaltyFunctionArguments = penaltyFunctionArguments)
       
-    }
-    if(penalty == "lasso"){
-      penaltyFunctionArguments <- list(
-        "regularizedParameterLabels" = regularizedParameterLabels,
-        "lambda" = lambda,
-        "eps" = eps
-      )
-      aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+    }else{
+      
+      aCV <- GLMNETACVRcpp_SEMCpp(SEM = aCVSEM, 
                                   k = k,
-                                  individualPenaltyFunction = smoothLASSO, 
-                                  individualPenaltyFunctionGradient = smoothLASSOGradient,
-                                  individualPenaltyFunctionHessian = smoothLASSOHessian,
-                                  raw = FALSE, 
-                                  penaltyFunctionArguments = penaltyFunctionArguments)
+                                  penalty = penalty, 
+                                  raw = TRUE, 
+                                  regularizedParameterLabels = regularizedParameterLabels, 
+                                  lambda = lambda, 
+                                  alpha = alpha, 
+                                  adaptiveLassoWeights = adaptiveLassoWeights)
     }
     
     aCVs[paste0("sample", 1:k),selectPars] <- aCV$leaveOutFits
