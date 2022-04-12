@@ -1,3 +1,8 @@
+#' SEMdata
+#' 
+#' internal function. Creates internal data representation
+#' @param rawData matrix with raw data set
+#' @export
 SEMdata <- function(rawData){
   
   # identify unique missing patterns
@@ -8,7 +13,7 @@ SEMdata <- function(rawData){
 
 #' constructDataset
 #'
-#' Computes the number of unique missingness patterns
+#' internal function. Creates internal data representation
 #' @param rawData raw dataset with persons in rows and variables in columns 
 #' @export
 constructDataset <- function(rawData){

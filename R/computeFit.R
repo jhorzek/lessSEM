@@ -1,9 +1,23 @@
+#' fit
+#' 
+#' fits an object of class Rcpp_SEMCpp.
+#' 
+#' @param SEM model of class Rcpp_SEMCpp. 
+#' @export
 fit <- function(SEM){
   SEM$fit()
   return(SEM)
   
 }
 
+#' fitFunction
+#' 
+#' internal function which returns the -2 log Likelihood of an object of class Rcpp_SEMCpp. This function can be used in optimizers
+#' 
+#' @param par labeled vector with parameter values
+#' @param SEM model of class Rcpp_SEMCpp. 
+#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @export
 fitFunction <- function(par, SEM, raw){
   SEM <- setParameters(SEM = SEM, names(par), values = par, raw = raw)
   tryFit <- try(SEM$fit(), silent = TRUE)
@@ -11,6 +25,14 @@ fitFunction <- function(par, SEM, raw){
   return(SEM$m2LL)
 }
 
+#' derivativeFunction
+#' 
+#' internal function which returns the gradients of an object of class Rcpp_SEMCpp. This function can be used in optimizers
+#' 
+#' @param par labeled vector with parameter values
+#' @param SEM model of class Rcpp_SEMCpp. 
+#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @export
 derivativeFunction <- function(par, SEM, raw){
   failureReturns <- rep(999999999, length(par))
   names(failureReturns) <- names(par)
@@ -23,15 +45,15 @@ derivativeFunction <- function(par, SEM, raw){
   return(tryGradients)
 }
 
-minus2LogLikelihood <- function(par, SEM, raw){
-  
-  if(any(getParameters(SEM)[names(par)] != par)) setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
-  SEM$fit()
-  if(any(class(SEM) == "try-error") || !is.numeric(SEM$m2LL)){ return( 999999999 )}
-  
-  return(SEM$m2LL)
-}
-
+#' individualMinus2LogLikelihood
+#' 
+#' internal function which returns the -2 log Likelihood for a single subject
+#' 
+#' @param par labeled vector with parameter values
+#' @param SEM model of class Rcpp_SEMCpp. 
+#' @param data vector with data points for this single individual
+#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @export
 individualMinus2LogLikelihood <- function(par, SEM, data, raw){
   if(any(names(data) != SEM$manifestNames)) stop("SEM$manifestNames and colnames of data do not match!")
   if(any(getParameters(SEM, raw = raw)[names(par)] != par)) SEM <- setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
@@ -46,6 +68,14 @@ individualMinus2LogLikelihood <- function(par, SEM, data, raw){
   
 }
 
+#' likelihoodRatioFit
+#' 
+#' internal function which returns the likelihood ratio fit statistic
+#' 
+#' @param par labeled vector with parameter values
+#' @param SEM model of class Rcpp_SEMCpp. 
+#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @export
 likelihoodRatioFit <- function(par, SEM, raw){
   if(anyNA(SEM$rawData)) stop("likelihoodRatioFit currently only implemented for data without missings")
   if(any(getParameters(SEM)[names(par)] != par)) SEM <- setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)

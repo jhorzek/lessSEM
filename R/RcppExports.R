@@ -2,22 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 innerGLMNET <- function(parameters, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak) {
-    .Call(`_aCV4SEM_innerGLMNET`, parameters, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak)
+    .Call('_aCV4SEM_innerGLMNET', PACKAGE = 'aCV4SEM', parameters, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak)
 }
 
 computeIndividualM2LL <- function(nObservedVariables, rawData, impliedMeans, impliedCovariance) {
-    .Call(`_aCV4SEM_computeIndividualM2LL`, nObservedVariables, rawData, impliedMeans, impliedCovariance)
+    .Call('_aCV4SEM_computeIndividualM2LL', PACKAGE = 'aCV4SEM', nObservedVariables, rawData, impliedMeans, impliedCovariance)
 }
 
 computeGroupM2LL <- function(sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance) {
-    .Call(`_aCV4SEM_computeGroupM2LL`, sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance)
+    .Call('_aCV4SEM_computeGroupM2LL', PACKAGE = 'aCV4SEM', sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance)
 }
 
 computeImpliedCovariance <- function(Fmatrix, Amatrix, Smatrix) {
-    .Call(`_aCV4SEM_computeImpliedCovariance`, Fmatrix, Amatrix, Smatrix)
+    .Call('_aCV4SEM_computeImpliedCovariance', PACKAGE = 'aCV4SEM', Fmatrix, Amatrix, Smatrix)
 }
 
 computeImpliedMeans <- function(Fmatrix, Amatrix, Mvector) {
-    .Call(`_aCV4SEM_computeImpliedMeans`, Fmatrix, Amatrix, Mvector)
+    .Call('_aCV4SEM_computeImpliedMeans', PACKAGE = 'aCV4SEM', Fmatrix, Amatrix, Mvector)
 }
 

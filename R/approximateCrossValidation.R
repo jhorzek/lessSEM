@@ -1,4 +1,27 @@
-smoothACVRcpp_SEMCpp <- function(SEM, k, 
+#' smoothACVRcpp_SEMCpp
+#' 
+#' internal function for approximate cross-validation based on the internal model representation of aCV4SEM. The smooth part refers to the fact
+#' that this function expectes the penalty functions to be smooth. If the true penalty function is non-differentiable (e.g., lasso) a smooth
+#' approximation of this function should be provided. See aCV4SEM::smoothLASSO as an example. Also, the gradients and the Hessian of this 
+#' smooth approximation should be provided.
+#' 
+#' @param SEM model of class Rcpp_SEMCpp. Models of this class
+#' can be generated with the SEMFromLavaan-function.
+#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param individualPenaltyFunction penalty function which takes the current parameter values as first argument and the penaltyFunctionArguments as second argument and 
+#' returns a single value - the value of the penalty function for a single person. If the true penalty function is non-differentiable (e.g., lasso) a smooth
+#' approximation of this function should be provided.
+#' @param individualPenaltyFunctionGradient gradients of the penalty function. Function should take the current parameter values as first argument and the penaltyFunctionArguments as second argument and 
+#' return a vector of the same length as parameters. If the true penalty function is non-differentiable (e.g., lasso) a smooth
+#' approximation of this function should be provided.
+#' @param individualPenaltyFunctionHessian Hessian of the penalty function. Function should take the current parameter values as first argument and the penaltyFunctionArguments as second argument and 
+#' return a matrix with (length as parameters)^2 number of elements. If the true penalty function is non-differentiable (e.g., lasso) a smooth
+#' approximation of this function should be provided.
+#' @param raw controls if the internal transformations of aCV4SEM should be used.
+#' @param penaltyFunctionArguments can be anything that the functions individualPenaltyFunction, individualPenaltyFunctionGradient, or individualPenaltyFunctionHessian need. See aCV4SEM::smoothLASSO for an example.
+#' @export
+smoothACVRcpp_SEMCpp <- function(SEM, 
+                                 k, 
                                  individualPenaltyFunction = NULL, 
                                  individualPenaltyFunctionGradient = NULL, 
                                  individualPenaltyFunctionHessian = NULL, 
@@ -139,11 +162,31 @@ smoothACVRcpp_SEMCpp <- function(SEM, k,
   
 }
 
+#' GLMNETACVRcpp_SEMCpp
+#' 
+#' internal function for approximate cross-validation based on the internal model representation of aCV4SEM. The GLMNET part refers to the fact
+#' that this function uses the GLMNET optimizer for non-differentiable penalty functions. 
+#' 
+#' @param SEM model of class Rcpp_SEMCpp. Models of this class
+#' can be generated with the SEMFromLavaan-function.
+#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param penalty which penalty should be used? Available are "lasso", "adaptiveLasso", and "elasticNet"
+#' @param raw controls if the internal transformations of aCV4SEM should be used.
+#' @param regularizedParameterLabels vector with labels of regularized parameters
+#' @param lambda value of tuning parameter lambda
+#' @param alpha value of tuning parameter alpha (for elastic net)
+#' @param adaptiveLassoWeights vector with labeled adaptive lasso weights. Only required if penalty = "adaptiveLasso"
+#' @param maxIter maximal number of iterations used in GLMENT
+#' @param epsBreak breaking condition of GLMNET
+#' @export
 GLMNETACVRcpp_SEMCpp <- function(SEM, 
                                  k, 
                                  penalty, 
                                  raw = FALSE, 
-                                 penaltyFunctionArguments = NULL,
+                                 regularizedParameterLabels,
+                                 lambda,
+                                 alpha = NULL,
+                                 adaptiveLassoWeights = NULL,
                                  maxIter = 100,
                                  epsBreak = 1e-10){
   
@@ -151,18 +194,14 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     stop("SEM must be of class Rcpp_SEMCpp")
   }
   
-  if(!penalty %in% c("lasso", "adaptiveLasso")) stop("Currently only lasso and adaptive lasso supported!")
+  if(!penalty %in% c("lasso", "adaptiveLasso", "elasticNet")) stop("Currently only lasso, adaptiveLasso, and elasticNet supported.")
   
   parameters <- getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
   N <- nrow(dataSet)
   
-  regularizedParameterLabels <- penaltyFunctionArguments$regularizedParameterLabels
-  if(is.null(regularizedParameterLabels)) stop("penaltyFunctionArguments$regularizedParameterLabels missing")
-  lambda <- penaltyFunctionArguments$lambda
-  if(is.null(lambda)) stop("penaltyFunctionArguments$lambda missing")
+  if(is.null(alpha)) alpha <- 1 # set to lasso
   
-  adaptiveLassoWeights <- penaltyFunctionArguments$adaptiveLassoWeights
   if(is.null(adaptiveLassoWeights) && penalty == "adaptiveLasso") stop("penaltyFunctionArguments$adaptiveLassoWeights missing")
   if(is.null(adaptiveLassoWeights)) adaptiveLassoWeights <- rep(1, length(parameters))
   
@@ -194,7 +233,17 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   for(s in 1:k){
     subGroupGradient <- apply(scores[-subsets[[s]],],2,sum) # gradients of all inidividuals but the ones in the subgroup
     subGroupHessian <- ((N-length(subsets[[s]]))/N)*hessian # approximated hessian for all but the subgroup
-    subGroupLambda <- (N-length(subsets[[s]]))*lambda
+    subGroupLambda <- alpha*(N-length(subsets[[s]]))*lambda
+    
+    # if elastic net is used, we approximate the ridge part as well and add this here:
+    if(alpha != 0){
+      penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
+                                       "lambda" = 0.5*lambda*(1-alpha)*(N-length(subsets[[s]])))
+      subGroupGradient <- subGroupGradient + ridgeGradient(parameters = parameters,
+                                                           penaltyFunctionArguments = penaltyFunctionArguments)
+      subGroupHessian <- subGroupHessian + ridgeHessian(parameters = parameters,
+                                                         penaltyFunctionArguments = penaltyFunctionArguments)
+    }
     
     direction <- innerGLMNET(parameters = parameters, 
                              subGroupGradient = subGroupGradient, 

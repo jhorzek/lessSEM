@@ -1,3 +1,10 @@
+#' getParameters.lavaan
+#' 
+#' helper function: returns a labeled vector with parameters from lavaan
+#'
+#' @param lavaanModel model of class lavaan
+#' @param removeDuplicates should duplicated parameters be removed?
+#' @export
 getParameters.lavaan <- function(lavaanModel, removeDuplicates = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   parameters <- coef(lavaanModel)
@@ -5,6 +12,13 @@ getParameters.lavaan <- function(lavaanModel, removeDuplicates = TRUE){
   return(parameters[unique(names(parameters))])
 }
 
+#' lavaan2regsemLabels
+#' 
+#' helper function: regsem and lavaan use slightly different parameter labels. This function
+#' can be used to get both sets of labels.
+#'
+#' @param lavaanModel model of class lavaan
+#' @export
 lavaan2regsemLabels <- function(lavaanModel){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   # extract parameters
@@ -27,6 +41,14 @@ lavaan2regsemLabels <- function(lavaanModel){
   )
 }
 
+#' cvregsem2LavaanParameters
+#' 
+#' helper function: regsem and lavaan use slightly different parameter labels. This function
+#' can be used to translate the parameter labels of a cv_regsem object to lavaan labels
+#' 
+#' @param cvregsemModel model of class cvregsem
+#' @param lavaanModel model of class lavaan
+#' @export
 cvregsem2LavaanParameters <- function(cvregsemModel, lavaanModel){
   if(!is(cvregsemModel, "cvregsem")) stop("cvregsemModel must be of class cvregsem.")
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
@@ -42,6 +64,14 @@ cvregsem2LavaanParameters <- function(cvregsemModel, lavaanModel){
   return(parameters)
 }
 
+#' regsem2LavaanParameters
+#' 
+#' helper function: regsem and lavaan use slightly different parameter labels. This function
+#' can be used to translate the parameter labels of a cv_regsem object to lavaan labels
+#' 
+#' @param regsemModel model of class regsem
+#' @param lavaanModel model of class lavaan
+#' @export
 regsem2LavaanParameters <- function(regsemModel, lavaanModel){
   if(!is(regsemModel, "regsem")) stop("regsemModel must be of class cvregsem.")
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")

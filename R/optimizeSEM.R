@@ -1,4 +1,14 @@
-optimizeSEM <- function(SEM, raw = TRUE, ...){
+#' optimizeSEM
+#' 
+#' optimize internal SEM representation with optim() function
+#' 
+#' @param SEM model of class Rcpp_SEMCpp. 
+#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @param method optimizer method. See ?optim
+#' @param control control optimizer. See ?optim
+#' @param hessian Should the optimizer return the hessian?
+#' @export
+optimizeSEM <- function(SEM, raw = TRUE, method = "BFGS", control = list(), hessian = FALSE){
   
   parameters <- getParameters(SEM, raw = raw)
   
@@ -7,8 +17,9 @@ optimizeSEM <- function(SEM, raw = TRUE, ...){
                      gr = derivativeFunction, 
                      SEM = SEM,
                      raw = raw,
-                     method = "BFGS",
-                     ...)
+                     method = method,
+                     control = control,
+                     hessian = hessian)
   SEM <- setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
   SEM <- try(fit(SEM), silent = TRUE)
   
@@ -16,9 +27,34 @@ optimizeSEM <- function(SEM, raw = TRUE, ...){
               "optimizer" = optimized))
 }
 
-optimizeCustomRegularizedSEM <- function(SEM, individualPenaltyFunction, individualPenaltyFunctionGradient, penaltyFunctionArguments, controlOptim = NULL, method = "BFGS", raw = TRUE, ...){
+#' optimizeCustomRegularizedSEM
+#' 
+#' optimize a SEM with custom penalty function.
+#' 
+#' @param SEM model of class Rcpp_SEMCpp. 
+#' @param individualPenaltyFunction penalty function which takes the current parameter values as first argument and the penaltyFunctionArguments as second argument and 
+#' returns a single value - the value of the penalty function for a single person. If the true penalty function is non-differentiable (e.g., lasso) a smooth
+#' approximation of this function should be provided.
+#' @param individualPenaltyFunctionGradient gradients of the penalty function. Function should take the current parameter values as first argument and the penaltyFunctionArguments as second argument and 
+#' return a vector of the same length as parameters. If the true penalty function is non-differentiable (e.g., lasso) a smooth
+#' approximation of this function should be provided.
+#' @param individualPenaltyFunctionHessian Hessian of the penalty function. Function should take the current parameter values as first argument and the penaltyFunctionArguments as second argument and 
+#' return a matrix with (length as parameters)^2 number of elements. If the true penalty function is non-differentiable (e.g., lasso) a smooth
+#' approximation of this function should be provided.
+#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @param method optimizer method. See ?optim
+#' @param control control optimizer. See ?optim
+#' @param hessian Should the optimizer return the hessian?
+#' @export
+optimizeCustomRegularizedSEM <- function(SEM, 
+                                         individualPenaltyFunction, 
+                                         individualPenaltyFunctionGradient, 
+                                         penaltyFunctionArguments,
+                                         raw = TRUE, 
+                                         method = "BFGS", 
+                                         control = list(), 
+                                         hessian = FALSE){
   
-  additionalArguments <- list(...)
   
   parameters <- getParameters(SEM, raw = raw)
   
@@ -45,30 +81,18 @@ optimizeCustomRegularizedSEM <- function(SEM, individualPenaltyFunction, individ
     return(gradients)
   }
   
-  if(is.null(controlOptim)) {
-    optimized <- optim(par = parameters, 
-                       fn = fitFun, 
-                       gr = gradFun, 
-                       SEM = SEM,
-                       raw = raw,
-                       individualPenaltyFunction = individualPenaltyFunction,
-                       individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
-                       penaltyFunctionArguments = penaltyFunctionArguments,
-                       method = method
-    )
-  }else{
-    optimized <- optim(par = parameters, 
-                       fn = fitFun, 
-                       gr = gradFun, 
-                       SEM = SEM,
-                       raw = raw,
-                       individualPenaltyFunction = individualPenaltyFunction,
-                       individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
-                       penaltyFunctionArguments = penaltyFunctionArguments,
-                       method = method,
-                       control = controlOptim,
-    )
-  }
+  
+  optimized <- optim(par = parameters, 
+                     fn = fitFun, 
+                     gr = gradFun, 
+                     SEM = SEM,
+                     raw = raw,
+                     individualPenaltyFunction = individualPenaltyFunction,
+                     individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
+                     penaltyFunctionArguments = penaltyFunctionArguments,
+                     method = method,
+                     control = control,
+                     hessian = hessian)
   
   SEM <- setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
   SEM <- try(fit(SEM), silent = TRUE)
@@ -77,15 +101,32 @@ optimizeCustomRegularizedSEM <- function(SEM, individualPenaltyFunction, individ
               "optimizer" = optimized))
 }
 
+#' optimizeRegularizedSEM
+#' 
+#' optimize a SEM with regularized penalty function. Uses smooth approximations for non-differentiable penalty functions.
+#' 
+#' @param lavaanModel model of class lavaan 
+#' @param regularizedParameterLabels labels of regularized parameters
+#' @param penalty which penalty should be used? Available are "ridge", "lasso", "adaptiveLasso", and "elasticNet"
+#' @param lambdas vector with lambda values. Higher values = higher penalty
+#' @param alphas 0<alpha<1. only required for elastic net. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge
+#' @param eps controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
+#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @param method optimizer method. See ?optim
+#' @param control control optimizer. See ?optim
+#' @param hessian Should the optimizer return the hessian?
+#' @export
 optimizeRegularizedSEM <- function(lavaanModel, 
                                    regularizedParameterLabels,
                                    penalty, 
                                    lambdas, 
                                    alphas = NULL, 
                                    eps = 1e-4, 
-                                   controlOptim = NULL, 
+                                   raw = TRUE,
                                    method = "BFGS", 
-                                   raw = TRUE){
+                                   control = list(), 
+                                   hessian = FALSE
+                                   ){
   
   inputArguments <- as.list(environment())
   
@@ -119,8 +160,8 @@ optimizeRegularizedSEM <- function(lavaanModel,
   if(is.null(alphas)) alphas <- 0
   
   parameterEstimates <- matrix(NA, 
-                              nrow = length(lambdas)*length(alphas), 
-                              ncol = length(parameters))
+                               nrow = length(lambdas)*length(alphas), 
+                               ncol = length(parameters))
   colnames(parameterEstimates) <- names(parameters)
   if(all(alphas == 0)){
     rownames(parameterEstimates) <- paste0("lambda=", lambdas)
@@ -148,8 +189,9 @@ optimizeRegularizedSEM <- function(lavaanModel,
                                                penaltyFunctionArguments = list("lambda" = lambda,
                                                                                "regularizedParameterLabels" = regularizedParameterLabels
                                                ),
-                                               controlOptim = controlOptim,
-                                               method = method)
+                                               control = control,
+                                               method = method,
+                                               hessian = hessian)
       }
       
       if(penalty == "lasso"){ 
@@ -161,8 +203,9 @@ optimizeRegularizedSEM <- function(lavaanModel,
                                                                                "regularizedParameterLabels" = regularizedParameterLabels,
                                                                                "eps" = eps
                                                ),
-                                               controlOptim = controlOptim,
-                                               method = method)
+                                               control = control,
+                                               method = method,
+                                               hessian = hessian)
       }
       
       if(penalty == "adaptiveLasso") {
@@ -176,8 +219,9 @@ optimizeRegularizedSEM <- function(lavaanModel,
                                                                                "regularizedParameterLabels" = regularizedParameterLabels,
                                                                                "eps" = eps
                                                ),
-                                               controlOptim = controlOptim,
-                                               method = method)
+                                               control = control,
+                                               method = method,
+                                               hessian = hessian)
       }
       
       if(penalty == "elasticNet") {
@@ -191,8 +235,9 @@ optimizeRegularizedSEM <- function(lavaanModel,
                                                                                "regularizedParameterLabels" = regularizedParameterLabels,
                                                                                "eps" = eps
                                                ),
-                                               controlOptim = controlOptim,
-                                               method = method)
+                                               control = control,
+                                               method = method,
+                                               hessian = hessian)
       }
       
       whereTo <- ifelse(all(alphas == 0), paste0("lambda=",lambda), paste0("lambda=",lambda, ";", "alpha=",alpha))
@@ -214,6 +259,15 @@ optimizeRegularizedSEM <- function(lavaanModel,
   
 }
 
+#' checkRegularizedParameters
+#' 
+#' internal function to check if the regularized parameters can be found in the model
+#' 
+#' @param parameters labeled vector with parameter values
+#' @param regularizedParameterLabels labels of regularized parameters
+#' @param parameterTable table with all parameters
+#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @export
 checkRegularizedParameters <- function(parameters, regularizedParameterLabels, parameterTable, raw){
   
   

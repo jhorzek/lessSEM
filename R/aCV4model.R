@@ -1,3 +1,14 @@
+#### This script provides functions to perform approximate cross-validation for different types of models ####
+
+#' aCV4regularizedSEM
+#' 
+#' approximate cross-validation for models of class regularizedSEM. These models can be fit with regularizedSEM() (see ?regularizedSEM)
+#' in this package.
+#' 
+#' @param regularizedSEM model of class regularizedSEM
+#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param eps controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
+#' @export
 aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
@@ -122,6 +133,15 @@ aCV4regularizedSEM <- function(regularizedSEM, k, eps = 1e-4){
   )
 }
 
+#' aCV4lavaan
+#' 
+#' approximate cross-validation for models of class lavaan. 
+#' 
+#' @param lavaanModel model of class lavaan
+#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param raw controls if the cross-validation should use the internal transformations of aCV4SEM. aCV4SEM will use an exponential function for all variances to 
+#' avoid negative variances. This can result in better sub-group parameters, but may not be necessary and will also result in more difficult to interpret parameters.
+#' @export
 aCV4lavaan <- function(lavaanModel, 
                        k, 
                        raw = FALSE){
@@ -146,6 +166,17 @@ aCV4lavaan <- function(lavaanModel,
                                         penaltyFunctionArguments = NULL))
 }
 
+#' aCV4regsem
+#' 
+#' approximate cross-validation for models of class regsem. 
+#' 
+#' @param regsemModel model of class regsem
+#' @param lavaanModel model of class lavaan. This must be the same model used to set up the regsem model!
+#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param penalty which penalty was used in regsem? Currently available are: penalty = "lasso", penalty = "ridge", or penalty = "elasticNet"
+#' @param lambda value of the tuning parameter lambda. The tuning parameter alpha for the elastic net will be exported from the regsemModel
+#' @param eps controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
+#' @export
 aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4){
   if(!is(lavaanModel, "lavaan")){
     stop("lavaanModel must be of class lavaan")
@@ -235,6 +266,17 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
   )
 }
 
+#' aCV4cv_regsem
+#' 
+#' approximate cross-validation for models of class cv_regsem. 
+#' 
+#' @param cvregsemModel model of class cv_regsem
+#' @param lavaanModel model of class lavaan. This must be the same model used to set up the regsem model!
+#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param penalty which penalty was used in regsem? Currently available are: penalty = "lasso", penalty = "ridge", or penalty = "elasticNet"
+#' @param exact boolean: If set to TRUE, an exact optimization based on GLMNET will be used to compute the sub-group parameters.
+#' @param eps Only relevant if exact = FALSE. Controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
+#' @export
 aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, exact = FALSE, eps = 1e-4){
   if(!is(lavaanModel, "lavaan")){
     stop("lavaanModel must be of class lavaan")

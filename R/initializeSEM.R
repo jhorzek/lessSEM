@@ -1,3 +1,11 @@
+#' SEMFromLavaan
+#' 
+#' internal function. Translates an object of class lavaan to the internal model representation.
+#' 
+#' @param lavaanModel model of class lavaan
+#' @param rawData raw data set also used for lavaan model
+#' @param transformVariances set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative
+#' @export
 SEMFromLavaan <- function(lavaanModel, rawData, transformVariances = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   if(!is(rawData, "matrix") && !is(rawData, "data.frame")) stop("rawData must be of class matrix or data.frame.")
@@ -236,6 +244,17 @@ SEMFromLavaan <- function(lavaanModel, rawData, transformVariances = TRUE){
   return(SEMCpp)
 }
 
+#' setAMatrix
+#' 
+#' internal function. Populates the matrix with directed effects in RAM notation
+#' 
+#' @param model model of class lavaan
+#' @param lavaanParameterTable parameter table from lavaan
+#' @param nLatent number of latent variables
+#' @param nManifest number of manifest variables 
+#' @param latentNames names of latent variables
+#' @param manifestNames names of manifest variables
+#' @export
 setAMatrix <- function(model, lavaanParameterTable, nLatent, nManifest, latentNames, manifestNames){
   
   Amatrix <- matrix(0, 
@@ -260,6 +279,17 @@ setAMatrix <- function(model, lavaanParameterTable, nLatent, nManifest, latentNa
   
 }
 
+#' setSMatrix
+#' 
+#' internal function. Populates the matrix with undirected paths in RAM notation
+#' 
+#' @param model model of class lavaan
+#' @param lavaanParameterTable parameter table from lavaan
+#' @param nLatent number of latent variables
+#' @param nManifest number of manifest variables 
+#' @param latentNames names of latent variables
+#' @param manifestNames names of manifest variables
+#' @export
 setSMatrix <- function(model, lavaanParameterTable, nLatent, nManifest, latentNames, manifestNames){
   
   Smatrix <- matrix(0, 
@@ -283,6 +313,18 @@ setSMatrix <- function(model, lavaanParameterTable, nLatent, nManifest, latentNa
   
 }
 
+#' setMVector
+#' 
+#' internal function. Populates the vector with means in RAM notation
+#' 
+#' @param model model of class lavaan
+#' @param lavaanParameterTable parameter table from lavaan
+#' @param nLatent number of latent variables
+#' @param nManifest number of manifest variables 
+#' @param latentNames names of latent variables
+#' @param manifestNames names of manifest variables
+#' @param rawData matrix with raw data
+#' @export
 setMVector <- function(model, lavaanParameterTable, nLatent, nManifest, latentNames, manifestNames, rawData){
   
   Mvector <- matrix(0, 
