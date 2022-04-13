@@ -237,10 +237,9 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
 #' @param lavaanModel model of class lavaan. This must be the same model used to set up the regsem model!
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
 #' @param penalty which penalty was used in regsem? Currently available are: penalty = "lasso", penalty = "ridge", or penalty = "elasticNet"
-#' @param exact boolean: If set to TRUE, an exact optimization based on GLMNET will be used to compute the sub-group parameters.
-#' @param eps Only relevant if exact = FALSE. Controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
+#' @param eps Controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
 #' @export
-aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, exact = FALSE, eps = 1e-4){
+aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
   if(!is(lavaanModel, "lavaan")){
     stop("lavaanModel must be of class lavaan")
   }
@@ -309,8 +308,7 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, exact = FALSE,
                                   raw = FALSE, 
                                   penaltyFunctionArguments = penaltyFunctionArguments)
       
-    }
-    if(penalty == "ridge"){
+    }else if(penalty == "ridge"){
       penaltyFunctionArguments <- list(
         "regularizedParameterLabels" = regularizedParameterLabels,
         "lambda" = lambdas[p],
@@ -323,35 +321,21 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, exact = FALSE,
                                   raw = FALSE, 
                                   penaltyFunctionArguments = penaltyFunctionArguments)
       
-    }
-    if(penalty == "lasso"){
+    }else if(penalty == "lasso"){
       
-      if(exact){
-        penaltyFunctionArguments <- list(
-          "regularizedParameterLabels" = regularizedParameterLabels,
-          "lambda" = lambdas[p]
-        )
-        aCV <- GLMNETACVRcpp_SEMCpp(SEM = aCVSEM,
-                                    k = k,
-                                    penalty = penalty,
-                                    raw = TRUE,
-                                    penaltyFunctionArguments = penaltyFunctionArguments,
-                                    hessianOfDifferentiablePart = NULL)
-      }else{
-        penaltyFunctionArguments <- list(
-          "regularizedParameterLabels" = regularizedParameterLabels,
-          "lambda" = lambdas[p],
-          "eps" = eps
-        )
-        aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                    k = k,
-                                    individualPenaltyFunction = smoothLASSO, 
-                                    individualPenaltyFunctionGradient = smoothLASSOGradient,
-                                    individualPenaltyFunctionHessian = smoothLASSOHessian,
-                                    raw = FALSE, 
-                                    penaltyFunctionArguments = penaltyFunctionArguments)
-        
-      }
+      penaltyFunctionArguments <- list(
+        "regularizedParameterLabels" = regularizedParameterLabels,
+        "lambda" = lambdas[p],
+        "eps" = eps
+      )
+      
+      aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                  k = k,
+                                  individualPenaltyFunction = smoothLASSO, 
+                                  individualPenaltyFunctionGradient = smoothLASSOGradient,
+                                  individualPenaltyFunctionHessian = smoothLASSOHessian,
+                                  raw = FALSE, 
+                                  penaltyFunctionArguments = penaltyFunctionArguments)
       
     }
     
@@ -360,10 +344,9 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, exact = FALSE,
     setTxtProgressBar(progressbar,p)
   }
   
-  return(list(
-    "lambda" = lambdas,
-    "regsemParameters" = regsemParameters,
-    "leaveOutFits" = aCVs
-  )
+  return(
+    list("lambda" = lambdas,
+         "regsemParameters" = regsemParameters,
+         "leaveOutFits" = aCVs)
   )
 }

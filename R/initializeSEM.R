@@ -155,27 +155,6 @@ SEMFromLavaan <- function(lavaanModel, rawData, transformVariances = TRUE){
     }
   }
   
-  # saturated model fit
-  N <- nrow(rawData)
-  saturatedFit <- rep(NA,N)
-  obsMeans <- NULL
-  obsCov <- NULL
-  
-  if(!anyNA(rawData)) {
-    
-    nParameters <- ncol(rawData)
-    
-    obsMeans <- apply(rawData,2,mean)
-    obsCov <- ((N - 1)/N)*cov(rawData)
-    
-    for(i in 1:N){
-      saturatedFit[i] <- computeIndividualM2LL(nObservedVariables = nParameters, 
-                                               rawData = rawData[i,],
-                                               impliedMeans = obsMeans,
-                                               impliedCovariance = obsCov)
-    }
-  }
-  
   # build model
   
   SEMCpp <- new(SEMCpp)

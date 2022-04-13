@@ -7,7 +7,6 @@
 GLMNET(
   SEM,
   regularizedParameterLabels,
-  penalty,
   lambda,
   alpha,
   adaptiveLassoWeights,
@@ -30,11 +29,9 @@ GLMNET(
 
 \item{regularizedParameterLabels}{labels of regularized parameters}
 
-\item{penalty}{which penalty should be used? Available are "lasso", "adaptiveLasso", and "elasticNet"}
-
 \item{lambda}{lasso tuning parameter. Higher values = higher penalty}
 
-\item{alpha}{0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge}
+\item{alpha}{0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge, in between is elastic net}
 
 \item{adaptiveLassoWeights}{vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO}
 

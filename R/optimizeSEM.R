@@ -156,6 +156,7 @@ optimizeRegularizedSEM <- function(lavaanModel,
   initialHessian4Optimizer <- initialHessian
   
   if(penalty == "adaptiveLasso" && is.null(adaptiveLassoWeights)){
+    warning("adaptiveLasso selected, but no adaptiveLassoWeights provided. Using the default abs(parameters)^(-1).")
     adaptiveLassoWeights <- abs(parameters)^(-1)
   }else{
     adaptiveLassoWeights <- rep(1, length(parameters))
@@ -200,7 +201,6 @@ optimizeRegularizedSEM <- function(lavaanModel,
       
       result <- GLMNET(SEM = SEM, 
                        regularizedParameterLabels = regularizedParameterLabels, 
-                       penalty = penalty, 
                        lambda = ifelse(penalty == "ridge", 2*lambda, lambda), # we are using the 
                        # elastic net implementation which takes .5*lambda*(1-alpha) with alpha = 0
                        # Setting lambda to 2*lambda makes sure that we are getting the ridge 

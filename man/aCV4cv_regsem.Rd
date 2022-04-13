@@ -4,14 +4,7 @@
 \alias{aCV4cv_regsem}
 \title{aCV4cv_regsem}
 \usage{
-aCV4cv_regsem(
-  cvregsemModel,
-  lavaanModel,
-  k,
-  penalty,
-  exact = FALSE,
-  eps = 1e-04
-)
+aCV4cv_regsem(cvregsemModel, lavaanModel, k, penalty, eps = 1e-04)
 }
 \arguments{
 \item{cvregsemModel}{model of class cv_regsem}
@@ -22,9 +15,7 @@ aCV4cv_regsem(
 
 \item{penalty}{which penalty was used in regsem? Currently available are: penalty = "lasso", penalty = "ridge", or penalty = "elasticNet"}
 
-\item{exact}{boolean: If set to TRUE, an exact optimization based on GLMNET will be used to compute the sub-group parameters.}
-
-\item{eps}{Only relevant if exact = FALSE. Controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.}
+\item{eps}{Controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.}
 }
 \description{
 approximate cross-validation for models of class cv_regsem.

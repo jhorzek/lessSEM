@@ -3,9 +3,8 @@
 #' Performs GLMNET (see Friedman, 2010 & Yuan, 2011) with bfgs approximated Hessian
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param regularizedParameterLabels labels of regularized parameters
-#' @param penalty which penalty should be used? Available are "lasso", "adaptiveLasso", and "elasticNet"
 #' @param lambda lasso tuning parameter. Higher values = higher penalty
-#' @param alpha 0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge
+#' @param alpha 0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge, in between is elastic net
 #' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO
 #' @param stepSize Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)
 #' @param c1 c1 constant for lineSearch. This constant controls the Armijo condition in lineSearch if lineSearch = "Wolfe"
@@ -20,7 +19,6 @@
 #' @export
 GLMNET <- function(SEM, 
                    regularizedParameterLabels, 
-                   penalty,
                    lambda, 
                    alpha,
                    adaptiveLassoWeights,
@@ -36,6 +34,7 @@ GLMNET <- function(SEM,
                    epsOut = 1e-06,
                    epsIn = 1e-06,
                    verbose = 0){
+  if(!((0 <= alpha) && (alpha <= 1))) stop("alpha must be in [0,1]")
   
   # Setup
   N <- nrow(SEM$rawData)
@@ -80,7 +79,9 @@ GLMNET <- function(SEM,
   newGradients <- initialGradients
   newHessian <- initialHessian
   
-  if(penalty %in% c("elasticNet", "ridge")){
+  if(alpha != 1){
+    # elastic net or ridge are used -> we add the differentiable part of 
+    # the penalty to the gradients and the Hessian
     penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
                                      "lambda" = 0.5*lambda*(1-alpha)*N)
     newGradients <- newGradients + ridgeGradient(parameters = newParameters, 
@@ -173,7 +174,8 @@ GLMNET <- function(SEM,
     
     # extract gradients:
     newGradients <- getGradients(SEM = SEM, raw = TRUE)
-    if(penalty %in% c("elasticNet", "ridge")){
+    if(alpha != 1){
+      # add derivative of differentiable part of the penalty:
       newGradients <- newGradients + ridgeGradient(parameters = newParameters, 
                                                    penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     }
