@@ -13,6 +13,7 @@ GLMNETACVRcpp_SEMCpp(
   lambda,
   alpha = NULL,
   adaptiveLassoWeights = NULL,
+  hessianOfDifferentiablePart = NULL,
   maxIter = 100,
   epsBreak = 1e-10
 )

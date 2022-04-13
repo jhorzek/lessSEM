@@ -4,14 +4,14 @@
 \alias{aCV4regularizedSEM}
 \title{aCV4regularizedSEM}
 \usage{
-aCV4regularizedSEM(regularizedSEM, k, eps = 1e-04)
+aCV4regularizedSEM(regularizedSEM, k, recomputeHessian = TRUE)
 }
 \arguments{
 \item{regularizedSEM}{model of class regularizedSEM}
 
 \item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set}
 
-\item{eps}{controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.}
+\item{recomputeHessian}{if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.}
 }
 \description{
 approximate cross-validation for models of class regularizedSEM. These models can be fit with regularizedSEM() (see ?regularizedSEM)

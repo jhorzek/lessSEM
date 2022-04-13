@@ -187,6 +187,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
                                  lambda,
                                  alpha = NULL,
                                  adaptiveLassoWeights = NULL,
+                                 hessianOfDifferentiablePart = NULL,
                                  maxIter = 100,
                                  epsBreak = 1e-10){
   
@@ -194,7 +195,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     stop("SEM must be of class Rcpp_SEMCpp")
   }
   
-  if(!penalty %in% c("lasso", "adaptiveLasso", "elasticNet")) stop("Currently only lasso, adaptiveLasso, and elasticNet supported.")
+  if(!penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) stop("Currently only ridge, lasso, adaptiveLasso, and elasticNet supported.")
   
   parameters <- getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
@@ -224,7 +225,11 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   # compute derivatives of -2log-Likelihood without penalty
   
   scores <- getScores(SEM = SEM, raw = raw)
-  hessian <- getHessian(SEM = SEM, raw = raw)
+  if(is.null(hessianOfDifferentiablePart)){
+    hessian <- getHessian(SEM = SEM, raw = raw)
+  }else{
+    hessian <- hessianOfDifferentiablePart
+  }
   
   # Now do the GLMNET inner iteration for each sub-group
   stepdirections <- matrix(NA, nrow = k, ncol = length(parameters))
@@ -241,8 +246,10 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
                                        "lambda" = 0.5*lambda*(1-alpha)*(N-length(subsets[[s]])))
       subGroupGradient <- subGroupGradient + ridgeGradient(parameters = parameters,
                                                            penaltyFunctionArguments = penaltyFunctionArguments)
-      subGroupHessian <- subGroupHessian + ridgeHessian(parameters = parameters,
-                                                         penaltyFunctionArguments = penaltyFunctionArguments)
+      if(is.null(hessianOfDifferentiablePart)){
+        subGroupHessian <- subGroupHessian + ridgeHessian(parameters = parameters,
+                                                          penaltyFunctionArguments = penaltyFunctionArguments)
+      }
     }
     
     direction <- innerGLMNET(parameters = parameters, 

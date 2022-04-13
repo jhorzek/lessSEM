@@ -152,6 +152,9 @@ optimizeRegularizedSEM <- function(lavaanModel,
                              SEM$getParameters(), 
                              raw = raw)
   
+  initialHessian <- getHessian(SEM = SEM, raw = TRUE)
+  initialHessian4Optimizer <- initialHessian
+  
   if(penalty == "adaptiveLasso" && is.null(adaptiveLassoWeights)){
     adaptiveLassoWeights <- abs(parameters)^(-1)
   }else{
@@ -160,11 +163,11 @@ optimizeRegularizedSEM <- function(lavaanModel,
   }
   inputArguments$adaptiveLassoWeights <- adaptiveLassoWeights
   
-  if(!is.null(alphas) && penalty != "elasticNet") {stop("non-null alpha parameter only valid for adaptiveLasso")}
+  if(!is.null(alphas) && penalty != "elasticNet") {stop("non-null alpha parameter only valid for elasticNet")}
   if(is.null(alphas)) {
     if(penalty %in% c("lasso", "adaptiveLasso")) {
       alphas <- 1
-    }else{
+    }else if(penalty == "ridge"){
       alphas <- 0
     }
   }
@@ -176,9 +179,12 @@ optimizeRegularizedSEM <- function(lavaanModel,
   
   rownames(parameterEstimates) <- paste0("lambda=", lambdas, ";", rep(paste0("alpha=", alphas), each = length(lambdas)))
   
-  optimResults <- vector("list", nrow(parameterEstimates))
-  names(optimResults) <- rownames(parameterEstimates)
-  
+  Hessians <- array(NA, 
+                    dim = c(length(parameters), length(parameters), nrow(parameterEstimates)),
+                    dimnames = list(names(parameters),
+                                    names(parameters),
+                                    rownames(parameterEstimates))
+  )
   it <- 0
   
   progressbar = txtProgressBar(min = 0, 
@@ -192,50 +198,44 @@ optimizeRegularizedSEM <- function(lavaanModel,
       
       whereTo <- paste0("lambda=",lambda, ";", "alpha=",alpha)
       
-      if(lambda==0){
-        parameterEstimates[whereTo,] <- parameters
-        next
-      }
+      result <- GLMNET(SEM = SEM, 
+                       regularizedParameterLabels = regularizedParameterLabels, 
+                       penalty = penalty, 
+                       lambda = ifelse(penalty == "ridge", 2*lambda, lambda), # we are using the 
+                       # elastic net implementation which takes .5*lambda*(1-alpha) with alpha = 0
+                       # Setting lambda to 2*lambda makes sure that we are getting the ridge 
+                       # estimates for lambda, not -5*lambda.
+                       alpha = alpha, 
+                       adaptiveLassoWeights = adaptiveLassoWeights,
+                       initialHessian = initialHessian4Optimizer)
       
-      if(penalty == "ridge") {
-        result <- optimizeCustomRegularizedSEM(SEM = SEM, 
-                                               raw = raw, 
-                                               individualPenaltyFunction = ridge, 
-                                               individualPenaltyFunctionGradient = ridgeGradient,
-                                               penaltyFunctionArguments = list("lambda" = lambda,
-                                                                               "regularizedParameterLabels" = regularizedParameterLabels
-                                               ),
-                                               control = control,
-                                               method = method,
-                                               hessian = hessian)
-        optimResults[[whereTo]] <- result$optimized
-        
+      newParameters <- getParameters(result$SEM, raw = FALSE)
+      parameterEstimates[whereTo,] <- newParameters
+      Hessians[,,whereTo] <- result$Hessian
+      
+      # set initial values for next iteration
+      SEM <- setParameters(SEM = SEM, labels = names(newParameters), value = newParameters, raw = FALSE)
+      SEM <- try(fit(SEM))
+      if(is(SEM, "try-Error")){
+        # reset
+        warning("Fit for ", whereTo, " resultet in Error!")
+        SEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = rawData, transformVariances = TRUE)
+        initialHessian4Optimizer <- NULL
       }else{
-        
-        result <- GLMNET(SEM = SEM, 
-                         regularizedParameterLabels = regularizedParameterLabels, 
-                         penalty = penalty, 
-                         lambda = lambda, 
-                         alpha = alpha, 
-                         adaptiveLassoWeights = adaptiveLassoWeights)
-        
-        
+        initialHessian4Optimizer <- result$Hessian
       }
-      
-      parameterEstimates[whereTo,] <- getParameters(result$SEM, raw = FALSE)
       
       it <- it + 1
       setTxtProgressBar(progressbar,it)
     }
-    if(length(alphas > 1)){
-      # reset parameters
-      SEM <- setParameters(SEM = SEM, labels = names(parameters), values = parameters, raw = raw)
-    }
   }
   
+  internalOptimization <- list(
+    "HessiansOfDifferentiablePart" = Hessians
+  )
   results <- list(
     "parameters" = parameterEstimates,
-    "optimResults" = optimResults,
+    "internalOptimization" = internalOptimization,
     "inputArguments" = inputArguments)
   class(results) <- "regularizedSEM"
   return(

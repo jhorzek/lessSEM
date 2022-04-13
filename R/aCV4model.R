@@ -7,8 +7,9 @@
 #' 
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param recomputeHessian if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
 #' @export
-aCV4regularizedSEM <- function(regularizedSEM, k){
+aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
   }
@@ -60,30 +61,25 @@ aCV4regularizedSEM <- function(regularizedSEM, k){
                             raw = FALSE)
     aCVSEM <- fit(aCVSEM)
     
-    if(penalty == "ridge"){
-      penaltyFunctionArguments <- list(
-        "regularizedParameterLabels" = regularizedParameterLabels,
-        "lambda" = lambda
-      )
-      aCV <- smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                  k = k,
-                                  individualPenaltyFunction = ridge, 
-                                  individualPenaltyFunctionGradient = ridgeGradient,
-                                  individualPenaltyFunctionHessian = ridgeHessian,
-                                  raw = FALSE, 
-                                  penaltyFunctionArguments = penaltyFunctionArguments)
-      
+    if(recomputeHessian){
+      hessianOfDifferentiablePart <- NULL
     }else{
-      
-      aCV <- GLMNETACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                  k = k,
-                                  penalty = penalty, 
-                                  raw = TRUE, 
-                                  regularizedParameterLabels = regularizedParameterLabels, 
-                                  lambda = lambda, 
-                                  alpha = alpha, 
-                                  adaptiveLassoWeights = adaptiveLassoWeights)
+      hessianOfDifferentiablePart <- regularizedSEM$internalOptimization$HessiansOfDifferentiablePart[,,selectPars]
     }
+    
+    aCV <- GLMNETACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                k = k,
+                                penalty = penalty, 
+                                raw = TRUE, 
+                                regularizedParameterLabels = regularizedParameterLabels, 
+                                lambda = ifelse(penalty == "ridge", 2*lambda, lambda), # we are using the 
+                                # elastic net implementation which takes .5*lambda*(1-alpha) with alpha = 0
+                                # Setting lambda to 2*lambda makes sure that we are getting the ridge 
+                                # estimates for lambda, not -5*lambda.
+                                alpha = alpha, 
+                                adaptiveLassoWeights = adaptiveLassoWeights,
+                                hessianOfDifferentiablePart = hessianOfDifferentiablePart)
+    
     
     aCVs[paste0("sample", 1:k),selectPars] <- aCV$leaveOutFits
     
@@ -339,7 +335,8 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, exact = FALSE,
                                     k = k,
                                     penalty = penalty,
                                     raw = TRUE,
-                                    penaltyFunctionArguments = penaltyFunctionArguments)
+                                    penaltyFunctionArguments = penaltyFunctionArguments,
+                                    hessianOfDifferentiablePart = NULL)
       }else{
         penaltyFunctionArguments <- list(
           "regularizedParameterLabels" = regularizedParameterLabels,

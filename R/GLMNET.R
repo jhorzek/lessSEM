@@ -24,6 +24,7 @@ GLMNET <- function(SEM,
                    lambda, 
                    alpha,
                    adaptiveLassoWeights,
+                   initialHessian = NULL,
                    stepSize = 1,
                    c1 = 1e-04,
                    c2 = 0.9,
@@ -41,7 +42,9 @@ GLMNET <- function(SEM,
   
   # save current state
   initialParameters <- getParameters(SEM, raw = TRUE)
-  initialHessian <- getHessian(SEM = SEM, raw = TRUE)
+  if(is.null(initialHessian)){
+    initialHessian <- getHessian(SEM = SEM, raw = TRUE)
+  }
   initialGradients <- getGradients(SEM = SEM, raw = TRUE)
   
   # initialize parameter values
@@ -77,13 +80,13 @@ GLMNET <- function(SEM,
   newGradients <- initialGradients
   newHessian <- initialHessian
   
-  if(penalty == "elasticNet"){
+  if(penalty %in% c("elasticNet", "ridge")){
     penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
                                      "lambda" = 0.5*lambda*(1-alpha)*N)
     newGradients <- newGradients + ridgeGradient(parameters = newParameters, 
-                                                 penaltyFunctionArguments = penaltyFunctionArguments)
+                                                 penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     newHessian <- newHessian + ridgeHessian(parameters = newParameters, 
-                                            penaltyFunctionArguments = penaltyFunctionArguments)
+                                            penaltyFunctionArguments = penaltyFunctionArguments)[rownames(newHessian), colnames(newHessian)]
   }
   
   newM2LL <- SEM$m2LL
@@ -127,7 +130,7 @@ GLMNET <- function(SEM,
     direction <- aCV4SEM:::innerGLMNET(parameters = oldParameters,
                                        subGroupGradient = oldGradients, 
                                        subGroupHessian = oldHessian, 
-                                       subGroupLambda = N*lambda, 
+                                       subGroupLambda = N*lambda*alpha, # update for lasso part
                                        regularized = regularized, 
                                        adaptiveLassoWeights = adaptiveLassoWeights,
                                        maxIter = maxIterIn, 
@@ -170,9 +173,9 @@ GLMNET <- function(SEM,
     
     # extract gradients:
     newGradients <- getGradients(SEM = SEM, raw = TRUE)
-    if(penalty == "elasticNet"){
+    if(penalty %in% c("elasticNet", "ridge")){
       newGradients <- newGradients + ridgeGradient(parameters = newParameters, 
-                                                   penaltyFunctionArguments = penaltyFunctionArguments)
+                                                   penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     }
     
     # Approximate Hessian using bfgs

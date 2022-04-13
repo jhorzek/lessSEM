@@ -11,6 +11,7 @@ GLMNET(
   lambda,
   alpha,
   adaptiveLassoWeights,
+  initialHessian = NULL,
   stepSize = 1,
   c1 = 1e-04,
   c2 = 0.9,
