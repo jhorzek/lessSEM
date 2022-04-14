@@ -19,7 +19,6 @@
 #' approximation of this function should be provided.
 #' @param raw controls if the internal transformations of aCV4SEM should be used.
 #' @param penaltyFunctionArguments can be anything that the functions individualPenaltyFunction, individualPenaltyFunctionGradient, or individualPenaltyFunctionHessian need. See aCV4SEM::smoothLASSO for an example.
-#' @export
 smoothACVRcpp_SEMCpp <- function(SEM, 
                                  k, 
                                  individualPenaltyFunction = NULL, 
@@ -37,12 +36,12 @@ smoothACVRcpp_SEMCpp <- function(SEM,
     stop("SEM must be of class Rcpp_SEMCpp")
   }
   
-  parameters <- getParameters(SEM = SEM, raw = raw)
+  parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
   N <- nrow(dataSet)
   
   # step 1: compute scores
-  scores <- getScores(SEM = SEM, raw = raw)
+  scores <- aCV4SEM:::getScores(SEM = SEM, raw = raw)
   
   # compute penalty scores
   
@@ -68,7 +67,7 @@ smoothACVRcpp_SEMCpp <- function(SEM,
     }
   }
   
-  hessian <- getHessian(SEM = SEM, raw = raw)
+  hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
   
   if(!is.null(individualPenaltyFunction)){
     
@@ -122,7 +121,7 @@ smoothACVRcpp_SEMCpp <- function(SEM,
     steps <- 1
     while(steps<100){
       parameters_s <- parameters + stepLength*direction[,names(parameters)]
-      SEM <- setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
+      SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
       SEM <- try(fit(SEM), silent = TRUE)
       if(any(class(SEM) == "try-error")) {
         stepLength <- stepLength*.9
@@ -146,10 +145,10 @@ smoothACVRcpp_SEMCpp <- function(SEM,
     subsetParameters[[s]] <- parameters_s
     
     for(i in 1:length(subsets[[s]])){
-      leaveOutFits[s] <- leaveOutFits[s] + individualMinus2LogLikelihood(par = subsetParameters[[s]], 
-                                                                         SEM = SEM, 
-                                                                         data = dataSet[subsets[[s]][i],], 
-                                                                         raw = raw)
+      leaveOutFits[s] <- leaveOutFits[s] + aCV4SEM:::individualMinus2LogLikelihood(par = subsetParameters[[s]], 
+                                                                                      SEM = SEM, 
+                                                                                      data = dataSet[subsets[[s]][i],], 
+                                                                                      raw = raw)
     }
     
   }
@@ -177,7 +176,6 @@ smoothACVRcpp_SEMCpp <- function(SEM,
 #' @param adaptiveLassoWeights vector with labeled adaptive lasso weights. Only required if penalty = "adaptiveLasso"
 #' @param maxIter maximal number of iterations used in GLMENT
 #' @param epsBreak breaking condition of GLMNET
-#' @export
 GLMNETACVRcpp_SEMCpp <- function(SEM, 
                                  subsets, 
                                  raw = FALSE, 
@@ -193,16 +191,16 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     stop("SEM must be of class Rcpp_SEMCpp")
   }
   
-  parameters <- getParameters(SEM = SEM, raw = raw)
+  parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
   N <- nrow(dataSet)
   k <- length(subsets)
   
   # compute derivatives of -2log-Likelihood without penalty
   
-  scores <- getScores(SEM = SEM, raw = raw)
+  scores <- aCV4SEM:::getScores(SEM = SEM, raw = raw)
   if(is.null(hessianOfDifferentiablePart)){
-    hessian <- getHessian(SEM = SEM, raw = raw)
+    hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
   }else{
     hessian <- hessianOfDifferentiablePart
   }
@@ -220,22 +218,22 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     if(alpha != 0){
       penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
                                        "lambda" = 0.5*lambda*(1-alpha)*(N-length(subsets[[s]])))
-      subGroupGradient <- subGroupGradient + ridgeGradient(parameters = parameters,
-                                                           penaltyFunctionArguments = penaltyFunctionArguments)
+      subGroupGradient <- subGroupGradient + aCV4SEM::ridgeGradient(parameters = parameters,
+                                                                       penaltyFunctionArguments = penaltyFunctionArguments)
       if(is.null(hessianOfDifferentiablePart)){
-        subGroupHessian <- subGroupHessian + ridgeHessian(parameters = parameters,
-                                                          penaltyFunctionArguments = penaltyFunctionArguments)
+        subGroupHessian <- subGroupHessian + aCV4SEM::ridgeHessian(parameters = parameters,
+                                                                      penaltyFunctionArguments = penaltyFunctionArguments)
       }
     }
     
-    direction <- innerGLMNET(parameters = parameters, 
-                             subGroupGradient = subGroupGradient, 
-                             subGroupHessian = subGroupHessian, 
-                             subGroupLambda = subGroupLambda, 
-                             regularized = names(parameters)%in%regularizedParameterLabels, 
-                             adaptiveLassoWeights = adaptiveLassoWeights, 
-                             maxIter = maxIter, 
-                             epsBreak = epsBreak)
+    direction <- aCV4SEM:::innerGLMNET(parameters = parameters, 
+                                       subGroupGradient = subGroupGradient, 
+                                       subGroupHessian = subGroupHessian, 
+                                       subGroupLambda = subGroupLambda, 
+                                       regularized = names(parameters)%in%regularizedParameterLabels, 
+                                       adaptiveLassoWeights = adaptiveLassoWeights, 
+                                       maxIter = maxIter, 
+                                       epsBreak = epsBreak)
     
     rownames(direction) = names(parameters)
     
@@ -253,15 +251,15 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     stepLength <- 1
     parameters_s <- parameters + 1*stepdirections[s,names(parameters)]
     
-    SEM <- setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
-    SEM <- try(fit(SEM), silent = TRUE)
-    subsetParameters[[s]] <- getParameters(SEM = SEM, raw = FALSE)
+    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
+    SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
+    subsetParameters[[s]] <- aCV4SEM:::getParameters(SEM = SEM, raw = FALSE)
     
     for(i in 1:length(subsets[[s]])){
-      leaveOutFits[s] <- leaveOutFits[s] + individualMinus2LogLikelihood(par = subsetParameters[[s]], 
-                                                                         SEM = SEM, 
-                                                                         data = dataSet[subsets[[s]][i],], 
-                                                                         raw = FALSE)
+      leaveOutFits[s] <- leaveOutFits[s] + aCV4SEM:::individualMinus2LogLikelihood(par = subsetParameters[[s]], 
+                                                                                   SEM = SEM, 
+                                                                                   data = dataSet[subsets[[s]][i],], 
+                                                                                   raw = FALSE)
     }
     
   }
@@ -282,7 +280,6 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
 #' @param N number of samples in the data set
 #' @param k number of subsets to create
 #' @return list with subsets
-#' @export
 createSubsets <- function(N,k){
   # build subgroups
   if(k < N){

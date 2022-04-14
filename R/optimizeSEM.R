@@ -10,18 +10,18 @@
 #' @export
 optimizeSEM <- function(SEM, raw = TRUE, method = "BFGS", control = list(), hessian = FALSE){
   
-  parameters <- getParameters(SEM, raw = raw)
+  parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
   
   optimized <- optim(par = parameters, 
-                     fn = fitFunction, 
-                     gr = derivativeFunction, 
+                     fn = aCV4SEM:::fitFunction, 
+                     gr = aCV4SEM:::derivativeFunction, 
                      SEM = SEM,
                      raw = raw,
                      method = method,
                      control = control,
                      hessian = hessian)
-  SEM <- setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
-  SEM <- try(fit(SEM), silent = TRUE)
+  SEM <- aCV4SEM:::setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
+  SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
   
   return(list("SEM" = SEM,
               "optimizer" = optimized))
@@ -56,12 +56,12 @@ optimizeCustomRegularizedSEM <- function(SEM,
                                          hessian = FALSE){
   
   
-  parameters <- getParameters(SEM, raw = raw)
+  parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
   
   N <- nrow(SEM$rawData)
   
   fitFun <- function(par, SEM, raw, individualPenaltyFunction, individualPenaltyFunctionGradient, penaltyFunctionArguments){
-    m2LL <- fitFunction(par = par, SEM = SEM, raw = raw)
+    m2LL <- aCV4SEM:::fitFunction(par = par, SEM = SEM, raw = raw)
     if(m2LL == 9999999999999) return(m2LL)
     m2LLRegularized <- m2LL 
     for(i in 1:N){
@@ -71,7 +71,7 @@ optimizeCustomRegularizedSEM <- function(SEM,
   }
   
   gradFun <- function(par, SEM, raw, individualPenaltyFunction, individualPenaltyFunctionGradient, penaltyFunctionArguments){
-    gradients <- derivativeFunction(par = par, SEM = SEM, raw = raw)
+    gradients <- aCV4SEM:::derivativeFunction(par = par, SEM = SEM, raw = raw)
     if(all(gradients == 9999999999999)) return(gradients)
     
     for(i in 1:N){
@@ -94,8 +94,8 @@ optimizeCustomRegularizedSEM <- function(SEM,
                      control = control,
                      hessian = hessian)
   
-  SEM <- setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
-  SEM <- try(fit(SEM), silent = TRUE)
+  SEM <- aCV4SEM:::setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
+  SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
   
   return(list("SEM" = SEM,
               "optimizer" = optimized))
@@ -113,9 +113,6 @@ optimizeCustomRegularizedSEM <- function(SEM,
 #' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO
 #' @param eps controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
 #' @param raw controls if the internal transformations of aCV4SEM is used.
-#' @param method optimizer method. See ?optim
-#' @param control control optimizer. See ?optim
-#' @param hessian Should the optimizer return the hessian?
 #' @export
 regularizeSEM <- function(lavaanModel, 
                           regularizedParameterLabels,
@@ -123,11 +120,7 @@ regularizeSEM <- function(lavaanModel,
                           lambdas, 
                           alphas = NULL, 
                           adaptiveLassoWeights = NULL,
-                          raw = TRUE,
-                          method = "BFGS", 
-                          control = list(), 
-                          hessian = FALSE
-){
+                          raw = TRUE){
   
   inputArguments <- as.list(environment())
   
@@ -143,16 +136,16 @@ regularizeSEM <- function(lavaanModel,
   if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
   
   
-  SEM <- SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
+  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
   
   # get parameters
-  parameters <- getParameters(SEM, raw = raw)
-  checkRegularizedParameters(parameters = parameters, 
-                             regularizedParameterLabels = regularizedParameterLabels,
-                             SEM$getParameters(), 
-                             raw = raw)
+  parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
+  aCV4SEM:::checkRegularizedParameters(parameters = parameters, 
+                                       regularizedParameterLabels = regularizedParameterLabels,
+                                       SEM$getParameters(), 
+                                       raw = raw)
   
-  initialHessian <- getHessian(SEM = SEM, raw = TRUE)
+  initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
   initialHessian4Optimizer <- initialHessian
   
   if(penalty == "adaptiveLasso" && is.null(adaptiveLassoWeights)){
@@ -217,7 +210,7 @@ regularizeSEM <- function(lavaanModel,
     lambda <- tuningGrid$lambda[it]
     alpha <- tuningGrid$alpha[it]
     
-    result <- GLMNET(SEM = SEM, 
+    result <- aCV4SEM:::GLMNET(SEM = SEM, 
                      regularizedParameterLabels = regularizedParameterLabels, 
                      lambda = lambda,
                      alpha = alpha, 
@@ -227,7 +220,7 @@ regularizeSEM <- function(lavaanModel,
     fits$m2LL[it] <- result$m2LL
     fits$regM2LL[it] <- result$regM2LL
     fits$nonZeroParameters[it] <- result$nonZeroParameters
-    newParameters <- getParameters(result$SEM, raw = FALSE)
+    newParameters <- aCV4SEM:::getParameters(result$SEM, raw = FALSE)
     currentElements <- parameterEstimates$alpha == alpha & parameterEstimates$lambda == lambda
     
     parameterEstimates$value[currentElements] <- newParameters[parameterEstimates$label[currentElements]]
@@ -235,12 +228,12 @@ regularizeSEM <- function(lavaanModel,
     Hessians$Hessian[[it]] <- result$Hessian
     
     # set initial values for next iteration
-    SEM <- setParameters(SEM = SEM, labels = names(newParameters), value = newParameters, raw = FALSE)
-    SEM <- try(fit(SEM))
+    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(newParameters), value = newParameters, raw = FALSE)
+    SEM <- try(aCV4SEM:::fit(SEM))
     if(is(SEM, "try-Error")){
       # reset
       warning("Fit for lambda = ",lambda, "alpha = ", alpha, " resulted in Error!")
-      SEM <- SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
+      SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
       initialHessian4Optimizer <- NULL
     }else{
       initialHessian4Optimizer <- result$Hessian
@@ -272,7 +265,6 @@ regularizeSEM <- function(lavaanModel,
 #' @param regularizedParameterLabels labels of regularized parameters
 #' @param parameterTable table with all parameters
 #' @param raw controls if the internal transformations of aCV4SEM is used.
-#' @export
 checkRegularizedParameters <- function(parameters, regularizedParameterLabels, parameterTable, raw){
   
   

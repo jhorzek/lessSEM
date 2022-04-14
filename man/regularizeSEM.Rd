@@ -11,10 +11,7 @@ regularizeSEM(
   lambdas,
   alphas = NULL,
   adaptiveLassoWeights = NULL,
-  raw = TRUE,
-  method = "BFGS",
-  control = list(),
-  hessian = FALSE
+  raw = TRUE
 )
 }
 \arguments{
@@ -31,12 +28,6 @@ regularizeSEM(
 \item{adaptiveLassoWeights}{vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO}
 
 \item{raw}{controls if the internal transformations of aCV4SEM is used.}
-
-\item{method}{optimizer method. See ?optim}
-
-\item{control}{control optimizer. See ?optim}
-
-\item{hessian}{Should the optimizer return the hessian?}
 
 \item{eps}{controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.}
 }

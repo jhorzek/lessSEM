@@ -56,5 +56,5 @@ GLMNET(
 \item{epsIn}{Stopping criterion for inner iterations}
 }
 \description{
-Performs GLMNET (see Friedman, 2010 & Yuan, 2011) with bfgs approximated Hessian
+Performs GLMNET (see Friedman, 2010 & Yuan, 2011) with aCV4SEM:::BFGS approximated Hessian
 }

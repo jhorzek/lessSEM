@@ -4,7 +4,6 @@
 #' 
 #' @param lavaanModel model of class lavaan
 #' @param transformVariances set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative
-#' @export
 SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
 
@@ -35,7 +34,7 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
     
   }
   
-  internalData <- SEMdata(rawData)
+  internalData <- aCV4SEM:::SEMdata(rawData)
   
   # Extract Model
   
@@ -44,7 +43,7 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
   # translate to RAM notation
   
   ## directed paths
-  AmatrixElements <- setAMatrix(model = lavaanModel, 
+  AmatrixElements <- aCV4SEM:::setAMatrix(model = lavaanModel, 
                                 lavaanParameterTable = lavaanParameterTable, 
                                 nLatent = nLatent, 
                                 nManifest = nManifest, 
@@ -52,7 +51,7 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
                                 manifestNames = manifestNames)
   
   ## undirected paths
-  SmatrixElements <- setSMatrix(model = lavaanModel, 
+  SmatrixElements <- aCV4SEM:::setSMatrix(model = lavaanModel, 
                                 lavaanParameterTable = lavaanParameterTable, 
                                 nLatent = nLatent, 
                                 nManifest = nManifest, 
@@ -61,7 +60,7 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
   
   
   ## Mean structure
-  MvectorElements <- setMVector(model = lavaanModel, 
+  MvectorElements <- aCV4SEM:::setMVector(model = lavaanModel, 
                                 lavaanParameterTable = lavaanParameterTable, 
                                 nLatent = nLatent, 
                                 nManifest = nManifest, 
@@ -234,7 +233,6 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
 #' @param nManifest number of manifest variables 
 #' @param latentNames names of latent variables
 #' @param manifestNames names of manifest variables
-#' @export
 setAMatrix <- function(model, lavaanParameterTable, nLatent, nManifest, latentNames, manifestNames){
   
   Amatrix <- matrix(0, 

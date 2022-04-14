@@ -1,6 +1,6 @@
 #' GLMNET
 #' 
-#' Performs GLMNET (see Friedman, 2010 & Yuan, 2011) with bfgs approximated Hessian
+#' Performs GLMNET (see Friedman, 2010 & Yuan, 2011) with aCV4SEM:::BFGS approximated Hessian
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param regularizedParameterLabels labels of regularized parameters
 #' @param lambda lasso tuning parameter. Higher values = higher penalty
@@ -16,7 +16,6 @@
 #' @param maxIterLine Maximal number of iterations for the line search procedure
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
-#' @export
 GLMNET <- function(SEM, 
                    regularizedParameterLabels, 
                    lambda, 
@@ -40,11 +39,11 @@ GLMNET <- function(SEM,
   N <- nrow(SEM$rawData)
   
   # save current state
-  initialParameters <- getParameters(SEM, raw = TRUE)
+  initialParameters <- aCV4SEM:::getParameters(SEM, raw = TRUE)
   if(is.null(initialHessian)){
-    initialHessian <- getHessian(SEM = SEM, raw = TRUE)
+    initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
   }
-  initialGradients <- getGradients(SEM = SEM, raw = TRUE)
+  initialGradients <- aCV4SEM:::getGradients(SEM = SEM, raw = TRUE)
   
   # initialize parameter values
   newParameters <- initialParameters
@@ -84,18 +83,18 @@ GLMNET <- function(SEM,
     # the penalty to the gradients and the Hessian
     penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
                                      "lambda" = 0.5*lambda*(1-alpha)*N)
-    newGradients <- newGradients + ridgeGradient(parameters = newParameters, 
-                                                 penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
+    newGradients <- newGradients + aCV4SEM::ridgeGradient(parameters = newParameters, 
+                                                          penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     newHessian <- newHessian + ridgeHessian(parameters = newParameters, 
                                             penaltyFunctionArguments = penaltyFunctionArguments)[rownames(newHessian), colnames(newHessian)]
   }
   
   newM2LL <- SEM$m2LL
-  newRegM2LL <- newM2LL + getPenaltyValue(parameters = newParameters,
-                                          lambda = N*lambda,
-                                          alpha = alpha,
-                                          regularizedParameterLabels = regularizedParameterLabels,
-                                          adaptiveLassoWeights = adaptiveLassoWeights)
+  newRegM2LL <- newM2LL + aCV4SEM::getPenaltyValue(parameters = newParameters,
+                                                   lambda = N*lambda,
+                                                   alpha = alpha,
+                                                   regularizedParameterLabels = regularizedParameterLabels,
+                                                   adaptiveLassoWeights = adaptiveLassoWeights)
   
   while(iterOut < maxIterOut){
     iterOut <- iterOut +1
@@ -142,50 +141,50 @@ GLMNET <- function(SEM,
     
     # perform Line Search
     
-    stepSize_k <- GLMNETLineSearch(SEM = SEM, 
-                                   adaptiveLassoWeights = adaptiveLassoWeights, 
-                                   parameterLabels = parameterLabels,
-                                   regularizedParameterLabels = regularizedParameterLabels,
-                                   lambda = N*lambda,
-                                   alpha = alpha,
-                                   oldParameters = oldParameters, 
-                                   oldM2LL = oldM2LL, 
-                                   oldGradients = oldGradients,
-                                   oldHessian = oldHessian,
-                                   direction = direction,
-                                   stepSize= stepSize, 
-                                   sig = sig,
-                                   gam = gam, 
-                                   maxIterLine = maxIterLine)
+    stepSize_k <- aCV4SEM:::GLMNETLineSearch(SEM = SEM, 
+                                             adaptiveLassoWeights = adaptiveLassoWeights, 
+                                             parameterLabels = parameterLabels,
+                                             regularizedParameterLabels = regularizedParameterLabels,
+                                             lambda = N*lambda,
+                                             alpha = alpha,
+                                             oldParameters = oldParameters, 
+                                             oldM2LL = oldM2LL, 
+                                             oldGradients = oldGradients,
+                                             oldHessian = oldHessian,
+                                             direction = direction,
+                                             stepSize= stepSize, 
+                                             sig = sig,
+                                             gam = gam, 
+                                             maxIterLine = maxIterLine)
     
     newParameters <- oldParameters+stepSize_k*direction
     
     # update model: set parameter values and compute
-    SEM <- setParameters(SEM = SEM, labels = names(newParameters), values = newParameters, raw = TRUE)
+    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(newParameters), values = newParameters, raw = TRUE)
     SEM <- fit(SEM)
     
     # get fit
     newM2LL <- SEM$m2LL
-    newRegM2LL <- newM2LL + getPenaltyValue(parameters = newParameters,
-                                            lambda = N*lambda,
-                                            alpha = alpha,
-                                            regularizedParameterLabels = regularizedParameterLabels,
-                                            adaptiveLassoWeights = adaptiveLassoWeights)
+    newRegM2LL <- newM2LL + aCV4SEM::getPenaltyValue(parameters = newParameters,
+                                                     lambda = N*lambda,
+                                                     alpha = alpha,
+                                                     regularizedParameterLabels = regularizedParameterLabels,
+                                                     adaptiveLassoWeights = adaptiveLassoWeights)
     
     # extract gradients:
-    newGradients <- getGradients(SEM = SEM, raw = TRUE)
+    newGradients <- aCV4SEM:::getGradients(SEM = SEM, raw = TRUE)
     if(alpha != 1){
       # add derivative of differentiable part of the penalty:
-      newGradients <- newGradients + ridgeGradient(parameters = newParameters, 
-                                                   penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
+      newGradients <- newGradients + aCV4SEM::ridgeGradient(parameters = newParameters, 
+                                                            penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     }
     
-    # Approximate Hessian using bfgs
-    newHessian <- BFGS(oldParameters = oldParameters, 
-                       oldGradients = oldGradients, 
-                       oldHessian = oldHessian, 
-                       newParameters = newParameters, 
-                       newGradients = newGradients)
+    # Approximate Hessian using aCV4SEM:::BFGS
+    newHessian <- aCV4SEM:::BFGS(oldParameters = oldParameters, 
+                                 oldGradients = oldGradients, 
+                                 oldHessian = oldHessian, 
+                                 newParameters = newParameters, 
+                                 newGradients = newGradients)
     
   }
   # warnings
@@ -225,7 +224,6 @@ GLMNET <- function(SEM,
 #' @param sig only relevant when lineSearch = 'GLMNET'. Controls the sigma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.
 #' @param gam Controls the gamma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421. Defaults to 0.
 #' @param maxIterLine maximal number of iterations for line search
-#' @export
 GLMNETLineSearch <- function(SEM, 
                              regularizedParameterLabels,
                              adaptiveLassoWeights, 
@@ -243,11 +241,11 @@ GLMNETLineSearch <- function(SEM,
                              maxIterLine){
   
   # get penalized M2LL for step size 0:
-  pen_0 <- getPenaltyValue(parameters = oldParameters,
-                           lambda = lambda,
-                           alpha = alpha,
-                           regularizedParameterLabels = regularizedParameterLabels,
-                           adaptiveLassoWeights = adaptiveLassoWeights)
+  pen_0 <- aCV4SEM::getPenaltyValue(parameters = oldParameters,
+                                    lambda = lambda,
+                                    alpha = alpha,
+                                    regularizedParameterLabels = regularizedParameterLabels,
+                                    adaptiveLassoWeights = adaptiveLassoWeights)
   f_0 <- oldM2LL + pen_0
   
   i <- 0
@@ -258,7 +256,7 @@ GLMNETLineSearch <- function(SEM,
     newParameters <- oldParameters+stepSize*direction
     
     # compute new fitfunction value
-    newM2LL <- try(fit(setParameters(SEM, names(newParameters), newParameters, raw = TRUE))$m2LL, silent = TRUE)
+    newM2LL <- try(aCV4SEM:::fit(aCV4SEM:::setParameters(SEM, names(newParameters), newParameters, raw = TRUE))$m2LL, silent = TRUE)
     if(is(newM2LL, "try-error")){
       stop("Error in line search.")
     }
@@ -268,11 +266,11 @@ GLMNETLineSearch <- function(SEM,
     }
     
     # compute h(stepSize) = L(x+td) + p(x+td) - L(x) - p(x), where p(x) is the penalty function
-    p_new <- getPenaltyValue(parameters = newParameters,
-                             lambda = lambda,
-                             alpha = alpha,
-                             regularizedParameterLabels = regularizedParameterLabels,
-                             adaptiveLassoWeights = adaptiveLassoWeights)
+    p_new <- aCV4SEM::getPenaltyValue(parameters = newParameters,
+                                      lambda = lambda,
+                                      alpha = alpha,
+                                      regularizedParameterLabels = regularizedParameterLabels,
+                                      adaptiveLassoWeights = adaptiveLassoWeights)
     f_new <- newM2LL + p_new
     
     # test line search criterion
@@ -300,7 +298,6 @@ GLMNETLineSearch <- function(SEM,
 #' @param newGradients gradients of current iteration
 #' @param cautious boolean: should the update be skipped if it would result in a non positive definite Hessian?
 #' @param hessianEps controls when the update of the Hessian approximation is skipped
-#' @export
 BFGS <- function(oldParameters, 
                  oldGradients, 
                  oldHessian, 

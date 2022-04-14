@@ -2,21 +2,7 @@
 #' 
 #' internal function. Creates internal data representation
 #' @param rawData matrix with raw data set
-#' @export
 SEMdata <- function(rawData){
-  
-  # identify unique missing patterns
-  dataList <- constructDataset(rawData = rawData)
-  return(dataList)
-  
-}
-
-#' constructDataset
-#'
-#' internal function. Creates internal data representation
-#' @param rawData raw dataset with persons in rows and variables in columns 
-#' @export
-constructDataset <- function(rawData){
   
   # extract unique missingness patterns
   
@@ -56,4 +42,6 @@ constructDataset <- function(rawData){
   )
   
   return(dataList)
+  
 }
+
