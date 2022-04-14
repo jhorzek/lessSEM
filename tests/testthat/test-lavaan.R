@@ -19,10 +19,12 @@ test_that("lavaan works", {
     y6 ~~ y8
 '
   
-  model <- sem(model1, data = PoliticalDemocracy, meanstructure = FALSE)
-  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracy)
+  model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE)
+  SEM <- SEMFromLavaan(lavaanModel = model)
   show(SEM)
   logLik(SEM)
+  testthat::expect_equal(round(AIC(SEM) - AIC(model),5),0)
+  testthat::expect_equal(round(BIC(SEM) - BIC(model),5),0)
   
   testthat::expect_equal(round(SEM$m2LL - (-2*as.numeric(logLik(model))),4),0)
 
@@ -51,7 +53,7 @@ test_that("lavaan works", {
   
   model <- sem(model1, data = dat, meanstructure = TRUE, missing = "ML")
   
-  SEM <- SEMFromLavaan(lavaanModel = model, rawData = dat)
+  SEM <- SEMFromLavaan(lavaanModel = model)
   fit(SEM)
   
   testthat::expect_equal(round(SEM$m2LL - (-2*as.numeric(logLik(model))),4),0)

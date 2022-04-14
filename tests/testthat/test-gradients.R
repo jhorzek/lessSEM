@@ -24,7 +24,7 @@ test_that("gradients work", {
   scores <- -2*lavScores(model)
   gradients <- apply(scores,2,sum)
   
-  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracy)
+  SEM <- SEMFromLavaan(lavaanModel = model)
   SEM <- fit(SEM)
   
   gradientsAnalytic <- getGradients(SEM = SEM, raw = FALSE)
@@ -43,7 +43,7 @@ test_that("gradients work", {
   }
   
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
-  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracyWithNA)
+  SEM <- SEMFromLavaan(lavaanModel = model)
   SEM <- fit(SEM)
   
   scores <- -2*lavScores(model)

@@ -31,7 +31,7 @@ test_that("approximate cross validation works", {
   mod <- 'f =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9'
   outt = cfa(mod, HS, meanstructure = TRUE)
   
-  CFA <- SEMFromLavaan(lavaanModel = outt, rawData = HS)
+  CFA <- SEMFromLavaan(lavaanModel = outt)
   CFA <- fit(CFA)
   
   lambda_ <- 0.05
@@ -119,69 +119,45 @@ test_that("approximate cross validation works", {
   cvregsemPars <- cvregsem2LavaanParameters(cvregsemModel = cv.out, lavaanModel = outt)
   
   regularizedParameterLabels <- paste0("f=~x", c(2:3, 7:9))
-  optLasso2 <- optimizeRegularizedSEM(lavaanModel = outt,
-                                      regularizedParameterLabels = regularizedParameterLabels, 
-                                      lambda = cv.out$fits[,"lambda"], 
-                                      penalty = "lasso")
-  testthat::expect_equal(all(round(optLasso2$parameters[,colnames(cvregsemPars)] - cvregsemPars,1) == 0), TRUE)
-  matplot(optLasso2$inputArguments$lambdas, optLasso2$parameters, type = "l")
-  matplot(optLasso2$inputArguments$lambdas, cvregsemPars, type = "l")
+  optLasso2 <- regularizeSEM(lavaanModel = outt,
+                             regularizedParameterLabels = regularizedParameterLabels, 
+                             lambda = cv.out$fits[,"lambda"], 
+                             penalty = "lasso")
+  testthat::expect_equal(all(round(wideResults(optLasso2)[,colnames(cvregsemPars)] - cvregsemPars,1) == 0), TRUE)
+  matplot(optLasso2@inputArguments$lambdas, wideResults(optLasso2), type = "l")
+  matplot(optLasso2@inputArguments$lambdas, cvregsemPars, type = "l")
   cv <- aCV4regularizedSEM(regularizedSEM = optLasso2, k = nrow(HS))
-  
-  plot(
-    x = cv$lambda,
-    y = apply(cv$leaveOutFits,2,sum),
-    xlab = "lambda",
-    ylab = "cv fit",
-    type = "l"
-    )
-  abline(v = which(apply(cv$leaveOutFits,2,sum) == min(apply(cv$leaveOutFits,2,sum))))
+  coef(cv)
+  plot(cv)
   
   ## Test ridge
-  optLasso3 <- optimizeRegularizedSEM(lavaanModel = outt,
-                                      regularizedParameterLabels = regularizedParameterLabels, 
-                                      lambda = cv.out$fits[,"lambda"], 
-                                      penalty = "ridge")
-  matplot(optLasso3$inputArguments$lambdas, optLasso3$parameters, type = "l")
+  optLasso3 <- regularizeSEM(lavaanModel = outt,
+                             regularizedParameterLabels = regularizedParameterLabels, 
+                             lambda = cv.out$fits[,"lambda"], 
+                             penalty = "ridge")
+  plot(optLasso3)
   cv <- aCV4regularizedSEM(regularizedSEM = optLasso3, k = nrow(HS))
-  
-  plot(
-    x = cv$lambda,
-    y = apply(cv$leaveOutFits,2,sum),
-    xlab = "lambda",
-    ylab = "cv fit",
-    type = "l"
-  )
-  
+  coef(cv)
+  plot(cv)
+
   ## Test adaptive lasso
-  optLasso4 <- optimizeRegularizedSEM(lavaanModel = outt,
-                                      regularizedParameterLabels = regularizedParameterLabels, 
-                                      lambda = cv.out$fits[,"lambda"], 
-                                      penalty = "adaptiveLasso")
-  matplot(optLasso4$inputArguments$lambdas, optLasso4$parameters, type = "l")
+  optLasso4 <- regularizeSEM(lavaanModel = outt,
+                             regularizedParameterLabels = regularizedParameterLabels, 
+                             lambda = cv.out$fits[,"lambda"], 
+                             penalty = "adaptiveLasso")
+  plot(optLasso4)
   cv <- aCV4regularizedSEM(regularizedSEM = optLasso4, k = nrow(HS))
-  
-  plot(
-    x = cv$lambda,
-    y = apply(cv$leaveOutFits,2,sum),
-    xlab = "lambda",
-    ylab = "cv fit",
-    type = "l"
-  )
+  coef(cv)
+  plot(cv)
+
   
   ## Test elastic net
-  optLasso5 <- optimizeRegularizedSEM(lavaanModel = outt,
-                                      regularizedParameterLabels = regularizedParameterLabels, 
-                                      lambda = c(0,.2,.5), 
-                                      alpha = c(0,.1),
-                                      penalty = "elasticNet")
+  optLasso5 <- regularizeSEM(lavaanModel = outt,
+                             regularizedParameterLabels = regularizedParameterLabels, 
+                             lambda = c(0,.2,.5), 
+                             alpha = c(0,.1),
+                             penalty = "elasticNet")
   cv <- aCV4regularizedSEM(regularizedSEM = optLasso5, k = nrow(HS))
-  
-  # plot(
-  #   x = cv$lambda,
-  #   y = apply(cv$leaveOutFits,2,sum),
-  #   xlab = "lambda",
-  #   ylab = "cv fit",
-  #   type = "l"
-  # )
+  coef(cv)
+  plot(cv, alpha = .1)
 })

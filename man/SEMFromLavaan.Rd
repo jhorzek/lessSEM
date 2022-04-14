@@ -4,12 +4,10 @@
 \alias{SEMFromLavaan}
 \title{SEMFromLavaan}
 \usage{
-SEMFromLavaan(lavaanModel, rawData, transformVariances = TRUE)
+SEMFromLavaan(lavaanModel, transformVariances = TRUE)
 }
 \arguments{
 \item{lavaanModel}{model of class lavaan}
-
-\item{rawData}{raw data set also used for lavaan model}
 
 \item{transformVariances}{set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative}
 }

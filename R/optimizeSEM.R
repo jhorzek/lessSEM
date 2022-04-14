@@ -101,7 +101,7 @@ optimizeCustomRegularizedSEM <- function(SEM,
               "optimizer" = optimized))
 }
 
-#' optimizeRegularizedSEM
+#' regularizeSEM
 #' 
 #' optimize a SEM with regularized penalty function. Uses smooth approximations for non-differentiable penalty functions.
 #' 
@@ -117,16 +117,16 @@ optimizeCustomRegularizedSEM <- function(SEM,
 #' @param control control optimizer. See ?optim
 #' @param hessian Should the optimizer return the hessian?
 #' @export
-optimizeRegularizedSEM <- function(lavaanModel, 
-                                   regularizedParameterLabels,
-                                   penalty, 
-                                   lambdas, 
-                                   alphas = NULL, 
-                                   adaptiveLassoWeights = NULL,
-                                   raw = TRUE,
-                                   method = "BFGS", 
-                                   control = list(), 
-                                   hessian = FALSE
+regularizeSEM <- function(lavaanModel, 
+                          regularizedParameterLabels,
+                          penalty, 
+                          lambdas, 
+                          alphas = NULL, 
+                          adaptiveLassoWeights = NULL,
+                          raw = TRUE,
+                          method = "BFGS", 
+                          control = list(), 
+                          hessian = FALSE
 ){
   
   inputArguments <- as.list(environment())
@@ -143,7 +143,7 @@ optimizeRegularizedSEM <- function(lavaanModel,
   if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
   
   
-  SEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = rawData, transformVariances = TRUE)
+  SEM <- SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
   
   # get parameters
   parameters <- getParameters(SEM, raw = raw)
@@ -170,77 +170,97 @@ optimizeRegularizedSEM <- function(lavaanModel,
       alphas <- 1
     }else if(penalty == "ridge"){
       alphas <- 0
+      message("regularizeSEM uses the elastic net for ridge regularization. Multiplying all lambda values with 2 to stay consistent with implementations in regsem and lslx.")
+      lambdas <- 2*lambdas # we are using the 
+      # elastic net implementation which takes .5*lambda*(1-alpha) with alpha = 0
+      # Setting lambda to 2*lambda makes sure that we are getting the ridge 
+      # estimates for lambda, not .5*lambda.
     }
   }
   
-  parameterEstimates <- matrix(NA, 
-                               nrow = length(lambdas)*length(alphas), 
-                               ncol = length(parameters))
-  colnames(parameterEstimates) <- names(parameters)
+  tuningGrid <- expand.grid("lambda" = lambdas, "alpha" = alphas)
   
-  rownames(parameterEstimates) <- paste0("lambda=", lambdas, ";", rep(paste0("alpha=", alphas), each = length(lambdas)))
-  
-  Hessians <- array(NA, 
-                    dim = c(length(parameters), length(parameters), nrow(parameterEstimates)),
-                    dimnames = list(names(parameters),
-                                    names(parameters),
-                                    rownames(parameterEstimates))
+  fits <- data.frame(
+    tuningGrid,
+    "m2LL" = NA,
+    "regM2LL"= NA,
+    "nonZeroParameters" = NA,
+    "id" = 1:nrow(tuningGrid)
   )
-  it <- 0
+  
+  parameterEstimates <- data.frame(
+    "label" = rep(names(parameters), nrow(tuningGrid)),
+    "lambda"= rep(tuningGrid$lambda, each = length(parameters)),
+    "alpha" = rep(tuningGrid$alpha, each = length(parameters)),
+    "value" = rep(NA, nrow(tuningGrid)),
+    "regularized" = rep(names(parameters) %in% regularizedParameterLabels, nrow(tuningGrid)),
+    "id" = rep(1:nrow(tuningGrid), each = length(parameters))
+  )
+  
+  Hessians <- list(
+    "lambda" = tuningGrid$lambda,
+    "alpha" = tuningGrid$alpha,
+    "Hessian" = lapply(1:nrow(tuningGrid), 
+                       matrix, 
+                       data= NA, 
+                       nrow=nrow(initialHessian), 
+                       ncol=ncol(initialHessian)),
+    "id" = 1:nrow(tuningGrid)
+  )
   
   progressbar = txtProgressBar(min = 0, 
-                               max = nrow(parameterEstimates), 
-                               initial = it, 
+                               max = nrow(tuningGrid), 
+                               initial = 0, 
                                style = 3)
   
-  for(lambda in lambdas){
+  for(it in 1:nrow(tuningGrid)){
+    lambda <- tuningGrid$lambda[it]
+    alpha <- tuningGrid$alpha[it]
     
-    for(alpha in alphas){
-      
-      whereTo <- paste0("lambda=",lambda, ";", "alpha=",alpha)
-      
-      result <- GLMNET(SEM = SEM, 
-                       regularizedParameterLabels = regularizedParameterLabels, 
-                       lambda = ifelse(penalty == "ridge", 2*lambda, lambda), # we are using the 
-                       # elastic net implementation which takes .5*lambda*(1-alpha) with alpha = 0
-                       # Setting lambda to 2*lambda makes sure that we are getting the ridge 
-                       # estimates for lambda, not -5*lambda.
-                       alpha = alpha, 
-                       adaptiveLassoWeights = adaptiveLassoWeights,
-                       initialHessian = initialHessian4Optimizer)
-      
-      newParameters <- getParameters(result$SEM, raw = FALSE)
-      parameterEstimates[whereTo,] <- newParameters
-      Hessians[,,whereTo] <- result$Hessian
-      
-      # set initial values for next iteration
-      SEM <- setParameters(SEM = SEM, labels = names(newParameters), value = newParameters, raw = FALSE)
-      SEM <- try(fit(SEM))
-      if(is(SEM, "try-Error")){
-        # reset
-        warning("Fit for ", whereTo, " resultet in Error!")
-        SEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = rawData, transformVariances = TRUE)
-        initialHessian4Optimizer <- NULL
-      }else{
-        initialHessian4Optimizer <- result$Hessian
-      }
-      
-      it <- it + 1
-      setTxtProgressBar(progressbar,it)
+    result <- GLMNET(SEM = SEM, 
+                     regularizedParameterLabels = regularizedParameterLabels, 
+                     lambda = lambda,
+                     alpha = alpha, 
+                     adaptiveLassoWeights = adaptiveLassoWeights,
+                     initialHessian = initialHessian4Optimizer)
+    
+    fits$m2LL[it] <- result$m2LL
+    fits$regM2LL[it] <- result$regM2LL
+    fits$nonZeroParameters[it] <- result$nonZeroParameters
+    newParameters <- getParameters(result$SEM, raw = FALSE)
+    currentElements <- parameterEstimates$alpha == alpha & parameterEstimates$lambda == lambda
+    
+    parameterEstimates$value[currentElements] <- newParameters[parameterEstimates$label[currentElements]]
+    
+    Hessians$Hessian[[it]] <- result$Hessian
+    
+    # set initial values for next iteration
+    SEM <- setParameters(SEM = SEM, labels = names(newParameters), value = newParameters, raw = FALSE)
+    SEM <- try(fit(SEM))
+    if(is(SEM, "try-Error")){
+      # reset
+      warning("Fit for lambda = ",lambda, "alpha = ", alpha, " resulted in Error!")
+      SEM <- SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
+      initialHessian4Optimizer <- NULL
+    }else{
+      initialHessian4Optimizer <- result$Hessian
     }
+    
+    setTxtProgressBar(progressbar,it)
+    
   }
   
   internalOptimization <- list(
     "HessiansOfDifferentiablePart" = Hessians
   )
-  results <- list(
-    "parameters" = parameterEstimates,
-    "internalOptimization" = internalOptimization,
-    "inputArguments" = inputArguments)
-  class(results) <- "regularizedSEM"
-  return(
-    results
-  )
+  
+  results <- new("regularizedSEM",
+                 parameters = parameterEstimates,
+                 fits = fits,
+                 internalOptimization = internalOptimization,
+                 inputArguments = inputArguments)
+  
+  return(results)
   
 }
 
@@ -270,4 +290,39 @@ checkRegularizedParameters <- function(parameters, regularizedParameterLabels, p
       }
     }
   }
+}
+
+#' wideResults
+#' 
+#' The results of regularizeSEM are returned in tidy format. If you prefer wide format, this function will return just that
+#' @param regularizedSEM object of class regularizedSEM from regularizeSEM() function
+#' @return matrix with parameters in wide format
+#' @export
+wideResults <- function(regularizedSEM){
+  if(!is(regularizedSEM, "regularizedSEM")) stop("regularizedSEM must be of class regularizedSEM.")
+  
+  ids <- unique(regularizedSEM@parameters$id)
+  parameterLabels <- unique(regularizedSEM@parameters$label)
+  lambdas <- unique(regularizedSEM@parameters$lambda)
+  alphas <- unique(regularizedSEM@parameters$alpha)
+  parameterMatrix <- matrix(NA, 
+                            nrow = length(ids), 
+                            ncol = length(parameterLabels),
+                            dimnames = list(
+                              paste0("lambda=", lambdas, 
+                                     ";alpha=", rep(alphas, each = length(lambdas))
+                              ),
+                              parameterLabels)
+  )
+  for(id in ids){
+    currentRows <- regularizedSEM@parameters$id == id
+    currentLambda <- unique(regularizedSEM@parameters$lambda[currentRows])
+    currentAlpha <- unique(regularizedSEM@parameters$alpha[currentRows])
+    
+    parameterMatrix[paste0("lambda=", currentLambda, 
+                           ";alpha=", currentAlpha), regularizedSEM@parameters$label[currentRows]] <- regularizedSEM@parameters$value[currentRows]
+  }
+  
+  return(parameterMatrix)
+  
 }

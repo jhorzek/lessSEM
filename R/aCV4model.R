@@ -14,37 +14,41 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
     stop("regularizedSEM must be of class regularizedSEM")
   }
   
-  data <- try(lavaan::lavInspect(regularizedSEM$inputArguments$lavaanModel, "data"))
+  data <- try(lavaan::lavInspect(regularizedSEM@inputArguments$lavaanModel, "data"))
   if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
   
-  aCVSEM <- SEMFromLavaan(lavaanModel = regularizedSEM$inputArguments$lavaanModel, rawData = data, transformVariances = TRUE)
+  N <- nrow(data)
   
-  # extract tuning parameters
-  penalty <- regularizedSEM$inputArguments$penalty
-  lambdas <- regularizedSEM$inputArguments$lambdas
-  alphas <- regularizedSEM$inputArguments$alphas
+  aCVSEM <- SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, transformVariances = TRUE)
   
-  adaptiveLassoWeights <- regularizedSEM$inputArguments$adaptiveLassoWeights
+  # extract elements for easier access
+  fits <- regularizedSEM@fits
+  parameters <- regularizedSEM@parameters
   
-  if(penalty == "elasticNet"){
-    tuningParameters <- expand.grid(lambda = lambdas, alpha = alphas)
-  }else{
-    tuningParameters <- expand.grid(lambda = lambdas, alpha = ifelse(penalty == "ridge", 0, 1))
-  }
+  adaptiveLassoWeights <- regularizedSEM@inputArguments$adaptiveLassoWeights
   
-  regularizedParameters <- regularizedSEM$parameters
-  regularizedParameterLabels <- regularizedSEM$inputArguments$regularizedParameterLabels
+  tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
   
-  aCVs <- matrix(NA,
-                 nrow = k, 
-                 ncol = nrow(regularizedParameters),
-                 dimnames = list(
-                   paste0("sample", 1:k),
-                   rownames(regularizedParameters)
-                 ))
+  regularizedParameterLabels <- regularizedSEM@inputArguments$regularizedParameterLabels
+  
+  cvfits <- data.frame(
+    tuningParameters,
+    cvfit = NA,
+    id = fits$id
+  )
+  
+  cvfitsDetails <- data.frame(
+    testSample = rep(seq_len(k), nrow(tuningParameters)),
+    lambda = rep(tuningParameters$lambda, each = k),
+    alpha = rep(tuningParameters$alpha, each = k),
+    value = NA,
+    id = rep(fits$id, each = k)
+  )
+  
+  subsets <- createSubsets(N = N, k = k)
   
   progressbar = txtProgressBar(min = 0,
-                               max = nrow(regularizedParameters), 
+                               max = nrow(tuningParameters), 
                                initial = 0, 
                                style = 3)
   
@@ -52,47 +56,43 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
     
     lambda <- tuningParameters$lambda[ro]
     alpha <- tuningParameters$alpha[ro]
-    selectPars <- paste0("lambda=",lambda, ";alpha=", alpha)
-    
+    select <- parameters$lambda == lambda & parameters$alpha == alpha
+    pars <- parameters$value[select]
+    names(pars) <- parameters$label[select]
     
     aCVSEM <- setParameters(SEM = aCVSEM,
-                            labels = colnames(regularizedParameters),
-                            values = regularizedParameters[selectPars,],
+                            labels = names(pars),
+                            values = pars,
                             raw = FALSE)
     aCVSEM <- fit(aCVSEM)
     
     if(recomputeHessian){
       hessianOfDifferentiablePart <- NULL
     }else{
-      hessianOfDifferentiablePart <- regularizedSEM$internalOptimization$HessiansOfDifferentiablePart[,,selectPars]
+      hessianOfDifferentiablePart <- regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$Hessian[[which(select)]]
     }
     
     aCV <- GLMNETACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                k = k,
-                                penalty = penalty, 
+                                subsets = subsets,
                                 raw = TRUE, 
                                 regularizedParameterLabels = regularizedParameterLabels, 
-                                lambda = ifelse(penalty == "ridge", 2*lambda, lambda), # we are using the 
-                                # elastic net implementation which takes .5*lambda*(1-alpha) with alpha = 0
-                                # Setting lambda to 2*lambda makes sure that we are getting the ridge 
-                                # estimates for lambda, not -5*lambda.
+                                lambda = lambda,
                                 alpha = alpha, 
                                 adaptiveLassoWeights = adaptiveLassoWeights,
                                 hessianOfDifferentiablePart = hessianOfDifferentiablePart)
     
-    
-    aCVs[paste0("sample", 1:k),selectPars] <- aCV$leaveOutFits
-    
-    setTxtProgressBar(progressbar,which(colnames(aCVs) == selectPars))
+    cvfitsDetails$value[cvfitsDetails$alpha == alpha & cvfitsDetails$lambda == lambda] <- aCV$leaveOutFits
+    cvfits$cvfit[ro] <- sum(aCV$leaveOutFits)
+    setTxtProgressBar(progressbar,ro)
     
   }
   
-  return(list(
-    "lambda" = lambdas,
-    "alpha" = alphas,
-    "parameters" = regularizedParameters,
-    "leaveOutFits" = aCVs
-  )
+  return(
+    new("aCV4Regsem",
+        parameters=parameters,
+        cvfits = cvfits,
+        cvfitsDetails=cvfitsDetails, 
+        subsets = subsets)
   )
 }
 
@@ -115,10 +115,7 @@ aCV4lavaan <- function(lavaanModel,
   
   if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
   
-  data <- try(lavaan::lavInspect(lavaanModel, "data"))
-  if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
-  
-  aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = data, transformVariances = TRUE)
+  aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
   
   return(aCV4SEM:::smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
                                         k = k,
@@ -152,7 +149,7 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
   if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
   if(!is(regsemModel, "regsem")) stop("regsemModel must be of class regsem.")
   
-  aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = data, transformVariances = TRUE)
+  aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
   
   regsemParameters <- regsem2LavaanParameters(regsemModel = regsemModel, lavaanModel = lavaanModel)
   regularizedParameterLabels <- names(regsemParameters)[regsemModel$pars_pen]
@@ -251,7 +248,7 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
   if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
   if(!is(cvregsemModel, "cvregsem")) stop("cvregsemModel must be of class regsem.")
   
-  aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, rawData = data, transformVariances = TRUE)
+  aCVSEM <- SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
   
   regsemParameters <- cvregsem2LavaanParameters(cvregsemModel = cvregsemModel, lavaanModel = lavaanModel)
   regularizedParameterLabels <- colnames(regsemParameters)[cvregsemModel$pars_pen]

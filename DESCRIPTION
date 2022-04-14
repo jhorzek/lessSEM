@@ -1,15 +1,14 @@
 Package: aCV4SEM
 Type: Package
-Title: What the Package Does Using Title Case
+Title: Provides approximate cross-validation for (regularized) structural equation models
 Version: 1.0
 Date: 2022-04-03
-Author: Your Name
-Maintainer: Your Name <your@email.com>
-Description: More details about what the package does. See
-               <http://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file> for details on how to write this
-               part.
+Author: Jannik H. Orzek
+Maintainer: Jannik H. Orzek <orzek@mpib-berlin.mpg.de>
+Description: aCV4SEM builds on lavaan and provides optimization of regularized SEM with ridge, lasso, adpative lasso, and elastic net penalty using the GLMNET opitimizer
+  as well as approximate cross-validation for models built with this package, lavaan or regsem. 
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.1.2
-Imports: Rcpp (>= 1.0.8)
+Imports: Rcpp (>= 1.0.8), ggplot2, patchwork
 LinkingTo: Rcpp, RcppArmadillo

@@ -22,7 +22,7 @@ test_that("optimization works", {
   modelSyntax <- paste0('f =~ 1*', yNames[1], ' + ', paste0(yNames[2:length(yNames)], collapse = " + "))
   modelFit = cfa(modelSyntax, y, meanstructure = TRUE)
   
-  CFA <- SEMFromLavaan(lavaanModel = modelFit, rawData = y)
+  CFA <- SEMFromLavaan(lavaanModel = modelFit)
   CFA <- fit(CFA)
   correctParameters <- getParameters(CFA, raw = FALSE)
   
@@ -45,11 +45,12 @@ test_that("optimization works", {
   pars <- regsem2LavaanParameters(regsemModel = regsem_fit, lavaanModel = modelFit)
   regularizedParameters <- names(pars)[pars_pen]
   
-  optLasso <- optimizeRegularizedSEM(lavaanModel = modelFit,
-                                     regularizedParameterLabels = regularizedParameters, 
-                                     lambda = lambda, 
-                                     penalty = "lasso")
-  testthat::expect_equal(any(abs(optLasso$parameters[,names(pars)] - pars) > .1),
+  optLasso <- regularizeSEM(lavaanModel = modelFit,
+                            regularizedParameterLabels = regularizedParameters, 
+                            lambda = lambda, 
+                            penalty = "lasso")
+  
+  testthat::expect_equal(any(abs(wideResults(optLasso)[,names(pars)] - pars) > .1),
                          FALSE)
   
   regsem_cvFit <- cv_regsem(model = modelFit, 
@@ -57,11 +58,14 @@ test_that("optimization works", {
                             gradFun = "ram")
   pars_cvFit <- cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, lavaanModel = modelFit)
   
-  optLasso2 <- optimizeRegularizedSEM(lavaanModel = modelFit,
-                                     regularizedParameterLabels = regularizedParameters, 
-                                     lambda = regsem_cvFit$fits[,"lambda"], 
-                                     penalty = "lasso")
-  testthat::expect_equal(any(abs(optLasso2$parameters[,names(pars)] - pars_cvFit[,names(pars)]) > .1),
+  optLasso2 <- regularizeSEM(lavaanModel = modelFit,
+                             regularizedParameterLabels = regularizedParameters, 
+                             lambda = regsem_cvFit$fits[,"lambda"], 
+                             penalty = "lasso")
+  testthat::expect_equal(any(abs(wideResults(optLasso2)[,names(pars)] - pars_cvFit[,names(pars)]) > .1),
                          FALSE)
-
+  
+  coef(optLasso2)
+  AIC(optLasso2)
+  BIC(optLasso2)
 })

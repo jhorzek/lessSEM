@@ -169,8 +169,7 @@ smoothACVRcpp_SEMCpp <- function(SEM,
 #' 
 #' @param SEM model of class Rcpp_SEMCpp. Models of this class
 #' can be generated with the SEMFromLavaan-function.
-#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
-#' @param penalty which penalty should be used? Available are "lasso", "adaptiveLasso", and "elasticNet"
+#' @param subsets list with subsets created with createSubsets()
 #' @param raw controls if the internal transformations of aCV4SEM should be used.
 #' @param regularizedParameterLabels vector with labels of regularized parameters
 #' @param lambda value of tuning parameter lambda
@@ -180,8 +179,7 @@ smoothACVRcpp_SEMCpp <- function(SEM,
 #' @param epsBreak breaking condition of GLMNET
 #' @export
 GLMNETACVRcpp_SEMCpp <- function(SEM, 
-                                 k, 
-                                 penalty, 
+                                 subsets, 
                                  raw = FALSE, 
                                  regularizedParameterLabels,
                                  lambda,
@@ -195,32 +193,10 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     stop("SEM must be of class Rcpp_SEMCpp")
   }
   
-  if(!penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) stop("Currently only ridge, lasso, adaptiveLasso, and elasticNet supported.")
-  
   parameters <- getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
   N <- nrow(dataSet)
-  
-  if(is.null(alpha)) alpha <- 1 # set to lasso
-  
-  if(is.null(adaptiveLassoWeights) && penalty == "adaptiveLasso") stop("penaltyFunctionArguments$adaptiveLassoWeights missing")
-  if(is.null(adaptiveLassoWeights)) adaptiveLassoWeights <- rep(1, length(parameters))
-  
-  # build subgroups
-  if(k < N){
-    
-    randomCases <- sample(1:N,N)
-    subsets <- split(randomCases, sort(randomCases%%k)) # https://stackoverflow.com/questions/3318333/split-a-vector-into-chunks
-    
-  }else if(k == N){
-    
-    subsets <- vector("list",N)
-    names(subsets) <- 1:N
-    for(i in 1:N) subsets[[i]] <- i
-    
-  }else{
-    stop(paste0("k must be <= ", N))
-  }
+  k <- length(subsets)
   
   # compute derivatives of -2log-Likelihood without penalty
   
@@ -297,4 +273,32 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
          "subsetParameters" = subsetParameters)
   )
   
+}
+
+
+#' createSubsets
+#' 
+#' create subsets for cross-validation
+#' @param N number of samples in the data set
+#' @param k number of subsets to create
+#' @return list with subsets
+#' @export
+createSubsets <- function(N,k){
+  # build subgroups
+  if(k < N){
+    
+    randomCases <- sample(1:N,N)
+    subsets <- split(randomCases, sort(randomCases%%k)) # https://stackoverflow.com/questions/3318333/split-a-vector-into-chunks
+    
+  }else if(k == N){
+    
+    subsets <- vector("list",N)
+    names(subsets) <- 1:N
+    for(i in 1:N) subsets[[i]] <- i
+    
+  }else{
+    stop(paste0("k must be <= ", N))
+  }
+  
+  return(subsets)
 }

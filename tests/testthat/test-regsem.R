@@ -10,7 +10,7 @@ test_that("regsem works", {
   
   parameters <- cvregsem2LavaanParameters(cvregsemModel = cv.out, lavaanModel = outt)
   
-  CFA <- SEMFromLavaan(lavaanModel = outt, rawData = HS)
+  CFA <- SEMFromLavaan(lavaanModel = outt)
 
   chisquares <- rep(NA, nrow(parameters))
   for(p in 1:nrow(parameters)){

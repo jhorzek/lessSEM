@@ -6,8 +6,7 @@
 \usage{
 GLMNETACVRcpp_SEMCpp(
   SEM,
-  k,
-  penalty,
+  subsets,
   raw = FALSE,
   regularizedParameterLabels,
   lambda,
@@ -22,9 +21,7 @@ GLMNETACVRcpp_SEMCpp(
 \item{SEM}{model of class Rcpp_SEMCpp. Models of this class
 can be generated with the SEMFromLavaan-function.}
 
-\item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set}
-
-\item{penalty}{which penalty should be used? Available are "lasso", "adaptiveLasso", and "elasticNet"}
+\item{subsets}{list with subsets created with createSubsets()}
 
 \item{raw}{controls if the internal transformations of aCV4SEM should be used.}
 

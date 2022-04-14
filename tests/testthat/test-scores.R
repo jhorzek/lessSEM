@@ -23,7 +23,7 @@ test_that("analytic scores work", {
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE)
   lavaanScores <- -2*lavaan::lavScores(model)
   
-  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracy)
+  SEM <- SEMFromLavaan(lavaanModel = model)
   SEM <- fit(SEM)
   
   scoresAnalytic <- getScores(SEM, raw = FALSE)
@@ -44,7 +44,7 @@ test_that("analytic scores work", {
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
   lavaanScores <- -2*lavaan::lavScores(model)
   
-  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracyWithNA)
+  SEM <- SEMFromLavaan(lavaanModel = model)
   SEM <- fit(SEM)
   
   scoresAnalytic <- getScores(SEM, raw = FALSE)

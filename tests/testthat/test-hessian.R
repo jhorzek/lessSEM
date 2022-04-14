@@ -22,7 +22,7 @@ test_that("hessian works", {
   PoliticalDemocracy[1:4,2] <- NA
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE, missing = "ML")
 
-  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracy)
+  SEM <- SEMFromLavaan(lavaanModel = model)
   SEM <- fit(SEM)
   
   hessian <- getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
@@ -44,7 +44,7 @@ test_that("hessian works", {
   }
   
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
-  SEM <- SEMFromLavaan(lavaanModel = model, rawData = PoliticalDemocracyWithNA)
+  SEM <- SEMFromLavaan(lavaanModel = model)
   SEM <- fit(SEM)
   
   hessian <- getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)

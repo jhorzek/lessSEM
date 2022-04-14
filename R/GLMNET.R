@@ -194,6 +194,9 @@ GLMNET <- function(SEM,
   }
   return(list("SEM" = SEM, 
               "parameters" = newParameters, 
+              "m2LL" = newM2LL,
+              "regM2LL" = newRegM2LL,
+              "nonZeroParameters" = sum(newParameters != 0),
               "gradients" = newGradients, 
               "Hessian" = newHessian, 
               "convergence" = converged))

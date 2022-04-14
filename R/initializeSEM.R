@@ -3,13 +3,14 @@
 #' internal function. Translates an object of class lavaan to the internal model representation.
 #' 
 #' @param lavaanModel model of class lavaan
-#' @param rawData raw data set also used for lavaan model
 #' @param transformVariances set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative
 #' @export
-SEMFromLavaan <- function(lavaanModel, rawData, transformVariances = TRUE){
+SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
-  if(!is(rawData, "matrix") && !is(rawData, "data.frame")) stop("rawData must be of class matrix or data.frame.")
 
+  rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
+  if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  
   # extract basic features
   meanstructure <- lavaanModel@Options$meanstructure
   
