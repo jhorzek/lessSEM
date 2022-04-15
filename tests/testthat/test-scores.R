@@ -1,5 +1,6 @@
-test_that("analytic scores work", {
+test_that("testing scores", {
   library(lavaan)
+  library(aCV4SEM)
   set.seed(123)
 
   model1 <- ' 

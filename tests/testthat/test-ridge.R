@@ -1,6 +1,7 @@
-test_that("ridge works", {
+test_that("testing ridge", {
   library(lslx)
   library(lavaan)
+  library(aCV4SEM)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;

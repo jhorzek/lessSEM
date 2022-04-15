@@ -1,5 +1,6 @@
-test_that("gradients work", {
+test_that("testing gradients", {
   library(lavaan)
+  library(aCV4SEM)
   
   model1 <- ' 
   # latent variable definitions

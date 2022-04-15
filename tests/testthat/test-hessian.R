@@ -1,6 +1,6 @@
-test_that("hessian works", {
+test_that("testing hessian", {
   library(lavaan)
-  
+  library(aCV4SEM)
   model1 <- ' 
   # latent variable definitions
      ind60 =~ x1 + x2 + x3

@@ -1,5 +1,6 @@
-test_that("regsem works", {
+test_that("testing regsem", {
   library(regsem)
+  library(aCV4SEM)
   # put variables on same scale for regsem
   HS <- data.frame(scale(HolzingerSwineford1939[,7:15]))
   mod <- 'f =~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9'

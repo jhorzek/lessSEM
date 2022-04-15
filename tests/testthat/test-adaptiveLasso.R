@@ -1,5 +1,6 @@
-test_that("adaptive lasso works", {
+test_that("testing adaptive lasso", {
   library(regsem)
+  library(aCV4SEM)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
