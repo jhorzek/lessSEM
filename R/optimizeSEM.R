@@ -151,24 +151,28 @@ regularizeSEM <- function(lavaanModel,
   if(penalty == "adaptiveLasso" && is.null(adaptiveLassoWeights)){
     warning("adaptiveLasso selected, but no adaptiveLassoWeights provided. Using the default abs(parameters)^(-1).")
     adaptiveLassoWeights <- abs(parameters)^(-1)
+  }else if(penalty == "ridge"){
+    adaptiveLassoWeights <- rep(2, length(parameters)) # we are using the 
+    # elastic net implementation which takes w_j.5*lambda*(1-alpha) with alpha = 0
+    # Setting w_j to 2 makes sure that we are getting the ridge 
+    # estimates for lambda, not .5*lambda.
+    names(adaptiveLassoWeights) <- names(parameters)
   }else{
-    adaptiveLassoWeights <- rep(1, length(parameters))
+    adaptiveLassoWeights <- rep(1, length(parameters)) 
     names(adaptiveLassoWeights) <- names(parameters)
   }
   inputArguments$adaptiveLassoWeights <- adaptiveLassoWeights
   
-  if(!is.null(alphas) && penalty != "elasticNet") {stop("non-null alpha parameter only valid for elasticNet")}
-  if(is.null(alphas)) {
-    if(penalty %in% c("lasso", "adaptiveLasso")) {
-      alphas <- 1
-    }else if(penalty == "ridge"){
-      alphas <- 0
-      message("regularizeSEM uses the elastic net for ridge regularization. Multiplying all lambda values with 2 to stay consistent with implementations in regsem and lslx.")
-      lambdas <- 2*lambdas # we are using the 
-      # elastic net implementation which takes .5*lambda*(1-alpha) with alpha = 0
-      # Setting lambda to 2*lambda makes sure that we are getting the ridge 
-      # estimates for lambda, not .5*lambda.
-    }
+  if(!is.null(alphas) && penalty != "elasticNet") {
+    stop("non-null alpha parameter only valid for elasticNet")
+  }
+  if(is.null(alphas)){
+    if(penalty == "elasticNet") stop("elasticNet requires specification of alpha parameter.")
+  }
+  if(penalty %in% c("lasso", "adaptiveLasso")){ 
+    alphas <- 1
+  }else if(penalty == "ridge"){
+    alphas <- 0
   }
   
   tuningGrid <- expand.grid("lambda" = lambdas, "alpha" = alphas)
@@ -211,11 +215,11 @@ regularizeSEM <- function(lavaanModel,
     alpha <- tuningGrid$alpha[it]
     
     result <- aCV4SEM:::GLMNET(SEM = SEM, 
-                     regularizedParameterLabels = regularizedParameterLabels, 
-                     lambda = lambda,
-                     alpha = alpha, 
-                     adaptiveLassoWeights = adaptiveLassoWeights,
-                     initialHessian = initialHessian4Optimizer)
+                               regularizedParameterLabels = regularizedParameterLabels, 
+                               lambda = lambda,
+                               alpha = alpha, 
+                               adaptiveLassoWeights = adaptiveLassoWeights,
+                               initialHessian = initialHessian4Optimizer)
     
     fits$m2LL[it] <- result$m2LL
     fits$regM2LL[it] <- result$regM2LL

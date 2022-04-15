@@ -1,3 +1,120 @@
+#' GLMNETACVRcpp_SEMCpp
+#' 
+#' internal function for approximate cross-validation based on the internal model representation of aCV4SEM. The GLMNET part refers to the fact
+#' that this function uses the GLMNET optimizer for non-differentiable penalty functions. 
+#' 
+#' @param SEM model of class Rcpp_SEMCpp. Models of this class
+#' can be generated with the SEMFromLavaan-function.
+#' @param subsets list with subsets created with createSubsets()
+#' @param raw controls if the internal transformations of aCV4SEM should be used.
+#' @param regularizedParameterLabels vector with labels of regularized parameters
+#' @param lambda value of tuning parameter lambda
+#' @param alpha value of tuning parameter alpha (for elastic net)
+#' @param adaptiveLassoWeights vector with labeled adaptive lasso weights. Only required if penalty = "adaptiveLasso"
+#' @param maxIter maximal number of iterations used in GLMENT
+#' @param epsBreak breaking condition of GLMNET
+GLMNETACVRcpp_SEMCpp <- function(SEM, 
+                                 subsets, 
+                                 raw = FALSE, 
+                                 regularizedParameterLabels,
+                                 lambda,
+                                 alpha = NULL,
+                                 adaptiveLassoWeights = NULL,
+                                 hessianOfDifferentiablePart = NULL,
+                                 maxIter = 100,
+                                 epsBreak = 1e-10){
+  
+  if(!is(SEM, "Rcpp_SEMCpp")){
+    stop("SEM must be of class Rcpp_SEMCpp")
+  }
+  
+  parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = raw)
+  dataSet <- SEM$rawData
+  N <- nrow(dataSet)
+  k <- length(subsets)
+  
+  # compute derivatives of -2log-Likelihood without penalty
+  
+  scores <- aCV4SEM:::getScores(SEM = SEM, raw = raw)
+  if(is.null(hessianOfDifferentiablePart)){
+    hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
+  }else{
+    hessian <- hessianOfDifferentiablePart
+  }
+  
+  # Now do the GLMNET inner iteration for each sub-group
+  stepdirections <- matrix(NA, nrow = k, ncol = length(parameters))
+  colnames(stepdirections) <- names(parameters)
+  
+  for(s in 1:k){
+    subGroupGradient <- apply(scores[-subsets[[s]],],2,sum) # gradients of all inidividuals but the ones in the subgroup
+    subGroupHessian <- ((N-length(subsets[[s]]))/N)*hessian # approximated hessian for all but the subgroup
+    subGroupLambda <- alpha*(N-length(subsets[[s]]))*lambda
+    
+    # if elastic net is used, we approximate the ridge part as well and add this here:
+    if(alpha != 1){
+      # ridge or elastic net are used
+      if(length(unique(adaptiveLassoWeights))!= 1) stop("ridge and elastic net can not be combined with adaptive lasso weights")
+      # we multiply with the adaptive lasso weights. These are all 1 in case of elastic net. In case of ridge, they are
+      # set to 0. This allows for one single unified optimization procedure 
+      penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
+                                       "lambda" = unique(adaptiveLassoWeights)*0.5*lambda*(1-alpha)*(N-length(subsets[[s]])))
+      subGroupGradient <- subGroupGradient + aCV4SEM::ridgeGradient(parameters = parameters,
+                                                                       penaltyFunctionArguments = penaltyFunctionArguments)
+      if(is.null(hessianOfDifferentiablePart)){
+        subGroupHessian <- subGroupHessian + aCV4SEM::ridgeHessian(parameters = parameters,
+                                                                      penaltyFunctionArguments = penaltyFunctionArguments)
+      }
+    }
+    
+    direction <- aCV4SEM:::innerGLMNET(parameters = parameters, 
+                                       subGroupGradient = subGroupGradient, 
+                                       subGroupHessian = subGroupHessian, 
+                                       subGroupLambda = subGroupLambda, 
+                                       regularized = names(parameters)%in%regularizedParameterLabels, 
+                                       adaptiveLassoWeights = adaptiveLassoWeights, 
+                                       maxIter = maxIter, 
+                                       epsBreak = epsBreak)
+    
+    rownames(direction) = names(parameters)
+    
+    # return step direction
+    stepdirections[s,names(parameters)] <- direction[names(parameters),]
+  }
+  
+  subsetParameters <- vector("list",k)
+  leaveOutFits <- rep(0, k)
+  names(leaveOutFits) <- paste0("sample", 1:k)
+  
+  for(s in 1:k){
+    # currently, we do not use line search as this would result in additional computational overhead.
+    # therefore a fixed stepLength of 1 is used; this could be adapted to get better results.
+    stepLength <- 1
+    parameters_s <- parameters + 1*stepdirections[s,names(parameters)]
+    
+    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
+    SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
+    subsetParameters[[s]] <- aCV4SEM:::getParameters(SEM = SEM, raw = FALSE)
+    
+    for(i in 1:length(subsets[[s]])){
+      leaveOutFits[s] <- leaveOutFits[s] + aCV4SEM:::individualMinus2LogLikelihood(par = subsetParameters[[s]], 
+                                                                                   SEM = SEM, 
+                                                                                   data = dataSet[subsets[[s]][i],], 
+                                                                                   raw = FALSE)
+    }
+    
+  }
+  
+  return(
+    list("leaveOutFits" = leaveOutFits,
+         "subsets" = subsets,
+         "scores" = scores,
+         "subsetParameters" = subsetParameters)
+  )
+  
+}
+
+
 #' smoothACVRcpp_SEMCpp
 #' 
 #' internal function for approximate cross-validation based on the internal model representation of aCV4SEM. The smooth part refers to the fact
@@ -146,9 +263,9 @@ smoothACVRcpp_SEMCpp <- function(SEM,
     
     for(i in 1:length(subsets[[s]])){
       leaveOutFits[s] <- leaveOutFits[s] + aCV4SEM:::individualMinus2LogLikelihood(par = subsetParameters[[s]], 
-                                                                                      SEM = SEM, 
-                                                                                      data = dataSet[subsets[[s]][i],], 
-                                                                                      raw = raw)
+                                                                                   SEM = SEM, 
+                                                                                   data = dataSet[subsets[[s]][i],], 
+                                                                                   raw = raw)
     }
     
   }
@@ -160,119 +277,6 @@ smoothACVRcpp_SEMCpp <- function(SEM,
   ))
   
 }
-
-#' GLMNETACVRcpp_SEMCpp
-#' 
-#' internal function for approximate cross-validation based on the internal model representation of aCV4SEM. The GLMNET part refers to the fact
-#' that this function uses the GLMNET optimizer for non-differentiable penalty functions. 
-#' 
-#' @param SEM model of class Rcpp_SEMCpp. Models of this class
-#' can be generated with the SEMFromLavaan-function.
-#' @param subsets list with subsets created with createSubsets()
-#' @param raw controls if the internal transformations of aCV4SEM should be used.
-#' @param regularizedParameterLabels vector with labels of regularized parameters
-#' @param lambda value of tuning parameter lambda
-#' @param alpha value of tuning parameter alpha (for elastic net)
-#' @param adaptiveLassoWeights vector with labeled adaptive lasso weights. Only required if penalty = "adaptiveLasso"
-#' @param maxIter maximal number of iterations used in GLMENT
-#' @param epsBreak breaking condition of GLMNET
-GLMNETACVRcpp_SEMCpp <- function(SEM, 
-                                 subsets, 
-                                 raw = FALSE, 
-                                 regularizedParameterLabels,
-                                 lambda,
-                                 alpha = NULL,
-                                 adaptiveLassoWeights = NULL,
-                                 hessianOfDifferentiablePart = NULL,
-                                 maxIter = 100,
-                                 epsBreak = 1e-10){
-  
-  if(!is(SEM, "Rcpp_SEMCpp")){
-    stop("SEM must be of class Rcpp_SEMCpp")
-  }
-  
-  parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = raw)
-  dataSet <- SEM$rawData
-  N <- nrow(dataSet)
-  k <- length(subsets)
-  
-  # compute derivatives of -2log-Likelihood without penalty
-  
-  scores <- aCV4SEM:::getScores(SEM = SEM, raw = raw)
-  if(is.null(hessianOfDifferentiablePart)){
-    hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
-  }else{
-    hessian <- hessianOfDifferentiablePart
-  }
-  
-  # Now do the GLMNET inner iteration for each sub-group
-  stepdirections <- matrix(NA, nrow = k, ncol = length(parameters))
-  colnames(stepdirections) <- names(parameters)
-  
-  for(s in 1:k){
-    subGroupGradient <- apply(scores[-subsets[[s]],],2,sum) # gradients of all inidividuals but the ones in the subgroup
-    subGroupHessian <- ((N-length(subsets[[s]]))/N)*hessian # approximated hessian for all but the subgroup
-    subGroupLambda <- alpha*(N-length(subsets[[s]]))*lambda
-    
-    # if elastic net is used, we approximate the ridge part as well and add this here:
-    if(alpha != 0){
-      penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
-                                       "lambda" = 0.5*lambda*(1-alpha)*(N-length(subsets[[s]])))
-      subGroupGradient <- subGroupGradient + aCV4SEM::ridgeGradient(parameters = parameters,
-                                                                       penaltyFunctionArguments = penaltyFunctionArguments)
-      if(is.null(hessianOfDifferentiablePart)){
-        subGroupHessian <- subGroupHessian + aCV4SEM::ridgeHessian(parameters = parameters,
-                                                                      penaltyFunctionArguments = penaltyFunctionArguments)
-      }
-    }
-    
-    direction <- aCV4SEM:::innerGLMNET(parameters = parameters, 
-                                       subGroupGradient = subGroupGradient, 
-                                       subGroupHessian = subGroupHessian, 
-                                       subGroupLambda = subGroupLambda, 
-                                       regularized = names(parameters)%in%regularizedParameterLabels, 
-                                       adaptiveLassoWeights = adaptiveLassoWeights, 
-                                       maxIter = maxIter, 
-                                       epsBreak = epsBreak)
-    
-    rownames(direction) = names(parameters)
-    
-    # return step direction
-    stepdirections[s,names(parameters)] <- direction[names(parameters),]
-  }
-  
-  subsetParameters <- vector("list",k)
-  leaveOutFits <- rep(0, k)
-  names(leaveOutFits) <- paste0("sample", 1:k)
-  
-  for(s in 1:k){
-    # currently, we do not use line search as this would result in additional computational overhead.
-    # therefore a fixed stepLength of 1 is used; this could be adapted to get better results.
-    stepLength <- 1
-    parameters_s <- parameters + 1*stepdirections[s,names(parameters)]
-    
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
-    SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
-    subsetParameters[[s]] <- aCV4SEM:::getParameters(SEM = SEM, raw = FALSE)
-    
-    for(i in 1:length(subsets[[s]])){
-      leaveOutFits[s] <- leaveOutFits[s] + aCV4SEM:::individualMinus2LogLikelihood(par = subsetParameters[[s]], 
-                                                                                   SEM = SEM, 
-                                                                                   data = dataSet[subsets[[s]][i],], 
-                                                                                   raw = FALSE)
-    }
-    
-  }
-  
-  return(
-    list("leaveOutFits" = leaveOutFits,
-         "subsets" = subsets,
-         "scores" = scores,
-         "subsetParameters" = subsetParameters)
-  )
-  
-}
-
 
 #' createSubsets
 #' 

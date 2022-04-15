@@ -1,5 +1,6 @@
 test_that("ridge works", {
   library(lslx)
+  library(lavaan)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
