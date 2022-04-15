@@ -4,6 +4,7 @@
 #include "fit.hpp"
 #include "scores.hpp"
 #include "gradients.hpp"
+#include "hessian.hpp"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
@@ -66,7 +67,7 @@ void SEMCpp::addSubset(int N_,
   if(currentStatus < 4){
     Rcpp::stop("Please define the model matrices, add parameters as well as derivative elements and raw data before calling addSubset.");
   }
-
+  
   data.addSubset(N_,
                  observed_, // number of variables without missings
                  notMissing_, // vector with indices of non-missing values
@@ -246,15 +247,15 @@ double SEMCpp::fit(){
     arma::colvec currentImpliedMeans = impliedMeans.rows(currentSubset.notMissing);
     
     if(currentSubset.N == 1){
-
+      
       currentSubset.m2LL = computeIndividualM2LL(currentSubset.observed, 
                                                  currentSubset.rawData(currentSubset.notMissing), 
                                                  currentImpliedMeans, 
                                                  currentImpliedCovariance);
       m2LL += currentSubset.m2LL;
-
+      
     }else if(currentSubset.N > 1){
-
+      
       currentSubset.m2LL = computeGroupM2LL(currentSubset.N, 
                                             currentSubset.observed, 
                                             currentSubset.means, 
@@ -262,13 +263,13 @@ double SEMCpp::fit(){
                                             currentImpliedMeans, 
                                             currentImpliedCovariance);
       m2LL += currentSubset.m2LL;
-
+      
     }else{
       Rcpp::stop("Unknown N in data subset");
     }
     
   }
-
+  
   return(m2LL);
 }
 
@@ -294,6 +295,25 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   arma::rowvec gradients = gradientsByGroup(*this, raw);
   
   return(gradients);
+}
+
+arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
+                             arma::vec value_,
+                             bool raw,
+                             double eps){
+  if(!wasChecked){
+    wasChecked = checkModel();
+  }
+  if(!wasFit){
+    Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
+  }
+  arma::mat hessian = approximateHessian(*this, 
+                                         label_,
+                                         value_,
+                                         raw,
+                                         eps);
+  
+  return(hessian);
 }
 
 RCPP_EXPOSED_CLASS(SEMCpp)
@@ -326,6 +346,7 @@ RCPP_EXPOSED_CLASS(SEMCpp)
     .method( "getParameterLabels", &SEMCpp::getParameterLabels, "Returns a vector with unique parameter labels as used internally.")
     .method( "getGradients", &SEMCpp::getGradients, "Returns a matrix with scores.")
     .method( "getScores", &SEMCpp::getScores, "Returns a matrix with scores.")
+    .method( "getHessian", &SEMCpp::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
     ;
   }
 

@@ -7,8 +7,16 @@ setClass(Class = "regularizedSEM",
          )
 )
 
-setMethod("coef", "regularizedSEM", function (object) {
-  return(object@parameters)
+setMethod("coef", "regularizedSEM", function (object, lambda = NULL, alpha = NULL) {
+  if(is.null(lambda) && is.null(alpha)) return(object@parameters)
+  if(any(is.null(lambda), is.null(alpha))) stop("Please specify both, lambda and alpha")
+  if(any(!lambda %in% unique(object@parameters$lambda), !alpha %in% unique(object@parameters$alpha))
+     ) stop("Could not find the requested alpha and lambda values in the model.")
+  pars <- object@parameters
+  pars <- pars[pars$lambda == lambda & pars$alpha == alpha, , drop = FALSE]
+  parameters <- pars$value
+  names(parameters) <- pars$label
+  return(parameters)
 })
 
 setMethod("AIC", "regularizedSEM", function (object) {

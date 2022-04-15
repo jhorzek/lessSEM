@@ -84,7 +84,10 @@ public:
   double fit();
   arma::rowvec getGradients(bool raw);
   arma::mat getScores(bool raw);
-  arma::mat getHessian(bool raw);
+  arma::mat getHessian(Rcpp::StringVector label_,
+                       arma::vec value_,
+                       bool raw,
+                       double eps);
 };
 
 #endif

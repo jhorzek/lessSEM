@@ -53,5 +53,15 @@ test_that("ridge works", {
                         penalty = "ridge", 
                         lambdas = lambdas)
   testthat::expect_equal(all(round(wideResults(rsem)[,regularizedLavaan] - lslxParameter[,regularized],4)==0), TRUE)
-
+  plot(rsem)
+  coef(rsem)
+  coef(rsem, alpha = 0, lambda = .1)
+  
+  ## Test approximated cross-validation
+  
+  cv <- aCV4regularizedSEM(regularizedSEM = rsem, k = N)
+  coef(cv)
+  coef(cv, alpha = 0, lambda = .1)
+  plot(cv)
+  
 })

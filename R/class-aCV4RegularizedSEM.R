@@ -16,11 +16,25 @@ setMethod("show", "aCV4RegularizedSEM", function (object) {
   print(parameters)
 })
 
-setMethod("coef", "aCV4RegularizedSEM", function (object) {
-  bestFit <- which(object@cvfits$cvfit == min(object@cvfits$cvfit))
-  parameters <- object@parameters$value[object@parameters$id == object@cvfits$id[bestFit]]
-  names(parameters) <- object@parameters$label[object@parameters$id == object@cvfits$id[bestFit]]
+setMethod("coef", "aCV4RegularizedSEM", function (object, lambda = NULL, alpha = NULL) {
+  
+  if(is.null(lambda) && is.null(alpha)) {
+    # return parameters of model with best cv fit
+    bestFit <- which(object@cvfits$cvfit == min(object@cvfits$cvfit))
+    parameters <- object@parameters$value[object@parameters$id == object@cvfits$id[bestFit]]
+    names(parameters) <- object@parameters$label[object@parameters$id == object@cvfits$id[bestFit]]
+    return(parameters)
+  }
+  # otherwise: return the parameters for the requested lambda and alpha values:
+  if(any(is.null(lambda), is.null(alpha))) stop("Please specify both, lambda and alpha")
+  if(any(!lambda %in% unique(object@parameters$lambda), !alpha %in% unique(object@parameters$alpha))
+  ) stop("Could not find the requested alpha and lambda values in the model.")
+  pars <- object@parameters
+  pars <- pars[pars$lambda == lambda & pars$alpha == alpha, , drop = FALSE]
+  parameters <- pars$value
+  names(parameters) <- pars$label
   return(parameters)
+  
 })
 
 

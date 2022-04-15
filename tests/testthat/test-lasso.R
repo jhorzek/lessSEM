@@ -52,5 +52,14 @@ test_that("lasso works", {
                         penalty = "lasso", 
                         lambdas = lambdas)
   testthat::expect_equal(all(round(wideResults(rsem)[,regularizedLavaan] - lslxParameter[,regularized],3)==0), TRUE)
+  plot(rsem)
+  coef(rsem)
+  coef(rsem, alpha = 1, lambda = .1)
   
+  ## Test approximated cross-validation
+  
+  cv <- aCV4regularizedSEM(regularizedSEM = rsem, k = N)
+  coef(cv)
+  coef(cv, alpha = 1, lambda = .1)
+  plot(cv)
 })

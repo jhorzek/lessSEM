@@ -36,14 +36,7 @@ test_that("lavaan works", {
   testthat::expect_equal(round(sum(individualFit) - (-2*as.numeric(logLik(model))),4),0)
   
   testthat::expect_equal(round(model@Fit@test$standard$stat - likelihoodRatioFit(par = getParameters(SEM), SEM),4)[1,1],0)
-  
-  # individualChisqValues <- rep(NA, nrow(PoliticalDemocracy))
-  # for(i in 1:nrow(PoliticalDemocracy)){
-  #   individualChisqValues[i] <- individualLikelihoodRatioFit(par = getParameters(SEM), SEM = SEM, data = SEM$rawData[i,], raw = FALSE)
-  # }
-  
-  #testthat::expect_equal(round(model@Fit@test$standard$stat - sum(individualChisqValues),4),0)
-  
+
   # test missing data
   dat <- PoliticalDemocracy
   

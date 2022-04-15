@@ -1,32 +1,3 @@
-#' optimizeSEM
-#' 
-#' optimize internal SEM representation with optim() function
-#' 
-#' @param SEM model of class Rcpp_SEMCpp. 
-#' @param raw controls if the internal transformations of aCV4SEM is used.
-#' @param method optimizer method. See ?optim
-#' @param control control optimizer. See ?optim
-#' @param hessian Should the optimizer return the hessian?
-#' @export
-optimizeSEM <- function(SEM, raw = TRUE, method = "BFGS", control = list(), hessian = FALSE){
-  
-  parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
-  
-  optimized <- optim(par = parameters, 
-                     fn = aCV4SEM:::fitFunction, 
-                     gr = aCV4SEM:::derivativeFunction, 
-                     SEM = SEM,
-                     raw = raw,
-                     method = method,
-                     control = control,
-                     hessian = hessian)
-  SEM <- aCV4SEM:::setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
-  SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
-  
-  return(list("SEM" = SEM,
-              "optimizer" = optimized))
-}
-
 #' optimizeCustomRegularizedSEM
 #' 
 #' optimize a SEM with custom penalty function.

@@ -48,45 +48,9 @@ getHessian <- function (SEM, raw = FALSE, eps = 1e-7){
   
   SEM <- aCV4SEM:::fit(SEM = SEM)
   parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = raw)
-  nParameters <- length(parameters)
-  Hessian <- matrix(data = 0, 
-                    nrow = nParameters, 
-                    ncol = nParameters, 
-                    dimnames = list(names(parameters),
-                                    names(parameters)))
-  
-  for (p in 1:nParameters) {
-    
-    stepLeft <- twoStepLeft <- stepRight <- twoStepRight <- parameters
-    stepLeft[p] <- stepLeft[p] - eps
-    twoStepLeft[p] <- twoStepLeft[p] - 2 * eps
-    stepRight[p] <- stepRight[p] + eps
-    twoStepRight[p] <- twoStepRight[p] + 2 * eps
-    
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(stepLeft), values = stepLeft, raw = raw)
-    SEM <- aCV4SEM:::fit(SEM = SEM)
-    gradientsStepLeft <- aCV4SEM:::getGradients(SEM = SEM, raw = raw)
-    
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(twoStepLeft), values = twoStepLeft, raw = raw)
-    SEM <- aCV4SEM:::fit(SEM = SEM)
-    gradientsTwoStepLeft <- aCV4SEM:::getGradients(SEM = SEM, raw = raw)
-    
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(stepRight), values = stepRight, raw = raw)
-    SEM <- aCV4SEM:::fit(SEM = SEM)
-    gradientsStepRight <- aCV4SEM:::getGradients(SEM = SEM, raw = raw)
-    
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(twoStepRight), values = twoStepRight, raw = raw)
-    SEM <- aCV4SEM:::fit(SEM = SEM)
-    gradientsTwoStepRight <- aCV4SEM:::getGradients(SEM = SEM, raw = raw)
-    
-    Hessian[,p] <- (gradientsTwoStepLeft - 
-                      8 * gradientsStepLeft + 
-                      8 * gradientsStepRight - 
-                      gradientsTwoStepRight)/(12 * eps)
-  }
-  # make symmetric
-  Hessian <- (Hessian + t(Hessian))/2
-  
-  return(Hessian)
+  hessian <- SEM$getHessian(names(parameters), parameters, raw, eps)
+  rownames(hessian) <- names(parameters)
+  colnames(hessian) <- names(parameters)
+  return(hessian)
   
 }

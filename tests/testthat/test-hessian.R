@@ -22,12 +22,12 @@ test_that("hessian works", {
   PoliticalDemocracy[1:4,2] <- NA
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE, missing = "ML")
 
-  SEM <- SEMFromLavaan(lavaanModel = model)
-  SEM <- fit(SEM)
+  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = model)
+  SEM <- aCV4SEM:::fit(SEM)
   
-  hessian <- getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
+  hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
   
-  hessian2 <- numDeriv::hessian(func = fitFunction, x = getParameters(SEM), SEM = SEM, raw = FALSE)
+  hessian2 <- numDeriv::hessian(func = aCV4SEM:::fitFunction, x = aCV4SEM:::getParameters(SEM), SEM = SEM, raw = FALSE)
   
   testthat::expect_equal(abs(sum(hessian - hessian2)) < .001, TRUE)
   
@@ -44,12 +44,12 @@ test_that("hessian works", {
   }
   
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
-  SEM <- SEMFromLavaan(lavaanModel = model)
-  SEM <- fit(SEM)
+  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = model)
+  SEM <- aCV4SEM:::fit(SEM)
   
-  hessian <- getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
+  hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
   
-  hessian2 <- numDeriv::hessian(func = fitFunction, x = getParameters(SEM), SEM = SEM, raw = FALSE)
+  hessian2 <- numDeriv::hessian(func = aCV4SEM:::fitFunction, x = aCV4SEM:::getParameters(SEM), SEM = SEM, raw = FALSE)
   
   testthat::expect_equal(abs(sum(hessian - hessian2)) < .001, TRUE)
 })

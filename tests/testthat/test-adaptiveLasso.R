@@ -38,5 +38,14 @@ test_that("adaptive lasso works", {
   plot(rsem)
   testthat::expect_equal(any(abs(wideResults(rsem)[,regularizedLavaan] - regsem_cvFit$parameters[,pars_pen]) > .1),
                          FALSE)
+  plot(rsem)
+  coef(rsem)
+  coef(rsem, alpha = 1, lambda = .1)
   
+  ## Test approximated cross-validation
+  
+  cv <- aCV4regularizedSEM(regularizedSEM = rsem, k = N)
+  coef(cv)
+  coef(cv, alpha = 1, lambda = .1)
+  plot(cv)
 })
