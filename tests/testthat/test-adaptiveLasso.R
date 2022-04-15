@@ -40,16 +40,16 @@ test_that("testing adaptive lasso", {
                         penalty = "adaptiveLasso", 
                         lambdas = regsem_cvFit$fits[,"lambda"])
   plot(rsem)
-  testthat::expect_equal(any(abs(wideResults(rsem)[,colnames(regsemPars)] - regsemPars) > .1),
+  testthat::expect_equal(any(abs(rsem@parameters[,colnames(regsemPars)] - regsemPars) > .1),
                          FALSE)
   plot(rsem)
   coef(rsem)
-  coef(rsem, alpha = 1, lambda = .1)
+  coef(rsem, alpha = 1, lambda = .01)
   
   ## Test approximated cross-validation
   
   cv <- aCV4regularizedSEM(regularizedSEM = rsem, k = N)
   coef(cv)
-  coef(cv, alpha = 1, lambda = .1)
+  coef(cv, alpha = 1, lambda = .01)
   plot(cv)
 })

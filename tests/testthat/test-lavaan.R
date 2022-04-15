@@ -20,7 +20,7 @@ test_that("testing lavaan", {
 '
   
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE)
-  SEM <- SEMFromLavaan(lavaanModel = model)
+  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = model)
   show(SEM)
   logLik(SEM)
   testthat::expect_equal(round(AIC(SEM) - AIC(model),5),0)
@@ -30,7 +30,7 @@ test_that("testing lavaan", {
 
   individualFit <- rep(NA, nrow(PoliticalDemocracy))
   for(i in 1:nrow(PoliticalDemocracy)){
-    individualFit[i] <- individualMinus2LogLikelihood(par = getParameters(SEM), SEM = SEM, data = SEM$rawData[i,], raw = FALSE)
+    individualFit[i] <- aCV4SEM:::individualMinus2LogLikelihood(par = getParameters(SEM), SEM = SEM, data = SEM$rawData[i,], raw = FALSE)
   }
   
   testthat::expect_equal(round(sum(individualFit) - (-2*as.numeric(logLik(model))),4),0)
@@ -46,8 +46,8 @@ test_that("testing lavaan", {
   
   model <- sem(model1, data = dat, meanstructure = TRUE, missing = "ML")
   
-  SEM <- SEMFromLavaan(lavaanModel = model)
-  fit(SEM)
+  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = model)
+  aCV4SEM:::fit(SEM)
   
   testthat::expect_equal(round(SEM$m2LL - (-2*as.numeric(logLik(model))),4),0)
 

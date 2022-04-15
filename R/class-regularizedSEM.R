@@ -2,6 +2,8 @@ setClass(Class = "regularizedSEM",
          representation = representation(
            parameters="data.frame",
            fits="data.frame", 
+           parameterLabels = "character",
+           regularized = "character",
            internalOptimization="list", 
            inputArguments="list"
          )
@@ -9,14 +11,12 @@ setClass(Class = "regularizedSEM",
 
 setMethod("coef", "regularizedSEM", function (object, lambda = NULL, alpha = NULL) {
   if(is.null(lambda) && is.null(alpha)) return(object@parameters)
-  if(any(is.null(lambda), is.null(alpha))) stop("Please specify both, lambda and alpha")
-  if(any(!lambda %in% unique(object@parameters$lambda), !alpha %in% unique(object@parameters$alpha))
-     ) stop("Could not find the requested alpha and lambda values in the model.")
+  if(is.null(lambda)) return(object@parameters[object@parameters$alpha == alpha,])
+  if(is.null(alpha)) return(object@parameters[object@parameters$lambda == lambda,])
+  
   pars <- object@parameters
-  pars <- pars[pars$lambda == lambda & pars$alpha == alpha, , drop = FALSE]
-  parameters <- pars$value
-  names(parameters) <- pars$label
-  return(parameters)
+  pars <- unlist(pars[pars$lambda == lambda & pars$alpha == alpha, object@parameterLabels])
+  return(pars)
 })
 
 setMethod("AIC", "regularizedSEM", function (object) {
@@ -48,20 +48,33 @@ setMethod("plot", "regularizedSEM", function (x, alpha = NULL, regularizedOnly =
     )
   }
   
-  
   if(regularizedOnly){
-    parameters <- parameters[parameters$alpha == alpha & parameters$regularized, , drop = FALSE]
+    parameters <- cbind(
+      lambda = x@fits$lambda,
+      alpha = x@fits$alpha,
+      coef(x, alpha = alpha)[,x@regularized]
+    )
+    parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@regularized)
     
-    ggplot2::ggplot(data = parameters,
-                                     mapping = ggplot2::aes(x = lambda, y = value, group = label)) +
+    ggplot2::ggplot(data = parametersLong,
+                    mapping = ggplot2::aes(x = lambda, y = value, group = name)) +
       ggplot2::geom_line(colour = "#008080")+
       ggplot2::ggtitle("Regularized Parameters")
     
   }else{
-    parameters <- parameters[parameters$alpha == alpha,]
+    parameters <- cbind(
+      lambda = x@fits$lambda,
+      alpha = x@fits$alpha,
+      coef(x, alpha = alpha)
+    )
+    parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@parameterLabels)
+    parametersLong$regularized <- parametersLong$name %in% x@regularized
     
-    ggplot2::ggplot(data = parameters,
-                                     mapping = ggplot2::aes(x = lambda, y = value, group = label, color = regularized)) +
+    ggplot2::ggplot(data = parametersLong,
+                    mapping = ggplot2::aes(x = lambda, 
+                                           y = value, 
+                                           group = name, 
+                                           color = regularized)) +
       ggplot2::geom_line()+ 
       ggplot2::scale_color_manual(values=c("FALSE"="gray","TRUE"="#008080")) +
       ggplot2::ggtitle("Parameter Estimates")

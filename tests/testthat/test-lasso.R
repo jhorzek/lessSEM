@@ -1,8 +1,9 @@
 test_that("testing lasso", {
   library(lslx)
+  library(lavaan)
   library(aCV4SEM)
   set.seed(123)
-  N <- 50
+  N <- 100
   l1 <- 1; l2 <- .2; l3 <- 0;
   v1 <- .2; v2 <- .8; v3 <- 1
   
@@ -52,7 +53,7 @@ test_that("testing lasso", {
                         regularizedParameterLabels = regularizedLavaan,
                         penalty = "lasso", 
                         lambdas = lambdas)
-  testthat::expect_equal(all(round(wideResults(rsem)[,regularizedLavaan] - lslxParameter[,regularized],3)==0), TRUE)
+  testthat::expect_equal(all(round(rsem@parameters[,regularizedLavaan] - lslxParameter[,regularized],3)==0), TRUE)
   plot(rsem)
   coef(rsem)
   coef(rsem, alpha = 1, lambda = .1)

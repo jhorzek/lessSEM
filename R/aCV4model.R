@@ -33,16 +33,14 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
   
   cvfits <- data.frame(
     tuningParameters,
-    cvfit = NA,
-    id = fits$id
+    cvfit = NA
   )
   
-  cvfitsDetails <- data.frame(
-    testSample = rep(seq_len(k), nrow(tuningParameters)),
-    lambda = rep(tuningParameters$lambda, each = k),
-    alpha = rep(tuningParameters$alpha, each = k),
-    value = NA,
-    id = rep(fits$id, each = k)
+  cvfitsDetails <- as.data.frame(matrix(NA,nrow = nrow(cvfits), ncol = k))
+  colnames(cvfitsDetails) <- paste0("sample", 1:k)
+  cvfitsDetails <- cbind(
+    tuningParameters,
+    cvfitsDetails
   )
   
   subsets <- aCV4SEM:::createSubsets(N = N, k = k)
@@ -56,14 +54,12 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
     
     lambda <- tuningParameters$lambda[ro]
     alpha <- tuningParameters$alpha[ro]
-    select <- parameters$lambda == lambda & parameters$alpha == alpha
-    pars <- parameters$value[select]
-    names(pars) <- parameters$label[select]
+    pars <- coef(regularizedSEM, lambda = lambda, alpha = alpha)
     
     aCVSEM <- aCV4SEM:::setParameters(SEM = aCVSEM,
-                                         labels = names(pars),
-                                         values = pars,
-                                         raw = FALSE)
+                                      labels = names(pars),
+                                      values = pars,
+                                      raw = FALSE)
     aCVSEM <- aCV4SEM:::fit(aCVSEM)
     
     if(recomputeHessian){
@@ -73,15 +69,15 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
     }
     
     aCV <- aCV4SEM:::GLMNETACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                             subsets = subsets,
-                                             raw = TRUE, 
-                                             regularizedParameterLabels = regularizedParameterLabels, 
-                                             lambda = lambda,
-                                             alpha = alpha, 
-                                             adaptiveLassoWeights = adaptiveLassoWeights,
-                                             hessianOfDifferentiablePart = hessianOfDifferentiablePart)
+                                          subsets = subsets,
+                                          raw = TRUE, 
+                                          regularizedParameterLabels = regularizedParameterLabels, 
+                                          lambda = lambda,
+                                          alpha = alpha, 
+                                          adaptiveLassoWeights = adaptiveLassoWeights,
+                                          hessianOfDifferentiablePart = hessianOfDifferentiablePart)
     
-    cvfitsDetails$value[cvfitsDetails$alpha == alpha & cvfitsDetails$lambda == lambda] <- aCV$leaveOutFits
+    cvfitsDetails[cvfitsDetails$alpha == alpha & cvfitsDetails$lambda == lambda,paste0("sample",1:k)] <- aCV$leaveOutFits
     cvfits$cvfit[ro] <- sum(aCV$leaveOutFits)
     setTxtProgressBar(progressbar,ro)
     
@@ -91,6 +87,8 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
     new("aCV4RegularizedSEM",
         parameters=parameters,
         cvfits = cvfits,
+        parameterLabels = names(pars),
+        regularized = regularizedParameterLabels,
         cvfitsDetails=cvfitsDetails, 
         subsets = subsets)
   )
@@ -165,9 +163,9 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
   }
   
   aCVSEM <- aCV4SEM:::setParameters(SEM = aCVSEM,
-                                       labels = names(regsemParameters),
-                                       values = regsemParameters,
-                                       raw = FALSE)
+                                    labels = names(regsemParameters),
+                                    values = regsemParameters,
+                                    raw = FALSE)
   aCVSEM <- aCV4SEM:::fit(aCVSEM)
   
   if(penalty == "elasticNet"){
@@ -178,12 +176,12 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
       "eps" = eps
     )
     aCV <- aCV4SEM:::smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                             k = k,
-                                             individualPenaltyFunction = aCV4SEM::smoothElasticNet, 
-                                             individualPenaltyFunctionGradient = aCV4SEM::smoothElasticNetGradient,
-                                             individualPenaltyFunctionHessian = aCV4SEM::smoothElasticNetHessian,
-                                             raw = FALSE, 
-                                             penaltyFunctionArguments = penaltyFunctionArguments)
+                                          k = k,
+                                          individualPenaltyFunction = aCV4SEM::smoothElasticNet, 
+                                          individualPenaltyFunctionGradient = aCV4SEM::smoothElasticNetGradient,
+                                          individualPenaltyFunctionHessian = aCV4SEM::smoothElasticNetHessian,
+                                          raw = FALSE, 
+                                          penaltyFunctionArguments = penaltyFunctionArguments)
     
   }
   if(penalty == "ridge"){
@@ -192,12 +190,12 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
       "lambda" = lambda,
     )
     aCV <- aCV4SEM:::smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                             k = k,
-                                             individualPenaltyFunction = aCV4SEM::ridge, 
-                                             individualPenaltyFunctionGradient = aCV4SEM::ridgeGradient,
-                                             individualPenaltyFunctionHessian = aCV4SEM::ridgeHessian,
-                                             raw = FALSE, 
-                                             penaltyFunctionArguments = penaltyFunctionArguments)
+                                          k = k,
+                                          individualPenaltyFunction = aCV4SEM::ridge, 
+                                          individualPenaltyFunctionGradient = aCV4SEM::ridgeGradient,
+                                          individualPenaltyFunctionHessian = aCV4SEM::ridgeHessian,
+                                          raw = FALSE, 
+                                          penaltyFunctionArguments = penaltyFunctionArguments)
     
   }
   if(penalty == "lasso"){
@@ -207,12 +205,12 @@ aCV4regsem <- function(regsemModel, lavaanModel, k, penalty, lambda, eps = 1e-4)
       "eps" = eps
     )
     aCV <- aCV4SEM:::smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                             k = k,
-                                             individualPenaltyFunction = aCV4SEM::smoothLASSO, 
-                                             individualPenaltyFunctionGradient = aCV4SEM::smoothLASSOGradient,
-                                             individualPenaltyFunctionHessian = aCV4SEM::smoothLASSOHessian,
-                                             raw = FALSE, 
-                                             penaltyFunctionArguments = penaltyFunctionArguments)
+                                          k = k,
+                                          individualPenaltyFunction = aCV4SEM::smoothLASSO, 
+                                          individualPenaltyFunctionGradient = aCV4SEM::smoothLASSOGradient,
+                                          individualPenaltyFunctionHessian = aCV4SEM::smoothLASSOHessian,
+                                          raw = FALSE, 
+                                          penaltyFunctionArguments = penaltyFunctionArguments)
   }
   
   
@@ -285,9 +283,9 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
   for(p in 1:nrow(regsemParameters)){
     if(anyNA(regsemParameters[p,])) next
     aCVSEM <- aCV4SEM:::setParameters(SEM = aCVSEM,
-                                         labels = colnames(regsemParameters),
-                                         values = regsemParameters[p,],
-                                         raw = FALSE)
+                                      labels = colnames(regsemParameters),
+                                      values = regsemParameters[p,],
+                                      raw = FALSE)
     aCVSEM <- aCV4SEM:::fit(aCVSEM)
     
     if(penalty == "elasticNet"){
@@ -298,12 +296,12 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
         "eps" = eps
       )
       aCV <- aCV4SEM:::smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                               k = k,
-                                               individualPenaltyFunction = aCV4SEM::smoothElasticNet, 
-                                               individualPenaltyFunctionGradient = aCV4SEM::smoothElasticNetGradient,
-                                               individualPenaltyFunctionHessian = aCV4SEM::smoothElasticNetHessian,
-                                               raw = FALSE, 
-                                               penaltyFunctionArguments = penaltyFunctionArguments)
+                                            k = k,
+                                            individualPenaltyFunction = aCV4SEM::smoothElasticNet, 
+                                            individualPenaltyFunctionGradient = aCV4SEM::smoothElasticNetGradient,
+                                            individualPenaltyFunctionHessian = aCV4SEM::smoothElasticNetHessian,
+                                            raw = FALSE, 
+                                            penaltyFunctionArguments = penaltyFunctionArguments)
       
     }else if(penalty == "ridge"){
       penaltyFunctionArguments <- list(
@@ -311,12 +309,12 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
         "lambda" = lambdas[p],
       )
       aCV <- aCV4SEM:::smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                               k = k,
-                                               individualPenaltyFunction = aCV4SEM::ridge, 
-                                               individualPenaltyFunctionGradient = aCV4SEM::ridgeGradient,
-                                               individualPenaltyFunctionHessian = aCV4SEM::ridgeHessian,
-                                               raw = FALSE, 
-                                               penaltyFunctionArguments = penaltyFunctionArguments)
+                                            k = k,
+                                            individualPenaltyFunction = aCV4SEM::ridge, 
+                                            individualPenaltyFunctionGradient = aCV4SEM::ridgeGradient,
+                                            individualPenaltyFunctionHessian = aCV4SEM::ridgeHessian,
+                                            raw = FALSE, 
+                                            penaltyFunctionArguments = penaltyFunctionArguments)
       
     }else if(penalty == "lasso"){
       
@@ -327,12 +325,12 @@ aCV4cv_regsem <- function(cvregsemModel, lavaanModel, k, penalty, eps = 1e-4){
       )
       
       aCV <- aCV4SEM:::smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                               k = k,
-                                               individualPenaltyFunction = aCV4SEM::smoothLASSO, 
-                                               individualPenaltyFunctionGradient = aCV4SEM::smoothLASSOGradient,
-                                               individualPenaltyFunctionHessian = aCV4SEM::smoothLASSOHessian,
-                                               raw = FALSE, 
-                                               penaltyFunctionArguments = penaltyFunctionArguments)
+                                            k = k,
+                                            individualPenaltyFunction = aCV4SEM::smoothLASSO, 
+                                            individualPenaltyFunctionGradient = aCV4SEM::smoothLASSOGradient,
+                                            individualPenaltyFunctionHessian = aCV4SEM::smoothLASSOHessian,
+                                            raw = FALSE, 
+                                            penaltyFunctionArguments = penaltyFunctionArguments)
       
     }
     

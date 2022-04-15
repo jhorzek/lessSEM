@@ -84,6 +84,7 @@ optimizeCustomRegularizedSEM <- function(SEM,
 #' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO
 #' @param eps controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
 #' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @param initialHessian option to provide an initial Hessian for the optimizer
 #' @export
 regularizeSEM <- function(lavaanModel, 
                           regularizedParameterLabels,
@@ -91,7 +92,8 @@ regularizeSEM <- function(lavaanModel,
                           lambdas, 
                           alphas = NULL, 
                           adaptiveLassoWeights = NULL,
-                          raw = TRUE){
+                          raw = TRUE,
+                          initialHessian = NULL){
   
   inputArguments <- as.list(environment())
   
@@ -115,8 +117,9 @@ regularizeSEM <- function(lavaanModel,
                                        regularizedParameterLabels = regularizedParameterLabels,
                                        SEM$getParameters(), 
                                        raw = raw)
-  
-  initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
+  if(is.null(initialHessian)){
+    initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
+  }
   initialHessian4Optimizer <- initialHessian
   
   if(penalty == "adaptiveLasso" && is.null(adaptiveLassoWeights)){
@@ -152,17 +155,14 @@ regularizeSEM <- function(lavaanModel,
     tuningGrid,
     "m2LL" = NA,
     "regM2LL"= NA,
-    "nonZeroParameters" = NA,
-    "id" = 1:nrow(tuningGrid)
+    "nonZeroParameters" = NA
   )
   
-  parameterEstimates <- data.frame(
-    "label" = rep(names(parameters), nrow(tuningGrid)),
-    "lambda"= rep(tuningGrid$lambda, each = length(parameters)),
-    "alpha" = rep(tuningGrid$alpha, each = length(parameters)),
-    "value" = rep(NA, nrow(tuningGrid)),
-    "regularized" = rep(names(parameters) %in% regularizedParameterLabels, nrow(tuningGrid)),
-    "id" = rep(1:nrow(tuningGrid), each = length(parameters))
+  parameterEstimates <- as.data.frame(matrix(NA,nrow = nrow(tuningGrid), ncol = length(parameters)))
+  colnames(parameterEstimates) <- names(parameters)
+  parameterEstimates <- cbind(
+    tuningGrid,
+    parameterEstimates
   )
   
   Hessians <- list(
@@ -172,8 +172,7 @@ regularizeSEM <- function(lavaanModel,
                        matrix, 
                        data= NA, 
                        nrow=nrow(initialHessian), 
-                       ncol=ncol(initialHessian)),
-    "id" = 1:nrow(tuningGrid)
+                       ncol=ncol(initialHessian))
   )
   
   progressbar = txtProgressBar(min = 0, 
@@ -196,9 +195,8 @@ regularizeSEM <- function(lavaanModel,
     fits$regM2LL[it] <- result$regM2LL
     fits$nonZeroParameters[it] <- result$nonZeroParameters
     newParameters <- aCV4SEM:::getParameters(result$SEM, raw = FALSE)
-    currentElements <- parameterEstimates$alpha == alpha & parameterEstimates$lambda == lambda
     
-    parameterEstimates$value[currentElements] <- newParameters[parameterEstimates$label[currentElements]]
+    parameterEstimates[it, names(parameters)] <- newParameters[names(parameters)]
     
     Hessians$Hessian[[it]] <- result$Hessian
     
@@ -225,6 +223,8 @@ regularizeSEM <- function(lavaanModel,
   results <- new("regularizedSEM",
                  parameters = parameterEstimates,
                  fits = fits,
+                 parameterLabels = names(parameters),
+                 regularized = regularizedParameterLabels,
                  internalOptimization = internalOptimization,
                  inputArguments = inputArguments)
   
@@ -251,45 +251,10 @@ checkRegularizedParameters <- function(parameters, regularizedParameterLabels, p
   # check if variances are regularized and the parameters are raw
   if(raw){
     for(regularizedParmeter in regularizedParameterLabels){
-      if(parameterTable$location[parameterTable$label == regularizedParmeter] != "Smatrix") next
-      if(parameterTable$row[parameterTable$label == regularizedParmeter] == parameterTable$col[parameterTable$label == regularizedParmeter]){
+      if(all(parameterTable$location[parameterTable$label == regularizedParmeter] != "Smatrix")) next
+      if(any(parameterTable$row[parameterTable$label == regularizedParmeter] == parameterTable$col[parameterTable$label == regularizedParmeter])){
         warning("Regularizing raw_value of variances (raw = TRUE). The actual variances are given by var = exp(raw_value).")
       }
     }
   }
-}
-
-#' wideResults
-#' 
-#' The results of regularizeSEM are returned in tidy format. If you prefer wide format, this function will return just that
-#' @param regularizedSEM object of class regularizedSEM from regularizeSEM() function
-#' @return matrix with parameters in wide format
-#' @export
-wideResults <- function(regularizedSEM){
-  if(!is(regularizedSEM, "regularizedSEM")) stop("regularizedSEM must be of class regularizedSEM.")
-  
-  ids <- unique(regularizedSEM@parameters$id)
-  parameterLabels <- unique(regularizedSEM@parameters$label)
-  lambdas <- unique(regularizedSEM@parameters$lambda)
-  alphas <- unique(regularizedSEM@parameters$alpha)
-  parameterMatrix <- matrix(NA, 
-                            nrow = length(ids), 
-                            ncol = length(parameterLabels),
-                            dimnames = list(
-                              paste0("lambda=", lambdas, 
-                                     ";alpha=", rep(alphas, each = length(lambdas))
-                              ),
-                              parameterLabels)
-  )
-  for(id in ids){
-    currentRows <- regularizedSEM@parameters$id == id
-    currentLambda <- unique(regularizedSEM@parameters$lambda[currentRows])
-    currentAlpha <- unique(regularizedSEM@parameters$alpha[currentRows])
-    
-    parameterMatrix[paste0("lambda=", currentLambda, 
-                           ";alpha=", currentAlpha), regularizedSEM@parameters$label[currentRows]] <- regularizedSEM@parameters$value[currentRows]
-  }
-  
-  return(parameterMatrix)
-  
 }

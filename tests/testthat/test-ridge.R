@@ -53,7 +53,7 @@ test_that("testing ridge", {
                         regularizedParameterLabels = regularizedLavaan,
                         penalty = "ridge", 
                         lambdas = lambdas)
-  testthat::expect_equal(all(round(wideResults(rsem)[,regularizedLavaan] - lslxParameter[,regularized],4)==0), TRUE)
+  testthat::expect_equal(all(round(rsem@parameters[,regularizedLavaan] - lslxParameter[,regularized],4)==0), TRUE)
   plot(rsem)
   coef(rsem)
   coef(rsem, alpha = 0, lambda = .1)
