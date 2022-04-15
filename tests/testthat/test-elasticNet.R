@@ -1,5 +1,6 @@
 test_that("testing elastic net", {
   library(lslx)
+  library(lavaan)
   library(aCV4SEM)
   set.seed(123)
   N <- 50

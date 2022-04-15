@@ -38,7 +38,7 @@ setMethod("coef", "aCV4RegularizedSEM", function (object, lambda = NULL, alpha =
 })
 
 
-setMethod("plot", "aCV4RegularizedSEM", function (x, alpha = NULL) {
+setMethod("plot", "aCV4RegularizedSEM", function (x, alpha = NULL, regularizedOnly = TRUE) {
   parameters <- x@parameters
   fits <- x@cvfits
   if(is.null(alpha)) {
@@ -53,14 +53,32 @@ setMethod("plot", "aCV4RegularizedSEM", function (x, alpha = NULL) {
     )
   }
   
-  parameters <- parameters[parameters$alpha == alpha,]
-  fits <- fits[fits$alpha == alpha,]
-  
-  parameterPlot <- ggplot2::ggplot(data = parameters,
-                                   mapping = ggplot2::aes(x = lambda, y = value, group = label, color = regularized)) +
-    ggplot2::geom_line()
-  fitPlot <- ggplot2::ggplot(data = fits,
-                             mapping = ggplot2::aes(x = lambda, y = cvfit), title = "cv-fit") +
-    ggplot2::geom_line()
+  if(regularizedOnly){
+    parameters <- parameters[parameters$alpha == alpha & parameters$regularized, , drop = FALSE]
+    fits <- fits[fits$alpha == alpha,, drop = FALSE]
+    
+    parameterPlot <- ggplot2::ggplot(data = parameters,
+                                     mapping = ggplot2::aes(x = lambda, y = value, group = label)) +
+      ggplot2::geom_line(colour = "#008080")+
+      ggplot2::ggtitle("Regularized Parameters")
+    fitPlot <- ggplot2::ggplot(data = fits,
+                               mapping = ggplot2::aes(x = lambda, y = cvfit), title = "cv-fit") +
+      ggplot2::geom_line()
+
+  }else{
+    parameters <- parameters[parameters$alpha == alpha,]
+    fits <- fits[fits$alpha == alpha,]
+    
+    parameterPlot <- ggplot2::ggplot(data = parameters,
+                                     mapping = ggplot2::aes(x = lambda, y = value, group = label, color = regularized)) +
+      ggplot2::geom_line()+ 
+      ggplot2::scale_color_manual(values=c("FALSE"="gray","TRUE"="#008080")) +
+      ggplot2::ggtitle("Parameter Estimates")
+    fitPlot <- ggplot2::ggplot(data = fits,
+                               mapping = ggplot2::aes(x = lambda, y = cvfit), title = "cv-fit") +
+      ggplot2::geom_line()
+
+  }
+
   parameterPlot / fitPlot
 })

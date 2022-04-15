@@ -34,7 +34,7 @@ setMethod("BIC", "regularizedSEM", function (object) {
   return(fits)
 })
 
-setMethod("plot", "regularizedSEM", function (x, alpha = NULL) {
+setMethod("plot", "regularizedSEM", function (x, alpha = NULL, regularizedOnly = TRUE) {
   parameters <- x@parameters
   if(is.null(alpha)) {
     alpha <- unique(parameters$alpha)[1]
@@ -48,7 +48,22 @@ setMethod("plot", "regularizedSEM", function (x, alpha = NULL) {
     )
   }
   
-  parameters <- parameters[parameters$alpha == alpha,]
-  ggplot2::ggplot(data = parameters, mapping = ggplot2::aes(x = lambda, y = value, group = label, color = regularized))+
-    ggplot2::geom_line()
+  
+  if(regularizedOnly){
+    parameters <- parameters[parameters$alpha == alpha & parameters$regularized, , drop = FALSE]
+    
+    ggplot2::ggplot(data = parameters,
+                                     mapping = ggplot2::aes(x = lambda, y = value, group = label)) +
+      ggplot2::geom_line(colour = "#008080")+
+      ggplot2::ggtitle("Regularized Parameters")
+    
+  }else{
+    parameters <- parameters[parameters$alpha == alpha,]
+    
+    ggplot2::ggplot(data = parameters,
+                                     mapping = ggplot2::aes(x = lambda, y = value, group = label, color = regularized)) +
+      ggplot2::geom_line()+ 
+      ggplot2::scale_color_manual(values=c("FALSE"="gray","TRUE"="#008080")) +
+      ggplot2::ggtitle("Parameter Estimates")
+  }
 })

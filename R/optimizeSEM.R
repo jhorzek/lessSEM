@@ -120,7 +120,7 @@ regularizeSEM <- function(lavaanModel,
   initialHessian4Optimizer <- initialHessian
   
   if(penalty == "adaptiveLasso" && is.null(adaptiveLassoWeights)){
-    warning("adaptiveLasso selected, but no adaptiveLassoWeights provided. Using the default abs(parameters)^(-1).")
+    message("adaptiveLasso selected, but no adaptiveLassoWeights provided. Using the default abs(parameters)^(-1).")
     adaptiveLassoWeights <- abs(parameters)^(-1)
   }else if(penalty == "ridge"){
     adaptiveLassoWeights <- rep(2, length(parameters)) # we are using the 

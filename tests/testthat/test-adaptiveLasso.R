@@ -26,9 +26,12 @@ test_that("testing adaptive lasso", {
   pars_pen = 5:24
   regsem_cvFit <- cv_regsem(model = modelFit, 
                             pars_pen = pars_pen, 
-                            penalty = "alasso",
+                            type = "alasso", 
+                            n.lambda = 5,
                             gradFun = "ram")
   plot(regsem_cvFit)
+  
+  regsemPars <- aCV4SEM::cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, lavaanModel = modelFit)
   
   # replicate with regularizedSEM
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
@@ -37,7 +40,7 @@ test_that("testing adaptive lasso", {
                         penalty = "adaptiveLasso", 
                         lambdas = regsem_cvFit$fits[,"lambda"])
   plot(rsem)
-  testthat::expect_equal(any(abs(wideResults(rsem)[,regularizedLavaan] - regsem_cvFit$parameters[,pars_pen]) > .1),
+  testthat::expect_equal(any(abs(wideResults(rsem)[,colnames(regsemPars)] - regsemPars) > .1),
                          FALSE)
   plot(rsem)
   coef(rsem)

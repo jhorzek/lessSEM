@@ -202,6 +202,16 @@ GLMNET <- function(SEM,
   if(iterOut == maxIterOut){
     warning(paste("For lambda = ", lambda, "the maximum number of iterations was reached. Try with a higher maxIterOut or with smaller lambda-steps."))
   }
+  
+  if(alpha != 1){
+    # remove derivative of differentiable part of the penalty; we want the gradients of the log-Likelihood, not those including the penalty
+    newGradients <- newGradients - aCV4SEM::ridgeGradient(parameters = newParameters, 
+                                                          penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
+    # remove hessian of differentiable part of the penalty; we want the hessian of the log-Likelihood, not the one including the penalty
+    newHessian <- newHessian - aCV4SEM::ridgeHessian(parameters = newParameters, 
+                                                       penaltyFunctionArguments = penaltyFunctionArguments)[rownames(newHessian), colnames(newHessian)]
+  }
+  
   return(list("SEM" = SEM, 
               "parameters" = newParameters, 
               "m2LL" = newM2LL,
