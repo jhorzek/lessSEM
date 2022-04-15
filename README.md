@@ -13,12 +13,11 @@ If you want to install aCV4SEM from GitHub, use the following commands in R:
 
 # Example
 
-The following example is adapted from the documentation of ?lavaan::cfa.
-
     library(lavaan) # aCV4SEM builds on lavaan models
     library(aCV4SEM)
     
     ## Approximate leave one out cross-validation for a lavaan model
+    ## The following example is adapted from the documentation of ?lavaan::cfa.
     ### set up model in lavaan
     HS.model <- ' visual  =~ x1 + x2 + x3
                   textual =~ x4 + x5 + x6
@@ -47,7 +46,7 @@ The following example is adapted from the documentation of ?lavaan::cfa.
          xlab = "exact loocv", ylab = "approximated loocv")
     points(exactLOOCV, aLOOCV$leaveOutFits, col = "red")
     
-    ## Example for regularized model SEM
+    ## Example for regularized SEM
     
     ### Simulate a data set
     set.seed(123)
