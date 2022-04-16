@@ -1,3 +1,195 @@
+#' regularizeSEM
+#' 
+#' optimize a SEM with regularized penalty function. Uses smooth approximations for non-differentiable penalty functions.
+#' 
+#' @param lavaanModel model of class lavaan 
+#' @param regularizedParameterLabels labels of regularized parameters
+#' @param penalty which penalty should be used? Available are "ridge", "lasso", "adaptiveLasso", and "elasticNet"
+#' @param lambdas vector with lambda values. Higher values = higher penalty
+#' @param alphas 0<alpha<1. only required for elastic net. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge
+#' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO
+#' @param eps controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
+#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @param control option to set parameters of the GLMNET optimizer
+#' @export
+regularizeSEM <- function(lavaanModel, 
+                          regularizedParameterLabels,
+                          penalty, 
+                          lambdas, 
+                          alphas = NULL, 
+                          adaptiveLassoWeights = NULL,
+                          raw = TRUE,
+                          control = aCV4SEM::controlGLMNET()){
+  
+  inputArguments <- as.list(environment())
+  
+  if(!penalty %in% c("lasso", "ridge", "adaptiveLasso", "elasticNet")) stop("Currently supported penalty functions are: lasso, ridge, adaptiveLasso, and elasticNet")
+  
+  if(!is(lavaanModel, "lavaan")){
+    stop("lavaanModel must be of class lavaan")
+  }
+  
+  if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
+  
+  rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
+  if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  
+  startingValues <- control$startingValues
+  
+  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+                                 transformVariances = TRUE,
+                                 fit = any(is.null(startingValues))
+  )
+  
+  if(!any(is.null(startingValues))){
+    SEM <- aCV4SEM:::setParameters(SEM = SEM,
+                                   labels = names(startingValues), 
+                                   values = startingValues, 
+                                   raw = FALSE)
+    SEM <- aCV4SEM:::fit(SEM = SEM)
+  }
+  
+  # get parameters
+  parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
+  aCV4SEM:::checkRegularizedParameters(parameters = parameters, 
+                                       regularizedParameterLabels = regularizedParameterLabels,
+                                       SEM$getParameters(), 
+                                       raw = raw)
+  
+  initialHessian <- control$initialHessian
+  if(is.null(initialHessian)){
+    initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
+  }
+  initialHessian4Optimizer <- initialHessian
+  
+  if(penalty == "adaptiveLasso" && is.null(adaptiveLassoWeights)){
+    message("adaptiveLasso selected, but no adaptiveLassoWeights provided. Using the default abs(parameters)^(-1).")
+    adaptiveLassoWeights <- abs(parameters)^(-1)
+  }else if(penalty == "ridge"){
+    adaptiveLassoWeights <- rep(2, length(parameters)) # we are using the 
+    # elastic net implementation which takes w_j.5*lambda*(1-alpha) with alpha = 0
+    # Setting w_j to 2 makes sure that we are getting the ridge 
+    # estimates for lambda, not .5*lambda.
+    names(adaptiveLassoWeights) <- names(parameters)
+  }else{
+    adaptiveLassoWeights <- rep(1, length(parameters)) 
+    names(adaptiveLassoWeights) <- names(parameters)
+  }
+  inputArguments$adaptiveLassoWeights <- adaptiveLassoWeights
+  
+  if(!is.null(alphas) && penalty != "elasticNet") {
+    stop("non-null alpha parameter only valid for elasticNet")
+  }
+  if(is.null(alphas)){
+    if(penalty == "elasticNet") stop("elasticNet requires specification of alpha parameter.")
+  }
+  if(penalty %in% c("lasso", "adaptiveLasso")){ 
+    alphas <- 1
+  }else if(penalty == "ridge"){
+    alphas <- 0
+  }
+  
+  tuningGrid <- expand.grid("lambda" = lambdas, "alpha" = alphas)
+  
+  fits <- data.frame(
+    tuningGrid,
+    "m2LL" = NA,
+    "regM2LL"= NA,
+    "nonZeroParameters" = NA
+  )
+  
+  parameterEstimates <- as.data.frame(matrix(NA,nrow = nrow(tuningGrid), ncol = length(parameters)))
+  colnames(parameterEstimates) <- names(parameters)
+  parameterEstimates <- cbind(
+    tuningGrid,
+    parameterEstimates
+  )
+  
+  Hessians <- list(
+    "lambda" = tuningGrid$lambda,
+    "alpha" = tuningGrid$alpha,
+    "Hessian" = lapply(1:nrow(tuningGrid), 
+                       matrix, 
+                       data= NA, 
+                       nrow=nrow(initialHessian), 
+                       ncol=ncol(initialHessian))
+  )
+  
+  if(control$verbose == 0){
+    progressbar = txtProgressBar(min = 0, 
+                                 max = nrow(tuningGrid), 
+                                 initial = 0, 
+                                 style = 3)
+  }
+  
+  for(it in 1:nrow(tuningGrid)){
+    if(control$verbose == 0){
+      setTxtProgressBar(progressbar,it)
+    }else{
+      cat(paste0("\nIteration [", it, "/", nrow(tuningGrid),"]\n"))
+    }
+    
+    lambda <- tuningGrid$lambda[it]
+    alpha <- tuningGrid$alpha[it]
+    
+    result <- aCV4SEM:::GLMNET(SEM = SEM, 
+                               regularizedParameterLabels = regularizedParameterLabels, 
+                               lambda = lambda, 
+                               alpha = alpha,
+                               adaptiveLassoWeights = adaptiveLassoWeights,
+                               initialHessian = initialHessian4Optimizer,
+                               stepSize = control$stepSize,
+                               c1 = control$c1,
+                               c2 = control$c2,
+                               sig = control$sig,
+                               gam = control$gam,
+                               maxIterOut = control$maxIterOut,
+                               maxIterIn = control$maxIterIn,
+                               maxIterLine = control$maxIterLine,
+                               epsOut = control$epsOut,
+                               epsIn = control$epsIn,
+                               useMultipleConvergencCriteria = control$useMultipleConvergencCriteria,
+                               verbose = control$verbose)
+    
+    fits$m2LL[it] <- result$m2LL
+    fits$regM2LL[it] <- result$regM2LL
+    fits$nonZeroParameters[it] <- result$nonZeroParameters
+    newParameters <- aCV4SEM:::getParameters(result$SEM, raw = FALSE)
+    
+    parameterEstimates[it, names(parameters)] <- newParameters[names(parameters)]
+    
+    Hessians$Hessian[[it]] <- result$Hessian
+    
+    # set initial values for next iteration
+    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(newParameters), value = newParameters, raw = FALSE)
+    SEM <- try(aCV4SEM:::fit(SEM))
+    if(is(SEM, "try-Error")){
+      # reset
+      warning("Fit for lambda = ",lambda, "alpha = ", alpha, " resulted in Error!")
+      SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
+      initialHessian4Optimizer <- NULL
+    }else{
+      initialHessian4Optimizer <- result$Hessian
+    }
+    
+  }
+  
+  internalOptimization <- list(
+    "HessiansOfDifferentiablePart" = Hessians
+  )
+  
+  results <- new("regularizedSEM",
+                 parameters = parameterEstimates,
+                 fits = fits,
+                 parameterLabels = names(parameters),
+                 regularized = regularizedParameterLabels,
+                 internalOptimization = internalOptimization,
+                 inputArguments = inputArguments)
+  
+  return(results)
+  
+}
+
 #' optimizeCustomRegularizedSEM
 #' 
 #' optimize a SEM with custom penalty function.
@@ -70,166 +262,6 @@ optimizeCustomRegularizedSEM <- function(SEM,
   
   return(list("SEM" = SEM,
               "optimizer" = optimized))
-}
-
-#' regularizeSEM
-#' 
-#' optimize a SEM with regularized penalty function. Uses smooth approximations for non-differentiable penalty functions.
-#' 
-#' @param lavaanModel model of class lavaan 
-#' @param regularizedParameterLabels labels of regularized parameters
-#' @param penalty which penalty should be used? Available are "ridge", "lasso", "adaptiveLasso", and "elasticNet"
-#' @param lambdas vector with lambda values. Higher values = higher penalty
-#' @param alphas 0<alpha<1. only required for elastic net. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge
-#' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO
-#' @param eps controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
-#' @param raw controls if the internal transformations of aCV4SEM is used.
-#' @param initialHessian option to provide an initial Hessian for the optimizer
-#' @export
-regularizeSEM <- function(lavaanModel, 
-                          regularizedParameterLabels,
-                          penalty, 
-                          lambdas, 
-                          alphas = NULL, 
-                          adaptiveLassoWeights = NULL,
-                          raw = TRUE,
-                          initialHessian = NULL){
-  
-  inputArguments <- as.list(environment())
-  
-  if(!penalty %in% c("lasso", "ridge", "adaptiveLasso", "elasticNet")) stop("Currently supported penalty functions are: lasso, ridge, adaptiveLasso, and elasticNet")
-  
-  if(!is(lavaanModel, "lavaan")){
-    stop("lavaanModel must be of class lavaan")
-  }
-  
-  if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
-  
-  rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
-  if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
-  
-  
-  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
-  
-  # get parameters
-  parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
-  aCV4SEM:::checkRegularizedParameters(parameters = parameters, 
-                                       regularizedParameterLabels = regularizedParameterLabels,
-                                       SEM$getParameters(), 
-                                       raw = raw)
-  if(is.null(initialHessian)){
-    initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
-  }
-  initialHessian4Optimizer <- initialHessian
-  
-  if(penalty == "adaptiveLasso" && is.null(adaptiveLassoWeights)){
-    message("adaptiveLasso selected, but no adaptiveLassoWeights provided. Using the default abs(parameters)^(-1).")
-    adaptiveLassoWeights <- abs(parameters)^(-1)
-  }else if(penalty == "ridge"){
-    adaptiveLassoWeights <- rep(2, length(parameters)) # we are using the 
-    # elastic net implementation which takes w_j.5*lambda*(1-alpha) with alpha = 0
-    # Setting w_j to 2 makes sure that we are getting the ridge 
-    # estimates for lambda, not .5*lambda.
-    names(adaptiveLassoWeights) <- names(parameters)
-  }else{
-    adaptiveLassoWeights <- rep(1, length(parameters)) 
-    names(adaptiveLassoWeights) <- names(parameters)
-  }
-  inputArguments$adaptiveLassoWeights <- adaptiveLassoWeights
-  
-  if(!is.null(alphas) && penalty != "elasticNet") {
-    stop("non-null alpha parameter only valid for elasticNet")
-  }
-  if(is.null(alphas)){
-    if(penalty == "elasticNet") stop("elasticNet requires specification of alpha parameter.")
-  }
-  if(penalty %in% c("lasso", "adaptiveLasso")){ 
-    alphas <- 1
-  }else if(penalty == "ridge"){
-    alphas <- 0
-  }
-  
-  tuningGrid <- expand.grid("lambda" = lambdas, "alpha" = alphas)
-  
-  fits <- data.frame(
-    tuningGrid,
-    "m2LL" = NA,
-    "regM2LL"= NA,
-    "nonZeroParameters" = NA
-  )
-  
-  parameterEstimates <- as.data.frame(matrix(NA,nrow = nrow(tuningGrid), ncol = length(parameters)))
-  colnames(parameterEstimates) <- names(parameters)
-  parameterEstimates <- cbind(
-    tuningGrid,
-    parameterEstimates
-  )
-  
-  Hessians <- list(
-    "lambda" = tuningGrid$lambda,
-    "alpha" = tuningGrid$alpha,
-    "Hessian" = lapply(1:nrow(tuningGrid), 
-                       matrix, 
-                       data= NA, 
-                       nrow=nrow(initialHessian), 
-                       ncol=ncol(initialHessian))
-  )
-  
-  progressbar = txtProgressBar(min = 0, 
-                               max = nrow(tuningGrid), 
-                               initial = 0, 
-                               style = 3)
-  
-  for(it in 1:nrow(tuningGrid)){
-    lambda <- tuningGrid$lambda[it]
-    alpha <- tuningGrid$alpha[it]
-    
-    result <- aCV4SEM:::GLMNET(SEM = SEM, 
-                               regularizedParameterLabels = regularizedParameterLabels, 
-                               lambda = lambda,
-                               alpha = alpha, 
-                               adaptiveLassoWeights = adaptiveLassoWeights,
-                               initialHessian = initialHessian4Optimizer)
-    
-    fits$m2LL[it] <- result$m2LL
-    fits$regM2LL[it] <- result$regM2LL
-    fits$nonZeroParameters[it] <- result$nonZeroParameters
-    newParameters <- aCV4SEM:::getParameters(result$SEM, raw = FALSE)
-    
-    parameterEstimates[it, names(parameters)] <- newParameters[names(parameters)]
-    
-    Hessians$Hessian[[it]] <- result$Hessian
-    
-    # set initial values for next iteration
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(newParameters), value = newParameters, raw = FALSE)
-    SEM <- try(aCV4SEM:::fit(SEM))
-    if(is(SEM, "try-Error")){
-      # reset
-      warning("Fit for lambda = ",lambda, "alpha = ", alpha, " resulted in Error!")
-      SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
-      initialHessian4Optimizer <- NULL
-    }else{
-      initialHessian4Optimizer <- result$Hessian
-    }
-    
-    setTxtProgressBar(progressbar,it)
-    
-  }
-  
-  internalOptimization <- list(
-    "HessiansOfDifferentiablePart" = Hessians
-  )
-  
-  results <- new("regularizedSEM",
-                 parameters = parameterEstimates,
-                 fits = fits,
-                 parameterLabels = names(parameters),
-                 regularized = regularizedParameterLabels,
-                 internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
-  
-  return(results)
-  
 }
 
 #' checkRegularizedParameters

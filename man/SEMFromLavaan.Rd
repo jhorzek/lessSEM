@@ -4,12 +4,14 @@
 \alias{SEMFromLavaan}
 \title{SEMFromLavaan}
 \usage{
-SEMFromLavaan(lavaanModel, transformVariances = TRUE)
+SEMFromLavaan(lavaanModel, transformVariances = TRUE, fit = TRUE)
 }
 \arguments{
 \item{lavaanModel}{model of class lavaan}
 
 \item{transformVariances}{set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative}
+
+\item{fit}{should the model be fitted and compared to the lavaanModel?}
 }
 \description{
 internal function. Translates an object of class lavaan to the internal model representation.

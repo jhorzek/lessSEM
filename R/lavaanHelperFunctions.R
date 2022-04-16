@@ -1,11 +1,11 @@
-#' getParameters.lavaan
+#' getLavaanParameters
 #' 
 #' helper function: returns a labeled vector with parameters from lavaan
 #'
 #' @param lavaanModel model of class lavaan
 #' @param removeDuplicates should duplicated parameters be removed?
 #' @export
-getParameters.lavaan <- function(lavaanModel, removeDuplicates = TRUE){
+getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   parameters <- coef(lavaanModel)
   if(!removeDuplicates) return(parameters)

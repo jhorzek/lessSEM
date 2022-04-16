@@ -12,7 +12,7 @@ regularizeSEM(
   alphas = NULL,
   adaptiveLassoWeights = NULL,
   raw = TRUE,
-  initialHessian = NULL
+  control = aCV4SEM::controlGLMNET()
 )
 }
 \arguments{
@@ -30,7 +30,7 @@ regularizeSEM(
 
 \item{raw}{controls if the internal transformations of aCV4SEM is used.}
 
-\item{initialHessian}{option to provide an initial Hessian for the optimizer}
+\item{control}{option to set parameters of the GLMNET optimizer}
 
 \item{eps}{controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.}
 }

@@ -4,9 +4,10 @@
 #' 
 #' @param lavaanModel model of class lavaan
 #' @param transformVariances set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative
-SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
+#' @param fit should the model be fitted and compared to the lavaanModel?
+SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE, fit = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
-
+  
   rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
   
@@ -44,29 +45,29 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
   
   ## directed paths
   AmatrixElements <- aCV4SEM:::setAMatrix(model = lavaanModel, 
-                                lavaanParameterTable = lavaanParameterTable, 
-                                nLatent = nLatent, 
-                                nManifest = nManifest, 
-                                latentNames = latentNames, 
-                                manifestNames = manifestNames)
+                                          lavaanParameterTable = lavaanParameterTable, 
+                                          nLatent = nLatent, 
+                                          nManifest = nManifest, 
+                                          latentNames = latentNames, 
+                                          manifestNames = manifestNames)
   
   ## undirected paths
   SmatrixElements <- aCV4SEM:::setSMatrix(model = lavaanModel, 
-                                lavaanParameterTable = lavaanParameterTable, 
-                                nLatent = nLatent, 
-                                nManifest = nManifest, 
-                                latentNames = latentNames, 
-                                manifestNames = manifestNames)
+                                          lavaanParameterTable = lavaanParameterTable, 
+                                          nLatent = nLatent, 
+                                          nManifest = nManifest, 
+                                          latentNames = latentNames, 
+                                          manifestNames = manifestNames)
   
   
   ## Mean structure
   MvectorElements <- aCV4SEM:::setMVector(model = lavaanModel, 
-                                lavaanParameterTable = lavaanParameterTable, 
-                                nLatent = nLatent, 
-                                nManifest = nManifest, 
-                                latentNames = latentNames, 
-                                manifestNames = manifestNames,
-                                rawData = rawData)
+                                          lavaanParameterTable = lavaanParameterTable, 
+                                          nLatent = nLatent, 
+                                          nManifest = nManifest, 
+                                          latentNames = latentNames, 
+                                          manifestNames = manifestNames,
+                                          rawData = rawData)
   
   ## Filter matrix
   Fmatrix <- matrix(0, 
@@ -98,7 +99,7 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
   parameterLabels[lavaanModel@ParTable$label!=""] <- lavaanModel@ParTable$label[lavaanModel@ParTable$label!=""]
   parameterLabels <- parameterLabels[lavaanModel@ParTable$free != 0]
   parameterValues <- lavaanModel@ParTable$est[lavaanModel@ParTable$free != 0]
-
+  
   # construct internal representation of parameters
   nParameters <- length(parameterLabels)
   parameterTable <- data.frame("label" = c(),
@@ -144,7 +145,7 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
     for(manifestName in manifestNames){
       parameterTable <- rbind(parameterTable,
                               data.frame(
-                                "label" = paste0("nu_", manifestName),
+                                "label" = paste0(manifestName, "~1"),
                                 "location" = "Mvector", 
                                 "row" = which(rownames(MvectorElements$Mvector) == manifestName), 
                                 "col" = 1,
@@ -181,7 +182,7 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
     if(length(uniqueLocation) != 1) stop("Any parameter can only be in either A, S, or m")
     rows <- parameterTable$row[select]
     cols <- parameterTable$col[select]
-
+    
     if(uniqueLocation == "Amatrix"){
       positionMatrix <- modelMatrices$Amatrix
       positionMatrix[] <- 0
@@ -217,8 +218,10 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE){
                      internalData$missingSubsets[[s]]$rawData)
   }
   
-  # check model
-  if(round(SEMCpp$fit() - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+  if(fit){
+    # check model
+    if(round(SEMCpp$fit() - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+  }
   
   return(SEMCpp)
 }

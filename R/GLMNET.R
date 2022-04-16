@@ -6,6 +6,7 @@
 #' @param lambda lasso tuning parameter. Higher values = higher penalty
 #' @param alpha 0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge, in between is elastic net
 #' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO
+#' @param initialHessian option to provide an initial Hessian to the optimizer
 #' @param stepSize Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)
 #' @param c1 c1 constant for lineSearch. This constant controls the Armijo condition in lineSearch if lineSearch = "Wolfe"
 #' @param c2 c2 constant for lineSearch. This constant controls the Curvature condition in lineSearch if lineSearch = "Wolfe"
@@ -16,22 +17,25 @@
 #' @param maxIterLine Maximal number of iterations for the line search procedure
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
+#' @param useMultipleConvergencCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
+#' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 GLMNET <- function(SEM, 
                    regularizedParameterLabels, 
                    lambda, 
                    alpha,
                    adaptiveLassoWeights,
-                   initialHessian = NULL,
-                   stepSize = 1,
-                   c1 = 1e-04,
-                   c2 = 0.9,
-                   sig = 10^(-5),
-                   gam = 0,
-                   maxIterOut = 100,
-                   maxIterIn = 1000,
-                   maxIterLine = 500,
-                   epsOut = 1e-06,
-                   epsIn = 1e-06,
+                   initialHessian,
+                   stepSize,
+                   c1,
+                   c2,
+                   sig,
+                   gam,
+                   maxIterOut,
+                   maxIterIn,
+                   maxIterLine,
+                   epsOut,
+                   epsIn,
+                   useMultipleConvergencCriteria,
                    verbose = 0){
   if(!((0 <= alpha) && (alpha <= 1))) stop("alpha must be in [0,1]")
   
@@ -43,7 +47,8 @@ GLMNET <- function(SEM,
   if(is.null(initialHessian)){
     initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
   }
-  initialGradients <- aCV4SEM:::getGradients(SEM = SEM, raw = TRUE)
+  initialGradients <- try(aCV4SEM:::getGradients(SEM = SEM, raw = TRUE))
+  if(is(initialGradients, "try-error")){stop("Could not compute gradients at initial parameter values.")}
   
   # initialize parameter values
   newParameters <- initialParameters
@@ -62,19 +67,6 @@ GLMNET <- function(SEM,
     names(adaptiveLassoWeights) <- parameterLabels
   }
   
-  # initialize initial gradients
-  newGradients <- initialGradients
-  
-  # get initial Hessian
-  newHessian <- initialHessian
-  eigenDecomp <- eigen(newHessian)
-  if(any(eigenDecomp$values < 0)){
-    warning("Initial Hessian is not positive definite. Flipping Eigen values to obtain a positive definite initial Hessian.")
-    D <- abs(diag(eigenDecomp$values))
-    L <- eigenDecomp$vectors
-    newHessian <- L%*%D%*%solve(L)
-  }
-  
   #### start optimizing ####
   
   # outer loop: optimize parameters
@@ -82,9 +74,19 @@ GLMNET <- function(SEM,
   
   converged <- TRUE
   
+  # initialize parameters
   newParameters <- initialParameters
+  # initialize initial gradients
   newGradients <- initialGradients
+  # initialize Hessian
   newHessian <- initialHessian
+  eigenDecomp <- eigen(newHessian)
+  if(any(eigenDecomp$values < 0)){
+    warning("Initial Hessian is not positive definite. Using diagonal matrix instead.")
+    newHessian <- diag(100, nrow(initialHessian))
+    rownames(newHessian) <- parameterLabels
+    colnames(newHessian) <- parameterLabels
+  }
   
   if(alpha != 1){
     # elastic net or ridge are used -> we add the differentiable part of 
@@ -110,11 +112,19 @@ GLMNET <- function(SEM,
   while(iterOut < maxIterOut){
     iterOut <- iterOut +1
     
+    if(iterOut > 1){
+      parameterChange <- (newParameters - oldParameters)/(newParameters+1e-9) # add small jitter as zeroed parameters will otherwise 
+      # result in division by 0
+    }
+    
     oldParameters <- newParameters
     oldGradients <- newGradients
     oldHessian <- newHessian
     
     oldM2LL <- newM2LL
+    if(iterOut > 1){
+      regM2LLChange <- newRegM2LL - oldRegM2LL
+    }
     oldRegM2LL <- newRegM2LL
     
     # outer breaking condition
@@ -132,6 +142,10 @@ GLMNET <- function(SEM,
         break
       }
       if(convergenceCriterion){
+        break
+      }
+      if(useMultipleConvergencCriteria && abs(regM2LLChange) < 1e-8 && max(abs(parameterChange)) < 1e-8){
+        # second convergence criterion: no more change in fit
         break
       }
     }
@@ -183,7 +197,11 @@ GLMNET <- function(SEM,
                                                      adaptiveLassoWeights = adaptiveLassoWeights)
     
     # extract gradients:
-    newGradients <- aCV4SEM:::getGradients(SEM = SEM, raw = TRUE)
+    newGradients <- try(aCV4SEM:::getGradients(SEM = SEM, raw = TRUE))
+    if(is(newGradients, "try-error")){
+      stop("Could not compute gradients at new location.")
+    }
+    
     if(alpha != 1){
       # add derivative of differentiable part of the penalty:
       newGradients <- newGradients + aCV4SEM::ridgeGradient(parameters = newParameters, 
@@ -197,6 +215,18 @@ GLMNET <- function(SEM,
                                  newParameters = newParameters, 
                                  newGradients = newGradients)
     
+    if(verbose > 0){
+      
+      cat(paste0("\r",
+                 "## [", iterOut,
+                 "] m2LL: ", sprintf('%.3f',newM2LL),
+                 " | regM2LL:  ", sprintf('%.3f',newRegM2LL),
+                 " | zeroed: ", sum(newParameters[regularizedParameterLabels] == 0),
+                 " ##")
+      )
+      flush.console()
+    }
+    
   }
   # warnings
   if(iterOut == maxIterOut){
@@ -209,7 +239,7 @@ GLMNET <- function(SEM,
                                                           penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     # remove hessian of differentiable part of the penalty; we want the hessian of the log-Likelihood, not the one including the penalty
     newHessian <- newHessian - aCV4SEM::ridgeHessian(parameters = newParameters, 
-                                                       penaltyFunctionArguments = penaltyFunctionArguments)[rownames(newHessian), colnames(newHessian)]
+                                                     penaltyFunctionArguments = penaltyFunctionArguments)[rownames(newHessian), colnames(newHessian)]
   }
   
   return(list("SEM" = SEM, 
@@ -278,13 +308,14 @@ GLMNETLineSearch <- function(SEM,
     
     # compute new fitfunction value
     newM2LL <- try(aCV4SEM:::fit(aCV4SEM:::setParameters(SEM, names(newParameters), newParameters, raw = TRUE))$m2LL, silent = TRUE)
-    if(is(newM2LL, "try-error")){
-      stop("Error in line search.")
-    }
     if(!is.finite(newM2LL)){
       i <- i+1
       next
     }
+    if(is(newM2LL, "try-error")){
+      stop("Error in line search: Could not compute fit at current location.")
+    }
+    
     
     # compute h(stepSize) = L(x+td) + p(x+td) - L(x) - p(x), where p(x) is the penalty function
     p_new <- aCV4SEM::getPenaltyValue(parameters = newParameters,
