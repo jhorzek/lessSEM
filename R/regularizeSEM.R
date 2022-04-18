@@ -23,6 +23,9 @@ regularizeSEM <- function(lavaanModel,
   
   inputArguments <- as.list(environment())
   
+  # reversing lambda can help as the model with lambda = 0 may be unidentified
+  #lambdas <- sort(lambdas, decreasing = TRUE)
+  
   if(!penalty %in% c("lasso", "ridge", "adaptiveLasso", "elasticNet")) stop("Currently supported penalty functions are: lasso, ridge, adaptiveLasso, and elasticNet")
   
   if(!is(lavaanModel, "lavaan")){
@@ -34,21 +37,24 @@ regularizeSEM <- function(lavaanModel,
   rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
   
+  ### initialize model ####
   startingValues <- control$startingValues
-  
-  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                 transformVariances = TRUE,
-                                 fit = any(is.null(startingValues))
-  )
-  
-  if(!any(is.null(startingValues))){
-    SEM <- aCV4SEM:::setParameters(SEM = SEM,
-                                   labels = names(startingValues), 
-                                   values = startingValues, 
-                                   raw = FALSE)
-    SEM <- aCV4SEM:::fit(SEM = SEM)
+  if(any(startingValues == "est")){
+    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+                                   transformVariances = TRUE,
+                                   whichPars = "est")
+  }else if(any(startingValues == "start")){
+    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+                                   transformVariances = TRUE,
+                                   whichPars = "start")
+  }else if(is.numeric(startingValues)){
+    
+    if(!all(names(startingValues) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See aCV4SEM::getLavaanParameters(lavaanModel).")
+    
+  }else{
+    stop("Invalid startingValues passed to GLMNET. See ?controlGLMNET for more information.")
   }
-  
+
   # get parameters
   parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
   aCV4SEM:::checkRegularizedParameters(parameters = parameters, 
@@ -57,9 +63,20 @@ regularizeSEM <- function(lavaanModel,
                                        raw = raw)
   
   initialHessian <- control$initialHessian
-  if(is.null(initialHessian)){
-    initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
+  if(is.matrix(initialHessian) && nrow(initialHessian) == length(parameters) && ncol(initialHessian) == length(parameters)){
+    if(!all(rownames(initialHessian) %in% names(aCV4SEM::getLavaanParameters(lavaanModel))) ||
+       !all(colnames(initialHessian) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))
+       ) stop("initialHessian must have the parameter names as rownames and colnames. See aCV4SEM::getLavaanParameters(lavaanModel).")
+  }else if(any(initialHessian == "compute")){
+    initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
+  }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
+    initialHessian <- diag(initialHessian,length(parameters))
+    rownames(initialHessian) <- names(parameters)
+    colnames(initialHessian) <- names(parameters)
+  }else{
+    stop("Invalid initialHessian passed to GLMNET. See ?controlGLMNET for more information.")
   }
+  
   initialHessian4Optimizer <- initialHessian
   
   if(penalty == "adaptiveLasso" && is.null(adaptiveLassoWeights)){
@@ -131,7 +148,7 @@ regularizeSEM <- function(lavaanModel,
     
     lambda <- tuningGrid$lambda[it]
     alpha <- tuningGrid$alpha[it]
-    
+
     result <- aCV4SEM:::GLMNET(SEM = SEM, 
                                regularizedParameterLabels = regularizedParameterLabels, 
                                lambda = lambda, 
@@ -139,8 +156,6 @@ regularizeSEM <- function(lavaanModel,
                                adaptiveLassoWeights = adaptiveLassoWeights,
                                initialHessian = initialHessian4Optimizer,
                                stepSize = control$stepSize,
-                               c1 = control$c1,
-                               c2 = control$c2,
                                sig = control$sig,
                                gam = control$gam,
                                maxIterOut = control$maxIterOut,
@@ -166,7 +181,9 @@ regularizeSEM <- function(lavaanModel,
     if(is(SEM, "try-Error")){
       # reset
       warning("Fit for lambda = ",lambda, "alpha = ", alpha, " resulted in Error!")
-      SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
+      SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+                                     transformVariances = TRUE,
+                                     whichPars = "start")
       initialHessian4Optimizer <- NULL
     }else{
       initialHessian4Optimizer <- result$Hessian
@@ -188,6 +205,54 @@ regularizeSEM <- function(lavaanModel,
   
   return(results)
   
+}
+
+#' optimizeSEM
+#' 
+#' optimize a SEM 
+#' 
+#' @param SEM model of class Rcpp_SEMCpp. 
+#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @param method optimizer method. See ?optim
+#' @param control control optimizer. See ?optim
+#' @param hessian Should the optimizer return the hessian?
+#' @export
+optimizeSEM <- function(SEM, 
+                        raw = TRUE, 
+                        method = "BFGS", 
+                        control = list(), 
+                        hessian = FALSE){
+  
+  
+  parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
+  
+  fitFun <- function(par, SEM, raw){
+    m2LL <- aCV4SEM:::fitFunction(par = par, SEM = SEM, raw = raw)
+    if(m2LL == 9999999999999) return(m2LL)
+    return(m2LL)
+  }
+  
+  gradFun <- function(par, SEM, raw){
+    gradients <- aCV4SEM:::derivativeFunction(par = par, SEM = SEM, raw = raw)
+    if(all(gradients == 9999999999999)) return(gradients)
+    return(gradients)
+  }
+  
+  
+  optimized <- optim(par = parameters, 
+                     fn = fitFun, 
+                     gr = gradFun, 
+                     SEM = SEM,
+                     raw = raw,
+                     method = method,
+                     control = control,
+                     hessian = hessian)
+  
+  SEM <- aCV4SEM:::setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
+  SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
+  
+  return(list("SEM" = SEM,
+              "optimizer" = optimized))
 }
 
 #' optimizeCustomRegularizedSEM
@@ -289,4 +354,22 @@ checkRegularizedParameters <- function(parameters, regularizedParameterLabels, p
       }
     }
   }
+}
+
+#' alternativeStartingValues
+#' 
+#' generate alternative starting values for a SEM in raw format.
+#' @param SEM model of class Rcpp_SEMCpp. 
+alternativeStartingValues <- function(SEM){
+  parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = TRUE)
+  parameters[] <- 0
+  parTable <- SEM$getParameters()
+  for(p in names(parameters)){
+    rows <- parTable$label == p
+    if(!any(parTable$location[rows] == "Smatrix")) next
+    parameters[p] <- runif(1,-.1,.1) # covariances
+    if(any(parTable$row[rows] == parTable$col[rows])) parameters[p] <- log(10) # set variances to 10; this works better with log-transformation
+    
+  }
+  return(parameters)
 }

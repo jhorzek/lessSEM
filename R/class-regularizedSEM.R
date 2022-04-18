@@ -52,7 +52,7 @@ setMethod("plot", "regularizedSEM", function (x, alpha = NULL, regularizedOnly =
     parameters <- cbind(
       lambda = x@fits$lambda,
       alpha = x@fits$alpha,
-      coef(x, alpha = alpha)[,x@regularized]
+      coef(x, alpha = alpha)[,x@regularized, drop = FALSE]
     )
     parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@regularized)
     

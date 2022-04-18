@@ -19,7 +19,7 @@ fit <- function(SEM){
 fitFunction <- function(par, SEM, raw){
   SEM <- setParameters(SEM = SEM, names(par), values = par, raw = raw)
   tryFit <- try(SEM$fit(), silent = TRUE)
-  if(any(class(tryFit) == "try-error") || is.na(SEM$m2LL)) {return(9999999999999)}
+  if(is(tryFit, "try-error") || is.na(SEM$m2LL) || any(eigen(SEM$S, only.values = TRUE)$values < 0)) {return(9999999999999)}
   return(SEM$m2LL)
 }
 

@@ -57,7 +57,7 @@ setMethod("plot", "aCV4RegularizedSEM", function (x, alpha = NULL, regularizedOn
     parameters <- cbind(
       lambda = parameters$lambda,
       alpha = parameters$alpha,
-      coef(x, alpha = alpha)[,x@regularized]
+      coef(x, alpha = alpha)[,x@regularized, drop = FALSE]
     )
     parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@regularized)
     

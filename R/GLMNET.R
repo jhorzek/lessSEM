@@ -8,8 +8,6 @@
 #' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO
 #' @param initialHessian option to provide an initial Hessian to the optimizer
 #' @param stepSize Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)
-#' @param c1 c1 constant for lineSearch. This constant controls the Armijo condition in lineSearch if lineSearch = "Wolfe"
-#' @param c2 c2 constant for lineSearch. This constant controls the Curvature condition in lineSearch if lineSearch = "Wolfe"
 #' @param sig only relevant when lineSearch = 'GLMNET'. Controls the sigma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.
 #' @param gam Controls the gamma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421. Defaults to 0.
 #' @param maxIterOut Maximal number of outer iterations
@@ -26,8 +24,6 @@ GLMNET <- function(SEM,
                    adaptiveLassoWeights,
                    initialHessian,
                    stepSize,
-                   c1,
-                   c2,
                    sig,
                    gam,
                    maxIterOut,
@@ -47,7 +43,7 @@ GLMNET <- function(SEM,
   if(is.null(initialHessian)){
     initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
   }
-  initialGradients <- try(aCV4SEM:::getGradients(SEM = SEM, raw = TRUE))
+  initialGradients <- try(aCV4SEM:::getGradients(SEM = SEM, raw = TRUE), silent = TRUE)
   if(is(initialGradients, "try-error")){stop("Could not compute gradients at initial parameter values.")}
   
   # initialize parameter values
@@ -82,8 +78,8 @@ GLMNET <- function(SEM,
   newHessian <- initialHessian
   eigenDecomp <- eigen(newHessian)
   if(any(eigenDecomp$values < 0)){
-    warning("Initial Hessian is not positive definite. Using diagonal matrix instead.")
-    newHessian <- diag(100, nrow(initialHessian))
+    warning("Initial Hessian is not positive definite. Using identity matrix instead.")
+    newHessian <- diag(1, nrow(initialHessian))
     rownames(newHessian) <- parameterLabels
     colnames(newHessian) <- parameterLabels
   }
@@ -166,23 +162,24 @@ GLMNET <- function(SEM,
     
     # perform Line Search
     
-    stepSize_k <- aCV4SEM:::GLMNETLineSearch(SEM = SEM, 
-                                             adaptiveLassoWeights = adaptiveLassoWeights, 
-                                             parameterLabels = parameterLabels,
-                                             regularizedParameterLabels = regularizedParameterLabels,
-                                             lambda = N*lambda,
-                                             alpha = alpha,
-                                             oldParameters = oldParameters, 
-                                             oldM2LL = oldM2LL, 
-                                             oldGradients = oldGradients,
-                                             oldHessian = oldHessian,
-                                             direction = direction,
-                                             stepSize= stepSize, 
-                                             sig = sig,
-                                             gam = gam, 
-                                             maxIterLine = maxIterLine)
-    
-    newParameters <- oldParameters+stepSize_k*direction
+    step <- aCV4SEM:::GLMNETLineSearch(SEM = SEM, 
+                                       adaptiveLassoWeights = adaptiveLassoWeights, 
+                                       parameterLabels = parameterLabels,
+                                       regularizedParameterLabels = regularizedParameterLabels,
+                                       lambda = N*lambda,
+                                       alpha = alpha,
+                                       oldParameters = oldParameters, 
+                                       oldM2LL = oldM2LL, 
+                                       oldGradients = oldGradients,
+                                       oldHessian = oldHessian,
+                                       direction = direction,
+                                       stepSize= stepSize, 
+                                       sig = sig,
+                                       gam = gam, 
+                                       maxIterLine = maxIterLine)
+    # extract elements:
+    newParameters <- step$newParameters
+    newGradients <- step$newGradients
     
     # update model: set parameter values and compute
     SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(newParameters), values = newParameters, raw = TRUE)
@@ -195,12 +192,6 @@ GLMNET <- function(SEM,
                                                      alpha = alpha,
                                                      regularizedParameterLabels = regularizedParameterLabels,
                                                      adaptiveLassoWeights = adaptiveLassoWeights)
-    
-    # extract gradients:
-    newGradients <- try(aCV4SEM:::getGradients(SEM = SEM, raw = TRUE))
-    if(is(newGradients, "try-error")){
-      stop("Could not compute gradients at new location.")
-    }
     
     if(alpha != 1){
       # add derivative of differentiable part of the penalty:
@@ -290,7 +281,7 @@ GLMNETLineSearch <- function(SEM,
                              sig,
                              gam, 
                              maxIterLine){
-  
+  newGradients <- NULL
   # get penalized M2LL for step size 0:
   pen_0 <- aCV4SEM::getPenaltyValue(parameters = oldParameters,
                                     lambda = lambda,
@@ -328,6 +319,22 @@ GLMNETLineSearch <- function(SEM,
     # test line search criterion
     lineCriterion <- f_new - f_0 <= sig*stepSize*(t(oldGradients)%*%direction + gam*t(direction)%*%oldHessian%*%direction + p_new - pen_0)
     if(lineCriterion){
+      # check if covariance matrix is positive definite
+      if(any(eigen(SEM$S, only.values = TRUE)$values < 0)){
+        i <- i+1
+        next
+      }
+      if(any(eigen(SEM$impliedCovariance, only.values = TRUE)$values < 0)){
+        i <- i+1
+        next
+      }
+      
+      # check if gradients can be computed at the new location; this can often cause issues
+      newGradients <-  try(aCV4SEM:::getGradients(SEM, raw = TRUE), silent = TRUE)
+      if(is(newGradients, "try-error")) {
+        i <- i+1
+        next
+      }
       break
     }
     i <- i+1
@@ -335,7 +342,14 @@ GLMNETLineSearch <- function(SEM,
       break
     }
   }
-  return(stepSize)
+  if(is.null(newGradients) || is(newGradients, "try-error")){
+    newGradients <- try(aCV4SEM:::getGradients(SEM, raw = TRUE), silent = TRUE)
+  }
+  return(
+    list("stepSize" = stepSize,
+         "newParameters" = newParameters,
+         "newGradients" = newGradients)
+  )
 }
 
 #' BFGS

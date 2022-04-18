@@ -12,8 +12,6 @@ GLMNET(
   adaptiveLassoWeights,
   initialHessian,
   stepSize,
-  c1,
-  c2,
   sig,
   gam,
   maxIterOut,
@@ -39,10 +37,6 @@ GLMNET(
 \item{initialHessian}{option to provide an initial Hessian to the optimizer}
 
 \item{stepSize}{Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)}
-
-\item{c1}{c1 constant for lineSearch. This constant controls the Armijo condition in lineSearch if lineSearch = "Wolfe"}
-
-\item{c2}{c2 constant for lineSearch. This constant controls the Curvature condition in lineSearch if lineSearch = "Wolfe"}
 
 \item{sig}{only relevant when lineSearch = 'GLMNET'. Controls the sigma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.}
 

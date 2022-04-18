@@ -108,7 +108,7 @@ std::vector<arma::mat> computeimpliedCovarianceDerivatives(const SEMCpp& SEM,
       continue; // derivative is zero, as initiated above
     }
     if(parameterLocations.at(p).compare("Smatrix") == 0){
-      
+
       if(isVariance.at(p) && raw){
         // find value of variance
         double valueIs =-9999.9999;

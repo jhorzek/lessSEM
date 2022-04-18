@@ -5,14 +5,14 @@
 \title{controlGLMNET}
 \usage{
 controlGLMNET(
-  startingValues = NULL,
-  initialHessian = NULL,
+  startingValues = "est",
+  initialHessian = 1,
   stepSize = 1,
   c1 = 1e-04,
   c2 = 0.9,
   sig = 10^(-5),
   gam = 0,
-  maxIterOut = 100,
+  maxIterOut = 1000,
   maxIterIn = 1000,
   maxIterLine = 500,
   epsOut = 1e-06,
@@ -22,15 +22,14 @@ controlGLMNET(
 )
 }
 \arguments{
-\item{startingValues}{option to provide initial starting values. Only used for the first lambda.}
+\item{startingValues}{option to provide initial starting values. Only used for the first lambda. Three options are supported. Setting to "est" will use the estimates
+from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
+values can be passed to the function which will then be used as starting values.}
 
-\item{initialHessian}{option to provide an initial Hessian to the optimizer}
+\item{initialHessian}{option to provide an initial Hessian to the optimizer. Must have row and column names corresponding to the parameter labels. use getLavaanParameters(lavaanModel) to 
+see those labels. If set to "compute", the initial hessian will be computed. If set to a single value, a diagonal matrix with the single value along the diagonal will be used.}
 
 \item{stepSize}{Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)}
-
-\item{c1}{c1 constant for lineSearch. This constant controls the Armijo condition in lineSearch if lineSearch = "Wolfe"}
-
-\item{c2}{c2 constant for lineSearch. This constant controls the Curvature condition in lineSearch if lineSearch = "Wolfe"}
 
 \item{sig}{only relevant when lineSearch = 'GLMNET'. Controls the sigma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.}
 

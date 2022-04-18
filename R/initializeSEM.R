@@ -3,9 +3,15 @@
 #' internal function. Translates an object of class lavaan to the internal model representation.
 #' 
 #' @param lavaanModel model of class lavaan
+#' @param whichPars which parameters should be used to initialize the model. If set to "est", the parameters will be set to the
+#' estimated parameters of the lavaan model. If set to "start", the starting values of lavaan will be used. The latter can be useful if parameters are to
+#' be optimized afterwards as setting the parameters to "est" may result in the model getting stuck in a local minimum.
 #' @param transformVariances set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative
 #' @param fit should the model be fitted and compared to the lavaanModel?
-SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE, fit = TRUE){
+SEMFromLavaan <- function(lavaanModel, 
+                          whichPars = "est",
+                          transformVariances = TRUE, 
+                          fit = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   
   rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
@@ -98,7 +104,13 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE, fit = TRUE){
   parameterLabels <- paste0(lavaanModel@ParTable$lhs, ops, lavaanModel@ParTable$rhs)
   parameterLabels[lavaanModel@ParTable$label!=""] <- lavaanModel@ParTable$label[lavaanModel@ParTable$label!=""]
   parameterLabels <- parameterLabels[lavaanModel@ParTable$free != 0]
-  parameterValues <- lavaanModel@ParTable$est[lavaanModel@ParTable$free != 0]
+  if(whichPars == "est"){
+    parameterValues <- lavaanModel@ParTable$est[lavaanModel@ParTable$free != 0]
+  }else if(whichPars == "start"){
+    parameterValues <- lavaanModel@ParTable$start[lavaanModel@ParTable$free != 0]
+  }else{
+    stop(paste0("Could not set the parameters of the model. Set whichPars to one of: 'est', 'start'. See ?aCV4SEM:::SEMFromLavaan for more details."))
+  }
   
   # construct internal representation of parameters
   nParameters <- length(parameterLabels)
@@ -192,18 +204,18 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE, fit = TRUE){
       positionMatrix <- modelMatrices$Smatrix
       positionMatrix[] <- 0
       positionMatrix[cbind(rows,cols)] <- 1
-      if(all(rows == cols)) isVariance <- TRUE
+      isVariance <- all(rows == cols)
     }else if(uniqueLocation == "Mvector"){
       positionMatrix <- modelMatrices$Mvector
       positionMatrix[] <- 0
       positionMatrix[cbind(rows,cols)] <- 1
       isVariance <- FALSE
     }
-    
     SEMCpp$addDerivativeElement(p, 
                                 uniqueLocation, 
                                 isVariance, 
                                 positionMatrix)
+    rm(positionMatrix, isVariance) # avoid any carry over
   }
   
   # set data
@@ -218,9 +230,18 @@ SEMFromLavaan <- function(lavaanModel, transformVariances = TRUE, fit = TRUE){
                      internalData$missingSubsets[[s]]$rawData)
   }
   
+  # the following step is necessary if the parameters of the lavaanModel do not correspond to those in
+  # the matrices of the lavaan object. This is, for instance, the case if the starting values
+  # instead of the estimates are used.
+  parameters <- aCV4SEM:::getParameters(SEM = SEMCpp, raw = TRUE)
+  SEMCpp <- aCV4SEM:::setParameters(SEM = SEMCpp, labels = names(parameters), values = parameters, raw = TRUE)
+  
   if(fit){
-    # check model
-    if(round(SEMCpp$fit() - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+    SEMCpp <- aCV4SEM::fit(SEM = SEMCpp)
+    if(whichPars == "est"){
+      # check model fit
+      if(round(SEMCpp$m2LL - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+    }
   }
   
   return(SEMCpp)
