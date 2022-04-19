@@ -9,6 +9,9 @@ setClass(Class = "aCV4RegularizedSEM",
          )
 )
 
+#' show
+#' 
+#' @export
 setMethod("show", "aCV4RegularizedSEM", function (object) {
   bestFit <- which(object@cvfits$cvfit == min(object@cvfits$cvfit))
   cat(paste0("Best parameter estimates observed for: lambda = ", object@cvfits$lambda[bestFit], " & alpha = ", object@cvfits$alpha[bestFit], ":\n"))
@@ -17,6 +20,37 @@ setMethod("show", "aCV4RegularizedSEM", function (object) {
   print(parameters)
 })
 
+#' summary
+#' 
+#' @export
+setMethod("summary", "aCV4RegularizedSEM", function (object) {
+  modelName <-deparse(substitute(object)) # get the name of the object
+  cat(paste0("#### Approximate Cross Validation Results ####\n\n"))
+  cat("regularized parameters: ")
+  cat(paste0(object@regularized, collapse = ", "))
+  cat("\n\n")
+  cat("Final parameter estimates based on best out-of-sample fit:\n")
+  print(coef(object))
+  cat("\n\n")
+  cat(paste0("- Use coef(", modelName, 
+             ") to get the final parameter estimates of the model. With coef(", 
+             modelName, "lambda = x, delta = y) parameters estimates at the values x and y for lambda and delta can be extracted.\n\n"))
+  cat(paste0("- Use plot(", modelName, 
+             ") to plot the parameter estimates and the cross-validation fit of the model.\n\n"))
+  cat(paste0("- Cross-validation fits can be accessed with ", modelName, 
+             "@cvfits.\n\n"))
+  cat("################################################\n")
+})
+
+#' coef
+#' 
+#' Returns the parameter estimates of an aCV4RegularizedSEM
+#' 
+#' @param object object of class regularizedSEM
+#' @param lambda numeric: value of lambda for which parameters should be returned. Must be present in object
+#' @param alpha numeric: value of alpha for which parameters should be returned. Must be present in object
+#' 
+#' @export
 setMethod("coef", "aCV4RegularizedSEM", function (object, lambda = NULL, alpha = NULL) {
   
   if(is.null(lambda) && is.null(alpha)) {
@@ -34,7 +68,14 @@ setMethod("coef", "aCV4RegularizedSEM", function (object, lambda = NULL, alpha =
   return(pars)
 })
 
-
+#' plot
+#' 
+#' plots the regularized and unregularized parameters as well as the cross-validation fits for all levels of lambda
+#' 
+#' @param x object of class regularizedSEM
+#' @param alpha numeric: value of alpha for which parameters should be returned. Must be present in object. Required if elastic net was used
+#' @param regularizedOnly boolean: should only regularized parameters be plotted?``
+#' @export
 setMethod("plot", "aCV4RegularizedSEM", function (x, alpha = NULL, regularizedOnly = TRUE) {
   
   parameters <- x@parameters

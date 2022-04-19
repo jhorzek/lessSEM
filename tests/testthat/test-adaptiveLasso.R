@@ -40,7 +40,7 @@ test_that("testing adaptive lasso", {
                         penalty = "adaptiveLasso", 
                         lambdas = regsem_cvFit$fits[,"lambda"])
   plot(rsem)
-  testthat::expect_equal(any(abs(rsem@parameters[,colnames(regsemPars)] - regsemPars) > .1),
+  testthat::expect_equal(any(abs(rsem@parameters[,colnames(regsemPars)] - regsemPars) > .01),
                          FALSE)
   plot(rsem)
   coef(rsem)

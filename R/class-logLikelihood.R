@@ -6,6 +6,11 @@ setClass("logLikelihood",
            nParameters="integer", 
            N="integer"
          ))
+
+#' show
+#' 
+#' @param object object of class logLikelihood
+#' @export
 setMethod("show", "logLikelihood", function(object){
   cat(paste0(object@logLik), "(nPar = ", object@nParameters, ")")
 })

@@ -9,6 +9,36 @@ setClass(Class = "regularizedSEM",
          )
 )
 
+#' summary
+#' @param object object of class regularizedSEM
+#' @export
+setMethod("summary", "regularizedSEM", function (object) {
+  modelName <-deparse(substitute(object)) # get the name of the object
+  cat(paste0("#### Model of class regularizedSEM with ",object@inputArguments$penalty, "penalty ####\n\n"))
+  cat("regularized parameters: ")
+  cat(paste0(object@regularized, collapse = ", "))
+  cat("\n\n")
+  cat(paste0("- Use coef(", modelName, 
+             ") to get the parameter estimates of the model. With coef(", 
+             modelName, "lambda = x, delta = y) parameters estimates at the values x and y for lambda and delta can be extracted.\n\n"))
+  cat(paste0("- Use plot(", modelName, 
+             ") to plot the parameter estimates of the model.\n\n"))
+  cat(paste0("- Use aCV4regularizedSEM(", modelName, 
+             ", k = k) to compute an approximate k-fold cross-valdidation.\n\n"))
+  cat(paste0("- Information criteria can be compute with AIC(", modelName, 
+             ") or BIC(", modelName, 
+             ").\n\n"))
+  cat("################################################\n")
+})
+
+#' coef
+#' 
+#' Returns the parameter estimates of a regularizedSEM
+#' 
+#' @param object object of class regularizedSEM
+#' @param lambda numeric: value of lambda for which parameters should be returned. Must be present in object
+#' @param alpha numeric: value of alpha for which parameters should be returned. Must be present in object
+#' @export
 setMethod("coef", "regularizedSEM", function (object, lambda = NULL, alpha = NULL) {
   if(is.null(lambda) && is.null(alpha)) return(object@parameters)
   if(is.null(lambda)) return(object@parameters[object@parameters$alpha == alpha,])
@@ -19,6 +49,12 @@ setMethod("coef", "regularizedSEM", function (object, lambda = NULL, alpha = NUL
   return(pars)
 })
 
+#' AIC
+#' 
+#' returns the AIC
+#' 
+#' @param object object of class regularizedSEM
+#' @export
 setMethod("AIC", "regularizedSEM", function (object) {
   fits <- object@fits
   fits$AIC <- fits$m2LL + 2*fits$nonZeroParameters
@@ -26,6 +62,12 @@ setMethod("AIC", "regularizedSEM", function (object) {
   return(fits)
 })
 
+#' BIC
+#' 
+#' returns the BIC
+#' 
+#' @param object object of class regularizedSEM
+#' @export
 setMethod("BIC", "regularizedSEM", function (object) {
   N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
   fits <- object@fits
@@ -34,6 +76,14 @@ setMethod("BIC", "regularizedSEM", function (object) {
   return(fits)
 })
 
+#' plot
+#' 
+#' plots the regularized and unregularized parameters for all levels of lambda
+#' 
+#' @param x object of class regularizedSEM
+#' @param alpha numeric: value of alpha for which parameters should be returned. Must be present in object. Required if elastic net was used
+#' @param regularizedOnly boolean: should only regularized parameters be plotted?``
+#' @export
 setMethod("plot", "regularizedSEM", function (x, alpha = NULL, regularizedOnly = TRUE) {
   parameters <- x@parameters
   if(is.null(alpha)) {

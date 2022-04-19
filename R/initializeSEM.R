@@ -237,7 +237,7 @@ SEMFromLavaan <- function(lavaanModel,
   SEMCpp <- aCV4SEM:::setParameters(SEM = SEMCpp, labels = names(parameters), values = parameters, raw = TRUE)
   
   if(fit){
-    SEMCpp <- aCV4SEM::fit(SEM = SEMCpp)
+    SEMCpp <- aCV4SEM:::fit(SEM = SEMCpp)
     if(whichPars == "est"){
       # check model fit
       if(round(SEMCpp$m2LL - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
