@@ -1,6 +1,6 @@
 #include "derivativeStructure.hpp"
 #include <RcppArmadillo.h>
-
+#include "config.hpp"
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
 void derivativeElements::addDerivativeElement(std::string label_, 

@@ -16,6 +16,8 @@
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
 #' @param useMultipleConvergencCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
+#' @param parameterChangeEps if useMultipleConvergencCriteria: change in parameters which results in convergence
+#' @param regM2LLChangeEps if useMultipleConvergencCriteria: change in fit which results in convergence
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 #' @export
 controlGLMNET <- function(
@@ -32,6 +34,8 @@ controlGLMNET <- function(
   epsOut = 1e-06,
   epsIn = 1e-06,
   useMultipleConvergencCriteria = TRUE,
+  parameterChangeEps = 1e-6,
+  regM2LLChangeEps = 1e-6,
   verbose = 0
 ){
   return(
@@ -49,6 +53,8 @@ controlGLMNET <- function(
     epsOut = epsOut,
     epsIn = epsIn,
     useMultipleConvergencCriteria = useMultipleConvergencCriteria,
+    parameterChangeEps = parameterChangeEps,
+    regM2LLChangeEps = regM2LLChangeEps,
     verbose = verbose
     )
   )

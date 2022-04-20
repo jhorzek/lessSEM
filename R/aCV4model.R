@@ -19,7 +19,7 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
   
   N <- nrow(data)
   
-  aCVSEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, transformVariances = TRUE)
+  aCVSEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, transformVariances = TRUE, fit = FALSE)
   
   # extract elements for easier access
   fits <- regularizedSEM@fits

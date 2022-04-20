@@ -1,4 +1,5 @@
 #include <RcppArmadillo.h>
+#include "config.hpp"
 #include "subset.hpp"
 #include "dataset.hpp"
 

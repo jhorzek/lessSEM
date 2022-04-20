@@ -2,7 +2,7 @@
 #define DERIVATIVEMODULE_H
 
 #include <RcppArmadillo.h>
-
+#include "config.hpp"
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
 class derivativeElements{

@@ -164,6 +164,8 @@ regularizeSEM <- function(lavaanModel,
                                epsOut = control$epsOut,
                                epsIn = control$epsIn,
                                useMultipleConvergencCriteria = control$useMultipleConvergencCriteria,
+                               parameterChangeEps = control$parameterChangeEps, 
+                               regM2LLChangeEps = control$regM2LLChangeEps,
                                verbose = control$verbose)
     
     fits$m2LL[it] <- result$m2LL

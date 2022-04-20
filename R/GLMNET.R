@@ -16,6 +16,8 @@
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
 #' @param useMultipleConvergencCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
+#' @param parameterChangeEps if useMultipleConvergencCriteria: change in parameters which results in convergence
+#' @param regM2LLChangeEps if useMultipleConvergencCriteria: change in fit which results in convergence
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 GLMNET <- function(SEM, 
                    regularizedParameterLabels, 
@@ -32,6 +34,8 @@ GLMNET <- function(SEM,
                    epsOut,
                    epsIn,
                    useMultipleConvergencCriteria,
+                   parameterChangeEps,
+                   regM2LLChangeEps,
                    verbose = 0){
   if(!((0 <= alpha) && (alpha <= 1))) stop("alpha must be in [0,1]")
   
@@ -140,9 +144,23 @@ GLMNET <- function(SEM,
       if(convergenceCriterion){
         break
       }
-      if(useMultipleConvergencCriteria && abs(regM2LLChange) < 1e-8 && max(abs(parameterChange)) < 1e-8){
+      if(useMultipleConvergencCriteria && abs(regM2LLChange) < regM2LLChangeEps && max(abs(parameterChange)) < parameterChangeEps){
         # second convergence criterion: no more change in fit
         break
+      }
+      
+      if(verbose > 0){
+        
+        cat(paste0("\r",
+                   "## [", iterOut,
+                   "] m2LL: ", sprintf('%.4f',newM2LL),
+                   " | regM2LL:  ", sprintf('%.4f',newRegM2LL),
+                   " | regM2LL change:  ", sprintf('%.4f',regM2LLChange),
+                   " | max. parameter change:  ", sprintf('%.4f',max(abs(parameterChange))),
+                   " | zeroed: ", sum(newParameters[regularizedParameterLabels] == 0),
+                   " ##")
+        )
+        flush.console()
       }
     }
     
@@ -205,18 +223,6 @@ GLMNET <- function(SEM,
                                  oldHessian = oldHessian, 
                                  newParameters = newParameters, 
                                  newGradients = newGradients)
-    
-    if(verbose > 0){
-      
-      cat(paste0("\r",
-                 "## [", iterOut,
-                 "] m2LL: ", sprintf('%.3f',newM2LL),
-                 " | regM2LL:  ", sprintf('%.3f',newRegM2LL),
-                 " | zeroed: ", sum(newParameters[regularizedParameterLabels] == 0),
-                 " ##")
-      )
-      flush.console()
-    }
     
   }
   # warnings

@@ -1,5 +1,6 @@
 #include "parameters.hpp"
 #include <RcppArmadillo.h>
+#include "config.hpp"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

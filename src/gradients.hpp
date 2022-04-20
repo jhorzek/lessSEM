@@ -2,6 +2,7 @@
 #define GRADIENTS_H
 
 #include <RcppArmadillo.h>
+#include "config.hpp"
 #include "SEM.hpp"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
