@@ -57,19 +57,21 @@ void SEMCpp::addRawData(arma::mat rawData_, Rcpp::StringVector manifestNames_, a
 }
 
 void SEMCpp::addSubset(int N_,
+                       arma::uvec persons_, // indices for which persons are in this subset
                        int observed_, // number of variables without missings
                        arma::uvec notMissing_, // vector with indices of non-missing values
                        // the following elements are only relevant for N>1
                        arma::mat covariance_,
                        arma::colvec means_,
                        // raw data is required for N == 1
-                       arma::colvec rawData_){
+                       arma::mat rawData_){
   
   if(currentStatus < 4){
     Rcpp::stop("Please define the model matrices, add parameters as well as derivative elements and raw data before calling addSubset.");
   }
   
   data.addSubset(N_,
+                 persons_,
                  observed_, // number of variables without missings
                  notMissing_, // vector with indices of non-missing values
                  // the following elements are only relevant for N>1

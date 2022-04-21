@@ -56,18 +56,16 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
   arma::colvec dataWithoutMissings; // used in N=1 case
   
   for(int gr = 0; gr < SEM.data.nGroups; gr++){
-
+    
     if(SEM.data.dataSubsets.at(gr).N == 1){
 
-      groupGradients.row(gr) = arma::trans(computeSingleSubjectGradient_Internal(SEM.data.dataSubsets.at(gr).rawData, 
-                                           SEM,
-                                           IminusAInverse,
-                                           dataSubsets.at(gr).notMissing,
-                                           gr,
-                                           impliedCovInverses.at(gr),
-                                           arma::trans(logDetSigmas.row(gr)), 
-                                           derivativesOfCovariance)
-      );
+      groupGradients.row(gr) = computeSingleSubjectGradient_Internal(SEM.data.dataSubsets.at(gr).rawData, 
+                         SEM,
+                         IminusAInverse,
+                         dataSubsets.at(gr).notMissing,
+                         impliedCovInverses.at(gr),
+                         arma::trans(logDetSigmas.row(gr)), 
+                         derivativesOfCovariance);
       
     }
     
@@ -85,25 +83,27 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
         arma::trans(logDetSigmas.row(gr)), 
         derivativesOfCovariance)
       );
-
+      
     }
     
     currentGradients += groupGradients.row(gr);
-
+    
   }
   return(currentGradients);
   
 }
 
 
-arma::colvec computeSingleSubjectGradient_Internal(const arma::colvec& data_i, 
-                                                   const SEMCpp& SEM,
-                                                   const arma::mat& IminusAInverse,
-                                                   const arma::uvec isObserved,
-                                                   const int personInSubset,
-                                                   const arma::mat& impliedCovInverse,
-                                                   const arma::colvec& logDetSigmas, 
-                                                   const std::vector<arma::mat>& derivativesOfCovariance){
+arma::mat computeSingleSubjectGradient_Internal(const arma::mat& data_i, // The function also allows
+                                                // for a short cut if multiple individuals have the same
+                                                // missingness pattern; Then persons are assumed to be in
+                                                // the rows, variables in columns.
+                                                const SEMCpp& SEM,
+                                                const arma::mat& IminusAInverse,
+                                                const arma::uvec isObserved,
+                                                const arma::mat& impliedCovInverse,
+                                                const arma::colvec& logDetSigmas, 
+                                                const std::vector<arma::mat>& derivativesOfCovariance){
   
   // define some convenient references
   const arma::mat& Amatrix = SEM.Amatrix;
@@ -118,54 +118,51 @@ arma::colvec computeSingleSubjectGradient_Internal(const arma::colvec& data_i,
   const std::vector<bool>& isVariance = SEM.derivElements.isVariance;
   const std::vector<arma::mat>& positionInLocation = SEM.derivElements.positionInLocation;
   
-  const int numberOfMissingnessPatterns = SEM.data.nGroups;
-  const std::vector<subset>& dataSubsets = SEM.data.dataSubsets;
-  
-  arma::colvec individualGradient(uniqueParameterLabels.size(), arma::fill::zeros);
+  arma::mat individualGradients(data_i.n_rows,uniqueParameterLabels.size(), arma::fill::zeros);
   arma::rowvec tempVec;
   arma::mat tempMat;
+  arma::mat dataNoNAMinusImplied = data_i.cols(isObserved);
+  dataNoNAMinusImplied.each_row() -= arma::trans(impliedMeans(isObserved));
   
   for(int p = 0; p < uniqueParameterLabels.size(); p++){
     
     if(parameterLocations.at(p).compare("Mvector") == 0){
-      
+
       tempVec = arma::trans(-Fmatrix*IminusAInverse*positionInLocation.at(p));
-      tempMat = arma::trans(tempVec(isObserved))*
-        impliedCovInverse*
-        (data_i(isObserved) - impliedMeans(isObserved));
-      individualGradient(p) = 2.0*tempMat(0,0);
-      
+      individualGradients.col(p) = arma::trans(2.0*arma::trans(tempVec(isObserved))*impliedCovInverse*
+        arma::trans(dataNoNAMinusImplied));
+
       continue;
     }
     if(parameterLocations.at(p).compare("Smatrix") == 0){
-      
-      tempMat = logDetSigmas(p) + arma::trans(data_i(isObserved) - impliedMeans(isObserved))*
+
+      tempMat = logDetSigmas(p) + dataNoNAMinusImplied*
         (-impliedCovInverse)*
         derivativesOfCovariance.at(p)(isObserved, isObserved)*
         impliedCovInverse*
-        (data_i(isObserved) - impliedMeans(isObserved));
-      individualGradient(p) = tempMat(0,0);
-      
+        arma::trans(dataNoNAMinusImplied);
+      individualGradients.col(p) = tempMat.diag();
+
       continue;
     }
     if(parameterLocations.at(p).compare("Amatrix") == 0){
-      
+
       tempVec = arma::trans(-Fmatrix*IminusAInverse*positionInLocation.at(p)*IminusAInverse*Mvector);
-      
-      tempMat = logDetSigmas(p) + 2.0*arma::trans(tempVec(isObserved))*
-        impliedCovInverse*(data_i(isObserved) - impliedMeans(isObserved))+
-        arma::trans(data_i(isObserved) - impliedMeans(isObserved))*
+      tempMat = dataNoNAMinusImplied*
         (-impliedCovInverse)*
         derivativesOfCovariance.at(p)(isObserved, isObserved)*
         impliedCovInverse*
-        (data_i(isObserved) - impliedMeans(isObserved));
-      individualGradient(p) = tempMat(0,0);
+        arma::trans(dataNoNAMinusImplied);
       
+      individualGradients.col(p) =  logDetSigmas(p) + arma::trans(2.0*arma::trans(tempVec(isObserved))*
+        impliedCovInverse*arma::trans(dataNoNAMinusImplied)) + tempMat.diag();
+
       continue;
     }
     Rcpp::stop("Encountered parameter in unknown location");
   }
-  return(individualGradient);
+
+  return(individualGradients);
 }
 
 

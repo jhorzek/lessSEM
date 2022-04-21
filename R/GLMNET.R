@@ -144,7 +144,7 @@ GLMNET <- function(SEM,
       if(convergenceCriterion){
         break
       }
-      if(useMultipleConvergencCriteria && abs(regM2LLChange) < regM2LLChangeEps && max(abs(parameterChange)) < parameterChangeEps){
+      if(useMultipleConvergencCriteria && (abs(regM2LLChange) < regM2LLChangeEps || max(abs(parameterChange)) < parameterChangeEps)){
         # second convergence criterion: no more change in fit
         break
       }
@@ -156,7 +156,7 @@ GLMNET <- function(SEM,
                    "] m2LL: ", sprintf('%.4f',newM2LL),
                    " | regM2LL:  ", sprintf('%.4f',newRegM2LL),
                    " | regM2LL change:  ", sprintf('%.4f',regM2LLChange),
-                   " | max. parameter change:  ", sprintf('%.4f',max(abs(parameterChange))),
+                   " | max. rel. parameter change:  ", sprintf('%.4f',max(abs(parameterChange))),
                    " | zeroed: ", sum(newParameters[regularizedParameterLabels] == 0),
                    " ##")
         )

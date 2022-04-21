@@ -220,9 +220,9 @@ SEMFromLavaan <- function(lavaanModel,
   
   # set data
   SEMCpp$addRawData(rawData, manifestNames, internalData$individualMissingPatternID-1)
-  
   for(s in 1:length(internalData$missingSubsets)){
     SEMCpp$addSubset(internalData$missingSubsets[[s]]$N,
+                     which(internalData$individualMissingPatternID == s)-1,
                      internalData$missingSubsets[[s]]$observed,
                      internalData$missingSubsets[[s]]$notMissing,
                      internalData$missingSubsets[[s]]$covariance,

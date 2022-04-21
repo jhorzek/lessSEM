@@ -50,13 +50,14 @@ public:
   // setter or change elements
   void addRawData(arma::mat rawData_, Rcpp::StringVector manifestNames_, arma::uvec personInSubset_);
   void addSubset(int N_,
+                 arma::uvec persons_, // indices for which persons are in this subset
                  int observed_, // number of variables without missings
                  arma::uvec notMissing_, // vector with indices of non-missing values
                  // the following elements are only relevant for N>1
                  arma::mat covariance_,
                  arma::colvec means_,
                  // raw data is required for N == 1
-                 arma::colvec rawData_);
+                 arma::mat rawData_);
   void removeSubset(int whichSubset);
   void setMatrix(std::string whichMatrix, arma::mat values);
   void setVector(std::string whichVector, arma::colvec values);

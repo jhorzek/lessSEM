@@ -53,24 +53,22 @@ arma::mat scores(const SEMCpp& SEM, bool raw){
 
   // individual in row, parameter in column
   arma::mat individualGradients(N, uniqueParameterLabels.size());
-  arma::colvec currentGradients;
-
-  for(int i = 0; i < N; i++){
+  arma::mat currentGradients;
+  
+  // we can speed up the computation considerably by going over the missingness patterns
+  for(int miss = 0; miss < numberOfMissingnessPatterns; miss++){
     
-    const int personInSubset = SEM.personInSubset.at(i);
-    
-    currentGradients = computeSingleSubjectGradient_Internal(arma::trans(SEM.rawData.row(i)), 
+    currentGradients = computeSingleSubjectGradient_Internal(dataSubsets.at(miss).rawData, 
                                                              SEM,
                                                              IminusAInverse,
-                                                             dataSubsets.at(personInSubset).notMissing,
-                                                             personInSubset,
-                                                             impliedCovInverses.at(personInSubset),
-                                                             arma::trans(logDetSigmas.row(personInSubset)), 
+                                                             dataSubsets.at(miss).notMissing,
+                                                             impliedCovInverses.at(miss),
+                                                             arma::trans(logDetSigmas.row(miss)), 
                                                              derivativesOfCovariance);
-    
-    individualGradients.row(i) = arma::trans(currentGradients);
+    individualGradients.rows(dataSubsets.at(miss).persons) = currentGradients;
     
   }
+
   return(individualGradients);
   
 }
