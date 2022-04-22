@@ -52,4 +52,12 @@ test_that("testing adaptive lasso", {
   coef(cv)
   coef(cv, alpha = 1, lambda = .01)
   plot(cv)
+  
+  # set automatic lambda:
+  rsem2 <- regularizeSEM(lavaanModel = modelFit, 
+                         regularizedParameterLabels = regularizedLavaan,
+                         penalty = "adaptiveLasso", 
+                         lambdas = NULL,
+                         nLambdas = 10)
+  testthat::expect_equal(all(apply(rsem2@parameters[,regularizedLavaan] == 0,2,sum) > 0), TRUE)
 })

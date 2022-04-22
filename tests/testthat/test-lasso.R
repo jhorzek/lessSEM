@@ -53,7 +53,7 @@ test_that("testing lasso", {
                         regularizedParameterLabels = regularizedLavaan,
                         penalty = "lasso", 
                         lambdas = lambdas)
-  testthat::expect_equal(all(round(rsem@parameters[,regularizedLavaan] - lslxParameter[,regularized],3)==0), TRUE)
+  testthat::expect_equal(all(abs(rsem@parameters[,regularizedLavaan] - lslxParameter[,regularized]) < .002), TRUE)
   plot(rsem)
   coef(rsem)
   coef(rsem, alpha = 1, lambda = .1)
@@ -62,6 +62,20 @@ test_that("testing lasso", {
   
   cv <- aCV4regularizedSEM(regularizedSEM = rsem, k = N)
   coef(cv)
+  coef(cv, rule = "1sd")
+  coef(cv, rule = "penalized")
   coef(cv, alpha = 1, lambda = .1)
   plot(cv)
+  
+  cv2 <- aCV4regularizedSEM(regularizedSEM = rsem, k = N, recomputeHessian = FALSE)
+  plot(cv2)
+  round(cv@cvfits - cv2@cvfits,4)
+  
+  # set automatic lambda:
+  rsem2 <- regularizeSEM(lavaanModel = modelFit, 
+                        regularizedParameterLabels = regularizedLavaan,
+                        penalty = "lasso", 
+                        lambdas = NULL,
+                        nLambdas = 10)
+  testthat::expect_equal(all(apply(rsem2@parameters[,regularizedLavaan] == 0,2,sum) > 0), TRUE)
 })

@@ -65,6 +65,8 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
     if(recomputeHessian){
       hessianOfDifferentiablePart <- NULL
     }else{
+      select <- regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$lambda == lambda &
+        regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$alpha == alpha
       hessianOfDifferentiablePart <- regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$Hessian[[which(select)]]
     }
     

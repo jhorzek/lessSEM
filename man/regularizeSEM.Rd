@@ -8,7 +8,8 @@ regularizeSEM(
   lavaanModel,
   regularizedParameterLabels,
   penalty,
-  lambdas,
+  lambdas = NULL,
+  nLambdas = NULL,
   alphas = NULL,
   adaptiveLassoWeights = NULL,
   raw = TRUE,
@@ -23,6 +24,8 @@ regularizeSEM(
 \item{penalty}{which penalty should be used? Available are "ridge", "lasso", "adaptiveLasso", and "elasticNet"}
 
 \item{lambdas}{vector with lambda values. Higher values = higher penalty}
+
+\item{nLambdas}{if penalty == "lasso" or penalty == "adaptiveLasso", one can specify the number of lambda values to use. In this case, set lambdas = NULL.}
 
 \item{alphas}{0<alpha<1. only required for elastic net. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge}
 

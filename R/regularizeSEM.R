@@ -6,6 +6,7 @@
 #' @param regularizedParameterLabels labels of regularized parameters
 #' @param penalty which penalty should be used? Available are "ridge", "lasso", "adaptiveLasso", and "elasticNet"
 #' @param lambdas vector with lambda values. Higher values = higher penalty
+#' @param nLambdas if penalty == "lasso" or penalty == "adaptiveLasso", one can specify the number of lambda values to use. In this case, set lambdas = NULL.
 #' @param alphas 0<alpha<1. only required for elastic net. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge
 #' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO
 #' @param eps controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
@@ -15,7 +16,8 @@
 regularizeSEM <- function(lavaanModel, 
                           regularizedParameterLabels,
                           penalty, 
-                          lambdas, 
+                          lambdas = NULL,
+                          nLambdas = NULL,
                           alphas = NULL, 
                           adaptiveLassoWeights = NULL,
                           raw = TRUE,
@@ -23,10 +25,11 @@ regularizeSEM <- function(lavaanModel,
   
   inputArguments <- as.list(environment())
   
-  # reversing lambda can help as the model with lambda = 0 may be unidentified
-  #lambdas <- sort(lambdas, decreasing = TRUE)
-  
   if(!penalty %in% c("lasso", "ridge", "adaptiveLasso", "elasticNet")) stop("Currently supported penalty functions are: lasso, ridge, adaptiveLasso, and elasticNet")
+  
+  if(is.null(lambdas) && is.null(nLambdas)) stop("Function requires either lambdas or nLambdas to be specified.")
+  if(!is.null(lambdas) && !is.null(nLambdas)) stop("Please specify either lambdas or nLambdas, but not both.")
+  if(is.null(lambdas) && any(!is.null(alphas), penalty %in% c("ridge", "elasticNet"))) stop("nLambdas is currently not supported for ridge and elasticNet penalty. Please specify lambdas (e.g., lambdas = seq(0,1,.1)).")
   
   if(!is(lavaanModel, "lavaan")){
     stop("lavaanModel must be of class lavaan")
@@ -104,6 +107,17 @@ regularizeSEM <- function(lavaanModel,
     alphas <- 1
   }else if(penalty == "ridge"){
     alphas <- 0
+  }
+  
+  if(!is.null(nLambdas)){
+    message("Automatically selecting the maximal lambda value. Note: This may not work properly if a model with all regularized parameters set to zero is not identified.")
+    maxLambda <- aCV4SEM:::getMaxLambda(SEM = SEM, 
+                                        regularizedParameterLabels = regularizedParameterLabels, 
+                                        adaptiveLassoWeights = adaptiveLassoWeights,
+                                        initialHessian4Optimizer = initialHessian4Optimizer, 
+                                        control = control,
+                                        N = nrow(rawData))
+    lambdas <- seq(0, maxLambda, length.out = nLambdas)
   }
   
   tuningGrid <- expand.grid("lambda" = lambdas, "alpha" = alphas)
@@ -358,20 +372,46 @@ checkRegularizedParameters <- function(parameters, regularizedParameterLabels, p
   }
 }
 
-#' alternativeStartingValues
+#' getMaxLambda
 #' 
-#' generate alternative starting values for a SEM in raw format.
-#' @param SEM model of class Rcpp_SEMCpp. 
-alternativeStartingValues <- function(SEM){
-  parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = TRUE)
-  parameters[] <- 0
-  parTable <- SEM$getParameters()
-  for(p in names(parameters)){
-    rows <- parTable$label == p
-    if(!any(parTable$location[rows] == "Smatrix")) next
-    parameters[p] <- runif(1,-.1,.1) # covariances
-    if(any(parTable$row[rows] == parTable$col[rows])) parameters[p] <- log(10) # set variances to 10; this works better with log-transformation
-    
-  }
-  return(parameters)
+#' generates a the first lambda which sets all regularized parameters to zero
+#' @param SEM model of class Rcpp_SEMCpp
+#' @param regularizedParameterLabels labels of regularized parameters
+#' @param adaptiveLassoWeights vector with weights for adaptive LASSO
+#' @param initialHessian4Optimizer initial Hessian used by the optimizer
+#' @param control additional arguments passed to GLMNET. See ?controlGLMNET
+#' @param N sample size
+getMaxLambda <- function(SEM, regularizedParameterLabels, adaptiveLassoWeights, initialHessian4Optimizer, control, N){
+  initialParameters <- aCV4SEM:::getParameters(SEM = SEM, raw = TRUE)
+  lambda <- .Machine$double.xmax^(.05)
+  result <- aCV4SEM:::GLMNET(SEM = SEM, 
+                             regularizedParameterLabels = regularizedParameterLabels, 
+                             lambda = lambda, 
+                             alpha = 1,
+                             adaptiveLassoWeights = adaptiveLassoWeights,
+                             initialHessian = initialHessian4Optimizer,
+                             stepSize = control$stepSize,
+                             sig = control$sig,
+                             gam = control$gam,
+                             maxIterOut = control$maxIterOut,
+                             maxIterIn = control$maxIterIn,
+                             maxIterLine = control$maxIterLine,
+                             epsOut = control$epsOut,
+                             epsIn = control$epsIn,
+                             useMultipleConvergencCriteria = control$useMultipleConvergencCriteria,
+                             parameterChangeEps = control$parameterChangeEps, 
+                             regM2LLChangeEps = control$regM2LLChangeEps,
+                             verbose = control$verbose)
+  sparseParameters <- result$parameters
+  SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(sparseParameters), values = sparseParameters, raw = TRUE)
+  SEM <- aCV4SEM:::fit(SEM = SEM)
+  gradients <- aCV4SEM:::getGradients(SEM = SEM, raw = TRUE)
+  
+  # define maxLambda as the maximal gradient of the regularized parameters
+  maxLambda <- max(abs(gradients[regularizedParameterLabels]) * adaptiveLassoWeights[regularizedParameterLabels]^(-1))
+  
+  SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(initialParameters), values = initialParameters, raw = TRUE)
+  SEM <- aCV4SEM:::fit(SEM = SEM)
+  
+  return((1/N)*(maxLambda+.01*maxLambda)) # adding some wiggle room as well
 }

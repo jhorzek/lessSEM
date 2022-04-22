@@ -6,7 +6,7 @@
 \usage{
 controlGLMNET(
   startingValues = "est",
-  initialHessian = 1,
+  initialHessian = ifelse(all(startingValues == "est"), "compute", 1),
   stepSize = 1,
   c1 = 1e-04,
   c2 = 0.9,
