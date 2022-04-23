@@ -55,16 +55,9 @@ GLMNET <- function(SEM,
   parameterLabels <- names(newParameters)
   regularized <- parameterLabels%in%regularizedParameterLabels
   if(is.null(adaptiveLassoWeights)){
-    if(alpha==1) {
-      # lasso or elastic net
-      adaptiveLassoWeights <- rep(1, length(newParameters))
-    }else if(alpha==0){
-      # ridge
-      adaptiveLassoWeights <- rep(2, length(newParameters))
-    }else{
-      stop("adaptiveLassoWeights missing without default.")
-    }
+    adaptiveLassoWeights <- rep(1, length(newParameters))
     names(adaptiveLassoWeights) <- parameterLabels
+    warning("No adaptive lasso weights passed to GLMNET. Using 1 as weight.")
   }
   
   #### start optimizing ####
@@ -91,11 +84,9 @@ GLMNET <- function(SEM,
   if(alpha != 1){
     # elastic net or ridge are used -> we add the differentiable part of 
     # the penalty to the gradients and the Hessian
-    if(length(unique(adaptiveLassoWeights))!= 1) stop("ridge and elastic net can not be combined with adaptive lasso weights")
-    # we multiply with the adaptive lasso weights. These are all 1 in case of elastic net. In case of ridge, they are
-    # set to 0. This allows for one single unified optimization procedure 
+    # we multiply with the adaptive lasso weights.
     penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
-                                     "lambda" = unique(adaptiveLassoWeights)*.5*lambda*(1-alpha)*N)
+                                     "lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*N)
     newGradients <- newGradients + aCV4SEM::ridgeGradient(parameters = newParameters, 
                                                           penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     newHessian <- newHessian + ridgeHessian(parameters = newParameters, 
@@ -431,6 +422,6 @@ getPenaltyValue <- function(parameters,
                             regularizedParameterLabels,
                             adaptiveLassoWeights){
   return(alpha*lambda*sum(adaptiveLassoWeights[regularizedParameterLabels]*abs(parameters[regularizedParameterLabels])) + # lasso
-           .5*(1-alpha)*lambda*sum(adaptiveLassoWeights[regularizedParameterLabels]*parameters[regularizedParameterLabels]^2) # ridge
+           (1-alpha)*lambda*sum(adaptiveLassoWeights[regularizedParameterLabels]*parameters[regularizedParameterLabels]^2) # ridge
   )
 }

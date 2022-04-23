@@ -12,7 +12,7 @@ createSubsets(N, k)
 \item{k}{number of subsets to create}
 }
 \value{
-list with subsets
+matrix with subsets
 }
 \description{
 create subsets for cross-validation

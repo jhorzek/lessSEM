@@ -197,6 +197,7 @@ arma::colvec computeSubgroupGradient_Internal(
   arma::colvec groupGradient(uniqueParameterLabels.size(), arma::fill::zeros);
   arma::rowvec tempVec;
   arma::mat tempMat, tempMat2;
+  arma::colvec meanDiff = (means - impliedMeans(isObserved));
   
   for(int p = 0; p < uniqueParameterLabels.size(); p++){
     
@@ -205,25 +206,25 @@ arma::colvec computeSubgroupGradient_Internal(
       tempVec = arma::trans(-Fmatrix*IminusAInverse*positionInLocation.at(p));
       tempMat = arma::trans(tempVec(isObserved))*
         impliedCovInverse*
-        (means - impliedMeans(isObserved));
+        (meanDiff);
       groupGradient(p) = N*2.0*tempMat(0,0);
-      
       continue;
     }
     if(parameterLocations.at(p).compare("Smatrix") == 0){
+
       tempMat2 = (-impliedCovInverse)*
         derivativesOfCovariance.at(p)(isObserved, isObserved)*
         impliedCovInverse;
       tempMat = N*logDetSigmas(p) +
         N*arma::trace(covariance*tempMat2)+
-        N*arma::trans(means - impliedMeans(isObserved))*
+        N*arma::trans(meanDiff)*
         tempMat2*
-        (means - impliedMeans(isObserved));
+        (meanDiff);
       groupGradient(p) = tempMat(0,0);
-      
       continue;
     }
     if(parameterLocations.at(p).compare("Amatrix") == 0){
+      
       tempMat2 = (-impliedCovInverse)*
         derivativesOfCovariance.at(p)(isObserved, isObserved)*
         impliedCovInverse;
@@ -233,14 +234,13 @@ arma::colvec computeSubgroupGradient_Internal(
       
       tempMat = N*logDetSigmas(p) +
         N*2*tempVec*impliedCovInverse*
-        (means - impliedMeans(isObserved)) +
+        (meanDiff) +
         N*arma::trace(covariance*tempMat2)+
-        N*arma::trans(means - impliedMeans(isObserved))*
+        N*arma::trans(meanDiff)*
         tempMat2*
-        (means - impliedMeans(isObserved));
-      ;
-      groupGradient(p) = tempMat(0,0);
+        (meanDiff);
       
+      groupGradient(p) = tempMat(0,0);
       continue;
     }
     Rcpp::stop("Encountered parameter in unknown location");

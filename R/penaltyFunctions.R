@@ -164,7 +164,7 @@ smoothElasticNet <- function(parameters,
   )
   ridgePart <- ridge(parameters = parameters,
                      penaltyFunctionArguments = list("regularizedParameterLabels" = penaltyFunctionArguments$regularizedParameterLabels,
-                                                     "lambda" = 0.5*penaltyFunctionArguments$lambda*(1-penaltyFunctionArguments$alpha)
+                                                     "lambda" = penaltyFunctionArguments$lambda*(1-penaltyFunctionArguments$alpha)
                      )
   )
   return(lassoPart + ridgePart)
@@ -186,7 +186,7 @@ smoothElasticNetGradient <- function(parameters,
   )
   ridgePart <- ridgeGradient(parameters = parameters,
                              penaltyFunctionArguments = list("regularizedParameterLabels" = penaltyFunctionArguments$regularizedParameterLabels,
-                                                             "lambda" = 0.5*penaltyFunctionArguments$lambda*(1-penaltyFunctionArguments$alpha)
+                                                             "lambda" = penaltyFunctionArguments$lambda*(1-penaltyFunctionArguments$alpha)
                              )
   )
   return(lassoPart + ridgePart)
@@ -208,7 +208,7 @@ smoothElasticNetHessian <- function(parameters,
   )
   ridgePart <- ridgeHessian(parameters = parameters,
                              penaltyFunctionArguments = list("regularizedParameterLabels" = penaltyFunctionArguments$regularizedParameterLabels,
-                                                             "lambda" = 0.5*penaltyFunctionArguments$lambda*(1-penaltyFunctionArguments$alpha)
+                                                             "lambda" = penaltyFunctionArguments$lambda*(1-penaltyFunctionArguments$alpha)
                              )
   )
   return(lassoPart + ridgePart)

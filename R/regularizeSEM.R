@@ -85,15 +85,13 @@ regularizeSEM <- function(lavaanModel,
   if(penalty == "adaptiveLasso" && is.null(adaptiveLassoWeights)){
     message("adaptiveLasso selected, but no adaptiveLassoWeights provided. Using the default abs(parameters)^(-1).")
     adaptiveLassoWeights <- abs(parameters)^(-1)
-  }else if(penalty == "ridge"){
-    adaptiveLassoWeights <- rep(2, length(parameters)) # we are using the 
-    # elastic net implementation which takes w_j.5*lambda*(1-alpha) with alpha = 0
-    # Setting w_j to 2 makes sure that we are getting the ridge 
-    # estimates for lambda, not .5*lambda.
+  }else if(is.null(adaptiveLassoWeights)){
+    adaptiveLassoWeights <- rep(1, length(parameters)) # we are using the 
     names(adaptiveLassoWeights) <- names(parameters)
   }else{
-    adaptiveLassoWeights <- rep(1, length(parameters)) 
-    names(adaptiveLassoWeights) <- names(parameters)
+    message("Using user specified adaptive lasso weights.")
+    
+    if(alpha != 1) warning("Combining ridge and elastic net with adaptive lasso weights is unexplored territory.")
   }
   inputArguments$adaptiveLassoWeights <- adaptiveLassoWeights
   

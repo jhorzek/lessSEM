@@ -5,7 +5,7 @@ setClass(Class = "aCV4RegularizedSEM",
            parameterLabels = "character",
            regularized = "character",
            cvfitsDetails="data.frame", 
-           subsets = "list"
+           subsets = "matrix"
          )
 )
 
@@ -100,7 +100,7 @@ setMethod("coef", "aCV4RegularizedSEM", function (object, lambda = NULL, alpha =
       
       bestNNonzeroParameter <- nNotZeroed[lambdaMin] 
       
-      penalty <- ((bestCVFit - sparseCVFit)/bestNNonzeroParameter)*nNotZeroed[lambdaMin:lambdaMax]
+      penalty <- -2*((bestCVFit - sparseCVFit)/bestNNonzeroParameter)*nNotZeroed[lambdaMin:lambdaMax] # -2 as we are using the -2 log-likelihood
       
       cvFits[lambdaMin:lambdaMax] <- cvFits[lambdaMin:lambdaMax] + penalty
       cvFits[-c(lambdaMin:lambdaMax)] <- Inf

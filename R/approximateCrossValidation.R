@@ -31,7 +31,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
   N <- nrow(dataSet)
-  k <- length(subsets)
+  k <- ncol(subsets)
   
   # compute derivatives of -2log-Likelihood without penalty
   
@@ -46,19 +46,23 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   stepdirections <- matrix(NA, nrow = k, ncol = length(parameters))
   colnames(stepdirections) <- names(parameters)
   
+  subsetParameters <- vector("list",k)
+  leaveOutFits <- rep(0, k)
+  names(leaveOutFits) <- paste0("sample", 1:k)
+  
   for(s in 1:k){
-    subGroupGradient <- apply(scores[-subsets[[s]],],2,sum) # gradients of all inidividuals but the ones in the subgroup
-    subGroupHessian <- ((N-length(subsets[[s]]))/N)*hessian # approximated hessian for all but the subgroup
-    subGroupLambda <- alpha*(N-length(subsets[[s]]))*lambda
+
+    subGroupGradient <- apply(scores[-c(which(subsets[,s])),],2,sum) # gradients of all inidividuals but the ones in the subgroup
+    subGroupHessian <- ((N-sum(subsets[,s]))/N)*hessian # approximated hessian for all but the subgroup
+    subGroupLambda <- alpha*(N-sum(subsets[,s]))*lambda
     
     # if elastic net is used, we approximate the ridge part as well and add this here:
     if(alpha != 1){
       # ridge or elastic net are used
-      if(length(unique(adaptiveLassoWeights))!= 1) stop("ridge and elastic net can not be combined with adaptive lasso weights")
-      # we multiply with the adaptive lasso weights. These are all 1 in case of elastic net. In case of ridge, they are
-      # set to 0. This allows for one single unified optimization procedure 
+      if(length(unique(adaptiveLassoWeights))!= 1) warning("Combining ridge and elastic net with adaptive lasso weights is unexplored territory.")
+      # we multiply with the adaptive lasso weights.
       penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
-                                       "lambda" = unique(adaptiveLassoWeights)*0.5*lambda*(1-alpha)*(N-length(subsets[[s]])))
+                                       "lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*(N-length(subsets[[s]])))
       subGroupGradient <- subGroupGradient + aCV4SEM::ridgeGradient(parameters = parameters,
                                                                        penaltyFunctionArguments = penaltyFunctionArguments)
       if(is.null(hessianOfDifferentiablePart)){
@@ -67,6 +71,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
       }
     }
     
+    startDirection <- Sys.time()
     direction <- aCV4SEM:::innerGLMNET(parameters = parameters, 
                                        subGroupGradient = subGroupGradient, 
                                        subGroupHessian = subGroupHessian, 
@@ -80,29 +85,21 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     
     # return step direction
     stepdirections[s,names(parameters)] <- direction[names(parameters),]
-  }
-  
-  subsetParameters <- vector("list",k)
-  leaveOutFits <- rep(0, k)
-  names(leaveOutFits) <- paste0("sample", 1:k)
-  
-  for(s in 1:k){
-    # currently, we do not use line search as this would result in additional computational overhead.
-    # therefore a fixed stepLength of 1 is used; this could be adapted to get better results.
-    stepLength <- 1
-    parameters_s <- parameters + 1*stepdirections[s,names(parameters)]
     
+    # compute out of sample fit
+    parameters_s <- parameters + stepdirections[s,names(parameters)]
     SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
-    SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
+    #SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
     subsetParameters[[s]] <- aCV4SEM:::getParameters(SEM = SEM, raw = FALSE)
+   
     
-    for(i in 1:length(subsets[[s]])){
+    for(i in which(subsets[,s])){
       leaveOutFits[s] <- leaveOutFits[s] + aCV4SEM:::individualMinus2LogLikelihood(par = subsetParameters[[s]], 
                                                                                    SEM = SEM, 
-                                                                                   data = dataSet[subsets[[s]][i],], 
+                                                                                   data = dataSet[i,], 
                                                                                    raw = FALSE)
     }
-    
+
   }
   
   return(
@@ -283,7 +280,7 @@ smoothACVRcpp_SEMCpp <- function(SEM,
 #' create subsets for cross-validation
 #' @param N number of samples in the data set
 #' @param k number of subsets to create
-#' @return list with subsets
+#' @return matrix with subsets
 createSubsets <- function(N,k){
   # build subgroups
   if(k < N){
@@ -301,5 +298,14 @@ createSubsets <- function(N,k){
     stop(paste0("k must be <= ", N))
   }
   
-  return(subsets)
+  subsetMatrix <- matrix(NA, nrow = N, ncol = k,
+                         dimnames = list(paste0("N",1:N), 
+                                         paste0("subset", 1:k)))
+  for(s in 1:length(subsets)){
+    subsetMatrix[,s] <- 1:N %in% subsets[[s]]
+  }
+  
+  if(any(apply(subsetMatrix,1,sum) != 1)) stop("Error while splitting data in subsets: Some persons are in multiple or none of the subsets")
+  
+  return(subsetMatrix)
 }
