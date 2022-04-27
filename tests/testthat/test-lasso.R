@@ -32,7 +32,7 @@ test_that("testing lasso", {
   
   fitLslx$penalize_coefficient(name = paste0("y", 6:ncol(y)," <- f"))
   
-  lambdas <- seq(0,.8,.05)
+  lambdas <- seq(0,.3,.01)
   fitLslx$fit(penalty_method = "lasso",lambda_grid = lambdas, loss = "ml")
   
   # extract fits

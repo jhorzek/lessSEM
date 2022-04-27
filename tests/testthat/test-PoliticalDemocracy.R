@@ -23,16 +23,11 @@ test_that("testing optimization with PoliticalDemocracy", {
                data = PoliticalDemocracy, 
                meanstructure = TRUE)
   
-  modelNotOptimized <- sem(modelSyntax, 
-                           data = PoliticalDemocracy, 
-                           meanstructure = TRUE,
-                           do.fit = FALSE)
-  
   regsem <- regularizeSEM(lavaanModel = model, 
                           regularizedParameterLabels = c("a", "b", "c"),
                           penalty = "lasso",
-                          lambdas = seq(0,1,.1), 
-                          control = controlGLMNET(startingValues = "start"))
+                          lambdas = 0, 
+                          control = controlGLMNET(startingValues = "start", useMultipleConvergenceCriteria = FALSE))
   testthat::expect_equal(abs(regsem@fits$m2LL[1] - (-2*logLik(model))) < 1e-4,TRUE)
   
 })

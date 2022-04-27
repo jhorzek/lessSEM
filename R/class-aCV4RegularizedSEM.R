@@ -88,13 +88,13 @@ setMethod("coef", "aCV4RegularizedSEM", function (object, lambda = NULL, alpha =
       
       if(!all(parameterWasZeroed)) {
         warning("rule = 'penalized' requires that ALL regularized parameters have been set to zero for at least one lambda. This is not satisfied in the object passed here. Using the maximal lambda instead.")
-        lambdaMax <- max(object@cvfits$lambda)
+        lambdaMax <- which(object@cvfits$lambda == max(object@cvfits$lambda))
       }else{
         # the lambda for which all parameters were first zeroed provides the upper bound
         lambdaMax <- min(which(nNotZeroed == 0))
       }
       lambdaMin <- which(cvFits == min(cvFits)) # the lambda which has the best cv fit provides the lower bound
-
+      
       bestCVFit <- min(cvFits)
       sparseCVFit <- cvFits[lambdaMax]
       

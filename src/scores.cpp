@@ -99,7 +99,7 @@ std::vector<arma::mat> computeimpliedCovarianceDerivatives(const SEMCpp& SEM,
   // pre-compute some repeatedly used elements
   arma::mat FIminusAInverse = Fmatrix*IminusAInverse;
   arma::mat ImASImAF = IminusAInverse*Smatrix*arma::trans(FIminusAInverse);
-  arma::mat FImASImA = FIminusAInverse*Smatrix*IminusAInverse;
+  arma::mat FImASImA = FIminusAInverse*Smatrix*arma::trans(IminusAInverse);
   
   // iterate over all parameters and compute derivatives
   for(int p = 0; p < uniqueParameterLabels.size(); p++){
@@ -136,7 +136,7 @@ std::vector<arma::mat> computeimpliedCovarianceDerivatives(const SEMCpp& SEM,
         positionInLocation.at(p)*
         ImASImAF +
         FImASImA*
-        positionInLocation.at(p)*
+        arma::trans(positionInLocation.at(p))*
         arma::trans(FIminusAInverse);
       
       continue;

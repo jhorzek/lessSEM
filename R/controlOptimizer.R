@@ -34,8 +34,8 @@ controlGLMNET <- function(
   epsOut = 1e-5,
   epsIn = 1e-5,
   useMultipleConvergenceCriteria = TRUE,
-  parameterChangeEps = 1e-5,
-  regM2LLChangeEps = 1e-5,
+  parameterChangeEps = 1e-6,
+  regM2LLChangeEps = 1e-6,
   verbose = 0
 ){
   return(

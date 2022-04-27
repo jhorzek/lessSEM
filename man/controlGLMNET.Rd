@@ -18,8 +18,8 @@ controlGLMNET(
   epsOut = 1e-05,
   epsIn = 1e-05,
   useMultipleConvergenceCriteria = TRUE,
-  parameterChangeEps = 1e-05,
-  regM2LLChangeEps = 1e-05,
+  parameterChangeEps = 1e-06,
+  regM2LLChangeEps = 1e-06,
   verbose = 0
 )
 }
