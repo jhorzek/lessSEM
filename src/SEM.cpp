@@ -53,6 +53,7 @@ void SEMCpp::addRawData(arma::mat rawData_, Rcpp::StringVector manifestNames_, a
   manifestNames = manifestNames_;
   currentStatus = 4;
   wasFit = false; // reset fit 
+  impliedWasCalled = false; // reset implied
   return;
 }
 
@@ -219,9 +220,8 @@ void SEMCpp::implied(){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  // if(!wasFit){
-  //   Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
-  // }
+  impliedWasCalled = true;
+
   // step one: compute implied mean and covariance
   impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
   impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
@@ -292,8 +292,8 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(!wasFit){
-    Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
+  if(!impliedWasCalled){
+    Rcpp::stop("The model implied matrices have not been computed yet. Call Model$implied() first.");
   }
   arma::rowvec gradients = gradientsByGroup(*this, raw);
   

@@ -10,16 +10,16 @@ controlGLMNET(
   stepSize = 1,
   c1 = 1e-04,
   c2 = 0.9,
-  sig = 10^(-5),
+  sig = 1e-05,
   gam = 0,
   maxIterOut = 1000,
   maxIterIn = 1000,
   maxIterLine = 500,
-  epsOut = 1e-06,
-  epsIn = 1e-06,
-  useMultipleConvergencCriteria = TRUE,
-  parameterChangeEps = 1e-06,
-  regM2LLChangeEps = 1e-06,
+  epsOut = 1e-05,
+  epsIn = 1e-05,
+  useMultipleConvergenceCriteria = TRUE,
+  parameterChangeEps = 1e-05,
+  regM2LLChangeEps = 1e-05,
   verbose = 0
 )
 }
@@ -47,11 +47,11 @@ see those labels. If set to "compute", the initial hessian will be computed. If 
 
 \item{epsIn}{Stopping criterion for inner iterations}
 
-\item{useMultipleConvergencCriteria}{if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops}
+\item{useMultipleConvergenceCriteria}{if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops}
 
-\item{parameterChangeEps}{if useMultipleConvergencCriteria: change in parameters which results in convergence}
+\item{parameterChangeEps}{if useMultipleConvergenceCriteria: change in parameters which results in convergence}
 
-\item{regM2LLChangeEps}{if useMultipleConvergencCriteria: change in fit which results in convergence}
+\item{regM2LLChangeEps}{if useMultipleConvergenceCriteria: change in fit which results in convergence}
 
 \item{verbose}{0 prints no additional information, > 0 prints GLMNET iterations}
 }

@@ -15,9 +15,9 @@
 #' @param maxIterLine Maximal number of iterations for the line search procedure
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
-#' @param useMultipleConvergencCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
-#' @param parameterChangeEps if useMultipleConvergencCriteria: change in parameters which results in convergence
-#' @param regM2LLChangeEps if useMultipleConvergencCriteria: change in fit which results in convergence
+#' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
+#' @param parameterChangeEps if useMultipleConvergenceCriteria: change in parameters which results in convergence
+#' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 GLMNET <- function(SEM, 
                    regularizedParameterLabels, 
@@ -33,7 +33,7 @@ GLMNET <- function(SEM,
                    maxIterLine,
                    epsOut,
                    epsIn,
-                   useMultipleConvergencCriteria,
+                   useMultipleConvergenceCriteria,
                    parameterChangeEps,
                    regM2LLChangeEps,
                    verbose = 0){
@@ -101,7 +101,7 @@ GLMNET <- function(SEM,
                                                    adaptiveLassoWeights = adaptiveLassoWeights)
   
   while(iterOut < maxIterOut){
-    iterOut <- iterOut +1
+    iterOut <- iterOut + 1
     
     if(iterOut > 1){
       parameterChange <- (newParameters - oldParameters)/(newParameters+1e-9) # add small jitter as zeroed parameters will otherwise 
@@ -135,7 +135,7 @@ GLMNET <- function(SEM,
       if(convergenceCriterion){
         break
       }
-      if(useMultipleConvergencCriteria && (abs(regM2LLChange) < regM2LLChangeEps || max(abs(parameterChange)) < parameterChangeEps)){
+      if(useMultipleConvergenceCriteria && (abs(regM2LLChange) < regM2LLChangeEps || max(abs(parameterChange)) < parameterChangeEps)){
         # second convergence criterion: no more change in fit
         break
       }
@@ -164,13 +164,13 @@ GLMNET <- function(SEM,
                                        regularized = regularized, 
                                        adaptiveLassoWeights = adaptiveLassoWeights,
                                        maxIter = maxIterIn, 
-                                       epsBreak = epsIn
+                                       epsBreak = epsIn,
+                                       useMultipleConvergenceCriteria = useMultipleConvergenceCriteria
     )
     direction <- c(direction)
     names(direction) <- parameterLabels
     
     # perform Line Search
-    
     step <- aCV4SEM:::GLMNETLineSearch(SEM = SEM, 
                                        adaptiveLassoWeights = adaptiveLassoWeights, 
                                        parameterLabels = parameterLabels,
@@ -214,7 +214,6 @@ GLMNET <- function(SEM,
                                  oldHessian = oldHessian, 
                                  newParameters = newParameters, 
                                  newGradients = newGradients)
-    
   }
   # warnings
   if(iterOut == maxIterOut){
@@ -325,10 +324,11 @@ GLMNETLineSearch <- function(SEM,
         i <- i+1
         next
       }
-      
       # check if gradients can be computed at the new location; this can often cause issues
       newGradients <-  try(aCV4SEM:::getGradients(SEM, raw = TRUE), silent = TRUE)
+      
       if(is(newGradients, "try-error")) {
+        car("Was error\n")
         i <- i+1
         next
       }
@@ -394,6 +394,7 @@ BFGS <- function(oldParameters,
     eigenVectors <- Re(HessianEigen$vectors)
     eigenValues <- Re(HessianEigen$values)
     newHessian <- eigenVectors%*%diag(eigenValues)%*%t(eigenVectors)
+    HessianEigen <- eigen(newHessian)
   }
   if(any(HessianEigen$values < 0)){
     while(any(eigen(newHessian)$values < 0)){

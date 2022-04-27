@@ -11,8 +11,7 @@
 #' @param lambda value of tuning parameter lambda
 #' @param alpha value of tuning parameter alpha (for elastic net)
 #' @param adaptiveLassoWeights vector with labeled adaptive lasso weights. Only required if penalty = "adaptiveLasso"
-#' @param maxIter maximal number of iterations used in GLMENT
-#' @param epsBreak breaking condition of GLMNET
+#' @param control arguments passed to GLMNET inner iteration
 GLMNETACVRcpp_SEMCpp <- function(SEM, 
                                  subsets, 
                                  raw = FALSE, 
@@ -21,8 +20,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
                                  alpha = NULL,
                                  adaptiveLassoWeights = NULL,
                                  hessianOfDifferentiablePart = NULL,
-                                 maxIter = 100,
-                                 epsBreak = 1e-10){
+                                 control){
   
   if(!is(SEM, "Rcpp_SEMCpp")){
     stop("SEM must be of class Rcpp_SEMCpp")
@@ -34,9 +32,10 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   k <- ncol(subsets)
   
   # compute derivatives of -2log-Likelihood without penalty
-  
+  if(control$verbose != 0) cat("Computing scores\n")
   scores <- aCV4SEM:::getScores(SEM = SEM, raw = raw)
   if(is.null(hessianOfDifferentiablePart)){
+    if(control$verbose != 0) cat("Computing Hessian\n\n")
     hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
   }else{
     hessian <- hessianOfDifferentiablePart
@@ -54,7 +53,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   names(leaveOutFits) <- paste0("sample", 1:k)
   
   for(s in 1:k){
-
+    if(control$verbose != 0) cat("\r","Subset [",s, "/", k, "]")
     subGroupGradient <- apply(scores[-c(which(subsets[,s])),],2,sum) # gradients of all inidividuals but the ones in the subgroup
     subGroupHessian <- ((N-sum(subsets[,s]))/N)*hessian # approximated hessian for all but the subgroup
     subGroupLambda <- alpha*(N-sum(subsets[,s]))*lambda
@@ -81,8 +80,9 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
                                        subGroupLambda = subGroupLambda, 
                                        regularized = names(parameters)%in%regularizedParameterLabels, 
                                        adaptiveLassoWeights = adaptiveLassoWeights, 
-                                       maxIter = maxIter, 
-                                       epsBreak = epsBreak)
+                                       maxIter = control$maxIterIn, 
+                                       epsBreak = control$epsIn, 
+                                       useMultipleConvergenceCriteria = control$useMultipleConvergenceCriteria)
     
     rownames(direction) = names(parameters)
     
@@ -104,7 +104,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     }
 
   }
-  
+  if(control$verbose != 0) cat("\n")
   return(
     list("leaveOutFits" = leaveOutFits,
          "subsets" = subsets,

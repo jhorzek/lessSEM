@@ -79,6 +79,7 @@ arma::mat scores(const SEMCpp& SEM, bool raw){
 std::vector<arma::mat> computeimpliedCovarianceDerivatives(const SEMCpp& SEM,
                                                            const arma::mat& IminusAInverse,
                                                            bool raw){
+  
   // define some convenient references
   const arma::mat& Amatrix = SEM.Amatrix;
   const arma::mat& Smatrix = SEM.Smatrix;
@@ -97,8 +98,8 @@ std::vector<arma::mat> computeimpliedCovarianceDerivatives(const SEMCpp& SEM,
   
   // pre-compute some repeatedly used elements
   arma::mat FIminusAInverse = Fmatrix*IminusAInverse;
-  arma::mat Aelement1 = Smatrix*arma::trans(IminusAInverse)*arma::trans(Fmatrix);
-  arma::mat Aelement2 =  Fmatrix*IminusAInverse*Smatrix;
+  arma::mat ImASImAF = IminusAInverse*Smatrix*arma::trans(FIminusAInverse);
+  arma::mat FImASImA = FIminusAInverse*Smatrix*IminusAInverse;
   
   // iterate over all parameters and compute derivatives
   for(int p = 0; p < uniqueParameterLabels.size(); p++){
@@ -107,7 +108,7 @@ std::vector<arma::mat> computeimpliedCovarianceDerivatives(const SEMCpp& SEM,
       continue; // derivative is zero, as initiated above
     }
     if(parameterLocations.at(p).compare("Smatrix") == 0){
-
+      
       if(isVariance.at(p) && raw){
         // find value of variance
         double valueIs =-9999.9999;
@@ -131,21 +132,19 @@ std::vector<arma::mat> computeimpliedCovarianceDerivatives(const SEMCpp& SEM,
     }
     if(parameterLocations.at(p).compare("Amatrix") == 0){
       
-      derivativesOfCovariance.at(p) = Fmatrix*(
-        IminusAInverse*
+      derivativesOfCovariance.at(p) = FIminusAInverse*
         positionInLocation.at(p)*
-        IminusAInverse)*
-        Aelement1 +
-        Aelement2*
-        arma::trans(IminusAInverse*
+        ImASImAF +
+        FImASImA*
         positionInLocation.at(p)*
-        IminusAInverse
-        )*arma::trans(Fmatrix);
+        arma::trans(FIminusAInverse);
+      
       continue;
     }
     
     Rcpp::stop("Could not locate parameter while computing gradients.");
   }
+  
   return(derivativesOfCovariance);
 }
 

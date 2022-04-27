@@ -27,10 +27,6 @@ arma::mat approximateHessian(SEMCpp& SEM,
   // SEE lavaan:::lav_model_hessian FOR THE IMPLEMENTATION
   // BY Yves Rosseel
   
-  // just in case:
-  SEM.fit();
-  double initialM2LL = SEM.m2LL;
-  
   for(int p = 0; p < nPar; p++) {
     
     stepLeft.at(p) -= eps;
@@ -40,22 +36,22 @@ arma::mat approximateHessian(SEMCpp& SEM,
     
     // step left
     SEM.setParameters(label_, stepLeft, raw);
-    SEM.fit();
+    SEM.implied();
     gradientsStepLeft = SEM.getGradients(raw);
     
     // two step left
     SEM.setParameters(label_, twoStepLeft, raw);
-    SEM.fit();
+    SEM.implied();
     gradientsTwoStepLeft = SEM.getGradients(raw);
     
     // step right
     SEM.setParameters(label_, stepRight, raw);
-    SEM.fit();
+    SEM.implied();
     gradientsStepRight = SEM.getGradients(raw);
     
     // two step right
     SEM.setParameters(label_, twoStepRight, raw);
-    SEM.fit();
+    SEM.implied();
     gradientsTwoStepRight = SEM.getGradients(raw);
     
     // approximate hessian
@@ -76,9 +72,6 @@ arma::mat approximateHessian(SEMCpp& SEM,
   // reset SEM
   SEM.setParameters(label_, value_, raw);
   SEM.fit();
-  if(std::abs(initialM2LL - SEM.m2LL) > 1e-8){
-    Rcpp::warning("Change in fit of the SEM while computing the Hessian. This should not happen! Are you sure that you did set the parameters before computing the Hessian?");
-  }
   return(hessian);
 }
 

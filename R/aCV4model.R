@@ -8,8 +8,9 @@
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
 #' @param recomputeHessian if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
+#' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
 #' @export
-aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
+aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, control = controlGLMNET()){
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
   }
@@ -45,13 +46,13 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
   
   subsets <- aCV4SEM:::createSubsets(N = N, k = k)
   
-  progressbar = txtProgressBar(min = 0,
-                               max = nrow(tuningParameters), 
-                               initial = 0, 
-                               style = 3)
+  if(control$verbose == 0) progressbar = txtProgressBar(min = 0,
+                                                        max = nrow(tuningParameters), 
+                                                        initial = 0, 
+                                                        style = 3)
   
   for(ro in 1:nrow(tuningParameters)){
-    
+    if(control$verbose != 0) cat("Model [",ro, "/", nrow(tuningParameters), "]\n")
     lambda <- tuningParameters$lambda[ro]
     alpha <- tuningParameters$alpha[ro]
     pars <- coef(regularizedSEM, lambda = lambda, alpha = alpha)
@@ -77,11 +78,12 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
                                           lambda = lambda,
                                           alpha = alpha, 
                                           adaptiveLassoWeights = adaptiveLassoWeights,
-                                          hessianOfDifferentiablePart = hessianOfDifferentiablePart)
+                                          hessianOfDifferentiablePart = hessianOfDifferentiablePart,
+                                          control = control)
     
     cvfitsDetails[cvfitsDetails$alpha == alpha & cvfitsDetails$lambda == lambda,paste0("sample",1:k)] <- aCV$leaveOutFits
     cvfits$cvfit[ro] <- sum(aCV$leaveOutFits)
-    setTxtProgressBar(progressbar,ro)
+    if(control$verbose == 0) setTxtProgressBar(progressbar,ro)
     
   }
   

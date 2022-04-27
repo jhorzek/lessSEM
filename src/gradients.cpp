@@ -7,7 +7,7 @@
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
 arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
-  
+
   // define some convenient references
   const arma::mat& Amatrix = SEM.Amatrix;
   const arma::mat& Smatrix = SEM.Smatrix;
@@ -26,19 +26,17 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
   
   // define some elements which will be used repeatedly:
   arma::mat IminusAInverse = arma::inv(arma::eye(arma::size(Amatrix)) - Amatrix);
-  
+
   std::vector<arma::mat> impliedCovInverses(numberOfMissingnessPatterns);
   for(int m = 0; m < numberOfMissingnessPatterns; m++){
-    arma::mat currentimpliedCovarianceInverse = arma::inv_sympd(impliedCovariance(dataSubsets.at(m).notMissing, dataSubsets.at(m).notMissing));
-    
-    impliedCovInverses.at(m) = currentimpliedCovarianceInverse;
-    
+      impliedCovInverses.at(m) = arma::inv_sympd(impliedCovariance(dataSubsets.at(m).notMissing, dataSubsets.at(m).notMissing));
   }
   
   // For each parameter, compute the derivative of the expected covariance
   std::vector<arma::mat>  derivativesOfCovariance = computeimpliedCovarianceDerivatives(SEM,
                                                                                         IminusAInverse,
                                                                                         raw);
+  
   // log-det-Sigma-derivative is independent of the person,
   // but depends on the missing structure!
   arma::mat logDetSigmas = computeLogDetSigmas(SEM,
@@ -46,7 +44,6 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
                                                derivativesOfCovariance,
                                                impliedCovInverses,
                                                raw);
-  
   // compute group gradients
   
   
@@ -58,7 +55,6 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
   for(int gr = 0; gr < SEM.data.nGroups; gr++){
     
     if(SEM.data.dataSubsets.at(gr).N == 1){
-
       groupGradients.row(gr) = computeSingleSubjectGradient_Internal(SEM.data.dataSubsets.at(gr).rawData, 
                          SEM,
                          IminusAInverse,
@@ -66,11 +62,9 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
                          impliedCovInverses.at(gr),
                          arma::trans(logDetSigmas.row(gr)), 
                          derivativesOfCovariance);
-      
     }
     
     if(SEM.data.dataSubsets.at(gr).N > 1){
-      
       groupGradients.row(gr) = arma::trans(computeSubgroupGradient_Internal(
         SEM.data.dataSubsets.at(gr).N,
         SEM.data.dataSubsets.at(gr).means,
@@ -83,12 +77,12 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
         arma::trans(logDetSigmas.row(gr)), 
         derivativesOfCovariance)
       );
-      
     }
     
     currentGradients += groupGradients.row(gr);
     
   }
+  
   return(currentGradients);
   
 }
@@ -127,26 +121,26 @@ arma::mat computeSingleSubjectGradient_Internal(const arma::mat& data_i, // The 
   for(int p = 0; p < uniqueParameterLabels.size(); p++){
     
     if(parameterLocations.at(p).compare("Mvector") == 0){
-
+      
       tempVec = arma::trans(-Fmatrix*IminusAInverse*positionInLocation.at(p));
       individualGradients.col(p) = arma::trans(2.0*arma::trans(tempVec(isObserved))*impliedCovInverse*
         arma::trans(dataNoNAMinusImplied));
-
+      
       continue;
     }
     if(parameterLocations.at(p).compare("Smatrix") == 0){
-
+      
       tempMat = logDetSigmas(p) + dataNoNAMinusImplied*
         (-impliedCovInverse)*
         derivativesOfCovariance.at(p)(isObserved, isObserved)*
         impliedCovInverse*
         arma::trans(dataNoNAMinusImplied);
       individualGradients.col(p) = tempMat.diag();
-
+      
       continue;
     }
     if(parameterLocations.at(p).compare("Amatrix") == 0){
-
+      
       tempVec = arma::trans(-Fmatrix*IminusAInverse*positionInLocation.at(p)*IminusAInverse*Mvector);
       tempMat = dataNoNAMinusImplied*
         (-impliedCovInverse)*
@@ -156,12 +150,12 @@ arma::mat computeSingleSubjectGradient_Internal(const arma::mat& data_i, // The 
       
       individualGradients.col(p) =  logDetSigmas(p) + arma::trans(2.0*arma::trans(tempVec(isObserved))*
         impliedCovInverse*arma::trans(dataNoNAMinusImplied)) + tempMat.diag();
-
+      
       continue;
     }
     Rcpp::stop("Encountered parameter in unknown location");
   }
-
+  
   return(individualGradients);
 }
 
@@ -211,7 +205,7 @@ arma::colvec computeSubgroupGradient_Internal(
       continue;
     }
     if(parameterLocations.at(p).compare("Smatrix") == 0){
-
+      
       tempMat2 = (-impliedCovInverse)*
         derivativesOfCovariance.at(p)(isObserved, isObserved)*
         impliedCovInverse;

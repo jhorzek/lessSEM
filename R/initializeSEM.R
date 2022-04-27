@@ -135,7 +135,16 @@ SEMFromLavaan <- function(lavaanModel,
             if(modelParameters[[matrixName]][ro,co] != parameterIDs[parameter]) next
             rawParameterValue <- parameterValues[parameter]
             # keep variances positive:
-            if(transformVariances && ro==co && matrixName=="Smatrix") rawParameterValue <- ifelse(rawParameterValue < 0, log(.01), log(rawParameterValue))
+            if(transformVariances && ro==co && matrixName=="Smatrix") {
+              if(rawParameterValue < 0){
+                rawParameterValue <- log(.01)
+                warning("lavaanModel has negative variances. Cannot compare fit to lavaanModel")
+                fit <- FALSE
+              }else{
+                rawParameterValue <- log(rawParameterValue)
+              }
+              
+            }
             parameterTable <- rbind(parameterTable,
                                     data.frame(
                                       "label" = parameterLabels[parameter],

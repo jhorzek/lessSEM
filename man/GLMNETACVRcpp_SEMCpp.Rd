@@ -13,8 +13,7 @@ GLMNETACVRcpp_SEMCpp(
   alpha = NULL,
   adaptiveLassoWeights = NULL,
   hessianOfDifferentiablePart = NULL,
-  maxIter = 100,
-  epsBreak = 1e-10
+  control
 )
 }
 \arguments{
@@ -33,9 +32,7 @@ can be generated with the SEMFromLavaan-function.}
 
 \item{adaptiveLassoWeights}{vector with labeled adaptive lasso weights. Only required if penalty = "adaptiveLasso"}
 
-\item{maxIter}{maximal number of iterations used in GLMENT}
-
-\item{epsBreak}{breaking condition of GLMNET}
+\item{control}{arguments passed to GLMNET inner iteration}
 }
 \description{
 internal function for approximate cross-validation based on the internal model representation of aCV4SEM. The GLMNET part refers to the fact

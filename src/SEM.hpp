@@ -14,6 +14,7 @@ public:
   //flags
   bool wasChecked = false; // true if the model was checked
   bool wasFit = false; // true if fit was called
+  bool impliedWasCalled = false; // true if the implied matrices were computed
   int currentStatus = 0; // 0 = initialized
                      // 1 = matrices were defined
                      // 2 = initializeParameters was called

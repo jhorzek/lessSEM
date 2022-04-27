@@ -15,27 +15,27 @@
 #' @param maxIterLine Maximal number of iterations for the line search procedure
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
-#' @param useMultipleConvergencCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
-#' @param parameterChangeEps if useMultipleConvergencCriteria: change in parameters which results in convergence
-#' @param regM2LLChangeEps if useMultipleConvergencCriteria: change in fit which results in convergence
+#' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
+#' @param parameterChangeEps if useMultipleConvergenceCriteria: change in parameters which results in convergence
+#' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 #' @export
 controlGLMNET <- function(
   startingValues = "est",
   initialHessian = ifelse(all(startingValues=="est"),"compute",1),
   stepSize = 1,
-  c1 = 1e-04,
+  c1 = 1e-4,
   c2 = 0.9,
-  sig = 10^(-5),
+  sig = 1e-5,
   gam = 0,
   maxIterOut = 1000,
   maxIterIn = 1000,
   maxIterLine = 500,
-  epsOut = 1e-06,
-  epsIn = 1e-06,
-  useMultipleConvergencCriteria = TRUE,
-  parameterChangeEps = 1e-6,
-  regM2LLChangeEps = 1e-6,
+  epsOut = 1e-5,
+  epsIn = 1e-5,
+  useMultipleConvergenceCriteria = TRUE,
+  parameterChangeEps = 1e-5,
+  regM2LLChangeEps = 1e-5,
   verbose = 0
 ){
   return(
@@ -52,7 +52,7 @@ controlGLMNET <- function(
     maxIterLine = maxIterLine,
     epsOut = epsOut,
     epsIn = epsIn,
-    useMultipleConvergencCriteria = useMultipleConvergencCriteria,
+    useMultipleConvergenceCriteria = useMultipleConvergenceCriteria,
     parameterChangeEps = parameterChangeEps,
     regM2LLChangeEps = regM2LLChangeEps,
     verbose = verbose

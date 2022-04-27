@@ -10,20 +10,21 @@ arma::colvec innerGLMNET(const arma::colvec parameters,
                          const Rcpp::LogicalVector regularized,
                          const arma::colvec adaptiveLassoWeights,
                          const int maxIter, 
-                         const double epsBreak 
+                         const double epsBreak,
+                         const bool useMultipleConvergenceCriteria
 ){
   arma::colvec stepDirection(parameters.n_elem, arma::fill::zeros);
-  arma::colvec z(parameters.n_elem, arma::fill::zeros);
+  arma::colvec z(parameters.n_elem, arma::fill::zeros), z_old(parameters.n_elem, arma::fill::zeros);
   arma::colvec newParameters(parameters.n_elem, arma::fill::zeros);
   arma::colvec hessianXdirection, HessTimesZ(subGroupHessian.n_rows, arma::fill::zeros);
   arma::mat HessDiag(subGroupHessian.n_rows, subGroupHessian.n_cols, arma::fill::zeros),
-  dp_k(1,1, arma::fill::zeros), d2p_k(1,1, arma::fill::zeros), z_j(1,1, arma::fill::zeros), newParameter(1,1, arma::fill::zeros);
+  dp_k(1,1, arma::fill::zeros), d2p_k(1,1, arma::fill::zeros), z_j(1,1, arma::fill::zeros), newParameter(1,1, arma::fill::zeros), zChange(1,1, arma::fill::zeros);
   
   for(int it = 0; it < maxIter; it++){
     
     // reset direction z
     z.fill(arma::fill::zeros); 
-    
+    z_old.fill(arma::fill::zeros);
     // iterate over parameters
     for(int p = 0; p < parameters.n_elem; p++){
       
@@ -65,9 +66,15 @@ arma::colvec innerGLMNET(const arma::colvec parameters,
     HessDiag.diag() = subGroupHessian.diag();
     HessTimesZ = HessDiag*pow(z,2);
     
+    zChange = z*arma::trans(z_old);
+    if(useMultipleConvergenceCriteria & (zChange(0,0) < epsBreak)){
+      break;
+    }
+    
     if(HessTimesZ.max() < epsBreak){
       break;
     }
+    z_old = z;
   }
   return(stepDirection);
 }

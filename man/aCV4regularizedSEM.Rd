@@ -4,7 +4,12 @@
 \alias{aCV4regularizedSEM}
 \title{aCV4regularizedSEM}
 \usage{
-aCV4regularizedSEM(regularizedSEM, k, recomputeHessian = TRUE)
+aCV4regularizedSEM(
+  regularizedSEM,
+  k,
+  recomputeHessian = TRUE,
+  control = controlGLMNET()
+)
 }
 \arguments{
 \item{regularizedSEM}{model of class regularizedSEM}
@@ -12,6 +17,8 @@ aCV4regularizedSEM(regularizedSEM, k, recomputeHessian = TRUE)
 \item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set}
 
 \item{recomputeHessian}{if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.}
+
+\item{control}{parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details}
 }
 \description{
 approximate cross-validation for models of class regularizedSEM. These models can be fit with regularizedSEM() (see ?regularizedSEM)

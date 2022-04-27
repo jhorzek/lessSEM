@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // innerGLMNET
-arma::colvec innerGLMNET(const arma::colvec parameters, const arma::colvec subGroupGradient, const arma::mat subGroupHessian, const double subGroupLambda, const Rcpp::LogicalVector regularized, const arma::colvec adaptiveLassoWeights, const int maxIter, const double epsBreak);
-RcppExport SEXP _aCV4SEM_innerGLMNET(SEXP parametersSEXP, SEXP subGroupGradientSEXP, SEXP subGroupHessianSEXP, SEXP subGroupLambdaSEXP, SEXP regularizedSEXP, SEXP adaptiveLassoWeightsSEXP, SEXP maxIterSEXP, SEXP epsBreakSEXP) {
+arma::colvec innerGLMNET(const arma::colvec parameters, const arma::colvec subGroupGradient, const arma::mat subGroupHessian, const double subGroupLambda, const Rcpp::LogicalVector regularized, const arma::colvec adaptiveLassoWeights, const int maxIter, const double epsBreak, const bool useMultipleConvergenceCriteria);
+RcppExport SEXP _aCV4SEM_innerGLMNET(SEXP parametersSEXP, SEXP subGroupGradientSEXP, SEXP subGroupHessianSEXP, SEXP subGroupLambdaSEXP, SEXP regularizedSEXP, SEXP adaptiveLassoWeightsSEXP, SEXP maxIterSEXP, SEXP epsBreakSEXP, SEXP useMultipleConvergenceCriteriaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,7 +25,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::colvec >::type adaptiveLassoWeights(adaptiveLassoWeightsSEXP);
     Rcpp::traits::input_parameter< const int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< const double >::type epsBreak(epsBreakSEXP);
-    rcpp_result_gen = Rcpp::wrap(innerGLMNET(parameters, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak));
+    Rcpp::traits::input_parameter< const bool >::type useMultipleConvergenceCriteria(useMultipleConvergenceCriteriaSEXP);
+    rcpp_result_gen = Rcpp::wrap(innerGLMNET(parameters, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak, useMultipleConvergenceCriteria));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -89,7 +90,7 @@ END_RCPP
 RcppExport SEXP _rcpp_module_boot_SEM_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_aCV4SEM_innerGLMNET", (DL_FUNC) &_aCV4SEM_innerGLMNET, 8},
+    {"_aCV4SEM_innerGLMNET", (DL_FUNC) &_aCV4SEM_innerGLMNET, 9},
     {"_aCV4SEM_computeIndividualM2LL", (DL_FUNC) &_aCV4SEM_computeIndividualM2LL, 4},
     {"_aCV4SEM_computeGroupM2LL", (DL_FUNC) &_aCV4SEM_computeGroupM2LL, 6},
     {"_aCV4SEM_computeImpliedCovariance", (DL_FUNC) &_aCV4SEM_computeImpliedCovariance, 3},
