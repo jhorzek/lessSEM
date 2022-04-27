@@ -2,6 +2,7 @@
 
 export(aCV4lavaan)
 export(aCV4regularizedSEM)
+export(aI4regularizedSEM)
 export(controlGLMNET)
 export(cvregsem2LavaanParameters)
 export(getLavaanParameters)

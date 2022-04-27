@@ -46,7 +46,10 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   stepdirections <- matrix(NA, nrow = k, ncol = length(parameters))
   colnames(stepdirections) <- names(parameters)
   
-  subsetParameters <- vector("list",k)
+  #subsetParameters <- vector("list",k)
+  subsetParameters <- matrix(NA, nrow = k, ncol = length(parameters))
+  colnames(subsetParameters) <- names(parameters)
+  rownames(subsetParameters) <- paste0("sample", 1:k)
   leaveOutFits <- rep(0, k)
   names(leaveOutFits) <- paste0("sample", 1:k)
   
@@ -90,11 +93,11 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     parameters_s <- parameters + stepdirections[s,names(parameters)]
     SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
     #SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
-    subsetParameters[[s]] <- aCV4SEM:::getParameters(SEM = SEM, raw = FALSE)
+    subsetParameters[s,names(parameters)] <- aCV4SEM:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
    
     
     for(i in which(subsets[,s])){
-      leaveOutFits[s] <- leaveOutFits[s] + aCV4SEM:::individualMinus2LogLikelihood(par = subsetParameters[[s]], 
+      leaveOutFits[s] <- leaveOutFits[s] + aCV4SEM:::individualMinus2LogLikelihood(par = subsetParameters[s,], 
                                                                                    SEM = SEM, 
                                                                                    data = dataSet[i,], 
                                                                                    raw = FALSE)
