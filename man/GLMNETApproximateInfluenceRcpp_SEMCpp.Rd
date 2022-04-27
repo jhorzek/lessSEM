@@ -13,8 +13,7 @@ GLMNETApproximateInfluenceRcpp_SEMCpp(
   alpha = NULL,
   adaptiveLassoWeights = NULL,
   hessianOfDifferentiablePart = NULL,
-  maxIter = 100,
-  epsBreak = 1e-10
+  control
 )
 }
 \arguments{
@@ -32,6 +31,8 @@ can be generated with the SEMFromLavaan-function.}
 \item{alpha}{value of tuning parameter alpha (for elastic net)}
 
 \item{adaptiveLassoWeights}{vector with labeled adaptive lasso weights. Only required if penalty = "adaptiveLasso"}
+
+\item{control}{parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details}
 
 \item{maxIter}{maximal number of iterations used in GLMENT}
 

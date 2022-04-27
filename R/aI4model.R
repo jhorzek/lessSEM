@@ -8,8 +8,9 @@
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
 #' @param recomputeHessian if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
+#' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
 #' @export
-aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
+aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, control = controlGLMNET()){
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
   }
@@ -34,12 +35,20 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
   
   subsets <- aCV4SEM:::createSubsets(N = N, k = k)
   
-  subsetParameters <- array(NA, dim = c(k,length(parameterLabels), nrow(tuningParameters)), dimnames = list(paste0("subset",1:k), 
-                                                                                                            parameterLabels, 
-                                                                                                            NULL))
-  subsetFits <- array(NA, dim = c(k,1, nrow(tuningParameters)), dimnames = list(paste0("subset",1:k), 
-                                                                                "fit", 
-                                                                                NULL))
+  subsetElements<- expand.grid(removedSubset = 1:k, 
+                               lambda = unique(tuningParameters$lambda), 
+                               alpha = unique(tuningParameters$alpha)
+  )
+  subsetFits <- cbind(subsetElements, 
+                      matrix(NA, nrow(subsetElements), 
+                             ncol = 1, 
+                             dimnames = list(NULL, "fit")))
+  
+  subsetParameters <- cbind(subsetElements, 
+                            matrix(NA, nrow(subsetElements), 
+                                   ncol = length(parameterLabels), 
+                                   dimnames = list(NULL, parameterLabels)))
+  
   
   progressbar = txtProgressBar(min = 0,
                                max = nrow(tuningParameters), 
@@ -73,9 +82,11 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
                                                                   lambda = lambda,
                                                                   alpha = alpha, 
                                                                   adaptiveLassoWeights = adaptiveLassoWeights,
-                                                                  hessianOfDifferentiablePart = hessianOfDifferentiablePart)
-    subsetFits[,,ro] <- aInfluence$fits
-    subsetParameters[,,ro] <- aInfluence$subsetParameters[,parameterLabels]
+                                                                  hessianOfDifferentiablePart = hessianOfDifferentiablePart,
+                                                                  control = control)
+    subsetFits$fit[subsetFits$lambda == lambda & subsetFits$alpha == alpha] <- aInfluence$fits$fit
+    subsetParameters[subsetFits$lambda == lambda & subsetFits$alpha == alpha, parameterLabels] <- aInfluence$subsetParameters[,parameterLabels]
+    
     setTxtProgressBar(progressbar,ro)
     
   }
@@ -107,6 +118,7 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE){
 #' @param adaptiveLassoWeights vector with labeled adaptive lasso weights. Only required if penalty = "adaptiveLasso"
 #' @param maxIter maximal number of iterations used in GLMENT
 #' @param epsBreak breaking condition of GLMNET
+#' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
 GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM, 
                                                   subsets, 
                                                   raw = FALSE, 
@@ -115,8 +127,7 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
                                                   alpha = NULL,
                                                   adaptiveLassoWeights = NULL,
                                                   hessianOfDifferentiablePart = NULL,
-                                                  maxIter = 100,
-                                                  epsBreak = 1e-10){
+                                                  control){
   
   if(!is(SEM, "Rcpp_SEMCpp")){
     stop("SEM must be of class Rcpp_SEMCpp")
@@ -140,14 +151,12 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
   stepdirections <- matrix(NA, nrow = k, ncol = length(parameters))
   colnames(stepdirections) <- names(parameters)
   
-  #subsetParameters <- vector("list",k)
-  subsetParameters <- matrix(NA, nrow = k, ncol = length(parameters))
-  colnames(subsetParameters) <- names(parameters)
-  rownames(subsetParameters) <- paste0("sample", 1:k)
-  leaveOutFits <- rep(0, k)
-  names(leaveOutFits) <- paste0("sample", 1:k)
-  fits <- rep(NA, k)
-  names(fits) <- paste0("FitWithoutSample", 1:k)
+  subsetParameters <- data.frame(lambda = rep(lambda,k), alpha = rep(alpha,k), removedSubset = 1:k)
+  subsetParameters <- cbind(subsetParameters, 
+                            matrix(NA, nrow = k, ncol = length(parameters), dimnames = list(NULL, names(parameters)))
+  )
+  
+  fits <- data.frame(lambda = rep(lambda,k), alpha = rep(alpha,k), removedSubset = 1:k, fit = NA)
   
   for(s in 1:k){
     
@@ -177,8 +186,9 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
                                        subGroupLambda = subGroupLambda, 
                                        regularized = names(parameters)%in%regularizedParameterLabels, 
                                        adaptiveLassoWeights = adaptiveLassoWeights, 
-                                       maxIter = maxIter, 
-                                       epsBreak = epsBreak)
+                                       maxIter = control$maxIterIn, 
+                                       epsBreak = control$epsIn, 
+                                       useMultipleConvergenceCriteria = control$useMultipleConvergenceCriteria)
     
     rownames(direction) = names(parameters)
     
@@ -189,15 +199,15 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
     parameters_s <- parameters + stepdirections[s,names(parameters)]
     SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
     SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
-    subsetParameters[s,names(parameters)] <- aCV4SEM:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
-    fits[s] <- SEM$m2LL 
+    subsetParameters[subsetParameters$removedSubset == s, names(parameters)] <- aCV4SEM:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
+    fits$fit[fits$removedSubset == s] <- SEM$m2LL 
     
     for(i in which(subsets[,s])){
       isMissing <- is.na(dataSet[i,])
-      fits[s] <- fits[s] - computeIndividualM2LL(nObservedVariables = sum(!isMissing),  
-                                                 rawData = dataSet[i,!isMissing], 
-                                                 impliedMeans = SEM$impliedMeans[!isMissing], 
-                                                 impliedCovariance = SEM$impliedCovariance[!isMissing,!isMissing])
+      fits$fit[fits$removedSubset == s] <- fits$fit[fits$removedSubset == s] - computeIndividualM2LL(nObservedVariables = sum(!isMissing),  
+                                                                                                     rawData = dataSet[i,!isMissing], 
+                                                                                                     impliedMeans = SEM$impliedMeans[!isMissing], 
+                                                                                                     impliedCovariance = SEM$impliedCovariance[!isMissing,!isMissing])
     }
   }
   
