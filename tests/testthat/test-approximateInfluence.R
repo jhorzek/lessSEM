@@ -33,6 +33,17 @@ test_that("testing approximate influence", {
   
   aI <- aI4regularizedSEM(regularizedSEM = rsem, k = N)
   plot(aI)
-  AIC(aI)
-  BIC(aI)
+  AICs <- AIC(aI)
+  BICs <- BIC(aI)
+  
+  coef(AICs)
+  coef(BICs)
+  
+  plot(AICs)
+  plot(BICs)
+  
+  mean(AICs)
+  mean(BICs)
+  
+  plot(mean(AICs)$lambda, mean(AICs)$value,type = "l")
 })

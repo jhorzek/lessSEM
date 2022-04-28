@@ -4,10 +4,12 @@
 \alias{coef,regularizedSEM-method}
 \title{coef}
 \usage{
-\S4method{coef}{regularizedSEM}(object, lambda = NULL, alpha = NULL)
+\S4method{coef}{regularizedSEM}(object, criterion = NULL, lambda = NULL, alpha = NULL)
 }
 \arguments{
 \item{object}{object of class regularizedSEM}
+
+\item{criterion}{can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned}
 
 \item{lambda}{numeric: value of lambda for which parameters should be returned. Must be present in object}
 

@@ -57,6 +57,8 @@ test_that("testing lasso", {
   plot(rsem)
   coef(rsem)
   coef(rsem, alpha = 1, lambda = .1)
+  coef(rsem, criterion = "AIC")
+  coef(rsem, criterion = "BIC")
   
   ## Test approximated cross-validation
   

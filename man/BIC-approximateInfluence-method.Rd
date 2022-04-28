@@ -2,7 +2,7 @@
 % Please edit documentation in R/class-approximateInfluence.R
 \name{BIC,approximateInfluence-method}
 \alias{BIC,approximateInfluence-method}
-\title{AIC}
+\title{BIC}
 \usage{
 \S4method{BIC}{approximateInfluence}(object)
 }

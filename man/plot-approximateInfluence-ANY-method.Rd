@@ -4,10 +4,16 @@
 \alias{plot,approximateInfluence,ANY-method}
 \title{plot}
 \usage{
-\S4method{plot}{approximateInfluence,ANY}(x, alpha = NULL)
+\S4method{plot}{approximateInfluence,ANY}(x, alpha = NULL, regularizedOnly = TRUE, interactive = FALSE)
 }
 \arguments{
-\item{object}{object of class approximateInfluence}
+\item{x}{object of class approximateInfluence}
+
+\item{alpha}{the alpha tuning parameter value for which the data should be plotted}
+
+\item{regularizedOnly}{boolean: Should only the regularized parameters be plotted?}
+
+\item{interactive}{boolean: If set to TRUE, plotly will be used to make the plot interactive. This can provide more information into which person may influence the results substantially}
 }
 \description{
 plot

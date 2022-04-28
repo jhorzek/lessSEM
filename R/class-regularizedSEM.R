@@ -36,13 +36,29 @@ setMethod("summary", "regularizedSEM", function (object) {
 #' Returns the parameter estimates of a regularizedSEM
 #' 
 #' @param object object of class regularizedSEM
+#' @param criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
 #' @param lambda numeric: value of lambda for which parameters should be returned. Must be present in object
 #' @param alpha numeric: value of alpha for which parameters should be returned. Must be present in object
 #' @export
-setMethod("coef", "regularizedSEM", function (object, lambda = NULL, alpha = NULL) {
-  if(is.null(lambda) && is.null(alpha)) return(object@parameters)
-  if(is.null(lambda)) return(object@parameters[object@parameters$alpha == alpha,])
-  if(is.null(alpha)) return(object@parameters[object@parameters$lambda == lambda,])
+setMethod("coef", "regularizedSEM", function (object, criterion = NULL, lambda = NULL, alpha = NULL) {
+  if(is.null(lambda) && is.null(alpha) && is.null(criterion)) return(object@parameters)
+  if(is.null(lambda) && is.null(criterion)) return(object@parameters[object@parameters$alpha == alpha,])
+  if(is.null(alpha) && is.null(criterion)) return(object@parameters[object@parameters$lambda == lambda,])
+  if(!is.null(criterion) && criterion %in% c("AIC", "BIC")){
+    if(length(unique(object@parameters$alpha)) != 1 || unique(object@parameters$alpha) != 1) stop("Selection by criterion currently only supported for lasso type penalties.")
+    if(criterion == "AIC"){
+      AICs <- AIC(object)
+      bestAIC <- which(AICs$AIC == min(AICs$AIC))[1]
+      return(object@parameters[bestAIC,]) 
+    }
+    
+    if(criterion == "BIC"){
+      BICs <- BIC(object)
+      bestBIC <- which(BICs$BIC == min(BICs$BIC))[1]
+      return(object@parameters[bestBIC,])
+    }
+    
+  }
   
   pars <- object@parameters
   pars <- unlist(pars[pars$lambda == lambda & pars$alpha == alpha, object@parameterLabels])

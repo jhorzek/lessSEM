@@ -97,6 +97,7 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contro
         subsetParameters = subsetParameters,
         tuningParameters = tuningParameters,
         subsetFits = subsetFits,
+        parameters = regularizedSEM@parameters,
         parameterLabels = parameterLabels,
         regularized = regularizedParameterLabels)
   )

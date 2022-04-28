@@ -93,18 +93,20 @@ setMethod("coef", "aCV4RegularizedSEM", function (object, lambda = NULL, alpha =
         # the lambda for which all parameters were first zeroed provides the upper bound
         lambdaMax <- min(which(nNotZeroed == 0))
       }
-      lambdaMin <- which(cvFits == min(cvFits)) # the lambda which has the best cv fit provides the lower bound
+      lambdaMin <- which.min(cvFits) # the lambda which has the best cv fit provides the lower bound
       
       bestCVFit <- min(cvFits)
       sparseCVFit <- cvFits[lambdaMax]
       
       bestNNonzeroParameter <- nNotZeroed[lambdaMin] 
       
-      penalty <- -2*((bestCVFit - sparseCVFit)/bestNNonzeroParameter)*nNotZeroed[lambdaMin:lambdaMax] # -2 as we are using the -2 log-likelihood
+      penalty <- ((sparseCVFit - bestCVFit)/bestNNonzeroParameter)*nNotZeroed[lambdaMin:lambdaMax] # note: we use the -2 log-Likelihood; our penalty term is therefore different from
+      # Ternès et al. (2016)
       
-      cvFits[lambdaMin:lambdaMax] <- cvFits[lambdaMin:lambdaMax] + penalty
-      cvFits[-c(lambdaMin:lambdaMax)] <- Inf
-      bestFit <- which(cvFits == min(cvFits))
+      cvFitsPenalized <- cvFits
+      cvFitsPenalized[] <- Inf
+      cvFitsPenalized[lambdaMin:lambdaMax] <- cvFits[lambdaMin:lambdaMax] + penalty
+      bestFit <- which.min(cvFitsPenalized)
       
       parameters <- unlist(object@parameters[bestFit,object@parameterLabels])
       return(parameters)
