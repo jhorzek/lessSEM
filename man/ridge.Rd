@@ -4,12 +4,14 @@
 \alias{ridge}
 \title{ridge}
 \usage{
-ridge(parameters, penaltyFunctionArguments)
+ridge(parameters, tuningParameters, penaltyFunctionArguments)
 }
 \arguments{
 \item{parameters}{vector with labeled parameter values}
 
-\item{penaltyFunctionArguments}{list with fields lambda (tuning parameter value) and regularizedParameterLabels (labels of regularized parameters)}
+\item{tuningParameters}{list with field lambda (tuning parameter value)}
+
+\item{penaltyFunctionArguments}{list with field regularizedParameterLabels (labels of regularized parameters)}
 }
 \description{
 ridge penalty function

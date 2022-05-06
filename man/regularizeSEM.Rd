@@ -34,9 +34,7 @@ regularizeSEM(
 \item{raw}{controls if the internal transformations of aCV4SEM is used.}
 
 \item{control}{option to set parameters of the GLMNET optimizer}
-
-\item{eps}{controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.}
 }
 \description{
-optimize a SEM with regularized penalty function. Uses smooth approximations for non-differentiable penalty functions.
+optimize a SEM with regularized penalty function.
 }

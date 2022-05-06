@@ -1,6 +1,6 @@
 #' regularizeSEM
 #' 
-#' optimize a SEM with regularized penalty function. Uses smooth approximations for non-differentiable penalty functions.
+#' optimize a SEM with regularized penalty function.
 #' 
 #' @param lavaanModel model of class lavaan 
 #' @param regularizedParameterLabels labels of regularized parameters
@@ -9,7 +9,6 @@
 #' @param nLambdas if penalty == "lasso" or penalty == "adaptiveLasso", one can specify the number of lambda values to use. In this case, set lambdas = NULL.
 #' @param alphas 0<alpha<1. only required for elastic net. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge
 #' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO
-#' @param eps controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.
 #' @param raw controls if the internal transformations of aCV4SEM is used.
 #' @param control option to set parameters of the GLMNET optimizer
 #' @export
@@ -176,7 +175,6 @@ regularizeSEM <- function(lavaanModel,
                                epsOut = control$epsOut,
                                epsIn = control$epsIn,
                                useMultipleConvergenceCriteria = control$useMultipleConvergenceCriteria,
-                               parameterChangeEps = control$parameterChangeEps, 
                                regM2LLChangeEps = control$regM2LLChangeEps,
                                verbose = control$verbose)
     
@@ -397,7 +395,6 @@ getMaxLambda <- function(SEM, regularizedParameterLabels, adaptiveLassoWeights, 
                              epsOut = control$epsOut,
                              epsIn = control$epsIn,
                              useMultipleConvergenceCriteria = control$useMultipleConvergenceCriteria,
-                             parameterChangeEps = control$parameterChangeEps, 
                              regM2LLChangeEps = control$regM2LLChangeEps,
                              verbose = control$verbose)
   sparseParameters <- result$parameters

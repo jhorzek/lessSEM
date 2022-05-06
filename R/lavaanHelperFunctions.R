@@ -87,3 +87,36 @@ regsem2LavaanParameters <- function(regsemModel, lavaanModel){
   
   return(parameters)
 }
+
+#' lavaan2lslxLabels
+#' 
+#' helper function: lslx and lavaan use slightly different parameter labels. This function
+#' can be used to get both sets of labels.
+#'
+#' @param lavaanModel model of class lavaan
+#' @export
+lavaan2lslxLabels <- function(lavaanModel){
+  if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
+  # extract parameters
+  parameterIDs <- lavaanModel@ParTable$id[lavaanModel@ParTable$free != 0]
+  ops <- lavaanModel@ParTable$op
+  lavaanLabels <- paste0(lavaanModel@ParTable$lhs, ops, lavaanModel@ParTable$rhs)
+  lavaanLabels[lavaanModel@ParTable$label!=""] <- lavaanModel@ParTable$label[lavaanModel@ParTable$label!=""]
+  lavaanLabels <- lavaanLabels[lavaanModel@ParTable$free != 0]
+  
+  parFrameLslx <- data.frame(lhs = lavaanModel@ParTable$rhs, ops = ops, rhs = lavaanModel@ParTable$lhs, g = "/g")
+  parFrameLslx <- parFrameLslx[lavaanModel@ParTable$free != 0,]
+  parFrameLslx$ops[parFrameLslx$ops == "=~"] <- "<-"
+  parFrameLslx$ops[parFrameLslx$ops == "~~"] <- "<->"
+  parFrameLslx$lhs[parFrameLslx$ops == "~1"] <- parFrameLslx$rhs[parFrameLslx$ops == "~1"]
+  parFrameLslx$rhs[parFrameLslx$ops == "~1"] <- ""
+  parFrameLslx$ops[parFrameLslx$ops == "~1"] <- "<-1"
+  
+  lslxLabels <- apply(parFrameLslx,1,paste0, collapse = "")
+  names(lslxLabels) <- NULL
+  
+  return( 
+    list("lavaanLabels" = lavaanLabels,
+         "lslxLabels" = lslxLabels)
+  )
+}

@@ -4,12 +4,14 @@
 \alias{smoothElasticNetHessian}
 \title{smoothElasticNetHessian}
 \usage{
-smoothElasticNetHessian(parameters, penaltyFunctionArguments)
+smoothElasticNetHessian(parameters, tuningParameters, penaltyFunctionArguments)
 }
 \arguments{
 \item{parameters}{vector with labeled parameter values}
 
-\item{penaltyFunctionArguments}{list with fields lambda (tuning parameter value), alpha (0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge), regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)}
+\item{tuningParameters}{list with fields lambda (tuning parameter value), alpha (0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge)}
+
+\item{penaltyFunctionArguments}{list with fields regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)}
 }
 \description{
 smoothed version of non-differentiable elastic LASSO Hessian

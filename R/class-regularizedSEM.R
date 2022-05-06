@@ -73,7 +73,30 @@ setMethod("coef", "regularizedSEM", function (object, criterion = NULL, lambda =
 #' @export
 setMethod("AIC", "regularizedSEM", function (object) {
   fits <- object@fits
-  fits$AIC <- fits$m2LL + 2*fits$nonZeroParameters
+  if(all(fits$alpha == 1)){
+    fits$AIC <- fits$m2LL + 2*fits$nonZeroParameters
+  }else{
+    warning("AIC for non-lasso models is experimental and should not be trusted. Use approximate cross-validation instead")
+    fits$AIC <- rep(NA, length(fits$m2LL))
+    tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
+    
+    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = object@inputArguments$lavaanModel, fit = FALSE)
+    
+    for(i in 1:nrow(tuningParameters)){
+      SEM <- aCV4SEM:::setParameters(SEM, 
+                                     labels = object@parameterLabels, 
+                                     values = coef(object, 
+                                                   lambda = tuningParameters$lambda[i], 
+                                                   alpha = tuningParameters$alpha[i]), 
+                                     raw = FALSE)
+      SEM <- aCV4SEM:::fit(SEM)
+      scores <- aCV4SEM:::getScores(SEM, raw = FALSE)
+      hessian <- aCV4SEM:::getHessian(SEM, raw = FALSE)
+      hessianInv <- solve(hessian)
+      twoTimesNpar <- sum(apply(scores, 1, function(x) t(x)%*%hessianInv%*%(x)))
+      fits$AIC[i] <- fits$m2LL[i] + twoTimesNpar
+    }
+  }
   
   return(fits)
 })
@@ -87,8 +110,32 @@ setMethod("AIC", "regularizedSEM", function (object) {
 setMethod("BIC", "regularizedSEM", function (object) {
   N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
   fits <- object@fits
-  fits$BIC <- fits$m2LL + log(N)*fits$nonZeroParameters
   
+  if(all(fits$alpha == 1)){
+    fits$BIC <- fits$m2LL + fits$m2LL + log(N)*fits$nonZeroParameters
+  }else{
+    warning("BIC for non-lasso models is experimental and should not be trusted. Use approximate cross-validation instead")
+    fits$BIC <- rep(NA, length(fits$m2LL))
+    tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
+    
+    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = object@inputArguments$lavaanModel, fit = FALSE)
+    
+    for(i in 1:nrow(tuningParameters)){
+      SEM <- aCV4SEM:::setParameters(SEM, 
+                                     labels = object@parameterLabels, 
+                                     values = coef(object, 
+                                                   lambda = tuningParameters$lambda[i], 
+                                                   alpha = tuningParameters$alpha[i]), 
+                                     raw = FALSE)
+      SEM <- aCV4SEM:::fit(SEM)
+      scores <- aCV4SEM:::getScores(SEM, raw = FALSE)
+      hessian <- aCV4SEM:::getHessian(SEM, raw = FALSE)
+      hessianInv <- solve(hessian)
+      npar <- .5*sum(apply(scores, 1, function(x) t(x)%*%hessianInv%*%(x))) # scores and hessian are for -2 log-Likelihood
+      fits$BIC[i] <- fits$m2LL[i] + log(N)*npar
+    }
+  }
+
   return(fits)
 })
 

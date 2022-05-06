@@ -18,7 +18,6 @@ controlGLMNET(
   epsOut = 1e-05,
   epsIn = 1e-05,
   useMultipleConvergenceCriteria = TRUE,
-  parameterChangeEps = 1e-06,
   regM2LLChangeEps = 1e-06,
   verbose = 0
 )
@@ -48,8 +47,6 @@ see those labels. If set to "compute", the initial hessian will be computed. If 
 \item{epsIn}{Stopping criterion for inner iterations}
 
 \item{useMultipleConvergenceCriteria}{if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops}
-
-\item{parameterChangeEps}{if useMultipleConvergenceCriteria: change in parameters which results in convergence}
 
 \item{regM2LLChangeEps}{if useMultipleConvergenceCriteria: change in fit which results in convergence}
 

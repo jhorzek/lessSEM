@@ -16,7 +16,6 @@
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
 #' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
-#' @param parameterChangeEps if useMultipleConvergenceCriteria: change in parameters which results in convergence
 #' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 GLMNET <- function(SEM, 
@@ -34,7 +33,6 @@ GLMNET <- function(SEM,
                    epsOut,
                    epsIn,
                    useMultipleConvergenceCriteria,
-                   parameterChangeEps,
                    regM2LLChangeEps,
                    verbose = 0){
   if(!((0 <= alpha) && (alpha <= 1))) stop("alpha must be in [0,1]")
@@ -85,11 +83,13 @@ GLMNET <- function(SEM,
     # elastic net or ridge are used -> we add the differentiable part of 
     # the penalty to the gradients and the Hessian
     # we multiply with the adaptive lasso weights.
-    penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
-                                     "lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*N)
+    penaltyFunctionTuning <- list("lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*N)
+    penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels)
     newGradients <- newGradients + aCV4SEM::ridgeGradient(parameters = newParameters, 
+                                                          tuningParameters = penaltyFunctionTuning,
                                                           penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     newHessian <- newHessian + ridgeHessian(parameters = newParameters, 
+                                            tuningParameters = penaltyFunctionTuning,
                                             penaltyFunctionArguments = penaltyFunctionArguments)[rownames(newHessian), colnames(newHessian)]
   }
   
@@ -104,8 +104,7 @@ GLMNET <- function(SEM,
     iterOut <- iterOut + 1
     
     if(iterOut > 1){
-      parameterChange <- (newParameters - oldParameters)/(newParameters+1e-9) # add small jitter as zeroed parameters will otherwise 
-      # result in division by 0
+      parameterChange <- (newParameters - oldParameters)
     }
     
     oldParameters <- newParameters
@@ -135,7 +134,7 @@ GLMNET <- function(SEM,
       if(convergenceCriterion){
         break
       }
-      if(useMultipleConvergenceCriteria && (abs(regM2LLChange) < regM2LLChangeEps || max(abs(parameterChange)) < parameterChangeEps)){
+      if(useMultipleConvergenceCriteria && (abs(regM2LLChange) < regM2LLChangeEps)){
         # second convergence criterion: no more change in fit
         break
       }
@@ -147,7 +146,7 @@ GLMNET <- function(SEM,
                    "] m2LL: ", sprintf('%.4f',newM2LL),
                    " | regM2LL:  ", sprintf('%.4f',newRegM2LL),
                    " | regM2LL change:  ", sprintf('%.4f',regM2LLChange),
-                   " | max. rel. parameter change:  ", sprintf('%.4f',max(abs(parameterChange))),
+                   " | max. abs. parameter change:  ", sprintf('%.4f',max(abs(parameterChange))),
                    " | zeroed: ", sum(newParameters[regularizedParameterLabels] == 0),
                    " ##")
         )
@@ -205,6 +204,7 @@ GLMNET <- function(SEM,
     if(alpha != 1){
       # add derivative of differentiable part of the penalty:
       newGradients <- newGradients + aCV4SEM::ridgeGradient(parameters = newParameters, 
+                                                            tuningParameters = penaltyFunctionTuning,
                                                             penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     }
     
@@ -223,9 +223,11 @@ GLMNET <- function(SEM,
   if(alpha != 1){
     # remove derivative of differentiable part of the penalty; we want the gradients of the log-Likelihood, not those including the penalty
     newGradients <- newGradients - aCV4SEM::ridgeGradient(parameters = newParameters, 
+                                                          tuningParameters = penaltyFunctionTuning,
                                                           penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     # remove hessian of differentiable part of the penalty; we want the hessian of the log-Likelihood, not the one including the penalty
-    newHessian <- newHessian - aCV4SEM::ridgeHessian(parameters = newParameters, 
+    newHessian <- newHessian - aCV4SEM::ridgeHessian(parameters = newParameters,
+                                                     tuningParameters = penaltyFunctionTuning,
                                                      penaltyFunctionArguments = penaltyFunctionArguments)[rownames(newHessian), colnames(newHessian)]
   }
   

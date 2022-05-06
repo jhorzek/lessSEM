@@ -4,12 +4,18 @@
 \alias{smoothAdaptiveLASSOGradient}
 \title{smoothAdaptiveLASSOGradient}
 \usage{
-smoothAdaptiveLASSOGradient(parameters, penaltyFunctionArguments)
+smoothAdaptiveLASSOGradient(
+  parameters,
+  tuningParameters,
+  penaltyFunctionArguments
+)
 }
 \arguments{
 \item{parameters}{vector with labeled parameter values}
 
-\item{penaltyFunctionArguments}{list with fields lambdas (vector with one tuning parameter value for each parameter), regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)}
+\item{tuningParameters}{list with fields lambdas (vector with one tuning parameter value for each parameter)}
+
+\item{penaltyFunctionArguments}{list with fields regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)}
 }
 \description{
 smoothed version of non-differentiable adaptive LASSO gradient

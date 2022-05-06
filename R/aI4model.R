@@ -170,12 +170,14 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
       # ridge or elastic net are used
       if(length(unique(adaptiveLassoWeights))!= 1) warning("Combining ridge and elastic net with adaptive lasso weights is unexplored territory.")
       # we multiply with the adaptive lasso weights.
-      penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels,
-                                       "lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*(N-length(subsets[[s]])))
+      penaltyFunctionTuning <- list("lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*(N-length(subsets[[s]])))
+      penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels)
       subGroupGradient <- subGroupGradient + aCV4SEM::ridgeGradient(parameters = parameters,
+                                                                    tuningParameters = penaltyFunctionTuning,
                                                                     penaltyFunctionArguments = penaltyFunctionArguments)
       if(is.null(hessianOfDifferentiablePart)){
         subGroupHessian <- subGroupHessian + aCV4SEM::ridgeHessian(parameters = parameters,
+                                                                   tuningParameters = penaltyFunctionTuning,
                                                                    penaltyFunctionArguments = penaltyFunctionArguments)
       }
     }
