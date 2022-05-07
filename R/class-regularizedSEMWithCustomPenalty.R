@@ -3,6 +3,7 @@ setClass(Class = "regularizedSEMWithCustomPenalty",
            parameters="data.frame",
            fits="data.frame", 
            parameterLabels = "character",
+           internalOptimization = "list",
            inputArguments="list"
          )
 )

@@ -70,6 +70,7 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contro
     if(recomputeHessian){
       hessianOfDifferentiablePart <- NULL
     }else{
+      if(!regularizedSEM@inputArguments$control$saveHessian) stop("Hessians were not saved in the regularizedSEM object. This is the default as saving the Hessians can take a lot of disk space. To save the Hessians, use the controlGLMNET argument (see ?controlGLMNET).")
       select <- regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$lambda == lambda &
         regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$alpha == alpha
       hessianOfDifferentiablePart <- regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$Hessian[[which(select)]]

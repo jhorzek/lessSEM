@@ -56,7 +56,7 @@ regularizeSEM <- function(lavaanModel,
   }else{
     stop("Invalid startingValues passed to GLMNET. See ?controlGLMNET for more information.")
   }
-
+  
   # get parameters
   parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
   aCV4SEM:::checkRegularizedParameters(parameters = parameters, 
@@ -68,7 +68,7 @@ regularizeSEM <- function(lavaanModel,
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(parameters) && ncol(initialHessian) == length(parameters)){
     if(!all(rownames(initialHessian) %in% names(aCV4SEM::getLavaanParameters(lavaanModel))) ||
        !all(colnames(initialHessian) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))
-       ) stop("initialHessian must have the parameter names as rownames and colnames. See aCV4SEM::getLavaanParameters(lavaanModel).")
+    ) stop("initialHessian must have the parameter names as rownames and colnames. See aCV4SEM::getLavaanParameters(lavaanModel).")
   }else if(any(initialHessian == "compute")){
     initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
   }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
@@ -133,15 +133,19 @@ regularizeSEM <- function(lavaanModel,
     parameterEstimates
   )
   
-  Hessians <- list(
-    "lambda" = tuningGrid$lambda,
-    "alpha" = tuningGrid$alpha,
-    "Hessian" = lapply(1:nrow(tuningGrid), 
-                       matrix, 
-                       data= NA, 
-                       nrow=nrow(initialHessian), 
-                       ncol=ncol(initialHessian))
-  )
+  if(control$saveHessian){
+    Hessians <- list(
+      "lambda" = tuningGrid$lambda,
+      "alpha" = tuningGrid$alpha,
+      "Hessian" = lapply(1:nrow(tuningGrid), 
+                         matrix, 
+                         data= NA, 
+                         nrow=nrow(initialHessian), 
+                         ncol=ncol(initialHessian))
+    )
+  }else{
+    Hessians <- list(NULL)
+  }
   
   if(control$verbose == 0){
     progressbar = txtProgressBar(min = 0, 
@@ -159,7 +163,7 @@ regularizeSEM <- function(lavaanModel,
     
     lambda <- tuningGrid$lambda[it]
     alpha <- tuningGrid$alpha[it]
-
+    
     result <- aCV4SEM:::GLMNET(SEM = SEM, 
                                regularizedParameterLabels = regularizedParameterLabels, 
                                lambda = lambda, 
@@ -185,7 +189,7 @@ regularizeSEM <- function(lavaanModel,
     
     parameterEstimates[it, names(parameters)] <- newParameters[names(parameters)]
     
-    Hessians$Hessian[[it]] <- result$Hessian
+    if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
     
     # set initial values for next iteration
     SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(newParameters), value = newParameters, raw = FALSE)

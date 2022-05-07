@@ -90,6 +90,20 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
     parameterEstimates
   )
   
+  if(control$saveHessian){
+    Hessians <- list(
+      "lambda" = tuningGrid$lambda,
+      "alpha" = tuningGrid$alpha,
+      "Hessian" = lapply(1:nrow(tuningGrid), 
+                         matrix, 
+                         data= NA, 
+                         nrow=nrow(initialHessian), 
+                         ncol=ncol(initialHessian))
+    )
+  }else{
+    Hessians <- list(NULL)
+  }
+  
   if(control$verbose == 0){
     progressbar = txtProgressBar(min = 0, 
                                  max = nrow(tuningParameters), 
@@ -136,12 +150,19 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
                                                                                   currentTuningParameters,
                                                                                   penaltyFunctionArguments)
     
+    if(control$saveHessian) Hessians$Hessian[[it]] <- initialHessian4Optimizer # note: we are returning the Hessian only for the likelihood, not for the penalty
+    
   }
+  
+  internalOptimization <- list(
+    "HessiansOfDifferentiablePart" = Hessians
+  )
   
   results <- new("regularizedSEMWithCustomPenalty",
                  parameters = parameterEstimates,
                  fits = fits,
                  parameterLabels = names(parameters),
+                 internalOptimization = internalOptimization,
                  inputArguments = inputArguments)
   
   return(results)

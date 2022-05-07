@@ -19,6 +19,7 @@ controlQuasiNewtonBFGS(
   epsIn = 1e-05,
   useMultipleConvergenceCriteria = TRUE,
   regM2LLChangeEps = 1e-06,
+  saveHessian = FALSE,
   verbose = 0
 )
 }
@@ -49,6 +50,8 @@ see those labels. If set to "compute", the initial hessian will be computed. If 
 \item{useMultipleConvergenceCriteria}{if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops}
 
 \item{regM2LLChangeEps}{if useMultipleConvergenceCriteria: change in fit which results in convergence}
+
+\item{saveHessian}{should the Hessian be saved for later use? Note: This may take a lot of memory!}
 
 \item{verbose}{0 prints no additional information, > 0 prints GLMNET iterations}
 }

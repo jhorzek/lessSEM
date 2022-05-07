@@ -17,6 +17,7 @@
 #' @param epsIn Stopping criterion for inner iterations
 #' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
 #' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
+#' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 #' @export
 controlGLMNET <- function(
@@ -34,6 +35,7 @@ controlGLMNET <- function(
   epsIn = 1e-5,
   useMultipleConvergenceCriteria = TRUE,
   regM2LLChangeEps = 1e-6,
+  saveHessian = FALSE,
   verbose = 0
 ){
   return(
@@ -52,6 +54,7 @@ controlGLMNET <- function(
     epsIn = epsIn,
     useMultipleConvergenceCriteria = useMultipleConvergenceCriteria,
     regM2LLChangeEps = regM2LLChangeEps,
+    saveHessian = saveHessian,
     verbose = verbose
     )
   )
@@ -76,6 +79,7 @@ controlGLMNET <- function(
 #' @param epsIn Stopping criterion for inner iterations
 #' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
 #' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
+#' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 #' @export
 controlQuasiNewtonBFGS <- function(
@@ -93,6 +97,7 @@ controlQuasiNewtonBFGS <- function(
     epsIn = 1e-5,
     useMultipleConvergenceCriteria = TRUE,
     regM2LLChangeEps = 1e-6,
+    saveHessian = FALSE,
     verbose = 0
 ){
   return(
@@ -111,6 +116,7 @@ controlQuasiNewtonBFGS <- function(
       epsIn = epsIn,
       useMultipleConvergenceCriteria = useMultipleConvergenceCriteria,
       regM2LLChangeEps = regM2LLChangeEps,
+      saveHessian = saveHessian,
       verbose = verbose
     )
   )
