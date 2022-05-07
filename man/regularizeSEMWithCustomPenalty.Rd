@@ -7,8 +7,8 @@
 regularizeSEMWithCustomPenalty(
   lavaanModel,
   individualPenaltyFunction,
-  individualPenaltyFunctionGradient,
-  individualPenaltyFunctionHessian,
+  individualPenaltyFunctionGradient = NULL,
+  individualPenaltyFunctionHessian = NULL,
   tuningParameters,
   penaltyFunctionArguments,
   control = aCV4SEM::controlQuasiNewtonBFGS()
@@ -23,21 +23,17 @@ approximation of this function should be provided.}
 
 \item{individualPenaltyFunctionGradient}{gradients of the penalty function. Function should take the current parameter values as first argument, the tuning parameters as second, and the penaltyFunctionArguments as third argument and 
 return a vector of the same length as parameters. If the true penalty function is non-differentiable (e.g., lasso) a smooth
-approximation of this function should be provided.}
+approximation of this function should be provided. If set to NULL, numDeriv will be used.}
 
 \item{individualPenaltyFunctionHessian}{Hessian of the penalty function. Function should take the current parameter values as first argument, the tuning parameters as second, and the penaltyFunctionArguments as third argument and 
 return a matrix with (length as parameters)^2 number of elements. If the true penalty function is non-differentiable (e.g., lasso) a smooth
-approximation of this function should be provided.}
+approximation of this function should be provided. If set to NULL, numDeriv will be used.}
 
 \item{tuningParameters}{data.frame with tuning parameter values. Important: The function will iterate over the rows of these tuning parameters and pass them to your penalty function}
 
 \item{penaltyFunctionArguments}{arguments passed to individualPenaltyFunction, individualPenaltyFunctionGradient, and individualPenaltyFunctionHessian}
 
 \item{control}{option to set parameters of the optimizer}
-
-\item{method}{optimizer method. See ?optim}
-
-\item{hessian}{Should the optimizer return the hessian?}
 }
 \description{
 optimize a SEM with custom penalty functions.

@@ -17,11 +17,10 @@ If you want to install aCV4SEM from GitHub, use the following commands in R:
     library(aCV4SEM)
     
     ## Approximate leave one out cross-validation for a lavaan model
-    ## The following example is adapted from the documentation of ?lavaan::cfa.
     ### set up model in lavaan
     HS.model <- ' visual  =~ x1 + x2 + x3
-                  textual =~ x4 + x5 + x6
-                  speed   =~ x7 + x8 + x9 '
+                    textual =~ x4 + x5 + x6
+                    speed   =~ x7 + x8 + x9 '
     HS <- HolzingerSwineford1939[,paste0("x",1:9)]
     
     fit <- cfa(HS.model, data = HS, meanstructure = TRUE)
@@ -33,10 +32,10 @@ If you want to install aCV4SEM from GitHub, use the following commands in R:
     exactLOOCV <- rep(NA, nrow(HS))
     for(i in 1:nrow(HS)){
       fit = sem(HS.model, HS[-i,], meanstructure = TRUE)
-      exactLOOCV[i] <- computeIndividualM2LL(nObservedVariables = ncol(HS), 
-                                             rawData = as.numeric(HS[i,]),
-                                             impliedMeans = fit@implied$mean[[1]], 
-                                             impliedCovariance = fit@implied$cov[[1]])
+      exactLOOCV[i] <- aCV4SEM:::computeIndividualM2LL(nObservedVariables = ncol(HS), 
+                                                       rawData = as.numeric(HS[i,]),
+                                                       impliedMeans = fit@implied$mean[[1]], 
+                                                       impliedCovariance = fit@implied$cov[[1]])
     }
     
     # The plot shows the relation between exact and approximate cross-validation.
@@ -46,7 +45,7 @@ If you want to install aCV4SEM from GitHub, use the following commands in R:
          xlab = "exact loocv", ylab = "approximated loocv")
     points(exactLOOCV, aLOOCV$leaveOutFits, col = "red")
     
-    ## Example for regularized SEM
+    ## Example for regularized model SEM
     
     ### Simulate a data set
     set.seed(123)
@@ -75,7 +74,7 @@ If you want to install aCV4SEM from GitHub, use the following commands in R:
     
     ### Use lasso regularization for a subset of the loadings.
     regularizedParameterLabels <- paste0("f=~y", 6:15)
-        
+    
     regularizedModel <- regularizeSEM(lavaanModel = modelFit,
                                       penalt = "lasso",
                                       regularizedParameterLabels = regularizedParameterLabels,

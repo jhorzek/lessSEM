@@ -1,6 +1,7 @@
 test_that("testing optimization with PoliticalDemocracy", {
   library(lavaan)
   library(aCV4SEM)
+  set.seed(123)
   modelSyntax <- ' 
   # latent variable definitions
      ind60 =~ x1 + x2 + x3
@@ -28,6 +29,6 @@ test_that("testing optimization with PoliticalDemocracy", {
                           penalty = "lasso",
                           lambdas = 0, 
                           control = controlGLMNET(startingValues = "start", useMultipleConvergenceCriteria = FALSE))
-  testthat::expect_equal(abs(regsem@fits$m2LL[1] - (-2*logLik(model))) < 1e-4,TRUE)
+  testthat::expect_equal(abs(regsem@fits$m2LL[1] - (-2*logLik(model))) < 1e-3,TRUE)
   
 })

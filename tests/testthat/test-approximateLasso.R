@@ -1,4 +1,4 @@
-test_that("testing lasso", {
+test_that("testing approximate lasso", {
   library(lavaan)
   library(aCV4SEM)
   set.seed(123)
@@ -28,13 +28,13 @@ test_that("testing lasso", {
   rsem <- regularizeSEM(lavaanModel = modelFit, 
                         regularizedParameterLabels = regularizedLavaan,
                         penalty = "lasso", 
-                        nLambdas = 20)
+                        nLambdas = 30)
   
   lambdas <- rsem@fits$lambda 
   
   penaltyFunctionArguments <- list(
     regularizedParameterLabels = regularizedLavaan,
-    eps = 0
+    eps = 1e-5 # note: the optimization works better, if eps is NOT set to 0! This is especially true for aLOOCV
   )
   tuningParameters <- data.frame("lambda" = lambdas)
   
@@ -45,40 +45,48 @@ test_that("testing lasso", {
                                                tuningParameters = tuningParameters, 
                                                penaltyFunctionArguments = penaltyFunctionArguments)
   
-  
-  
   parameterDifference <- apprRegsem@parameters[,rsem@parameterLabels] - rsem@parameters[,rsem@parameterLabels]
   matplot(abs(parameterDifference[,regularizedLavaan]), type  ="l")
   testthat::expect_equal(max(abs(parameterDifference[,regularizedLavaan])) < .03, TRUE)
   
-  
-  ## with approximate gradient
-  smoothLASSOGradientApprox <- function(parameters, 
-                                        tuningParameters,
-                                        penaltyFunctionArguments){
-    gradients <- numDeriv::grad(func = smoothLASSO, x = parameters, tuningParameters = tuningParameters, penaltyFunctionArguments = penaltyFunctionArguments)
-    names(gradients) <- names(parameters)
-    return(gradients)
-  }
-  
-  smoothLASSOGradientApprox(parameters = coef(rsem, lambda = 0 , alpha = 1), tuningParameters = tuningParameters[1,1,drop=FALSE], penaltyFunctionArguments = penaltyFunctionArguments) - 
-    smoothLASSOGradient(parameters = coef(rsem, lambda = 0 , alpha = 1), tuningParameters = tuningParameters[1,1,drop=FALSE], penaltyFunctionArguments = penaltyFunctionArguments)
-  
+  ## with approximate Hessian
   apprRegsem2 <- regularizeSEMWithCustomPenalty(lavaanModel = modelFit, 
-                                               individualPenaltyFunction = smoothLASSO, 
-                                               individualPenaltyFunctionGradient = smoothLASSOGradientApprox, 
-                                               individualPenaltyFunctionHessian = smoothLASSOHessian, 
-                                               tuningParameters = tuningParameters, 
-                                               penaltyFunctionArguments = penaltyFunctionArguments)
+                                                individualPenaltyFunction = smoothLASSO, 
+                                                individualPenaltyFunctionGradient = smoothLASSOGradient,
+                                                tuningParameters = tuningParameters, 
+                                                penaltyFunctionArguments = penaltyFunctionArguments)
   
   parameterDifference2 <- apprRegsem2@parameters[,rsem@parameterLabels] - rsem@parameters[,rsem@parameterLabels]
   matplot(abs(parameterDifference2[,regularizedLavaan]), type  ="l")
   testthat::expect_equal(max(abs(parameterDifference2[,regularizedLavaan])) < .03, TRUE)
   
-  AICRsem <- AIC(rsem)
+  # approximate gradient AND Hessian
+  apprRegsem3 <- regularizeSEMWithCustomPenalty(lavaanModel = modelFit, 
+                                                individualPenaltyFunction = smoothLASSO,
+                                                tuningParameters = tuningParameters, 
+                                                penaltyFunctionArguments = penaltyFunctionArguments)
   
-  AICApprRsem <- AIC(apprRegsem)
+  parameterDifference3 <- apprRegsem3@parameters[,rsem@parameterLabels] - rsem@parameters[,rsem@parameterLabels]
+  matplot(abs(parameterDifference3[,regularizedLavaan]), type  ="l")
+  testthat::expect_equal(max(abs(parameterDifference3[,regularizedLavaan])) < .03, TRUE)
   
-  plot(AICRsem$lambda, AICRsem$AIC, type = "l")
-  plot(AICApprRsem$lambda, AICApprRsem$AIC, type = "l")
+  # with Rsolnp:
+  apprRegsem4 <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit, 
+                                                      individualPenaltyFunction = smoothLASSO, 
+                                                      tuningParameters = tuningParameters, 
+                                                      penaltyFunctionArguments = penaltyFunctionArguments)
+  parameterDifference4 <- apprRegsem4@parameters[,rsem@parameterLabels] - rsem@parameters[,rsem@parameterLabels]
+  matplot(abs(parameterDifference4[,regularizedLavaan]), type  ="l")
+  testthat::expect_equal(max(abs(parameterDifference4[,regularizedLavaan])) < .03, TRUE)
+  
+  # test approximate cross-validation
+  aCV1 <- aCV4regularizedSEMWithCustomPenalty(regularizedSEMWithCustomPenalty = apprRegsem, k = N)
+  print(aCV1)
+  coef(aCV1)
+  plot(aCV1)
+  
+  AICs <- AIC(apprRegsem, penalizedParameterLabels = apprRegsem@inputArguments$penaltyFunctionArguments$regularizedParameterLabels, zeroThreshold = 1e-4)
+  plot(AICs$lambda, AICs$AIC, type = "l")
+  BICs <- BIC(apprRegsem, penalizedParameterLabels = apprRegsem@inputArguments$penaltyFunctionArguments$regularizedParameterLabels, zeroThreshold = 1e-4)
+  plot(BICs$lambda, BICs$BIC, type = "l")
 })

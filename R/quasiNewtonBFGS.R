@@ -89,7 +89,7 @@ quasiNewtonBFGS <- function(SEM,
   newHessian <- initialHessian
   eigenDecomp <- eigen(newHessian)
   if(any(eigenDecomp$values < 0)){
-    warning("Initial Hessian is not positive definite. Using identity matrix instead.")
+    warning("Initial Hessian is not positive definite. Using identity matrix instead. If you are using the numDeriv approximation, this may be the cause of the non-positive-definiteness. This is especially common if the penalty function is still relatively non-smooth.")
     newHessian <- diag(1, nrow(initialHessian))
     rownames(newHessian) <- parameterLabels
     colnames(newHessian) <- parameterLabels

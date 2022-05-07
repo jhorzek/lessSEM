@@ -52,6 +52,13 @@ regularizeSEM <- function(lavaanModel,
   }else if(is.numeric(startingValues)){
     
     if(!all(names(startingValues) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See aCV4SEM::getLavaanParameters(lavaanModel).")
+    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+                                   transformVariances = TRUE,
+                                   whichPars = "start", 
+                                   fit = FALSE)
+    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
+    SEM <- try(aCV4SEM:::fit(SEM))
+    if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) stop("Infeasible starting values.")
     
   }else{
     stop("Invalid startingValues passed to GLMNET. See ?controlGLMNET for more information.")
@@ -123,7 +130,8 @@ regularizeSEM <- function(lavaanModel,
     tuningGrid,
     "m2LL" = NA,
     "regM2LL"= NA,
-    "nonZeroParameters" = NA
+    "nonZeroParameters" = NA,
+    "convergence" = NA
   )
   
   parameterEstimates <- as.data.frame(matrix(NA,nrow = nrow(tuningGrid), ncol = length(parameters)))
@@ -185,6 +193,7 @@ regularizeSEM <- function(lavaanModel,
     fits$m2LL[it] <- result$m2LL
     fits$regM2LL[it] <- result$regM2LL
     fits$nonZeroParameters[it] <- result$nonZeroParameters
+    fits$convergence[it] <- result$convergence
     newParameters <- aCV4SEM:::getParameters(result$SEM, raw = FALSE)
     
     parameterEstimates[it, names(parameters)] <- newParameters[names(parameters)]

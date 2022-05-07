@@ -18,10 +18,10 @@ test_that("testing readme", {
   exactLOOCV <- rep(NA, nrow(HS))
   for(i in 1:nrow(HS)){
     fit = sem(HS.model, HS[-i,], meanstructure = TRUE)
-    exactLOOCV[i] <- computeIndividualM2LL(nObservedVariables = ncol(HS), 
-                                           rawData = as.numeric(HS[i,]),
-                                           impliedMeans = fit@implied$mean[[1]], 
-                                           impliedCovariance = fit@implied$cov[[1]])
+    exactLOOCV[i] <- aCV4SEM:::computeIndividualM2LL(nObservedVariables = ncol(HS), 
+                                                     rawData = as.numeric(HS[i,]),
+                                                     impliedMeans = fit@implied$mean[[1]], 
+                                                     impliedCovariance = fit@implied$cov[[1]])
   }
   
   # The plot shows the relation between exact and approximate cross-validation.

@@ -4,10 +4,14 @@
 \alias{BIC,regularizedSEMWithCustomPenalty-method}
 \title{BIC}
 \usage{
-\S4method{BIC}{regularizedSEMWithCustomPenalty}(object)
+\S4method{BIC}{regularizedSEMWithCustomPenalty}(object, penalizedParameterLabels, zeroThreshold)
 }
 \arguments{
 \item{object}{object of class regularizedSEMWithCustomPenalty}
+
+\item{penalizedParameterLabels}{vector with labels of penalized parameters}
+
+\item{zeroThreshold}{penalized parameters below this threshold will be counted as zeroed}
 }
 \description{
 returns the BIC

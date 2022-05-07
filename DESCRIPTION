@@ -11,5 +11,5 @@ License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.1.2
 Imports: Rcpp (>= 1.0.8), ggplot2, patchwork, tidyr
-Suggests: plotly
+Suggests: plotly, Rsolnp
 LinkingTo: Rcpp, RcppArmadillo

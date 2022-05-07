@@ -4,10 +4,14 @@
 \alias{AIC,regularizedSEMWithCustomPenalty-method}
 \title{AIC}
 \usage{
-\S4method{AIC}{regularizedSEMWithCustomPenalty}(object)
+\S4method{AIC}{regularizedSEMWithCustomPenalty}(object, penalizedParameterLabels, zeroThreshold)
 }
 \arguments{
 \item{object}{object of class regularizedSEMWithCustomPenalty}
+
+\item{penalizedParameterLabels}{vector with labels of penalized parameters}
+
+\item{zeroThreshold}{penalized parameters below this threshold will be counted as zeroed}
 }
 \description{
 returns the AIC

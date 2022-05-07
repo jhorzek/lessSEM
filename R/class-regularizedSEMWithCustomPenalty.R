@@ -41,48 +41,18 @@ setMethod("coef", "regularizedSEMWithCustomPenalty", function (object) {
 #' returns the AIC
 #' 
 #' @param object object of class regularizedSEMWithCustomPenalty
+#' @param penalizedParameterLabels vector with labels of penalized parameters
+#' @param zeroThreshold penalized parameters below this threshold will be counted as zeroed
 #' @export
-setMethod("AIC", "regularizedSEMWithCustomPenalty", function (object) {
-  stop("AIC is experimental and should not be trusted. Use cross-validation instead, Not correctly implemented yet.")
+setMethod("AIC", "regularizedSEMWithCustomPenalty", function (object, penalizedParameterLabels, zeroThreshold) {
+  
   fits <- object@fits
+  parameters <- object@parameters
+  
   fits$AIC <- rep(NA, length(fits$m2LL))
-  tuningParameters <- object@inputArguments$tuningParameters
-  penaltyFunctionArguments <- object@inputArguments$penaltyFunctionArguments
   
-  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = object@inputArguments$lavaanModel, fit = FALSE)
-  N <- nrow(SEM$rawData)
+  fits$AIC <- fits$m2LL + 2*apply(parameters, 1, function(x) length(x) - sum(abs(x[penalizedParameterLabels]) < zeroThreshold))
   
-  for(i in 1:nrow(tuningParameters)){
-    parameters <- unlist(object@parameters[i,object@parameterLabels])
-    SEM <- aCV4SEM:::setParameters(SEM, 
-                                   labels = object@parameterLabels, 
-                                   values = parameters,
-                                   raw = FALSE)
-    SEM <- aCV4SEM:::fit(SEM)
-    scores <- aCV4SEM:::getScores(SEM, raw = FALSE)
-    hessian <- aCV4SEM:::getHessian(SEM, raw = FALSE)
-    
-    # penalty scores
-    penaltyScores <- object@inputArguments$individualPenaltyFunctionGradient(parameters = parameters, 
-                                                                             tuningParameters = tuningParameters[i,,drop=FALSE], 
-                                                                             penaltyFunctionArguments = penaltyFunctionArguments)
-    penaltyHessian <- N*object@inputArguments$individualPenaltyFunctionHessian(parameters = parameters, 
-                                                                               tuningParameters = tuningParameters[i,,drop=FALSE], 
-                                                                               penaltyFunctionArguments = penaltyFunctionArguments)
-    
-    scores <- scores + matrix(rep(penaltyScores, N), 
-                              nrow = N, 
-                              ncol = length(penaltyScores), 
-                              byrow = TRUE,
-                              dimnames = list(NULL, names(penaltyScores)))[,colnames(scores)]
-    hessian <- hessian + penaltyHessian[rownames(hessian), colnames(hessian)]
-    
-    hessianInv <- solve(hessian)
-    twoTimesNpar <- sum(apply(scores, 1, function(x) t(x)%*%hessianInv%*%(x)))
-    fits$AIC[i] <- fits$m2LL[i] + twoTimesNpar
-  }
-  
-  fits <- cbind(tuningParameters, fits)
   return(fits)
   
 })
@@ -92,47 +62,18 @@ setMethod("AIC", "regularizedSEMWithCustomPenalty", function (object) {
 #' returns the BIC
 #' 
 #' @param object object of class regularizedSEMWithCustomPenalty
+#' @param penalizedParameterLabels vector with labels of penalized parameters
+#' @param zeroThreshold penalized parameters below this threshold will be counted as zeroed
 #' @export
-setMethod("BIC", "regularizedSEMWithCustomPenalty", function (object) {
-  stop("BIC is experimental and should not be trusted. Use cross-validation instead. Not correctly implemented yet.")
+setMethod("BIC", "regularizedSEMWithCustomPenalty", function (object, penalizedParameterLabels, zeroThreshold) {
   fits <- object@fits
+  parameters <- object@parameters
+  
   fits$BIC <- rep(NA, length(fits$m2LL))
-  tuningParameters <- object@inputArguments$tuningParameters
-  penaltyFunctionArguments <- object@inputArguments$penaltyFunctionArguments
   
-  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = object@inputArguments$lavaanModel, fit = FALSE)
-  N <- nrow(SEM$rawData)
+  N <- lavaan::lavInspect(object = object@inputArguments$lavaanModel, what = "nobs")
   
-  for(i in 1:nrow(tuningParameters)){
-    parameters <- unlist(object@parameters[i,object@parameterLabels])
-    SEM <- aCV4SEM:::setParameters(SEM, 
-                                   labels = object@parameterLabels, 
-                                   values = parameters,
-                                   raw = FALSE)
-    SEM <- aCV4SEM:::fit(SEM)
-    scores <- aCV4SEM:::getScores(SEM, raw = FALSE)
-    hessian <- aCV4SEM:::getHessian(SEM, raw = FALSE)
-    
-    # penalty scores
-    penaltyScores <- object@inputArguments$individualPenaltyFunctionGradient(parameters = parameters, 
-                                                                             tuningParameters = tuningParameters[i,,drop=FALSE], 
-                                                                             penaltyFunctionArguments = penaltyFunctionArguments)
-    penaltyHessian <- N*object@inputArguments$individualPenaltyFunctionHessian(parameters = parameters, 
-                                                                               tuningParameters = tuningParameters[i,,drop=FALSE], 
-                                                                               penaltyFunctionArguments = penaltyFunctionArguments)
-    
-    scores <- scores + matrix(rep(penaltyScores, N), 
-                              nrow = N, 
-                              ncol = length(penaltyScores), 
-                              byrow = TRUE,
-                              dimnames = list(NULL, names(penaltyScores)))[,colnames(scores)]
-    hessian <- hessian + penaltyHessian[rownames(hessian), colnames(hessian)]
-    
-    hessianInv <- solve(hessian)
-    twoTimesNpar <- sum(apply(scores, 1, function(x) t(x)%*%hessianInv%*%(x)))
-    fits$BIC[i] <- fits$m2LL[i] + log(N)*.5*twoTimesNpar
-  }
+  fits$BIC <- fits$m2LL + log(N)*apply(parameters, 1, function(x) length(x) - sum(abs(x[penalizedParameterLabels]) < zeroThreshold))
   
-  fits <- cbind(tuningParameters, fits)
   return(fits)
 })

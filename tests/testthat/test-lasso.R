@@ -52,7 +52,8 @@ test_that("testing lasso", {
   rsem <- regularizeSEM(lavaanModel = modelFit, 
                         regularizedParameterLabels = regularizedLavaan,
                         penalty = "lasso", 
-                        lambdas = lambdas)
+                        lambdas = lambdas,
+                        control = controlGLMNET(saveHessian = TRUE))
   testthat::expect_equal(all(abs(rsem@parameters[,regularizedLavaan] - lslxParameter[,regularized]) < .002), TRUE)
   plot(rsem)
   coef(rsem)

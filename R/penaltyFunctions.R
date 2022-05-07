@@ -238,3 +238,35 @@ smoothElasticNetHessian <- function(parameters,
   )
   return(lassoPart + ridgePart)
 }
+
+#' genericGradientApproximiation
+#' 
+#' This function can be used to approximate the gradients of a generic penalty function with numDeriv
+#' @param parameters vector with labeled parameter values
+#' @param tuningParameters data.frame with tuning parameters
+#' @param penaltyFunctionArguments list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see aCV4SEM::smoothLASSO for an example 
+#' @export
+genericGradientApproximiation <- function(parameters,  
+                                          tuningParameters,
+                                          penaltyFunctionArguments){
+  gradients <- numDeriv::grad(func = penaltyFunctionArguments$individualPenaltyFunction, x = parameters, tuningParameters = tuningParameters, penaltyFunctionArguments = penaltyFunctionArguments)
+  names(gradients) <- names(parameters)
+  return(gradients)
+}
+
+#' genericHessianApproximiation
+#' 
+#' This function can be used to approximate the Hessian of a generic penalty function with numDeriv
+#' @param parameters vector with labeled parameter values
+#' @param penaltyFunction 
+#' @param tuningParameters data.frame with tuning parameters
+#' @param penaltyFunctionArguments list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see aCV4SEM::smoothLASSO for an example 
+#' @export
+genericHessianApproximiation <- function(parameters,  
+                                      tuningParameters,
+                                      penaltyFunctionArguments){
+  hessian <- numDeriv::hessian(func = penaltyFunctionArguments$individualPenaltyFunction, x = parameters, tuningParameters = tuningParameters, penaltyFunctionArguments = penaltyFunctionArguments)
+  rownames(hessian) <- names(parameters)
+  colnames(hessian) <- names(parameters)
+  return(hessian)
+}

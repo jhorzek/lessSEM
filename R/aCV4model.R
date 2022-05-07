@@ -118,15 +118,34 @@ aCV4lavaan <- function(lavaanModel,
   
   if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
   
+  N <- lavaan::lavInspect(lavaanModel, "nobs")
   aCVSEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
   
-  return(aCV4SEM:::smoothACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                        k = k,
-                                        individualPenaltyFunction = NULL, 
-                                        individualPenaltyFunctionGradient = NULL,
-                                        individualPenaltyFunctionHessian = NULL,
+  individualPenaltyFunction <- function(a,b,c) {
+    return(0)
+  }
+  individualPenaltyFunctionGradient <- function(a,b,c) {
+    grs <- rep(0, length(a))
+    names(grs) <- names(a)
+    return(grs)
+  }
+  individualPenaltyFunctionHessian <- function(a,b,c) {
+    return(
+      matrix(0, 
+               nrow = length(a), 
+               ncol = length(a), 
+               dimnames = list(names(a), names(a))))
+  }
+  subsets <- aCV4SEM:::createSubsets(N = N, k = k)
+  aCV <- aCV4SEM:::customACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                        subsets = subsets,
                                         raw = raw, 
-                                        penaltyFunctionArguments = NULL))
+                                        individualPenaltyFunction = individualPenaltyFunction,
+                                        individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
+                                        individualPenaltyFunctionHessian = individualPenaltyFunctionHessian,
+                                        currentTuningParameters = NULL,
+                                        penaltyFunctionArguments = NULL)
+  return(aCV)
 }
 
 #' GLMNETACVRcpp_SEMCpp
@@ -145,7 +164,7 @@ aCV4lavaan <- function(lavaanModel,
 #' @param control arguments passed to GLMNET inner iteration
 GLMNETACVRcpp_SEMCpp <- function(SEM, 
                                  subsets, 
-                                 raw = FALSE, 
+                                 raw, 
                                  regularizedParameterLabels,
                                  lambda,
                                  alpha = NULL,
@@ -248,39 +267,127 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
 }
 
 
-#' smoothACVRcpp_SEMCpp
+#' aCV4regularizedSEMWithCustomPenalty
 #' 
-#' internal function for approximate cross-validation based on the internal model representation of aCV4SEM. The smooth part refers to the fact
-#' that this function expectes the penalty functions to be smooth. If the true penalty function is non-differentiable (e.g., lasso) a smooth
-#' approximation of this function should be provided. See aCV4SEM::smoothLASSO as an example. Also, the gradients and the Hessian of this 
-#' smooth approximation should be provided.
+#' approximate cross-validation for models of class regularizedSEMWithCustomPenalty. These models can be fit with regularizedSEMWithCustomPenalty.() (see ?regularizedSEMWithCustomPenalty.)
+#' in this package.
+#' 
+#' @param regularizedSEMWithCustomPenalty. model of class regularizedSEMWithCustomPenalty.
+#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @export
+aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, k){
+  if(!is(regularizedSEMWithCustomPenalty, "regularizedSEMWithCustomPenalty")){
+    stop("regularizedSEMWithCustomPenalty must be of class regularizedSEMWithCustomPenalty")
+  }
+  
+  data <- try(lavaan::lavInspect(regularizedSEMWithCustomPenalty@inputArguments$lavaanModel, "data"))
+  if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  
+  N <- nrow(data)
+  
+  aCVSEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = regularizedSEMWithCustomPenalty@inputArguments$lavaanModel, transformVariances = TRUE, fit = FALSE)
+  
+  # extract elements for easier access
+  fits <- regularizedSEMWithCustomPenalty@fits
+  parameters <- regularizedSEMWithCustomPenalty@parameters
+  
+  # custom penalty bits
+  individualPenaltyFunction <- regularizedSEMWithCustomPenalty@inputArguments$individualPenaltyFunction
+  individualPenaltyFunctionGradient <- regularizedSEMWithCustomPenalty@inputArguments$individualPenaltyFunctionGradient
+  individualPenaltyFunctionHessian <- regularizedSEMWithCustomPenalty@inputArguments$individualPenaltyFunctionHessian
+  tuningParameters <- regularizedSEMWithCustomPenalty@inputArguments$tuningParameters
+  penaltyFunctionArguments <- regularizedSEMWithCustomPenalty@inputArguments$penaltyFunctionArguments
+  
+  if(is.null(individualPenaltyFunctionGradient)){
+    message("Using numDeriv to approximate the gradient of the individualPenaltyFunction.")
+    individualPenaltyFunctionGradient <- aCV4SEM::genericGradientApproximiation
+    penaltyFunctionArguments <- c(penaltyFunctionArguments, individualPenaltyFunction = individualPenaltyFunction)
+  }
+  if(is.null(individualPenaltyFunctionHessian)){
+    message("Using numDeriv to approximate the Hessian of the individualPenaltyFunction.")
+    individualPenaltyFunctionHessian <- aCV4SEM::genericHessianApproximiation
+    penaltyFunctionArguments <- c(penaltyFunctionArguments, individualPenaltyFunction = individualPenaltyFunction)
+  }
+  
+  cvfits <- data.frame(
+    tuningParameters,
+    cvfit = NA
+  )
+  
+  cvfitsDetails <- as.data.frame(matrix(NA,nrow = nrow(cvfits), ncol = k))
+  colnames(cvfitsDetails) <- paste0("sample", 1:k)
+  cvfitsDetails <- cbind(
+    tuningParameters,
+    cvfitsDetails
+  )
+  
+  subsets <- aCV4SEM:::createSubsets(N = N, k = k)
+  
+  progressbar = txtProgressBar(min = 0,
+                               max = nrow(tuningParameters), 
+                               initial = 0, 
+                               style = 3)
+  
+  for(ro in 1:nrow(tuningParameters)){
+    
+    currentTuningParameters <- tuningParameters[ro,,drop = FALSE]
+    
+    pars <- unlist(regularizedSEMWithCustomPenalty@parameters[ro,regularizedSEMWithCustomPenalty@parameterLabels])
+    
+    aCVSEM <- aCV4SEM:::setParameters(SEM = aCVSEM,
+                                      labels = names(pars),
+                                      values = pars,
+                                      raw = FALSE)
+    aCVSEM <- aCV4SEM:::fit(aCVSEM)
+    
+    aCV <- aCV4SEM:::customACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                          subsets = subsets,
+                                          raw = TRUE, 
+                                          individualPenaltyFunction = individualPenaltyFunction,
+                                          individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
+                                          individualPenaltyFunctionHessian = individualPenaltyFunctionHessian,
+                                          currentTuningParameters = currentTuningParameters,
+                                          penaltyFunctionArguments = penaltyFunctionArguments)
+    
+    cvfitsDetails[ro,paste0("sample",1:k)] <- aCV$leaveOutFits
+    cvfits$cvfit[ro] <- sum(aCV$leaveOutFits)
+    setTxtProgressBar(progressbar,ro)
+    
+  }
+  
+  return(
+    new("aCV4regularizedSEMWithCustomPenalty",
+        parameters=parameters,
+        tuningParameters = tuningParameters,
+        cvfits = cvfits,
+        parameterLabels = names(pars),
+        cvfitsDetails=cvfitsDetails, 
+        subsets = subsets)
+  )
+}
+
+
+#' customACVRcpp_SEMCpp
+#' 
+#' internal function for approximate cross-validation based on the internal model representation of aCV4SEM. The custom part refers to the fact
+#' that this function uses a custom penalty function. 
 #' 
 #' @param SEM model of class Rcpp_SEMCpp. Models of this class
 #' can be generated with the SEMFromLavaan-function.
-#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
-#' @param individualPenaltyFunction penalty function which takes the current parameter values as first argument and the penaltyFunctionArguments as second argument and 
-#' returns a single value - the value of the penalty function for a single person. If the true penalty function is non-differentiable (e.g., lasso) a smooth
-#' approximation of this function should be provided.
-#' @param individualPenaltyFunctionGradient gradients of the penalty function. Function should take the current parameter values as first argument and the penaltyFunctionArguments as second argument and 
-#' return a vector of the same length as parameters. If the true penalty function is non-differentiable (e.g., lasso) a smooth
-#' approximation of this function should be provided.
-#' @param individualPenaltyFunctionHessian Hessian of the penalty function. Function should take the current parameter values as first argument and the penaltyFunctionArguments as second argument and 
-#' return a matrix with (length as parameters)^2 number of elements. If the true penalty function is non-differentiable (e.g., lasso) a smooth
-#' approximation of this function should be provided.
+#' @param subsets list with subsets created with createSubsets()
 #' @param raw controls if the internal transformations of aCV4SEM should be used.
-#' @param penaltyFunctionArguments can be anything that the functions individualPenaltyFunction, individualPenaltyFunctionGradient, or individualPenaltyFunctionHessian need. See aCV4SEM::smoothLASSO for an example.
-smoothACVRcpp_SEMCpp <- function(SEM, 
-                                 k, 
-                                 individualPenaltyFunction = NULL, 
-                                 individualPenaltyFunctionGradient = NULL, 
-                                 individualPenaltyFunctionHessian = NULL, 
-                                 raw = FALSE, 
-                                 penaltyFunctionArguments = NULL){
-  if(!is.null(individualPenaltyFunction)){
-    if(is.null(individualPenaltyFunctionGradient) || is.null(individualPenaltyFunctionHessian)){
-      warning("You did not specify the individualPenaltyFunctionGradient and individualPenaltyFunctionHessian. We highly recommend that you do so for smooth approximations of non-differential penalties (lasso, adaptive lasso, etc.) as it may improve the results considerably")
-    }
-  }
+#' @param regularizedParameterLabels vector with labels of regularized parameters
+#' @param lambda value of tuning parameter lambda
+#' @param alpha value of tuning parameter alpha (for elastic net)
+#' @param adaptiveLassoWeights vector with labeled adaptive lasso weights. Only required if penalty = "adaptiveLasso"
+customACVRcpp_SEMCpp <- function(SEM, 
+                                 subsets, 
+                                 raw, 
+                                 individualPenaltyFunction,
+                                 individualPenaltyFunctionGradient,
+                                 individualPenaltyFunctionHessian,
+                                 currentTuningParameters,
+                                 penaltyFunctionArguments){
   
   if(!is(SEM, "Rcpp_SEMCpp")){
     stop("SEM must be of class Rcpp_SEMCpp")
@@ -289,125 +396,69 @@ smoothACVRcpp_SEMCpp <- function(SEM,
   parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
   N <- nrow(dataSet)
+  k <- ncol(subsets)
   
-  # step 1: compute scores
+  # compute derivatives of -2log-Likelihood without penalty
   scores <- aCV4SEM:::getScores(SEM = SEM, raw = raw)
-  
-  # compute penalty scores
-  
-  if(!is.null(individualPenaltyFunction)){
-    for(i in 1:N){
-      
-      if(is.null(individualPenaltyFunctionGradient)){
-        scores[i,] <- scores[i,] + do.call(what = numDeriv::grad, 
-                                           args = c(list(
-                                             "func" = individualPenaltyFunction,
-                                             "x" = parameters[colnames(scores)],
-                                             "method" = "simple",
-                                             "method.args" = list(eps = 1e-7),
-                                             "penaltyFunctionArguments" = penaltyFunctionArguments
-                                           )
-                                           ))
-      }else{
-        scores[i,] <- scores[i,] + individualPenaltyFunctionGradient(parameters = parameters[colnames(scores)],
-                                                                     penaltyFunctionArguments = penaltyFunctionArguments)
-        
-      }
-      
-    }
-  }
-  
   hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
   
-  if(!is.null(individualPenaltyFunction)){
-    
-    if(is.null(individualPenaltyFunctionHessian)){
-      hessian + N*do.call(what = numDeriv::hessian, 
-                          args = list(
-                            "func" = individualPenaltyFunction,
-                            "x" = parameters[rownames(hessian)],
-                            "method.args" = list(eps = 1e-7),
-                            "penaltyFunctionArguments" = penaltyFunctionArguments)
-      )
-    }else{
-      for(i in 1:N){
-        hessian <- hessian + individualPenaltyFunctionHessian(
-          parameters = parameters[colnames(scores)],
-          penaltyFunctionArguments = penaltyFunctionArguments
-        )
-      }
-    }
-    
-    
-  }
+  # penalty scores
+  penaltyScores <- individualPenaltyFunctionGradient(parameters, 
+                                                     currentTuningParameters, 
+                                                     penaltyFunctionArguments)
+  penaltyHessian <- N*individualPenaltyFunctionHessian(parameters, 
+                                                       currentTuningParameters, 
+                                                       penaltyFunctionArguments)
   
-  # step 2: subgroup-parameters
-  if(k < N){
-    
-    randomCases <- sample(1:N,N)
-    subsets <- split(randomCases, sort(randomCases%%k)) # https://stackoverflow.com/questions/3318333/split-a-vector-into-chunks
-    
-  }else if(k == N){
-    
-    subsets <- vector("list",N)
-    names(subsets) <- 1:N
-    for(i in 1:N) subsets[[i]] <- i
-    
-  }else{
-    stop(paste0("k must be <= ", N))
-  }
+  scores <- scores + matrix(rep(penaltyScores, N), 
+                            nrow = N, 
+                            ncol = length(penaltyScores), 
+                            byrow = TRUE,
+                            dimnames = list(NULL, names(penaltyScores)))[,colnames(scores)]
+  hessian <- hessian + penaltyHessian[rownames(hessian), colnames(hessian)]
   
-  subsetParameters <- vector("list",k)
+  # Now do the optimization step for each sub-group
+  stepdirections <- matrix(NA, nrow = k, ncol = length(parameters))
+  colnames(stepdirections) <- names(parameters)
+  
+  subsetParameters <- matrix(NA, nrow = k, ncol = length(parameters))
+  colnames(subsetParameters) <- names(parameters)
+  rownames(subsetParameters) <- paste0("sample", 1:k)
   leaveOutFits <- rep(0, k)
   names(leaveOutFits) <- paste0("sample", 1:k)
   
-  inverseHessian <- (N/(N-1))*solve(hessian)
   for(s in 1:k){
     
-    direction <- -t(inverseHessian%*%apply(scores[-subsets[[s]],,drop=FALSE],2,sum))
+    subGroupGradient <- apply(scores[-c(which(subsets[,s])),],2,sum) # gradients of all individuals but the ones in the subgroup
+    subGroupHessian <- ((N-sum(subsets[,s]))/N)*hessian # approximated hessian for all but the subgroup
     
-    # Taking a step size of 1 can result in nonsensical parameters. Therefore, a rudimentary line search is used here:
-    stepLength <- 1
-    steps <- 1
-    while(steps<100){
-      parameters_s <- parameters + stepLength*direction[,names(parameters)]
-      SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
-      SEM <- try(fit(SEM), silent = TRUE)
-      if(any(class(SEM) == "try-error")) {
-        stepLength <- stepLength*.9
-        steps <- steps + 1
-        next
-      }
-      # check positive definiteness
-      tryChol <- try(chol(SEM$impliedCovariance), silent = TRUE)
-      if(any(class(tryChol) == "try-error")) {
-        stepLength <- stepLength*.9
-        steps <- steps + 1
-        next
-      }
-      
-      break
-    }
+    direction <- -solve(subGroupHessian)%*%subGroupGradient
     
-    if(steps != 1) print(paste0("Used linesearch with ", steps, " steps. Final stepLength: ", stepLength))
+    rownames(direction) = names(parameters)
     
-    names(parameters_s) <- names(parameters)
-    subsetParameters[[s]] <- parameters_s
+    # return step direction
+    stepdirections[s,names(parameters)] <- direction[names(parameters),]
     
-    for(i in 1:length(subsets[[s]])){
-      leaveOutFits[s] <- leaveOutFits[s] + aCV4SEM:::individualMinus2LogLikelihood(par = subsetParameters[[s]], 
+    # compute out of sample fit
+    parameters_s <- parameters + stepdirections[s,names(parameters)]
+    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
+    subsetParameters[s,names(parameters)] <- aCV4SEM:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
+    
+    for(i in which(subsets[,s])){
+      leaveOutFits[s] <- leaveOutFits[s] + aCV4SEM:::individualMinus2LogLikelihood(par = subsetParameters[s,], 
                                                                                    SEM = SEM, 
-                                                                                   data = dataSet[subsets[[s]][i],], 
-                                                                                   raw = raw)
+                                                                                   data = dataSet[i,], 
+                                                                                   raw = FALSE)
     }
     
   }
   
-  return(list("leaveOutFits" = leaveOutFits,
-              "subsets" = subsets,
-              "scores" = scores,
-              "subsetParameters" = subsetParameters
-  ))
+  return(
+    list("leaveOutFits" = leaveOutFits,
+         "subsets" = subsets,
+         "scores" = scores,
+         "subsetParameters" = subsetParameters)
+  )
   
 }
 
