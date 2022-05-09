@@ -73,11 +73,31 @@ regularizeSEM <- function(lavaanModel,
   
   initialHessian <- control$initialHessian
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(parameters) && ncol(initialHessian) == length(parameters)){
+    
     if(!all(rownames(initialHessian) %in% names(aCV4SEM::getLavaanParameters(lavaanModel))) ||
        !all(colnames(initialHessian) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))
     ) stop("initialHessian must have the parameter names as rownames and colnames. See aCV4SEM::getLavaanParameters(lavaanModel).")
+    
   }else if(any(initialHessian == "compute")){
+    
     initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
+    
+  }else if(any(initialHessian == "scoreBased")){
+    
+    scores <- aCV4SEM:::getScores(SEM = SEM, raw = TRUE)
+    FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
+    rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
+    for(score in 1:nrow(scores)){
+      FisherInformation <- FisherInformation + t(-.5*scores[score,, drop = FALSE]) %*%(-.5*scores[score,, drop = FALSE]) # we are using the -2 log-Likelihood
+    }
+    
+    initialHessian <- -2*(-FisherInformation) # negative log-likelihood
+    # make symmetric; just in case...
+    initialHessian <- .5*(initialHessian + t(initialHessian))
+    while(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
+      diag(initialHessian) <- diag(initialHessian) + 1e-4
+    }
+    
   }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
     initialHessian <- diag(initialHessian,length(parameters))
     rownames(initialHessian) <- names(parameters)
@@ -421,5 +441,5 @@ getMaxLambda <- function(SEM, regularizedParameterLabels, adaptiveLassoWeights, 
   SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(initialParameters), values = initialParameters, raw = TRUE)
   SEM <- aCV4SEM:::fit(SEM = SEM)
   
-  return((1/N)*(maxLambda+.01*maxLambda)) # adding some wiggle room as well
+  return((1/N)*(maxLambda+.1*maxLambda)) # adding some wiggle room as well
 }

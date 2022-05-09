@@ -19,10 +19,19 @@ SEMFromLavaan <- function(lavaanModel,
   
   # extract basic features
   meanstructure <- lavaanModel@Options$meanstructure
+  fixedX <- lavInspect(lavaanModel, "fixed.x")
+  if(fixedX) {
+    warning("lavaanModel has option fixed.x set to TRUE. This is currently not fully supported by aCV4SEM. Be sure to check the results.")
+    fit <- FALSE
+  }
+  lavaanParameterTable <- lavInspect(lavaanModel, what = "parTable")
   
-  latentNames <- lavNames(lavaanModel, type = "lv")
-  manifestNames <- lavNames(lavaanModel, type = "ov")
-  
+  latentNames <- colnames(lavaanParameterTable$lambda)  #lavNames(lavaanModel, type = "lv")
+  manifestNames <- rownames(lavaanParameterTable$lambda) # lavNames(lavaanModel, type = "ov")
+
+  # if regressions manifest -> latent are specified, lavaan will duplicate some latent and
+  # manifest names; this may be confusing in RAM notation, so we take care of this here (see testing-mediation.R):
+  latentNames[latentNames%in%manifestNames] <- paste0(latentNames[latentNames%in%manifestNames], "_lv")
   nLatent <- length(latentNames)
   nManifest <- length(manifestNames)
   
@@ -42,10 +51,6 @@ SEMFromLavaan <- function(lavaanModel,
   }
   
   internalData <- aCV4SEM:::SEMdata(rawData)
-  
-  # Extract Model
-  
-  lavaanParameterTable <- lavInspect(lavaanModel, what = "parTable")
   
   # translate to RAM notation
   
@@ -76,14 +81,14 @@ SEMFromLavaan <- function(lavaanModel,
                                           rawData = rawData)
   
   ## Filter matrix
-  Fmatrix <- matrix(0, 
-                    nrow = nManifest, 
-                    ncol = nLatent + nManifest, 
-                    dimnames = list(manifestNames, 
-                                    c(latentNames, manifestNames))
-  )
-  diag(Fmatrix[manifestNames, manifestNames]) <- 1
-  
+  Fmatrix <- diag(nManifest)
+  rownames(Fmatrix) <- manifestNames
+  colnames(Fmatrix) <- manifestNames
+  Fmatrix <- cbind(
+    matrix(0, nrow = nManifest, ncol = nLatent, dimnames = list(manifestNames, 
+                                                                latentNames)),
+    Fmatrix)
+
   ## Combine in list:
   modelMatrices <- list("Amatrix" = AmatrixElements$Amatrix,
                         "Smatrix" = SmatrixElements$Smatrix,
