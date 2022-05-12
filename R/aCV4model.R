@@ -7,10 +7,11 @@
 #' 
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
-#' @param recomputeHessian if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
+#' @param recomputeHessian if set to FALSE, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
+#' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
 #' @export
-aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, control = controlGLMNET()){
+aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, returnSubsetParameters = FALSE, control = controlGLMNET()){
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
   }
@@ -43,6 +44,26 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contr
     tuningParameters,
     cvfitsDetails
   )
+  
+  if(returnSubsetParameters){
+    subsetParameters <- array(NA, 
+                              dim = c(k, length(regularizedSEM@parameterLabels), nrow(tuningParameters)),
+                              dimnames = list(paste0("sample", 1:k),
+                                              regularizedSEM@parameterLabels,
+                                              NULL))
+    dimname3 <- c()
+    for(ro in 1:nrow(tuningParameters)){
+      dimname3 <- c(dimname3, 
+                    paste0(paste0(colnames(tuningParameters[ro,,drop = FALSE]),
+                                  "=", 
+                                  tuningParameters[ro,]), 
+                    collapse = "; ")
+      )
+    }
+    dimnames(subsetParameters)[[3]] <- dimname3
+  }else{
+    subsetParameters <- array(NA,dim = 1)
+  }
   
   subsets <- aCV4SEM:::createSubsets(N = N, k = k)
   
@@ -82,6 +103,10 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contr
                                           hessianOfDifferentiablePart = hessianOfDifferentiablePart,
                                           control = control)
     
+    if(returnSubsetParameters){
+      subsetParameters[,,ro] <- aCV$subsetParameters[,dimnames(subsetParameters)[[2]]]
+    }
+    
     cvfitsDetails[cvfitsDetails$alpha == alpha & cvfitsDetails$lambda == lambda,paste0("sample",1:k)] <- aCV$leaveOutFits
     cvfits$cvfit[ro] <- sum(aCV$leaveOutFits)
     if(control$verbose == 0) setTxtProgressBar(progressbar,ro)
@@ -95,7 +120,8 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contr
         parameterLabels = names(pars),
         regularized = regularizedParameterLabels,
         cvfitsDetails=cvfitsDetails, 
-        subsets = subsets)
+        subsets = subsets,
+        subsetParameters = subsetParameters)
   )
 }
 
@@ -274,8 +300,9 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
 #' 
 #' @param regularizedSEMWithCustomPenalty. model of class regularizedSEMWithCustomPenalty.
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @export
-aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, k){
+aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, k, returnSubsetParameters = FALSE){
   if(!is(regularizedSEMWithCustomPenalty, "regularizedSEMWithCustomPenalty")){
     stop("regularizedSEMWithCustomPenalty must be of class regularizedSEMWithCustomPenalty")
   }
@@ -321,6 +348,26 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
     cvfitsDetails
   )
   
+  if(returnSubsetParameters){
+    subsetParameters <- array(NA, 
+                              dim = c(k, length(regularizedSEMWithCustomPenalty@parameterLabels), nrow(tuningParameters)),
+                              dimnames = list(paste0("sample", 1:k),
+                                              regularizedSEMWithCustomPenalty@parameterLabels,
+                                              NULL))
+    dimname3 <- c()
+    for(ro in 1:nrow(tuningParameters)){
+      dimname3 <- c(dimname3, 
+                    paste0(paste0(colnames(tuningParameters[ro,,drop = FALSE]),
+                                  "=", 
+                                  tuningParameters[ro,]), 
+                           collapse = "; ")
+      )
+    }
+    dimnames(subsetParameters)[[3]] <- dimname3
+  }else{
+    subsetParameters <- array(NA,dim = 1)
+  }
+  
   subsets <- aCV4SEM:::createSubsets(N = N, k = k)
   
   progressbar = txtProgressBar(min = 0,
@@ -349,6 +396,10 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
                                           currentTuningParameters = currentTuningParameters,
                                           penaltyFunctionArguments = penaltyFunctionArguments)
     
+    if(returnSubsetParameters){
+      subsetParameters[,,ro] <- aCV$subsetParameters[,dimnames(subsetParameters)[[2]]]
+    }
+    
     cvfitsDetails[ro,paste0("sample",1:k)] <- aCV$leaveOutFits
     cvfits$cvfit[ro] <- sum(aCV$leaveOutFits)
     setTxtProgressBar(progressbar,ro)
@@ -362,7 +413,8 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
         cvfits = cvfits,
         parameterLabels = names(pars),
         cvfitsDetails=cvfitsDetails, 
-        subsets = subsets)
+        subsets = subsets,
+        subsetParameters = subsetParameters)
   )
 }
 

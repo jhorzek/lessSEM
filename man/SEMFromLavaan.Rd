@@ -8,7 +8,8 @@ SEMFromLavaan(
   lavaanModel,
   whichPars = "est",
   transformVariances = TRUE,
-  fit = TRUE
+  fit = TRUE,
+  addMeans = TRUE
 )
 }
 \arguments{
@@ -21,6 +22,8 @@ be optimized afterwards as setting the parameters to "est" may result in the mod
 \item{transformVariances}{set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative}
 
 \item{fit}{should the model be fitted and compared to the lavaanModel?}
+
+\item{addMeans}{If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average}
 }
 \description{
 internal function. Translates an object of class lavaan to the internal model representation.

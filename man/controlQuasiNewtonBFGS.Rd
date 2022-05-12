@@ -5,6 +5,7 @@
 \title{controlQuasiNewtonBFGS}
 \usage{
 controlQuasiNewtonBFGS(
+  addMeans = TRUE,
   startingValues = "est",
   initialHessian = ifelse(all(startingValues == "est"), "compute", 1),
   stepSize = 1,
@@ -24,6 +25,8 @@ controlQuasiNewtonBFGS(
 )
 }
 \arguments{
+\item{addMeans}{If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average}
+
 \item{startingValues}{option to provide initial starting values. Only used for the first lambda. Three options are supported. Setting to "est" will use the estimates
 from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
 values can be passed to the function which will then be used as starting values.}

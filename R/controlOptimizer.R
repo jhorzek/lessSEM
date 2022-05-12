@@ -2,6 +2,7 @@
 #' 
 #' Control the GLMNET optimizer.
 #' 
+#' @param addMeans If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average
 #' @param startingValues option to provide initial starting values. Only used for the first lambda. Three options are supported. Setting to "est" will use the estimates
 #' from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
 #' values can be passed to the function which will then be used as starting values.
@@ -22,41 +23,43 @@
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 #' @export
 controlGLMNET <- function(
-  startingValues = "est",
-  initialHessian = ifelse(all(startingValues=="est"),"compute",1),
-  stepSize = 1,
-  c1 = 1e-4,
-  c2 = 0.9,
-  sig = 1e-5,
-  gam = 0,
-  maxIterOut = 1000,
-  maxIterIn = 1000,
-  maxIterLine = 500,
-  epsOut = 1e-5,
-  epsIn = 1e-5,
-  useMultipleConvergenceCriteria = TRUE,
-  regM2LLChangeEps = 1e-6,
-  saveHessian = FALSE,
-  verbose = 0
+    addMeans = TRUE,
+    startingValues = "est",
+    initialHessian = ifelse(all(startingValues=="est"),"compute",1),
+    stepSize = 1,
+    c1 = 1e-4,
+    c2 = 0.9,
+    sig = 1e-5,
+    gam = 0,
+    maxIterOut = 1000,
+    maxIterIn = 1000,
+    maxIterLine = 500,
+    epsOut = 1e-5,
+    epsIn = 1e-5,
+    useMultipleConvergenceCriteria = TRUE,
+    regM2LLChangeEps = 1e-6,
+    saveHessian = FALSE,
+    verbose = 0
 ){
   return(
     list(
-    startingValues = startingValues,
-    initialHessian = initialHessian,
-    stepSize = stepSize,
-    c1 = c1,
-    c2 = c2,
-    sig = sig,
-    gam = gam,
-    maxIterOut = maxIterOut,
-    maxIterIn = maxIterIn,
-    maxIterLine = maxIterLine,
-    epsOut = epsOut,
-    epsIn = epsIn,
-    useMultipleConvergenceCriteria = useMultipleConvergenceCriteria,
-    regM2LLChangeEps = regM2LLChangeEps,
-    saveHessian = saveHessian,
-    verbose = verbose
+      addMeans = addMeans,
+      startingValues = startingValues,
+      initialHessian = initialHessian,
+      stepSize = stepSize,
+      c1 = c1,
+      c2 = c2,
+      sig = sig,
+      gam = gam,
+      maxIterOut = maxIterOut,
+      maxIterIn = maxIterIn,
+      maxIterLine = maxIterLine,
+      epsOut = epsOut,
+      epsIn = epsIn,
+      useMultipleConvergenceCriteria = useMultipleConvergenceCriteria,
+      regM2LLChangeEps = regM2LLChangeEps,
+      saveHessian = saveHessian,
+      verbose = verbose
     )
   )
 }
@@ -65,6 +68,7 @@ controlGLMNET <- function(
 #' 
 #' Control the quasiNewtonBFGS optimizer.
 #' 
+#' @param addMeans If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average
 #' @param startingValues option to provide initial starting values. Only used for the first lambda. Three options are supported. Setting to "est" will use the estimates
 #' from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
 #' values can be passed to the function which will then be used as starting values.
@@ -85,6 +89,7 @@ controlGLMNET <- function(
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 #' @export
 controlQuasiNewtonBFGS <- function(
+    addMeans = TRUE,
     startingValues = "est",
     initialHessian = ifelse(all(startingValues=="est"),"compute",1),
     stepSize = 1,
@@ -104,6 +109,7 @@ controlQuasiNewtonBFGS <- function(
 ){
   return(
     list(
+      addMeans = addMeans,
       startingValues = startingValues,
       initialHessian = initialHessian,
       stepSize = stepSize,

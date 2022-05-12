@@ -4,10 +4,16 @@
 \alias{aCV4regularizedSEMWithCustomPenalty}
 \title{aCV4regularizedSEMWithCustomPenalty}
 \usage{
-aCV4regularizedSEMWithCustomPenalty(regularizedSEMWithCustomPenalty, k)
+aCV4regularizedSEMWithCustomPenalty(
+  regularizedSEMWithCustomPenalty,
+  k,
+  returnSubsetParameters = FALSE
+)
 }
 \arguments{
 \item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set}
+
+\item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
 
 \item{regularizedSEMWithCustomPenalty.}{model of class regularizedSEMWithCustomPenalty.}
 }

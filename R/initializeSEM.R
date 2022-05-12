@@ -8,10 +8,12 @@
 #' be optimized afterwards as setting the parameters to "est" may result in the model getting stuck in a local minimum.
 #' @param transformVariances set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative
 #' @param fit should the model be fitted and compared to the lavaanModel?
+#' @param addMeans If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average
 SEMFromLavaan <- function(lavaanModel, 
                           whichPars = "est",
                           transformVariances = TRUE, 
-                          fit = TRUE){
+                          fit = TRUE,
+                          addMeans = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   
   rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
@@ -22,7 +24,9 @@ SEMFromLavaan <- function(lavaanModel,
   fixedX <- lavInspect(lavaanModel, "fixed.x")
   if(fixedX) {
     warning("lavaanModel has option fixed.x set to TRUE. This is currently not fully supported by aCV4SEM. Be sure to check the results.")
-    fit <- FALSE
+    checkFit <- FALSE
+  }else{
+    checkFit <- TRUE
   }
   lavaanParameterTable <- lavInspect(lavaanModel, what = "parTable")
   
@@ -167,7 +171,7 @@ SEMFromLavaan <- function(lavaanModel,
   }
   
   # if no mean structure: add 
-  if(!meanstructure) {
+  if(!meanstructure && addMeans) {
     for(manifestName in manifestNames){
       parameterTable <- rbind(parameterTable,
                               data.frame(
@@ -252,7 +256,7 @@ SEMFromLavaan <- function(lavaanModel,
   
   if(fit){
     SEMCpp <- aCV4SEM:::fit(SEM = SEMCpp)
-    if(whichPars == "est"){
+    if(whichPars == "est" && checkFit){
       # check model fit
       if(round(SEMCpp$m2LL - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
     }

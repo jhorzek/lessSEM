@@ -5,7 +5,8 @@ setClass(Class = "aCV4RegularizedSEM",
            parameterLabels = "character",
            regularized = "character",
            cvfitsDetails="data.frame", 
-           subsets = "matrix"
+           subsets = "matrix",
+           subsetParameters = "array"
          )
 )
 

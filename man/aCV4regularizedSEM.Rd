@@ -8,6 +8,7 @@ aCV4regularizedSEM(
   regularizedSEM,
   k,
   recomputeHessian = TRUE,
+  returnSubsetParameters = FALSE,
   control = controlGLMNET()
 )
 }
@@ -16,7 +17,9 @@ aCV4regularizedSEM(
 
 \item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set}
 
-\item{recomputeHessian}{if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.}
+\item{recomputeHessian}{if set to FALSE, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.}
+
+\item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
 
 \item{control}{parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details}
 }

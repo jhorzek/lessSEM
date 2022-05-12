@@ -112,7 +112,7 @@ setMethod("BIC", "regularizedSEM", function (object) {
   fits <- object@fits
   
   if(all(fits$alpha == 1)){
-    fits$BIC <- fits$m2LL + fits$m2LL + log(N)*fits$nonZeroParameters
+    fits$BIC <- fits$m2LL + log(N)*fits$nonZeroParameters
   }else{
     warning("BIC for non-lasso models is experimental and should not be trusted. Use approximate cross-validation instead")
     fits$BIC <- rep(NA, length(fits$m2LL))

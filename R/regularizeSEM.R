@@ -44,18 +44,21 @@ regularizeSEM <- function(lavaanModel,
   if(any(startingValues == "est")){
     SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
-                                   whichPars = "est")
+                                   whichPars = "est",
+                                   addMeans = control$addMeans)
   }else if(any(startingValues == "start")){
     SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
-                                   whichPars = "start")
+                                   whichPars = "start",
+                                   addMeans = control$addMeans)
   }else if(is.numeric(startingValues)){
     
     if(!all(names(startingValues) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See aCV4SEM::getLavaanParameters(lavaanModel).")
     SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start", 
-                                   fit = FALSE)
+                                   fit = FALSE,
+                                   addMeans = control$addMeans)
     SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
     SEM <- try(aCV4SEM:::fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) stop("Infeasible starting values.")
@@ -228,7 +231,8 @@ regularizeSEM <- function(lavaanModel,
       warning("Fit for lambda = ",lambda, "alpha = ", alpha, " resulted in Error!")
       SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                      transformVariances = TRUE,
-                                     whichPars = "start")
+                                     whichPars = "start",
+                                     addMeans = control$addMeans)
       initialHessian4Optimizer <- NULL
     }else{
       initialHessian4Optimizer <- result$Hessian
