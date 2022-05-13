@@ -9,12 +9,28 @@ setClass(Class = "regularizedSEM",
          )
 )
 
+#' show
+#' @param object object of class regularizedSEM
+#' @export
+setMethod("show", "regularizedSEM", function (object) {
+  #modelName <-deparse(substitute(object)) # get the name of the object
+  cat(paste0("#### Model of class regularizedSEM with ",object@inputArguments$penalty, " penalty ####\n\n"))
+  cat("regularized parameters: ")
+  cat(paste0(object@regularized, collapse = ", "))
+  cat("\n\n")
+  cat(paste0("- Use coef(object) to get the parameter estimates of the model. With coef(object, lambda = x, delta = y) parameters estimates at the values x and y for lambda and delta can be extracted.\n\n"))
+  cat(paste0("- Use plot(object) to plot the parameter estimates of the model.\n\n"))
+  cat(paste0("- Use aCV4regularizedSEM(object, k = k) to compute an approximate k-fold cross-valdidation.\n\n"))
+  cat(paste0("- Information criteria can be compute with AIC(object) or BIC(object).\n\n"))
+  cat("################################################\n")
+})
+
 #' summary
 #' @param object object of class regularizedSEM
 #' @export
 setMethod("summary", "regularizedSEM", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
-  cat(paste0("#### Model of class regularizedSEM with ",object@inputArguments$penalty, "penalty ####\n\n"))
+  cat(paste0("#### Model of class regularizedSEM with ",object@inputArguments$penalty, " penalty ####\n\n"))
   cat("regularized parameters: ")
   cat(paste0(object@regularized, collapse = ", "))
   cat("\n\n")

@@ -29,12 +29,81 @@ regularizeSEM(
 
 \item{alphas}{0<alpha<1. only required for elastic net. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge}
 
-\item{adaptiveLassoWeights}{vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO}
+\item{adaptiveLassoWeights}{vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO. Default is inverse of absolute unregularized parameter estimates}
 
-\item{raw}{controls if the internal transformations of aCV4SEM is used.}
+\item{raw}{controls if the internal transformations of aCV4SEM is used. Recommended to set to TRUE!}
 
-\item{control}{option to set parameters of the GLMNET optimizer}
+\item{control}{option to set parameters of the GLMNET optimizer. See ?controlGLMNET}
 }
 \description{
-optimize a SEM with regularized penalty function.
+This function provides optimization for regularized structural equation models with ridge,
+lasso, adaptive lasso, or elastic net penalty. In case of lasso and adaptive lasso, the lambda values
+can be selected automatically. The returned object is an S4 class; its elements can be accessed
+with the "@" operator (see examples).
+}
+\details{
+# References
+
+Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. 
+Structural Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+
+Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. 
+Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
+}
+\examples{
+ 
+library(aCV4SEM)
+
+# Identical to regsem, aCV4SEM builds on the lavaan
+# package for model specification. The first step
+# therefore is to implement the model in lavaan.
+
+dataset <- simulateExampleData()
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           meanstructure = TRUE,
+                           std.lv = TRUE)
+
+# Optional: Plot the model
+# semPlot::semPaths(lavaanModel, 
+#                   what = "est",
+#                   fade = FALSE)
+
+regsem <- regularizeSEM(# pass the fitted lavaan model
+  lavaanModel = lavaanModel,
+  # names of the regularized paramters:
+  regularizedParameterLabels = paste0("l", 6:15),
+  # which penalty should be used?
+  penalty = "lasso",
+  # in case of lasso and adaptive lasso, we can specify the number of lambda
+  # values to use. aCV4SEM will automatically find lambda_max and fit
+  # models for nLambda values between 0 and lambda_max. For the other
+  # penalty functions, lambdas must be specified explicitly
+  nLambdas = 5)
+
+# use the plot-function to plot the regularized parameters:
+plot(regsem)
+
+# elements of regsem can be accessed with the @ operator:
+regsem@parameters[1,]
+
+# AIC and BIC:
+AIC(regsem)
+BIC(regsem)
+
+# The best parameters can also be extracted with:
+coef(regsem, criterion = "AIC")
+coef(regsem, criterion = "BIC")
+
+## The fitted model can then be used as basis for an approximate cross-validation
+# (see ?aCV4SEM::aCV4regularizedSEM) or approximate influence functions
+# (see ?aCV4SEM::aI4regularizedSEM)
 }

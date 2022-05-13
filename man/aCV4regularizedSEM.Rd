@@ -27,3 +27,86 @@ aCV4regularizedSEM(
 approximate cross-validation for models of class regularizedSEM. These models can be fit with regularizedSEM() (see ?regularizedSEM)
 in this package.
 }
+\examples{
+library(aCV4SEM)
+
+# Let's first set up a regularized model. The following steps are
+# explained in detail in ?aCV4SEM::regularizeSEM
+dataset <- simulateExampleData()
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           meanstructure = TRUE,
+                           std.lv = TRUE)
+
+# Optional: Plot the model
+# semPlot::semPaths(lavaanModel, 
+#                   what = "est",
+#                   fade = FALSE)
+
+regsem <- regularizeSEM(
+  lavaanModel = lavaanModel,
+  regularizedParameterLabels = paste0("l", 6:15),
+  penalty = "lasso",
+  nLambdas = 5)
+plot(regsem)
+
+## The approximate cross-validation can be computed with:
+aCV <- aCV4regularizedSEM(regularizedSEM = regsem,
+                          # we highly recommend that you use approximate
+                          # leave one out cross-validation:
+                          k = nrow(dataset)
+                          )
+# let's plot the parameter values and the corresponding leave-one-out fit:
+plot(aCV)
+
+# the best parameters can be extracted with
+coef(aCV)
+
+# we can also use the one standard deviation rule:
+coef(aCV, rule = "1sd")
+
+# To see which person ended up in which sample, use:
+aCV@subsets
+
+#### Advanced ####
+# If you are interested in the parameter estimates of each sub-sample,
+# you must re-run the computation with returnSubsetParameters set to TRUE.
+# This is disabled by default because it may take a lot of disk space
+aCV <- aCV4regularizedSEM(regularizedSEM = regsem,
+                          k = nrow(dataset),
+                          returnSubsetParameters = TRUE
+)
+
+# the parameter are returned in a 3D-array. The subsets are in the
+# rows, the parameters in the columns and the tuning parameters in
+# the third dimension. To access the elements, use:
+# Access elements for:
+dimnames(aCV@subsetParameters)[[3]][1]
+aCV@subsetParameters[,,1] # first lambda value
+# Access elements for:
+dimnames(aCV@subsetParameters)[[3]][2]
+aCV@subsetParameters[,,2] # second lambda value
+
+## Currently, aCV4regularizedSEM recomputes the Hessian for each configuration
+# of the tuning parameters. To reuse the Hessian of the previous optimiztation, use:
+regsem <- regularizeSEM(
+  lavaanModel = lavaanModel,
+  regularizedParameterLabels = paste0("l", 6:15),
+  penalty = "lasso",
+  nLambdas = 5,
+  control = controlGLMNET(saveHessian = TRUE)) # save the Hessian of the optimizer
+
+aCV <- aCV4regularizedSEM(regularizedSEM = regsem,
+                          k = nrow(dataset),
+                          recomputeHessian = FALSE # don't recompute Hessian
+
+)
+}

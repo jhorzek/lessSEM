@@ -21,14 +21,14 @@ SEMFromLavaan <- function(lavaanModel,
   
   # extract basic features
   meanstructure <- lavaanModel@Options$meanstructure
-  fixedX <- lavInspect(lavaanModel, "fixed.x")
+  fixedX <- lavaan::lavInspect(lavaanModel, "fixed.x")
   if(fixedX) {
     warning("lavaanModel has option fixed.x set to TRUE. This is currently not fully supported by aCV4SEM. Be sure to check the results.")
     checkFit <- FALSE
   }else{
     checkFit <- TRUE
   }
-  lavaanParameterTable <- lavInspect(lavaanModel, what = "parTable")
+  lavaanParameterTable <- lavaan::lavInspect(lavaanModel, what = "parTable")
   
   latentNames <- colnames(lavaanParameterTable$lambda)  #lavNames(lavaanModel, type = "lv")
   manifestNames <- rownames(lavaanParameterTable$lambda) # lavNames(lavaanModel, type = "ov")

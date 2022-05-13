@@ -21,6 +21,52 @@ aI4regularizedSEM(
 \item{control}{parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details}
 }
 \description{
-approximate influence for models of class regularizedSEM. These models can be fit with regularizedSEM() (see ?regularizedSEM)
+Provides an approximate influence for models of class regularizedSEM. These models can be fit with regularizedSEM() (see ?aCV4SEM::regularizedSEM)
 in this package.
+}
+\examples{
+library(aCV4SEM)
+
+# Let's first set up a regularized model. The following steps are
+# explained in detail in ?aCV4SEM::regularizeSEM
+dataset <- simulateExampleData()
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           meanstructure = TRUE,
+                           std.lv = TRUE)
+
+# Optional: Plot the model
+# semPlot::semPaths(lavaanModel, 
+#                   what = "est",
+#                   fade = FALSE)
+
+regsem <- regularizeSEM(
+  lavaanModel = lavaanModel,
+  regularizedParameterLabels = paste0("l", 6:15),
+  penalty = "lasso",
+  nLambdas = 5)
+plot(regsem)
+
+## The approximate influence function can be computed with:
+aI <- aI4regularizedSEM(regularizedSEM = regsem,
+                          # we compute the influence of each individual
+                          k = nrow(dataset)
+                          )
+
+# let's plot the influence
+plot(aI) # The points are the fits for the model
+# when one individual is removed. The lines are the
+# fits with all individuals.
+
+# To get more information, install the plotly - package and use::
+# plot(aI, interactive  = TRUE)
+# This creates an interactive plot which can be explored with your mouse
 }

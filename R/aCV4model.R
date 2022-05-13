@@ -10,6 +10,88 @@
 #' @param recomputeHessian if set to FALSE, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
+#' @examples
+#' library(aCV4SEM)
+#' 
+#' # Let's first set up a regularized model. The following steps are
+#' # explained in detail in ?aCV4SEM::regularizeSEM
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Optional: Plot the model
+#' # semPlot::semPaths(lavaanModel, 
+#' #                   what = "est",
+#' #                   fade = FALSE)
+#' 
+#' regsem <- regularizeSEM(
+#'   lavaanModel = lavaanModel,
+#'   regularizedParameterLabels = paste0("l", 6:15),
+#'   penalty = "lasso",
+#'   nLambdas = 5)
+#' plot(regsem)
+#' 
+#' ## The approximate cross-validation can be computed with:
+#' aCV <- aCV4regularizedSEM(regularizedSEM = regsem,
+#'                           # we highly recommend that you use approximate
+#'                           # leave one out cross-validation:
+#'                           k = nrow(dataset)
+#'                           )
+#' # let's plot the parameter values and the corresponding leave-one-out fit:
+#' plot(aCV)
+#' 
+#' # the best parameters can be extracted with
+#' coef(aCV)
+#' 
+#' # we can also use the one standard deviation rule:
+#' coef(aCV, rule = "1sd")
+#' 
+#' # To see which person ended up in which sample, use:
+#' aCV@subsets
+#' 
+#' #### Advanced ####
+#' # If you are interested in the parameter estimates of each sub-sample,
+#' # you must re-run the computation with returnSubsetParameters set to TRUE.
+#' # This is disabled by default because it may take a lot of disk space
+#' aCV <- aCV4regularizedSEM(regularizedSEM = regsem,
+#'                           k = nrow(dataset),
+#'                           returnSubsetParameters = TRUE
+#' )
+#' 
+#' # the parameter are returned in a 3D-array. The subsets are in the
+#' # rows, the parameters in the columns and the tuning parameters in
+#' # the third dimension. To access the elements, use:
+#' # Access elements for:
+#' dimnames(aCV@subsetParameters)[[3]][1]
+#' aCV@subsetParameters[,,1] # first lambda value
+#' # Access elements for:
+#' dimnames(aCV@subsetParameters)[[3]][2]
+#' aCV@subsetParameters[,,2] # second lambda value
+#' 
+#' ## Currently, aCV4regularizedSEM recomputes the Hessian for each configuration
+#' # of the tuning parameters. To reuse the Hessian of the previous optimiztation, use:
+#' regsem <- regularizeSEM(
+#'   lavaanModel = lavaanModel,
+#'   regularizedParameterLabels = paste0("l", 6:15),
+#'   penalty = "lasso",
+#'   nLambdas = 5,
+#'   control = controlGLMNET(saveHessian = TRUE)) # save the Hessian of the optimizer
+#' 
+#' aCV <- aCV4regularizedSEM(regularizedSEM = regsem,
+#'                           k = nrow(dataset),
+#'                           recomputeHessian = FALSE # don't recompute Hessian
+#' 
+#' )
 #' @export
 aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, returnSubsetParameters = FALSE, control = controlGLMNET()){
   if(!is(regularizedSEM, "regularizedSEM")){
@@ -133,6 +215,37 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
 #' @param raw controls if the cross-validation should use the internal transformations of aCV4SEM. aCV4SEM will use an exponential function for all variances to 
 #' avoid negative variances. This can result in better sub-group parameters, but may not be necessary and will also result in more difficult to interpret parameters.
+#' @examples 
+#' ## Approximate leave one out cross-validation for a lavaan model
+#' ### set up model in lavaan
+#' library(lavaan)
+#' library(aCV4SEM)
+#' HS.model <- ' visual  =~ x1 + x2 + x3
+#'                     textual =~ x4 + x5 + x6
+#'                     speed   =~ x7 + x8 + x9 '
+#' HS <- HolzingerSwineford1939[,paste0("x",1:9)]
+#' 
+#' fit <- cfa(HS.model, data = HS, meanstructure = TRUE)
+#' 
+#' ### approximate cross-validation
+#' aLOOCV <- aCV4lavaan(lavaanModel = fit, k = nrow(HS))
+#' 
+#' ### Optional: Compare this to a true leave one out cross-validation
+#' # exactLOOCV <- rep(NA, nrow(HS))
+#' # for(i in 1:nrow(HS)){
+#' #   fit = sem(HS.model, HS[-i,], meanstructure = TRUE)
+#' #   exactLOOCV[i] <- aCV4SEM:::computeIndividualM2LL(nObservedVariables = ncol(HS),
+#' #                                                    rawData = as.numeric(HS[i,]),
+#' #                                                    impliedMeans = fit@implied$mean[[1]],
+#' #                                                    impliedCovariance = fit@implied$cov[[1]])
+#' # }
+#' # 
+#' # # The plot shows the relation between exact and approximate cross-validation.
+#' # # If the points are on the line, the approximate and exact cross-validation
+#' # # produce relatively similar results
+#' # plot(exactLOOCV, exactLOOCV, type = "l",
+#' #      xlab = "exact loocv", ylab = "approximated loocv")
+#' # points(exactLOOCV, aLOOCV$leaveOutFits, col = "red")
 #' @export
 aCV4lavaan <- function(lavaanModel, 
                        k, 

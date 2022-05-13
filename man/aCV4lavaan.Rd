@@ -17,3 +17,35 @@ avoid negative variances. This can result in better sub-group parameters, but ma
 \description{
 approximate cross-validation for models of class lavaan.
 }
+\examples{
+## Approximate leave one out cross-validation for a lavaan model
+### set up model in lavaan
+library(lavaan)
+library(aCV4SEM)
+HS.model <- ' visual  =~ x1 + x2 + x3
+                    textual =~ x4 + x5 + x6
+                    speed   =~ x7 + x8 + x9 '
+HS <- HolzingerSwineford1939[,paste0("x",1:9)]
+
+fit <- cfa(HS.model, data = HS, meanstructure = TRUE)
+
+### approximate cross-validation
+aLOOCV <- aCV4lavaan(lavaanModel = fit, k = nrow(HS))
+
+### Optional: Compare this to a true leave one out cross-validation
+# exactLOOCV <- rep(NA, nrow(HS))
+# for(i in 1:nrow(HS)){
+#   fit = sem(HS.model, HS[-i,], meanstructure = TRUE)
+#   exactLOOCV[i] <- aCV4SEM:::computeIndividualM2LL(nObservedVariables = ncol(HS),
+#                                                    rawData = as.numeric(HS[i,]),
+#                                                    impliedMeans = fit@implied$mean[[1]],
+#                                                    impliedCovariance = fit@implied$cov[[1]])
+# }
+# 
+# # The plot shows the relation between exact and approximate cross-validation.
+# # If the points are on the line, the approximate and exact cross-validation
+# # produce relatively similar results
+# plot(exactLOOCV, exactLOOCV, type = "l",
+#      xlab = "exact loocv", ylab = "approximated loocv")
+# points(exactLOOCV, aLOOCV$leaveOutFits, col = "red")
+}
