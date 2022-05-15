@@ -110,9 +110,10 @@ f ~~ 1*f
                                              k = nrow(dataset))
   plot(aCV)
   # To extract the best parameter estimates:
-  coef(aCV)
+  #coef(aCV)
   
   ## true cross-validation
+  
   CV <- CV4regularizedSEMWithCustomPenalty(regularizedSEMWithCustomPenalty = regsemApprox,
                                            k = nrow(dataset))
   plot(CV)
