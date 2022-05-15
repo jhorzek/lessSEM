@@ -83,6 +83,14 @@ test_that("testing lasso", {
   testthat::expect_equal(all(round(AIC(rsem)$AIC - (AICs))==0), TRUE)
   testthat::expect_equal(all(round(BIC(rsem)$BIC - (BICs))==0), TRUE)
   
+  ## Test exact cross-validation
+  cvExact <- CV4regularizedSEM(regularizedSEM = rsem, k = N)
+  coef(cvExact)
+  coef(cvExact, rule = "1sd")
+  coef(cvExact, rule = "penalized")
+  coef(cvExact, alpha = 1, lambda = .1)
+  plot(cvExact)
+  
   ## Test approximated cross-validation
   
   cv <- aCV4regularizedSEM(regularizedSEM = rsem, k = N)
@@ -91,6 +99,8 @@ test_that("testing lasso", {
   coef(cv, rule = "penalized")
   coef(cv, alpha = 1, lambda = .1)
   plot(cv)
+  
+  testthat::expect_equal(all(coef(cv) - coef(cvExact) ==0), TRUE)
   
   cv2 <- aCV4regularizedSEM(regularizedSEM = rsem, k = N, recomputeHessian = FALSE)
   plot(cv2)

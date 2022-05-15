@@ -58,6 +58,8 @@ If set to "compute", the initial hessian will be computed. If set to a single va
 \item{saveHessian}{should the Hessian be saved for later use? Note: This may take a lot of memory!}
 
 \item{verbose}{0 prints no additional information, > 0 prints GLMNET iterations}
+
+\item{activeSet}{Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.}
 }
 \description{
 Control the GLMNET optimizer.

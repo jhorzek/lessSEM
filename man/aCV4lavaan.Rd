@@ -9,7 +9,8 @@ aCV4lavaan(lavaanModel, k, raw = FALSE)
 \arguments{
 \item{lavaanModel}{model of class lavaan}
 
-\item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set}
+\item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
+a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example}
 
 \item{raw}{controls if the cross-validation should use the internal transformations of aCV4SEM. aCV4SEM will use an exponential function for all variances to 
 avoid negative variances. This can result in better sub-group parameters, but may not be necessary and will also result in more difficult to interpret parameters.}

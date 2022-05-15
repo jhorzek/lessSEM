@@ -6,7 +6,8 @@
 #' in this package.
 #' 
 #' @param regularizedSEM model of class regularizedSEM
-#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
+#' a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example
 #' @param recomputeHessian if set to FALSE, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
@@ -46,7 +47,7 @@
 #'                           # we highly recommend that you use approximate
 #'                           # leave one out cross-validation:
 #'                           k = nrow(dataset)
-#'                           )
+#' )
 #' # let's plot the parameter values and the corresponding leave-one-out fit:
 #' plot(aCV)
 #' 
@@ -90,8 +91,17 @@
 #' aCV <- aCV4regularizedSEM(regularizedSEM = regsem,
 #'                           k = nrow(dataset),
 #'                           recomputeHessian = FALSE # don't recompute Hessian
-#' 
+#'                           
 #' )
+#' 
+#' ## Instead of letting aCV4SEM create the subsets, you can
+#' # also pass your own subsets. As an example:
+#' subsets <- aCV4SEM:::createSubsets(N = nrow(dataset), k  = 10)
+#' 
+#' aCV <- aCV4regularizedSEM(regularizedSEM = regsem,
+#'                           k = subsets
+#' )
+#' aCV@cvfitsDetails
 #' @export
 aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, returnSubsetParameters = FALSE, control = controlGLMNET()){
   if(!is(regularizedSEM, "regularizedSEM")){
@@ -104,6 +114,16 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
   N <- nrow(data)
   
   aCVSEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, transformVariances = TRUE, fit = FALSE)
+  
+  # create subsets 
+  if(is.matrix(k)){
+    subsets <- k
+    if(!is.logical(subsets)) stop("k must be a matrix with booleans (TRUE, FALSE)")
+    if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
+    k <- ncol(subsets)
+  }else{
+    subsets <- aCV4SEM:::createSubsets(N = N, k = k)
+  }
   
   # extract elements for easier access
   fits <- regularizedSEM@fits
@@ -121,7 +141,7 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
   )
   
   cvfitsDetails <- as.data.frame(matrix(NA,nrow = nrow(cvfits), ncol = k))
-  colnames(cvfitsDetails) <- paste0("sample", 1:k)
+  colnames(cvfitsDetails) <- paste0("testSet", 1:k)
   cvfitsDetails <- cbind(
     tuningParameters,
     cvfitsDetails
@@ -130,7 +150,7 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
   if(returnSubsetParameters){
     subsetParameters <- array(NA, 
                               dim = c(k, length(regularizedSEM@parameterLabels), nrow(tuningParameters)),
-                              dimnames = list(paste0("sample", 1:k),
+                              dimnames = list(paste0("trainSet", 1:k),
                                               regularizedSEM@parameterLabels,
                                               NULL))
     dimname3 <- c()
@@ -139,15 +159,13 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
                     paste0(paste0(colnames(tuningParameters[ro,,drop = FALSE]),
                                   "=", 
                                   tuningParameters[ro,]), 
-                    collapse = "; ")
+                           collapse = "; ")
       )
     }
     dimnames(subsetParameters)[[3]] <- dimname3
   }else{
     subsetParameters <- array(NA,dim = 1)
   }
-  
-  subsets <- aCV4SEM:::createSubsets(N = N, k = k)
   
   if(control$verbose == 0) progressbar = txtProgressBar(min = 0,
                                                         max = nrow(tuningParameters), 
@@ -189,7 +207,7 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
       subsetParameters[,,ro] <- aCV$subsetParameters[,dimnames(subsetParameters)[[2]]]
     }
     
-    cvfitsDetails[cvfitsDetails$alpha == alpha & cvfitsDetails$lambda == lambda,paste0("sample",1:k)] <- aCV$leaveOutFits
+    cvfitsDetails[cvfitsDetails$alpha == alpha & cvfitsDetails$lambda == lambda,paste0("testSet",1:k)] <- aCV$leaveOutFits
     cvfits$cvfit[ro] <- sum(aCV$leaveOutFits)
     if(control$verbose == 0) setTxtProgressBar(progressbar,ro)
     
@@ -212,7 +230,8 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
 #' approximate cross-validation for models of class lavaan. 
 #' 
 #' @param lavaanModel model of class lavaan
-#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
+#' a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example
 #' @param raw controls if the cross-validation should use the internal transformations of aCV4SEM. aCV4SEM will use an exponential function for all variances to 
 #' avoid negative variances. This can result in better sub-group parameters, but may not be necessary and will also result in more difficult to interpret parameters.
 #' @examples 
@@ -260,6 +279,16 @@ aCV4lavaan <- function(lavaanModel,
   N <- lavaan::lavInspect(lavaanModel, "nobs")
   aCVSEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
   
+  # create subsets 
+  if(is.matrix(k)){
+    subsets <- k
+    if(!is.logical(subsets)) stop("k must be a matrix with booleans (TRUE, FALSE)")
+    if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
+    k <- ncol(subsets)
+  }else{
+    subsets <- aCV4SEM:::createSubsets(N = N, k = k)
+  }
+  
   individualPenaltyFunction <- function(a,b,c) {
     return(0)
   }
@@ -271,11 +300,11 @@ aCV4lavaan <- function(lavaanModel,
   individualPenaltyFunctionHessian <- function(a,b,c) {
     return(
       matrix(0, 
-               nrow = length(a), 
-               ncol = length(a), 
-               dimnames = list(names(a), names(a))))
+             nrow = length(a), 
+             ncol = length(a), 
+             dimnames = list(names(a), names(a))))
   }
-  subsets <- aCV4SEM:::createSubsets(N = N, k = k)
+  
   aCV <- aCV4SEM:::customACVRcpp_SEMCpp(SEM = aCVSEM, 
                                         subsets = subsets,
                                         raw = raw, 
@@ -334,12 +363,11 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   stepdirections <- matrix(NA, nrow = k, ncol = length(parameters))
   colnames(stepdirections) <- names(parameters)
   
-  #subsetParameters <- vector("list",k)
   subsetParameters <- matrix(NA, nrow = k, ncol = length(parameters))
   colnames(subsetParameters) <- names(parameters)
-  rownames(subsetParameters) <- paste0("sample", 1:k)
+  rownames(subsetParameters) <- paste0("trainSet", 1:k)
   leaveOutFits <- rep(0, k)
-  names(leaveOutFits) <- paste0("sample", 1:k)
+  names(leaveOutFits) <- paste0("testSet", 1:k)
   
   for(s in 1:k){
     if(control$verbose != 0) cat("\r","Subset [",s, "/", k, "]")
@@ -412,7 +440,8 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
 #' in this package.
 #' 
 #' @param regularizedSEMWithCustomPenalty. model of class regularizedSEMWithCustomPenalty.
-#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
+#' a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @export
 aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, k, returnSubsetParameters = FALSE){
@@ -426,6 +455,16 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
   N <- nrow(data)
   
   aCVSEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = regularizedSEMWithCustomPenalty@inputArguments$lavaanModel, transformVariances = TRUE, fit = FALSE)
+  
+  # create subsets 
+  if(is.matrix(k)){
+    subsets <- k
+    if(!is.logical(subsets)) stop("k must be a matrix with booleans (TRUE, FALSE)")
+    if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
+    k <- ncol(subsets)
+  }else{
+    subsets <- aCV4SEM:::createSubsets(N = N, k = k)
+  }
   
   # extract elements for easier access
   fits <- regularizedSEMWithCustomPenalty@fits
@@ -455,7 +494,7 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
   )
   
   cvfitsDetails <- as.data.frame(matrix(NA,nrow = nrow(cvfits), ncol = k))
-  colnames(cvfitsDetails) <- paste0("sample", 1:k)
+  colnames(cvfitsDetails) <- paste0("testSet", 1:k)
   cvfitsDetails <- cbind(
     tuningParameters,
     cvfitsDetails
@@ -464,7 +503,7 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
   if(returnSubsetParameters){
     subsetParameters <- array(NA, 
                               dim = c(k, length(regularizedSEMWithCustomPenalty@parameterLabels), nrow(tuningParameters)),
-                              dimnames = list(paste0("sample", 1:k),
+                              dimnames = list(paste0("trainSet", 1:k),
                                               regularizedSEMWithCustomPenalty@parameterLabels,
                                               NULL))
     dimname3 <- c()
@@ -480,8 +519,6 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
   }else{
     subsetParameters <- array(NA,dim = 1)
   }
-  
-  subsets <- aCV4SEM:::createSubsets(N = N, k = k)
   
   progressbar = txtProgressBar(min = 0,
                                max = nrow(tuningParameters), 
@@ -513,7 +550,7 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
       subsetParameters[,,ro] <- aCV$subsetParameters[,dimnames(subsetParameters)[[2]]]
     }
     
-    cvfitsDetails[ro,paste0("sample",1:k)] <- aCV$leaveOutFits
+    cvfitsDetails[ro,paste0("testSet",1:k)] <- aCV$leaveOutFits
     cvfits$cvfit[ro] <- sum(aCV$leaveOutFits)
     setTxtProgressBar(progressbar,ro)
     
@@ -588,9 +625,9 @@ customACVRcpp_SEMCpp <- function(SEM,
   
   subsetParameters <- matrix(NA, nrow = k, ncol = length(parameters))
   colnames(subsetParameters) <- names(parameters)
-  rownames(subsetParameters) <- paste0("sample", 1:k)
+  rownames(subsetParameters) <- paste0("trainSet", 1:k)
   leaveOutFits <- rep(0, k)
-  names(leaveOutFits) <- paste0("sample", 1:k)
+  names(leaveOutFits) <- paste0("testSet", 1:k)
   
   for(s in 1:k){
     
@@ -651,8 +688,8 @@ createSubsets <- function(N,k){
   }
   
   subsetMatrix <- matrix(NA, nrow = N, ncol = k,
-                         dimnames = list(paste0("N",1:N), 
-                                         paste0("subset", 1:k)))
+                         dimnames = list(paste0("person",1:N), 
+                                         paste0("testSet", 1:k)))
   for(s in 1:length(subsets)){
     subsetMatrix[,s] <- 1:N %in% subsets[[s]]
   }

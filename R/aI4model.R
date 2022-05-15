@@ -6,7 +6,8 @@
 #' in this package.
 #' 
 #' @param regularizedSEM model of class regularizedSEM
-#' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set
+#' @param k the number of subset fold. We recommend leave-one-out influence functions; i.e. set k to the number of persons in the data set. Alternatively, 
+#' a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example
 #' @param recomputeHessian if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
 #' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
 #' @examples
@@ -69,6 +70,16 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contro
                                     transformVariances = TRUE, 
                                     fit = FALSE)
   
+  # create subsets 
+  if(is.matrix(k)){
+    subsets <- k
+    if(!is.logical(subsets)) stop("k must be a matrix with booleans (TRUE, FALSE)")
+    if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
+    k <- ncol(subsets)
+  }else{
+    subsets <- aCV4SEM:::createSubsets(N = N, k = k)
+  }
+  
   # extract elements for easier access
   fits <- regularizedSEM@fits
   parameters <- regularizedSEM@parameters
@@ -79,8 +90,6 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contro
   tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
   
   regularizedParameterLabels <- regularizedSEM@inputArguments$regularizedParameterLabels
-  
-  subsets <- aCV4SEM:::createSubsets(N = N, k = k)
   
   subsetElements<- expand.grid(removedSubset = 1:k, 
                                lambda = unique(tuningParameters$lambda), 

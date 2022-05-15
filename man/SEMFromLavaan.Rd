@@ -9,7 +9,8 @@ SEMFromLavaan(
   whichPars = "est",
   transformVariances = TRUE,
   fit = TRUE,
-  addMeans = TRUE
+  addMeans = TRUE,
+  activeSet = NULL
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ be optimized afterwards as setting the parameters to "est" may result in the mod
 \item{fit}{should the model be fitted and compared to the lavaanModel?}
 
 \item{addMeans}{If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average}
+
+\item{activeSet}{Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.}
 }
 \description{
 internal function. Translates an object of class lavaan to the internal model representation.

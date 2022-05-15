@@ -20,6 +20,7 @@
 #' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
 #' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
 #' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
+#' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 #' @export
 controlGLMNET <- function(
@@ -86,6 +87,7 @@ controlGLMNET <- function(
 #' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
 #' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
 #' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
+#' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 #' @export
 controlQuasiNewtonBFGS <- function(

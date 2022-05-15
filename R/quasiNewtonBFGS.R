@@ -198,7 +198,7 @@ quasiNewtonBFGS <- function(SEM,
   }
   # warnings
   if(iterOut == maxIterOut){
-    warning(paste("For lambda = ", lambda, "the maximum number of iterations was reached. Try with a higher maxIterOut or with smaller lambda-steps."))
+    warning(paste("For currentTuningParameters = ", paste0(currentTuningParameters, collapse = "; "), "the maximum number of iterations was reached."))
   }
   
   return(list("SEM" = SEM, 

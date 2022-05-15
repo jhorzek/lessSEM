@@ -8,16 +8,25 @@
 #' be optimized afterwards as setting the parameters to "est" may result in the model getting stuck in a local minimum.
 #' @param transformVariances set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative
 #' @param fit should the model be fitted and compared to the lavaanModel?
+#' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param addMeans If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average
 SEMFromLavaan <- function(lavaanModel, 
                           whichPars = "est",
                           transformVariances = TRUE, 
                           fit = TRUE,
-                          addMeans = TRUE){
+                          addMeans = TRUE,
+                          activeSet = NULL){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   
   rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  
+  if(!is.null(activeSet)){
+    if(length(activeSet) != nrow(rawData)) stop("length of activeSet must be identical to the rows in the data set.")
+    if(!is.logical(activeSet)) stop("activeSet must be logical.")
+    rawData <- rawData[activeSet,,drop = FALSE]
+    fit <- FALSE
+  }
   
   # extract basic features
   meanstructure <- lavaanModel@Options$meanstructure
