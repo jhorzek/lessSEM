@@ -32,7 +32,7 @@ lavaan2regsemLabels <- function(lavaanModel){
   opsRegsem[opsRegsem == "=~"] <- "->"
   regsemLabels <- paste(lavaanModel@ParTable$lhs, opsRegsem, lavaanModel@ParTable$rhs)
   regsemLabels[opsRegsem == "~1"] <- paste("1 ->", lavaanModel@ParTable$lhs[opsRegsem == "~1"])
-  regsemLabels[lavaanModel@ParTable$label!=""] <- lavaanModel@ParTable$label[lavaanModel@ParTable$label!=""]
+  #regsemLabels[lavaanModel@ParTable$label!=""] <- lavaanModel@ParTable$label[lavaanModel@ParTable$label!=""]
   regsemLabels <- regsemLabels[lavaanModel@ParTable$free != 0]
   
   return( 

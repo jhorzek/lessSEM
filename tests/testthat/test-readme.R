@@ -5,8 +5,8 @@ test_that("testing readme", {
   ## Approximate leave one out cross-validation for a lavaan model
   ### set up model in lavaan
   HS.model <- ' visual  =~ x1 + x2 + x3
-                  textual =~ x4 + x5 + x6
-                  speed   =~ x7 + x8 + x9 '
+                    textual =~ x4 + x5 + x6
+                    speed   =~ x7 + x8 + x9 '
   HS <- HolzingerSwineford1939[,paste0("x",1:9)]
   
   fit <- cfa(HS.model, data = HS, meanstructure = TRUE)
@@ -18,10 +18,11 @@ test_that("testing readme", {
   exactLOOCV <- rep(NA, nrow(HS))
   for(i in 1:nrow(HS)){
     fit = sem(HS.model, HS[-i,], meanstructure = TRUE)
-    exactLOOCV[i] <- aCV4SEM:::computeIndividualM2LL(nObservedVariables = ncol(HS), 
-                                                     rawData = as.numeric(HS[i,]),
-                                                     impliedMeans = fit@implied$mean[[1]], 
-                                                     impliedCovariance = fit@implied$cov[[1]])
+    exactLOOCV[i] <- aCV4SEM:::computeIndividualM2LL(
+      nObservedVariables = ncol(HS), 
+      rawData = as.numeric(HS[i,]),
+      impliedMeans = fit@implied$mean[[1]], 
+      impliedCovariance = fit@implied$cov[[1]])
   }
   
   # The plot shows the relation between exact and approximate cross-validation.
@@ -35,41 +36,53 @@ test_that("testing readme", {
   
   ### Simulate a data set
   set.seed(123)
-  library(mvtnorm)
-  # library(semPlot)
-  N <- 50
-  f <- matrix(rnorm(N, 0, 1), ncol = 1)
-  L <- matrix(c(rep(1,5), rep(.2,5), rep(0,5)), nrow = 1)
-  y <- matrix(NA, nrow = N, ncol = ncol(L))
-  
-  covs <- c(rep(1.2-1^2,5), rep(1.2-.8^2,5), rep(1.2-0^2,5))
-  
-  for(i in 1:N){
-    y[i,] <- L*f[i,] +  mvtnorm::rmvnorm(1, sigma = diag(covs))
-  }
-  
-  yNames <- paste0("y", 1:ncol(y))
-  colnames(y) <- yNames
+  dataset <- simulateExampleData()
   
   ### Fit model with lavaan
-  modelSyntax <- paste0('f =~ 1*', yNames[1], ' + ', paste0(yNames[2:length(yNames)], collapse = " + "))
-  modelFit = cfa(modelSyntax, y, meanstructure = TRUE)
+  modelSyntax <- paste0('f =~ 1*', 
+                        colnames(dataset)[1], ' + ', 
+                        paste0(colnames(dataset)[2:ncol(dataset)], 
+                               collapse = " + "))
+  modelFit = cfa(modelSyntax, dataset, meanstructure = TRUE)
   
   ### optional: plot model
   # semPlot::semPaths(modelFit)
   
   ### Use lasso regularization for a subset of the loadings.
-  regularizedParameterLabels <- paste0("f=~y", 6:15)
+  regularize <- paste0("f=~y", 6:15)
   
   regularizedModel <- regularizeSEM(lavaanModel = modelFit,
                                     penalt = "lasso",
-                                    regularizedParameterLabels = regularizedParameterLabels,
+                                    regularizedParameterLabels = regularize,
                                     lambda = seq(0,1,.1)
   )
   
   plot(regularizedModel)
   
   ### approximate leave one out cross-validation:
-  aCV <- aCV4regularizedSEM(regularizedModel, k = N)
+  aCV <- aCV4regularizedSEM(regularizedModel, k = nrow(dataset))
   plot(aCV)
+  
+  ### Missing data
+  isMissing <- matrix(
+    sample(x = c(TRUE,FALSE),
+           size = prod(dim(dataset)),
+           prob = c(.2,.8), # 20 % missing data
+           replace = TRUE),
+    nrow = nrow(dataset),
+    ncol = ncol(dataset)
+  )
+  dataset[isMissing] <- NA
+  head(dataset)
+  
+  # fit lavaan model with missing = "ml"
+  modelFit = cfa(modelSyntax, dataset, meanstructure = TRUE, missing = "ml")
+  regularizedModel <- regularizeSEM(lavaanModel = modelFit,
+                                    penalt = "lasso",
+                                    regularizedParameterLabels = regularize,
+                                    lambda = seq(0,1,.1)
+  )
+  
+  plot(regularizedModel)
+  
 })
