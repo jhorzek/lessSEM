@@ -56,7 +56,7 @@ If you want to install aCV4SEM from GitHub, use the following commands in R:
          xlab = "exact loocv", ylab = "approximated loocv")
     points(exactLOOCV, aLOOCV$leaveOutFits, col = "red")
     
-    ## Example for regularized model SEM
+    ## Example for regularized SEM
     
     ### Simulate a data set
     set.seed(123)
