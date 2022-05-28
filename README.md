@@ -1,6 +1,8 @@
 # aCV4SEM
 
-aCV4SEM is an R package which provides regularized structural equation modeling (regsem) as well as approximate cross-validation and approximate influence functions building on lavaan. The package is relatively new and you may find more stable implementations of regsem in the R packages regsem and lslx. 
+aCV4SEM is an R package which provides regularized structural equation modeling (regularized SEM) as well as approximate cross-validation and approximate influence functions building on lavaan. 
+
+**Warning**: The package is relatively new and you may find more stable implementations of regularized SEM in the R packages [regsem](https://github.com/Rjacobucci/regsem) and [lslx](https://github.com/psyphh/lslx). 
 
 The following features are implemented in aCV4SEM:
 
