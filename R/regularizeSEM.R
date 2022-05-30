@@ -278,8 +278,7 @@ regularizeSEM <- function(lavaanModel,
                                maxIterLine = control$maxIterLine,
                                epsOut = control$epsOut,
                                epsIn = control$epsIn,
-                               useMultipleConvergenceCriteria = control$useMultipleConvergenceCriteria,
-                               regM2LLChangeEps = control$regM2LLChangeEps,
+                               convergenceCriterion = control$convergenceCriterion,
                                verbose = control$verbose)
     
     fits$m2LL[it] <- result$m2LL
@@ -425,8 +424,7 @@ getMaxLambda <- function(SEM, regularizedParameterLabels, adaptiveLassoWeights, 
                              maxIterLine = control$maxIterLine,
                              epsOut = control$epsOut,
                              epsIn = control$epsIn,
-                             useMultipleConvergenceCriteria = control$useMultipleConvergenceCriteria,
-                             regM2LLChangeEps = control$regM2LLChangeEps,
+                             convergenceCriterion = control$convergenceCriterion,
                              verbose = control$verbose)
   sparseParameters <- result$parameters
   SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(sparseParameters), values = sparseParameters, raw = TRUE)

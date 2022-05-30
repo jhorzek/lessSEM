@@ -19,8 +19,7 @@ GLMNET(
   maxIterLine,
   epsOut,
   epsIn,
-  useMultipleConvergenceCriteria,
-  regM2LLChangeEps,
+  convergenceCriterion,
   verbose = 0
 )
 }
@@ -53,9 +52,7 @@ GLMNET(
 
 \item{epsIn}{Stopping criterion for inner iterations}
 
-\item{useMultipleConvergenceCriteria}{if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops}
-
-\item{regM2LLChangeEps}{if useMultipleConvergenceCriteria: change in fit which results in convergence}
+\item{convergenceCriterion}{which convergence criterion should be used for the outer iterations? possible are "GLMNET", "gradients", "fitChange"}
 
 \item{verbose}{0 prints no additional information, > 0 prints GLMNET iterations}
 }

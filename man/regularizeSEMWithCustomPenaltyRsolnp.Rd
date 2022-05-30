@@ -10,6 +10,7 @@ regularizeSEMWithCustomPenaltyRsolnp(
   tuningParameters,
   penaltyFunctionArguments,
   startingValues = "est",
+  carryOverParameters = FALSE,
   saveHessian = FALSE,
   control = list(trace = 0)
 )
@@ -28,6 +29,9 @@ approximation of this function should be provided.}
 \item{startingValues}{option to provide initial starting values. Only used for the first lambda. Three options are supported. Setting to "est" will use the estimates
 from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
 values can be passed to the function which will then be used as starting values.}
+
+\item{carryOverParameters}{should parameters from the previous iteration be used as starting values of
+the next iteration? Interestingly, this can result in worse parameter estimates...}
 
 \item{saveHessian}{should the Hessian of the optimizer be saved? This will take a lot of space!}
 

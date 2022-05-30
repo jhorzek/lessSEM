@@ -248,7 +248,7 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
                                        adaptiveLassoWeights = adaptiveLassoWeights, 
                                        maxIter = control$maxIterIn, 
                                        epsBreak = control$epsIn, 
-                                       useMultipleConvergenceCriteria = control$useMultipleConvergenceCriteria)
+                                       useMultipleConvergenceCriteria = TRUE)
     
     rownames(direction) = names(parameters)
     

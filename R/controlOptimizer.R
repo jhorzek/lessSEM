@@ -17,8 +17,7 @@
 #' @param maxIterLine Maximal number of iterations for the line search procedure
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
-#' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
-#' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
+#' @param convergenceCriterion which convergence criterion should be used for the outer iterations? possible are "GLMNET", "gradients", "fitChange"
 #' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
 #' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
@@ -36,9 +35,8 @@ controlGLMNET <- function(
     maxIterIn = 1000,
     maxIterLine = 500,
     epsOut = 1e-5,
-    epsIn = 1e-5,
-    useMultipleConvergenceCriteria = TRUE,
-    regM2LLChangeEps = 1e-6,
+    epsIn = 1e-10,
+    convergenceCriterion = "gradients",
     saveHessian = FALSE,
     verbose = 0
 ){
@@ -57,8 +55,7 @@ controlGLMNET <- function(
       maxIterLine = maxIterLine,
       epsOut = epsOut,
       epsIn = epsIn,
-      useMultipleConvergenceCriteria = useMultipleConvergenceCriteria,
-      regM2LLChangeEps = regM2LLChangeEps,
+      convergenceCriterion = convergenceCriterion,
       saveHessian = saveHessian,
       verbose = verbose
     )
@@ -84,8 +81,7 @@ controlGLMNET <- function(
 #' @param maxIterLine Maximal number of iterations for the line search procedure
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
-#' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
-#' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
+#' @param convergenceCriterion which convergence criterion should be used for the outer iterations? possible are "GLMNET", "gradients", "fitChange"
 #' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
 #' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
@@ -102,10 +98,9 @@ controlQuasiNewtonBFGS <- function(
     maxIterOut = 1000,
     maxIterIn = 1000,
     maxIterLine = 500,
-    epsOut = 1e-5,
-    epsIn = 1e-5,
-    useMultipleConvergenceCriteria = TRUE,
-    regM2LLChangeEps = 1e-6,
+    epsOut = 1e-8,
+    epsIn = 1e-10,
+    convergenceCriterion = "fitChange",
     saveHessian = FALSE,
     verbose = 0
 ){
@@ -124,8 +119,7 @@ controlQuasiNewtonBFGS <- function(
       maxIterLine = maxIterLine,
       epsOut = epsOut,
       epsIn = epsIn,
-      useMultipleConvergenceCriteria = useMultipleConvergenceCriteria,
-      regM2LLChangeEps = regM2LLChangeEps,
+      convergenceCriterion = convergenceCriterion,
       saveHessian = saveHessian,
       verbose = verbose
     )

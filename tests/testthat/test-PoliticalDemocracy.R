@@ -28,7 +28,7 @@ test_that("testing optimization with PoliticalDemocracy", {
                           regularizedParameterLabels = c("a", "b", "c"),
                           penalty = "lasso",
                           lambdas = 0, 
-                          control = controlGLMNET(startingValues = "start", useMultipleConvergenceCriteria = FALSE))
+                          control = controlGLMNET(startingValues = "start"))
   testthat::expect_equal(abs(regsem@fits$m2LL[1] - (-2*logLik(model))) < 1e-3,TRUE)
   
 })

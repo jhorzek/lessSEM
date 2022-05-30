@@ -15,8 +15,7 @@
 #' @param maxIterLine Maximal number of iterations for the line search procedure
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
-#' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
-#' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
+#' @param convergenceCriterion which convergence criterion should be used for the outer iterations? possible are "GLMNET", "gradients", "fitChange"
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 GLMNET <- function(SEM, 
                    regularizedParameterLabels, 
@@ -32,8 +31,7 @@ GLMNET <- function(SEM,
                    maxIterLine,
                    epsOut,
                    epsIn,
-                   useMultipleConvergenceCriteria,
-                   regM2LLChangeEps,
+                   convergenceCriterion,
                    verbose = 0){
   if(!((0 <= alpha) && (alpha <= 1))) stop("alpha must be in [0,1]")
   
@@ -121,8 +119,21 @@ GLMNET <- function(SEM,
     if(iterOut > 1){
       # requires a direction vector d; therefore, we cannot evaluate the
       # convergence in the first iteration
-      convergenceCriterion <- try(max(diag(diag(oldHessian))%*%direction^2) < epsOut, silent = TRUE)
-      if(is(convergenceCriterion, "try-error") || is.na(convergenceCriterion)){
+      if(convergenceCriterion == "GLMNET") converged <- try(max(diag(diag(oldHessian))%*%direction^2) < epsOut,
+                                                            silent = TRUE)
+      if(convergenceCriterion == "gradients") converged <- try(all(abs(getSubgradients(parameters = newParameters,
+                                                                                       gradients = newGradients,
+                                                                                       lambda = N*lambda,
+                                                                                       alpha = alpha,
+                                                                                       regularizedParameterLabels = regularizedParameterLabels,
+                                                                                       adaptiveLassoWeights = adaptiveLassoWeights)/N) < # gradient are based on likelihood and therefore 
+                                                                     # increase with the number of subjects
+                                                                     epsOut), 
+                                                               silent = TRUE)
+      if(convergenceCriterion == "fitChange") converged <- try(abs(regM2LLChange) < epsOut, 
+                                                               silent = TRUE)
+      
+      if(is(converged, "try-error") || is.na(converged)){
         converged <- FALSE
         # save last working parameters
         newParameters <- oldParameters
@@ -131,11 +142,7 @@ GLMNET <- function(SEM,
         warning(paste("The model did NOT CONVERGE for lambda = ", lambda, "."))
         break
       }
-      if(convergenceCriterion){
-        break
-      }
-      if(useMultipleConvergenceCriteria && (abs(regM2LLChange) < regM2LLChangeEps)){
-        # second convergence criterion: no more change in fit
+      if(converged){
         break
       }
       
@@ -146,7 +153,12 @@ GLMNET <- function(SEM,
                    "] m2LL: ", sprintf('%.4f',newM2LL),
                    " | regM2LL:  ", sprintf('%.4f',newRegM2LL),
                    " | regM2LL change:  ", sprintf('%.4f',regM2LLChange),
-                   " | max. abs. parameter change:  ", sprintf('%.4f',max(abs(parameterChange))),
+                   " | max. gradient:  ", sprintf('%.5f',max(abs(getSubgradients(parameters = newParameters,
+                                                                                 gradients = newGradients,
+                                                                                 lambda = N*lambda,
+                                                                                 alpha = alpha,
+                                                                                 regularizedParameterLabels = regularizedParameterLabels,
+                                                                                 adaptiveLassoWeights = adaptiveLassoWeights)/N))),
                    " | zeroed: ", sum(newParameters[regularizedParameterLabels] == 0),
                    " ##")
         )
@@ -164,7 +176,7 @@ GLMNET <- function(SEM,
                                        adaptiveLassoWeights = adaptiveLassoWeights,
                                        maxIter = maxIterIn, 
                                        epsBreak = epsIn,
-                                       useMultipleConvergenceCriteria = useMultipleConvergenceCriteria
+                                       useMultipleConvergenceCriteria = TRUE
     )
     direction <- c(direction)
     names(direction) <- parameterLabels
@@ -291,6 +303,9 @@ GLMNETLineSearch <- function(SEM,
   i <- 0
   stepSizeInit <- stepSize
   if(stepSizeInit >= 1) stepSizeInit <- .9
+  # sometimes the optimizer gets stuck in one specific location;
+  # here, it can help to try different step sizes
+  stepSizeInit <- runif(1,.1,stepSizeInit)
   while(TRUE){
     stepSize <- stepSizeInit^i
     newParameters <- oldParameters+stepSize*direction
@@ -427,4 +442,56 @@ getPenaltyValue <- function(parameters,
   return(alpha*lambda*sum(adaptiveLassoWeights[regularizedParameterLabels]*abs(parameters[regularizedParameterLabels])) + # lasso
            (1-alpha)*lambda*sum(adaptiveLassoWeights[regularizedParameterLabels]*parameters[regularizedParameterLabels]^2) # ridge
   )
+}
+
+#' getSubgradients
+#'
+#' returns the sub-gradients at the current position
+#'
+#'
+#' @param parameters vector with labeled parameter values
+#' @param gradients gradients of the differentiable part
+#' @param lambda lasso tuning parameter. Higher values = higher penalty
+#' @param alpha 0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge
+#' @param regularizedParameterLabels labels of regularized parameters
+#' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to vector of ones if not using adaptive LASSO
+#' @export
+getSubgradients <- function(parameters,
+                            gradients,
+                            lambda,
+                            alpha,
+                            regularizedParameterLabels,
+                            adaptiveLassoWeights){
+  subgradients <- gradients
+  
+  for(regularizedParameterLabel in regularizedParameterLabels){
+    # subgradients of penalized parameters:
+    if(parameters[regularizedParameterLabel] == 0){
+      lower <- -alpha*lambda*adaptiveLassoWeights[regularizedParameterLabel]
+      # note: we don't add the ridge part here, because this part is already incorporated
+      # in the differentiable part in gradients
+      upper <- alpha*lambda*adaptiveLassoWeights[regularizedParameterLabel]
+      if(lower < gradients[regularizedParameterLabel] & upper > gradients[regularizedParameterLabel]) {
+        subgradients[regularizedParameterLabel] <- 0
+        next
+      }
+      if(lower < gradients[regularizedParameterLabel]){
+        subgradients[regularizedParameterLabel] <- gradients[regularizedParameterLabel] + upper
+        next
+      }
+      if(gradients[regularizedParameterLabel] > upper){
+        subgradients[regularizedParameterLabel] <- gradients[regularizedParameterLabel] + lower
+        next
+      }
+    }else{
+      
+      subgradients[regularizedParameterLabel] <- gradients[regularizedParameterLabel] + 
+        sign(parameters[regularizedParameterLabel])*alpha*lambda*adaptiveLassoWeights[regularizedParameterLabel]
+      
+    }
+    
+  }
+  
+  return(subgradients)
+  
 }

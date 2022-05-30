@@ -22,8 +22,7 @@
 #' @param maxIterLine Maximal number of iterations for the line search procedure
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
-#' @param useMultipleConvergenceCriteria if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops
-#' @param regM2LLChangeEps if useMultipleConvergenceCriteria: change in fit which results in convergence
+#' @param convergenceCriterion which convergence criterion should be used for the outer iterations? possible are "GLMNET", "gradients", "fitChange"
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 quasiNewtonBFGS <- function(SEM, 
                             individualPenaltyFunction, 
@@ -40,8 +39,7 @@ quasiNewtonBFGS <- function(SEM,
                             maxIterLine,
                             epsOut,
                             epsIn,
-                            useMultipleConvergenceCriteria,
-                            regM2LLChangeEps,
+                            convergenceCriterion,
                             verbose = 0){
   
   # Setup
@@ -119,8 +117,18 @@ quasiNewtonBFGS <- function(SEM,
     if(iterOut > 1){
       # requires a direction vector d; therefore, we cannot evaluate the
       # convergence in the first iteration
-      convergenceCriterion <- try(max(diag(diag(oldHessian))%*%direction^2) < epsOut, silent = TRUE)
-      if(is(convergenceCriterion, "try-error") || is.na(convergenceCriterion)){
+      # requires a direction vector d; therefore, we cannot evaluate the
+      # convergence in the first iteration
+      if(convergenceCriterion == "GLMNET") converged <- try(max(diag(diag(oldHessian))%*%direction^2) < epsOut,
+                                                            silent = TRUE)
+      if(convergenceCriterion == "gradients") converged <- try(all(abs(newGradients/N) < # gradient are based on likelihood and therefore 
+                                                                     # increase with the number of subjects
+                                                                     epsOut), 
+                                                               silent = TRUE)
+      if(convergenceCriterion == "fitChange") converged <- try(abs(regM2LLChange) < epsOut, 
+                                                               silent = TRUE)
+      
+      if(is(converged, "try-error") || is.na(converged)){
         converged <- FALSE
         # save last working parameters
         newParameters <- oldParameters
@@ -129,11 +137,7 @@ quasiNewtonBFGS <- function(SEM,
         warning(paste("The model did NOT CONVERGE for lambda = ", lambda, "."))
         break
       }
-      if(convergenceCriterion){
-        break
-      }
-      if(useMultipleConvergenceCriteria && (abs(regM2LLChange) < regM2LLChangeEps)){
-        # second convergence criterion: no more change in fit
+      if(converged){
         break
       }
       
@@ -144,8 +148,7 @@ quasiNewtonBFGS <- function(SEM,
                    "] m2LL: ", sprintf('%.4f',newM2LL),
                    " | regM2LL:  ", sprintf('%.4f',newRegM2LL),
                    " | regM2LL change:  ", sprintf('%.4f',regM2LLChange),
-                   " | max. abs. parameter change:  ", sprintf('%.4f',max(abs(parameterChange))),
-                   " | zeroed: ", sum(newParameters[regularizedParameterLabels] == 0),
+                   " | max. gradient:  ", sprintf('%.5f',max(abs(newGradients/N))),
                    " ##")
         )
         flush.console()
@@ -258,6 +261,9 @@ quasiNewtonLineSearch <- function(SEM,
   i <- 0
   stepSizeInit <- stepSize
   if(stepSizeInit >= 1) stepSizeInit <- .9
+  # sometimes the optimizer gets stuck in one specific location;
+  # here, it can help to try different step sizes
+  stepSizeInit <- runif(1,.1,stepSizeInit)
   while(TRUE){
     stepSize <- stepSizeInit^i
     newParameters <- oldParameters+stepSize*direction

@@ -359,7 +359,7 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
     if(control$verbose == 0){
       setTxtProgressBar(progressbar,i)
     }else{
-      cat(paste0("\nIteration [", it, "/", nrow(tuningParameters),"]\n"))
+      cat(paste0("\nIteration [", i, "/", nrow(tuningParameters),"]\n"))
     }
     
     currentTuningParameters <- tuningParameters[i,,drop = FALSE]
@@ -379,8 +379,7 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
                                         maxIterLine = control$maxIterLine,
                                         epsOut = control$epsOut,
                                         epsIn = control$epsIn,
-                                        useMultipleConvergenceCriteria = control$useMultipleConvergenceCriteria,
-                                        regM2LLChangeEps = control$regM2LLChangeEps,
+                                        convergenceCriterion = control$convergenceCriterion,
                                         verbose = control$verbose)
     
     SEM <- result$SEM
@@ -426,6 +425,8 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
 #' @param startingValues option to provide initial starting values. Only used for the first lambda. Three options are supported. Setting to "est" will use the estimates
 #' from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
 #' values can be passed to the function which will then be used as starting values.
+#' @param carryOverParameters should parameters from the previous iteration be used as starting values of
+#' the next iteration? Interestingly, this can result in worse parameter estimates...
 #' @param saveHessian should the Hessian of the optimizer be saved? This will take a lot of space!
 #' @param control option to set parameters of the optimizer; see ?Rsolnp::solnp
 #' @examples 
@@ -546,6 +547,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
                                                  tuningParameters,
                                                  penaltyFunctionArguments,
                                                  startingValues = "est",
+                                                 carryOverParameters = FALSE,
                                                  saveHessian = FALSE,
                                                  control = list("trace" = 0)){
   
@@ -667,9 +669,15 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
                             tuningParameters = currentTuningParameters,
                             penaltyFunctionArguments = penaltyFunctionArguments,
                             control = control)
-    parametersInit <- result$pars
+    # regsem does not re-use the parameters for the next iteration;
+    # this is considerably slower, but it does help the optimizer.
+    # The optimizer builds an approximation of the Hessian which
+    # will be better if more iterations have to be done until convergence
+    if(carryOverParameters) parametersInit <- result$pars
     
-    SEM <- try(aCV4SEM:::setParameters(SEM = SEM, labels = names(parametersInit), values = parametersInit, raw = TRUE), silent = TRUE)
+    SEM <- try(aCV4SEM:::setParameters(SEM = SEM, labels = names(result$pars), 
+                                       values = result$pars, raw = TRUE), 
+               silent = TRUE)
     SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
     
     parameterEstimates[i, names(parameters)] <- aCV4SEM:::getParameters(SEM, raw = FALSE)[names(parameters)]

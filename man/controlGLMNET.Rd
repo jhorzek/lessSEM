@@ -17,9 +17,8 @@ controlGLMNET(
   maxIterIn = 1000,
   maxIterLine = 500,
   epsOut = 1e-05,
-  epsIn = 1e-05,
-  useMultipleConvergenceCriteria = TRUE,
-  regM2LLChangeEps = 1e-06,
+  epsIn = 1e-10,
+  convergenceCriterion = "gradients",
   saveHessian = FALSE,
   verbose = 0
 )
@@ -51,9 +50,7 @@ If set to "compute", the initial hessian will be computed. If set to a single va
 
 \item{epsIn}{Stopping criterion for inner iterations}
 
-\item{useMultipleConvergenceCriteria}{if set to TRUE, GLMNET will also check the change in fit and the change in parameters. If any convergence criterion is met, the optimization stops}
-
-\item{regM2LLChangeEps}{if useMultipleConvergenceCriteria: change in fit which results in convergence}
+\item{convergenceCriterion}{which convergence criterion should be used for the outer iterations? possible are "GLMNET", "gradients", "fitChange"}
 
 \item{saveHessian}{should the Hessian be saved for later use? Note: This may take a lot of memory!}
 
