@@ -2,7 +2,6 @@
 #define IMPLIED_H
 
 #include <RcppArmadillo.h>
-#include "config.hpp"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

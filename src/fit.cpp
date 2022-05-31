@@ -1,5 +1,5 @@
 #include <RcppArmadillo.h>
-#include "config.hpp"
+
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
 // Computes the -2log likelihood in a RAM model for a  single person given the number of non-missing variables (nObservedVariables), x (rawData), filtered impliedMeans, and filtered impliedCovariance.

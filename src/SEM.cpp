@@ -1,5 +1,4 @@
 #include <RcppArmadillo.h>
-#include "config.hpp"
 #include "SEM.hpp"
 #include "implied.hpp"
 #include "fit.hpp"

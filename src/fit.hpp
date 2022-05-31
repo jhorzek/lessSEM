@@ -2,7 +2,7 @@
 #define FIT_H
 
 #include <RcppArmadillo.h>
-#include "config.hpp"
+
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
 double computeIndividualM2LL(const int nObservedVariables, const arma::colvec& rawData, const arma::colvec& impliedMeans, const arma::mat& impliedCovariance);
