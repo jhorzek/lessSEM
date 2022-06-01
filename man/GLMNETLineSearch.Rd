@@ -6,6 +6,7 @@
 \usage{
 GLMNETLineSearch(
   SEM,
+  N,
   regularizedParameterLabels,
   adaptiveLassoWeights,
   parameterLabels,
@@ -24,6 +25,8 @@ GLMNETLineSearch(
 }
 \arguments{
 \item{SEM}{model of class Rcpp_SEMCpp.}
+
+\item{N}{sample size}
 
 \item{regularizedParameterLabels}{labels of regularized parameters}
 

@@ -56,7 +56,7 @@ f ~~ 1*f
   # penalize those while all others remain unpenalized.
   
   penaltyFunctionArguments <- list(
-    eps = 1e-10,
+    eps = 1e-8,
     regularizedParameterLabels = paste0("l", 6:15)
   )
   

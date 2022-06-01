@@ -34,7 +34,7 @@ test_that("testing approximate lasso", {
   
   penaltyFunctionArguments <- list(
     regularizedParameterLabels = regularizedLavaan,
-    eps = 1e-5 # note: the optimization works better, if eps is NOT set to 0! This is especially true for aLOOCV
+    eps = 1e-7 # note: the optimization works better, if eps is NOT set to 0! This is especially true for aLOOCV
   )
   tuningParameters <- data.frame("lambda" = lambdas)
   

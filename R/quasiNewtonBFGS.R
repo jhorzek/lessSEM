@@ -119,13 +119,13 @@ quasiNewtonBFGS <- function(SEM,
       # convergence in the first iteration
       # requires a direction vector d; therefore, we cannot evaluate the
       # convergence in the first iteration
-      if(convergenceCriterion == "GLMNET") converged <- try(max(diag(diag(oldHessian))%*%direction^2) < epsOut,
+      if(convergenceCriterion == "GLMNET") converged <- try(max(diag(diag(oldHessian/N))%*%direction^2) < epsOut,
                                                             silent = TRUE)
       if(convergenceCriterion == "gradients") converged <- try(all(abs(newGradients/N) < # gradient are based on likelihood and therefore 
                                                                      # increase with the number of subjects
                                                                      epsOut), 
                                                                silent = TRUE)
-      if(convergenceCriterion == "fitChange") converged <- try(abs(regM2LLChange) < epsOut, 
+      if(convergenceCriterion == "fitChange") converged <- try(abs(regM2LLChange/N) < epsOut, 
                                                                silent = TRUE)
       
       if(is(converged, "try-error") || is.na(converged)){
@@ -284,7 +284,14 @@ quasiNewtonLineSearch <- function(SEM,
     f_new <- newM2LL + p_new
     
     # test line search criterion
-    lineCriterion <- f_new - f_0 <= sig*stepSize*(t(oldGradients)%*%direction + gam*t(direction)%*%oldHessian%*%direction + p_new - pen_0)
+    lineCriterion <- f_new/N - f_0/N <= sig*stepSize*(t(oldGradients/N)%*%direction + 
+                                                        gam*t(direction)%*%(oldHessian/N)%*%direction + 
+                                                        p_new/N - 
+                                                        pen_0/N)
+    # the likelihoods and the hessian depend on the sample size; re-scaling as otherwise
+    # the convergence criterion is much more difficult to achieve in larger samples.
+    # Similarly, getPenaltyValue scales the penalty with the number of subjects and should therefore be re-scaled
+    
     if(lineCriterion){
       # check if covariance matrix is positive definite
       if(any(eigen(SEM$S, only.values = TRUE)$values < 0)){

@@ -241,6 +241,7 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
     
     startDirection <- Sys.time()
     direction <- aCV4SEM:::innerGLMNET(parameters = parameters, 
+                                       N = (N-length(subsets[[s]])),
                                        subGroupGradient = subGroupGradient, 
                                        subGroupHessian = subGroupHessian, 
                                        subGroupLambda = subGroupLambda, 

@@ -371,7 +371,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   
   for(s in 1:k){
     if(control$verbose != 0) cat("\r","Subset [",s, "/", k, "]")
-    subGroupGradient <- apply(scores[-c(which(subsets[,s])),],2,sum) # gradients of all inidividuals but the ones in the subgroup
+    subGroupGradient <- apply(scores[-c(which(subsets[,s])),],2,sum) # gradients of all individuals but the ones in the subgroup
     subGroupHessian <- ((N-sum(subsets[,s]))/N)*hessian # approximated hessian for all but the subgroup
     subGroupLambda <- alpha*(N-sum(subsets[,s]))*lambda
     
@@ -394,6 +394,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     
     startDirection <- Sys.time()
     direction <- aCV4SEM:::innerGLMNET(parameters = parameters, 
+                                       N = (N-length(subsets[[s]])),
                                        subGroupGradient = subGroupGradient, 
                                        subGroupHessian = subGroupHessian, 
                                        subGroupLambda = subGroupLambda, 

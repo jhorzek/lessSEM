@@ -18,7 +18,7 @@ controlQuasiNewtonBFGS(
   maxIterLine = 500,
   epsOut = 1e-08,
   epsIn = 1e-10,
-  convergenceCriterion = "fitChange",
+  convergenceCriterion = "GLMNET",
   saveHessian = FALSE,
   verbose = 0
 )

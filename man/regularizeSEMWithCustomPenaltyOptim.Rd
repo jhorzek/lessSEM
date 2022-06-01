@@ -11,7 +11,7 @@ regularizeSEMWithCustomPenaltyOptim(
   tuningParameters,
   penaltyFunctionArguments,
   startingValues = "est",
-  carryOverParameters = TRUE,
+  carryOverParameters = FALSE,
   saveHessian = FALSE,
   method = "BFGS",
   control = list(trace = 0)

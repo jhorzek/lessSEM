@@ -16,9 +16,9 @@ controlGLMNET(
   maxIterOut = 1000,
   maxIterIn = 1000,
   maxIterLine = 500,
-  epsOut = 1e-05,
+  epsOut = 1e-08,
   epsIn = 1e-10,
-  convergenceCriterion = "gradients",
+  convergenceCriterion = "GLMNET",
   saveHessian = FALSE,
   verbose = 0
 )

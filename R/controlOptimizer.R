@@ -34,9 +34,9 @@ controlGLMNET <- function(
     maxIterOut = 1000,
     maxIterIn = 1000,
     maxIterLine = 500,
-    epsOut = 1e-5,
+    epsOut = 1e-8,
     epsIn = 1e-10,
-    convergenceCriterion = "gradients",
+    convergenceCriterion = "GLMNET",
     saveHessian = FALSE,
     verbose = 0
 ){
@@ -100,7 +100,7 @@ controlQuasiNewtonBFGS <- function(
     maxIterLine = 500,
     epsOut = 1e-8,
     epsIn = 1e-10,
-    convergenceCriterion = "fitChange",
+    convergenceCriterion = "GLMNET",
     saveHessian = FALSE,
     verbose = 0
 ){

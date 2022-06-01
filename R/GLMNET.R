@@ -119,8 +119,9 @@ GLMNET <- function(SEM,
     if(iterOut > 1){
       # requires a direction vector d; therefore, we cannot evaluate the
       # convergence in the first iteration
-      if(convergenceCriterion == "GLMNET") converged <- try(max(diag(diag(oldHessian))%*%direction^2) < epsOut,
-                                                            silent = TRUE)
+      if(convergenceCriterion == "GLMNET") converged <- try(max(diag(diag(oldHessian/N))%*%direction^2) < epsOut,
+                                                            silent = TRUE)# hessian is based on likelihood and therefore 
+      # increases with the number of subjects
       if(convergenceCriterion == "gradients") converged <- try(all(abs(getSubgradients(parameters = newParameters,
                                                                                        gradients = newGradients,
                                                                                        lambda = N*lambda,
@@ -130,8 +131,8 @@ GLMNET <- function(SEM,
                                                                      # increase with the number of subjects
                                                                      epsOut), 
                                                                silent = TRUE)
-      if(convergenceCriterion == "fitChange") converged <- try(abs(regM2LLChange) < epsOut, 
-                                                               silent = TRUE)
+      if(convergenceCriterion == "fitChange") converged <- try(abs(regM2LLChange/N) < epsOut, 
+                                                               silent = TRUE)# likelihood increases with the number of subjects
       
       if(is(converged, "try-error") || is.na(converged)){
         converged <- FALSE
@@ -169,6 +170,7 @@ GLMNET <- function(SEM,
     
     ## inner loop: optimize directions
     direction <- aCV4SEM:::innerGLMNET(parameters = oldParameters,
+                                       N = N,
                                        subGroupGradient = oldGradients, 
                                        subGroupHessian = oldHessian, 
                                        subGroupLambda = N*lambda*alpha, # update for lasso part
@@ -183,6 +185,7 @@ GLMNET <- function(SEM,
     
     # perform Line Search
     step <- aCV4SEM:::GLMNETLineSearch(SEM = SEM, 
+                                       N = N,
                                        adaptiveLassoWeights = adaptiveLassoWeights, 
                                        parameterLabels = parameterLabels,
                                        regularizedParameterLabels = regularizedParameterLabels,
@@ -264,6 +267,7 @@ GLMNET <- function(SEM,
 #'
 #'
 #' @param SEM model of class Rcpp_SEMCpp. 
+#' @param N sample size
 #' @param regularizedParameterLabels labels of regularized parameters
 #' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO
 #' @param lambda lasso tuning parameter. Higher values = higher penalty
@@ -277,6 +281,7 @@ GLMNET <- function(SEM,
 #' @param gam Controls the gamma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421. Defaults to 0.
 #' @param maxIterLine maximal number of iterations for line search
 GLMNETLineSearch <- function(SEM, 
+                             N,
                              regularizedParameterLabels,
                              adaptiveLassoWeights, 
                              parameterLabels,
@@ -311,7 +316,11 @@ GLMNETLineSearch <- function(SEM,
     newParameters <- oldParameters+stepSize*direction
     
     # compute new fitfunction value
-    newM2LL <- try(aCV4SEM:::fit(aCV4SEM:::setParameters(SEM, names(newParameters), newParameters, raw = TRUE))$m2LL, silent = TRUE)
+    newM2LL <- try(aCV4SEM:::fit(aCV4SEM:::setParameters(SEM = SEM, 
+                                                         labels = names(newParameters), 
+                                                         values = newParameters, 
+                                                         raw = TRUE))$m2LL,
+                   silent = TRUE)
     if(!is.finite(newM2LL)){
       i <- i+1
       next
@@ -330,7 +339,15 @@ GLMNETLineSearch <- function(SEM,
     f_new <- newM2LL + p_new
     
     # test line search criterion
-    lineCriterion <- f_new - f_0 <= sig*stepSize*(t(oldGradients)%*%direction + gam*t(direction)%*%oldHessian%*%direction + p_new - pen_0)
+    lineCriterion <- f_new/N - f_0/N <= sig*stepSize*(t(oldGradients/N)%*%direction + 
+                                                    gam*t(direction)%*%(oldHessian/N)%*%direction + 
+                                                    p_new/N - pen_0/N)
+    # the likelihoods and the hessian depend on the sample size; re-scaling as otherwise
+    # the convergence criterion is much more difficult to achieve in larger samples.
+    # Similarly, getPenaltyValue scales the penalty with the number of subjects and should therefore be re-scaled
+    # (scaling penalty values with N is handled by adapting lambda and therefore
+    # not directly visible in the call above) 
+    
     if(lineCriterion){
       # check if covariance matrix is positive definite
       if(any(eigen(SEM$S, only.values = TRUE)$values < 0)){

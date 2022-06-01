@@ -4,6 +4,7 @@
 
 // [[Rcpp::export]]
 arma::colvec innerGLMNET(const arma::colvec parameters, 
+                         const int N,
                          const arma::colvec subGroupGradient, 
                          const arma::mat subGroupHessian, 
                          const double subGroupLambda,
@@ -63,7 +64,10 @@ arma::colvec innerGLMNET(const arma::colvec parameters,
     }
     
     // check inner stopping criterion:
-    HessDiag.diag() = subGroupHessian.diag();
+    HessDiag.diag() = subGroupHessian.diag()/N;
+    // scaling hessian with sample size as the hessian is based on the likelihood
+    // which directly depends on the sample size -> it would make the
+    // convergence criterion harder to hit for larger samples otherwise.
     HessTimesZ = HessDiag*pow(z,2);
     
     zChange = z*arma::trans(z_old);
