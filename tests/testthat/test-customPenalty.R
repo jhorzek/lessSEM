@@ -91,7 +91,7 @@ f ~~ 1*f
                                                  individualPenaltyFunction = smoothLASSO,
                                                  tuningParameters = tuningParameters,
                                                  penaltyFunctionArguments = penaltyFunctionArguments)
-  
+  print(regsemApprox@fits)
   # let's compare the results to an exact optimization:
   
   regsemExact <- regularizeSEM(
@@ -106,6 +106,7 @@ f ~~ 1*f
   # Note that the parameter estimates are basically identical.
   
   ## To select a model, we used the approximate cross-validation function:
+  print(regsemApprox@fits)
   aCV <- aCV4regularizedSEMWithCustomPenalty(regularizedSEMWithCustomPenalty = regsemApprox,
                                              k = nrow(dataset))
   plot(aCV)
@@ -113,7 +114,7 @@ f ~~ 1*f
   #coef(aCV)
   
   ## true cross-validation
-  
+  print(regsemApprox@fits)
   CV <- CV4regularizedSEMWithCustomPenalty(regularizedSEMWithCustomPenalty = regsemApprox,
                                            k = nrow(dataset))
   plot(CV)

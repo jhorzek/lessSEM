@@ -147,8 +147,8 @@ quasiNewtonBFGS <- function(SEM,
                    "## [", iterOut,
                    "] m2LL: ", sprintf('%.4f',newM2LL),
                    " | regM2LL:  ", sprintf('%.4f',newRegM2LL),
-                   " | regM2LL change:  ", sprintf('%.4f',regM2LLChange),
-                   " | max. gradient:  ", sprintf('%.5f',max(abs(newGradients/N))),
+                   " | av. regM2LL change:  ", sprintf('%.4f',regM2LLChange),
+                   " | av. max. gradient:  ", sprintf('%.5f',max(abs(newGradients/N))),
                    " ##")
         )
         flush.console()
@@ -157,40 +157,42 @@ quasiNewtonBFGS <- function(SEM,
     
     
     ## inner loop: optimize directions
-    direction <- c(-solve(newHessian)%*%newGradients)
-    names(direction) <- parameterLabels
+    direction <- (-solve(newHessian)%*%newGradients)[parameterLabels,]
     
     # perform Line Search
     step <- quasiNewtonLineSearch(SEM = SEM, 
                                   N = N,
-                             individualPenaltyFunction = individualPenaltyFunction,
-                             currentTuningParameters = currentTuningParameters,
-                             penaltyFunctionArguments = penaltyFunctionArguments,
-                             oldParameters = oldParameters, 
-                             oldM2LL = oldM2LL, 
-                             oldGradients = oldGradients,
-                             oldHessian = oldHessian,
-                             direction = direction,
-                             stepSize= stepSize, 
-                             sig = sig,
-                             gam = gam, 
-                             maxIterLine = maxIterLine)
+                                  individualPenaltyFunction = individualPenaltyFunction,
+                                  currentTuningParameters = currentTuningParameters,
+                                  penaltyFunctionArguments = penaltyFunctionArguments,
+                                  oldParameters = oldParameters, 
+                                  oldM2LL = oldM2LL, 
+                                  oldGradients = oldGradients,
+                                  oldHessian = oldHessian,
+                                  direction = direction,
+                                  stepSize= stepSize, 
+                                  sig = sig,
+                                  gam = gam, 
+                                  maxIterLine = maxIterLine)
     
     # extract elements:
     newParameters <- step$newParameters
     newGradients <- step$newGradients + N*individualPenaltyFunctionGradient(newParameters, 
                                                                             currentTuningParameters,
-                                                                          penaltyFunctionArguments)
+                                                                            penaltyFunctionArguments)
     
     # update model: set parameter values and compute
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(newParameters), values = newParameters, raw = TRUE)
+    SEM <- aCV4SEM:::setParameters(SEM = SEM, 
+                                   labels = names(newParameters), 
+                                   values = newParameters, 
+                                   raw = TRUE)
     SEM <- fit(SEM)
     
     # get fit
     newM2LL <- SEM$m2LL
     newRegM2LL <- newM2LL + N*individualPenaltyFunction(newParameters, 
                                                         currentTuningParameters,
-                                                      penaltyFunctionArguments)
+                                                        penaltyFunctionArguments)
     
     # Approximate Hessian using aCV4SEM:::BFGS
     newHessian <- aCV4SEM:::BFGS(oldParameters = oldParameters, 
@@ -199,9 +201,12 @@ quasiNewtonBFGS <- function(SEM,
                                  newParameters = newParameters, 
                                  newGradients = newGradients)
   }
+  
   # warnings
   if(iterOut == maxIterOut){
-    warning(paste("For currentTuningParameters = ", paste0(currentTuningParameters, collapse = "; "), "the maximum number of iterations was reached."))
+    warning(paste("For currentTuningParameters = ", 
+                  paste0(currentTuningParameters, collapse = "; "), 
+                  "the maximum number of iterations was reached."))
   }
   
   return(list("SEM" = SEM, 
@@ -269,7 +274,11 @@ quasiNewtonLineSearch <- function(SEM,
     newParameters <- oldParameters+stepSize*direction
     
     # compute new fitfunction value
-    newM2LL <- try(aCV4SEM:::fit(aCV4SEM:::setParameters(SEM, names(newParameters), newParameters, raw = TRUE))$m2LL, silent = TRUE)
+    newM2LL <- try(aCV4SEM:::fit(aCV4SEM:::setParameters(SEM = SEM, 
+                                                         labels = names(newParameters), 
+                                                         values = newParameters, 
+                                                         raw = TRUE))$m2LL, 
+                   silent = TRUE)
     if(!is.finite(newM2LL)){
       i <- i+1
       next
@@ -280,7 +289,9 @@ quasiNewtonLineSearch <- function(SEM,
     
     
     # compute h(stepSize) = L(x+td) + p(x+td) - L(x) - p(x), where p(x) is the penalty function
-    p_new <- N*individualPenaltyFunction(newParameters, currentTuningParameters, penaltyFunctionArguments)
+    p_new <- N*individualPenaltyFunction(newParameters, 
+                                         currentTuningParameters, 
+                                         penaltyFunctionArguments)
     f_new <- newM2LL + p_new
     
     # test line search criterion

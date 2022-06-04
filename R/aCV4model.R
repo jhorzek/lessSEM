@@ -107,6 +107,9 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
   }
+  if(!is(control, "controlGLMNET")){
+    stop("control must be of class controlGLMNET. These objects can be generated with the controlGLMNET function. See ?aCV4SEM::controlGLMNET")
+  }
   
   data <- try(lavaan::lavInspect(regularizedSEM@inputArguments$lavaanModel, "data"))
   if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")

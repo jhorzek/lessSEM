@@ -292,7 +292,7 @@ CV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, 
   # extract elements for easier access
   fits <- regularizedSEMWithCustomPenalty@fits
   parameters <- regularizedSEMWithCustomPenalty@parameters
-  control <- regsemApprox@inputArguments$control
+  control <- regularizedSEMWithCustomPenalty@inputArguments$control
   
   # custom penalty bits
   individualPenaltyFunction <- regularizedSEMWithCustomPenalty@inputArguments$individualPenaltyFunction

@@ -90,6 +90,10 @@ regularizeSEM <- function(lavaanModel,
   
   inputArguments <- as.list(environment())
   
+  if(!is(control, "controlGLMNET")){
+    stop("control must be of class controlGLMNET. These objects can be generated with the controlGLMNET function. See ?aCV4SEM::controlGLMNET")
+  }
+  
   if(!penalty %in% c("lasso", "ridge", "adaptiveLasso", "elasticNet")) stop("Currently supported penalty functions are: lasso, ridge, adaptiveLasso, and elasticNet")
   
   if(is.null(lambdas) && is.null(nLambdas)) stop("Function requires either lambdas or nLambdas to be specified.")

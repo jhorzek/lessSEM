@@ -223,13 +223,18 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
                                            penaltyFunctionArguments,
                                            control = aCV4SEM::controlQuasiNewtonBFGS()){
   
+  
+  if(!is(control, "controlBFGS")){
+    stop("control must be of class controlBFGS These objects can be generated with the controlQuasiNewtonBFGS function. See ?aCV4SEM::controlQuasiNewtonBFGS")
+  }
+  
   if(is.null(individualPenaltyFunctionGradient)){
     message("Using numDeriv to approximate the gradient of the individualPenaltyFunction. This may result in slow optimization. We highly recommend that you pass an analytic solution.")
     individualPenaltyFunctionGradient <- aCV4SEM::genericGradientApproximiation
     penaltyFunctionArguments <- c(penaltyFunctionArguments, individualPenaltyFunction = individualPenaltyFunction)
   }
   if(is.null(individualPenaltyFunctionHessian)){
-    message("Using numDeriv to approximate the Hessian of the individualPenaltyFunction. This may result in slow optimization. We highly recommend that you pass an analytic solution.")
+    message("Using numDeriv to approximate the Hessian of the individualPenaltyFunction.")
     individualPenaltyFunctionHessian <- aCV4SEM::genericHessianApproximiation
     penaltyFunctionArguments <- c(penaltyFunctionArguments, individualPenaltyFunction = individualPenaltyFunction)
   }
@@ -606,7 +611,11 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
                      individualPenaltyFunction, 
                      tuningParameters,
                      penaltyFunctionArguments){
-    SEM <- try(aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters, raw = TRUE), silent = TRUE)
+    SEM <- try(aCV4SEM:::setParameters(SEM = SEM, 
+                                       labels = names(parameters), 
+                                       values = parameters, 
+                                       raw = TRUE), 
+               silent = TRUE)
     if(is(SEM, "try-error")){
       return(99999999999999999)
     }
@@ -615,12 +624,23 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
       return(99999999999999999)
     }
     
-    penalty <- sampleSize*individualPenaltyFunction(parameters, tuningParameters, penaltyFunctionArguments)
+    # check if covariance matrix is positive definite
+    if(any(eigen(SEM$S, only.values = TRUE)$values < 0)){
+      return(99999999999999999)
+    }
+    if(any(eigen(SEM$impliedCovariance, only.values = TRUE)$values < 0)){
+      return(99999999999999999)
+    }
+    
+    penalty <- sampleSize*individualPenaltyFunction(parameters, 
+                                                    tuningParameters, 
+                                                    penaltyFunctionArguments)
     if(is(penalty, "try-error") || !is.finite(penalty)){
       return(99999999999999999)
     }
     
-    return(SEM$m2LL + penalty)
+    # division by N to be closer to the implementation in regsem
+    return((SEM$m2LL + penalty)/sampleSize)
   }
   
   fits <- data.frame(
@@ -682,7 +702,10 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
     
     parameterEstimates[i, names(parameters)] <- aCV4SEM:::getParameters(SEM, raw = FALSE)[names(parameters)]
     fits$m2LL[i] <- SEM$m2LL
-    fits$regM2LL[i] <- result$value[length(result$value)]
+    fits$regM2LL[i] <- SEM$m2LL + sampleSize*individualPenaltyFunction(result$pars, 
+                                                                       currentTuningParameters, 
+                                                                       penaltyFunctionArguments)
+    #result$value[length(result$value)]
     fits$convergence[i] <- result$convergence == 0
     
     if(saveHessian) Hessians$Hessian[[it]] <- result$hessian # note: we are returning the Hessian for the likelihood AND the penalty

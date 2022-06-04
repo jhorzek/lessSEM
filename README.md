@@ -10,6 +10,7 @@ The following features are implemented in aCV4SEM:
 - automatic selection of $\lambda$ values for lasso and adaptive lasso (see ?aCV4SEM::regularizeSEM)
 - approximate optimization of SEM with custom penalty functions using a BFGS optimizer or Rsolnp (see ?aCV4SEM::regularizeSEMWithCustomPenalty and ?aCV4SEM::regularizeSEMWithCustomPenaltyRsolnp)
 - approximate cross-validation (see ?aCV4SEM::aCV4lavaan, ?aCV4SEM::aCV4RegularizedSEM, and ?aCV4SEM::aCV4regularizedSEMWithCustomPenalty)
+- exact cross-validation for regularized models (see ?aCV4SEM::CV4regularizedSEM)
 - approximate influence functions for regularized SEM (see ?aCV4SEM::aI4RegularizedSEM)
 
 # Installation
@@ -108,3 +109,10 @@ If you want to install aCV4SEM from GitHub, use the following commands in R:
     )
     
     plot(regularizedModel)
+
+# References
+
+* Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+* Jacobucci, R., Grimm, K. J., Brandmaier, A. M., Serang, S., Kievit, R. A., & Scharf, F. (2019). regsem: Regularized Structural Equation Modeling. https://CRAN.R-project.org/package=regsem
+* Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
+* Huang, P.-H. (2020). lslx: Semi-Confirmatory Structural Equation Modeling via Penalized Likelihood. Journal of Statistical Software, 93(7). https://doi.org/10.18637/jss.v093.i07

@@ -18,6 +18,8 @@
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
 #' @param convergenceCriterion which convergence criterion should be used for the outer iterations? possible are "GLMNET", "gradients", "fitChange"
+#' Note that in case of gradients and GLMNET, we divide the gradients (and the Hessian) of the log-Likelihood by N as it would otherwise be
+#' considerably more difficult for larger sample sizes to reach the convergence criteria.
 #' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
 #' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
@@ -40,26 +42,26 @@ controlGLMNET <- function(
     saveHessian = FALSE,
     verbose = 0
 ){
-  return(
-    list(
-      addMeans = addMeans,
-      startingValues = startingValues,
-      initialHessian = initialHessian,
-      stepSize = stepSize,
-      c1 = c1,
-      c2 = c2,
-      sig = sig,
-      gam = gam,
-      maxIterOut = maxIterOut,
-      maxIterIn = maxIterIn,
-      maxIterLine = maxIterLine,
-      epsOut = epsOut,
-      epsIn = epsIn,
-      convergenceCriterion = convergenceCriterion,
-      saveHessian = saveHessian,
-      verbose = verbose
-    )
+  control <- list(
+    addMeans = addMeans,
+    startingValues = startingValues,
+    initialHessian = initialHessian,
+    stepSize = stepSize,
+    c1 = c1,
+    c2 = c2,
+    sig = sig,
+    gam = gam,
+    maxIterOut = maxIterOut,
+    maxIterIn = maxIterIn,
+    maxIterLine = maxIterLine,
+    epsOut = epsOut,
+    epsIn = epsIn,
+    convergenceCriterion = convergenceCriterion,
+    saveHessian = saveHessian,
+    verbose = verbose
   )
+  class(control) <- "controlGLMNET"
+  return(control)
 }
 
 #' controlQuasiNewtonBFGS
@@ -82,6 +84,8 @@ controlGLMNET <- function(
 #' @param epsOut Stopping criterion for outer iterations
 #' @param epsIn Stopping criterion for inner iterations
 #' @param convergenceCriterion which convergence criterion should be used for the outer iterations? possible are "GLMNET", "gradients", "fitChange"
+#' Note that in case of gradients and GLMNET, we divide the gradients (and the Hessian) of the log-Likelihood by N as it would otherwise be
+#' considerably more difficult for larger sample sizes to reach the convergence criteria.
 #' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
 #' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
@@ -104,24 +108,24 @@ controlQuasiNewtonBFGS <- function(
     saveHessian = FALSE,
     verbose = 0
 ){
-  return(
-    list(
-      addMeans = addMeans,
-      startingValues = startingValues,
-      initialHessian = initialHessian,
-      stepSize = stepSize,
-      c1 = c1,
-      c2 = c2,
-      sig = sig,
-      gam = gam,
-      maxIterOut = maxIterOut,
-      maxIterIn = maxIterIn,
-      maxIterLine = maxIterLine,
-      epsOut = epsOut,
-      epsIn = epsIn,
-      convergenceCriterion = convergenceCriterion,
-      saveHessian = saveHessian,
-      verbose = verbose
-    )
+  control <- list(
+    addMeans = addMeans,
+    startingValues = startingValues,
+    initialHessian = initialHessian,
+    stepSize = stepSize,
+    c1 = c1,
+    c2 = c2,
+    sig = sig,
+    gam = gam,
+    maxIterOut = maxIterOut,
+    maxIterIn = maxIterIn,
+    maxIterLine = maxIterLine,
+    epsOut = epsOut,
+    epsIn = epsIn,
+    convergenceCriterion = convergenceCriterion,
+    saveHessian = saveHessian,
+    verbose = verbose
   )
+  class(control) <- "controlBFGS"
+  return(control)
 }
