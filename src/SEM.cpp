@@ -285,7 +285,7 @@ arma::mat SEMCpp::getScores(bool raw){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(currentStatus != fitted){
+  if(currentStatus != computedImplied & currentStatus != fitted){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
   arma::mat scoresMat = scores(*this, raw);
@@ -297,7 +297,7 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(currentStatus != computedImplied){
+  if(currentStatus != computedImplied & currentStatus != fitted){
     Rcpp::stop("The model implied matrices have not been computed yet. Call Model$implied() first.");
   }
   arma::rowvec gradients = gradientsByGroup(*this, raw);
@@ -312,7 +312,7 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(currentStatus != computedImplied){
+  if(currentStatus != computedImplied & currentStatus != fitted){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
   arma::mat hessian = approximateHessian(*this, 
