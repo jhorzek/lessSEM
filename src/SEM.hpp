@@ -8,18 +8,30 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+enum status {
+  addedMatrices,
+  addedParameters,
+  addedDerivatives,
+  addedRawData,
+  addedSubsets,
+  changedParameters,
+  filledMatrices,
+  computedImplied,
+  fitted
+};
+
 class SEMCpp{
 public: 
   //flags
   bool wasChecked = false; // true if the model was checked
+  // the following flags allow for recomputing only those elements,
+  // where changes in the parameters happened:
+  bool mChanged = true;
+  bool AChanged = true;
+  bool SChanged = true;
   bool wasFit = false; // true if fit was called
-  bool impliedWasCalled = false; // true if the implied matrices were computed
-  int currentStatus = 0; // 0 = initialized
-                     // 1 = matrices were defined
-                     // 2 = initializeParameters was called
-                     // 3 = addDerivativeElement was called
-                     // 4 = addRawData was called
-                     // 5 = addSubset was called
+  
+  status currentStatus;
   
   // data
   dataset data;
@@ -94,7 +106,9 @@ public:
   // optimization with ensmallen library
   arma::mat optimize(arma::mat parameterValues, 
                      const Rcpp::StringVector parameterLabels,
-                     const std::string optimizer);
+                     const std::string optimizer,
+                     const double fchange,
+                     const bool verbose);
 };
 
 #endif

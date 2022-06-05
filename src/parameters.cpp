@@ -16,6 +16,21 @@ void parameters::initialize(Rcpp::StringVector label_,
   col = col_;
   value = value_;
   rawValue = rawValue_;
+  changed.resize(label.size());
+  std::fill(changed.begin(), changed.end(), true);
+  
+  // create hashs
+  for(int i = 0; i < label.length(); i++){
+    
+    if(parameterToLocation.find(Rcpp::as< std::string >(label.at(i))) == parameterToLocation.end()){
+      std::vector<int> locations;
+      locations.push_back(i);
+      parameterToLocation[Rcpp::as< std::string >(label.at(i))] = locations;
+      continue;
+    }else{
+      parameterToLocation[Rcpp::as< std::string >(label.at(i))].push_back(i);
+    }
+  }
 }
 
 Rcpp::DataFrame parameters::getParameters(){
@@ -36,44 +51,54 @@ void parameters::setParameters(Rcpp::StringVector label_,
                                bool raw){
   bool found = false;
   
-  for(int element1 = 0; element1 < label_.size(); element1++){
-    // Note: Parameters can occur multiple times; we therefore have
-    // to iterate over all labels and can't break early.
-    found = false;
+  for(int param = 0; param < label_.size(); param++){
+    // all parameters are saved as a hash in parameterToLocation, where
+    // the value indicates the locations in the parameter table
+    std::vector<int> &locations = parameterToLocation[Rcpp::as< std::string >(label_.at(param))];
     
-    for(int element2 = 0; element2 < label.size(); element2++){
-      if(label_.at(element1) == label.at(element2)){
-        // parameter was found -> change value
-        found = true;
-        if(!raw){
-          // if the parameter values were not provided in raw format,
-          // all variances are assumed to be transformations 
-          value.at(element2) = value_.at(element1);
-
-          if(row.at(element2) == col.at(element2) && location(element2) == "Smatrix"){
-
-            rawValue.at(element2) = std::log(value_.at(element1));
-          }else{
-            rawValue.at(element2) = value_.at(element1);
-          }
+    // now iterate over these elements and set the parameters
+    
+    for(int locs = 0; locs < locations.size(); locs++){
+      
+      if(!raw){
+        // if the parameter values were not provided in raw format,
+        // all variances are assumed to be transformations 
+        if(value.at(locations.at(locs)) == value_.at(param)){
+          continue;
+        }
+        
+        value.at(locations.at(locs)) = value_.at(param);
+        changed.at(locations.at(locs)) = true;
+        
+        if(row.at(locations.at(locs)) == col.at(locations.at(locs)) && location(locations.at(locs)) == "Smatrix"){
+          
+          rawValue.at(locations.at(locs)) = std::log(value_.at(param));
+          
         }else{
-          // if the parameter values were provided in raw format,
-          // all raw variances are assumed to be unbounded;
-          // they will be transformed to get the actual variances
-          rawValue.at(element2) = value_.at(element1);
-
-          if(row.at(element2) == col.at(element2) && location(element2) == "Smatrix"){
-            value.at(element2) = std::exp(value_.at(element1));
-          }else{
-            value.at(element2) = value_.at(element1);
-          }
+          
+          rawValue.at(locations.at(locs)) = value_.at(param);
+          
+        }
+      }else{
+        // if the parameter values were provided in raw format,
+        // all raw variances are assumed to be unbounded;
+        // they will be transformed to get the actual variances
+        
+        if(rawValue.at(locations.at(locs)) == value_.at(param)){
+          continue;
+        }
+        
+        changed.at(locations.at(locs)) = true;
+        
+        rawValue.at(locations.at(locs)) = value_.at(param);
+        
+        if(row.at(locations.at(locs)) == col.at(locations.at(locs)) && location(locations.at(locs)) == "Smatrix"){
+          value.at(locations.at(locs)) = std::exp(value_.at(param));
+        }else{
+          value.at(locations.at(locs)) = value_.at(param);
         }
       }
     }
-    if(!found){
-      Rcpp::Rcout << label_.at(element1) << std::endl;
-      Rcpp::stop("Parameter not found!"); 
-      }
   }
   
   return;

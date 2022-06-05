@@ -7,6 +7,7 @@
 #' @param lavaanSyntax syntax used to generate a model for lavaan
 #' @param rawData matrix with data used for the model
 #' @param optimizer optimizer to use. SEM relies on optimizers from ensmallen
+#' @param verbose boolean: Print every tenth iteration?
 #' @return object of class SEMCpp
 #' @examples 
 #' library(lavaan)
@@ -35,7 +36,10 @@
 
 SEM <- function(lavaanSyntax,
                 rawData,
-                optimizer = "lbfgs"){
+                optimizer = "lbfgs",
+                fchange = 1e-8,
+                verbose = FALSE){
+  if(verbose) cat("Setting up model...\n")
   lavaanModel <- sem(model = modelSyntax, 
                      data = rawData, 
                      meanstructure = TRUE,
@@ -46,15 +50,20 @@ SEM <- function(lavaanSyntax,
                                     fit = FALSE)
   parameterValues <- aCV4SEM:::getParameters(SEMCpp, raw = TRUE)
   parameterLabels <- names(parameterValues)
-  optimizer <- "lbfgs"
-  optimizedParameters <- c(SEMCpp$optimize(matrix(parameterValues, ncol = 1), parameterLabels, optimizer))
+  
+  if(verbose) cat("Starting optimization...\n")
+  optimizedParameters <- c(SEMCpp$optimize(matrix(parameterValues, ncol = 1), 
+                                           parameterLabels, 
+                                           optimizer,
+                                           fchange,
+                                           verbose))
   
   SEMCpp <- aCV4SEM:::setParameters(SEM = SEMCpp, 
                                     values = optimizedParameters,
                                     labels = parameterLabels, 
                                     raw = TRUE)
   SEMCpp <- aCV4SEM:::fit(SEMCpp)
-  
+  if(verbose) cat("Done.\n")
   return(SEMCpp)
   
 }
