@@ -90,6 +90,11 @@ public:
                        arma::vec value_,
                        bool raw,
                        double eps);
+  
+  // optimization with ensmallen library
+  arma::mat optimize(arma::mat parameterValues, 
+                     const Rcpp::StringVector parameterLabels,
+                     const std::string optimizer);
 };
 
 #endif
