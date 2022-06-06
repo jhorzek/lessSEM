@@ -21,20 +21,20 @@ bool SEMCpp::checkModel(){
   // check if all parameters have defined derivative elements
   std::string currentParameterLabel;
   std::string currentParameterLocation;
-  bool wasFound = false;
-  for(int p = 0; p < parameterTable.label.length(); p++){
-    currentParameterLabel = Rcpp::as<std::string> (parameterTable.label(p));
-    currentParameterLocation = Rcpp::as<std::string> (parameterTable.location(p));
-    wasFound = false;
-    for(int p2 = 0; p2 < derivElements.uniqueLabels.size(); p2++){
-      if(currentParameterLabel.compare(derivElements.uniqueLabels.at(p2)) == 0){
-        if(currentParameterLocation.compare(derivElements.uniqueLocations.at(p2)) != 0){
-          Rcpp::stop("The location of the parameter in the parameter object and the derivElements does not match.");
-        }
-        wasFound = true;
-      }
-    }
-  }
+  // bool wasFound = false;
+  // for(int p = 0; p < parameterTable.label.length(); p++){
+  //   currentParameterLabel = Rcpp::as<std::string> (parameterTable.label(p));
+  //   currentParameterLocation = Rcpp::as<std::string> (parameterTable.location(p));
+  //   wasFound = false;
+  //   for(int p2 = 0; p2 < derivElements.uniqueLabels.size(); p2++){
+  //     if(currentParameterLabel.compare(derivElements.uniqueLabels.at(p2)) == 0){
+  //       if(currentParameterLocation.compare(derivElements.uniqueLocations.at(p2)) != 0){
+  //         Rcpp::stop("The location of the parameter in the parameter object and the derivElements does not match.");
+  //       }
+  //       wasFound = true;
+  //     }
+  //   }
+  // }
   
   return(true);
 }
@@ -160,37 +160,52 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
   // step one: change parameters in parameterTable
   parameterTable.setParameters(label_, value_, raw);
   // step two: change parameters in model matrices
-  std::string parLocation;
-  for(int par = 0; par < parameterTable.label.length(); par++){
-    if(!parameterTable.changed.at(par)) continue;
+  
+  for (auto const& param : parameterTable.parameterMap)
+  {
+    if(!param.second.changed) continue;
     
-    parLocation = Rcpp::as<std::string>(parameterTable.location.at(par));
-    if(parLocation.compare("Amatrix") == 0){
-      AChanged = true;
-      Amatrix(parameterTable.row.at(par), 
-              parameterTable.col.at(par)) = parameterTable.value.at(par);
+    if(param.second.location.compare("Amatrix") == 0){
+      parameterTable.AChanged = true;
+      
+      for(int elem = 0; elem < param.second.row.size(); elem ++){
+        
+        Amatrix(param.second.row.at(elem), 
+                param.second.col.at(elem)) = param.second.value;
+      }
       continue;
     }
-    if(parLocation.compare("Smatrix") == 0){
-      SChanged = true;
-      Smatrix(parameterTable.row.at(par), 
-              parameterTable.col.at(par)) = parameterTable.value.at(par);
+    
+    if(param.second.location.compare("Smatrix") == 0){
+      parameterTable.SChanged = true;
+      
+      for(int elem = 0; elem < param.second.row.size(); elem ++){
+        
+        Smatrix(param.second.row.at(elem), 
+                param.second.col.at(elem)) = param.second.value;
+      }
       continue;
     }
-    if(parLocation.compare("Mvector") == 0){
-      mChanged = true;
-      Mvector(parameterTable.row.at(par), 
-              parameterTable.col.at(par)) = parameterTable.value.at(par);
+    
+    if(param.second.location.compare("Mvector") == 0){
+      parameterTable.mChanged = true;
+      
+      for(int elem = 0; elem < param.second.row.size(); elem ++){
+        
+        Mvector(param.second.row.at(elem), 
+                param.second.col.at(elem)) = param.second.value;
+        
+      }
       continue;
     }
-    Rcpp::Rcout << parameterTable.label.at(par) << std::endl;
-    Rcpp::stop("Could not find parameter in SEMCpp::setParameters");
+    
+    Rcpp::stop("NOT FOUND");
   }
   
   // reset all fit elements
   m2LL = 0.0;
-  if(AChanged | SChanged)  impliedCovariance.fill(arma::datum::nan);
-  if(mChanged) impliedMeans.fill(arma::datum::nan);
+  if(parameterTable.AChanged | parameterTable.SChanged)  impliedCovariance.fill(arma::datum::nan);
+  if(parameterTable.mChanged) impliedMeans.fill(arma::datum::nan);
   return;
 }
 
@@ -221,13 +236,12 @@ void SEMCpp::implied(){
   currentStatus = computedImplied;
 
   // step one: compute implied mean and covariance
-  if(AChanged | SChanged) impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
-  if(mChanged | AChanged) impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
+  if(parameterTable.AChanged | parameterTable.SChanged) impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
+  if(parameterTable.mChanged | parameterTable.AChanged) impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
   
-  AChanged = false;
-  SChanged = false;
-  mChanged = false;
-  std::fill(parameterTable.changed.begin(), parameterTable.changed.end(), false);
+  parameterTable.AChanged = false;
+  parameterTable.SChanged = false;
+  parameterTable.mChanged = false;
   
   return;
 }

@@ -24,11 +24,6 @@ class SEMCpp{
 public: 
   //flags
   bool wasChecked = false; // true if the model was checked
-  // the following flags allow for recomputing only those elements,
-  // where changes in the parameters happened:
-  bool mChanged = true;
-  bool AChanged = true;
-  bool SChanged = true;
   bool wasFit = false; // true if fit was called
   
   status currentStatus;

@@ -6,7 +6,9 @@
 #' 
 #' @param lavaanSyntax syntax used to generate a model for lavaan
 #' @param rawData matrix with data used for the model
+#' @param addMeans estimate the means?
 #' @param optimizer optimizer to use. SEM relies on optimizers from ensmallen
+#' @param fchange convergence criterion value: change in fit
 #' @param verbose boolean: Print every tenth iteration?
 #' @return object of class SEMCpp
 #' @examples 
@@ -47,7 +49,8 @@ SEM <- function(lavaanSyntax,
                      do.fit = FALSE)
   SEMCpp <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                     whichPars = "start", 
-                                    fit = FALSE)
+                                    fit = FALSE
+                                    )
   parameterValues <- aCV4SEM:::getParameters(SEMCpp, raw = TRUE)
   parameterLabels <- names(parameterValues)
   

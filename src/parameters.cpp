@@ -10,38 +10,46 @@ void parameters::initialize(Rcpp::StringVector label_,
                             arma::vec value_,
                             arma::vec rawValue_){
   
-  label = label_;
-  location = location_;
-  row = row_;
-  col = col_;
-  value = value_;
-  rawValue = rawValue_;
-  changed.resize(label.size());
-  std::fill(changed.begin(), changed.end(), true);
-  
-  // create hashs
-  for(int i = 0; i < label.length(); i++){
+  std::string currentLabel;
+  // create hash values
+  for(int i = 0; i < label_.length(); i++){
     
-    if(parameterToLocation.find(Rcpp::as< std::string >(label.at(i))) == parameterToLocation.end()){
-      std::vector<int> locations;
-      locations.push_back(i);
-      parameterToLocation[Rcpp::as< std::string >(label.at(i))] = locations;
-      continue;
-    }else{
-      parameterToLocation[Rcpp::as< std::string >(label.at(i))].push_back(i);
+    currentLabel = Rcpp::as< std::string >(label_.at(i));
+    
+    if(parameterMap.count(currentLabel) == 0){
+      // the parameter does not yet exist
+      uniqueParameterLabels.push_back(label_.at(i));
+      uniqueParameterValues.push_back(value_.at(i));
+      uniqueRawParameterValues.push_back(rawValue_.at(i));
+      
+      parameterMap[currentLabel].value = value_.at(i);
+      parameterMap[currentLabel].rawValue = rawValue_.at(i);
+      parameterMap[currentLabel].changed = true;
+      
+      parameterMap[currentLabel].location = Rcpp::as< std::string >(location_.at(i));
+      
+      if((row_.at(i) == col_.at(i)) & (location_.at(i) == "Smatrix")){
+        parameterMap[currentLabel].isVariance = true;
+      }else{
+        parameterMap[currentLabel].isVariance = false;
+      }
+      
     }
+    
+    parameterMap.at(currentLabel).row.push_back(row_.at(i));
+    parameterMap.at(currentLabel).col.push_back(col_.at(i));
   }
 }
 
 Rcpp::DataFrame parameters::getParameters(){
-  
+  for(int i = 0; i < uniqueParameterLabels.length(); i++){
+    uniqueParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].value;
+    uniqueRawParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].rawValue;
+  }
   Rcpp::DataFrame parameterFrame =
-    Rcpp::DataFrame::create( Rcpp::Named("label") = label, 
-                             Rcpp::Named("location") = location,
-                             Rcpp::Named("row") = row,
-                             Rcpp::Named("col") = col,
-                             Rcpp::Named("value") = value,
-                             Rcpp::Named("rawValue") = rawValue
+    Rcpp::DataFrame::create( Rcpp::Named("label") = uniqueParameterLabels, 
+                             Rcpp::Named("value") = uniqueParameterValues,
+                             Rcpp::Named("rawValue") = uniqueRawParameterValues
     );
   return(parameterFrame);
 }
@@ -49,56 +57,49 @@ Rcpp::DataFrame parameters::getParameters(){
 void parameters::setParameters(Rcpp::StringVector label_,
                                arma::vec value_,
                                bool raw){
-  bool found = false;
-  
+  std::string parameterLabel;
   for(int param = 0; param < label_.size(); param++){
-    // all parameters are saved as a hash in parameterToLocation, where
-    // the value indicates the locations in the parameter table
-    std::vector<int> &locations = parameterToLocation[Rcpp::as< std::string >(label_.at(param))];
+    parameterLabel = Rcpp::as< std::string >(label_.at(param));
     
-    // now iterate over these elements and set the parameters
-    
-    for(int locs = 0; locs < locations.size(); locs++){
+    // all parameters are saved as a hash in parameterMap
+    if(!raw){
+      if(parameterMap.at(parameterLabel).value == value_.at(param)) continue;
       
-      if(!raw){
-        // if the parameter values were not provided in raw format,
-        // all variances are assumed to be transformations 
-        if(value.at(locations.at(locs)) == value_.at(param)){
-          continue;
-        }
+      parameterMap.at(parameterLabel).changed = true;
+      
+      parameterMap.at(parameterLabel).value = value_.at(param);
+      
+      if(parameterMap.at(parameterLabel).isVariance){
         
-        value.at(locations.at(locs)) = value_.at(param);
-        changed.at(locations.at(locs)) = true;
+        parameterMap.at(parameterLabel).rawValue = std::log(value_.at(param));
         
-        if(row.at(locations.at(locs)) == col.at(locations.at(locs)) && location(locations.at(locs)) == "Smatrix"){
-          
-          rawValue.at(locations.at(locs)) = std::log(value_.at(param));
-          
-        }else{
-          
-          rawValue.at(locations.at(locs)) = value_.at(param);
-          
-        }
       }else{
-        // if the parameter values were provided in raw format,
-        // all raw variances are assumed to be unbounded;
-        // they will be transformed to get the actual variances
         
-        if(rawValue.at(locations.at(locs)) == value_.at(param)){
-          continue;
-        }
+        parameterMap.at(parameterLabel).rawValue = value_.at(param);
         
-        changed.at(locations.at(locs)) = true;
+      }
+    }else{
+      
+      if(parameterMap.at(parameterLabel).rawValue == value_.at(param)) continue;
+      
+      parameterMap.at(parameterLabel).changed = true;
+      
+      parameterMap.at(parameterLabel).rawValue = value_.at(param);
+      
+      if(parameterMap.at(parameterLabel).isVariance){
         
-        rawValue.at(locations.at(locs)) = value_.at(param);
+        parameterMap.at(parameterLabel).value = std::exp(value_.at(param));
         
-        if(row.at(locations.at(locs)) == col.at(locations.at(locs)) && location(locations.at(locs)) == "Smatrix"){
-          value.at(locations.at(locs)) = std::exp(value_.at(param));
-        }else{
-          value.at(locations.at(locs)) = value_.at(param);
-        }
+      }else{
+        
+        parameterMap.at(parameterLabel).value = value_.at(param);
+        
       }
     }
+    
+    if(parameterMap.at(parameterLabel).location.compare("Smatrix")) SChanged = true;
+    if(parameterMap.at(parameterLabel).location.compare("Amatrix")) AChanged = true;
+    if(parameterMap.at(parameterLabel).location.compare("mVector")) mChanged = true;
   }
   
   return;
