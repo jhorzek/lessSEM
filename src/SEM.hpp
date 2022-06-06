@@ -98,12 +98,6 @@ public:
                        bool raw,
                        double eps);
   
-  // optimization with ensmallen library
-  arma::mat optimize(arma::mat parameterValues, 
-                     const Rcpp::StringVector parameterLabels,
-                     const std::string optimizer,
-                     const double fchange,
-                     const bool verbose);
 };
 
 #endif
