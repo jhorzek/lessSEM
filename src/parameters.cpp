@@ -10,23 +10,46 @@ void parameters::initialize(Rcpp::StringVector label_,
                             arma::vec value_,
                             arma::vec rawValue_){
   
-  label = label_;
-  location = location_;
-  row = row_;
-  col = col_;
-  value = value_;
-  rawValue = rawValue_;
+  std::string currentLabel;
+  // create hash values
+  for(int i = 0; i < label_.length(); i++){
+    
+    currentLabel = Rcpp::as< std::string >(label_.at(i));
+    
+    if(parameterMap.count(currentLabel) == 0){
+      // the parameter does not yet exist
+      uniqueParameterLabels.push_back(label_.at(i));
+      uniqueParameterValues.push_back(value_.at(i));
+      uniqueRawParameterValues.push_back(rawValue_.at(i));
+      
+      parameterMap[currentLabel].value = value_.at(i);
+      parameterMap[currentLabel].rawValue = rawValue_.at(i);
+      parameterMap[currentLabel].changed = true;
+      
+      parameterMap[currentLabel].location = Rcpp::as< std::string >(location_.at(i));
+      
+      if((row_.at(i) == col_.at(i)) & (location_.at(i) == "Smatrix")){
+        parameterMap[currentLabel].isVariance = true;
+      }else{
+        parameterMap[currentLabel].isVariance = false;
+      }
+      
+    }
+    
+    parameterMap.at(currentLabel).row.push_back(row_.at(i));
+    parameterMap.at(currentLabel).col.push_back(col_.at(i));
+  }
 }
 
 Rcpp::DataFrame parameters::getParameters(){
-  
+  for(int i = 0; i < uniqueParameterLabels.length(); i++){
+    uniqueParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].value;
+    uniqueRawParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].rawValue;
+  }
   Rcpp::DataFrame parameterFrame =
-    Rcpp::DataFrame::create( Rcpp::Named("label") = label, 
-                             Rcpp::Named("location") = location,
-                             Rcpp::Named("row") = row,
-                             Rcpp::Named("col") = col,
-                             Rcpp::Named("value") = value,
-                             Rcpp::Named("rawValue") = rawValue
+    Rcpp::DataFrame::create( Rcpp::Named("label") = uniqueParameterLabels, 
+                             Rcpp::Named("value") = uniqueParameterValues,
+                             Rcpp::Named("rawValue") = uniqueRawParameterValues
     );
   return(parameterFrame);
 }
@@ -34,46 +57,49 @@ Rcpp::DataFrame parameters::getParameters(){
 void parameters::setParameters(Rcpp::StringVector label_,
                                arma::vec value_,
                                bool raw){
-  bool found = false;
-  
-  for(int element1 = 0; element1 < label_.size(); element1++){
-    // Note: Parameters can occur multiple times; we therefore have
-    // to iterate over all labels and can't break early.
-    found = false;
+  std::string parameterLabel;
+  for(int param = 0; param < label_.size(); param++){
+    parameterLabel = Rcpp::as< std::string >(label_.at(param));
     
-    for(int element2 = 0; element2 < label.size(); element2++){
-      if(label_.at(element1) == label.at(element2)){
-        // parameter was found -> change value
-        found = true;
-        if(!raw){
-          // if the parameter values were not provided in raw format,
-          // all variances are assumed to be transformations 
-          value.at(element2) = value_.at(element1);
-
-          if(row.at(element2) == col.at(element2) && location(element2) == "Smatrix"){
-
-            rawValue.at(element2) = std::log(value_.at(element1));
-          }else{
-            rawValue.at(element2) = value_.at(element1);
-          }
-        }else{
-          // if the parameter values were provided in raw format,
-          // all raw variances are assumed to be unbounded;
-          // they will be transformed to get the actual variances
-          rawValue.at(element2) = value_.at(element1);
-
-          if(row.at(element2) == col.at(element2) && location(element2) == "Smatrix"){
-            value.at(element2) = std::exp(value_.at(element1));
-          }else{
-            value.at(element2) = value_.at(element1);
-          }
-        }
+    // all parameters are saved as a hash in parameterMap
+    if(!raw){
+      if(parameterMap.at(parameterLabel).value == value_.at(param)) continue;
+      
+      parameterMap.at(parameterLabel).changed = true;
+      
+      parameterMap.at(parameterLabel).value = value_.at(param);
+      
+      if(parameterMap.at(parameterLabel).isVariance){
+        
+        parameterMap.at(parameterLabel).rawValue = std::log(value_.at(param));
+        
+      }else{
+        
+        parameterMap.at(parameterLabel).rawValue = value_.at(param);
+        
+      }
+    }else{
+      
+      if(parameterMap.at(parameterLabel).rawValue == value_.at(param)) continue;
+      
+      parameterMap.at(parameterLabel).changed = true;
+      
+      parameterMap.at(parameterLabel).rawValue = value_.at(param);
+      
+      if(parameterMap.at(parameterLabel).isVariance){
+        
+        parameterMap.at(parameterLabel).value = std::exp(value_.at(param));
+        
+      }else{
+        
+        parameterMap.at(parameterLabel).value = value_.at(param);
+        
       }
     }
-    if(!found){
-      Rcpp::Rcout << label_.at(element1) << std::endl;
-      Rcpp::stop("Parameter not found!"); 
-      }
+    
+    if(parameterMap.at(parameterLabel).location.compare("Smatrix")) SChanged = true;
+    if(parameterMap.at(parameterLabel).location.compare("Amatrix")) AChanged = true;
+    if(parameterMap.at(parameterLabel).location.compare("mVector")) mChanged = true;
   }
   
   return;

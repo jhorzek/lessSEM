@@ -9,11 +9,7 @@
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
 bool SEMCpp::checkModel(){
-  // some rudimentary model checks
-  if(currentStatus < 5){
-    Rcpp::stop("The model is incomplete.");
-  }
-  
+
   int N_ = 0;
   for(int i = 0; i < data.dataSubsets.size(); i++){
     N_ += data.dataSubsets.at(i).N;
@@ -25,34 +21,34 @@ bool SEMCpp::checkModel(){
   // check if all parameters have defined derivative elements
   std::string currentParameterLabel;
   std::string currentParameterLocation;
-  bool wasFound = false;
-  for(int p = 0; p < parameterTable.label.length(); p++){
-    currentParameterLabel = Rcpp::as<std::string> (parameterTable.label(p));
-    currentParameterLocation = Rcpp::as<std::string> (parameterTable.location(p));
-    wasFound = false;
-    for(int p2 = 0; p2 < derivElements.uniqueLabels.size(); p2++){
-      if(currentParameterLabel.compare(derivElements.uniqueLabels.at(p2)) == 0){
-        if(currentParameterLocation.compare(derivElements.uniqueLocations.at(p2)) != 0){
-          Rcpp::stop("The location of the parameter in the parameter object and the derivElements does not match.");
-        }
-        wasFound = true;
-      }
-    }
-  }
+  // bool wasFound = false;
+  // for(int p = 0; p < parameterTable.label.length(); p++){
+  //   currentParameterLabel = Rcpp::as<std::string> (parameterTable.label(p));
+  //   currentParameterLocation = Rcpp::as<std::string> (parameterTable.location(p));
+  //   wasFound = false;
+  //   for(int p2 = 0; p2 < derivElements.uniqueLabels.size(); p2++){
+  //     if(currentParameterLabel.compare(derivElements.uniqueLabels.at(p2)) == 0){
+  //       if(currentParameterLocation.compare(derivElements.uniqueLocations.at(p2)) != 0){
+  //         Rcpp::stop("The location of the parameter in the parameter object and the derivElements does not match.");
+  //       }
+  //       wasFound = true;
+  //     }
+  //   }
+  // }
   
   return(true);
 }
 
 void SEMCpp::addRawData(arma::mat rawData_, Rcpp::StringVector manifestNames_, arma::uvec personInSubset_){
-  if(currentStatus < 3){
+  if(currentStatus != addedDerivatives & currentStatus != addedRawData){
     Rcpp::stop("Please define the model matrices and add parameters as well as add derivative elements before calling addRawData.");
   }
+  currentStatus = addedRawData;
+  
   rawData = rawData_;
   personInSubset = personInSubset_;
   manifestNames = manifestNames_;
-  currentStatus = 4;
-  wasFit = false; // reset fit 
-  impliedWasCalled = false; // reset implied
+  
   return;
 }
 
@@ -66,9 +62,10 @@ void SEMCpp::addSubset(int N_,
                        // raw data is required for N == 1
                        arma::mat rawData_){
   
-  if(currentStatus < 4){
-    Rcpp::stop("Please define the model matrices, add parameters as well as derivative elements and raw data before calling addSubset.");
+  if(currentStatus != addedRawData & currentStatus != addedSubsets){
+    Rcpp::stop("Please define the model matrices and add parameters as well as add derivative elements before calling addRawData.");
   }
+  currentStatus = addedSubsets;
   
   data.addSubset(N_,
                  persons_,
@@ -79,21 +76,18 @@ void SEMCpp::addSubset(int N_,
                  means_,
                  // raw data is required for N == 1
                  rawData_);
-  currentStatus = 5;
-  wasFit = false; // reset fit 
+  
   return;
   
 }
 
 void SEMCpp::removeSubset(int whichSubset){
   data.removeSubset(whichSubset);
-  wasFit = false; // reset fit 
   return;
 }
 
 void SEMCpp::setMatrix(std::string whichMatrix, arma::mat values){
-  currentStatus = 1;
-  wasFit = false; // reset fit 
+  currentStatus = addedMatrices; 
   
   if(whichMatrix.compare("A") == 0){
     Amatrix = values;
@@ -112,7 +106,6 @@ void SEMCpp::setMatrix(std::string whichMatrix, arma::mat values){
 }
 
 void SEMCpp::setVector(std::string whichVector, arma::colvec values){
-  wasFit = false; // reset fit 
   
   if(whichVector.compare("m") == 0){
     Mvector = values;
@@ -128,70 +121,91 @@ void SEMCpp::initializeParameters(Rcpp::StringVector label_,
                                   arma::uvec col_,
                                   arma::vec value_,
                                   arma::vec rawValue_){
-  if(currentStatus < 1){
+  if(currentStatus != addedMatrices){
     Rcpp::stop("Please define the model matrices before adding parameters");
   }
+  currentStatus = addedParameters;
+  
   parameterTable.initialize(label_,
                             location_,
                             row_,
                             col_,
                             value_,
                             rawValue_);
-  currentStatus = 2;
-  wasFit = false; // reset fit 
+  return;
+}
+
+void SEMCpp::addDerivativeElement(std::string label_, 
+                                  std::string location_, 
+                                  bool isVariance_, 
+                                  arma::mat positionMatrix_){
+  if(currentStatus != addedParameters & currentStatus != addedDerivatives){
+    Rcpp::stop("Please define the model matrices and add parameters before calling addDerivativeElement.");
+  }
+  currentStatus = addedDerivatives;
+  
+  derivElements.addDerivativeElement(label_, 
+                                     location_, 
+                                     isVariance_, 
+                                     positionMatrix_);
   return;
 }
 
 void SEMCpp::setParameters(Rcpp::StringVector label_,
                            arma::vec value_,
                            bool raw){
+  currentStatus = changedParameters;
+  
   wasFit = false; // reset fit 
   // step one: change parameters in parameterTable
   parameterTable.setParameters(label_, value_, raw);
   // step two: change parameters in model matrices
-  std::string parLocation;
-  for(int par = 0; par < parameterTable.label.length(); par++){
-    parLocation = Rcpp::as<std::string>(parameterTable.location.at(par));
-    if(parLocation.compare("Amatrix") == 0){
-      Amatrix(parameterTable.row.at(par), 
-              parameterTable.col.at(par)) = parameterTable.value.at(par);
+  
+  for (auto const& param : parameterTable.parameterMap)
+  {
+    if(!param.second.changed) continue;
+    
+    if(param.second.location.compare("Amatrix") == 0){
+      parameterTable.AChanged = true;
+      
+      for(int elem = 0; elem < param.second.row.size(); elem ++){
+        
+        Amatrix(param.second.row.at(elem), 
+                param.second.col.at(elem)) = param.second.value;
+      }
       continue;
     }
-    if(parLocation.compare("Smatrix") == 0){
-      Smatrix(parameterTable.row.at(par), 
-              parameterTable.col.at(par)) = parameterTable.value.at(par);
+    
+    if(param.second.location.compare("Smatrix") == 0){
+      parameterTable.SChanged = true;
+      
+      for(int elem = 0; elem < param.second.row.size(); elem ++){
+        
+        Smatrix(param.second.row.at(elem), 
+                param.second.col.at(elem)) = param.second.value;
+      }
       continue;
     }
-    if(parLocation.compare("Mvector") == 0){
-      Mvector(parameterTable.row.at(par), 
-              parameterTable.col.at(par)) = parameterTable.value.at(par);
+    
+    if(param.second.location.compare("Mvector") == 0){
+      parameterTable.mChanged = true;
+      
+      for(int elem = 0; elem < param.second.row.size(); elem ++){
+        
+        Mvector(param.second.row.at(elem), 
+                param.second.col.at(elem)) = param.second.value;
+        
+      }
       continue;
     }
-    Rcpp::Rcout << parameterTable.label.at(par) << std::endl;
-    Rcpp::stop("Could not find parameter in SEMCpp::setParameters");
+    
+    Rcpp::stop("NOT FOUND");
   }
   
   // reset all fit elements
   m2LL = 0.0;
-  impliedCovariance.fill(arma::datum::nan);
-  impliedMeans.fill(arma::datum::nan);
-  return;
-}
-
-
-void SEMCpp::addDerivativeElement(std::string label_, 
-                                  std::string location_, 
-                                  bool isVariance_, 
-                                  arma::mat positionMatrix_){
-  if(currentStatus < 2){
-    Rcpp::stop("Please define the model matrices and add parameters before calling addDerivativeElement.");
-  }
-  derivElements.addDerivativeElement(label_, 
-                                     location_, 
-                                     isVariance_, 
-                                     positionMatrix_);
-  currentStatus = 3;
-  wasFit = false; // reset fit 
+  if(parameterTable.AChanged | parameterTable.SChanged)  impliedCovariance.fill(arma::datum::nan);
+  if(parameterTable.mChanged) impliedMeans.fill(arma::datum::nan);
   return;
 }
 
@@ -219,11 +233,15 @@ void SEMCpp::implied(){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  impliedWasCalled = true;
+  currentStatus = computedImplied;
 
   // step one: compute implied mean and covariance
-  impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
-  impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
+  if(parameterTable.AChanged | parameterTable.SChanged) impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
+  if(parameterTable.mChanged | parameterTable.AChanged) impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
+  
+  parameterTable.AChanged = false;
+  parameterTable.SChanged = false;
+  parameterTable.mChanged = false;
   
   return;
 }
@@ -233,6 +251,8 @@ double SEMCpp::fit(){
   if(!wasChecked){
     wasChecked = checkModel();
   }
+  currentStatus = fitted;
+  
   m2LL = 0.0;
   wasFit = true;
   
@@ -279,7 +299,7 @@ arma::mat SEMCpp::getScores(bool raw){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(!wasFit){
+  if(currentStatus != computedImplied & currentStatus != fitted){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
   arma::mat scoresMat = scores(*this, raw);
@@ -291,7 +311,7 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(!impliedWasCalled){
+  if(currentStatus != computedImplied & currentStatus != fitted){
     Rcpp::stop("The model implied matrices have not been computed yet. Call Model$implied() first.");
   }
   arma::rowvec gradients = gradientsByGroup(*this, raw);
@@ -306,7 +326,7 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(!wasFit){
+  if(currentStatus != computedImplied & currentStatus != fitted){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
   arma::mat hessian = approximateHessian(*this, 

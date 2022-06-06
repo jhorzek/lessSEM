@@ -100,6 +100,8 @@ std::vector<arma::mat> computeimpliedCovarianceDerivatives(const SEMCpp& SEM,
   arma::mat ImASImAF = IminusAInverse*Smatrix*arma::trans(FIminusAInverse);
   arma::mat FImASImA = FIminusAInverse*Smatrix*arma::trans(IminusAInverse);
   
+  double valueIs;
+  
   // iterate over all parameters and compute derivatives
   for(int p = 0; p < uniqueParameterLabels.size(); p++){
     
@@ -110,20 +112,14 @@ std::vector<arma::mat> computeimpliedCovarianceDerivatives(const SEMCpp& SEM,
       
       if(isVariance.at(p) && raw){
         // find value of variance
-        double valueIs =-9999.9999;
-        for(int j = 0; j < SEM.parameterTable.label.length(); j++){
-          std::string compto = Rcpp::as<std::string>(SEM.parameterTable.label.at(j));
-          if(uniqueParameterLabels.at(p).compare(compto) == 0){
-            valueIs = SEM.parameterTable.value.at(j);
-            break;
-          }
-        }
-        if(valueIs == -9999.9999){
-          Rcpp::stop("Could not find variance value while computing derivatives.");
-        }
+        valueIs = SEM.parameterTable.parameterMap.at(uniqueParameterLabels.at(p)).value;
+
         derivativesOfCovariance.at(p) = FIminusAInverse*(valueIs*positionInLocation.at(p))*arma::trans(FIminusAInverse);
+        
       }else{
+        
         derivativesOfCovariance.at(p) = FIminusAInverse*positionInLocation.at(p)*arma::trans(FIminusAInverse);
+        
       }
       
       continue;

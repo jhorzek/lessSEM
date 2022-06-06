@@ -8,18 +8,25 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+enum status {
+  addedMatrices,
+  addedParameters,
+  addedDerivatives,
+  addedRawData,
+  addedSubsets,
+  changedParameters,
+  filledMatrices,
+  computedImplied,
+  fitted
+};
+
 class SEMCpp{
 public: 
   //flags
   bool wasChecked = false; // true if the model was checked
   bool wasFit = false; // true if fit was called
-  bool impliedWasCalled = false; // true if the implied matrices were computed
-  int currentStatus = 0; // 0 = initialized
-                     // 1 = matrices were defined
-                     // 2 = initializeParameters was called
-                     // 3 = addDerivativeElement was called
-                     // 4 = addRawData was called
-                     // 5 = addSubset was called
+  
+  status currentStatus;
   
   // data
   dataset data;
@@ -90,6 +97,7 @@ public:
                        arma::vec value_,
                        bool raw,
                        double eps);
+  
 };
 
 #endif
