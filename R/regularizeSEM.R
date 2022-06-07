@@ -268,22 +268,23 @@ regularizeSEM <- function(lavaanModel,
     lambda <- tuningGrid$lambda[it]
     alpha <- tuningGrid$alpha[it]
     
-    result <- aCV4SEM:::GLMNET(SEM = SEM, 
-                               regularizedParameterLabels = regularizedParameterLabels, 
-                               lambda = lambda, 
-                               alpha = alpha,
-                               adaptiveLassoWeights = adaptiveLassoWeights,
-                               initialHessian = initialHessian4Optimizer,
-                               stepSize = control$stepSize,
-                               sig = control$sig,
-                               gam = control$gam,
-                               maxIterOut = control$maxIterOut,
-                               maxIterIn = control$maxIterIn,
-                               maxIterLine = control$maxIterLine,
-                               epsOut = control$epsOut,
-                               epsIn = control$epsIn,
-                               convergenceCriterion = control$convergenceCriterion,
-                               verbose = control$verbose)
+    result <- try(aCV4SEM:::GLMNET(SEM = SEM, 
+                                   regularizedParameterLabels = regularizedParameterLabels, 
+                                   lambda = lambda, 
+                                   alpha = alpha,
+                                   adaptiveLassoWeights = adaptiveLassoWeights,
+                                   initialHessian = initialHessian4Optimizer,
+                                   stepSize = control$stepSize,
+                                   sig = control$sig,
+                                   gam = control$gam,
+                                   maxIterOut = control$maxIterOut,
+                                   maxIterIn = control$maxIterIn,
+                                   maxIterLine = control$maxIterLine,
+                                   epsOut = control$epsOut,
+                                   epsIn = control$epsIn,
+                                   convergenceCriterion = control$convergenceCriterion,
+                                   verbose = control$verbose))
+    if(is(result, "try-error")) next
     
     fits$m2LL[it] <- result$m2LL
     fits$regM2LL[it] <- result$regM2LL

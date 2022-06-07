@@ -369,23 +369,26 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
     
     currentTuningParameters <- tuningParameters[i,,drop = FALSE]
     
-    result <- aCV4SEM:::quasiNewtonBFGS(SEM = SEM, 
-                                        individualPenaltyFunction = individualPenaltyFunction, 
-                                        individualPenaltyFunctionGradient = individualPenaltyFunctionGradient, 
-                                        individualPenaltyFunctionHessian = individualPenaltyFunctionHessian,
-                                        currentTuningParameters = currentTuningParameters,
-                                        penaltyFunctionArguments = penaltyFunctionArguments,
-                                        initialHessian = initialHessian4Optimizer,
-                                        stepSize = control$stepSize,
-                                        sig = control$sig,
-                                        gam = control$gam,
-                                        maxIterOut = control$maxIterOut,
-                                        maxIterIn = control$maxIterIn,
-                                        maxIterLine = control$maxIterLine,
-                                        epsOut = control$epsOut,
-                                        epsIn = control$epsIn,
-                                        convergenceCriterion = control$convergenceCriterion,
-                                        verbose = control$verbose)
+    result <- try(aCV4SEM:::quasiNewtonBFGS(SEM = SEM, 
+                                            individualPenaltyFunction = individualPenaltyFunction, 
+                                            individualPenaltyFunctionGradient = individualPenaltyFunctionGradient, 
+                                            individualPenaltyFunctionHessian = individualPenaltyFunctionHessian,
+                                            currentTuningParameters = currentTuningParameters,
+                                            penaltyFunctionArguments = penaltyFunctionArguments,
+                                            initialHessian = initialHessian4Optimizer,
+                                            stepSize = control$stepSize,
+                                            sig = control$sig,
+                                            gam = control$gam,
+                                            maxIterOut = control$maxIterOut,
+                                            maxIterIn = control$maxIterIn,
+                                            maxIterLine = control$maxIterLine,
+                                            epsOut = control$epsOut,
+                                            epsIn = control$epsIn,
+                                            convergenceCriterion = control$convergenceCriterion,
+                                            verbose = control$verbose)
+    )
+    
+    if(is(result, "try-error")) next
     
     SEM <- result$SEM
     
@@ -683,12 +686,13 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
     
     currentTuningParameters <- tuningParameters[i,,drop = FALSE]
     
-    result <- Rsolnp::solnp(pars = parametersInit, fun = fitfun, SEM = SEM, 
-                            sampleSize = sampleSize,
-                            individualPenaltyFunction = individualPenaltyFunction, 
-                            tuningParameters = currentTuningParameters,
-                            penaltyFunctionArguments = penaltyFunctionArguments,
-                            control = control)
+    result <- try(Rsolnp::solnp(pars = parametersInit, fun = fitfun, SEM = SEM, 
+                                sampleSize = sampleSize,
+                                individualPenaltyFunction = individualPenaltyFunction, 
+                                tuningParameters = currentTuningParameters,
+                                penaltyFunctionArguments = penaltyFunctionArguments,
+                                control = control))
+    if(is(result, "try-error")) next
     # regsem does not re-use the parameters for the next iteration;
     # this is considerably slower, but it does help the optimizer.
     # The optimizer builds an approximation of the Hessian which
