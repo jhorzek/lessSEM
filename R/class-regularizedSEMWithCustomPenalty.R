@@ -52,7 +52,7 @@ setMethod("AIC", "regularizedSEMWithCustomPenalty", function (object, penalizedP
   fits$AIC <- rep(NA, length(fits$m2LL))
   
   fits$AIC <- fits$m2LL + 2*apply(parameters, 1, function(x) length(x) - sum(abs(x[penalizedParameterLabels]) < zeroThreshold))
-  
+  fits$nonZeroParameters <- apply(parameters, 1, function(x) length(x) - sum(abs(x[penalizedParameterLabels]) < zeroThreshold))
   return(fits)
   
 })
@@ -74,6 +74,6 @@ setMethod("BIC", "regularizedSEMWithCustomPenalty", function (object, penalizedP
   N <- lavaan::lavInspect(object = object@inputArguments$lavaanModel, what = "nobs")
   
   fits$BIC <- fits$m2LL + log(N)*apply(parameters, 1, function(x) length(x) - sum(abs(x[penalizedParameterLabels]) < zeroThreshold))
-  
+  fits$nonZeroParameters <- apply(parameters, 1, function(x) length(x) - sum(abs(x[penalizedParameterLabels]) < zeroThreshold))
   return(fits)
 })

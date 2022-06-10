@@ -10,7 +10,7 @@ regularizeSEMWithCustomPenaltyRsolnp(
   tuningParameters,
   penaltyFunctionArguments,
   startingValues = "est",
-  carryOverParameters = FALSE,
+  carryOverParameters = TRUE,
   saveHessian = FALSE,
   control = list(trace = 0)
 )

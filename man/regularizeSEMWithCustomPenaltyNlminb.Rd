@@ -11,8 +11,7 @@ regularizeSEMWithCustomPenaltyNlminb(
   tuningParameters,
   penaltyFunctionArguments,
   startingValues = "est",
-  carryOverParameters = FALSE,
-  saveHessian = FALSE,
+  carryOverParameters = TRUE,
   control = list()
 )
 }
@@ -37,8 +36,6 @@ values can be passed to the function which will then be used as starting values.
 
 \item{carryOverParameters}{should parameters from the previous iteration be used as starting values of
 the next iteration? Interestingly, this can result in worse parameter estimates...}
-
-\item{saveHessian}{should the Hessian of the optimizer be saved? This will take a lot of space!}
 
 \item{control}{option to set parameters of the optimizer; see ?optim}
 
