@@ -157,8 +157,8 @@ quasiNewtonBFGS <- function(SEM,
     
     
     ## inner loop: optimize directions
-    direction <- (-solve(newHessian)%*%newGradients)[parameterLabels,]
-    
+    direction <- try((-solve(newHessian)%*%newGradients)[parameterLabels,])
+
     # perform Line Search
     step <- quasiNewtonLineSearch(SEM = SEM, 
                                   N = N,

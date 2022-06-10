@@ -422,18 +422,20 @@ BFGS <- function(oldParameters,
     warning("Invalid Hessian. Returning previous Hessian")
     return(oldHessian)
   }
-  HessianEigen <- eigen(newHessian)
+  HessianEigen <- eigen(newHessian, only.values = TRUE)
   iscomplex <- any(!Im(HessianEigen$values) == 0)
   if(iscomplex){
+    HessianEigen <- eigen(newHessian)
     eigenVectors <- Re(HessianEigen$vectors)
     eigenValues <- Re(HessianEigen$values)
     newHessian <- eigenVectors%*%diag(eigenValues)%*%t(eigenVectors)
     HessianEigen <- eigen(newHessian)
   }
   if(any(HessianEigen$values < 0)){
-    while(any(eigen(newHessian)$values < 0)){
+    while(any(eigen(newHessian, only.values = TRUE)$values < 0)){
       newHessian <- newHessian + .01*diag(nrow(newHessian))
     }
+    dimnames(newHessian) <- dimnames(oldHessian)
   }
   
   return(newHessian)
