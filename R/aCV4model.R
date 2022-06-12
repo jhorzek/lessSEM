@@ -8,7 +8,7 @@
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
 #' a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example
-#' @param recomputeHessian if set to FALSE, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
+#' @param recomputeHessian if set to FALSE, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed. We currently recommend setting recomputeHessian to TRUE
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
 #' @examples
@@ -315,7 +315,8 @@ aCV4lavaan <- function(lavaanModel,
                                         individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
                                         individualPenaltyFunctionHessian = individualPenaltyFunctionHessian,
                                         currentTuningParameters = NULL,
-                                        penaltyFunctionArguments = NULL)
+                                        penaltyFunctionArguments = NULL, 
+                                        hessianOfDifferentiablePart = NULL)
   return(aCV)
 }
 
@@ -358,6 +359,15 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   if(is.null(hessianOfDifferentiablePart)){
     if(control$verbose != 0) cat("Computing Hessian\n\n")
     hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
+    
+    hessianEV <- eigen(hessian, only.values = TRUE)$values
+    if(any(hessianEV < 0)) {
+      hessian <- hessian + diag(-1.1*min(hessianEV), nrow(hessian))
+      hessianEV <- eigen(hessian, only.values = TRUE)$values
+      warning("Computed Hessian is not positive definite. Adding values to the diagonal to make it positive definite...")
+      if(any(hessianEV < 0)) stop("Hessian still not positive definite...")
+    }
+    
   }else{
     hessian <- hessianOfDifferentiablePart
   }
@@ -449,6 +459,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
 #' a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
+#' @param recomputeHessian if set to FALSE, the Hessians from the quasi newton optimization with BFGS will be used. Otherwise the Hessian will be recomputed. We currently recommend setting recomputeHessian to TRUE
 #' @export
 aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
                                                 k, 
@@ -625,6 +636,14 @@ customACVRcpp_SEMCpp <- function(SEM,
   scores <- aCV4SEM:::getScores(SEM = SEM, raw = raw)
   if(is.null(hessianOfDifferentiablePart)){
     hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
+    
+    hessianEV <- eigen(hessian, only.values = TRUE)$values
+    if(any(hessianEV < 0)) {
+      hessian <- hessian + diag(-1.1*min(hessianEV), nrow(hessian))
+      hessianEV <- eigen(hessian, only.values = TRUE)$values
+      warning("Computed Hessian is not positive definite. Adding values to the diagonal to make it positive definite...")
+      if(any(hessianEV < 0)) stop("Hessian still not positive definite...")
+    }
   }else{
     hessian <- hessianOfDifferentiablePart
   }

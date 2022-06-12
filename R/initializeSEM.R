@@ -17,9 +17,11 @@ SEMFromLavaan <- function(lavaanModel,
                           addMeans = TRUE,
                           activeSet = NULL){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
-  
+
   rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  
+  checkFit <- TRUE
   
   if(!is.null(activeSet)){
     if(length(activeSet) != nrow(rawData)) stop("length of activeSet must be identical to the rows in the data set.")
@@ -34,9 +36,8 @@ SEMFromLavaan <- function(lavaanModel,
   if(fixedX) {
     warning("lavaanModel has option fixed.x set to TRUE. This is currently not fully supported by aCV4SEM. Be sure to check the results.")
     checkFit <- FALSE
-  }else{
-    checkFit <- TRUE
   }
+  
   lavaanParameterTable <- lavaan::lavInspect(lavaanModel, what = "parTable")
   
   latentNames <- colnames(lavaanParameterTable$lambda)  #lavNames(lavaanModel, type = "lv")

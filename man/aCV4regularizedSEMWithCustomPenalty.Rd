@@ -17,6 +17,8 @@ a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::a
 
 \item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
 
+\item{recomputeHessian}{if set to FALSE, the Hessians from the quasi newton optimization with BFGS will be used. Otherwise the Hessian will be recomputed. We currently recommend setting recomputeHessian to TRUE}
+
 \item{regularizedSEMWithCustomPenalty.}{model of class regularizedSEMWithCustomPenalty.}
 }
 \description{
