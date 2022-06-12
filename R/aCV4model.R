@@ -373,17 +373,20 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
   names(leaveOutFits) <- paste0("testSet", 1:k)
   
   for(s in 1:k){
+    Ntraining <- sum(!subsets[,s])
+    Ntesting <- sum(subsets[,s])
+    
     if(control$verbose != 0) cat("\r","Subset [",s, "/", k, "]")
-    subGroupGradient <- apply(scores[-c(which(subsets[,s])),],2,sum) # gradients of all individuals but the ones in the subgroup
-    subGroupHessian <- ((N-sum(subsets[,s]))/N)*hessian # approximated hessian for all but the subgroup
-    subGroupLambda <- alpha*(N-sum(subsets[,s]))*lambda
+    subGroupGradient <- apply(scores[-c(which(subsets[,s])),,drop = FALSE],2,sum) # gradients of all individuals but the ones in the subgroup
+    subGroupHessian <- (Ntraining/N)*hessian # approximated hessian for all but the subgroup
+    subGroupLambda <- alpha*(Ntraining)*lambda
     
     # if elastic net is used, we approximate the ridge part as well and add this here:
     if(alpha != 1){
       # ridge or elastic net are used
       if(length(unique(adaptiveLassoWeights))!= 1) warning("Combining ridge and elastic net with adaptive lasso weights is unexplored territory.")
       # we multiply with the adaptive lasso weights.
-      penaltyFunctionTuning <- list("lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*(N-length(subsets[[s]])))
+      penaltyFunctionTuning <- list("lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*(Ntraining))
       penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels)
       subGroupGradient <- subGroupGradient + aCV4SEM::ridgeGradient(parameters = parameters,
                                                                     tuningParameters = penaltyFunctionTuning,
@@ -395,9 +398,8 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
       }
     }
     
-    startDirection <- Sys.time()
     direction <- aCV4SEM:::innerGLMNET(parameters = parameters, 
-                                       N = (N-length(subsets[[s]])),
+                                       N = Ntraining,
                                        subGroupGradient = subGroupGradient, 
                                        subGroupHessian = subGroupHessian, 
                                        subGroupLambda = subGroupLambda, 
@@ -448,7 +450,10 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
 #' a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @export
-aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, k, returnSubsetParameters = FALSE){
+aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
+                                                k, 
+                                                returnSubsetParameters = FALSE,
+                                                recomputeHessian = TRUE){
   if(!is(regularizedSEMWithCustomPenalty, "regularizedSEMWithCustomPenalty")){
     stop("regularizedSEMWithCustomPenalty must be of class regularizedSEMWithCustomPenalty")
   }
@@ -531,6 +536,15 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
   
   for(ro in 1:nrow(tuningParameters)){
     
+    if(recomputeHessian){
+      hessianOfDifferentiablePart <- NULL
+    }else{
+      
+      if(is.null(regularizedSEMWithCustomPenalty@inputArguments$control$saveHessian) || !regularizedSEMWithCustomPenalty@inputArguments$control$saveHessian) stop("Hessians were not saved in the regularizedSEMWithCustomPenalty object. This is the default as saving the Hessians can take a lot of disk space. To save the Hessians, use the controlQuasiNewtonBFGS argument (see ?controlQuasiNewtonBFGS).")
+      hessianOfDifferentiablePart <- regularizedSEMWithCustomPenalty@internalOptimization$HessiansOfDifferentiablePart$Hessian[[ro]]
+      
+    }
+    
     currentTuningParameters <- tuningParameters[ro,,drop = FALSE]
     
     pars <- unlist(regularizedSEMWithCustomPenalty@parameters[ro,regularizedSEMWithCustomPenalty@parameterLabels])
@@ -548,7 +562,8 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
                                           individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
                                           individualPenaltyFunctionHessian = individualPenaltyFunctionHessian,
                                           currentTuningParameters = currentTuningParameters,
-                                          penaltyFunctionArguments = penaltyFunctionArguments)
+                                          penaltyFunctionArguments = penaltyFunctionArguments,
+                                          hessianOfDifferentiablePart = hessianOfDifferentiablePart)
     
     if(returnSubsetParameters){
       subsetParameters[,,ro] <- aCV$subsetParameters[,dimnames(subsetParameters)[[2]]]
@@ -586,6 +601,7 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
 #' @param lambda value of tuning parameter lambda
 #' @param alpha value of tuning parameter alpha (for elastic net)
 #' @param adaptiveLassoWeights vector with labeled adaptive lasso weights. Only required if penalty = "adaptiveLasso"
+#' @param hessianOfDifferentiablePart hessian of log-likelihood
 customACVRcpp_SEMCpp <- function(SEM, 
                                  subsets, 
                                  raw, 
@@ -593,7 +609,8 @@ customACVRcpp_SEMCpp <- function(SEM,
                                  individualPenaltyFunctionGradient,
                                  individualPenaltyFunctionHessian,
                                  currentTuningParameters,
-                                 penaltyFunctionArguments){
+                                 penaltyFunctionArguments,
+                                 hessianOfDifferentiablePart){
   
   if(!is(SEM, "Rcpp_SEMCpp")){
     stop("SEM must be of class Rcpp_SEMCpp")
@@ -606,7 +623,11 @@ customACVRcpp_SEMCpp <- function(SEM,
   
   # compute derivatives of -2log-Likelihood without penalty
   scores <- aCV4SEM:::getScores(SEM = SEM, raw = raw)
-  hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
+  if(is.null(hessianOfDifferentiablePart)){
+    hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
+  }else{
+    hessian <- hessianOfDifferentiablePart
+  }
   
   # penalty scores
   penaltyScores <- individualPenaltyFunctionGradient(parameters, 

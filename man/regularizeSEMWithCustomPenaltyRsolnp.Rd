@@ -11,7 +11,6 @@ regularizeSEMWithCustomPenaltyRsolnp(
   penaltyFunctionArguments,
   startingValues = "est",
   carryOverParameters = TRUE,
-  saveHessian = FALSE,
   control = list(trace = 0)
 )
 }
@@ -31,9 +30,7 @@ from the lavaan model object. Setting to "start" will use the starting values of
 values can be passed to the function which will then be used as starting values.}
 
 \item{carryOverParameters}{should parameters from the previous iteration be used as starting values of
-the next iteration? Interestingly, this can result in worse parameter estimates...}
-
-\item{saveHessian}{should the Hessian of the optimizer be saved? This will take a lot of space!}
+the next iteration?}
 
 \item{control}{option to set parameters of the optimizer; see ?Rsolnp::solnp}
 }

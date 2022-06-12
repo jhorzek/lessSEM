@@ -12,7 +12,8 @@ customACVRcpp_SEMCpp(
   individualPenaltyFunctionGradient,
   individualPenaltyFunctionHessian,
   currentTuningParameters,
-  penaltyFunctionArguments
+  penaltyFunctionArguments,
+  hessianOfDifferentiablePart
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ can be generated with the SEMFromLavaan-function.}
 \item{subsets}{list with subsets created with createSubsets()}
 
 \item{raw}{controls if the internal transformations of aCV4SEM should be used.}
+
+\item{hessianOfDifferentiablePart}{hessian of log-likelihood}
 
 \item{regularizedParameterLabels}{vector with labels of regularized parameters}
 

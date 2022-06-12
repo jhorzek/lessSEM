@@ -25,7 +25,7 @@ SEMFromLavaan <- function(lavaanModel,
     if(length(activeSet) != nrow(rawData)) stop("length of activeSet must be identical to the rows in the data set.")
     if(!is.logical(activeSet)) stop("activeSet must be logical.")
     rawData <- rawData[activeSet,,drop = FALSE]
-    fit <- FALSE
+    checkFit <- FALSE
   }
   
   # extract basic features

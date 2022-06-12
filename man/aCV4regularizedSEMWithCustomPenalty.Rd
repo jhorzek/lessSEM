@@ -7,7 +7,8 @@
 aCV4regularizedSEMWithCustomPenalty(
   regularizedSEMWithCustomPenalty,
   k,
-  returnSubsetParameters = FALSE
+  returnSubsetParameters = FALSE,
+  recomputeHessian = TRUE
 )
 }
 \arguments{
