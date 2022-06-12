@@ -196,15 +196,16 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
       hessianOfDifferentiablePart <- regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$Hessian[[which(select)]]
     }
     
-    aCV <- aCV4SEM:::GLMNETACVRcpp_SEMCpp(SEM = aCVSEM, 
-                                          subsets = subsets,
-                                          raw = TRUE, 
-                                          regularizedParameterLabels = regularizedParameterLabels, 
-                                          lambda = lambda,
-                                          alpha = alpha, 
-                                          adaptiveLassoWeights = adaptiveLassoWeights,
-                                          hessianOfDifferentiablePart = hessianOfDifferentiablePart,
-                                          control = control)
+    aCV <- try(aCV4SEM:::GLMNETACVRcpp_SEMCpp(SEM = aCVSEM, 
+                                              subsets = subsets,
+                                              raw = TRUE, 
+                                              regularizedParameterLabels = regularizedParameterLabels, 
+                                              lambda = lambda,
+                                              alpha = alpha, 
+                                              adaptiveLassoWeights = adaptiveLassoWeights,
+                                              hessianOfDifferentiablePart = hessianOfDifferentiablePart,
+                                              control = control))
+    if(is(aCV, "try-error")) next
     
     if(returnSubsetParameters){
       subsetParameters[,,ro] <- aCV$subsetParameters[,dimnames(subsetParameters)[[2]]]
@@ -408,16 +409,17 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
       }
     }
     
-    direction <- aCV4SEM:::innerGLMNET(parameters = parameters, 
-                                       N = Ntraining,
-                                       subGroupGradient = subGroupGradient, 
-                                       subGroupHessian = subGroupHessian, 
-                                       subGroupLambda = subGroupLambda, 
-                                       regularized = names(parameters)%in%regularizedParameterLabels, 
-                                       adaptiveLassoWeights = adaptiveLassoWeights, 
-                                       maxIter = control$maxIterIn, 
-                                       epsBreak = control$epsIn, 
-                                       useMultipleConvergenceCriteria = TRUE)
+    direction <- try(aCV4SEM:::innerGLMNET(parameters = parameters, 
+                                           N = Ntraining,
+                                           subGroupGradient = subGroupGradient, 
+                                           subGroupHessian = subGroupHessian, 
+                                           subGroupLambda = subGroupLambda, 
+                                           regularized = names(parameters)%in%regularizedParameterLabels, 
+                                           adaptiveLassoWeights = adaptiveLassoWeights, 
+                                           maxIter = control$maxIterIn, 
+                                           epsBreak = control$epsIn, 
+                                           useMultipleConvergenceCriteria = TRUE))
+    if(is(direction, "try-error")) next
     
     rownames(direction) = names(parameters)
     

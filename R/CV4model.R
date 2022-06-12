@@ -173,7 +173,14 @@ CV4regularizedSEM <- function(regularizedSEM, k, returnSubsetParameters = FALSE)
     )
     
     if(returnSubsetParameters){
-      subsetParameters[s,,] <- regularizedSEM_s@parameters
+      for(ro in 1:nrow(tuningParameters)){
+        dimname3 <- paste0(paste0(colnames(tuningParameters[ro,,drop = FALSE]),
+                                    "=", 
+                                    tuningParameters[ro,]), 
+                             collapse = "; ")
+        
+        subsetParameters[s,,dimname3] <- as.matrix(regularizedSEM_s@parameters[ro,dimnames(subsetParameters)[[2]]])
+      }
     }
     
     for(p in 1:nrow(regularizedSEM_s@parameters)){
