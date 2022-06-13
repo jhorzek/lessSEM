@@ -639,13 +639,6 @@ customACVRcpp_SEMCpp <- function(SEM,
   if(is.null(hessianOfDifferentiablePart)){
     hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
     
-    hessianEV <- eigen(hessian, only.values = TRUE)$values
-    if(any(hessianEV < 0)) {
-      hessian <- hessian + diag(-1.1*min(hessianEV), nrow(hessian))
-      hessianEV <- eigen(hessian, only.values = TRUE)$values
-      warning("Computed Hessian is not positive definite. Adding values to the diagonal to make it positive definite...")
-      if(any(hessianEV < 0)) stop("Hessian still not positive definite...")
-    }
   }else{
     hessian <- hessianOfDifferentiablePart
   }
@@ -664,6 +657,14 @@ customACVRcpp_SEMCpp <- function(SEM,
                             byrow = TRUE,
                             dimnames = list(NULL, names(penaltyScores)))[,colnames(scores)]
   hessian <- hessian + penaltyHessian[rownames(hessian), colnames(hessian)]
+  
+  hessianEV <- eigen(hessian, only.values = TRUE)$values
+  if(any(hessianEV < 0)) {
+    hessian <- hessian + diag(-1.1*min(hessianEV), nrow(hessian))
+    hessianEV <- eigen(hessian, only.values = TRUE)$values
+    warning("Computed Hessian is not positive definite. Adding values to the diagonal to make it positive definite...")
+    if(any(hessianEV < 0)) stop("Hessian still not positive definite...")
+  }
   
   # Now do the optimization step for each sub-group
   stepdirections <- matrix(NA, nrow = k, ncol = length(parameters))
