@@ -1,4 +1,4 @@
-#include <RcppArmadillo.h>
+#include "ISTA.hpp"
 #include "SEM.hpp"
 #include "implied.hpp"
 #include "fit.hpp"
@@ -6,10 +6,11 @@
 #include "gradients.hpp"
 #include "hessian.hpp"
 
-// [[Rcpp :: depends ( RcppArmadillo )]]
+
+// [[Rcpp :: depends ( fista )]]
 
 bool SEMCpp::checkModel(){
-
+  
   int N_ = 0;
   for(int i = 0; i < data.dataSubsets.size(); i++){
     N_ += data.dataSubsets.at(i).N;
@@ -234,7 +235,7 @@ void SEMCpp::implied(){
     wasChecked = checkModel();
   }
   currentStatus = computedImplied;
-
+  
   // step one: compute implied mean and covariance
   if(parameterTable.AChanged | parameterTable.SChanged) impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
   if(parameterTable.mChanged | parameterTable.AChanged) impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
@@ -338,6 +339,33 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   return(hessian);
 }
 
+Rcpp::DataFrame SEMCpp::LASSO(arma::rowvec startingValues,
+                              const double lambda,
+                              const arma::rowvec weights)
+{
+  
+  SEMIsta SEMIsta_(*this);
+  Rcpp::Rcout << "Here" << std::endl;
+  ista::tuningParametersLasso tp;
+  tp.lambda = lambda;
+  tp.weights = weights;
+  
+  ista::proximalOperatorLasso proximalOperatorLasso_;
+  ista::penaltyLASSO penalty_;
+  
+  ista::control controlIsta;
+  
+  ista::fitResults fitResults_ = ista::ista(
+    SEMIsta_,
+    startingValues,
+    proximalOperatorLasso_,
+    penalty_,
+    tp,
+    controlIsta
+  );
+  return(fitResults_.parameterValues);
+}
+
 RCPP_EXPOSED_CLASS(SEMCpp)
   RCPP_MODULE(SEM_cpp){
     using namespace Rcpp;
@@ -369,6 +397,7 @@ RCPP_EXPOSED_CLASS(SEMCpp)
     .method( "getGradients", &SEMCpp::getGradients, "Returns a matrix with scores.")
     .method( "getScores", &SEMCpp::getScores, "Returns a matrix with scores.")
     .method( "getHessian", &SEMCpp::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
+    .method( "LASSO", &SEMCpp::LASSO, "temp")
     ;
   }
 

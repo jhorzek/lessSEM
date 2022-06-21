@@ -1,12 +1,13 @@
 #ifndef SEMMODULE_H
 #define SEMMODULE_H
 
-#include <RcppArmadillo.h>
+#include "fista.h"
 #include "dataset.hpp"
 #include "parameters.hpp"
 #include "derivativeStructure.hpp"
 
-// [[Rcpp :: depends ( RcppArmadillo )]]
+
+// [[Rcpp :: depends ( fista )]]
 
 enum status {
   addedMatrices,
@@ -97,6 +98,10 @@ public:
                        arma::vec value_,
                        bool raw,
                        double eps);
+  
+  Rcpp::DataFrame LASSO(arma::rowvec startingValues,
+                        const double lambda,
+                        const arma::rowvec weights);
   
 };
 
