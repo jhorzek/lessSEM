@@ -22,7 +22,7 @@ istaLasso <- function(SEM,
                       breakOuter = .0000001,
                       raw = FALSE){
   
-  startingValues <- aCV4SEM:::getParameters(SEM, raw = TRUE)
+  startingValues <- linr:::getParameters(SEM, raw = TRUE)
   if(any(! names(startingValues) %in% names(weights))) stop("weights vector must have the same names as the parameters!")
   weights <- weights[names(startingValues)]
   
@@ -40,6 +40,6 @@ istaLasso <- function(SEM,
   )
   if(raw) return(optPar)
   
-  SEM <-aCV4SEM:::setParameters(SEM, labels = names(optPar), values = optPar, raw = TRUE)
-  return(aCV4SEM:::getParameters(SEM, raw = FALSE))
+  SEM <-linr:::setParameters(SEM, labels = names(optPar), values = optPar, raw = TRUE)
+  return(linr:::getParameters(SEM, raw = FALSE))
 }
