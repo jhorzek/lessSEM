@@ -339,21 +339,35 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   return(hessian);
 }
 
-Rcpp::DataFrame SEMCpp::LASSO(arma::rowvec startingValues,
-                              const double lambda,
-                              const arma::rowvec weights)
+Rcpp::NumericVector SEMCpp::LASSO(Rcpp::NumericVector startingValues,
+                                  const double lambda,
+                                  const Rcpp::NumericVector weights,
+                                  const int i_k,
+                                  const double L0,
+                                  const double eta,
+                                  const int maxIterOut,
+                                  const int maxIterIn,
+                                  const double breakOuter
+)
 {
+  int N = rawData.n_rows;
   
   SEMIsta SEMIsta_(*this);
-  Rcpp::Rcout << "Here" << std::endl;
   ista::tuningParametersLasso tp;
-  tp.lambda = lambda;
+  tp.lambda = lambda*N;
   tp.weights = weights;
   
   ista::proximalOperatorLasso proximalOperatorLasso_;
   ista::penaltyLASSO penalty_;
   
-  ista::control controlIsta;
+  ista::control controlIsta = {
+    i_k,
+    L0,
+    eta,
+    maxIterOut,
+    maxIterIn,
+    breakOuter*N
+  };
   
   ista::fitResults fitResults_ = ista::ista(
     SEMIsta_,
@@ -363,6 +377,8 @@ Rcpp::DataFrame SEMCpp::LASSO(arma::rowvec startingValues,
     tp,
     controlIsta
   );
+  if(!fitResults_.convergence) Rcpp::warning("Optimizer did not converge");
+  Rcpp::Rcout << "Final objective value: " << fitResults_.fit << std::endl;
   return(fitResults_.parameterValues);
 }
 

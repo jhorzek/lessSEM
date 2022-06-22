@@ -99,9 +99,15 @@ public:
                        bool raw,
                        double eps);
   
-  Rcpp::DataFrame LASSO(arma::rowvec startingValues,
+  Rcpp::NumericVector LASSO(Rcpp::NumericVector startingValues,
                         const double lambda,
-                        const arma::rowvec weights);
+                        const Rcpp::NumericVector weights,
+                        const int i_k = 2,
+                        const double L0 = 1,
+                        const double eta = 2,
+                        const int maxIterOut = 1000,
+                        const int maxIterIn = 1000,
+                        const double breakOuter = .0000001);
   
 };
 

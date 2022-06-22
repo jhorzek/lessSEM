@@ -14,29 +14,50 @@ public:
     SEM = SEM_;
   }
   
-  void setParameters(arma::rowvec parameterValues) override {
-    SEM.setParameters(SEM.getParameterLabels(), // labels
-                      arma::trans(parameterValues), // values
-                      true); // raw
-  }
-  
-  double fit() override{
+  double fit(Rcpp::NumericVector parameterValues) override{
+    
     try{
-    SEM.fit();
+      // change parameter values
+      Rcpp::StringVector parameterLabels = parameterValues.names();
+      SEM.setParameters(parameterLabels, // labels
+                        parameterValues, // values
+                        true); // raw
+      SEM.fit();
+      
     }catch(...){
-      Rcpp::Rcout << "Fit error" << std::endl;
-      Rcpp::Rcout << SEM.m2LL << std::endl;
       return(arma::datum::nan);
     }
     if(!SEM.impliedCovariance.is_sympd()){
-      Rcpp::Rcout << "not positive definite" << std::endl;
       return(arma::datum::nan);
     }
     return(SEM.m2LL);
   }
   
-  arma::rowvec gradients() override{
-    return(SEM.getGradients(true)); 
+  Rcpp::NumericVector gradients(Rcpp::NumericVector parameterValues) override{
+    
+    Rcpp::NumericVector gradients(parameterValues.length());
+    
+    try{
+      // change parameter values
+      Rcpp::StringVector parameterLabels = parameterValues.names();
+      SEM.setParameters(parameterLabels, // labels
+                        parameterValues, // values
+                        true); // raw
+      SEM.fit();
+      arma::rowvec gradients_arma = SEM.getGradients(true);
+      gradients = Rcpp::NumericVector(gradients_arma.begin(), 
+                                                          gradients_arma.end());
+    }catch(...){
+      gradients.fill(NA_REAL);
+      return(gradients);
+    }
+    if(!SEM.impliedCovariance.is_sympd()){
+      gradients.fill(NA_REAL);
+      return(gradients);
+    }
+    
+    return(gradients); 
+
   }
   
 };
