@@ -40,13 +40,13 @@ test_that("testing gradients", {
   weights[labels %in% c("a", "b")] <- 1
   
   lassoPar <- linr:::istaLasso(SEM, 
-                                  lambda = 0, 
-                                  weights, 
-                                  maxIterOut = 100000)
+                               lambda = 0, 
+                               weights, 
+                               maxIterOut = 100000)
   SEM$fit() - -2*logLik(model)
   
   testthat::expect_equal(all(round(lassoPar - 
                                      linr::getLavaanParameters(model)[names(lassoPar)],
-                             1) == 0),
-  TRUE)
+                                   1) == 0),
+                         TRUE)
 })

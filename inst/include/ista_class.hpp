@@ -24,12 +24,14 @@ struct fitResults{
   Rcpp::NumericVector parameterValues;
 };
 
-template<typename T>
+template<typename T> // T is the type of the tuning parameters
 inline fitResults ista(model& model_, 
                        Rcpp::NumericVector startingValues,
-                       proximalOperator<T>& proximalOperator_,
-                       penalty<T>& penalty_,
-                       const T& tuningParameters,
+                       proximalOperator<T>& proximalOperator_, // proximalOperator takes the tuning parameters
+                       // as input -> <T>
+                       penalty<T>& penalty_, // penalty takes the tuning parameters
+                       // as input -> <T>
+                       const T& tuningParameters, // tuning parameters are of type T
                        const control& control_){
   
   Rcpp::StringVector parameterLabels = startingValues.names();
