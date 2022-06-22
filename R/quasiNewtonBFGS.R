@@ -1,6 +1,6 @@
 #' quasiNewtonBFGS
 #' 
-#' Performs quasi-Newton optimization with aCV4SEM:::BFGS approximated Hessian
+#' Performs quasi-Newton optimization with linr:::BFGS approximated Hessian
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param individualPenaltyFunction penalty function which takes the current parameter values as first argument, the tuning parameters as second, and the penaltyFunctionArguments as third argument and 
 #' returns a single value - the value of the penalty function for a single person. If the true penalty function is non-differentiable (e.g., lasso) a smooth
@@ -46,11 +46,11 @@ quasiNewtonBFGS <- function(SEM,
   N <- nrow(SEM$rawData)
   
   # save current state
-  initialParameters <- aCV4SEM:::getParameters(SEM, raw = TRUE)
+  initialParameters <- linr:::getParameters(SEM, raw = TRUE)
   if(is.null(initialHessian)){
-    initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
+    initialHessian <- linr:::getHessian(SEM = SEM, raw = TRUE)
   }
-  initialGradients <- try(aCV4SEM:::getGradients(SEM = SEM, raw = TRUE), silent = TRUE)
+  initialGradients <- try(linr:::getGradients(SEM = SEM, raw = TRUE), silent = TRUE)
   if(is(initialGradients, "try-error")){stop("Could not compute gradients at initial parameter values.")}
   
   ## check penalty functions
@@ -182,7 +182,7 @@ quasiNewtonBFGS <- function(SEM,
                                                                             penaltyFunctionArguments)
     
     # update model: set parameter values and compute
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, 
+    SEM <- linr:::setParameters(SEM = SEM, 
                                    labels = names(newParameters), 
                                    values = newParameters, 
                                    raw = TRUE)
@@ -194,8 +194,8 @@ quasiNewtonBFGS <- function(SEM,
                                                         currentTuningParameters,
                                                         penaltyFunctionArguments)
     
-    # Approximate Hessian using aCV4SEM:::BFGS
-    newHessian <- aCV4SEM:::BFGS(oldParameters = oldParameters, 
+    # Approximate Hessian using linr:::BFGS
+    newHessian <- linr:::BFGS(oldParameters = oldParameters, 
                                  oldGradients = oldGradients, 
                                  oldHessian = oldHessian, 
                                  newParameters = newParameters, 
@@ -274,7 +274,7 @@ quasiNewtonLineSearch <- function(SEM,
     newParameters <- oldParameters+stepSize*direction
     
     # compute new fitfunction value
-    newM2LL <- try(aCV4SEM:::fit(aCV4SEM:::setParameters(SEM = SEM, 
+    newM2LL <- try(linr:::fit(linr:::setParameters(SEM = SEM, 
                                                          labels = names(newParameters), 
                                                          values = newParameters, 
                                                          raw = TRUE))$m2LL, 
@@ -314,7 +314,7 @@ quasiNewtonLineSearch <- function(SEM,
         next
       }
       # check if gradients can be computed at the new location; this can often cause issues
-      newGradients <-  try(aCV4SEM:::getGradients(SEM, raw = TRUE), silent = TRUE)
+      newGradients <-  try(linr:::getGradients(SEM, raw = TRUE), silent = TRUE)
       
       if(is(newGradients, "try-error")) {
         car("Was error\n")
@@ -329,7 +329,7 @@ quasiNewtonLineSearch <- function(SEM,
     }
   }
   if(is.null(newGradients) || is(newGradients, "try-error")){
-    newGradients <- try(aCV4SEM:::getGradients(SEM, raw = TRUE), silent = TRUE)
+    newGradients <- try(linr:::getGradients(SEM, raw = TRUE), silent = TRUE)
   }
   return(
     list("stepSize" = stepSize,

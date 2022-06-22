@@ -11,7 +11,7 @@ likelihoodRatioFit(par, SEM, raw)
 
 \item{SEM}{model of class Rcpp_SEMCpp.}
 
-\item{raw}{controls if the internal transformations of aCV4SEM is used.}
+\item{raw}{controls if the internal transformations of linr is used.}
 }
 \description{
 internal function which returns the likelihood ratio fit statistic

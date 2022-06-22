@@ -15,5 +15,5 @@ simulateExampleData(N = 100, loadings = c(rep(1, 5), rep(0.4, 5), rep(0, 5)))
 simulate data for a simple CFA model
 }
 \examples{
-y <- aCV4SEM::simulateExampleData()
+y <- linr::simulateExampleData()
 }

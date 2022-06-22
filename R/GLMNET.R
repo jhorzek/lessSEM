@@ -1,6 +1,6 @@
 #' GLMNET
 #' 
-#' Performs GLMNET (see Friedman, 2010 & Yuan, 2011) with aCV4SEM:::BFGS approximated Hessian
+#' Performs GLMNET (see Friedman, 2010 & Yuan, 2011) with linr:::BFGS approximated Hessian
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param regularizedParameterLabels labels of regularized parameters
 #' @param lambda lasso tuning parameter. Higher values = higher penalty
@@ -39,11 +39,11 @@ GLMNET <- function(SEM,
   N <- nrow(SEM$rawData)
   
   # save current state
-  initialParameters <- aCV4SEM:::getParameters(SEM, raw = TRUE)
+  initialParameters <- linr:::getParameters(SEM, raw = TRUE)
   if(is.null(initialHessian)){
-    initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
+    initialHessian <- linr:::getHessian(SEM = SEM, raw = TRUE)
   }
-  initialGradients <- try(aCV4SEM:::getGradients(SEM = SEM, raw = TRUE), silent = TRUE)
+  initialGradients <- try(linr:::getGradients(SEM = SEM, raw = TRUE), silent = TRUE)
   if(is(initialGradients, "try-error")){stop("Could not compute gradients at initial parameter values.")}
   
   # initialize parameter values
@@ -83,7 +83,7 @@ GLMNET <- function(SEM,
     # we multiply with the adaptive lasso weights.
     penaltyFunctionTuning <- list("lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*N)
     penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels)
-    newGradients <- newGradients + aCV4SEM::ridgeGradient(parameters = newParameters, 
+    newGradients <- newGradients + linr::ridgeGradient(parameters = newParameters, 
                                                           tuningParameters = penaltyFunctionTuning,
                                                           penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     newHessian <- newHessian + ridgeHessian(parameters = newParameters, 
@@ -92,7 +92,7 @@ GLMNET <- function(SEM,
   }
   
   newM2LL <- SEM$m2LL
-  newRegM2LL <- newM2LL + aCV4SEM::getPenaltyValue(parameters = newParameters,
+  newRegM2LL <- newM2LL + linr::getPenaltyValue(parameters = newParameters,
                                                    lambda = N*lambda,
                                                    alpha = alpha,
                                                    regularizedParameterLabels = regularizedParameterLabels,
@@ -169,7 +169,7 @@ GLMNET <- function(SEM,
     
     
     ## inner loop: optimize directions
-    direction <- aCV4SEM:::innerGLMNET(parameters = oldParameters,
+    direction <- linr:::innerGLMNET(parameters = oldParameters,
                                        N = N,
                                        subGroupGradient = oldGradients, 
                                        subGroupHessian = oldHessian, 
@@ -184,7 +184,7 @@ GLMNET <- function(SEM,
     names(direction) <- parameterLabels
     
     # perform Line Search
-    step <- aCV4SEM:::GLMNETLineSearch(SEM = SEM, 
+    step <- linr:::GLMNETLineSearch(SEM = SEM, 
                                        N = N,
                                        adaptiveLassoWeights = adaptiveLassoWeights, 
                                        parameterLabels = parameterLabels,
@@ -205,12 +205,12 @@ GLMNET <- function(SEM,
     newGradients <- step$newGradients
     
     # update model: set parameter values and compute
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(newParameters), values = newParameters, raw = TRUE)
+    SEM <- linr:::setParameters(SEM = SEM, labels = names(newParameters), values = newParameters, raw = TRUE)
     SEM <- fit(SEM)
     
     # get fit
     newM2LL <- SEM$m2LL
-    newRegM2LL <- newM2LL + aCV4SEM::getPenaltyValue(parameters = newParameters,
+    newRegM2LL <- newM2LL + linr::getPenaltyValue(parameters = newParameters,
                                                      lambda = N*lambda,
                                                      alpha = alpha,
                                                      regularizedParameterLabels = regularizedParameterLabels,
@@ -218,13 +218,13 @@ GLMNET <- function(SEM,
     
     if(alpha != 1){
       # add derivative of differentiable part of the penalty:
-      newGradients <- newGradients + aCV4SEM::ridgeGradient(parameters = newParameters, 
+      newGradients <- newGradients + linr::ridgeGradient(parameters = newParameters, 
                                                             tuningParameters = penaltyFunctionTuning,
                                                             penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     }
     
-    # Approximate Hessian using aCV4SEM:::BFGS
-    newHessian <- aCV4SEM:::BFGS(oldParameters = oldParameters, 
+    # Approximate Hessian using linr:::BFGS
+    newHessian <- linr:::BFGS(oldParameters = oldParameters, 
                                  oldGradients = oldGradients, 
                                  oldHessian = oldHessian, 
                                  newParameters = newParameters, 
@@ -237,11 +237,11 @@ GLMNET <- function(SEM,
   
   if(alpha != 1){
     # remove derivative of differentiable part of the penalty; we want the gradients of the log-Likelihood, not those including the penalty
-    newGradients <- newGradients - aCV4SEM::ridgeGradient(parameters = newParameters, 
+    newGradients <- newGradients - linr::ridgeGradient(parameters = newParameters, 
                                                           tuningParameters = penaltyFunctionTuning,
                                                           penaltyFunctionArguments = penaltyFunctionArguments)[names(newGradients)]
     # remove hessian of differentiable part of the penalty; we want the hessian of the log-Likelihood, not the one including the penalty
-    newHessian <- newHessian - aCV4SEM::ridgeHessian(parameters = newParameters,
+    newHessian <- newHessian - linr::ridgeHessian(parameters = newParameters,
                                                      tuningParameters = penaltyFunctionTuning,
                                                      penaltyFunctionArguments = penaltyFunctionArguments)[rownames(newHessian), colnames(newHessian)]
   }
@@ -298,7 +298,7 @@ GLMNETLineSearch <- function(SEM,
                              maxIterLine){
   newGradients <- NULL
   # get penalized M2LL for step size 0:
-  pen_0 <- aCV4SEM::getPenaltyValue(parameters = oldParameters,
+  pen_0 <- linr::getPenaltyValue(parameters = oldParameters,
                                     lambda = lambda,
                                     alpha = alpha,
                                     regularizedParameterLabels = regularizedParameterLabels,
@@ -316,7 +316,7 @@ GLMNETLineSearch <- function(SEM,
     newParameters <- oldParameters+stepSize*direction
     
     # compute new fitfunction value
-    newM2LL <- try(aCV4SEM:::fit(aCV4SEM:::setParameters(SEM = SEM, 
+    newM2LL <- try(linr:::fit(linr:::setParameters(SEM = SEM, 
                                                          labels = names(newParameters), 
                                                          values = newParameters, 
                                                          raw = TRUE))$m2LL,
@@ -331,7 +331,7 @@ GLMNETLineSearch <- function(SEM,
     
     
     # compute h(stepSize) = L(x+td) + p(x+td) - L(x) - p(x), where p(x) is the penalty function
-    p_new <- aCV4SEM::getPenaltyValue(parameters = newParameters,
+    p_new <- linr::getPenaltyValue(parameters = newParameters,
                                       lambda = lambda,
                                       alpha = alpha,
                                       regularizedParameterLabels = regularizedParameterLabels,
@@ -359,7 +359,7 @@ GLMNETLineSearch <- function(SEM,
         next
       }
       # check if gradients can be computed at the new location; this can often cause issues
-      newGradients <-  try(aCV4SEM:::getGradients(SEM, raw = TRUE), silent = TRUE)
+      newGradients <-  try(linr:::getGradients(SEM, raw = TRUE), silent = TRUE)
       
       if(is(newGradients, "try-error")) {
         car("Was error\n")
@@ -374,7 +374,7 @@ GLMNETLineSearch <- function(SEM,
     }
   }
   if(is.null(newGradients) || is(newGradients, "try-error")){
-    newGradients <- try(aCV4SEM:::getGradients(SEM, raw = TRUE), silent = TRUE)
+    newGradients <- try(linr:::getGradients(SEM, raw = TRUE), silent = TRUE)
   }
   return(
     list("stepSize" = stepSize,

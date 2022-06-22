@@ -16,9 +16,9 @@
 #' @param penaltyFunctionArguments arguments passed to individualPenaltyFunction, individualPenaltyFunctionGradient, and individualPenaltyFunctionHessian
 #' @param control option to set parameters of the optimizer
 #' @examples 
-#' library(aCV4SEM)
+#' library(linr)
 #' 
-#' # Identical to regsem, aCV4SEM builds on the lavaan
+#' # Identical to regsem, linr builds on the lavaan
 #' # package for model specification. The first step
 #' # therefore is to implement the model in lavaan.
 #' 
@@ -42,23 +42,23 @@
 #' #                   fade = FALSE)
 #' 
 #' ## Defining a custom penalty function is a bit more complicated than
-#' # using the default ones provided in regularizeSEM (see ?aCV4SEM::regularizeSEM).
+#' # using the default ones provided in regularizeSEM (see ?linr::regularizeSEM).
 #' # We start with the definition of the penalty function. Make sure that the derivatives
 #' # of this function are well defined (i.e., the function is smooth)!
 #' # We will use the lasso penalty as an example.
 #' 
 #' # The penalty function MUST accept three arguments; how you use them is up to you.
 #' 
-#' # The first argument are the parameters. aCV4SEM will pass a vector with the current
+#' # The first argument are the parameters. linr will pass a vector with the current
 #' # parameter values and their names to your function. The parameter labels will be
 #' # exactly the same as those used by lavaan! So you can check them before with:
 #' 
-#' aCV4SEM::getLavaanParameters(lavaanModel)
+#' linr::getLavaanParameters(lavaanModel)
 #' 
 #' # The vector passed to your function will look like the vector above.
 #' 
 #' # The second argument is called tuningParameters MUST be a data.frame with the
-#' # tuning-parameters. aCV4SEM will automatically iterate over the rows of this object.
+#' # tuning-parameters. linr will automatically iterate over the rows of this object.
 #' # In case of LASSO regularization there is only one tuning parameter: lambda.
 #' # Therefore, we specify the tuningParameters object as:
 #' 
@@ -100,7 +100,7 @@
 #'   return(penaltyLasso)
 #' }
 #' # Important: This penalty function is assumed to be for a single individual only.
-#' # aCV4SEM will multiply it with sample size N to get the penalty value of the
+#' # linr will multiply it with sample size N to get the penalty value of the
 #' # full sample!
 #' 
 #' #### Now we are ready to optimize! ####
@@ -221,21 +221,21 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
                                            individualPenaltyFunctionHessian = NULL,
                                            tuningParameters,
                                            penaltyFunctionArguments,
-                                           control = aCV4SEM::controlQuasiNewtonBFGS()){
+                                           control = linr::controlQuasiNewtonBFGS()){
   
   
   if(!is(control, "controlBFGS")){
-    stop("control must be of class controlBFGS These objects can be generated with the controlQuasiNewtonBFGS function. See ?aCV4SEM::controlQuasiNewtonBFGS")
+    stop("control must be of class controlBFGS These objects can be generated with the controlQuasiNewtonBFGS function. See ?linr::controlQuasiNewtonBFGS")
   }
   
   if(is.null(individualPenaltyFunctionGradient)){
     message("Using numDeriv to approximate the gradient of the individualPenaltyFunction. This may result in slow optimization. We highly recommend that you pass an analytic solution.")
-    individualPenaltyFunctionGradient <- aCV4SEM::genericGradientApproximiation
+    individualPenaltyFunctionGradient <- linr::genericGradientApproximiation
     penaltyFunctionArguments <- c(penaltyFunctionArguments, individualPenaltyFunction = individualPenaltyFunction)
   }
   if(is.null(individualPenaltyFunctionHessian)){
     message("Using numDeriv to approximate the Hessian of the individualPenaltyFunction.")
-    individualPenaltyFunctionHessian <- aCV4SEM::genericHessianApproximiation
+    individualPenaltyFunctionHessian <- linr::genericHessianApproximiation
     penaltyFunctionArguments <- c(penaltyFunctionArguments, individualPenaltyFunction = individualPenaltyFunction)
   }
   
@@ -255,28 +255,28 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
   ### initialize model ####
   startingValues <- control$startingValues
   if(any(startingValues == "est")){
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "est",
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
   }else if(any(startingValues == "start")){
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start",
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
   }else if(is.numeric(startingValues)){
     
-    if(!all(names(startingValues) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See aCV4SEM::getLavaanParameters(lavaanModel).")
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    if(!all(names(startingValues) %in% names(linr::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See linr::getLavaanParameters(lavaanModel).")
+    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start", 
                                    fit = FALSE,
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(aCV4SEM:::fit(SEM))
+    SEM <- linr:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
+    SEM <- try(linr:::fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) stop("Infeasible starting values.")
     
   }else{
@@ -284,22 +284,22 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
   }
   
   # get parameters
-  parameters <- aCV4SEM:::getParameters(SEM, raw = TRUE)
+  parameters <- linr:::getParameters(SEM, raw = TRUE)
   
   initialHessian <- control$initialHessian
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(parameters) && ncol(initialHessian) == length(parameters)){
     
-    if(!all(rownames(initialHessian) %in% names(aCV4SEM::getLavaanParameters(lavaanModel))) ||
-       !all(colnames(initialHessian) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))
-    ) stop("initialHessian must have the parameter names as rownames and colnames. See aCV4SEM::getLavaanParameters(lavaanModel).")
+    if(!all(rownames(initialHessian) %in% names(linr::getLavaanParameters(lavaanModel))) ||
+       !all(colnames(initialHessian) %in% names(linr::getLavaanParameters(lavaanModel)))
+    ) stop("initialHessian must have the parameter names as rownames and colnames. See linr::getLavaanParameters(lavaanModel).")
     
   }else if(any(initialHessian == "compute")){
     
-    initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
+    initialHessian <- linr:::getHessian(SEM = SEM, raw = TRUE)
     
   }else if(any(initialHessian == "scoreBased")){
     
-    scores <- aCV4SEM:::getScores(SEM = SEM, raw = TRUE)
+    scores <- linr:::getScores(SEM = SEM, raw = TRUE)
     FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
     rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
     for(score in 1:nrow(scores)){
@@ -368,7 +368,7 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
     
     currentTuningParameters <- tuningParameters[i,,drop = FALSE]
     
-    result <- try(aCV4SEM:::quasiNewtonBFGS(SEM = SEM, 
+    result <- try(linr:::quasiNewtonBFGS(SEM = SEM, 
                                             individualPenaltyFunction = individualPenaltyFunction, 
                                             individualPenaltyFunctionGradient = individualPenaltyFunctionGradient, 
                                             individualPenaltyFunctionHessian = individualPenaltyFunctionHessian,
@@ -391,12 +391,12 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
     
     SEM <- result$SEM
     
-    parameterEstimates[i, names(parameters)] <- aCV4SEM:::getParameters(result$SEM, raw = FALSE)[names(parameters)]
+    parameterEstimates[i, names(parameters)] <- linr:::getParameters(result$SEM, raw = FALSE)[names(parameters)]
     fits$m2LL[i] <- result$m2LL
     fits$regM2LL[i] <- result$regM2LL
     fits$convergence[i] <- result$convergence
     
-    initialHessian4Optimizer <- result$Hessian - individualPenaltyFunctionHessian(aCV4SEM:::getParameters(result$SEM, raw = FALSE)[names(parameters)], 
+    initialHessian4Optimizer <- result$Hessian - individualPenaltyFunctionHessian(linr:::getParameters(result$SEM, raw = FALSE)[names(parameters)], 
                                                                                   currentTuningParameters,
                                                                                   penaltyFunctionArguments)
     
@@ -436,9 +436,9 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
 #' the next iteration?
 #' @param control option to set parameters of the optimizer; see ?Rsolnp::solnp
 #' @examples 
-#' library(aCV4SEM)
+#' library(linr)
 #' 
-#' # Identical to regsem, aCV4SEM builds on the lavaan
+#' # Identical to regsem, linr builds on the lavaan
 #' # package for model specification. The first step
 #' # therefore is to implement the model in lavaan.
 #' 
@@ -462,23 +462,23 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
 #' #                   fade = FALSE)
 #' 
 #' ## Defining a custom penalty function is a bit more complicated than
-#' # using the default ones provided in regularizeSEM (see ?aCV4SEM::regularizeSEM).
+#' # using the default ones provided in regularizeSEM (see ?linr::regularizeSEM).
 #' # We start with the definition of the penalty function. Make sure that the derivatives
 #' # of this function are well defined (i.e., the function is smooth)!
 #' # We will use the lasso penalty as an example.
 #' 
 #' # The penalty function MUST accept three arguments; how you use them is up to you.
 #' 
-#' # The first argument are the parameters. aCV4SEM will pass a vector with the current
+#' # The first argument are the parameters. linr will pass a vector with the current
 #' # parameter values and their names to your function. The parameter labels will be
 #' # exactly the same as those used by lavaan! So you can check them before with:
 #' 
-#' aCV4SEM::getLavaanParameters(lavaanModel)
+#' linr::getLavaanParameters(lavaanModel)
 #' 
 #' # The vector passed to your function will look like the vector above.
 #' 
 #' # The second argument is called tuningParameters MUST be a data.frame with the
-#' # tuning-parameters. aCV4SEM will automatically iterate over the rows of this object.
+#' # tuning-parameters. linr will automatically iterate over the rows of this object.
 #' # In case of LASSO regularization there is only one tuning parameter: lambda.
 #' # Therefore, we specify the tuningParameters object as:
 #' 
@@ -520,7 +520,7 @@ regularizeSEMWithCustomPenalty <- function(lavaanModel,
 #'   return(penaltyLasso)
 #' }
 #' # Important: This penalty function is assumed to be for a single individual only.
-#' # aCV4SEM will multiply it with sample size N to get the penalty value of the
+#' # linr will multiply it with sample size N to get the penalty value of the
 #' # full sample!
 #' 
 #' #### Now we are ready to optimize! ####
@@ -573,28 +573,28 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   
   ### initialize model ####
   if(any(startingValues == "est")){
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "est",
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
   }else if(any(startingValues == "start")){
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start",
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
   }else if(is.numeric(startingValues)){
     
-    if(!all(names(startingValues) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See aCV4SEM::getLavaanParameters(lavaanModel).")
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    if(!all(names(startingValues) %in% names(linr::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See linr::getLavaanParameters(lavaanModel).")
+    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start", 
                                    fit = FALSE,
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(aCV4SEM:::fit(SEM))
+    SEM <- linr:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
+    SEM <- try(linr:::fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) stop("Infeasible starting values.")
     
   }else{
@@ -602,7 +602,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   }
   
   # get parameters
-  parameters <- aCV4SEM:::getParameters(SEM, raw = TRUE)
+  parameters <- linr:::getParameters(SEM, raw = TRUE)
   
   # define fitting function
   fitfun <- function(parameters, 
@@ -611,7 +611,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
                      individualPenaltyFunction, 
                      tuningParameters,
                      penaltyFunctionArguments){
-    SEM <- try(aCV4SEM:::setParameters(SEM = SEM, 
+    SEM <- try(linr:::setParameters(SEM = SEM, 
                                        labels = names(parameters), 
                                        values = parameters, 
                                        raw = TRUE), 
@@ -619,7 +619,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
     if(is(SEM, "try-error")){
       return(99999999999999999)
     }
-    SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
+    SEM <- try(linr:::fit(SEM), silent = TRUE)
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)){
       return(99999999999999999)
     }
@@ -684,12 +684,12 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
     # will be better if more iterations have to be done until convergence
     if(carryOverParameters) parametersInit <- result$pars
     
-    SEM <- try(aCV4SEM:::setParameters(SEM = SEM, labels = names(result$pars), 
+    SEM <- try(linr:::setParameters(SEM = SEM, labels = names(result$pars), 
                                        values = result$pars, raw = TRUE), 
                silent = TRUE)
-    SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
+    SEM <- try(linr:::fit(SEM), silent = TRUE)
     
-    parameterEstimates[i, names(parameters)] <- aCV4SEM:::getParameters(SEM, raw = FALSE)[names(parameters)]
+    parameterEstimates[i, names(parameters)] <- linr:::getParameters(SEM, raw = FALSE)[names(parameters)]
     fits$m2LL[i] <- SEM$m2LL
     fits$regM2LL[i] <- SEM$m2LL + sampleSize*individualPenaltyFunction(result$pars, 
                                                                        currentTuningParameters, 

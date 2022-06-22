@@ -7,14 +7,14 @@
 #' 
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
-#' See ?aCV4SEM::aCV4regularizedSEM for an example
+#' See ?linr::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
 #' @examples
-#' library(aCV4SEM)
+#' library(linr)
 #' 
 #' # Let's first set up a regularized model. The following steps are
-#' # explained in detail in ?aCV4SEM::regularizeSEM
+#' # explained in detail in ?linr::regularizeSEM
 #' dataset <- simulateExampleData()
 #' 
 #' lavaanSyntax <- "
@@ -76,9 +76,9 @@
 #' dimnames(CV@subsetParameters)[[3]][2]
 #' CV@subsetParameters[,,2] # second lambda value
 #' 
-#' ## Instead of letting aCV4SEM create the subsets, you can
+#' ## Instead of letting linr create the subsets, you can
 #' # also pass your own subsets. As an example:
-#' subsets <- aCV4SEM:::createSubsets(N = nrow(dataset), k  = 10)
+#' subsets <- linr:::createSubsets(N = nrow(dataset), k  = 10)
 #' 
 #' CV <- CV4regularizedSEM(regularizedSEM = regsem,
 #'                           k = subsets
@@ -102,7 +102,7 @@ CV4regularizedSEM <- function(regularizedSEM, k, returnSubsetParameters = FALSE)
     if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
     k <- ncol(subsets)
   }else{
-    subsets <- aCV4SEM:::createSubsets(N = N, k = k)
+    subsets <- linr:::createSubsets(N = N, k = k)
   }
   
   # extract elements for easier access
@@ -148,20 +148,20 @@ CV4regularizedSEM <- function(regularizedSEM, k, returnSubsetParameters = FALSE)
   }
   
   # for CV - fits:
-  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel,
+  SEM <- linr:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel,
                                  whichPars = "est", 
                                  transformVariances = TRUE,
                                  fit = FALSE, 
                                  addMeans = TRUE, 
                                  activeSet = NULL
   )
-  SEM <- aCV4SEM:::fit(SEM)
+  SEM <- linr:::fit(SEM)
   
   for(s in 1:k){
     cat("\n[",s, "/",k,"]\n")
     control_s <- control
     control_s$activeSet <- !subsets[,s]
-    regularizedSEM_s <- aCV4SEM::regularizeSEM(
+    regularizedSEM_s <- linr::regularizeSEM(
       lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
       regularizedParameterLabels = regularizedSEM@inputArguments$regularizedParameterLabels, 
       penalty = regularizedSEM@inputArguments$penalty, 
@@ -188,7 +188,7 @@ CV4regularizedSEM <- function(regularizedSEM, k, returnSubsetParameters = FALSE)
       for(i in which(subsets[,s])){
 
         cvfitsDetails[p, paste0("testSet",s)] <- cvfitsDetails[p, paste0("testSet",s)] + 
-          aCV4SEM:::individualMinus2LogLikelihood(par = unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels]), 
+          linr:::individualMinus2LogLikelihood(par = unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels]), 
                                                   SEM = SEM, 
                                                   data = data[i,,drop = FALSE], 
                                                   raw = FALSE)
@@ -221,10 +221,10 @@ CV4regularizedSEM <- function(regularizedSEM, k, returnSubsetParameters = FALSE)
 #' 
 #' @param regularizedSEMWithCustomPenalty. model of class regularizedSEMWithCustomPenalty.
 #' @param k the number of cross-validation folds. Alternatively, 
-#' a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example
+#' a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @examples 
-#' library(aCV4SEM)
+#' library(linr)
 #' 
 #' dataset <- simulateExampleData()
 #' 
@@ -284,7 +284,7 @@ CV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, 
   
   N <- nrow(data)
   
-  aCVSEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = regularizedSEMWithCustomPenalty@inputArguments$lavaanModel, transformVariances = TRUE, fit = FALSE)
+  aCVSEM <- linr:::SEMFromLavaan(lavaanModel = regularizedSEMWithCustomPenalty@inputArguments$lavaanModel, transformVariances = TRUE, fit = FALSE)
   
   # create subsets 
   if(is.matrix(k)){
@@ -293,7 +293,7 @@ CV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, 
     if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
     k <- ncol(subsets)
   }else{
-    subsets <- aCV4SEM:::createSubsets(N = N, k = k)
+    subsets <- linr:::createSubsets(N = N, k = k)
   }
   
   # extract elements for easier access
@@ -310,12 +310,12 @@ CV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, 
   
   if(is.null(individualPenaltyFunctionGradient)){
     message("Using numDeriv to approximate the gradient of the individualPenaltyFunction.")
-    individualPenaltyFunctionGradient <- aCV4SEM::genericGradientApproximiation
+    individualPenaltyFunctionGradient <- linr::genericGradientApproximiation
     penaltyFunctionArguments <- c(penaltyFunctionArguments, individualPenaltyFunction = individualPenaltyFunction)
   }
   if(is.null(individualPenaltyFunctionHessian)){
     message("Using numDeriv to approximate the Hessian of the individualPenaltyFunction.")
-    individualPenaltyFunctionHessian <- aCV4SEM::genericHessianApproximiation
+    individualPenaltyFunctionHessian <- linr::genericHessianApproximiation
     penaltyFunctionArguments <- c(penaltyFunctionArguments, individualPenaltyFunction = individualPenaltyFunction)
   }
   
@@ -352,21 +352,21 @@ CV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, 
   }
   
   # for CV - fits:
-  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = regularizedSEMWithCustomPenalty@inputArguments$lavaanModel,
+  SEM <- linr:::SEMFromLavaan(lavaanModel = regularizedSEMWithCustomPenalty@inputArguments$lavaanModel,
                                  whichPars = "est", 
                                  transformVariances = TRUE,
                                  fit = FALSE, 
                                  addMeans = TRUE, 
                                  activeSet = NULL
   )
-  SEM <- aCV4SEM:::fit(SEM)
+  SEM <- linr:::fit(SEM)
   
   
   for(s in 1:k){
     cat("\n[",s, "/",k,"]\n")
     control_s <- control
     control_s$activeSet <- !subsets[,s]
-    regularizedSEM_s <- aCV4SEM::regularizeSEMWithCustomPenalty(
+    regularizedSEM_s <- linr::regularizeSEMWithCustomPenalty(
       lavaanModel = regularizedSEMWithCustomPenalty@inputArguments$lavaanModel,
       individualPenaltyFunction = individualPenaltyFunction,
       individualPenaltyFunctionGradient = individualPenaltyFunctionGradient,
@@ -385,7 +385,7 @@ CV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, 
       for(i in which(subsets[,s])){
         
         cvfitsDetails[p, paste0("testSet",s)] <- cvfitsDetails[p, paste0("testSet",s)] + 
-          aCV4SEM:::individualMinus2LogLikelihood(par = unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels]), 
+          linr:::individualMinus2LogLikelihood(par = unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels]), 
                                                   SEM = SEM, 
                                                   data = data[i,,drop = FALSE], 
                                                   raw = FALSE)

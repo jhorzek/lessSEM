@@ -2,19 +2,19 @@
 
 #' aI4regularizedSEM
 #' 
-#' Provides an approximate influence for models of class regularizedSEM. These models can be fit with regularizedSEM() (see ?aCV4SEM::regularizedSEM)
+#' Provides an approximate influence for models of class regularizedSEM. These models can be fit with regularizedSEM() (see ?linr::regularizedSEM)
 #' in this package.
 #' 
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of subset fold. We recommend leave-one-out influence functions; i.e. set k to the number of persons in the data set. Alternatively, 
-#' a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example
+#' a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example
 #' @param recomputeHessian if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
 #' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
 #' @examples
-#' library(aCV4SEM)
+#' library(linr)
 #' 
 #' # Let's first set up a regularized model. The following steps are
-#' # explained in detail in ?aCV4SEM::regularizeSEM
+#' # explained in detail in ?linr::regularizeSEM
 #' dataset <- simulateExampleData()
 #' 
 #' lavaanSyntax <- "
@@ -61,7 +61,7 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contro
     stop("regularizedSEM must be of class regularizedSEM")
   }
   if(!is(control, "controlGLMNET")){
-    stop("control must be of class controlGLMNET. These objects can be generated with the controlGLMNET function. See ?aCV4SEM::controlGLMNET")
+    stop("control must be of class controlGLMNET. These objects can be generated with the controlGLMNET function. See ?linr::controlGLMNET")
   }
   
   data <- try(lavaan::lavInspect(regularizedSEM@inputArguments$lavaanModel, "data"))
@@ -69,7 +69,7 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contro
   
   N <- nrow(data)
   
-  aCVSEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
+  aCVSEM <- linr:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
                                     transformVariances = TRUE, 
                                     fit = FALSE)
   
@@ -80,7 +80,7 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contro
     if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
     k <- ncol(subsets)
   }else{
-    subsets <- aCV4SEM:::createSubsets(N = N, k = k)
+    subsets <- linr:::createSubsets(N = N, k = k)
   }
   
   # extract elements for easier access
@@ -120,11 +120,11 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contro
     alpha <- tuningParameters$alpha[ro]
     pars <- coef(regularizedSEM, lambda = lambda, alpha = alpha)
     
-    aCVSEM <- aCV4SEM:::setParameters(SEM = aCVSEM,
+    aCVSEM <- linr:::setParameters(SEM = aCVSEM,
                                       labels = names(pars),
                                       values = pars,
                                       raw = FALSE)
-    aCVSEM <- aCV4SEM:::fit(aCVSEM)
+    aCVSEM <- linr:::fit(aCVSEM)
     
     if(recomputeHessian){
       hessianOfDifferentiablePart <- NULL
@@ -135,7 +135,7 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contro
       hessianOfDifferentiablePart <- regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$Hessian[[which(select)]]
     }
     
-    aInfluence <- aCV4SEM:::GLMNETApproximateInfluenceRcpp_SEMCpp(SEM = aCVSEM, 
+    aInfluence <- linr:::GLMNETApproximateInfluenceRcpp_SEMCpp(SEM = aCVSEM, 
                                                                   subsets = subsets,
                                                                   raw = TRUE, 
                                                                   regularizedParameterLabels = regularizedParameterLabels, 
@@ -166,13 +166,13 @@ aI4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, contro
 
 #' GLMNETApproximateInfluenceRcpp_SEMCpp
 #' 
-#' internal function for approximate influence based on the internal model representation of aCV4SEM. The GLMNET part refers to the fact
+#' internal function for approximate influence based on the internal model representation of linr. The GLMNET part refers to the fact
 #' that this function uses the GLMNET optimizer for non-differentiable penalty functions. 
 #' 
 #' @param SEM model of class Rcpp_SEMCpp. Models of this class
 #' can be generated with the SEMFromLavaan-function.
 #' @param subsets list with subsets created with createSubsets()
-#' @param raw controls if the internal transformations of aCV4SEM should be used.
+#' @param raw controls if the internal transformations of linr should be used.
 #' @param regularizedParameterLabels vector with labels of regularized parameters
 #' @param lambda value of tuning parameter lambda
 #' @param alpha value of tuning parameter alpha (for elastic net)
@@ -194,16 +194,16 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
     stop("SEM must be of class Rcpp_SEMCpp")
   }
   
-  parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = raw)
+  parameters <- linr:::getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
   N <- nrow(dataSet)
   k <- ncol(subsets)
   
   # compute derivatives of -2log-Likelihood without penalty
   
-  scores <- aCV4SEM:::getScores(SEM = SEM, raw = raw)
+  scores <- linr:::getScores(SEM = SEM, raw = raw)
   if(is.null(hessianOfDifferentiablePart)){
-    hessian <- aCV4SEM:::getHessian(SEM = SEM, raw = raw)
+    hessian <- linr:::getHessian(SEM = SEM, raw = raw)
   }else{
     hessian <- hessianOfDifferentiablePart
   }
@@ -232,18 +232,18 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
       # we multiply with the adaptive lasso weights.
       penaltyFunctionTuning <- list("lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*(N-length(subsets[[s]])))
       penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels)
-      subGroupGradient <- subGroupGradient + aCV4SEM::ridgeGradient(parameters = parameters,
+      subGroupGradient <- subGroupGradient + linr::ridgeGradient(parameters = parameters,
                                                                     tuningParameters = penaltyFunctionTuning,
                                                                     penaltyFunctionArguments = penaltyFunctionArguments)
       if(is.null(hessianOfDifferentiablePart)){
-        subGroupHessian <- subGroupHessian + aCV4SEM::ridgeHessian(parameters = parameters,
+        subGroupHessian <- subGroupHessian + linr::ridgeHessian(parameters = parameters,
                                                                    tuningParameters = penaltyFunctionTuning,
                                                                    penaltyFunctionArguments = penaltyFunctionArguments)
       }
     }
     
     startDirection <- Sys.time()
-    direction <- aCV4SEM:::innerGLMNET(parameters = parameters, 
+    direction <- linr:::innerGLMNET(parameters = parameters, 
                                        N = (N-length(subsets[[s]])),
                                        subGroupGradient = subGroupGradient, 
                                        subGroupHessian = subGroupHessian, 
@@ -261,9 +261,9 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
     
     # compute out of sample fit
     parameters_s <- parameters + stepdirections[s,names(parameters)]
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
-    SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
-    subsetParameters[subsetParameters$removedSubset == s, names(parameters)] <- aCV4SEM:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
+    SEM <- linr:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
+    SEM <- try(linr:::fit(SEM), silent = TRUE)
+    subsetParameters[subsetParameters$removedSubset == s, names(parameters)] <- linr:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
     fits$fit[fits$removedSubset == s] <- SEM$m2LL 
     
     for(i in which(subsets[,s])){

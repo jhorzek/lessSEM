@@ -66,5 +66,5 @@ approximation of this function should be provided.}
 \item{verbose}{0 prints no additional information, > 0 prints GLMNET iterations}
 }
 \description{
-Performs quasi-Newton optimization with aCV4SEM:::BFGS approximated Hessian
+Performs quasi-Newton optimization with linr:::BFGS approximated Hessian
 }

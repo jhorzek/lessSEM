@@ -1,7 +1,7 @@
 test_that("testing approximate influence", {
   
   library(lavaan)
-  library(aCV4SEM)
+  library(linr)
   
   set.seed(123)
   N <- 100

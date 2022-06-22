@@ -18,7 +18,7 @@ checkRegularizedParameters(
 
 \item{parameterTable}{table with all parameters}
 
-\item{raw}{controls if the internal transformations of aCV4SEM is used.}
+\item{raw}{controls if the internal transformations of linr is used.}
 }
 \description{
 internal function to check if the regularized parameters can be found in the model

@@ -9,7 +9,7 @@ getScores(SEM, raw)
 \arguments{
 \item{SEM}{model of class Rcpp_SEMCpp}
 
-\item{raw}{controls if the internal transformations of aCV4SEM should be used. aCV4SEM will use an exponential function for all variances to 
+\item{raw}{controls if the internal transformations of linr should be used. linr will use an exponential function for all variances to 
 avoid negative variances. When set to TRUE, the scores will be given for the internal parameter representation. Set to FALSE to get the usual 
 scores}
 }

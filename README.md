@@ -1,31 +1,38 @@
-# aCV4SEM
+# linr
 
-aCV4SEM is an R package which provides regularized structural equation modeling (regularized SEM) as well as approximate cross-validation and approximate influence functions building on lavaan. The package is inspired by [regsem](https://github.com/Rjacobucci/regsem).
+linr (linr is not [regsem](https://github.com/Rjacobucci/regsem)) is an R package which provides regularized structural equation modeling (regularized SEM) building on lavaan; that is, it makes SEM *leaner*. As the name suggests, linr is heavily inspired by the [regsem](https://github.com/Rjacobucci/regsem) package.
+
+The objectives of linr are:
+
+1. to compare exact and approximate optimization of regularized SEM
+2. to provide optimizers for other SEM packages which can be used with an interface similar to optim
+
+linr also also provides experimental functions for approximate cross-validation and approximate influence functions. 
 
 **Warning**: The package is relatively new and you may find more stable implementations of regularized SEM in the R packages [regsem](https://github.com/Rjacobucci/regsem) and [lslx](https://github.com/psyphh/lslx). 
 
-The following features are implemented in aCV4SEM:
+The following features are implemented in linr:
 
-- regularization of SEM with ridge, lasso, adaptive lasso, and elastic net (see ?aCV4SEM::regularizeSEM)
-- automatic selection of $\lambda$ values for lasso and adaptive lasso (see ?aCV4SEM::regularizeSEM)
-- approximate optimization of SEM with custom penalty functions using a BFGS optimizer or Rsolnp (see ?aCV4SEM::regularizeSEMWithCustomPenalty and ?aCV4SEM::regularizeSEMWithCustomPenaltyRsolnp)
-- approximate cross-validation (see ?aCV4SEM::aCV4lavaan, ?aCV4SEM::aCV4RegularizedSEM, and ?aCV4SEM::aCV4regularizedSEMWithCustomPenalty)
-- exact cross-validation for regularized models (see ?aCV4SEM::CV4regularizedSEM)
-- approximate influence functions for regularized SEM (see ?aCV4SEM::aI4RegularizedSEM)
+- regularization of SEM with ridge, lasso, adaptive lasso, and elastic net (see ?linr::regularizeSEM)
+- automatic selection of $\lambda$ values for lasso and adaptive lasso (see ?linr::regularizeSEM)
+- approximate optimization of SEM with custom penalty functions using a BFGS optimizer or Rsolnp (see ?linr::regularizeSEMWithCustomPenalty and ?linr::regularizeSEMWithCustomPenaltyRsolnp)
+- approximate cross-validation (see ?linr::aCV4lavaan, ?linr::aCV4RegularizedSEM, and ?linr::aCV4regularizedSEMWithCustomPenalty)
+- exact cross-validation for regularized models (see ?linr::CV4regularizedSEM)
+- approximate influence functions for regularized SEM (see ?linr::aI4RegularizedSEM)
 
 # Installation
 
-If you want to install aCV4SEM from GitHub, use the following commands in R:
+If you want to install linr from GitHub, use the following commands in R:
 
     if(!require(devtools))install.packages("devtools")
 
-    devtools::install_github("jhorzek/aCV4SEM")
+    devtools::install_github("jhorzek/linr")
     
 
 # Example
 
-    library(lavaan) # aCV4SEM builds on lavaan models
-    library(aCV4SEM)
+    library(lavaan) # linr builds on lavaan models
+    library(linr)
     
     ## Approximate leave one out cross-validation for a lavaan model
     ### set up model in lavaan
@@ -43,7 +50,7 @@ If you want to install aCV4SEM from GitHub, use the following commands in R:
     exactLOOCV <- rep(NA, nrow(HS))
     for(i in 1:nrow(HS)){
       fit = sem(HS.model, HS[-i,], meanstructure = TRUE)
-      exactLOOCV[i] <- aCV4SEM:::computeIndividualM2LL(
+      exactLOOCV[i] <- linr:::computeIndividualM2LL(
         nObservedVariables = ncol(HS), 
         rawData = as.numeric(HS[i,]),
         impliedMeans = fit@implied$mean[[1]], 

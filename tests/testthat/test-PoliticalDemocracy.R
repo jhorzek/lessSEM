@@ -1,6 +1,6 @@
 test_that("testing optimization with PoliticalDemocracy", {
   library(lavaan)
-  library(aCV4SEM)
+  library(linr)
   set.seed(123)
   modelSyntax <- ' 
   # latent variable definitions

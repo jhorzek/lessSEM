@@ -13,7 +13,7 @@ regularizeSEM(
   alphas = NULL,
   adaptiveLassoWeights = NULL,
   raw = TRUE,
-  control = aCV4SEM::controlGLMNET()
+  control = linr::controlGLMNET()
 )
 }
 \arguments{
@@ -31,7 +31,7 @@ regularizeSEM(
 
 \item{adaptiveLassoWeights}{vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO. Default is inverse of absolute unregularized parameter estimates}
 
-\item{raw}{controls if the internal transformations of aCV4SEM is used. Recommended to set to TRUE!}
+\item{raw}{controls if the internal transformations of linr is used. Recommended to set to TRUE!}
 
 \item{control}{option to set parameters of the GLMNET optimizer. See ?controlGLMNET}
 }
@@ -52,9 +52,9 @@ Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
 }
 \examples{
  
-library(aCV4SEM)
+library(linr)
 
-# Identical to regsem, aCV4SEM builds on the lavaan
+# Identical to regsem, linr builds on the lavaan
 # package for model specification. The first step
 # therefore is to implement the model in lavaan.
 
@@ -84,7 +84,7 @@ regsem <- regularizeSEM(# pass the fitted lavaan model
   # which penalty should be used?
   penalty = "lasso",
   # in case of lasso and adaptive lasso, we can specify the number of lambda
-  # values to use. aCV4SEM will automatically find lambda_max and fit
+  # values to use. linr will automatically find lambda_max and fit
   # models for nLambda values between 0 and lambda_max. For the other
   # penalty functions, lambdas must be specified explicitly
   nLambdas = 5)
@@ -104,6 +104,6 @@ coef(regsem, criterion = "AIC")
 coef(regsem, criterion = "BIC")
 
 ## The fitted model can then be used as basis for an approximate cross-validation
-# (see ?aCV4SEM::aCV4regularizedSEM) or approximate influence functions
-# (see ?aCV4SEM::aI4regularizedSEM)
+# (see ?linr::aCV4regularizedSEM) or approximate influence functions
+# (see ?linr::aI4regularizedSEM)
 }

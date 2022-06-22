@@ -1,6 +1,6 @@
 test_that("testing scores", {
   library(lavaan)
-  library(aCV4SEM)
+  library(linr)
   set.seed(123)
 
   model1 <- ' 
@@ -24,10 +24,10 @@ test_that("testing scores", {
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE)
   lavaanScores <- -2*lavaan::lavScores(model)
   
-  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = model)
-  SEM <- aCV4SEM:::fit(SEM)
+  SEM <- linr:::SEMFromLavaan(lavaanModel = model)
+  SEM <- linr:::fit(SEM)
   
-  scoresAnalytic <- aCV4SEM:::getScores(SEM, raw = FALSE)
+  scoresAnalytic <- linr:::getScores(SEM, raw = FALSE)
 
   testthat::expect_equal(round(sum(abs(scoresAnalytic - lavaanScores)),4),0)
   
@@ -45,9 +45,9 @@ test_that("testing scores", {
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
   lavaanScores <- -2*lavaan::lavScores(model)
   
-  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = model)
-  SEM <- aCV4SEM:::fit(SEM)
+  SEM <- linr:::SEMFromLavaan(lavaanModel = model)
+  SEM <- linr:::fit(SEM)
   
-  scoresAnalytic <- aCV4SEM:::getScores(SEM, raw = FALSE)
+  scoresAnalytic <- linr:::getScores(SEM, raw = FALSE)
   testthat::expect_equal(round(sum(abs(scoresAnalytic - lavaanScores)),4),0)
 })

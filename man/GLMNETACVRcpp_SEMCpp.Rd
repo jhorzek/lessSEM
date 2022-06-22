@@ -22,7 +22,7 @@ can be generated with the SEMFromLavaan-function.}
 
 \item{subsets}{list with subsets created with createSubsets()}
 
-\item{raw}{controls if the internal transformations of aCV4SEM should be used.}
+\item{raw}{controls if the internal transformations of linr should be used.}
 
 \item{regularizedParameterLabels}{vector with labels of regularized parameters}
 
@@ -35,6 +35,6 @@ can be generated with the SEMFromLavaan-function.}
 \item{control}{arguments passed to GLMNET inner iteration}
 }
 \description{
-internal function for approximate cross-validation based on the internal model representation of aCV4SEM. The GLMNET part refers to the fact
+internal function for approximate cross-validation based on the internal model representation of linr. The GLMNET part refers to the fact
 that this function uses the GLMNET optimizer for non-differentiable penalty functions.
 }

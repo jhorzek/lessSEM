@@ -13,7 +13,7 @@ aCV4regularizedSEMWithCustomPenalty(
 }
 \arguments{
 \item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
-a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example}
+a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example}
 
 \item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
 

@@ -15,7 +15,7 @@ genericHessianApproximiation(
 
 \item{tuningParameters}{data.frame with tuning parameters}
 
-\item{penaltyFunctionArguments}{list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see aCV4SEM::smoothLASSO for an example}
+\item{penaltyFunctionArguments}{list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see linr::smoothLASSO for an example}
 
 \item{penaltyFunction}{}
 }

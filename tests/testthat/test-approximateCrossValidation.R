@@ -2,7 +2,7 @@ test_that("testing approximate cross validation", {
   
   library(lavaan)
   library(regsem)
-  library(aCV4SEM)
+  library(linr)
   #### Test lavaan ####
   # put variables on same scale for regsem
   HS <- data.frame(scale(HolzingerSwineford1939[,7:15]))
@@ -14,7 +14,7 @@ test_that("testing approximate cross validation", {
   exactLOOCV <- rep(NA, nrow(HS))
   for(i in 1:nrow(HS)){
     outt = cfa(mod, HS[-i,], meanstructure = TRUE)
-    exactLOOCV[i] <- aCV4SEM:::computeIndividualM2LL(nObservedVariables = ncol(HS), 
+    exactLOOCV[i] <- linr:::computeIndividualM2LL(nObservedVariables = ncol(HS), 
                                                      rawData = as.numeric(HS[i,]),
                                                      impliedMeans = outt@implied$mean[[1]], 
                                                      impliedCovariance = outt@implied$cov[[1]])

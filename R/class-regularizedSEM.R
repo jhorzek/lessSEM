@@ -96,18 +96,18 @@ setMethod("AIC", "regularizedSEM", function (object) {
     fits$AIC <- rep(NA, length(fits$m2LL))
     tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
     
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = object@inputArguments$lavaanModel, fit = FALSE)
+    SEM <- linr:::SEMFromLavaan(lavaanModel = object@inputArguments$lavaanModel, fit = FALSE)
     
     for(i in 1:nrow(tuningParameters)){
-      SEM <- aCV4SEM:::setParameters(SEM, 
+      SEM <- linr:::setParameters(SEM, 
                                      labels = object@parameterLabels, 
                                      values = coef(object, 
                                                    lambda = tuningParameters$lambda[i], 
                                                    alpha = tuningParameters$alpha[i]), 
                                      raw = FALSE)
-      SEM <- aCV4SEM:::fit(SEM)
-      scores <- aCV4SEM:::getScores(SEM, raw = FALSE)
-      hessian <- aCV4SEM:::getHessian(SEM, raw = FALSE)
+      SEM <- linr:::fit(SEM)
+      scores <- linr:::getScores(SEM, raw = FALSE)
+      hessian <- linr:::getHessian(SEM, raw = FALSE)
       hessianInv <- solve(hessian)
       twoTimesNpar <- sum(apply(scores, 1, function(x) t(x)%*%hessianInv%*%(x)))
       fits$AIC[i] <- fits$m2LL[i] + twoTimesNpar
@@ -134,18 +134,18 @@ setMethod("BIC", "regularizedSEM", function (object) {
     fits$BIC <- rep(NA, length(fits$m2LL))
     tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
     
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = object@inputArguments$lavaanModel, fit = FALSE)
+    SEM <- linr:::SEMFromLavaan(lavaanModel = object@inputArguments$lavaanModel, fit = FALSE)
     
     for(i in 1:nrow(tuningParameters)){
-      SEM <- aCV4SEM:::setParameters(SEM, 
+      SEM <- linr:::setParameters(SEM, 
                                      labels = object@parameterLabels, 
                                      values = coef(object, 
                                                    lambda = tuningParameters$lambda[i], 
                                                    alpha = tuningParameters$alpha[i]), 
                                      raw = FALSE)
-      SEM <- aCV4SEM:::fit(SEM)
-      scores <- aCV4SEM:::getScores(SEM, raw = FALSE)
-      hessian <- aCV4SEM:::getHessian(SEM, raw = FALSE)
+      SEM <- linr:::fit(SEM)
+      scores <- linr:::getScores(SEM, raw = FALSE)
+      hessian <- linr:::getHessian(SEM, raw = FALSE)
       hessianInv <- solve(hessian)
       npar <- .5*sum(apply(scores, 1, function(x) t(x)%*%hessianInv%*%(x))) # scores and hessian are for -2 log-Likelihood
       fits$BIC[i] <- fits$m2LL[i] + log(N)*npar

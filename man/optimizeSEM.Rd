@@ -15,7 +15,7 @@ optimizeSEM(
 \arguments{
 \item{SEM}{model of class Rcpp_SEMCpp.}
 
-\item{raw}{controls if the internal transformations of aCV4SEM is used.}
+\item{raw}{controls if the internal transformations of linr is used.}
 
 \item{method}{optimizer method. See ?optim}
 

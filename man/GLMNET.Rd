@@ -57,5 +57,5 @@ GLMNET(
 \item{verbose}{0 prints no additional information, > 0 prints GLMNET iterations}
 }
 \description{
-Performs GLMNET (see Friedman, 2010 & Yuan, 2011) with aCV4SEM:::BFGS approximated Hessian
+Performs GLMNET (see Friedman, 2010 & Yuan, 2011) with linr:::BFGS approximated Hessian
 }

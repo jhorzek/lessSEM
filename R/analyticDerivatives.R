@@ -4,7 +4,7 @@
 #' can be generated with the SEMFromLavaan-function.
 #' 
 #' @param SEM model of class Rcpp_SEMCpp
-#' @param raw controls if the internal transformations of aCV4SEM should be used. aCV4SEM will use an exponential function for all variances to 
+#' @param raw controls if the internal transformations of linr should be used. linr will use an exponential function for all variances to 
 #' avoid negative variances. When set to TRUE, the scores will be given for the internal parameter representation. Set to FALSE to get the usual 
 #' scores
 getScores <- function(SEM, raw){
@@ -20,7 +20,7 @@ getScores <- function(SEM, raw){
 #' can be generated with the SEMFromLavaan-function.
 #' 
 #' @param SEM model of class Rcpp_SEMCpp
-#' @param raw controls if the internal transformations of aCV4SEM should be used. aCV4SEM will use an exponential function for all variances to 
+#' @param raw controls if the internal transformations of linr should be used. linr will use an exponential function for all variances to 
 #' avoid negative variances. When set to TRUE, the gradients will be given for the internal parameter representation. Set to FALSE to get the usual 
 #' gradients
 getGradients <- function(SEM, raw){
@@ -37,7 +37,7 @@ getGradients <- function(SEM, raw){
 #' can be generated with the SEMFromLavaan-function. The function is adapted from \link[lavaan]{lav_model_hessian}.
 #' 
 #' @param SEM model of class Rcpp_SEMCpp
-#' @param raw controls if the internal transformations of aCV4SEM should be used. aCV4SEM will use an exponential function for all variances to 
+#' @param raw controls if the internal transformations of linr should be used. linr will use an exponential function for all variances to 
 #' avoid negative variances. When set to TRUE, the gradients will be given for the internal parameter representation. Set to FALSE to get the usual 
 #' gradients
 #' @param eps eps controls the step size of the numerical approximation.
@@ -46,8 +46,8 @@ getHessian <- function (SEM, raw = FALSE, eps = 1e-7){
   # SEE lavaan:::lav_model_hessian FOR THE IMPLEMENTATION
   # BY Yves Rosseel
   
-  SEM <- aCV4SEM:::fit(SEM = SEM)
-  parameters <- aCV4SEM:::getParameters(SEM = SEM, raw = raw)
+  SEM <- linr:::fit(SEM = SEM)
+  parameters <- linr:::getParameters(SEM = SEM, raw = raw)
   hessian <- SEM$getHessian(names(parameters), parameters, raw, eps)
   rownames(hessian) <- names(parameters)
   colnames(hessian) <- names(parameters)

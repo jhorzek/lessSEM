@@ -1,6 +1,6 @@
 test_that("testing mediation model", {
   library(lavaan) 
-  library(aCV4SEM)
+  library(linr)
   N <- 100
   
   x_0 <- rnorm(n = N, mean = 0, sd = 1)

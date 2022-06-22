@@ -10,7 +10,7 @@ CV4regularizedSEM(regularizedSEM, k, returnSubsetParameters = FALSE)
 \item{regularizedSEM}{model of class regularizedSEM}
 
 \item{k}{the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
-See ?aCV4SEM::aCV4regularizedSEM for an example}
+See ?linr::aCV4regularizedSEM for an example}
 
 \item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
 
@@ -21,10 +21,10 @@ Exact cross-validation for models of class regularizedSEM. These models can be f
 in this package.
 }
 \examples{
-library(aCV4SEM)
+library(linr)
 
 # Let's first set up a regularized model. The following steps are
-# explained in detail in ?aCV4SEM::regularizeSEM
+# explained in detail in ?linr::regularizeSEM
 dataset <- simulateExampleData()
 
 lavaanSyntax <- "
@@ -86,9 +86,9 @@ CV@subsetParameters[,,1] # first lambda value
 dimnames(CV@subsetParameters)[[3]][2]
 CV@subsetParameters[,,2] # second lambda value
 
-## Instead of letting aCV4SEM create the subsets, you can
+## Instead of letting linr create the subsets, you can
 # also pass your own subsets. As an example:
-subsets <- aCV4SEM:::createSubsets(N = nrow(dataset), k  = 10)
+subsets <- linr:::createSubsets(N = nrow(dataset), k  = 10)
 
 CV <- CV4regularizedSEM(regularizedSEM = regsem,
                           k = subsets

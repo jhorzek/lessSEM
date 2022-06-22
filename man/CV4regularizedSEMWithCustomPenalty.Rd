@@ -12,7 +12,7 @@ CV4regularizedSEMWithCustomPenalty(
 }
 \arguments{
 \item{k}{the number of cross-validation folds. Alternatively, 
-a matrix with pre-defined subsets can be passed to the function. See ?aCV4SEM::aCV4regularizedSEM for an example}
+a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example}
 
 \item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
 
@@ -23,7 +23,7 @@ Exact cross-validation for models of class regularizedSEMWithCustomPenalty. Thes
 in this package.
 }
 \examples{
-library(aCV4SEM)
+library(linr)
 
 dataset <- simulateExampleData()
 

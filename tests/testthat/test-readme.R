@@ -1,6 +1,6 @@
 test_that("testing readme", {
-  library(lavaan) # aCV4SEM builds on lavaan models
-  library(aCV4SEM)
+  library(lavaan) # linr builds on lavaan models
+  library(linr)
   
   ## Approximate leave one out cross-validation for a lavaan model
   ### set up model in lavaan
@@ -18,7 +18,7 @@ test_that("testing readme", {
   exactLOOCV <- rep(NA, nrow(HS))
   for(i in 1:nrow(HS)){
     fit = sem(HS.model, HS[-i,], meanstructure = TRUE)
-    exactLOOCV[i] <- aCV4SEM:::computeIndividualM2LL(
+    exactLOOCV[i] <- linr:::computeIndividualM2LL(
       nObservedVariables = ncol(HS), 
       rawData = as.numeric(HS[i,]),
       impliedMeans = fit@implied$mean[[1]], 

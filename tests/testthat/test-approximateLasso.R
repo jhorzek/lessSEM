@@ -1,6 +1,6 @@
 test_that("testing approximate lasso", {
   library(lavaan)
-  library(aCV4SEM)
+  library(linr)
   set.seed(123)
   N <- 100
   l1 <- 1; l2 <- .2; l3 <- 0;

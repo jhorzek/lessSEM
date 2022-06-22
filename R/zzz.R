@@ -1,12 +1,12 @@
-#' aCV4SEM
+#' linr
 #'
-#' aCV4SEM implements approximate cross-validation for SEM
+#' linr implements approximate cross-validation for SEM
 #'
 #' @docType package
 #' @author Jannik Orzek <orzek@mpib-berlin.mpg.de>
 #' @import Rcpp
 #' @importFrom Rcpp sourceCpp
-#' @useDynLib aCV4SEM
-#' @name aCV4SEM
+#' @useDynLib linr
+#' @name linr
 
 Rcpp::loadModule("SEM_cpp", TRUE)

@@ -20,12 +20,12 @@
 #' @param nLambdas if penalty == "lasso" or penalty == "adaptiveLasso", one can specify the number of lambda values to use. In this case, set lambdas = NULL.
 #' @param alphas 0<alpha<1. only required for elastic net. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge
 #' @param adaptiveLassoWeights vector with weights for adaptive LASSO. Set to NULL if not using adaptive LASSO. Default is inverse of absolute unregularized parameter estimates
-#' @param raw controls if the internal transformations of aCV4SEM is used. Recommended to set to TRUE!
+#' @param raw controls if the internal transformations of linr is used. Recommended to set to TRUE!
 #' @param control option to set parameters of the GLMNET optimizer. See ?controlGLMNET
 #' @examples  
-#' library(aCV4SEM)
+#' library(linr)
 #' 
-#' # Identical to regsem, aCV4SEM builds on the lavaan
+#' # Identical to regsem, linr builds on the lavaan
 #' # package for model specification. The first step
 #' # therefore is to implement the model in lavaan.
 #' 
@@ -55,7 +55,7 @@
 #'   # which penalty should be used?
 #'   penalty = "lasso",
 #'   # in case of lasso and adaptive lasso, we can specify the number of lambda
-#'   # values to use. aCV4SEM will automatically find lambda_max and fit
+#'   # values to use. linr will automatically find lambda_max and fit
 #'   # models for nLambda values between 0 and lambda_max. For the other
 #'   # penalty functions, lambdas must be specified explicitly
 #'   nLambdas = 5)
@@ -75,8 +75,8 @@
 #' coef(regsem, criterion = "BIC")
 #' 
 #' ## The fitted model can then be used as basis for an approximate cross-validation
-#' # (see ?aCV4SEM::aCV4regularizedSEM) or approximate influence functions
-#' # (see ?aCV4SEM::aI4regularizedSEM)
+#' # (see ?linr::aCV4regularizedSEM) or approximate influence functions
+#' # (see ?linr::aI4regularizedSEM)
 #' @export
 regularizeSEM <- function(lavaanModel, 
                           regularizedParameterLabels,
@@ -86,12 +86,12 @@ regularizeSEM <- function(lavaanModel,
                           alphas = NULL, 
                           adaptiveLassoWeights = NULL,
                           raw = TRUE,
-                          control = aCV4SEM::controlGLMNET()){
+                          control = linr::controlGLMNET()){
   
   inputArguments <- as.list(environment())
   
   if(!is(control, "controlGLMNET")){
-    stop("control must be of class controlGLMNET. These objects can be generated with the controlGLMNET function. See ?aCV4SEM::controlGLMNET")
+    stop("control must be of class controlGLMNET. These objects can be generated with the controlGLMNET function. See ?linr::controlGLMNET")
   }
   
   if(!penalty %in% c("lasso", "ridge", "adaptiveLasso", "elasticNet")) stop("Currently supported penalty functions are: lasso, ridge, adaptiveLasso, and elasticNet")
@@ -112,28 +112,28 @@ regularizeSEM <- function(lavaanModel,
   ### initialize model ####
   startingValues <- control$startingValues
   if(any(startingValues == "est")){
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "est",
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
   }else if(any(startingValues == "start")){
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start",
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
   }else if(is.numeric(startingValues)){
     
-    if(!all(names(startingValues) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See aCV4SEM::getLavaanParameters(lavaanModel).")
-    SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    if(!all(names(startingValues) %in% names(linr::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See linr::getLavaanParameters(lavaanModel).")
+    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start", 
                                    fit = FALSE,
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(aCV4SEM:::fit(SEM))
+    SEM <- linr:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
+    SEM <- try(linr:::fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) stop("Infeasible starting values.")
     
   }else{
@@ -141,8 +141,8 @@ regularizeSEM <- function(lavaanModel,
   }
   
   # get parameters
-  parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
-  aCV4SEM:::checkRegularizedParameters(parameters = parameters, 
+  parameters <- linr:::getParameters(SEM, raw = raw)
+  linr:::checkRegularizedParameters(parameters = parameters, 
                                        regularizedParameterLabels = regularizedParameterLabels,
                                        SEM$getParameters(), 
                                        raw = raw)
@@ -150,17 +150,17 @@ regularizeSEM <- function(lavaanModel,
   initialHessian <- control$initialHessian
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(parameters) && ncol(initialHessian) == length(parameters)){
     
-    if(!all(rownames(initialHessian) %in% names(aCV4SEM::getLavaanParameters(lavaanModel))) ||
-       !all(colnames(initialHessian) %in% names(aCV4SEM::getLavaanParameters(lavaanModel)))
-    ) stop("initialHessian must have the parameter names as rownames and colnames. See aCV4SEM::getLavaanParameters(lavaanModel).")
+    if(!all(rownames(initialHessian) %in% names(linr::getLavaanParameters(lavaanModel))) ||
+       !all(colnames(initialHessian) %in% names(linr::getLavaanParameters(lavaanModel)))
+    ) stop("initialHessian must have the parameter names as rownames and colnames. See linr::getLavaanParameters(lavaanModel).")
     
   }else if(any(initialHessian == "compute")){
     
-    initialHessian <- aCV4SEM:::getHessian(SEM = SEM, raw = TRUE)
+    initialHessian <- linr:::getHessian(SEM = SEM, raw = TRUE)
     
   }else if(any(initialHessian == "scoreBased")){
     
-    scores <- aCV4SEM:::getScores(SEM = SEM, raw = TRUE)
+    scores <- linr:::getScores(SEM = SEM, raw = TRUE)
     FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
     rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
     for(score in 1:nrow(scores)){
@@ -211,7 +211,7 @@ regularizeSEM <- function(lavaanModel,
   
   if(!is.null(nLambdas)){
     message("Automatically selecting the maximal lambda value. Note: This may not work properly if a model with all regularized parameters set to zero is not identified.")
-    maxLambda <- aCV4SEM:::getMaxLambda(SEM = SEM, 
+    maxLambda <- linr:::getMaxLambda(SEM = SEM, 
                                         regularizedParameterLabels = regularizedParameterLabels, 
                                         adaptiveLassoWeights = adaptiveLassoWeights,
                                         initialHessian4Optimizer = initialHessian4Optimizer, 
@@ -268,7 +268,7 @@ regularizeSEM <- function(lavaanModel,
     lambda <- tuningGrid$lambda[it]
     alpha <- tuningGrid$alpha[it]
     
-    result <- try(aCV4SEM:::GLMNET(SEM = SEM, 
+    result <- try(linr:::GLMNET(SEM = SEM, 
                                    regularizedParameterLabels = regularizedParameterLabels, 
                                    lambda = lambda, 
                                    alpha = alpha,
@@ -290,19 +290,19 @@ regularizeSEM <- function(lavaanModel,
     fits$regM2LL[it] <- result$regM2LL
     fits$nonZeroParameters[it] <- result$nonZeroParameters
     fits$convergence[it] <- result$convergence
-    newParameters <- aCV4SEM:::getParameters(result$SEM, raw = FALSE)
+    newParameters <- linr:::getParameters(result$SEM, raw = FALSE)
     
     parameterEstimates[it, names(parameters)] <- newParameters[names(parameters)]
     
     if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
     
     # set initial values for next iteration
-    SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(newParameters), value = newParameters, raw = FALSE)
-    SEM <- try(aCV4SEM:::fit(SEM))
+    SEM <- linr:::setParameters(SEM = SEM, labels = names(newParameters), value = newParameters, raw = FALSE)
+    SEM <- try(linr:::fit(SEM))
     if(is(SEM, "try-Error")){
       # reset
       warning("Fit for lambda = ",lambda, "alpha = ", alpha, " resulted in Error!")
-      SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+      SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                      transformVariances = TRUE,
                                      whichPars = "start",
                                      addMeans = control$addMeans)
@@ -334,7 +334,7 @@ regularizeSEM <- function(lavaanModel,
 #' optimize a SEM 
 #' 
 #' @param SEM model of class Rcpp_SEMCpp. 
-#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @param raw controls if the internal transformations of linr is used.
 #' @param method optimizer method. See ?optim
 #' @param control control optimizer. See ?optim
 #' @param hessian Should the optimizer return the hessian?
@@ -345,16 +345,16 @@ optimizeSEM <- function(SEM,
                         hessian = FALSE){
   
   
-  parameters <- aCV4SEM:::getParameters(SEM, raw = raw)
+  parameters <- linr:::getParameters(SEM, raw = raw)
   
   fitFun <- function(par, SEM, raw){
-    m2LL <- aCV4SEM:::fitFunction(par = par, SEM = SEM, raw = raw)
+    m2LL <- linr:::fitFunction(par = par, SEM = SEM, raw = raw)
     if(m2LL == 9999999999999) return(m2LL)
     return(m2LL)
   }
   
   gradFun <- function(par, SEM, raw){
-    gradients <- aCV4SEM:::derivativeFunction(par = par, SEM = SEM, raw = raw)
+    gradients <- linr:::derivativeFunction(par = par, SEM = SEM, raw = raw)
     if(all(gradients == 9999999999999)) return(gradients)
     return(gradients)
   }
@@ -369,8 +369,8 @@ optimizeSEM <- function(SEM,
                      control = control,
                      hessian = hessian)
   
-  SEM <- aCV4SEM:::setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
-  SEM <- try(aCV4SEM:::fit(SEM), silent = TRUE)
+  SEM <- linr:::setParameters(SEM, names(optimized$par), optimized$par, raw = raw)
+  SEM <- try(linr:::fit(SEM), silent = TRUE)
   
   return(list("SEM" = SEM,
               "optimizer" = optimized))
@@ -383,7 +383,7 @@ optimizeSEM <- function(SEM,
 #' @param parameters labeled vector with parameter values
 #' @param regularizedParameterLabels labels of regularized parameters
 #' @param parameterTable table with all parameters
-#' @param raw controls if the internal transformations of aCV4SEM is used.
+#' @param raw controls if the internal transformations of linr is used.
 checkRegularizedParameters <- function(parameters, regularizedParameterLabels, parameterTable, raw){
   
   
@@ -413,9 +413,9 @@ checkRegularizedParameters <- function(parameters, regularizedParameterLabels, p
 #' @param control additional arguments passed to GLMNET. See ?controlGLMNET
 #' @param N sample size
 getMaxLambda <- function(SEM, regularizedParameterLabels, adaptiveLassoWeights, initialHessian4Optimizer, control, N){
-  initialParameters <- aCV4SEM:::getParameters(SEM = SEM, raw = TRUE)
+  initialParameters <- linr:::getParameters(SEM = SEM, raw = TRUE)
   lambda <- .Machine$double.xmax^(.05)
-  result <- aCV4SEM:::GLMNET(SEM = SEM, 
+  result <- linr:::GLMNET(SEM = SEM, 
                              regularizedParameterLabels = regularizedParameterLabels, 
                              lambda = lambda, 
                              alpha = 1,
@@ -432,15 +432,15 @@ getMaxLambda <- function(SEM, regularizedParameterLabels, adaptiveLassoWeights, 
                              convergenceCriterion = control$convergenceCriterion,
                              verbose = control$verbose)
   sparseParameters <- result$parameters
-  SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(sparseParameters), values = sparseParameters, raw = TRUE)
-  SEM <- aCV4SEM:::fit(SEM = SEM)
-  gradients <- aCV4SEM:::getGradients(SEM = SEM, raw = TRUE)
+  SEM <- linr:::setParameters(SEM = SEM, labels = names(sparseParameters), values = sparseParameters, raw = TRUE)
+  SEM <- linr:::fit(SEM = SEM)
+  gradients <- linr:::getGradients(SEM = SEM, raw = TRUE)
   
   # define maxLambda as the maximal gradient of the regularized parameters
   maxLambda <- max(abs(gradients[regularizedParameterLabels]) * adaptiveLassoWeights[regularizedParameterLabels]^(-1))
   
-  SEM <- aCV4SEM:::setParameters(SEM = SEM, labels = names(initialParameters), values = initialParameters, raw = TRUE)
-  SEM <- aCV4SEM:::fit(SEM = SEM)
+  SEM <- linr:::setParameters(SEM = SEM, labels = names(initialParameters), values = initialParameters, raw = TRUE)
+  SEM <- linr:::fit(SEM = SEM)
   
   return((1/N)*(maxLambda+.1*maxLambda)) # adding some wiggle room as well
 }

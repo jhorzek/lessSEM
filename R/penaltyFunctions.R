@@ -244,7 +244,7 @@ smoothElasticNetHessian <- function(parameters,
 #' This function can be used to approximate the gradients of a generic penalty function with numDeriv
 #' @param parameters vector with labeled parameter values
 #' @param tuningParameters data.frame with tuning parameters
-#' @param penaltyFunctionArguments list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see aCV4SEM::smoothLASSO for an example 
+#' @param penaltyFunctionArguments list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see linr::smoothLASSO for an example 
 #' @export
 genericGradientApproximiation <- function(parameters,  
                                           tuningParameters,
@@ -260,7 +260,7 @@ genericGradientApproximiation <- function(parameters,
 #' @param parameters vector with labeled parameter values
 #' @param penaltyFunction 
 #' @param tuningParameters data.frame with tuning parameters
-#' @param penaltyFunctionArguments list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see aCV4SEM::smoothLASSO for an example 
+#' @param penaltyFunctionArguments list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see linr::smoothLASSO for an example 
 #' @export
 genericHessianApproximiation <- function(parameters,  
                                       tuningParameters,

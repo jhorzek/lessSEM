@@ -1,6 +1,6 @@
 test_that("testing adaptive lasso", {
   library(regsem)
-  library(aCV4SEM)
+  library(linr)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
@@ -31,7 +31,7 @@ test_that("testing adaptive lasso", {
                             gradFun = "ram")
   plot(regsem_cvFit)
   
-  regsemPars <- aCV4SEM::cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, lavaanModel = modelFit)
+  regsemPars <- linr::cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, lavaanModel = modelFit)
   
   # replicate with regularizedSEM
   regularizedLavaan <- paste0("f=~y",6:ncol(y))

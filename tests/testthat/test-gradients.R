@@ -1,6 +1,6 @@
 test_that("testing gradients", {
   library(lavaan)
-  library(aCV4SEM)
+  library(linr)
   
   model1 <- ' 
   # latent variable definitions
@@ -25,10 +25,10 @@ test_that("testing gradients", {
   scores <- -2*lavScores(model)
   gradients <- apply(scores,2,sum)
   
-  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = model)
-  SEM <- aCV4SEM:::fit(SEM)
+  SEM <- linr:::SEMFromLavaan(lavaanModel = model)
+  SEM <- linr:::fit(SEM)
   
-  gradientsAnalytic <- aCV4SEM:::getGradients(SEM = SEM, raw = FALSE)
+  gradientsAnalytic <- linr:::getGradients(SEM = SEM, raw = FALSE)
 
   testthat::expect_equal(round(sum(abs(gradientsAnalytic - gradients)),4),0)
   
@@ -44,12 +44,12 @@ test_that("testing gradients", {
   }
   
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
-  SEM <- aCV4SEM:::SEMFromLavaan(lavaanModel = model)
-  SEM <- aCV4SEM:::fit(SEM)
+  SEM <- linr:::SEMFromLavaan(lavaanModel = model)
+  SEM <- linr:::fit(SEM)
   
   scores <- -2*lavScores(model)
   gradients <- apply(scores,2,sum)
   
-  gradientsAnalytic <- aCV4SEM:::getGradients(SEM, raw = FALSE)
+  gradientsAnalytic <- linr:::getGradients(SEM, raw = FALSE)
   testthat::expect_equal(round(sum(abs(gradientsAnalytic - gradients)),4),0)
 })
