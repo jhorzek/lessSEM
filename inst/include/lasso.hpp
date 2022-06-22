@@ -1,10 +1,10 @@
 #ifndef LASSO_H
 #define LASSO_H
 #include <RcppArmadillo.h>
-#include "proximalOperator.h"
-#include "penalty.h"
+#include "proximalOperator.hpp"
+#include "penalty.hpp"
 
-namespace ista{
+namespace linr{
 
 struct tuningParametersLasso{
   double lambda;

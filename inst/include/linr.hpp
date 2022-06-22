@@ -2,6 +2,6 @@
 #define LINR_H
 
 #include <RcppArmadillo.h>
-#include "ista_class.h"
-#include "lasso.h"
+#include "ista_class.hpp"
+#include "lasso.hpp"
 #endif

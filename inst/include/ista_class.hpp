@@ -1,13 +1,13 @@
-#ifndef ISTACLASS_H
-#define ISTACLASS_H
+#ifndef OPTIMIZERCLASS_H
+#define OPTIMIZERCLASS_H
 #include <RcppArmadillo.h>
-#include "model.h"
-#include "proximalOperator.h"
-#include "penalty.h"
+#include "model.hpp"
+#include "proximalOperator.hpp"
+#include "penalty.hpp"
 
 //#define DEBUG 0
 
-namespace ista{
+namespace linr{
 
 struct control{
   const int i_k;

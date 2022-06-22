@@ -2,7 +2,7 @@
 #define PENALTY_H
 #include <RcppArmadillo.h>
 
-namespace ista{
+namespace linr{
 
 template<class T>
 class penalty{

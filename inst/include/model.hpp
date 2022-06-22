@@ -3,7 +3,7 @@
 
 #include <RcppArmadillo.h>
 
-namespace ista{
+namespace linr{
 
 class model{
 public:

@@ -2,7 +2,7 @@
 #define PROXIMALOPERATOR_H
 #include <RcppArmadillo.h>
 
-namespace ista{
+namespace linr{
 template<class T>
 class proximalOperator{
 public:
