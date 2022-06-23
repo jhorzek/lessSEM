@@ -10,3 +10,5 @@
 #' @name linr
 
 Rcpp::loadModule("SEM_cpp", TRUE)
+Rcpp::loadModule("istaLASSO_cpp", TRUE)
+Rcpp::loadModule("istaLASSOGeneralPurpose_cpp", TRUE)

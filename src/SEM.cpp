@@ -5,7 +5,6 @@
 #include "scores.hpp"
 #include "gradients.hpp"
 #include "hessian.hpp"
-#include "ISTA.hpp"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
@@ -339,50 +338,8 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   return(hessian);
 }
 
-Rcpp::NumericVector SEMCpp::LASSO(Rcpp::NumericVector startingValues,
-                                  const double lambda,
-                                  const Rcpp::NumericVector weights,
-                                  const int i_k,
-                                  const double L0,
-                                  const double eta,
-                                  const int maxIterOut,
-                                  const int maxIterIn,
-                                  const double breakOuter
-)
-{
-  int N = rawData.n_rows;
-  
-  SEMIsta SEMIsta_(*this);
-  linr::tuningParametersLasso tp;
-  tp.lambda = lambda*N;
-  tp.weights = weights;
-  
-  linr::proximalOperatorLasso proximalOperatorLasso_;
-  linr::penaltyLASSO penalty_;
-  
-  linr::control controlIsta = {
-    i_k,
-    L0,
-    eta,
-    maxIterOut,
-    maxIterIn,
-    breakOuter*N
-  };
-  
-  linr::fitResults fitResults_ = linr::ista(
-    SEMIsta_,
-    startingValues,
-    proximalOperatorLasso_,
-    penalty_,
-    tp,
-    controlIsta
-  );
-  if(!fitResults_.convergence) Rcpp::warning("Optimizer did not converge");
-  Rcpp::Rcout << "Final objective value: " << fitResults_.fit << std::endl;
-  return(fitResults_.parameterValues);
-}
 
-RCPP_EXPOSED_CLASS(SEMCpp)
+
   RCPP_MODULE(SEM_cpp){
     using namespace Rcpp;
     Rcpp::class_<SEMCpp>( "SEMCpp" )
@@ -413,7 +370,6 @@ RCPP_EXPOSED_CLASS(SEMCpp)
     .method( "getGradients", &SEMCpp::getGradients, "Returns a matrix with scores.")
     .method( "getScores", &SEMCpp::getScores, "Returns a matrix with scores.")
     .method( "getHessian", &SEMCpp::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
-    .method( "LASSO", &SEMCpp::LASSO, "temp")
     ;
   }
 

@@ -3,15 +3,13 @@
 #include "SEM.hpp"
 #include "linr.hpp"
 
-class SEMIsta: public linr::model{
+class SEMFitFramework: public linr::model{
 public:
   
-  SEMCpp SEM;
+  SEMCpp& SEM;
   
-  SEMIsta(SEMCpp SEM_){
-    SEM = SEM_;
-  }
-  
+  SEMFitFramework(SEMCpp& SEM_): SEM(SEM_){}
+    
   double fit(Rcpp::NumericVector parameterValues) override{
     
     try{

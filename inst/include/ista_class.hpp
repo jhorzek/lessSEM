@@ -5,7 +5,7 @@
 #include "proximalOperator.hpp"
 #include "penalty.hpp"
 
-//#define DEBUG 0
+//#define DEBUG 
 
 namespace linr{
 
@@ -20,6 +20,7 @@ struct control{
 
 struct fitResults{
   double fit;
+  arma::rowvec fits;
   bool convergence;
   Rcpp::NumericVector parameterValues;
 };
@@ -42,7 +43,8 @@ inline fitResults ista(model& model_,
   
   double fit_k = model_.fit(startingValues), 
     fit_kMinus1 = model_.fit(startingValues);
-  double penalizedFit_k, penalizedFit_kMinus1;
+  double penalizedFit_k = fit_k + penalty_.getValue(parameters_k, tuningParameters),
+    penalizedFit_kMinus1 = fit_kMinus1 + penalty_.getValue(parameters_k, tuningParameters);
   Rcpp::NumericVector gradients_k = model_.gradients(startingValues), 
     gradients_kMinus1 = model_.gradients(startingValues);
   bool breakInner = false, breakOuter = false;
@@ -67,6 +69,11 @@ inline fitResults ista(model& model_,
     for(int inner_iteration = 0; inner_iteration < control_.maxIterIn; inner_iteration ++){
       L = control_.L0*std::pow(control_.eta,inner_iteration);
       
+#ifdef DEBUG
+      Rcpp::Rcout << "gradients_k : " << gradients_k << std::endl;
+      Rcpp::Rcout << "gradients_kMinus1 : " << gradients_kMinus1 << std::endl;
+#endif      
+      
       // apply proximal operator to get F(p_L(y))
       
       parameters_k = proximalOperator_.getParameters(
@@ -88,14 +95,26 @@ inline fitResults ista(model& model_,
       
       fit_k = model_.fit(parameters_k);
       
+#ifdef DEBUG
+      Rcpp::Rcout << "fit_k : " << fit_k << std::endl;
+#endif
       if(!arma::is_finite(fit_k)) continue;
-      
+
       penalizedFit_k = fit_k + penalty_.getValue(parameters_k, tuningParameters);
+
       
+#ifdef DEBUG
+      Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k << std::endl;
+      Rcpp::Rcout << "penalizedFit_kMinus1 : " << penalizedFit_kMinus1 << std::endl;
+#endif      
       // no need to compute gradients if the fit is not improved
       if(penalizedFit_k >= penalizedFit_kMinus1) continue;
       
       gradients_k = model_.gradients(parameters_k);
+      
+#ifdef DEBUG
+      Rcpp::Rcout << "gradients_k\n: " << gradients_k << std::endl;
+#endif
       
       // if any of the gradients is non-finite, we can skip to a 
       // smaller step size
@@ -140,6 +159,7 @@ inline fitResults ista(model& model_,
   
   fitResults_.convergence = breakOuter;
   fitResults_.fit = fit_k;
+  fitResults_.fits = fits;
   fitResults_.parameterValues = parameters_k;
   
   return(fitResults_);

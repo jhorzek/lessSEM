@@ -1,4 +1,4 @@
-test_that("testing gradients", {
+test_that("testing ista-lasso", {
   library(lavaan)
   library(linr)
   
@@ -39,14 +39,28 @@ test_that("testing gradients", {
   weights[] <- 0
   weights[labels %in% c("a", "b")] <- 1
   
-  lassoPar <- linr:::istaLasso(SEM, 
-                               lambda = 0, 
-                               weights, 
-                               maxIterOut = 100000)
-  SEM$fit() - -2*logLik(model)
+  control <- list(
+    i_k = 2,
+    L0 = 1,
+    eta = 2,
+    maxIterOut = 10000,
+    maxIterIn = 100,
+    breakOuter = .00000001
+  )
   
-  testthat::expect_equal(all(round(lassoPar - 
-                                     linr::getLavaanParameters(model)[names(lassoPar)],
+  IL <- new(istaLASSO, weights, control)
+  lassoResult <- IL$optimize(
+    SEM,
+    startingValues,
+    0
+  )
+  
+  lassoResult$fit - -2*logLik(model)
+  
+  lassoResult$rawParameters
+  
+  testthat::expect_equal(all(round(linr:::getParameters(SEM, raw = FALSE) - 
+                                     linr::getLavaanParameters(model)[names(linr:::getParameters(SEM, raw = FALSE))],
                                    1) == 0),
                          TRUE)
 })
