@@ -7,6 +7,9 @@
 
 //#define DEBUG 
 
+// The idea follows ensmallen in that the user supplies a C++ class with
+// methods fit and gradients which is used by the optimizer
+
 namespace linr{
 
 struct control{
