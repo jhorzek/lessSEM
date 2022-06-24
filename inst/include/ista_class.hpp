@@ -4,8 +4,9 @@
 #include "model.hpp"
 #include "proximalOperator.hpp"
 #include "penalty.hpp"
+#include "smoothPenalty.hpp"
 
-//#define DEBUG 
+#define DEBUG 
 
 // The idea follows ensmallen in that the user supplies a C++ class with
 // methods fit and gradients which is used by the optimizer
@@ -23,7 +24,7 @@ struct control{
 
 struct fitResults{
   double fit;
-  arma::rowvec fits;
+  arma::colvec fits;
   bool convergence;
   Rcpp::NumericVector parameterValues;
 };
@@ -34,6 +35,7 @@ inline fitResults ista(model& model_,
                        proximalOperator<T>& proximalOperator_, // proximalOperator takes the tuning parameters
                        // as input -> <T>
                        penalty<T>& penalty_, // penalty takes the tuning parameters
+                       smoothPenalty<T>& smoothPenalty_, // smoothPenalty takes the tuning parameters
                        // as input -> <T>
                        const T& tuningParameters, // tuning parameters are of type T
                        const control& control_){
@@ -46,17 +48,30 @@ inline fitResults ista(model& model_,
   
   double fit_k = model_.fit(startingValues), 
     fit_kMinus1 = model_.fit(startingValues);
-  double penalizedFit_k = fit_k + penalty_.getValue(parameters_k, tuningParameters),
-    penalizedFit_kMinus1 = fit_kMinus1 + penalty_.getValue(parameters_k, tuningParameters);
-  Rcpp::NumericVector gradients_k = model_.gradients(startingValues), 
-    gradients_kMinus1 = model_.gradients(startingValues);
+  double penalizedFit_k, penalizedFit_kMinus1;
+  Rcpp::NumericVector gradients_k, gradients_kMinus1;
   bool breakInner = false, breakOuter = false;
   arma::mat quadr;
+  
+  double ridgePenalty = 0.0;
+  
+  
+  penalizedFit_k = fit_k + 
+    penalty_.getValue(parameters_k, tuningParameters) + // lasso penalty part
+    smoothPenalty_.getValue(parameters_k, tuningParameters); // ridge penalty part
+  penalizedFit_kMinus1 = fit_kMinus1 + 
+    penalty_.getValue(parameters_k, tuningParameters) + // lasso penalty part
+    smoothPenalty_.getValue(parameters_k, tuningParameters); // ridge penalty part
+  
+  gradients_k = model_.gradients(startingValues) +
+    smoothPenalty_.getGradients(parameters_k, tuningParameters); // ridge part
+  gradients_kMinus1 = model_.gradients(startingValues) +
+    smoothPenalty_.getGradients(parameters_k, tuningParameters); // ridge part
   
   // initialize step size
   double L = control_.L0*std::pow(control_.eta,0);
   
-  arma::rowvec fits(control_.maxIterOut);
+  arma::colvec fits(control_.maxIterOut);
   fits.fill(arma::datum::nan);
   
   // outer iteration
@@ -99,24 +114,29 @@ inline fitResults ista(model& model_,
       fit_k = model_.fit(parameters_k);
       
 #ifdef DEBUG
+      Rcpp::Rcout << "ridge gradients: " << smoothPenalty_.getGradients(parameters_k, tuningParameters) << std::endl;
       Rcpp::Rcout << "fit_k : " << fit_k << std::endl;
 #endif
       if(!arma::is_finite(fit_k)) continue;
-
-      penalizedFit_k = fit_k + penalty_.getValue(parameters_k, tuningParameters);
-
+      
+      penalizedFit_k = fit_k + 
+        penalty_.getValue(parameters_k, tuningParameters) +  // lasso part
+        smoothPenalty_.getValue(parameters_k, tuningParameters); // ridge part
       
 #ifdef DEBUG
       Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k << std::endl;
       Rcpp::Rcout << "penalizedFit_kMinus1 : " << penalizedFit_kMinus1 << std::endl;
+      Rcpp::Rcout << "ridge penalty: " << smoothPenalty_.getValue(parameters_k, tuningParameters) << std::endl;
 #endif      
       // no need to compute gradients if the fit is not improved
       if(penalizedFit_k >= penalizedFit_kMinus1) continue;
       
-      gradients_k = model_.gradients(parameters_k);
+      gradients_k = model_.gradients(parameters_k) + 
+        smoothPenalty_.getGradients(parameters_k, tuningParameters); // ridge part
       
 #ifdef DEBUG
       Rcpp::Rcout << "gradients_k\n: " << gradients_k << std::endl;
+      Rcpp::Rcout << "ridge gradients: " << smoothPenalty_.getGradients(parameters_k, tuningParameters) << std::endl;
 #endif
       
       // if any of the gradients is non-finite, we can skip to a 
@@ -124,22 +144,22 @@ inline fitResults ista(model& model_,
       if(Rcpp::any(!Rcpp::is_finite(gradients_k)))  continue;
       
       if(inner_iteration > 0){
-
+        
         // check convergence
         
         quadr = parameterChange*arma::trans(parameterChange);
         breakInner = penalizedFit_k <= penalizedFit_kMinus1 - 
           (L/2.0)*quadr(0,0);
-
+        
         if(breakInner) {
 #ifdef DEBUG
-          Rcpp::Rcout << "Breaking inner iteration: " << fits << std::endl;
+          Rcpp::Rcout << "Breaking inner iteration: " << penalizedFit_k << std::endl;
 #endif
           break;
-          }
+        }
       }
     }
-    fits.at(outer_iteration) = fit_k;
+    fits.at(outer_iteration) = penalizedFit_k;
     
     // check outer breaking condition
     if(outer_iteration > 0){
@@ -147,10 +167,10 @@ inline fitResults ista(model& model_,
     }
     if(breakOuter) {
 #ifdef DEBUG
-      Rcpp::Rcout << "Breaking outer iteration: " << fits << std::endl;
+      Rcpp::Rcout << "Breaking outer iteration" << std::endl;
 #endif
       break;
-      }
+    }
     
     penalizedFit_kMinus1 = penalizedFit_k;
     parameters_kMinus1 = parameters_k;
@@ -161,7 +181,7 @@ inline fitResults ista(model& model_,
   fitResults fitResults_;
   
   fitResults_.convergence = breakOuter;
-  fitResults_.fit = fit_k;
+  fitResults_.fit = penalizedFit_k;
   fitResults_.fits = fits;
   fitResults_.parameterValues = parameters_k;
   

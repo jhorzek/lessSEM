@@ -4,13 +4,13 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-class istaLASSOGeneralPurpose{
+class istaEnetGeneralPurpose{
 public:
   
   
   // settings
   Rcpp::NumericVector startingValues;
-  double lambda;
+  double lambda, alpha;
   const Rcpp::NumericVector weights;
   
   // control
@@ -22,7 +22,7 @@ public:
   const double breakOuter;
   
   // constructor
-  istaLASSOGeneralPurpose(
+  istaEnetGeneralPurpose(
     const Rcpp::NumericVector weights_,
     Rcpp::List control
   ):
@@ -39,19 +39,22 @@ public:
       Rcpp::Function gradientFunction,
       Rcpp::List userSuppliedElements,
       Rcpp::NumericVector startingValues_, 
-      double lambda_){
+      double lambda_,
+      double alpha_){
     
     generalPurposeFitFramework gpFF(fitFunction, gradientFunction, userSuppliedElements);
     
     startingValues = startingValues_;
     lambda = lambda_;
+    alpha = alpha_;
     
-    linr::tuningParametersLasso tp;
+    linr::tuningParametersEnet tp;
     tp.lambda = lambda;
     tp.weights = weights;
     
     linr::proximalOperatorLasso proximalOperatorLasso_;
     linr::penaltyLASSO penalty_;
+    linr::penaltyRidge smoothPenalty_;
     
     linr::control controlIsta = {
       i_k,
@@ -67,6 +70,7 @@ public:
       startingValues,
       proximalOperatorLasso_,
       penalty_,
+      smoothPenalty_,
       tp,
       controlIsta
     );
@@ -82,14 +86,14 @@ public:
   }
 };
 
-RCPP_EXPOSED_CLASS(istaLASSOGeneralPurpose)
-  RCPP_MODULE(istaLASSOGeneralPurpose_cpp){
+RCPP_EXPOSED_CLASS(istaEnetGeneralPurpose)
+  RCPP_MODULE(istaEnetGeneralPurpose_cpp){
     using namespace Rcpp;
-    Rcpp::class_<istaLASSOGeneralPurpose>( "istaLASSOGeneralPurpose" )
-      .constructor<Rcpp::NumericVector,Rcpp::List>("Creates a new istaLASSOGeneralPurpose.")
-      .field_readonly( "lambda", &istaLASSOGeneralPurpose::lambda, "tuning parameter lambda")
+    Rcpp::class_<istaEnetGeneralPurpose>( "istaEnetGeneralPurpose" )
+      .constructor<Rcpp::NumericVector,Rcpp::List>("Creates a new istaEnetGeneralPurpose.")
+      .field_readonly( "lambda", &istaEnetGeneralPurpose::lambda, "tuning parameter lambda")
     // methods
-    .method( "optimize", &istaLASSOGeneralPurpose::optimize, "Optimizes the model. Expects fitFunction, gradientFunction, userSuppliedElements, labeled vector with starting values and lambda")
+    .method( "optimize", &istaEnetGeneralPurpose::optimize, "Optimizes the model. Expects fitFunction, gradientFunction, userSuppliedElements, labeled vector with starting values and lambda")
     ;
   }
 

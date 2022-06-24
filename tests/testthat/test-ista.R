@@ -40,19 +40,20 @@ test_that("testing ista-lasso", {
   weights[labels %in% c("a", "b")] <- 1
   
   control <- list(
-    i_k = 2,
+    i_k = 3,
     L0 = 1,
     eta = 2,
-    maxIterOut = 10000,
-    maxIterIn = 100,
-    breakOuter = .00000001
+    maxIterOut = 20,
+    maxIterIn = 50,
+    breakOuter = .000000000001
   )
   
-  IL <- new(istaLASSO, weights, control)
+  IL <- new(istaEnet, weights, control)
   lassoResult <- IL$optimize(
     SEM,
     startingValues,
-    0
+    0,
+    1
   )
   
   lassoResult$fit - -2*logLik(model)

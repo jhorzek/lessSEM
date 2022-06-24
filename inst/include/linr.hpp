@@ -4,4 +4,5 @@
 #include <RcppArmadillo.h>
 #include "ista_class.hpp"
 #include "lasso.hpp"
+#include "ridge.hpp"
 #endif

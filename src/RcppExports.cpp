@@ -88,9 +88,9 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP _rcpp_module_boot_istaLASSO_cpp();
 RcppExport SEXP _rcpp_module_boot_SEM_cpp();
-RcppExport SEXP _rcpp_module_boot_istaLASSOGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaEnet_cpp();
+RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurpose_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_linr_innerGLMNET", (DL_FUNC) &_linr_innerGLMNET, 10},
@@ -98,9 +98,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_linr_computeGroupM2LL", (DL_FUNC) &_linr_computeGroupM2LL, 6},
     {"_linr_computeImpliedCovariance", (DL_FUNC) &_linr_computeImpliedCovariance, 3},
     {"_linr_computeImpliedMeans", (DL_FUNC) &_linr_computeImpliedMeans, 3},
-    {"_rcpp_module_boot_istaLASSO_cpp", (DL_FUNC) &_rcpp_module_boot_istaLASSO_cpp, 0},
     {"_rcpp_module_boot_SEM_cpp", (DL_FUNC) &_rcpp_module_boot_SEM_cpp, 0},
-    {"_rcpp_module_boot_istaLASSOGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaLASSOGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaEnet_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnet_cpp, 0},
+    {"_rcpp_module_boot_istaEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetGeneralPurpose_cpp, 0},
     {NULL, NULL, 0}
 };
 
