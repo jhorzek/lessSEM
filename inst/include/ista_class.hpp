@@ -6,26 +6,37 @@
 #include "penalty.hpp"
 #include "smoothPenalty.hpp"
 
-// The idea follows ensmallen in that the user supplies a C++ class with
-// methods fit and gradients which is used by the optimizer
+// The design follows ensmallen (https://github.com/mlpack/ensmallen) in that the 
+// user supplies a C++ class with methods fit and gradients which is used
+// by the optimizer
 
 namespace linr{
 
 struct control{
-  const double L0;
-  const double eta;
-  const int maxIterOut;
-  const int maxIterIn;
-  const double breakOuter;
-  const int verbose;
+  const double L0; // L0 controls the step size used in the first iteration
+  const double eta; // eta controls by how much the step size changes in the
+  // inner iterations with (eta^i)*L, where i is the inner iteration
+  const int maxIterOut; // maximal number of outer iterations
+  const int maxIterIn; // maximal number of inner iterations
+  const double breakOuter; // change in fit required to break the outer iteration
+  const int verbose; // if set to a value > 0, the fit every verbose iterations
+  // is printed. If set to -99 you will get the debug output which is horribly
+  // convoluted
 };
 
 struct fitResults{
-  double fit;
-  Rcpp::NumericVector fits;
-  bool convergence;
-  Rcpp::NumericVector parameterValues;
+  double fit; // the final fit value (regularized fit)
+  Rcpp::NumericVector fits; // a vector with all fits at the outer iteration
+  bool convergence; // was the outer breaking condition met?
+  Rcpp::NumericVector parameterValues; // final parameter values
 };
+
+// The implementation of ista follows that outlined in 
+// Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding 
+// Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
+// 183–202. https://doi.org/10.1137/080716542
+// see Remark 3.1 on p. 191 (ISTA with backtracking)
+
 
 template<typename T> // T is the type of the tuning parameters
 inline fitResults ista(model& model_, 
@@ -38,20 +49,24 @@ inline fitResults ista(model& model_,
                        const T& tuningParameters, // tuning parameters are of type T
                        const control& control_){
   if(control_.verbose != 0) Rcpp::Rcout << "Optimizing with ista" << std::endl;
+  // we rely heavily on parameter labels because we want to make sure that we 
+  // are changing the correct values
   Rcpp::StringVector parameterLabels = startingValues.names();
   
+  // prepare parameter vectors
   Rcpp::NumericVector parameters_k = Rcpp::clone(startingValues), 
     parameters_kMinus1 = Rcpp::clone(startingValues);
+  // the following elements will be required to judge the breaking condition
   arma::rowvec parameterChange(startingValues.length());
   arma::rowvec armaGradients(startingValues.length());
+  arma::mat quadr, parchTimeGrad;
   
+  // prepare fit elements
   double fit_k = model_.fit(startingValues), 
     fit_kMinus1 = model_.fit(startingValues),
     penalty_k = 0.0;
   double penalizedFit_k, penalizedFit_kMinus1;
   Rcpp::NumericVector gradients_k, gradients_kMinus1;
-  bool breakInner = false, breakOuter = false;
-  arma::mat quadr, parchTimeGrad;
   
   double ridgePenalty = 0.0;
   
@@ -62,21 +77,29 @@ inline fitResults ista(model& model_,
     penalty_.getValue(parameters_kMinus1, tuningParameters) + // lasso penalty part
     smoothPenalty_.getValue(parameters_kMinus1, tuningParameters); // ridge penalty part
   
+  // the following vector will save the fits of all iterations:
+  Rcpp::NumericVector fits(control_.maxIterOut+1);
+  fits.fill(NA_REAL);
+  fits.at(0) = penalizedFit_kMinus1;
+  
+  // prepare gradient elements 
+  // NOTE: We combine the gradients of the smooth functions (the log-Likelihood)
+  // of the model and the smooth penalty function (e.g., ridge)
   gradients_k = model_.gradients(parameters_k) +
     smoothPenalty_.getGradients(parameters_k, tuningParameters); // ridge part
   gradients_kMinus1 = model_.gradients(parameters_kMinus1) +
     smoothPenalty_.getGradients(parameters_kMinus1, tuningParameters); // ridge part
   
+  // breaking flags
+  bool breakInner = false, // if true, the inner iteration is exited
+    breakOuter = false; // if true, the outer iteration is exited
+  
   // initialize step size
   double L_kMinus1 = control_.L0, L_k = control_.L0;
   
-  Rcpp::NumericVector fits(control_.maxIterOut+1);
-  fits.fill(NA_REAL);
-  fits.at(0) = penalizedFit_kMinus1;
-  
   // outer iteration
   for(int outer_iteration = 0; outer_iteration < control_.maxIterOut; outer_iteration ++){    
-    if(control_.verbose==-99) Rcpp::Rcout << "Outer iteration " << outer_iteration + 1 << std::endl;
+    if(control_.verbose == -99) Rcpp::Rcout << "Outer iteration " << outer_iteration + 1 << std::endl;
     
     // TODO: improve initial step size (e.g., using Barzilai Borwein; see GIST)
     
@@ -86,13 +109,13 @@ inline fitResults ista(model& model_,
       smoothPenalty_.getGradients(parameters_kMinus1, tuningParameters); // ridge part
     armaGradients = Rcpp::as<arma::rowvec>(gradients_kMinus1); // needed in convergence criterion
     
-    if(control_.verbose==-99) Rcpp::Rcout << "gradients_kMinus1 : " << gradients_kMinus1 << std::endl;
+    if(control_.verbose == -99) Rcpp::Rcout << "gradients_kMinus1 : " << gradients_kMinus1 << std::endl;
     
     for(int inner_iteration = 0; inner_iteration < control_.maxIterIn; inner_iteration ++){
       // inner iteration: reduce step size until the convergence criterion is met
       L_k = std::pow(control_.eta, inner_iteration)*L_kMinus1;
       
-      if(control_.verbose==-99) Rcpp::Rcout << "L_k : " << L_k << std::endl;
+      if(control_.verbose == -99) Rcpp::Rcout << "L_k : " << L_k << std::endl;
       
       // apply proximal operator to get new parameters for given step size
       parameters_k = proximalOperator_.getParameters(
@@ -105,7 +128,7 @@ inline fitResults ista(model& model_,
       // compute new fit; if this fit is non-finite, we can jump to the next
       // iteration
       fit_k = model_.fit(parameters_k);
-      if(control_.verbose==-99)
+      if(control_.verbose == -99)
       {
         Rcpp::Rcout << "fit_k : " << fit_k << std::endl;
       }
@@ -119,7 +142,7 @@ inline fitResults ista(model& model_,
         penalty_k +  // lasso part
         smoothPenalty_.getValue(parameters_k, tuningParameters); // ridge part
       
-      if(control_.verbose==-99){
+      if(control_.verbose == -99){
         Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k << std::endl;
         Rcpp::Rcout << "penalizedFit_kMinus1 : " << penalizedFit_kMinus1 << std::endl;
       }
@@ -145,7 +168,7 @@ inline fitResults ista(model& model_,
           penalty_k
       );
       
-      if(control_.verbose==-99){
+      if(control_.verbose == -99){
         Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k << std::endl;
         Rcpp::Rcout << "fit_kMinus1 : " << fit_kMinus1 << std::endl;
         Rcpp::Rcout << "parchTimeGrad : " << parchTimeGrad << std::endl;
@@ -160,7 +183,7 @@ inline fitResults ista(model& model_,
         gradients_k = model_.gradients(parameters_k) + 
           smoothPenalty_.getGradients(parameters_k, tuningParameters); // ridge part
         
-        if(control_.verbose==-99){
+        if(control_.verbose == -99){
           Rcpp::Rcout << "gradients_k\n: " << gradients_k << std::endl;
         }
         
@@ -169,7 +192,7 @@ inline fitResults ista(model& model_,
         if(Rcpp::any(!Rcpp::is_finite(gradients_k)))  continue;
         
         // if everything worked out fine, we break the inner iteration
-        if(control_.verbose==-99) Rcpp::Rcout << "Breaking inner iteration" << std::endl;
+        if(control_.verbose == -99) Rcpp::Rcout << "Breaking inner iteration" << std::endl;
         break;
         
       }// end break inner
@@ -190,11 +213,11 @@ inline fitResults ista(model& model_,
     fits.at(outer_iteration+1) = penalizedFit_k;
     
     // check outer breaking condition
-    if(control_.verbose==-99) Rcpp::Rcout << "Comparing " << fits.at(outer_iteration+1) << " to " << fits.at(outer_iteration) << std::endl;
+    if(control_.verbose == -99) Rcpp::Rcout << "Comparing " << fits.at(outer_iteration+1) << " to " << fits.at(outer_iteration) << std::endl;
     breakOuter = std::abs(fits.at(outer_iteration+1) - fits.at(outer_iteration)) < control_.breakOuter;
     
     if(breakOuter) {
-      if(control_.verbose==-99) Rcpp::Rcout << "Breaking outer iteration" << std::endl;
+      if(control_.verbose == -99) Rcpp::Rcout << "Breaking outer iteration" << std::endl;
       break;
     }
     

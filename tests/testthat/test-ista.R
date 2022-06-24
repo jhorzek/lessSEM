@@ -44,7 +44,7 @@ test_that("testing ista-lasso", {
     eta = 2,
     maxIterOut = 10000,
     maxIterIn = 1000,
-    breakOuter = .000000000001,
+    breakOuter = .00000001,
     verbose = 0
   )
   
