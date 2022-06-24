@@ -10,35 +10,32 @@ namespace linr{
 class proximalOperatorLasso: public proximalOperator<tuningParametersEnet>{
 public:
   
-  Rcpp::NumericVector getParameters(const Rcpp::NumericVector& parameterValues, 
-                                    const Rcpp::NumericVector& gradientValues, 
+  arma::rowvec getParameters(const arma::rowvec& parameterValues, 
+                                    const arma::rowvec& gradientValues, 
+                                    const Rcpp::StringVector& parameterLabels,
                                     const double L,
                                     const tuningParametersEnet& tuningParameters) 
   override {
     
-    Rcpp::StringVector parameterLabels = parameterValues.names();
+    arma::rowvec u_k = parameterValues - gradientValues/L;
     
-    Rcpp::NumericVector u_k = parameterValues - gradientValues/L;
-    u_k.names() = parameterLabels;
-    Rcpp::NumericVector parameters_kp1(parameterValues.length());
-    parameters_kp1.fill(NA_REAL);
-    parameters_kp1.names() = parameterLabels;
+    arma::rowvec parameters_kp1(parameterValues.n_elem);
+    parameters_kp1.fill(arma::datum::nan);
     
     double lambda_i;
     Rcpp::String parameterLabel;
     int sign;
-    for(int p = 0; p < parameterLabels.length(); p ++)
+    for(int p = 0; p < parameterValues.n_elem; p ++)
     {
-      parameterLabel = parameterLabels.at(p);
       
       lambda_i = tuningParameters.alpha *
         tuningParameters.lambda * 
-        tuningParameters.weights[parameterLabel];
+        tuningParameters.weights.at(p);
       
-      sign = (u_k[parameterLabel] > 0);
-      if(u_k[parameterLabel] < 0) sign = -1;
-      parameters_kp1[parameterLabel] = sign*
-        std::max(0.0, std::abs(u_k[parameterLabel]) - lambda_i/L);
+      sign = (u_k.at(p) > 0);
+      if(u_k.at(p) < 0) sign = -1;
+      parameters_kp1.at(p) = sign*
+        std::max(0.0, std::abs(u_k.at(p)) - lambda_i/L);
     }
     return parameters_kp1;
   }
@@ -48,24 +45,21 @@ public:
 class penaltyLASSO: public penalty<tuningParametersEnet>{
 public:
   
-  double getValue(const Rcpp::NumericVector& parameterValues, 
+  double getValue(const arma::rowvec& parameterValues, 
+                  const Rcpp::StringVector& parameterLabels,
                   const tuningParametersEnet& tuningParameters) 
   override {
     
-    Rcpp::StringVector parameterLabels = parameterValues.names();
-    
     double penalty = 0.0;
     double lambda_i;
-    Rcpp::String parameterLabel;
     
-    for(int p = 0; p < parameterLabels.length(); p ++){
-      parameterLabel = parameterLabels.at(p);
+    for(int p = 0; p < parameterValues.n_elem; p ++){
       
       lambda_i = tuningParameters.alpha *
         tuningParameters.lambda * 
-        tuningParameters.weights[parameterLabel];
+        tuningParameters.weights.at(p);
       
-      penalty += lambda_i * std::abs(parameterValues[parameterLabel]);
+      penalty += lambda_i * std::abs(parameterValues.at(p));
     }
     
     return penalty;

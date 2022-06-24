@@ -8,9 +8,11 @@ template<class T>
 class smoothPenalty{
 public:
   
-  virtual double getValue(const Rcpp::NumericVector& parameterValues,
+  virtual double getValue(const arma::rowvec& parameterValues,
+                          const Rcpp::StringVector& parameterLabels,
                           const T& tuningParameters);
-  virtual Rcpp::NumericVector getGradients(const Rcpp::NumericVector& parameterValues,
+  virtual arma::rowvec getGradients(const arma::rowvec& parameterValues,
+                                    const Rcpp::StringVector& parameterLabels,
                                            const T& tuningParameters);
 };
 }

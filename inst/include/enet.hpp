@@ -10,7 +10,7 @@ namespace linr{
   struct tuningParametersEnet{
     double lambda;
     double alpha;
-    Rcpp::NumericVector weights;
+    arma::rowvec weights;
   };
   
 }

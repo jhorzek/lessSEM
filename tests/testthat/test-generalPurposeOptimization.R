@@ -16,14 +16,14 @@ test_that("testing general purpose ista lasso", {
   X <- as.matrix(df[,grepl("x", colnames(df))])
   listElements <- list(X = X, 
                        y = df$y)
-  fitFunction <- function(b, listElements){
-    pred <- listElements$X%*%b
+  fitFunction <- function(b, parameterLabels, listElements){
+    pred <- listElements$X%*%t(b)
     sse <- sum((listElements$y - pred)^2)
     return(sse)
   }
   listElements$fitFunction <- fitFunction
   
-  gradientFunction <- function(b, listElements){
+  gradientFunction <- function(b, parameterLabels, listElements){
     grad <- numDeriv::grad(func = listElements$fitFunction, 
                            x = b, 
                            listElements = listElements)
@@ -34,8 +34,8 @@ test_that("testing general purpose ista lasso", {
   # initialize
   b <- rep(0, 5)
   names(b) <- paste0("b",1:5)
-  fitFunction(b, listElements)
-  gradientFunction(b, listElements)
+  fitFunction(matrix(b,nrow = 1), names(b), listElements)
+  gradientFunction(matrix(b,nrow = 1), names(b), listElements)
   
   weights <- b
   weights[paste0("b",1:3)] <- 1
@@ -43,13 +43,13 @@ test_that("testing general purpose ista lasso", {
   control <- list(
     L0 = .1,
     eta = 2,
-    maxIterOut = 10000,
-    maxIterIn = 1000,
+    maxIterOut = 10,
+    maxIterIn = 20,
     breakOuter = .00000001,
     convCritInner = 1,
     sigma = .01,
     stepSizeInheritance = 3,
-    verbose = 0
+    verbose = 10
   )
   
   IL <- new(istaEnetGeneralPurpose, 

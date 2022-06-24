@@ -18,11 +18,13 @@ public:
   gradientFunction(gradientFunction_),
   userSuppliedElements(userSuppliedElements_){}
   
-  double fit(Rcpp::NumericVector parameterValues) override{
+  double fit(arma::rowvec parameterValues,
+             Rcpp::StringVector parameterLabels) override{
     double fitValue;
     try{
       // compute fit
       fitValue = Rcpp::as<double>(fitFunction(parameterValues,
+                                              parameterLabels,
                                               userSuppliedElements)
       );
       
@@ -35,23 +37,25 @@ public:
     return(fitValue);
   }
   
-  Rcpp::NumericVector gradients(Rcpp::NumericVector parameterValues) override{
+  arma::rowvec gradients(arma::rowvec parameterValues,
+                         Rcpp::StringVector parameterLabels) override{
     
-    Rcpp::NumericVector gradients(parameterValues.length());
+    Rcpp::NumericVector gradients(parameterValues.n_elem);
     
     try{
       
-      gradients = gradientFunction(parameterValues, 
+      gradients = gradientFunction(parameterValues,
+                                   parameterLabels,
                                    userSuppliedElements);
       
     }catch(...){
       
       gradients.fill(NA_REAL);
-      return(gradients);
+      return(Rcpp::as<arma::rowvec>(gradients));
       
     }
     
-    return(gradients); 
+    return(Rcpp::as<arma::rowvec>(gradients)); 
     
   }
   

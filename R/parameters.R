@@ -14,7 +14,7 @@ getParameters <- function(SEM, raw = FALSE){
   
   names(values) <- parameterTable$label
   
-  values <- values[unique(names(values))]
+  values <- values[SEM$getParameterLabels()]
   return(values)
 }
 

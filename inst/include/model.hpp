@@ -7,8 +7,10 @@ namespace linr{
 
 class model{
 public:
-  virtual double fit(Rcpp::NumericVector parameterValues) = 0;
-  virtual Rcpp::NumericVector gradients(Rcpp::NumericVector parameterValues) = 0;
+  virtual double fit(arma::rowvec parameterValues,
+                     Rcpp::StringVector parameterLabels) = 0;
+  virtual arma::rowvec gradients(arma::rowvec parameterValues, 
+                                 Rcpp::StringVector parameterLabels) = 0;
 };
 
 }

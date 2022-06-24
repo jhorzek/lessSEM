@@ -10,13 +10,13 @@ public:
   
   SEMFitFramework(SEMCpp& SEM_): SEM(SEM_){}
     
-  double fit(Rcpp::NumericVector parameterValues) override{
+  double fit(arma::rowvec parameterValues,
+             Rcpp::StringVector parameterLabels) override{
     
     try{
       // change parameter values
-      Rcpp::StringVector parameterLabels = parameterValues.names();
       SEM.setParameters(parameterLabels, // labels
-                        parameterValues, // values
+                        parameterValues.t(), // values
                         true); // raw
       SEM.fit();
       
@@ -29,26 +29,25 @@ public:
     return(SEM.m2LL);
   }
   
-  Rcpp::NumericVector gradients(Rcpp::NumericVector parameterValues) override{
+  arma::rowvec gradients(arma::rowvec parameterValues,
+                         Rcpp::StringVector parameterLabels) override{
     
-    Rcpp::NumericVector gradients(parameterValues.length());
+    arma::rowvec gradients(parameterValues.n_elem);
     
     try{
       // change parameter values
-      Rcpp::StringVector parameterLabels = parameterValues.names();
       SEM.setParameters(parameterLabels, // labels
-                        parameterValues, // values
+                        parameterValues.t(), // values
                         true); // raw
       SEM.fit();
-      arma::rowvec gradients_arma = SEM.getGradients(true);
-      gradients = Rcpp::NumericVector(gradients_arma.begin(), 
-                                                          gradients_arma.end());
+      gradients = SEM.getGradients(true);
+      
     }catch(...){
-      gradients.fill(NA_REAL);
+      gradients.fill(arma::datum::nan);
       return(gradients);
     }
     if(!SEM.impliedCovariance.is_sympd()){
-      gradients.fill(NA_REAL);
+      gradients.fill(arma::datum::nan);
       return(gradients);
     }
     

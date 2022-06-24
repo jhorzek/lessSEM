@@ -9,7 +9,6 @@ public:
   
   
   // settings
-  Rcpp::NumericVector startingValues;
   const Rcpp::NumericVector weights;
   
   // control optimizer
@@ -49,8 +48,6 @@ public:
     
     generalPurposeFitFramework gpFF(fitFunction, gradientFunction, userSuppliedElements);
     
-    startingValues = startingValues_;
-    
     linr::tuningParametersEnet tp;
     tp.lambda = lambda_;
     tp.weights = weights;
@@ -74,7 +71,7 @@ public:
     
     linr::fitResults fitResults_ = linr::ista(
       gpFF,
-      startingValues,
+      startingValues_,
       proximalOperatorLasso_,
       penalty_,
       smoothPenalty_,
@@ -82,11 +79,17 @@ public:
       controlIsta
     );
     
+    Rcpp::NumericVector finalParameters(fitResults_.parameterValues.n_elem);
+    for(int i = 0; i < fitResults_.parameterValues.n_elem; i++){
+      finalParameters.at(i) = fitResults_.parameterValues.at(i);
+    }
+    finalParameters.names() = startingValues_.names();
+    
     if(!fitResults_.convergence) Rcpp::warning("Optimizer did not converge");
     Rcpp::List result = Rcpp::List::create(
       Rcpp::Named("fit") = fitResults_.fit,
       Rcpp::Named("convergence") = fitResults_.convergence,
-      Rcpp::Named("rawParameters") = fitResults_.parameterValues,
+      Rcpp::Named("rawParameters") = finalParameters,
       Rcpp::Named("fits") = fitResults_.fits
     );
     return(result);

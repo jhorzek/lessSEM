@@ -6,8 +6,9 @@ namespace linr{
 template<class T>
 class proximalOperator{
 public:
-  virtual Rcpp::NumericVector getParameters(const Rcpp::NumericVector& parameterValues, 
-                                            const Rcpp::NumericVector& gradientValues,
+  virtual arma::rowvec getParameters(const arma::rowvec& parameterValues, 
+                                            const arma::rowvec& gradientValues,
+                                            const Rcpp::StringVector& parameterLabels,
                                             const double L,
                                             const T& tuningParameters) = 0;
 };

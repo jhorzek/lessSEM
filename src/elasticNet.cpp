@@ -10,7 +10,7 @@ public:
   Rcpp::NumericVector startingValues;
   double alpha;
   double lambda;
-  const Rcpp::NumericVector weights;
+  const arma::rowvec weights;
   // control optimizer
   const double L0;
   const double eta;
@@ -25,7 +25,7 @@ public:
   
   // constructor
   istaEnet(
-    const Rcpp::NumericVector weights_,
+    const arma::rowvec weights_,
     Rcpp::List control
   ): 
     weights(weights_),
@@ -79,11 +79,17 @@ public:
       controlIsta
     );
     
+    Rcpp::NumericVector finalParameters(fitResults_.parameterValues.n_elem);
+    for(int i = 0; i < fitResults_.parameterValues.n_elem; i++){
+      finalParameters.at(i) = fitResults_.parameterValues.at(i);
+    }
+    finalParameters.names() = startingValues_.names();
+    
     if(!fitResults_.convergence) Rcpp::warning("Optimizer did not converge");
     Rcpp::List result = Rcpp::List::create(
       Rcpp::Named("fit") = fitResults_.fit,
       Rcpp::Named("convergence") = fitResults_.convergence,
-      Rcpp::Named("rawParameters") = fitResults_.parameterValues,
+      Rcpp::Named("rawParameters") = finalParameters,
       Rcpp::Named("fits") = fitResults_.fits
     );
     return(result);
@@ -94,7 +100,7 @@ RCPP_EXPOSED_CLASS(istaEnet)
   RCPP_MODULE(istaEnet_cpp){
     using namespace Rcpp;
     Rcpp::class_<istaEnet>( "istaEnet" )
-      .constructor<Rcpp::NumericVector,Rcpp::List>("Creates a new istaEnet.")
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaEnet.")
       .field_readonly( "lambda", &istaEnet::lambda, "tuning parameter lambda")
     // methods
     .method( "optimize", &istaEnet::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values and lambda")
