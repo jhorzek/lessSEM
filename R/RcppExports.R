@@ -2,22 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 innerGLMNET <- function(parameters, N, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak, useMultipleConvergenceCriteria) {
-    .Call('_linr_innerGLMNET', PACKAGE = 'linr', parameters, N, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak, useMultipleConvergenceCriteria)
+    .Call(`_linr_innerGLMNET`, parameters, N, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak, useMultipleConvergenceCriteria)
 }
 
 computeIndividualM2LL <- function(nObservedVariables, rawData, impliedMeans, impliedCovariance) {
-    .Call('_linr_computeIndividualM2LL', PACKAGE = 'linr', nObservedVariables, rawData, impliedMeans, impliedCovariance)
+    .Call(`_linr_computeIndividualM2LL`, nObservedVariables, rawData, impliedMeans, impliedCovariance)
 }
 
 computeGroupM2LL <- function(sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance) {
-    .Call('_linr_computeGroupM2LL', PACKAGE = 'linr', sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance)
+    .Call(`_linr_computeGroupM2LL`, sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance)
 }
 
 computeImpliedCovariance <- function(Fmatrix, Amatrix, Smatrix) {
-    .Call('_linr_computeImpliedCovariance', PACKAGE = 'linr', Fmatrix, Amatrix, Smatrix)
+    .Call(`_linr_computeImpliedCovariance`, Fmatrix, Amatrix, Smatrix)
 }
 
 computeImpliedMeans <- function(Fmatrix, Amatrix, Mvector) {
-    .Call('_linr_computeImpliedMeans', PACKAGE = 'linr', Fmatrix, Amatrix, Mvector)
+    .Call(`_linr_computeImpliedMeans`, Fmatrix, Amatrix, Mvector)
 }
 

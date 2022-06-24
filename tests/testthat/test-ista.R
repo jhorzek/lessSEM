@@ -40,12 +40,12 @@ test_that("testing ista-lasso", {
   weights[labels %in% c("a", "b")] <- 1
   
   control <- list(
-    L0 = 1,
+    L0 = .001,
     eta = 2,
-    maxIterOut = 50,
-    maxIterIn = 500,
+    maxIterOut = 10000,
+    maxIterIn = 1000,
     breakOuter = .000000000001,
-    verbose = -1
+    verbose = 0
   )
   
   IL <- new(istaEnet, weights, control)
