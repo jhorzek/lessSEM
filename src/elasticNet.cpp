@@ -11,26 +11,38 @@ public:
   double alpha;
   double lambda;
   const Rcpp::NumericVector weights;
+  // control optimizer
   const double L0;
   const double eta;
   const int maxIterOut;
   const int maxIterIn;
   const double breakOuter;
+  const linr::convCritInnerIsta convCritInner;
+  const double sigma;
+  const linr::stepSizeInheritance stepSizeInh;
   const int verbose; 
+  
   
   // constructor
   istaEnet(
-            const Rcpp::NumericVector weights_,
-            Rcpp::List control
-  ): weights(weights_),
-  L0(Rcpp::as<double> (control["L0"])),
-  eta(Rcpp::as<double> (control["eta"])),
-  maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
-  maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
-  breakOuter(Rcpp::as<double> (control["breakOuter"])),
-  verbose(Rcpp::as<int> (control["verbose"])){}
+    const Rcpp::NumericVector weights_,
+    Rcpp::List control
+  ): 
+    weights(weights_),
+    L0(Rcpp::as<double> (control["L0"])),
+    eta(Rcpp::as<double> (control["eta"])),
+    maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
+    maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
+    breakOuter(Rcpp::as<double> (control["breakOuter"])),
+    convCritInner(static_cast<linr::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
+    sigma(Rcpp::as<double> (control["sigma"])),
+    stepSizeInh(static_cast<linr::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
+    verbose(Rcpp::as<int> (control["verbose"])){}
   
-  Rcpp::List optimize(SEMCpp& SEM_, Rcpp::NumericVector startingValues_, double lambda_, double alpha_){
+  Rcpp::List optimize(SEMCpp& SEM_, 
+                      Rcpp::NumericVector startingValues_, 
+                      double lambda_, 
+                      double alpha_){
     
     SEMFitFramework SEMFF(SEM_);
     
@@ -51,6 +63,9 @@ public:
       maxIterOut,
       maxIterIn,
       breakOuter*N,
+      convCritInner,
+      sigma,
+      stepSizeInh,
       verbose
     };
     

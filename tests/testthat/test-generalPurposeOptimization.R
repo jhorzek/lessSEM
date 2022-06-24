@@ -2,27 +2,20 @@ test_that("testing general purpose ista lasso", {
   library(linr)
   set.seed(123)
   n <- 100
-  x1 <- rnorm(n)
-  x2 <- rnorm(n)
-  x3 <- rnorm(n)
-  x4 <- rnorm(n)
-  x5 <- rnorm(n)
-  
-  y <- 0*x1+.2*x2+.3*x3 + .4*x4 + .5*x5 + rnorm(n,0,.3) 
   df <- data.frame(
-    x1 = x1,
-    x2 = x2,
-    x3 = x3,
-    x4 = x4,
-    x5 = x5,
-    y = y
+    x1 = rnorm(n),
+    x2 = rnorm(n),
+    x3 = rnorm(n),
+    x4 = rnorm(n),
+    x5 = rnorm(n)
   )
+  df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + rnorm(n,0,.3) 
   lmFit <- lm(y ~ 0+., df)
   
   # manual
   X <- as.matrix(df[,grepl("x", colnames(df))])
   listElements <- list(X = X, 
-                      y = y)
+                       y = df$y)
   fitFunction <- function(b, listElements){
     pred <- listElements$X%*%b
     sse <- sum((listElements$y - pred)^2)
@@ -45,25 +38,31 @@ test_that("testing general purpose ista lasso", {
   gradientFunction(b, listElements)
   
   weights <- b
-  weights[] <- 1
+  weights[paste0("b",1:3)] <- 1
   
   control <- list(
-    i_k = 2,
-    L0 = 1,
+    L0 = .1,
     eta = 2,
-    maxIterOut = 50,
-    maxIterIn = 500,
-    breakOuter = .00000001
+    maxIterOut = 10000,
+    maxIterIn = 1000,
+    breakOuter = .00000001,
+    convCritInner = 1,
+    sigma = .01,
+    stepSizeInheritance = 3,
+    verbose = 0
   )
   
-  IL <- new(istaLASSOGeneralPurpose, weights, control)
+  IL <- new(istaEnetGeneralPurpose, 
+            weights, 
+            control)
   
   lassoResult <- IL$optimize(
     fitFunction,
     gradientFunction,
     listElements,
     b,
-    0
+    0,
+    1
   )
   
   lassoResult$fit - sum((lmFit$residuals)^2)
@@ -75,12 +74,29 @@ test_that("testing general purpose ista lasso", {
                                    4) == 0),
                          TRUE)
   
+  control <- list(
+    L0 = .1,
+    eta = 2,
+    maxIterOut = 3,
+    maxIterIn = 3,
+    breakOuter = .00000001,
+    convCritInner = 1,
+    sigma = .01,
+    stepSizeInheritance = 0,
+    verbose = -99
+  )
+  
+  IL <- new(istaEnetGeneralPurpose, 
+            weights, 
+            control)
+  
   lassoResult <- IL$optimize(
     fitFunction,
     gradientFunction,
     listElements,
     b,
-    n*.6
+    50,
+    1
   )
   lassoResult$fit
   lassoResult$rawParameters

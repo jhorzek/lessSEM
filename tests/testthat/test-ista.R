@@ -40,12 +40,15 @@ test_that("testing ista-lasso", {
   weights[labels %in% c("a", "b")] <- 1
   
   control <- list(
-    L0 = .001,
+    L0 = .1,
     eta = 2,
-    maxIterOut = 10000,
-    maxIterIn = 1000,
+    maxIterOut = 100,
+    maxIterIn = 50,
     breakOuter = .00000001,
-    verbose = 0
+    convCritInner = 1,
+    sigma = .01,
+    stepSizeInheritance = 3,
+    verbose = -99
   )
   
   IL <- new(istaEnet, weights, control)
@@ -64,4 +67,38 @@ test_that("testing ista-lasso", {
                                      linr::getLavaanParameters(model)[names(linr:::getParameters(SEM, raw = FALSE))],
                                    1) == 0),
                          TRUE)
+  
+  # lasso
+  lassoResult <- IL$optimize(
+    SEM,
+    startingValues,
+    100,
+    1
+  )
+  lassoResult$rawParameters
+  testthat::expect_equal(any(lassoResult$rawParameters == 0),
+                         TRUE)
+  
+  control <- list(
+    L0 = .1,
+    eta = 2,
+    maxIterOut = 10000,
+    maxIterIn = 1000,
+    breakOuter = .00000001,
+    convCritInner = 1,
+    sigma = .1,
+    stepSizeInheritance = 3,
+    verbose = 0
+  )
+  
+  IL <- new(istaEnet, weights, control)
+  
+  # enet
+  lassoResult <- IL$optimize(
+    SEM,
+    startingValues,
+    100,
+    .4
+  )
+  lassoResult$rawParameters
 })

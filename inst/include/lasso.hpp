@@ -30,14 +30,20 @@ public:
     for(int p = 0; p < parameterLabels.length(); p ++){
       parameterLabel = parameterLabels.at(p);
       
+      Rcpp::Rcout << parameterLabel.get_cstring() << std::endl;
       lambda_i = tuningParameters.alpha *
         tuningParameters.lambda * 
         tuningParameters.weights[parameterLabel];
+      Rcpp::Rcout << "alpha = " << tuningParameters.alpha << std::endl;
+      Rcpp::Rcout << "lambda = " << tuningParameters.lambda << std::endl;
+      Rcpp::Rcout << "lambda_i = " << lambda_i << std::endl;
+      Rcpp::Rcout << "weights = " << tuningParameters.weights << std::endl;
       
       sign = (u_k[parameterLabel] > 0);
       if(u_k[parameterLabel] < 0) sign = -1;
       parameters_kp1[parameterLabel] = sign*
         std::max(0.0, std::abs(u_k[parameterLabel]) - lambda_i/L);
+      Rcpp::Rcout << parameters_kp1.at(p) << std::endl;
     }
     return parameters_kp1;
   }

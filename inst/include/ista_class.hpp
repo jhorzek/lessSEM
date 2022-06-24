@@ -12,6 +12,28 @@
 
 namespace linr{
 
+enum convCritInnerIsta{
+  istaCrit,
+  gistCrit
+};
+const std::vector<std::string> convCritInnerIsta_txt = {
+  "istaCrit",
+  "gistCrit"
+};
+
+enum stepSizeInheritance{
+  initial,
+  istaStepInheritance,
+  barzilaiBorwein,
+  stochasticBarzilaiBorwein
+};
+
+const std::vector<std::string> stepSizeInheritance_txt = {
+  "initial",
+  "istaStepInheritance",
+  "barzilaiBorwein",
+  "stochasticBarzilaiBorwein"
+};
 struct control{
   const double L0; // L0 controls the step size used in the first iteration
   const double eta; // eta controls by how much the step size changes in the
@@ -19,6 +41,21 @@ struct control{
   const int maxIterOut; // maximal number of outer iterations
   const int maxIterIn; // maximal number of inner iterations
   const double breakOuter; // change in fit required to break the outer iteration
+  const convCritInnerIsta convCritInner; // this is related to the inner
+  // breaking condition. 
+  // ista, as presented by Beck & Teboulle (2009); see Remark 3.1 on p. 191 (ISTA with backtracking)
+  // gist, as presented by Gong et al. (2013) (Equation 3)
+  // 
+  const double sigma; // sigma in (0,1) is used by the gist convergence criterion. larger
+  // simga enforce larger improvement in fit
+  const stepSizeInheritance stepSizeIn; // how should step sizes be carried forward?
+  // from iteration to iteration? 
+  // initial resets the step size to L0 in each iteration
+  // istaStepInheritance takes the previous step size as initial value for the 
+  // next iteration
+  // barzilaiBorwein uses the Barzilai-Borwein procedure
+  // stochasticBarzilaiBorwein uses the Barzilai-Borwein procedure, but sometimes
+  // resets the step size; this can help when the optimizer is caught in a bad spot.
   const int verbose; // if set to a value > 0, the fit every verbose iterations
   // is printed. If set to -99 you will get the debug output which is horribly
   // convoluted
@@ -37,6 +74,12 @@ struct fitResults{
 // 183–202. https://doi.org/10.1137/080716542
 // see Remark 3.1 on p. 191 (ISTA with backtracking)
 
+// GIST can be found in 
+// Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 
+// A General Iterative Shrinkage and Thresholding Algorithm for Non-convex 
+// Regularized Optimization Problems. Proceedings of the 30th International 
+// Conference on Machine Learning, 28(2)(2), 37–45.
+
 
 template<typename T> // T is the type of the tuning parameters
 inline fitResults ista(model& model_, 
@@ -48,7 +91,12 @@ inline fitResults ista(model& model_,
                        // as input -> <T>
                        const T& tuningParameters, // tuning parameters are of type T
                        const control& control_){
-  if(control_.verbose != 0) Rcpp::Rcout << "Optimizing with ista" << std::endl;
+  if(control_.verbose != 0) {
+    Rcpp::Rcout << "Optimizing with ista.\n" <<
+      "Using " << convCritInnerIsta_txt.at(control_.convCritInner) << " as inner convergence criterion\n" <<
+        "Using " << stepSizeInheritance_txt.at(control_.stepSizeIn) << " as step size inheritance\n" << 
+          std::endl;
+  }
   // we rely heavily on parameter labels because we want to make sure that we 
   // are changing the correct values
   Rcpp::StringVector parameterLabels = startingValues.names();
@@ -59,6 +107,7 @@ inline fitResults ista(model& model_,
   // the following elements will be required to judge the breaking condition
   arma::rowvec parameterChange(startingValues.length());
   arma::rowvec armaGradients(startingValues.length());
+  arma::rowvec gradientChange(startingValues.length()); // necessary for Barzilai Borwein
   arma::mat quadr, parchTimeGrad;
   
   // prepare fit elements
@@ -149,33 +198,55 @@ inline fitResults ista(model& model_,
       
       if(!arma::is_finite(penalizedFit_k)) continue;
       
-      // to test the convergence criterion, we also have to compute
-      // the approximated fit based on the quadratic approximation
-      // h(parameters_k) := fit(parameters_k) + 
-      // (parameters_k-parameters_kMinus1)*gradients_k^T + 
-      // (L/2)*(parameters_k-parameters_kMinus1)^2 + 
-      // penalty(parameters_k) 
-      parameterChange = parameters_k-parameters_kMinus1;
-      quadr = parameterChange*arma::trans(parameterChange); // always positive
+      // to test the convergence criterion, we offer different criteria
       
-      parchTimeGrad = parameterChange*arma::trans(armaGradients); // can be 
-      // positive or negative
-      
-      breakInner = penalizedFit_k <= (
-        fit_kMinus1 + 
-          parchTimeGrad(0,0) +
-          (L_k/2.0)*quadr(0,0) + 
-          penalty_k
-      );
-      
-      if(control_.verbose == -99){
-        Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k << std::endl;
-        Rcpp::Rcout << "fit_kMinus1 : " << fit_kMinus1 << std::endl;
-        Rcpp::Rcout << "parchTimeGrad : " << parchTimeGrad << std::endl;
-        Rcpp::Rcout << "quadr : " << quadr << std::endl;
-        Rcpp::Rcout << "(L_k/2.0)*quadr(0,0) : " << (L_k/2.0)*quadr(0,0) << std::endl;
-        Rcpp::Rcout << "penalty_k : " << penalty_k << std::endl;
-        Rcpp::Rcout << "penalizedFit_kMinus1 : " << penalizedFit_kMinus1 << std::endl;
+      if(control_.convCritInner == istaCrit) {
+        // ISTA:
+        // The approximated fit based on the quadratic approximation
+        // h(parameters_k) := fit(parameters_k) + 
+        // (parameters_k-parameters_kMinus1)*gradients_k^T + 
+        // (L/2)*(parameters_k-parameters_kMinus1)^2 + 
+        // penalty(parameters_k) 
+        // is compared to the exact fit
+        parameterChange = parameters_k-parameters_kMinus1;
+        quadr = parameterChange*arma::trans(parameterChange); // always positive
+        parchTimeGrad = parameterChange*arma::trans(armaGradients); // can be 
+        // positive or negative
+        
+        if(control_.verbose == -99){
+          Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k  << " vs " << fit_kMinus1 + 
+            parchTimeGrad(0,0) +
+            (L_k/2.0)*quadr(0,0) + 
+            penalty_k << std::endl;
+        }
+        
+        breakInner = penalizedFit_k <= (
+          fit_kMinus1 + 
+            parchTimeGrad(0,0) +
+            (L_k/2.0)*quadr(0,0) + 
+            penalty_k
+        );
+        
+      }else if(control_.convCritInner == gistCrit){
+        
+        // GIST:
+        // the exact fit is compared to 
+        // h(parameters_k) := fit(parameters_k) + 
+        // penalty(parameters_kMinus1) +
+        // L*(sigma/2)*(parameters_k-parameters_kMinus1)^2 + 
+        // 
+        parameterChange = parameters_k-parameters_kMinus1;
+        quadr = parameterChange*arma::trans(parameterChange); // always positive
+        
+        if(control_.verbose == -99){
+          Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k  << " vs " << penalizedFit_kMinus1 -
+            L_k*(control_.sigma/2.0)*quadr(0,0) << std::endl;
+        }
+        
+        breakInner = penalizedFit_k <= (
+          penalizedFit_kMinus1 -
+            L_k*(control_.sigma/2.0)*quadr(0,0)
+        );
       }
       
       if(breakInner) {
@@ -200,12 +271,15 @@ inline fitResults ista(model& model_,
     
     // print fit info
     if(control_.verbose > 0 && outer_iteration % control_.verbose == 0){
-      Rcpp::Rcout << "Fit in iteration outer_iteration " << outer_iteration + 1 << ": " << penalizedFit_k << std::endl;
+      Rcpp::Rcout << "Fit in iteration outer_iteration " << 
+        outer_iteration + 1 << 
+          ": " << penalizedFit_k << 
+            std::endl;
       Rcpp::Rcout << parameters_k << std::endl;
     } 
     
     if(!breakInner){
-      Rcpp::warning("Inner iterations did not improve the fit. Resetting L");
+      Rcpp::warning("Inner iterations did not improve the fit --> resetting L.");
       L_kMinus1 = control_.L0;
       continue;
     }
@@ -221,11 +295,52 @@ inline fitResults ista(model& model_,
       break;
     }
     
+    // define new initial step size
+    if(control_.stepSizeIn == initial){
+      
+      L_kMinus1 = control_.L0;
+      
+    }else if(control_.stepSizeIn == barzilaiBorwein || 
+      control_.stepSizeIn == stochasticBarzilaiBorwein){
+      
+      if(control_.verbose == -99){
+        Rcpp::Rcout << "gradients_k\n" << gradients_k << std::endl;
+        gradients_k = model_.gradients(parameters_k) + 
+          smoothPenalty_.getGradients(parameters_k, tuningParameters);
+        Rcpp::Rcout << "Should be identical to\n" << gradients_k << std::endl;
+      }
+      
+      parameterChange = parameters_k - parameters_kMinus1;
+      gradientChange = gradients_k - gradients_kMinus1;
+
+      quadr = (parameterChange)*arma::trans(parameterChange);
+      parchTimeGrad = parameterChange*arma::trans(gradientChange);
+      if(control_.verbose == -99) Rcpp::Rcout << "quadr: " << quadr << std::endl;
+      if(control_.verbose == -99) Rcpp::Rcout << "parchTimeGrad: " << parchTimeGrad << std::endl;
+      L_kMinus1 = parchTimeGrad(0,0)/quadr(0,0);
+      if(control_.verbose == -99) Rcpp::Rcout << "L_kMinus1 after BB: " << L_kMinus1 << std::endl;
+      if(L_kMinus1 < 1e-10 || L_kMinus1 > 1e10) L_kMinus1 = control_.L0;
+      
+      Rcpp::Rcout << "Random number: " << rand() % 100 << std::endl;
+      if(control_.stepSizeIn == stochasticBarzilaiBorwein && 
+         rand() % 100 < 25) {
+        if(control_.verbose == -99) Rcpp::Rcout << "Resetting L_kMinus1 randomly " << std::endl;
+        L_kMinus1 = control_.L0;// reset with 25% probability
+        }
+      
+    }else if(control_.stepSizeIn == istaStepInheritance){
+      
+      L_kMinus1 = L_k;
+      
+    }else{
+      Rcpp::stop("Unknown step inheritance.");
+    }
+    
     // for next iteration: save current values as previous values
     penalizedFit_kMinus1 = penalizedFit_k;
-    parameters_kMinus1 = parameters_k;
-    gradients_kMinus1 = gradients_k;
-    L_kMinus1 = L_k;
+    parameters_kMinus1 = Rcpp::clone(parameters_k);
+    gradients_kMinus1 = Rcpp::clone(gradients_k);
+    
   }
   
   fitResults fitResults_;

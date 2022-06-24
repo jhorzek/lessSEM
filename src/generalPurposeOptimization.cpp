@@ -10,16 +10,18 @@ public:
   
   // settings
   Rcpp::NumericVector startingValues;
-  double lambda, alpha;
   const Rcpp::NumericVector weights;
   
-  // control
-  const int i_k;
+  // control optimizer
   const double L0;
   const double eta;
   const int maxIterOut;
   const int maxIterIn;
   const double breakOuter;
+  const linr::convCritInnerIsta convCritInner;
+  const double sigma;
+  const linr::stepSizeInheritance stepSizeInh;
+  const int verbose; 
   
   // constructor
   istaEnetGeneralPurpose(
@@ -27,12 +29,15 @@ public:
     Rcpp::List control
   ):
     weights(weights_),
-    i_k(Rcpp::as<int>(control["i_k"])),
     L0(Rcpp::as<double> (control["L0"])),
     eta(Rcpp::as<double> (control["eta"])),
     maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
     maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
-    breakOuter(Rcpp::as<double> (control["breakOuter"])){}
+    breakOuter(Rcpp::as<double> (control["breakOuter"])),
+    convCritInner(static_cast<linr::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
+    sigma(Rcpp::as<double> (control["sigma"])),
+    stepSizeInh(static_cast<linr::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
+    verbose(Rcpp::as<int> (control["verbose"])){}
   
   Rcpp::List optimize(
       Rcpp::Function fitFunction,
@@ -45,24 +50,26 @@ public:
     generalPurposeFitFramework gpFF(fitFunction, gradientFunction, userSuppliedElements);
     
     startingValues = startingValues_;
-    lambda = lambda_;
-    alpha = alpha_;
     
     linr::tuningParametersEnet tp;
-    tp.lambda = lambda;
+    tp.lambda = lambda_;
     tp.weights = weights;
+    tp.alpha = alpha_;
     
     linr::proximalOperatorLasso proximalOperatorLasso_;
     linr::penaltyLASSO penalty_;
     linr::penaltyRidge smoothPenalty_;
     
     linr::control controlIsta = {
-      i_k,
       L0,
       eta,
       maxIterOut,
       maxIterIn,
-      breakOuter
+      breakOuter,
+      convCritInner,
+      sigma,
+      stepSizeInh,
+      verbose
     };
     
     linr::fitResults fitResults_ = linr::ista(
@@ -91,7 +98,6 @@ RCPP_EXPOSED_CLASS(istaEnetGeneralPurpose)
     using namespace Rcpp;
     Rcpp::class_<istaEnetGeneralPurpose>( "istaEnetGeneralPurpose" )
       .constructor<Rcpp::NumericVector,Rcpp::List>("Creates a new istaEnetGeneralPurpose.")
-      .field_readonly( "lambda", &istaEnetGeneralPurpose::lambda, "tuning parameter lambda")
     // methods
     .method( "optimize", &istaEnetGeneralPurpose::optimize, "Optimizes the model. Expects fitFunction, gradientFunction, userSuppliedElements, labeled vector with starting values and lambda")
     ;
