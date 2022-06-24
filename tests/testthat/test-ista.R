@@ -42,13 +42,13 @@ test_that("testing ista-lasso", {
   control <- list(
     L0 = .1,
     eta = 2,
-    maxIterOut = 100,
-    maxIterIn = 50,
+    maxIterOut = 1000,
+    maxIterIn = 500,
     breakOuter = .00000001,
     convCritInner = 1,
     sigma = .01,
     stepSizeInheritance = 3,
-    verbose = -99
+    verbose = 10
   )
   
   IL <- new(istaEnet, weights, control)

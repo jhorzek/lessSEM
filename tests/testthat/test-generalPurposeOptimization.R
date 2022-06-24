@@ -77,13 +77,13 @@ test_that("testing general purpose ista lasso", {
   control <- list(
     L0 = .1,
     eta = 2,
-    maxIterOut = 3,
-    maxIterIn = 3,
+    maxIterOut = 1000,
+    maxIterIn = 1000,
     breakOuter = .00000001,
     convCritInner = 1,
     sigma = .01,
     stepSizeInheritance = 0,
-    verbose = -99
+    verbose = 10
   )
   
   IL <- new(istaEnetGeneralPurpose, 
@@ -95,10 +95,14 @@ test_that("testing general purpose ista lasso", {
     gradientFunction,
     listElements,
     b,
-    50,
+    500,
     1
   )
   lassoResult$fit
   lassoResult$rawParameters
   coef(lmFit)
+  testthat::expect_equal(all(round(lassoResult$rawParameters[c("b4", "b5")] -
+                                     coef(lm(y ~ 0+x4+x5, df)),
+                                   4) == 0),
+                         TRUE)
 })

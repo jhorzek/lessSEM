@@ -321,7 +321,6 @@ inline fitResults ista(model& model_,
       if(control_.verbose == -99) Rcpp::Rcout << "L_kMinus1 after BB: " << L_kMinus1 << std::endl;
       if(L_kMinus1 < 1e-10 || L_kMinus1 > 1e10) L_kMinus1 = control_.L0;
       
-      Rcpp::Rcout << "Random number: " << rand() % 100 << std::endl;
       if(control_.stepSizeIn == stochasticBarzilaiBorwein && 
          rand() % 100 < 25) {
         if(control_.verbose == -99) Rcpp::Rcout << "Resetting L_kMinus1 randomly " << std::endl;
