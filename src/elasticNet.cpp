@@ -11,24 +11,24 @@ public:
   double alpha;
   double lambda;
   const Rcpp::NumericVector weights;
-  const int i_k;
   const double L0;
   const double eta;
   const int maxIterOut;
   const int maxIterIn;
   const double breakOuter;
+  const int verbose; 
   
   // constructor
   istaEnet(
             const Rcpp::NumericVector weights_,
             Rcpp::List control
   ): weights(weights_),
-  i_k(Rcpp::as<int>(control["i_k"])),
   L0(Rcpp::as<double> (control["L0"])),
   eta(Rcpp::as<double> (control["eta"])),
   maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
   maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
-  breakOuter(Rcpp::as<double> (control["breakOuter"])){}
+  breakOuter(Rcpp::as<double> (control["breakOuter"])),
+  verbose(Rcpp::as<int> (control["verbose"])){}
   
   Rcpp::List optimize(SEMCpp& SEM_, Rcpp::NumericVector startingValues_, double lambda_, double alpha_){
     
@@ -46,12 +46,12 @@ public:
     linr::penaltyRidge smoothPenalty_;
     
     linr::control controlIsta = {
-      i_k,
       L0,
       eta,
       maxIterOut,
       maxIterIn,
-      breakOuter*N
+      breakOuter*N,
+      verbose
     };
     
     linr::fitResults fitResults_ = linr::ista(
