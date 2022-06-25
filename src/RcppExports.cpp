@@ -31,6 +31,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// BFGS_C
+arma::mat BFGS_C(const arma::rowvec& parameters_kMinus1, const arma::rowvec& gradients_kMinus1, const arma::mat& Hessian_kMinus1, const arma::rowvec& parameters_k, const arma::rowvec& gradients_k, const bool cautious, const double hessianEps);
+RcppExport SEXP _linr_BFGS_C(SEXP parameters_kMinus1SEXP, SEXP gradients_kMinus1SEXP, SEXP Hessian_kMinus1SEXP, SEXP parameters_kSEXP, SEXP gradients_kSEXP, SEXP cautiousSEXP, SEXP hessianEpsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type parameters_kMinus1(parameters_kMinus1SEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type gradients_kMinus1(gradients_kMinus1SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Hessian_kMinus1(Hessian_kMinus1SEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type parameters_k(parameters_kSEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type gradients_k(gradients_kSEXP);
+    Rcpp::traits::input_parameter< const bool >::type cautious(cautiousSEXP);
+    Rcpp::traits::input_parameter< const double >::type hessianEps(hessianEpsSEXP);
+    rcpp_result_gen = Rcpp::wrap(BFGS_C(parameters_kMinus1, gradients_kMinus1, Hessian_kMinus1, parameters_k, gradients_k, cautious, hessianEps));
+    return rcpp_result_gen;
+END_RCPP
+}
 // computeIndividualM2LL
 double computeIndividualM2LL(const int nObservedVariables, const arma::colvec& rawData, const arma::colvec& impliedMeans, const arma::mat& impliedCovariance);
 RcppExport SEXP _linr_computeIndividualM2LL(SEXP nObservedVariablesSEXP, SEXP rawDataSEXP, SEXP impliedMeansSEXP, SEXP impliedCovarianceSEXP) {
@@ -95,6 +112,7 @@ RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurpose_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_linr_innerGLMNET", (DL_FUNC) &_linr_innerGLMNET, 10},
+    {"_linr_BFGS_C", (DL_FUNC) &_linr_BFGS_C, 7},
     {"_linr_computeIndividualM2LL", (DL_FUNC) &_linr_computeIndividualM2LL, 4},
     {"_linr_computeGroupM2LL", (DL_FUNC) &_linr_computeGroupM2LL, 6},
     {"_linr_computeImpliedCovariance", (DL_FUNC) &_linr_computeImpliedCovariance, 3},

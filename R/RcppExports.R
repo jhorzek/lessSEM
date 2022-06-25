@@ -5,6 +5,10 @@ innerGLMNET <- function(parameters, N, subGroupGradient, subGroupHessian, subGro
     .Call(`_linr_innerGLMNET`, parameters, N, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak, useMultipleConvergenceCriteria)
 }
 
+BFGS_C <- function(parameters_kMinus1, gradients_kMinus1, Hessian_kMinus1, parameters_k, gradients_k, cautious, hessianEps) {
+    .Call(`_linr_BFGS_C`, parameters_kMinus1, gradients_kMinus1, Hessian_kMinus1, parameters_k, gradients_k, cautious, hessianEps)
+}
+
 computeIndividualM2LL <- function(nObservedVariables, rawData, impliedMeans, impliedCovariance) {
     .Call(`_linr_computeIndividualM2LL`, nObservedVariables, rawData, impliedMeans, impliedCovariance)
 }

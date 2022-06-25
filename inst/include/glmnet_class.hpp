@@ -7,6 +7,7 @@
 #include "lasso.hpp"
 #include "ridge.hpp"
 #include "enet.hpp"
+#include "bfgs.hpp"
 
 // The design follows ensmallen (https://github.com/mlpack/ensmallen) in that the 
 // user supplies a C++ class with methods fit and gradients which is used
@@ -55,100 +56,6 @@ struct controlGLMNET{
   // convoluted
 };
 
-// BFGS
-//
-// computes the BFGS Hessian approximation
-//
-//
-// param parameters_kMinus1 parameters of previous iteration
-// param gradients_kMinus1 gradients of previous iteration
-// param Hessian_kMinus1 Hessian of previous iteration
-// param parameters_k parameters of current iteration
-// param gradients_k gradients of current iteration
-// param cautious boolean: should the update be skipped if it would result in a non positive definite Hessian?
-// param hessianEps controls when the update of the Hessian approximation is skipped
-inline arma::mat BFGS(
-    const arma::rowvec& parameters_kMinus1, 
-    const arma::rowvec& gradients_kMinus1, 
-    const arma::mat& Hessian_kMinus1, 
-    const arma::rowvec& parameters_k, 
-    const arma::rowvec& gradients_k, 
-    const bool cautious, 
-    const double hessianEps){
-  
-  arma::rowvec y = gradients_k - gradients_kMinus1;
-  arma::rowvec d = parameters_k - parameters_kMinus1;
-  arma::mat yTimesD = y*arma::trans(d);
-  arma::mat Hessian_k = Hessian_kMinus1;
-  arma::mat ySquared, dHd;
-  bool skipUpdate = false;
-  // test if positive definiteness is ensured
-  try{
-    
-    skipUpdate = (yTimesD(0,0) < hessianEps) && cautious;
-    
-  }catch(...){
-    // skip in case of error: return Hessian_kMinus1
-    Rcpp::warning("Hessian update skipped.");
-    return(Hessian_k);
-  }
-  
-  if(yTimesD(0,0) < 0){
-    Rcpp::warning("Hessian update possibly non-positive definite.");
-    if(skipUpdate) return(Hessian_k);
-  }
-  
-  // see e.g., Nocedal, J., & Wright, S. J. (2006). Numerical optimization (2nd ed).
-  // Springer, p. 537 Equation 18.16
-  
-  ySquared = arma::trans(y)*y;
-  dHd = d*Hessian_kMinus1*arma::trans(d);
-  
-  Hessian_k = Hessian_kMinus1 - 
-    (Hessian_kMinus1*arma::trans(d)*d*Hessian_kMinus1)/dHd(0,0) + 
-    ySquared/yTimesD(0,0);
-  
-  if(!arma::is_finite(Hessian_k)){
-    Rcpp::warning("Invalid Hessian. Returning previous Hessian");
-    Hessian_k = Hessian_kMinus1;
-    return(Hessian_k);
-  }
-  
-  // check for symmetric positive definiteness 
-  if(!Hessian_k.is_sympd()){
-    Rcpp::warning("Hessian not symmetric?");
-    // make symmetric
-    Hessian_k = .5*(Hessian_k + arma::trans(Hessian_k));
-  }else{
-    return(Hessian_k);
-  }
-  
-  // we now know that the matrix is symmetric; lets check again
-  // for positive definite
-  if(!Hessian_k.is_sympd()){
-    // make positive definite
-    // see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
-    Rcpp::warning("Hessian not pd");
-    arma::vec eigenValues = arma::eig_sym(Hessian_k);
-    arma::mat diagMat = arma::eye(Hessian_k.n_rows, 
-                                  Hessian_k.n_cols);
-    diagMat.fill(0.0);
-    diagMat.diag() += -1.1*arma::min(eigenValues);
-    Hessian_k = Hessian_k +  diagMat;
-    
-    // check again...
-    if(!Hessian_k.is_sympd()){
-      // return non-updated hessian
-      Rcpp::warning("Invalid Hessian. Returning previous Hessian");
-      Hessian_k = Hessian_kMinus1;
-      return(Hessian_k);
-    }
-  }
-  
-  return(Hessian_k);
-  
-}
-
 inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
                                 const arma::rowvec& gradients_kMinus1,
                                 const arma::mat& Hessian,
@@ -187,7 +94,7 @@ inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
     z.fill(arma::fill::zeros); 
     //z_old.fill(arma::fill::zeros);
     // iterate over parameters in random order
-    std::random_shuffle(randOrder.begin(), randOrder.end());
+    //std::random_shuffle(randOrder.begin(), randOrder.end());
     
     for(int p = 0; p < stepDirection.n_elem; p++){
       
@@ -306,6 +213,10 @@ inline arma::rowvec glmnetLineSearch(
   // objective function and not as part of the non-differentiable
   // penalty
   double f_0 = fit_kMinus1 + pen_0;
+  // needed for convergence criterion (see Yuan et al. (2012), Eq. 20)
+  double pen_d = penalty_.getValue(parameters_kMinus1 + direction, 
+                                   parameterLabels,
+                                   tuningParameters);
   
   double currentStepSize;
   // a step size of >= 1 would result in no change or in an increasing step
@@ -315,6 +226,12 @@ inline arma::rowvec glmnetLineSearch(
   }else{
     currentStepSize = stepSize;
   }
+  if(rand() % 100 < 25){
+    Rcpp::NumericVector tmp = Rcpp::runif(1,.5,.99);
+    currentStepSize = tmp.at(0);
+  }
+  
+  Rcpp::Rcout << "Initial step: " << currentStepSize << std::endl;
   
   bool converged = false;
   
@@ -352,6 +269,8 @@ inline arma::rowvec glmnetLineSearch(
     // g(x+td) + p(x+td)
     f_k = fit_k + p_k;
     
+    Rcpp::Rcout << currentStepSize << ": " << f_k - fit_kMinus1 << ", ";
+    
     // test line search criterion. g(stepSize) must show a large enough decrease
     // to be accepted
     // see Equation 20 in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
@@ -362,15 +281,16 @@ inline arma::rowvec glmnetLineSearch(
     arma::mat compareTo = 
       gradients_kMinus1*arma::trans(direction) + // gradients and direction typically show
       // in the same direction -> positive
-      gamma*(direction*Hessian_kMinus1*arma::trans(direction)); // always positive
+      gamma*(direction*Hessian_kMinus1*arma::trans(direction)) + // always positive
+      pen_d - pen_0;
     // gamma is set to zero by Yuan et al. (2012)
-    
     // if sigma is 0, no decrease is necessary
+    
     if(verbose == -99 ) Rcpp::Rcout << "comparing " << 
-      fit_k-fit_kMinus1 << 
+      f_k - f_0 << 
       " and " << sigma*currentStepSize*compareTo(0,0) << 
         std::endl;
-    converged = fit_k - fit_kMinus1 <=  sigma*currentStepSize*compareTo(0,0);
+    converged = f_k - f_0 <=  sigma*currentStepSize*compareTo(0,0);
     
     if(converged){
       // check if gradients can be computed at the new location; 
@@ -541,7 +461,7 @@ inline linr::fitResults glmnet(model& model_,
     } 
     
     // Approximate Hessian using BFGS
-    Hessian_k = BFGS(
+    Hessian_k = linr::BFGS(
       parameters_kMinus1,
       gradients_kMinus1,
       Hessian_kMinus1,

@@ -42,11 +42,11 @@ test_that("testing ista-lasso", {
   control <- list(
     initialHessian = diag(1,length(startingValues)),
     stepSize = .9,
-    sigma = .0001,
+    sigma = 0,
     gamma = 0,
     maxIterOut = 1000,
     maxIterIn = 1000,
-    maxIterLine = 10000,
+    maxIterLine = 1000,
     breakOuter = 1e-6,
     breakInner = 1e-5,
     convergenceCriterion = 0, 
@@ -85,7 +85,7 @@ test_that("testing ista-lasso", {
   enetResult <- GNet$optimize(
     SEM,
     startingValues,
-    1.5,
+    2.7,
     .4
   )
   enetResult$rawParameters
