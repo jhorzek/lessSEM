@@ -165,8 +165,8 @@ public:
       maxIterOut, // maximal number of outer iterations
       maxIterIn, // maximal number of inner iterations
       maxIterLine,
-      breakOuter, // change in fit required to break the outer iteration
-      breakInner,
+      breakOuter*N, // change in fit required to break the outer iteration
+      breakInner*N,
       convergenceCriterion, // this is related to the inner
       // breaking condition. 
       verbose

@@ -231,8 +231,6 @@ inline arma::rowvec glmnetLineSearch(
     currentStepSize = tmp.at(0);
   }
   
-  Rcpp::Rcout << "Initial step: " << currentStepSize << std::endl;
-  
   bool converged = false;
   
   for(int iteration = 0; iteration < maxIterLine; iteration ++){
@@ -268,8 +266,6 @@ inline arma::rowvec glmnetLineSearch(
     
     // g(x+td) + p(x+td)
     f_k = fit_k + p_k;
-    
-    Rcpp::Rcout << currentStepSize << ": " << f_k - fit_kMinus1 << ", ";
     
     // test line search criterion. g(stepSize) must show a large enough decrease
     // to be accepted
@@ -534,6 +530,7 @@ inline linr::fitResults glmnet(model& model_,
   fitResults_.fit = penalizedFit_k;
   fitResults_.fits = fits;
   fitResults_.parameterValues = parameters_k;
+  fitResults_.Hessian = Hessian_k;
   
   return(fitResults_);
   

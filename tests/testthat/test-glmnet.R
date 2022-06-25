@@ -71,10 +71,11 @@ test_that("testing ista-lasso", {
                          TRUE)
   
   # lasso
+  lambda_lasso <- 1
   lassoResult <- GNet$optimize(
     SEM,
     startingValues,
-    1.5,
+    lambda_lasso,
     1
   )
   lassoResult$rawParameters
@@ -82,10 +83,11 @@ test_that("testing ista-lasso", {
                          TRUE)
   
   # enet
+  lambda_enet <- 2.2
   enetResult <- GNet$optimize(
     SEM,
     startingValues,
-    2.7,
+    lambda_enet,
     .4
   )
   enetResult$rawParameters
@@ -95,7 +97,7 @@ test_that("testing ista-lasso", {
     eta = 2,
     maxIterOut = 10000,
     maxIterIn = 1000,
-    breakOuter = .000000001,
+    breakOuter = .00000000001,
     convCritInner = 1,
     sigma = .1,
     stepSizeInheritance = 3,
@@ -106,7 +108,7 @@ test_that("testing ista-lasso", {
   lassoResultIsta <- IN$optimize(
     SEM,
     startingValues,
-    1.5,
+    lambda_lasso,
     1
   )
   lassoResultIsta$rawParameters
@@ -118,11 +120,25 @@ test_that("testing ista-lasso", {
   enetResultIsta <- IN$optimize(
     SEM,
     startingValues,
-    2.7,
+    lambda_enet,
     .4
   )
   enetResultIsta$rawParameters
   
   enetResult$rawParameters - enetResultIsta$rawParameters
   enetResult$fit - enetResultIsta$fit
+  
+  N <- nrow(PoliticalDemocracy)
+  
+  SEM <- linr::setParameters(SEM, names(enetResultIsta$rawParameters), enetResultIsta$rawParameters, raw = TRUE)
+  SEM$fit() + 
+    N*lambda_enet*.4* sum(abs(enetResultIsta$rawParameters*weights)) +
+    N*lambda_enet*(1-.4) * sum((enetResultIsta$rawParameters*weights)^2)
+  enetResultIsta$fit
+  
+  SEM <- linr::setParameters(SEM, names(enetResult$rawParameters), enetResult$rawParameters, raw = TRUE)
+  SEM$fit() + 
+    N*lambda_enet*.4*sum(abs(enetResult$rawParameters*weights)) +
+    N*lambda_enet*(1-.4) * sum((enetResult$rawParameters*weights)^2)
+  enetResult$fit
 })

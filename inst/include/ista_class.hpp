@@ -104,8 +104,10 @@ inline linr::fitResults ista(model& model_,
   arma::mat quadr, parchTimeGrad;
   
   // prepare fit elements
-  double fit_k = model_.fit(startingValues, parameterLabels), 
-    fit_kMinus1 = model_.fit(startingValues, parameterLabels),
+  double fit_k = model_.fit(startingValues, parameterLabels) +
+    smoothPenalty_.getValue(parameters_k, parameterLabels, tuningParameters), // ridge penalty part
+    fit_kMinus1 = model_.fit(startingValues, parameterLabels) +
+      smoothPenalty_.getValue(parameters_kMinus1, parameterLabels, tuningParameters), // ridge penalty part,
     penalty_k = 0.0;
   double penalizedFit_k, penalizedFit_kMinus1;
   arma::rowvec gradients_k, gradients_kMinus1;
@@ -113,11 +115,10 @@ inline linr::fitResults ista(model& model_,
   double ridgePenalty = 0.0;
   
   penalizedFit_k = fit_k + 
-    penalty_.getValue(parameters_k, parameterLabels, tuningParameters) + // lasso penalty part
-    smoothPenalty_.getValue(parameters_k, parameterLabels, tuningParameters); // ridge penalty part
+    penalty_.getValue(parameters_k, parameterLabels, tuningParameters); // lasso penalty part
+    
   penalizedFit_kMinus1 = fit_kMinus1 + 
-    penalty_.getValue(parameters_kMinus1, parameterLabels, tuningParameters) + // lasso penalty part
-    smoothPenalty_.getValue(parameters_kMinus1, parameterLabels, tuningParameters); // ridge penalty part
+    penalty_.getValue(parameters_kMinus1, parameterLabels, tuningParameters); // lasso penalty part
   
   // the following vector will save the fits of all iterations:
   Rcpp::NumericVector fits(control_.maxIterOut+1);
@@ -143,13 +144,6 @@ inline linr::fitResults ista(model& model_,
   for(int outer_iteration = 0; outer_iteration < control_.maxIterOut; outer_iteration ++){    
     if(control_.verbose == -99) Rcpp::Rcout << "Outer iteration " << outer_iteration + 1 << std::endl;
     
-    // the gradients will be used by the inner iteration to compute the new 
-    // parameters
-    gradients_kMinus1 = model_.gradients(parameters_kMinus1, parameterLabels) +
-      smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
-    
-    if(control_.verbose == -99) Rcpp::Rcout << "gradients_kMinus1 : " << gradients_kMinus1 << std::endl;
-    
     for(int inner_iteration = 0; inner_iteration < control_.maxIterIn; inner_iteration ++){
       // inner iteration: reduce step size until the convergence criterion is met
       L_k = std::pow(control_.eta, inner_iteration)*L_kMinus1;
@@ -167,7 +161,8 @@ inline linr::fitResults ista(model& model_,
       
       // compute new fit; if this fit is non-finite, we can jump to the next
       // iteration
-      fit_k = model_.fit(parameters_k, parameterLabels);
+      fit_k = model_.fit(parameters_k, parameterLabels) +
+        smoothPenalty_.getValue(parameters_k, parameterLabels, tuningParameters); // ridge penalty part
       if(control_.verbose == -99)
       {
         Rcpp::Rcout << "fit_k : " << fit_k << std::endl;
@@ -177,10 +172,12 @@ inline linr::fitResults ista(model& model_,
       
       // fit_k is only part of the fit we are interested in. We also need
       // the penalty values:
-      penalty_k = penalty_.getValue(parameters_k, parameterLabels, tuningParameters);
+      penalty_k = penalty_.getValue(parameters_k, 
+                                    parameterLabels, 
+                                    tuningParameters);
+      
       penalizedFit_k = fit_k + 
-        penalty_k +  // lasso part
-        smoothPenalty_.getValue(parameters_k, parameterLabels, tuningParameters); // ridge part
+        penalty_k;  // lasso part
       
       if(control_.verbose == -99){
         Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k << std::endl;
@@ -242,8 +239,11 @@ inline linr::fitResults ista(model& model_,
       
       if(breakInner) {
         // compute gradients at new position
-        gradients_k = model_.gradients(parameters_k, parameterLabels) + 
-          smoothPenalty_.getGradients(parameters_k, parameterLabels, tuningParameters); // ridge part
+        gradients_k = model_.gradients(parameters_k, 
+                                       parameterLabels) + 
+          smoothPenalty_.getGradients(parameters_k, 
+                                      parameterLabels, 
+                                      tuningParameters); // ridge part
         
         if(control_.verbose == -99){
           Rcpp::Rcout << "gradients_k\n: " << gradients_k << std::endl;
@@ -275,6 +275,12 @@ inline linr::fitResults ista(model& model_,
       continue;
     }
     
+    gradients_k = model_.gradients(parameters_k, 
+                                   parameterLabels) + 
+                                     smoothPenalty_.getGradients(parameters_k, 
+                                                                 parameterLabels, 
+                                                                 tuningParameters); // ridge part
+    
     fits.at(outer_iteration+1) = penalizedFit_k;
     
     // check outer breaking condition
@@ -293,13 +299,6 @@ inline linr::fitResults ista(model& model_,
       
     }else if(control_.stepSizeIn == barzilaiBorwein || 
       control_.stepSizeIn == stochasticBarzilaiBorwein){
-      
-      if(control_.verbose == -99){
-        Rcpp::Rcout << "gradients_k\n" << gradients_k << std::endl;
-        gradients_k = model_.gradients(parameters_k, parameterLabels) + 
-          smoothPenalty_.getGradients(parameters_k, parameterLabels, tuningParameters);
-        Rcpp::Rcout << "Should be identical to\n" << gradients_k << std::endl;
-      }
       
       parameterChange = parameters_k - parameters_kMinus1;
       gradientChange = gradients_k - gradients_kMinus1;
@@ -327,6 +326,7 @@ inline linr::fitResults ista(model& model_,
     }
     
     // for next iteration: save current values as previous values
+    fit_kMinus1 = fit_k;
     penalizedFit_kMinus1 = penalizedFit_k;
     parameters_kMinus1 = parameters_k;
     gradients_kMinus1 = gradients_k;
