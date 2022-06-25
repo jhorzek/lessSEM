@@ -39,10 +39,11 @@ public:
     stepSizeInh(static_cast<linr::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
     verbose(Rcpp::as<int> (control["verbose"])){}
   
-  Rcpp::List optimize(SEMCpp& SEM_, 
-                      Rcpp::NumericVector startingValues_, 
-                      double lambda_, 
-                      double alpha_){
+  Rcpp::List optimize(
+      Rcpp::NumericVector startingValues_, 
+      SEMCpp& SEM_,
+      double lambda_, 
+      double alpha_){
     
     SEMFitFramework SEMFF(SEM_);
     
@@ -139,8 +140,8 @@ public:
     convergenceCriterion(static_cast<linr::convergenceCriteriaGlmnet>(Rcpp::as<int> (control["convergenceCriterion"]))),
     verbose(Rcpp::as<int> (control["verbose"])){}
   
-  Rcpp::List optimize(SEMCpp& SEM_, 
-                      Rcpp::NumericVector startingValues_, 
+  Rcpp::List optimize(Rcpp::NumericVector startingValues_, 
+                      SEMCpp& SEM_, 
                       double lambda_, 
                       double alpha_){
     
@@ -192,7 +193,8 @@ public:
       Rcpp::Named("fit") = fitResults_.fit,
       Rcpp::Named("convergence") = fitResults_.convergence,
       Rcpp::Named("rawParameters") = finalParameters,
-      Rcpp::Named("fits") = fitResults_.fits
+      Rcpp::Named("fits") = fitResults_.fits,
+      Rcpp::Named("Hessian") = fitResults_.Hessian
     );
     return(result);
   }

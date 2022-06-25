@@ -108,6 +108,7 @@ END_RCPP
 RcppExport SEXP _rcpp_module_boot_SEM_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetEnet_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnet_cpp();
+RcppExport SEXP _rcpp_module_boot_glmnetEnetGeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurpose_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
@@ -120,6 +121,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_SEM_cpp", (DL_FUNC) &_rcpp_module_boot_SEM_cpp, 0},
     {"_rcpp_module_boot_glmnetEnet_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnet_cpp, 0},
     {"_rcpp_module_boot_istaEnet_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnet_cpp, 0},
+    {"_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp, 0},
     {"_rcpp_module_boot_istaEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetGeneralPurpose_cpp, 0},
     {NULL, NULL, 0}
 };

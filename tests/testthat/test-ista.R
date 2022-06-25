@@ -53,8 +53,8 @@ test_that("testing ista-lasso", {
   
   IL <- new(istaEnet, weights, control)
   lassoResult <- IL$optimize(
-    SEM,
     startingValues,
+    SEM,
     0,
     1
   )
@@ -70,8 +70,8 @@ test_that("testing ista-lasso", {
   
   # lasso
   lassoResult <- IL$optimize(
-    SEM,
     startingValues,
+    SEM,
     100,
     1
   )
@@ -95,8 +95,8 @@ test_that("testing ista-lasso", {
   
   # enet
   lassoResult <- IL$optimize(
-    SEM,
     startingValues,
+    SEM,
     100,
     .4
   )

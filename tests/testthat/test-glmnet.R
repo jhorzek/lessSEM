@@ -55,8 +55,8 @@ test_that("testing ista-lasso", {
   
   GNet <- new(glmnetEnet, weights, control)
   unregularized <- GNet$optimize(
-    SEM,
     startingValues,
+    SEM,
     0,
     1
   )
@@ -73,8 +73,8 @@ test_that("testing ista-lasso", {
   # lasso
   lambda_lasso <- 1
   lassoResult <- GNet$optimize(
-    SEM,
     startingValues,
+    SEM,
     lambda_lasso,
     1
   )
@@ -85,8 +85,8 @@ test_that("testing ista-lasso", {
   # enet
   lambda_enet <- 2.2
   enetResult <- GNet$optimize(
-    SEM,
     startingValues,
+    SEM,
     lambda_enet,
     .4
   )
@@ -106,8 +106,8 @@ test_that("testing ista-lasso", {
   
   IN <- new(istaEnet, weights, control)
   lassoResultIsta <- IN$optimize(
-    SEM,
     startingValues,
+    SEM,
     lambda_lasso,
     1
   )
@@ -118,8 +118,8 @@ test_that("testing ista-lasso", {
           lassoResultIsta$fit,7)
   
   enetResultIsta <- IN$optimize(
-    SEM,
     startingValues,
+    SEM,
     lambda_enet,
     .4
   )
