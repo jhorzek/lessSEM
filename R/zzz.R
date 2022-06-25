@@ -38,3 +38,4 @@ NULL
 Rcpp::loadModule("SEM_cpp", TRUE)
 Rcpp::loadModule("istaEnet_cpp", TRUE)
 Rcpp::loadModule("istaEnetGeneralPurpose_cpp", TRUE)
+Rcpp::loadModule("glmnetEnet_cpp", TRUE)

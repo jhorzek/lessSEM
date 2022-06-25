@@ -2,6 +2,7 @@
 #define ISTACLASS_H
 #include <RcppArmadillo.h>
 #include "model.hpp"
+#include "fitResults.hpp"
 #include "proximalOperator.hpp"
 #include "penalty.hpp"
 #include "smoothPenalty.hpp"
@@ -9,6 +10,18 @@
 // The design follows ensmallen (https://github.com/mlpack/ensmallen) in that the 
 // user supplies a C++ class with methods fit and gradients which is used
 // by the optimizer
+
+// The implementation of ista follows that outlined in 
+// Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding 
+// Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
+// 183–202. https://doi.org/10.1137/080716542
+// see Remark 3.1 on p. 191 (ISTA with backtracking)
+
+// GIST can be found in 
+// Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 
+// A General Iterative Shrinkage and Thresholding Algorithm for Non-convex 
+// Regularized Optimization Problems. Proceedings of the 30th International 
+// Conference on Machine Learning, 28(2)(2), 37–45.
 
 namespace linr{
 
@@ -34,6 +47,7 @@ const std::vector<std::string> stepSizeInheritance_txt = {
   "barzilaiBorwein",
   "stochasticBarzilaiBorwein"
 };
+
 struct control{
   const double L0; // L0 controls the step size used in the first iteration
   const double eta; // eta controls by how much the step size changes in the
@@ -61,28 +75,8 @@ struct control{
   // convoluted
 };
 
-struct fitResults{
-  double fit; // the final fit value (regularized fit)
-  arma::rowvec fits; // a vector with all fits at the outer iteration
-  bool convergence; // was the outer breaking condition met?
-  arma::rowvec parameterValues; // final parameter values
-};
-
-// The implementation of ista follows that outlined in 
-// Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding 
-// Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
-// 183–202. https://doi.org/10.1137/080716542
-// see Remark 3.1 on p. 191 (ISTA with backtracking)
-
-// GIST can be found in 
-// Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 
-// A General Iterative Shrinkage and Thresholding Algorithm for Non-convex 
-// Regularized Optimization Problems. Proceedings of the 30th International 
-// Conference on Machine Learning, 28(2)(2), 37–45.
-
-
 template<typename T> // T is the type of the tuning parameters
-inline fitResults ista(model& model_, 
+inline linr::fitResults ista(model& model_, 
                        Rcpp::NumericVector startingValuesRcpp,
                        proximalOperator<T>& proximalOperator_, // proximalOperator takes the tuning parameters
                        // as input -> <T>
@@ -97,8 +91,7 @@ inline fitResults ista(model& model_,
         "Using " << stepSizeInheritance_txt.at(control_.stepSizeIn) << " as step size inheritance\n" << 
           std::endl;
   }
-  // we rely heavily on parameter labels because we want to make sure that we 
-  // are changing the correct values
+  // separate labels and values
   const arma::rowvec startingValues = Rcpp::as<arma::rowvec>(startingValuesRcpp);
   const Rcpp::StringVector parameterLabels = startingValuesRcpp.names();
   
@@ -107,7 +100,6 @@ inline fitResults ista(model& model_,
     parameters_kMinus1 = startingValues;
   // the following elements will be required to judge the breaking condition
   arma::rowvec parameterChange(startingValues.n_elem);
-  arma::rowvec armaGradients(startingValues.n_elem);
   arma::rowvec gradientChange(startingValues.n_elem); // necessary for Barzilai Borwein
   arma::mat quadr, parchTimeGrad;
   
@@ -155,7 +147,6 @@ inline fitResults ista(model& model_,
     // parameters
     gradients_kMinus1 = model_.gradients(parameters_kMinus1, parameterLabels) +
       smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
-    armaGradients = gradients_kMinus1; // needed in convergence criterion
     
     if(control_.verbose == -99) Rcpp::Rcout << "gradients_kMinus1 : " << gradients_kMinus1 << std::endl;
     
@@ -210,7 +201,7 @@ inline fitResults ista(model& model_,
         // is compared to the exact fit
         parameterChange = parameters_k-parameters_kMinus1;
         quadr = parameterChange*arma::trans(parameterChange); // always positive
-        parchTimeGrad = parameterChange*arma::trans(armaGradients); // can be 
+        parchTimeGrad = parameterChange*arma::trans(gradients_kMinus1); // can be 
         // positive or negative
         
         if(control_.verbose == -99){

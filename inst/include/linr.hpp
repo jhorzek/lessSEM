@@ -3,6 +3,7 @@
 
 #include <RcppArmadillo.h>
 #include "ista_class.hpp"
+#include "glmnet_class.h"
 #include "lasso.hpp"
 #include "ridge.hpp"
 #endif

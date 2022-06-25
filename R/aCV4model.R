@@ -660,6 +660,7 @@ customACVRcpp_SEMCpp <- function(SEM,
   
   hessianEV <- eigen(hessian, only.values = TRUE)$values
   if(any(hessianEV < 0)) {
+    # see see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
     hessian <- hessian + diag(-1.1*min(hessianEV), nrow(hessian))
     hessianEV <- eigen(hessian, only.values = TRUE)$values
     warning("Computed Hessian is not positive definite. Adding values to the diagonal to make it positive definite...")
