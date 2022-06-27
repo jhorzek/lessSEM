@@ -83,7 +83,7 @@ test_that("testing elasticNet-lasso-c", {
   testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] - lslxParameter[,regularized]) < .002), TRUE)
   plot(rsemIsta)
   coef(rsemIsta)
-  coef(rsemIsta, alpha = 1, lambda = .1)
+  coef(rsemIsta, alpha = 1, lambda = lambdas[1])
   coef(rsemIsta, criterion = "AIC")
   coef(rsemIsta, criterion = "BIC")
   
@@ -102,7 +102,7 @@ test_that("testing elasticNet-lasso-c", {
   testthat::expect_equal(all(abs(rsemGlmnet@parameters[,rsemGlmnet@regularized] - lslxParameter[,regularized]) < .002), TRUE)
   plot(rsemGlmnet)
   coef(rsemGlmnet)
-  coef(rsemGlmnet, alpha = 1, lambda = .1)
+  coef(rsemGlmnet, alpha = 1, lambda = lambdas[1])
   coef(rsemGlmnet, criterion = "AIC")
   coef(rsemGlmnet, criterion = "BIC")
   
@@ -115,7 +115,7 @@ test_that("testing elasticNet-lasso-c", {
   coef(cvExact)
   coef(cvExact, rule = "1sd")
   coef(cvExact, rule = "penalized")
-  coef(cvExact, alpha = 1, lambda = .1)
+  coef(cvExact, alpha = 1, lambda = lambdas[1])
   plot(cvExact)
   
   ## Test approximated cross-validation
@@ -124,7 +124,7 @@ test_that("testing elasticNet-lasso-c", {
   # coef(cv)
   # coef(cv, rule = "1sd")
   # coef(cv, rule = "penalized")
-  # coef(cv, alpha = 1, lambda = .1)
+  # coef(cv, alpha = 1, lambda = lambdas[1])
   # plot(cv)
   # 
   # testthat::expect_equal(all(coef(cv) - coef(cvExact) ==0), TRUE)
