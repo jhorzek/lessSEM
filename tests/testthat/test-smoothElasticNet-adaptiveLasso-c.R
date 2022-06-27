@@ -1,4 +1,4 @@
-test_that("testing elasticNet-ridge-c", {
+test_that("testing smoothElasticNet-ridge-c", {
   library(lslx)
   library(lavaan)
   library(linr)
@@ -53,27 +53,24 @@ test_that("testing elasticNet-ridge-c", {
   names(weights) <- names(lavaanParameters)
   weights[paste0("f=~y",6:ncol(y))] <- 1
   
-  rsemIsta <- elasticNet(lavaanModel = modelFit, 
-                         weights =  weights, 
-                         alphas = 0, 
-                         lambdas = lambdas,
-                         method = "ista",
-                         control = controlIsta(verbose = 0, 
-                                               startingValues = "est")
+  rsemBfgs <- smoothElasticNetValue(lavaanModel = modelFit, 
+                               weights =  weights, 
+                               alphas = 0, 
+                               lambdas = lambdas,
+                               epsilon = 1e-8, 
+                               control = controlBFGS(startingValues = "start", 
+                                                     initialHessian = diag(100, length(lavaanParameters)),
+                                                     breakOuter = 1e-5, 
+                                                     breakInner = 1e-5, 
+                                                     sigma = 0,
+                                                     verbose = 0)
   )
+  rsemBfgs@fits$regM2LL
   
-  rsemIsta2 <- linr::ridge(lavaanModel = modelFit,
-                           regularized = paste0("f=~y",6:ncol(y)),
-                           lambdas = lambdas,
-                           method = "ista"
-  )
-  testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] -
-                                   rsemIsta2@parameters[,rsemIsta2@regularized]) < .002), TRUE)
-  
-  testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] - lslxParameter[,regularized]) < .002), TRUE)
-  plot(rsemIsta)
-  coef(rsemIsta)
-  coef(rsemIsta, alpha = 0, lambda = .1)
+  testthat::expect_equal(all(abs(rsemBfgs@parameters[,rsemBfgs@regularized] - lslxParameter[,regularized]) < .02), TRUE)
+  plot(rsemBfgs)
+  coef(rsemBfgs)
+  coef(rsemBfgs, alpha = 0, lambda = .1)
   
   rsemGlmnet <- elasticNet(lavaanModel = modelFit, 
                            weights =  weights, 
@@ -83,25 +80,10 @@ test_that("testing elasticNet-ridge-c", {
                            control = controlGlmnet(verbose = 0, 
                                                    startingValues = "est")
   )
-  rsemGlmnet2 <- linr::ridge(lavaanModel = modelFit,
-                             regularized = paste0("f=~y",6:ncol(y)),
-                             lambdas = lambdas,
-                             method = "glmnet", 
-                             control = controlGlmnet()
-  )
-  testthat::expect_equal(all(abs(rsemGlmnet@parameters[,rsemGlmnet@regularized] -
-                                   rsemGlmnet2@parameters[,rsemGlmnet2@regularized]) < .002), TRUE)
-  testthat::expect_equal(all(abs(rsemGlmnet@parameters[,rsemGlmnet@regularized] - lslxParameter[,regularized]) < .002), TRUE)
+  testthat::expect_equal(all(abs(rsemGlmnet@parameters[,rsemGlmnet@regularized] - rsemBfgs@parameters[,rsemBfgs@regularized]) < .02), TRUE)
   plot(rsemGlmnet)
   coef(rsemGlmnet)
   coef(rsemGlmnet, alpha = 0, lambda = .1)
-  
-  rsemBfgs <- ridgeBfgs(lavaanModel = modelFit,
-                        regularized = paste0("f=~y",6:ncol(y)),
-                        lambdas = lambdas
-  )
-  testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] -
-                                   rsemBfgs@parameters[,rsemBfgs@regularized]) < .002), TRUE)
   
   ## Test exact cross-validation
   warning("Not testing approximate cross-validation")

@@ -103,7 +103,12 @@
 #' )
 #' aCV@cvfitsDetails
 #' @export
-aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, returnSubsetParameters = FALSE, control = controlGLMNET()){
+aCV4regularizedSEM <- function(regularizedSEM, 
+                               k, 
+                               recomputeHessian = TRUE, 
+                               returnSubsetParameters = FALSE, 
+                               control = controlGLMNET()){
+  
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
   }
@@ -116,7 +121,9 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
   
   N <- nrow(data)
   
-  aCVSEM <- linr:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, transformVariances = TRUE, fit = FALSE)
+  aCVSEM <- linr:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
+                                 transformVariances = TRUE, 
+                                 fit = FALSE)
   
   # create subsets 
   if(is.matrix(k)){
@@ -190,7 +197,8 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
     if(recomputeHessian){
       hessianOfDifferentiablePart <- NULL
     }else{
-      if(!regularizedSEM@inputArguments$control$saveHessian) stop("Hessians were not saved in the regularizedSEM object. This is the default as saving the Hessians can take a lot of disk space. To save the Hessians, use the controlGLMNET argument (see ?controlGLMNET).")
+      if(!regularizedSEM@inputArguments$control$saveHessian)
+        stop("Hessians were not saved in the regularizedSEM object. This is the default as saving the Hessians can take a lot of disk space. To save the Hessians, use the controlGLMNET argument (see ?controlGLMNET).")
       select <- regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$lambda == lambda &
         regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$alpha == alpha
       hessianOfDifferentiablePart <- regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$Hessian[[which(select)]]
@@ -211,7 +219,8 @@ aCV4regularizedSEM <- function(regularizedSEM, k, recomputeHessian = TRUE, retur
       subsetParameters[,,ro] <- aCV$subsetParameters[,dimnames(subsetParameters)[[2]]]
     }
     
-    cvfitsDetails[cvfitsDetails$alpha == alpha & cvfitsDetails$lambda == lambda,paste0("testSet",1:k)] <- aCV$leaveOutFits
+    cvfitsDetails[cvfitsDetails$alpha == alpha & cvfitsDetails$lambda == lambda,
+                  paste0("testSet",1:k)] <- aCV$leaveOutFits
     cvfits$cvfit[ro] <- sum(aCV$leaveOutFits)
     if(control$verbose == 0) setTxtProgressBar(progressbar,ro)
     

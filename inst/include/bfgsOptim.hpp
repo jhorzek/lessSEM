@@ -1,18 +1,19 @@
-#ifndef GLMNETCLASS_H
-#define GLMNETCLASS_H
+#ifndef BFGSOPTIMCLASS_H
+#define BFGSOPTIMCLASS_H
 #include <RcppArmadillo.h>
 #include "model.hpp"
 #include "fitResults.hpp"
-#include "lasso.hpp"
+#include "proximalOperator.hpp"
 #include "ridge.hpp"
-#include "enet.hpp"
 #include "bfgs.hpp"
 
 // The design follows ensmallen (https://github.com/mlpack/ensmallen) in that the 
 // user supplies a C++ class with methods fit and gradients which is used
-// by the optimizer
+// by the optimizer.
 
-// The implementation of GLMNET follows that outlined in 
+// Important: This is not the same implementation of BFGS as that used in, for instance,
+// optim. Instead, the objective was to create a BFGS optimizer for smooth functions
+// which is very similar to the GLMNET optimizer proposed by 
 // 1) Friedman, J., Hastie, T., & Tibshirani, R. (2010). 
 // Regularization Paths for Generalized Linear Models via Coordinate Descent. 
 // Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
@@ -26,19 +27,19 @@
 
 namespace linr{
 
-enum convergenceCriteriaGlmnet{
-  GLMNET,
-  fitChange,
-  gradients
+enum convergenceCriteriaBFGS{
+  GLMNET_,
+  fitChange_,
+  gradients_
 };
-const std::vector<std::string> convergenceCriteriaGlmnet_txt = {
-  "GLMNET",
-  "fitChange",
-  "gradients"
+const std::vector<std::string> convergenceCriteriaBFGS_txt = {
+  "GLMNET_",
+  "fitChange_",
+  "gradients_"
 };
 
 
-struct controlGLMNET{
+struct controlBFGS{
   const arma::mat initialHessian;
   const double stepSize;
   const double sigma;
@@ -48,137 +49,18 @@ struct controlGLMNET{
   const int maxIterLine;
   const double breakOuter; // change in fit required to break the outer iteration
   const double breakInner;
-  const convergenceCriteriaGlmnet convergenceCriterion; // this is related to the inner
+  const convergenceCriteriaBFGS convergenceCriterion; // this is related to the inner
   // breaking condition. 
   const int verbose; // if set to a value > 0, the fit every verbose iterations
   // is printed. If set to -99 you will get the debug output which is horribly
   // convoluted
 };
 
-inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
-                                const arma::rowvec& gradients_kMinus1,
-                                const arma::mat& Hessian,
-                                const double lambda,
-                                const double alpha,
-                                const arma::rowvec& weights,
-                                const int maxIterIn,
-                                const double breakInner,
-                                const int verbose
-){
-  arma::rowvec stepDirection = parameters_kMinus1;
-  stepDirection.fill(0.0);
-  arma::rowvec z = parameters_kMinus1;
-  z.fill(0.0);
-  arma::rowvec parameters_k = parameters_kMinus1;
-  parameters_k.fill(0.0);
-  arma::colvec hessianXdirection, 
-  HessTimesZ(Hessian.n_rows, arma::fill::zeros);
-  arma::mat HessDiag(Hessian.n_rows, Hessian.n_cols, arma::fill::zeros),
-  dp_k(1,1, arma::fill::zeros), 
-  d2p_k(1,1, arma::fill::zeros), 
-  z_j(1,1, arma::fill::zeros),
-  newParameter(1,1, arma::fill::zeros), 
-  zChange(1,1, arma::fill::zeros);
-  
-  HessDiag.diag() = Hessian.diag();
-  
-  std::vector<int> randOrder(stepDirection.n_elem);
-  for(int i = 0; i < stepDirection.n_elem; i++) randOrder.at(i) = i;
-  
-  if(verbose == -99 ) Rcpp::Rcout << "parameters_kMinus1" << parameters_kMinus1 << std::endl;
-  
-  for(int it = 0; it < maxIterIn; it++){
-    
-    // reset direction z
-    z.fill(arma::fill::zeros); 
-    //z_old.fill(arma::fill::zeros);
-    // iterate over parameters in random order
-    //std::random_shuffle(randOrder.begin(), randOrder.end());
-    
-    for(int p = 0; p < stepDirection.n_elem; p++){
-      
-      // compute derivative elements:
-      hessianXdirection = Hessian*arma::trans(stepDirection);
-      if(verbose == -99 ) Rcpp::Rcout << "hessianXdirection in iteration " << p << ":\n" << hessianXdirection << std::endl;
-      dp_k = gradients_kMinus1.col(randOrder.at(p)) + hessianXdirection.row(randOrder.at(p));
-      d2p_k = Hessian.row(randOrder.at(p)).col(randOrder.at(p));
-      if(verbose == -99 ) Rcpp::Rcout << "randOrder.at(p)\n" << randOrder.at(p) << std::endl;
-      if(verbose == -99 ) Rcpp::Rcout << "dp_k\n" << dp_k << std::endl;
-      if(verbose == -99 ) Rcpp::Rcout << "d2p_k\n" << d2p_k << std::endl;
-      if(verbose == -99 ) Rcpp::Rcout << "stepDirection in iteration " << p << ":\n" << stepDirection << std::endl;
-      // if the parameter is regularized:
-      if(weights.at(randOrder.at(p)) != 0){
-        newParameter = parameters_kMinus1.at(randOrder.at(p));
-        
-        if(verbose == -99 ) Rcpp::Rcout << "parameter at position " << randOrder.at(p) << ": " << newParameter << std::endl;
-        
-        // adjust stepDirection for regularized parameters
-        if((dp_k(0,0)-alpha*lambda*weights.col(randOrder.at(p))(0,0)) >= 
-           (d2p_k(0,0)*(newParameter(0,0) + stepDirection.col(randOrder.at(p))(0,0)))){
-          if(verbose == -99 ) Rcpp::Rcout << "condition 1" << std::endl;
-          // condition 1
-          z_j = -(dp_k-alpha*lambda*weights.col(randOrder.at(p)))/(d2p_k);
-          z.col(randOrder.at(p)) = z_j(0,0);
-          stepDirection.col(randOrder.at(p)) += z_j(0,0);
-          
-        }else if((dp_k(0,0)+alpha*lambda*weights.col(randOrder.at(p))(0,0)) <=
-          (d2p_k(0,0)*(newParameter(0,0) + stepDirection.col(randOrder.at(p))(0,0)))){
-          if(verbose == -99 ) Rcpp::Rcout << "condition 2" << std::endl;
-          // condition 2
-          z_j = -(dp_k+alpha*lambda*weights.col(randOrder.at(p)))/(d2p_k);
-          z.col(randOrder.at(p)) = z_j(0,0);
-          stepDirection.col(randOrder.at(p)) = stepDirection.col(randOrder.at(p)) + z_j(0,0);
-          
-        }else{
-          if(verbose == -99 ) Rcpp::Rcout << "condition 3" << std::endl;
-          // condition 3
-          z_j = -(newParameter+stepDirection.col(randOrder.at(p)));
-          z.col(randOrder.at(p)) = z_j(0,0);
-          stepDirection.col(randOrder.at(p)) = stepDirection.col(randOrder.at(p))+z_j(0,0);
-          
-        }
-      }else{
-        if(verbose == -99 ) Rcpp::Rcout << "Not regularized" << std::endl;
-        // if not regularized: coordinate descent with newton direction
-        z_j = -dp_k/d2p_k;
-        z.col(randOrder.at(p)) = z_j(0,0);
-        stepDirection.col(randOrder.at(p)) = stepDirection.col(randOrder.at(p))+z_j(0,0);
-        
-      }
-    }
-    
-    if(verbose == -99 ) Rcpp::Rcout << "z = \n" << z << std::endl;
-    // check inner stopping criterion:
-    HessTimesZ = HessDiag*arma::pow(arma::trans(z),2);
-    
-    // zChange = z*arma::trans(z_old);
-    // if(useMultipleConvergenceCriteria & (zChange(0,0) < breakInner)){
-    //   break;
-    // }
-    if(verbose == -99 ) Rcpp::Rcout << "HessTimesZ.max(): " << HessTimesZ.max() << std::endl;
-    
-    if(HessTimesZ.max() < breakInner){
-      
-      if(verbose == -99 ) Rcpp::Rcout << "Inner iteration converged" << std::endl;
-      break;
-    }
-    // z_old = z;
-  }
-  if(HessTimesZ.max() >= breakInner){
-    if(verbose == -99) Rcpp::Rcout << 
-      "Inner iteration did not converge: " << 
-      HessTimesZ.max() << 
-      std::endl;
-  }
-  return(stepDirection);
-  
-}
-
-
-inline arma::rowvec glmnetLineSearch(
+// the line search procedure is the same as used by glmnet
+template<typename T> // T is the type of the tuning parameters
+inline arma::rowvec bfgsLineSearch(
     model& model_,
-    penaltyLASSO& penalty_,
-    penaltyRidge& smoothPenalty_, 
+    smoothPenalty<T>& smoothPenalty_,
     const arma::rowvec& parameters_kMinus1, 
     const Rcpp::StringVector& parameterLabels,
     const arma::rowvec& direction,
@@ -186,7 +68,7 @@ inline arma::rowvec glmnetLineSearch(
     const arma::rowvec& gradients_kMinus1,
     const arma::mat& Hessian_kMinus1,
     
-    const tuningParametersEnet& tuningParameters,
+    const T& tuningParameters,
     
     const double stepSize, 
     const double sigma,
@@ -204,18 +86,19 @@ inline arma::rowvec glmnetLineSearch(
   double f_k; // new combined fit
   
   // get penalized M2LL for step size 0:
-  
-  double pen_0 = penalty_.getValue(parameters_kMinus1, 
-                                   parameterLabels,
-                                   tuningParameters);
+  // Note: we assume that the penalty is already incorporated in the 
+  // normal fit function; the following is only in here to demonstrate the 
+  // parallels to glmnet
+  double pen_0 = 0.0;
   // Note: we see the smooth penalty as part of the smooth
   // objective function and not as part of the non-differentiable
   // penalty
   double f_0 = fit_kMinus1 + pen_0;
   // needed for convergence criterion (see Yuan et al. (2012), Eq. 20)
-  double pen_d = penalty_.getValue(parameters_kMinus1 + direction, 
-                                   parameterLabels,
-                                   tuningParameters);
+  // Note: we assume that the penalty is already incorporated in the 
+  // normal fit function; the following is only in here to demonstrate the 
+  // parallels to glmnet
+  double pen_d = 0.0;
   
   double currentStepSize;
   // a step size of >= 1 would result in no change or in an increasing step
@@ -259,9 +142,7 @@ inline arma::rowvec glmnetLineSearch(
     // compute g(stepSize) = g(x+td) + p(x+td) - g(x) - p(x), 
     // where g is the differentiable part and p the non-differentiable part
     // p(x+td):
-    p_k = penalty_.getValue(parameters_k, 
-                            parameterLabels, 
-                            tuningParameters);
+    p_k = 0.0;
     
     // g(x+td) + p(x+td)
     f_k = fit_k + p_k;
@@ -283,8 +164,8 @@ inline arma::rowvec glmnetLineSearch(
     
     if(verbose == -99 ) Rcpp::Rcout << "comparing " << 
       f_k - f_0 << 
-      " and " << sigma*currentStepSize*compareTo(0,0) << 
-        std::endl;
+        " and " << sigma*currentStepSize*compareTo(0,0) << 
+          std::endl;
     converged = f_k - f_0 <=  sigma*currentStepSize*compareTo(0,0);
     
     if(converged){
@@ -309,15 +190,14 @@ inline arma::rowvec glmnetLineSearch(
   return(parameters_k);
 }
 
-
-inline linr::fitResults glmnet(model& model_, 
+template<typename T> // T is the type of the tuning parameters
+inline linr::fitResults bfgsOptim(model& model_, 
                                Rcpp::NumericVector startingValuesRcpp,
-                               penaltyLASSO& penalty_,
-                               penaltyRidge& smoothPenalty_, 
-                               const tuningParametersEnet tuningParameters, // tuning parameters are of type T
-                               const controlGLMNET& control_){
+                               smoothPenalty<T>& smoothPenalty_,
+                               const T& tuningParameters, // tuning parameters are of type T
+                               const controlBFGS& control_){
   if(control_.verbose != 0) {
-    Rcpp::Rcout << "Optimizing with glmnet.\n" <<
+    Rcpp::Rcout << "Optimizing with bfgs.\n" <<
       std::endl;
   }
   
@@ -342,16 +222,10 @@ inline linr::fitResults glmnet(model& model_,
                                     smoothPenalty_.getValue(parameters_kMinus1,
                                                             parameterLabels,
                                                             tuningParameters);
-  // add non-differentiable part
-  double penalizedFit_k = fit_k +
-    penalty_.getValue(parameters_k,
-                      parameterLabels,
-                      tuningParameters);
+  // add non-differentiable part -> there is none here
+  double penalizedFit_k = fit_k;
   
-  double penalizedFit_kMinus1 = fit_kMinus1 +
-    penalty_.getValue(parameters_kMinus1,
-                      parameterLabels,
-                      tuningParameters);
+  double penalizedFit_kMinus1 = fit_kMinus1;
   
   // the following vector will save the fits of all iterations:
   Rcpp::NumericVector fits(control_.maxIterOut+1);
@@ -391,36 +265,28 @@ inline linr::fitResults glmnet(model& model_,
     if(control_.verbose == -99) Rcpp::Rcout << "parameters_kMinus1\n: " << parameters_kMinus1 << std::endl;
     if(control_.verbose == -99) Rcpp::Rcout << "gradients_kMinus1\n: " << gradients_kMinus1 << std::endl;
     
-    // find step direction
-    direction = glmnetInner(parameters_kMinus1,
-                            gradients_kMinus1,
-                            Hessian_kMinus1,
-                            tuningParameters.lambda,
-                            tuningParameters.alpha,
-                            tuningParameters.weights,
-                            control_.maxIterIn,
-                            control_.breakInner,
-                            control_.verbose);
+    // find step direction -> simple quasi-Newton step
+    direction = -arma::trans(arma::inv_sympd(Hessian_kMinus1)*arma::trans(gradients_kMinus1));
+    
     if(control_.verbose == -99) Rcpp::Rcout << "Found step direction\n: " << direction << std::endl;
     
     // find length of step in direction
-    parameters_k = glmnetLineSearch(model_, 
-                                    penalty_,
-                                    smoothPenalty_, 
-                                    parameters_kMinus1, 
-                                    parameterLabels,
-                                    direction,
-                                    fit_kMinus1, 
-                                    gradients_kMinus1,
-                                    Hessian_kMinus1,
-                                    
-                                    tuningParameters,
-                                    
-                                    control_.stepSize, 
-                                    control_.sigma,
-                                    control_.gamma, 
-                                    control_.maxIterLine,
-                                    control_.verbose);
+    parameters_k = bfgsLineSearch(model_, 
+                                  smoothPenalty_, 
+                                  parameters_kMinus1, 
+                                  parameterLabels,
+                                  direction,
+                                  fit_kMinus1, 
+                                  gradients_kMinus1,
+                                  Hessian_kMinus1,
+                                  
+                                  tuningParameters,
+                                  
+                                  control_.stepSize, 
+                                  control_.sigma,
+                                  control_.gamma, 
+                                  control_.maxIterLine,
+                                  control_.verbose);
     
     if(control_.verbose == -99) Rcpp::Rcout << "Proposed parameters_k\n: " << parameters_k << std::endl;
     
@@ -436,11 +302,8 @@ inline linr::fitResults glmnet(model& model_,
                          smoothPenalty_.getValue(parameters_k,
                                                  parameterLabels,
                                                  tuningParameters);
-    // add non-differentiable part
-    penalizedFit_k = fit_k +
-      penalty_.getValue(parameters_k,
-                        parameterLabels,
-                        tuningParameters);
+    // add non-differentiable part -> there is none here
+    penalizedFit_k = fit_k;
     
     fits.at(outer_iteration+1) = penalizedFit_k;
     
@@ -469,7 +332,7 @@ inline linr::fitResults glmnet(model& model_,
     if(control_.verbose == -99) Rcpp::Rcout << "New Hessian_k\n: " << Hessian_k << std::endl;
     
     // check convergence 
-    if(control_.convergenceCriterion == GLMNET) {
+    if(control_.convergenceCriterion == GLMNET_) {
       arma::mat HessDiag = arma::eye(Hessian_k.n_rows,
                                      Hessian_k.n_cols);
       HessDiag.fill(0.0);
@@ -481,7 +344,7 @@ inline linr::fitResults glmnet(model& model_,
       }
       
     }
-    if(control_.convergenceCriterion == fitChange){
+    if(control_.convergenceCriterion == fitChange_){
       try{
         breakOuter = std::abs(fits.at(outer_iteration+1) - 
           fits.at(outer_iteration)) < 
@@ -490,13 +353,9 @@ inline linr::fitResults glmnet(model& model_,
         Rcpp::stop("Error while computing convergence criterion");
       }
     }
-    if(control_.convergenceCriterion == gradients){
+    if(control_.convergenceCriterion == gradients_){
       try{
-        arma::rowvec subGradients = penalty_.getSubgradients(
-          parameters_k,
-          gradients_k,
-          tuningParameters
-        );
+        arma::rowvec subGradients = gradients_k;
         
         // check if all gradients are below the convergence criterion:
         breakOuter = arma::sum(arma::abs(subGradients) < control_.breakOuter) == 
@@ -533,7 +392,7 @@ inline linr::fitResults glmnet(model& model_,
   
   return(fitResults_);
   
-}// end glmnet
+}// end bfgs
 
 }// end namespace
 

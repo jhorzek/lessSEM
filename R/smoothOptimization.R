@@ -1,19 +1,18 @@
-#' lasso
+#' smoothLasso
 #' 
 #' This function allows for regularization of models built in lavaan with the
-#' lasso penalty. The returned object is an S4 class; its elements can be accessed
-#' with the "@" operator (see examples).
+#' smoothed lasso penalty. The returned object is an S4 class; its elements can be accessed
+#' with the "@" operator (see examples). We don't recommend using this function.
+#' Use lasso() instead.
 #' 
 #' For more details, see:
 #' 
-#' 1. Tibshirani, R. (1996). Regression Shrinkage and Selection via the Lasso. 
-#'    Journal of the Royal Statistical Society. Series B (Methodological), 58(1), 267–288.
+#' 1. Lee, S.-I., Lee, H., Abbeel, P., & Ng, A. Y. (2006). 
+#' Efficient L1 Regularized Logistic Regression. Proceedings of the 
+#' Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408.
 #' 2. Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). 
 #'    Regularized Structural Equation Modeling. Structural Equation Modeling: 
 #'    A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793    
-#' 3. Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood 
-#'    Method for Structural Equation Modeling. Psychometrika, 82(2),
-#'    329–354. https://doi.org/10.1007/s11336-017-9566-9
 #'  
 #' @param lavaanModel model of class lavaan 
 #' @param regularized vector with names of parameters which are to be regularized.
@@ -23,20 +22,17 @@
 #' @param nLambdas alternative to lambda: If alpha = 1, linr can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
-#' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
-#' for more details.
+#' the controlBFGS function. See ?controlBFGS for more details.
 #' @md
 #' @export
-lasso <- function(lavaanModel,
-                  regularized,
-                  lambdas = NULL,
-                  nLambdas = NULL,
-                  method = "ista", 
-                  control = controlIsta()){
+smoothLasso <- function(lavaanModel,
+                        regularized,
+                        lambdas = NULL,
+                        nLambdas = NULL,
+                        epsilon,
+                        control = controlBFGS()){
   
   weights <- getLavaanParameters(lavaanModel)
   weights[] <- 0
@@ -49,23 +45,23 @@ lasso <- function(lavaanModel,
     names(weights)
   ))
   
-  result <- elasticNet(
+  result <- smoohtElasticNet(
     lavaanModel = lavaanModel,
     weights = weights,
     lambdas = lambdas,
     nLambdas = nLambdas,
     alphas = 1,
-    method = method, 
+    epsilon = epsilon, 
     control = control
   )
   return(result)
   
 }
 
-#' adaptiveLasso
+#' smoothAdaptiveLasso
 #' 
 #' This function allows for regularization of models built in lavaan with the
-#' adaptive lasso penalty. The returned object is an S4 class; its elements can be accessed
+#' smooth adaptive lasso penalty. The returned object is an S4 class; its elements can be accessed
 #' with the "@" operator (see examples).
 #' 
 #' For more details, see:
@@ -76,9 +72,9 @@ lasso <- function(lavaanModel,
 #' 2. Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). 
 #'    Regularized Structural Equation Modeling. Structural Equation Modeling: 
 #'    A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
-#' 3. Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood 
-#'    Method for Structural Equation Modeling. Psychometrika, 82(2),
-#'    329–354. https://doi.org/10.1007/s11336-017-9566-9
+#' 3. Lee, S.-I., Lee, H., Abbeel, P., & Ng, A. Y. (2006). 
+#' Efficient L1 Regularized Logistic Regression. Proceedings of the 
+#' Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408.
 #'  
 #' @param lavaanModel model of class lavaan 
 #' @param regularized vector with names of parameters which are to be regularized.
@@ -93,21 +89,18 @@ lasso <- function(lavaanModel,
 #' @param nLambdas alternative to lambda: If alpha = 1, linr can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
-#' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
-#' for more details.
+#' the controlBFGS function. See ?controlBFGS for more details.
 #' @md
 #' @export
-adaptiveLasso <- function(lavaanModel,
-                  regularized,
-                  weights = NULL,
-                  lambdas = NULL,
-                  nLambdas = NULL,
-                  method = "ista", 
-                  control = controlIsta()){
+smoothAdaptiveLasso <- function(lavaanModel,
+                          regularized,
+                          weights = NULL,
+                          lambdas = NULL,
+                          nLambdas = NULL,
+                          epsilon, 
+                          control = controlBFGS()){
   if(is.null(weights)){
     weights <- 1/abs(getLavaanParameters(lavaanModel))
     weights[!names(weights) %in% regularized] <- 0
@@ -121,20 +114,20 @@ adaptiveLasso <- function(lavaanModel,
     names(weights)
   ))
   
-  result <- elasticNet(
+  result <- smoothElasticNet(
     lavaanModel = lavaanModel,
     weights = weights,
     lambdas = lambdas,
     nLambdas = nLambdas,
     alphas = 1,
-    method = method, 
+    epsilon = epsilon, 
     control = control
   )
   return(result)
   
 }
 
-#' ridge
+#' ridgeBfgs
 #' 
 #' This function allows for regularization of models built in lavaan with the
 #' ridge penalty. Its elements can be accessed
@@ -154,19 +147,14 @@ adaptiveLasso <- function(lavaanModel,
 #' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
-#' for more details.
+#' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
 #' @md
 #' @export
-ridge <- function(lavaanModel,
+ridgeBfgs <- function(lavaanModel,
                   regularized,
                   lambdas = NULL,
-                  method = "ista", 
-                  control = controlIsta()){
+                  control = controlBFGS()){
   
   weights <- getLavaanParameters(lavaanModel)
   weights[] <- 0
@@ -179,23 +167,23 @@ ridge <- function(lavaanModel,
     names(weights)
   ))
   
-  result <- elasticNet(
+  result <- smoothElasticNet(
     lavaanModel = lavaanModel,
     weights = weights,
     lambdas = lambdas,
     nLambdas = NULL,
     alphas = 0,
-    method = method, 
+    epsilon = 0, # ridge is already smooth
     control = control
   )
   return(result)
   
 }
 
-#' elasticNet
+#' smoothElasticNet
 #' 
 #' This function allows for regularization of models built in lavaan with the
-#' elastic net penalty. Its elements can be accessed
+#' smooth elastic net penalty. Its elements can be accessed
 #' with the "@" operator (see examples).
 #' 
 #' For more details, see:
@@ -207,9 +195,9 @@ ridge <- function(lavaanModel,
 #' 2. Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). 
 #' Regularized Structural Equation Modeling. Structural Equation Modeling: 
 #' A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
-#' 3. Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood 
-#' Method for Structural Equation Modeling. Psychometrika, 82(2),
-#'  329–354. https://doi.org/10.1007/s11336-017-9566-9
+#' 3. Lee, S.-I., Lee, H., Abbeel, P., & Ng, A. Y. (2006). 
+#' Efficient L1 Regularized Logistic Regression. Proceedings of the 
+#' Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408.
 #' 
 #' @param lavaanModel model of class lavaan 
 #' @param weights labeled vector with weights for each of the parameters in the 
@@ -221,26 +209,22 @@ ridge <- function(lavaanModel,
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
 #' in [0,1]. 0 = ridge, 1 = lasso.
-#' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
-#' for more details.
+#' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
 #' @md
 #' @export
-elasticNet <- function(lavaanModel,
+smoothElasticNet <- function(lavaanModel,
                        weights,
                        lambdas = NULL,
                        nLambdas = NULL,
                        alphas,
-                       method = "ista", 
-                       control = controlIsta()){
+                       epsilon, 
+                       control = controlBFGS()){
   
   inputArguments <- as.list(environment())
   
-  if(! method %in% c("ista", "glmnet")) 
-    stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
+  if(any(alphas != 0)) warning("Optimization of non-smooth functions with bfgs is not recommended.")
   
   if(is.null(lambdas) && is.null(nLambdas)) 
     stop("Specify lambdas or nLambdas")
@@ -249,8 +233,8 @@ elasticNet <- function(lavaanModel,
   if(!is.null(nLambdas) && any(alphas != 1))
     stop("nLambdas only supported for lasso type penalty (alpha = 1).")
   
-  if(method == "ista" && !is(control, "controlIsta")) 
-    stop("control must be of class controlIsta. See ?controlIsta.")
+  if(!is(control, "controlBFGS")) 
+    stop("control must be of class controlBFGS See ?controlBFGS")
   
   if(!is(lavaanModel, "lavaan"))
     stop("lavaanModel must be of class lavaan")
@@ -305,85 +289,64 @@ elasticNet <- function(lavaanModel,
   if(any(!is.numeric(weights))) stop("weights must be numeric")
   weights <- weights[names(rawParameters)]
   
-  #### glmnet requires an initial Hessian ####
-  if(method == "glmnet"){
-    initialHessian <- control$initialHessian
-    if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
-      
-      if(!all(rownames(initialHessian) %in% names(linr::getLavaanParameters(lavaanModel))) ||
-         !all(colnames(initialHessian) %in% names(linr::getLavaanParameters(lavaanModel)))
-      ) stop("initialHessian must have the parameter names as rownames and colnames. See linr::getLavaanParameters(lavaanModel).")
-      
-    }else if(any(initialHessian == "compute")){
-      
-      initialHessian <- linr:::getHessian(SEM = SEM, raw = TRUE)
-      
-    }else if(any(initialHessian == "scoreBased")){
-      
-      scores <- linr:::getScores(SEM = SEM, raw = TRUE)
-      FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
-      rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
-      for(score in 1:nrow(scores)){
-        FisherInformation <- FisherInformation + t(-.5*scores[score,, drop = FALSE]) %*%(-.5*scores[score,, drop = FALSE]) # we are using the -2 log-Likelihood
-      }
-      
-      initialHessian <- -2*(-FisherInformation) # negative log-likelihood
-      # make symmetric; just in case...
-      initialHessian <- .5*(initialHessian + t(initialHessian))
-      while(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
-        diag(initialHessian) <- diag(initialHessian) + 1e-4
-      }
-      
-    }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
-      initialHessian <- diag(initialHessian,length(rawParameters))
-      rownames(initialHessian) <- names(rawParameters)
-      colnames(initialHessian) <- names(rawParameters)
-    }else{
-      stop("Invalid initialHessian passed to GLMNET. See ?controlGLMNET for more information.")
+  #### bfgs requires an initial Hessian ####
+  initialHessian <- control$initialHessian
+  if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
+    
+    if(!all(rownames(initialHessian) %in% names(linr::getLavaanParameters(lavaanModel))) ||
+       !all(colnames(initialHessian) %in% names(linr::getLavaanParameters(lavaanModel)))
+    ) stop("initialHessian must have the parameter names as rownames and colnames. See linr::getLavaanParameters(lavaanModel).")
+    
+  }else if(any(initialHessian == "compute")){
+    
+    initialHessian <- linr:::getHessian(SEM = SEM, raw = TRUE)
+    
+  }else if(any(initialHessian == "scoreBased")){
+    
+    scores <- linr:::getScores(SEM = SEM, raw = TRUE)
+    FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
+    rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
+    for(score in 1:nrow(scores)){
+      FisherInformation <- FisherInformation + t(-.5*scores[score,, drop = FALSE]) %*%(-.5*scores[score,, drop = FALSE]) # we are using the -2 log-Likelihood
     }
     
-    control$initialHessian <- initialHessian
+    initialHessian <- -2*(-FisherInformation) # negative log-likelihood
+    # make symmetric; just in case...
+    initialHessian <- .5*(initialHessian + t(initialHessian))
+    while(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
+      diag(initialHessian) <- diag(initialHessian) + 1e-4
+    }
+    
+  }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
+    initialHessian <- diag(initialHessian,length(rawParameters))
+    rownames(initialHessian) <- names(rawParameters)
+    colnames(initialHessian) <- names(rawParameters)
+  }else{
+    stop("Invalid initialHessian passed to GLMNET. See ?controlGLMNET for more information.")
   }
   
+  control$initialHessian <- initialHessian
+  
   #### prepare regularized model object ####
-  if(method == "glmnet"){
-    
-    controlIntern <- list(
-      initialHessian = control$initialHessian,
-      stepSize = control$stepSize,
-      sigma = control$sigma,
-      gamma = control$gamma,
-      maxIterOut = control$maxIterOut,
-      maxIterIn = control$maxIterIn,
-      maxIterLine = control$maxIterLine,
-      breakOuter = N*control$breakOuter,
-      breakInner = N*control$breakInner,
-      convergenceCriterion = control$convergenceCriterion, 
-      verbose = control$verbose
-    )
-    
-    regularizedModel <- new(glmnetEnet, 
-                            weights, 
-                            controlIntern)
-    
-  }else if(method == "ista"){
-    
-    controlIntern <- list(
-      L0 = control$L0,
-      eta = control$eta,
-      maxIterOut = control$maxIterOut,
-      maxIterIn = control$maxIterIn,
-      breakOuter = control$breakOuter,
-      convCritInner = control$convCritInner,
-      sigma = control$sigma,
-      stepSizeInheritance = control$stepSizeInheritance,
-      verbose = control$verbose
-    )
-    
-    regularizedModel <- new(istaEnet, 
-                            weights, 
-                            controlIntern)
-  }
+  
+  controlIntern <- list(
+    epsilon = epsilon,
+    initialHessian = control$initialHessian,
+    stepSize = control$stepSize,
+    sigma = control$sigma,
+    gamma = control$gamma,
+    maxIterOut = control$maxIterOut,
+    maxIterIn = control$maxIterIn,
+    maxIterLine = control$maxIterLine,
+    breakOuter = N*control$breakOuter,
+    breakInner = N*control$breakInner,
+    convergenceCriterion = control$convergenceCriterion, 
+    verbose = control$verbose
+  )
+  
+  regularizedModel <- new(bfgsEnet, 
+                          weights, 
+                          controlIntern)
   
   #### define tuning parameters and prepare fit results ####
   ## get max lambda ##
@@ -394,10 +357,10 @@ elasticNet <- function(lavaanModel,
     )
     
     maxLambda <- getMaxLambda_C(regularizedModel = regularizedModel,
-                              SEM = SEM,
-                              rawParameters = rawParameters,
-                              weights = weights,
-                              N = N)
+                                SEM = SEM,
+                                rawParameters = rawParameters,
+                                weights = weights,
+                                N = N)
     lambdas <- seq(0,
                    maxLambda,
                    length.out = nLambdas)
@@ -424,7 +387,7 @@ elasticNet <- function(lavaanModel,
     parameterEstimates
   )
   
-  if(method == "glmnet" && control$saveHessian){
+  if(control$saveHessian){
     Hessians <- list(
       "lambda" = tuningGrid$lambda,
       "alpha" = tuningGrid$alpha,
@@ -467,7 +430,7 @@ elasticNet <- function(lavaanModel,
     
     rawParameters <- result$rawParameters
     fits$nonZeroParameters[it] <- length(rawParameters) - 
-      sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
+      sum(abs(rawParameters[weights[names(rawParameters)] != 0]) <= epsilon)
     fits$regM2LL[it] <- result$fit
     fits$convergence[it] <- result$convergence
     
@@ -480,7 +443,6 @@ elasticNet <- function(lavaanModel,
                                                   raw = FALSE)
     parameterEstimates[it, names(rawParameters)] <- transformedParameters[names(rawParameters)]
     
-    if(method == "glmnet" && control$saveHessian) 
       Hessians$Hessian[[it]] <- result$Hessian
     
     # set initial values for next iteration
@@ -496,19 +458,14 @@ elasticNet <- function(lavaanModel,
                                   whichPars = startingValues,
                                   addMeans = control$addMeans)
       
-      if(method == "glmnet"){
-        regularizedModel$setHessian(controlIntern$initialHessian)
-      }
+      regularizedModel$setHessian(controlIntern$initialHessian)
       
     }else{
       
-      if(method == "glmnet"){
-        if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
-        
-        # set Hessian for next iteration
-        regularizedModel$setHessian(result$Hessian)
-        
-      }
+      if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
+      
+      # set Hessian for next iteration
+      regularizedModel$setHessian(result$Hessian)
       
     }
     

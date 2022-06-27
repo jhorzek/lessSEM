@@ -1,5 +1,5 @@
-#ifndef GLMNET_H
-#define GLMNET_H
+#ifndef BFGS_H
+#define BFGS_H
 
 namespace linr{
   
@@ -57,15 +57,15 @@ namespace linr{
       ySquared/yTimesD(0,0);
     
     if(!arma::is_finite(Hessian_k)){
-      Rcpp::warning("Invalid Hessian. Returning previous Hessian");
-      Hessian_k = Hessian_kMinus1;
-      return(Hessian_k);
+      Rcpp::warning("Non-finite Hessian. Returning previous Hessian");
+      return(Hessian_kMinus1);
     }
     
     // check for symmetric positive definiteness 
-    if(!Hessian_k.is_sympd()){
-      Rcpp::warning("Hessian not symmetric?");
+    if(!Hessian_k.is_symmetric()){
       // make symmetric
+      double sumElem = arma::accu(arma::pow(Hessian_k - .5*(Hessian_k + arma::trans(Hessian_k)),2));
+      if(sumElem > 1) Rcpp::warning("Hessian not symmetric");
       Hessian_k = .5*(Hessian_k + arma::trans(Hessian_k));
     }else{
       return(Hessian_k);
@@ -86,10 +86,11 @@ namespace linr{
       
       // check again...
       if(!Hessian_k.is_sympd()){
+        Rcpp::Rcout << eigenValues << std::endl;
+        Rcpp::Rcout << diagMat.diag() << std::endl;
         // return non-updated hessian
         Rcpp::warning("Invalid Hessian. Returning previous Hessian");
-        Hessian_k = Hessian_kMinus1;
-        return(Hessian_k);
+        return(Hessian_kMinus1);
       }
     }
     

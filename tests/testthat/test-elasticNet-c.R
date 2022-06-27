@@ -83,11 +83,14 @@ test_that("testing elastic net-c", {
   coef(rsemGlmnet, alpha = alpha, lambda = .1)
   
   ## Test exact cross-validation
-  warning("Not testing approximate cross-validation")
-  # cvExact <- CV4regularizedSEM(regularizedSEM = rsem, k = N)
-  # coef(cvExact)
-  # coef(cvExact, rule = "1sd")
-  # coef(cvExact, rule = "penalized")
-  # coef(cvExact, alpha = 1, lambda = .1)
-  # plot(cvExact)
+  cvExactGlmnet <- cv4elasticNet(regularizedSEM = rsemGlmnet, k = 5)
+  
+  cvExactIsta <- cv4elasticNet(regularizedSEM = rsemIsta, k = cvExactGlmnet@subsets)
+  
+  testthat::expect_equal(all(abs(cvExactGlmnet@cvfits - cvExactIsta@cvfits) < .2), TRUE)
+  testthat::expect_equal(all(abs(coef(cvExactGlmnet) -
+  coef(cvExactIsta)
+  ) < .2), TRUE)
+  
+  plot(cvExactIsta)
 })
