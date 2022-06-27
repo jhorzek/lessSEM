@@ -207,6 +207,8 @@ elasticNet <- function(lavaanModel,
     if(is(result, "try-error")) next
     
     rawParameters <- result$rawParameters
+    fits$nonZeroParameters[it] <- length(rawParameters) - 
+      sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
     fits$regM2LL[it] <- result$fit
     fits$convergence[it] <- result$convergence
     
@@ -217,7 +219,6 @@ elasticNet <- function(lavaanModel,
     fits$m2LL[it] <- SEM$fit()
     transformedParameters <- linr:::getParameters(SEM,
                                                   raw = FALSE)
-    
     parameterEstimates[it, names(rawParameters)] <- transformedParameters[names(rawParameters)]
     
     if(method == "glmnet" && control$saveHessian) 

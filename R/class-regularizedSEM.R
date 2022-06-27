@@ -93,7 +93,7 @@ setMethod("AIC", "regularizedSEM", function (object) {
   if(all(fits$alpha == 1)){
     fits$AIC <- fits$m2LL + 2*fits$nonZeroParameters
   }else{
-    warning("AIC for non-lasso models is experimental and should not be trusted. Use approximate cross-validation instead")
+    warning("AIC for non-lasso models is experimental and should not be trusted. Use (approximate) cross-validation instead")
     fits$AIC <- rep(NA, length(fits$m2LL))
     tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
     
@@ -131,7 +131,7 @@ setMethod("BIC", "regularizedSEM", function (object) {
   if(all(fits$alpha == 1)){
     fits$BIC <- fits$m2LL + log(N)*fits$nonZeroParameters
   }else{
-    warning("BIC for non-lasso models is experimental and should not be trusted. Use approximate cross-validation instead")
+    warning("BIC for non-lasso models is experimental and should not be trusted. Use (approximate) cross-validation instead")
     fits$BIC <- rep(NA, length(fits$m2LL))
     tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
     
