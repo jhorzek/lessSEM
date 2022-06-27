@@ -1,6 +1,7 @@
 test_that("testing ista-lasso", {
   library(lavaan)
   library(linr)
+  set.seed(123)
   
   model1 <- ' 
   # latent variable definitions
@@ -39,16 +40,17 @@ test_that("testing ista-lasso", {
   weights[] <- 0
   weights[labels %in% c("a", "b")] <- 1
   
+  H <- diag(1000, length(startingValues))
   control <- list(
-    initialHessian = diag(1,length(startingValues)),
+    initialHessian = H,
     stepSize = .9,
     sigma = 0,
     gamma = 0,
     maxIterOut = 1000,
     maxIterIn = 1000,
     maxIterLine = 1000,
-    breakOuter = 1e-6,
-    breakInner = 1e-5,
+    breakOuter = 1e-10,
+    breakInner = 1e-10,
     convergenceCriterion = 0, 
     verbose = 0
   )
@@ -60,18 +62,19 @@ test_that("testing ista-lasso", {
     0,
     1
   )
-  
+  control$H <- unregularized$Hessian
   unregularized$fit - -2*logLik(model)
   
   unregularized$rawParameters
+  unregularizedParam <- linr:::getParameters(SEM, raw = FALSE)
   
-  testthat::expect_equal(all(round(linr:::getParameters(SEM, raw = FALSE) - 
+  testthat::expect_equal(all(round( unregularizedParam - 
                                      linr::getLavaanParameters(model)[names(linr:::getParameters(SEM, raw = FALSE))],
                                    1) == 0),
                          TRUE)
   
   # lasso
-  lambda_lasso <- 1
+  lambda_lasso <- 5
   lassoResult <- GNet$optimize(
     startingValues,
     SEM,
@@ -79,11 +82,12 @@ test_that("testing ista-lasso", {
     1
   )
   lassoResult$rawParameters
+  lassoParam <- linr:::getParameters(SEM, raw = FALSE)
   testthat::expect_equal(any(lassoResult$rawParameters == 0),
                          TRUE)
   
   # enet
-  lambda_enet <- 2.2
+  lambda_enet <- 1.5
   enetResult <- GNet$optimize(
     startingValues,
     SEM,
@@ -91,6 +95,7 @@ test_that("testing ista-lasso", {
     .4
   )
   enetResult$rawParameters
+  enetParam <- linr:::getParameters(SEM, raw = FALSE)
   
   control <- list(
     L0 = .1,
@@ -112,10 +117,13 @@ test_that("testing ista-lasso", {
     1
   )
   lassoResultIsta$rawParameters
-  round(lassoResult$rawParameters -
-  lassoResultIsta$rawParameters,3)
-  round(lassoResult$fit -
-          lassoResultIsta$fit,7)
+  lassoParamIsta <- linr:::getParameters(SEM, raw = FALSE)
+  
+  testthat::expect_equal(all(
+    round(lassoParam -
+            lassoParamIsta,2) == 0), TRUE)
+  testthat::expect_equal(round(lassoResult$fit -
+          lassoResultIsta$fit,3) == 0, TRUE)
   
   enetResultIsta <- IN$optimize(
     startingValues,
@@ -124,21 +132,31 @@ test_that("testing ista-lasso", {
     .4
   )
   enetResultIsta$rawParameters
+  enetParamIsta <- linr:::getParameters(SEM, raw = FALSE)
   
-  enetResult$rawParameters - enetResultIsta$rawParameters
-  enetResult$fit - enetResultIsta$fit
+  testthat::expect_equal(all(
+    round(
+      enetParam - enetParamIsta,2) == 0), TRUE)
+  testthat::expect_equal(abs(enetResult$fit - enetResultIsta$fit) < .01, TRUE)
   
   N <- nrow(PoliticalDemocracy)
   
-  SEM <- linr::setParameters(SEM, names(enetResultIsta$rawParameters), enetResultIsta$rawParameters, raw = TRUE)
-  SEM$fit() + 
+  SEM <- linr::setParameters(SEM, names(enetResultIsta$rawParameters), 
+                             enetResultIsta$rawParameters, raw = TRUE)
+  testthat::expect_equal(enetResultIsta$fit -
+                           (SEM$fit() + 
     N*lambda_enet*.4* sum(abs(enetResultIsta$rawParameters*weights)) +
-    N*lambda_enet*(1-.4) * sum((enetResultIsta$rawParameters*weights)^2)
-  enetResultIsta$fit
+    N*lambda_enet*(1-.4) * sum((enetResultIsta$rawParameters*weights)^2)) == 0, TRUE)
+  
   
   SEM <- linr::setParameters(SEM, names(enetResult$rawParameters), enetResult$rawParameters, raw = TRUE)
+  
+  testthat::expect_equal(
+    enetResult$fit - (
   SEM$fit() + 
     N*lambda_enet*.4*sum(abs(enetResult$rawParameters*weights)) +
     N*lambda_enet*(1-.4) * sum((enetResult$rawParameters*weights)^2)
-  enetResult$fit
+    ) == 0, TRUE)
+
 })
+

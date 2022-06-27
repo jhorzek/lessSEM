@@ -9,8 +9,6 @@ controlGLMNET(
   startingValues = "est",
   initialHessian = ifelse(all(startingValues == "est"), "compute", 1),
   stepSize = 1,
-  c1 = 1e-04,
-  c2 = 0.9,
   sig = 1e-05,
   gam = 0,
   maxIterOut = 1000,
@@ -20,6 +18,7 @@ controlGLMNET(
   epsIn = 1e-10,
   convergenceCriterion = "GLMNET",
   saveHessian = FALSE,
+  activeSet = NULL,
   verbose = 0
 )
 }
@@ -56,9 +55,9 @@ considerably more difficult for larger sample sizes to reach the convergence cri
 
 \item{saveHessian}{should the Hessian be saved for later use? Note: This may take a lot of memory!}
 
-\item{verbose}{0 prints no additional information, > 0 prints GLMNET iterations}
-
 \item{activeSet}{Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.}
+
+\item{verbose}{0 prints no additional information, > 0 prints GLMNET iterations}
 }
 \description{
 Control the GLMNET optimizer.

@@ -1,11 +1,163 @@
+#' lasso
+#' 
+#' This function allows for regularization of models built in lavaan with the
+#' lasso penalty. See, among others:
+#' 1) Tibshirani, R. (1996). Regression Shrinkage and Selection via the Lasso. 
+#' Journal of the Royal Statistical Society. Series B (Methodological), 58(1), 267–288.
+#' 2) Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). 
+#' Regularized Structural Equation Modeling. Structural Equation Modeling: 
+#' A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+#' 3) Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood 
+#' Method for Structural Equation Modeling. Psychometrika, 82(2),
+#'  329–354. https://doi.org/10.1007/s11336-017-9566-9
+#'  
+#' @param lavaanModel model of class lavaan 
+#' @param regularized vector with names of parameters which are to be regularized.
+#' If you are unsure what these parameters are called, use 
+#' getLavaanParameters(<model>) with your lavaan model object
+#' @param lambdas numeric vector: values for the tuning parameter lambda
+#' @param nLambdas alternative to lambda: If alpha = 1, linr can automatically
+#' compute the first lambda value which sets all regularized parameters to zero.
+#' It will then generate nLambda values between 0 and the computed lambda.
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. With ista, the control argument can be used to switch to related procedures
+#' (currently gist).
+#' @param control used to control the optimizer. This element is generated with 
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
+#' @export
+
+
+lasso <- function(lavaanModel,
+                  regularized,
+                  lambdas = NULL,
+                  nLambdas = NULL,
+                  method = "ista", 
+                  control = controlIsta()){
+  
+  weights <- getLavaanParameters(lavaanModel)
+  weights[] <- 0
+  weights[regularized] <- 1
+  if(! all(regularized %in% names(weights))) stop(paste0(
+    "You specified that the following parameters should be regularized:\n",
+    paste0(regularized, collapse = ", "), 
+    ". Not all of these parameters could be found in the model.\n",
+    "The model has the following parameters:\n",
+    names(weights)
+  ))
+  
+  result <- elasticNet(
+    lavaanModel = lavaanModel,
+    weights = weights,
+    lambdas = lambdas,
+    nLambdas = nLambdas,
+    alphas = 1,
+    method = method, 
+    control = control
+  )
+  return(result)
+  
+}
+
+#' ridge
+#' 
+#' This function allows for regularization of models built in lavaan with the
+#' ridge penalty. See, among others:
+#' 1) Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). 
+#' Regularized Structural Equation Modeling. Structural Equation Modeling: 
+#' A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+#' 2) Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood 
+#' Method for Structural Equation Modeling. Psychometrika, 82(2),
+#'  329–354. https://doi.org/10.1007/s11336-017-9566-9
+#'  
+#' @param lavaanModel model of class lavaan 
+#' @param regularized vector with names of parameters which are to be regularized.
+#' If you are unsure what these parameters are called, use 
+#' getLavaanParameters(<model>) with your lavaan model object
+#' @param lambdas numeric vector: values for the tuning parameter lambda
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. With ista, the control argument can be used to switch to related procedures
+#' (currently gist).
+#' @param control used to control the optimizer. This element is generated with 
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
+#' @export
+
+ridge <- function(lavaanModel,
+                  regularized,
+                  lambdas = NULL,
+                  method = "ista", 
+                  control = controlIsta()){
+  
+  weights <- getLavaanParameters(lavaanModel)
+  weights[] <- 0
+  weights[regularized] <- 1
+  if(! all(regularized %in% names(weights))) stop(paste0(
+    "You specified that the following parameters should be regularized:\n",
+    paste0(regularized, collapse = ", "), 
+    ". Not all of these parameters could be found in the model.\n",
+    "The model has the following parameters:\n",
+    names(weights)
+  ))
+  
+  result <- elasticNet(
+    lavaanModel = lavaanModel,
+    weights = weights,
+    lambdas = lambdas,
+    nLambdas = nLambdas,
+    alphas = 0,
+    method = method, 
+    control = control
+  )
+  return(result)
+  
+}
+
+#' elasticNet
+#' 
+#' This function allows for regularization of models built in lavaan with the
+#' elastic net penalty. See 
+#' Zou, H., & Hastie, T. (2005). Regularization and variable selection via 
+#' the elastic net. Journal of the Royal Statistical Society: 
+#' Series B, 67(2), 301–320. https://doi.org/10.1111/j.1467-9868.2005.00503.x
+#' for the details of this regularization technique.
+#' 
+#' @param lavaanModel model of class lavaan 
+#' @param weights labeled vector with weights for each of the parameters in the 
+#' model. If you are unsure what these parameters are called, use 
+#' getLavaanParameters(<model>) with your lavaan model object
+#' @param lambdas numeric vector: values for the tuning parameter lambda
+#' @param nLambdas alternative to lambda: If alpha = 1, linr can automatically
+#' compute the first lambda value which sets all regularized parameters to zero.
+#' It will then generate nLambda values between 0 and the computed lambda.
+#' @param alphas numeric vector with values of the tuning parameter alpha. Must be
+#' in [0,1]. 0 = ridge, 1 = lasso.
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. With ista, the control argument can be used to switch to related procedures
+#' (currently gist).
+#' @param control used to control the optimizer. This element is generated with 
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
+#' @export
 elasticNet <- function(lavaanModel,
                        weights,
-                       lambdas,
+                       lambdas = NULL,
+                       nLambdas = NULL,
                        alphas,
                        method = "ista", 
                        control = controlIsta()){
   
   inputArguments <- as.list(environment())
+  
+  if(! method %in% c("ista", "glmnet")) 
+    stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
+  
+  if(is.null(lambdas) && is.null(nLambdas)) 
+    stop("Specify lambdas or nLambdas")
+  if(!is.null(lambdas) && !is.null(nLambdas))
+    stop("Specify either lambdas or nLambdas, not both")
+  if(!is.null(nLambdas) && any(alphas != 1))
+    stop("nLambdas only supported for lasso type penalty (alpha = 1).")
   
   if(method == "ista" && !is(control, "controlIsta")) 
     stop("control must be of class controlIsta. See ?controlIsta.")
@@ -103,7 +255,6 @@ elasticNet <- function(lavaanModel,
     control$initialHessian <- initialHessian
   }
   
-  
   #### prepare regularized model object ####
   if(method == "glmnet"){
     
@@ -145,6 +296,24 @@ elasticNet <- function(lavaanModel,
   }
   
   #### define tuning parameters and prepare fit results ####
+  ## get max lambda ##
+  if(!is.null(nLambdas)){
+    message(paste0(
+      "Automatically selecting the maximal lambda value.\n",
+      "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
+    )
+    
+    maxLambda <- getMaxLambda_C(regularizedModel = regularizedModel,
+                              SEM = SEM,
+                              rawParameters = rawParameters,
+                              weights = weights,
+                              N = N)
+    lambdas <- seq(0,
+                   maxLambda,
+                   length.out = nLambdas)
+    
+  }
+  
   tuningGrid <- expand.grid("lambda" = lambdas, 
                             "alpha" = alphas)
   
