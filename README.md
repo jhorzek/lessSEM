@@ -1,6 +1,6 @@
 # linr
 
-linr (**l**inr **i**s **n**ot **r**egsem) is an R package which provides regularized structural equation modeling (regularized SEM) building on lavaan; that is, it makes SEM *leaner*. As the name suggests, linr is heavily inspired by the [regsem](https://github.com/Rjacobucci/regsem) package.
+linr (**l**inr **i**mplements **n**on-smooth **r**egsem) is an R package which provides regularized structural equation modeling (regularized SEM) with non-smooth penalty functions (e.g., lasso) building on lavaan. These non-smooth penalties make SEM *leaner*. As the name suggests, linr is heavily inspired by the [regsem](https://github.com/Rjacobucci/regsem) package.
 
 The objectives of linr are:
 

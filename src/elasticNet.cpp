@@ -105,7 +105,7 @@ public:
   double lambda;
   const arma::rowvec weights;
   // control optimizer
-  const arma::mat initialHessian;
+  arma::mat initialHessian;
   const double stepSize;
   const double sigma;
   const double gamma;
@@ -139,6 +139,10 @@ public:
     
     convergenceCriterion(static_cast<linr::convergenceCriteriaGlmnet>(Rcpp::as<int> (control["convergenceCriterion"]))),
     verbose(Rcpp::as<int> (control["verbose"])){}
+  
+  void setHessian(arma::mat newHessian){
+    initialHessian = newHessian;
+  }
   
   Rcpp::List optimize(Rcpp::NumericVector startingValues_, 
                       SEMCpp& SEM_, 
@@ -206,6 +210,7 @@ RCPP_EXPOSED_CLASS(glmnetEnet)
     Rcpp::class_<glmnetEnet>( "glmnetEnet" )
       .constructor<arma::rowvec,Rcpp::List>("Creates a new istaEnet.")
     // methods
+    .method( "setHessian", &glmnetEnet::setHessian, "Changes the initial hessian. Expects a matrix")
     .method( "optimize", &glmnetEnet::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values and lambda")
     ;
   }

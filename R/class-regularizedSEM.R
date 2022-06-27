@@ -3,6 +3,7 @@ setClass(Class = "regularizedSEM",
            parameters="data.frame",
            fits="data.frame", 
            parameterLabels = "character",
+           weights = "numeric",
            regularized = "character",
            internalOptimization="list", 
            inputArguments="list"
