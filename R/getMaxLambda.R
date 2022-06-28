@@ -6,6 +6,7 @@
 #' @param rawParameters labeled vector with starting values
 #' @param weights weights given to each parameter in the penalty function
 #' @param N sample size
+#' @export
 getMaxLambda_C <- function(regularizedModel, 
                          SEM,
                          rawParameters,
@@ -40,4 +41,43 @@ getMaxLambda_C <- function(regularizedModel,
   SEM <- linr:::fit(SEM = SEM)
   
   return((1/N)*(maxLambda+.1*maxLambda)) # adding some wiggle room as well
+}
+
+#' gpGetMaxLambda
+#' 
+#' generates a the first lambda which sets all regularized parameters to zero
+#' @param regularizedModel Model combining likelihood and lasso type penalty
+#' @param par labeled vector with starting values
+#' @param fitFunction R fit function 
+#' @param gradientFunction R gradient functions
+#' @param userSuppliedArguments list with arguments for fitFunction and gradientFunction
+#' @param weights weights given to each parameter in the penalty function
+#' @export
+gpGetMaxLambda <- function(regularizedModel,
+                           par,
+                           fitFunction,
+                           gradientFunction,
+                           userSuppliedArguments,
+                           weights){
+  
+  lambda <- .Machine$double.xmax^(.05)
+  result <- regularizedModel$optimize(
+    par,
+    fitFunction,
+    gradientFunction,
+    userSuppliedArguments,
+    lambda,
+    1
+  )
+  
+  sparseParameters <- result$rawParameters
+  gradients <- gradientFunction(par,
+                                names(par),
+                                userSuppliedArguments)
+  
+  # define maxLambda as the maximal gradient of the regularized parameters
+  maxLambda <- max(abs(gradients[weights[names(par)] != 0]) * 
+                     weights[weights[names(par)] != 0]^(-1))
+  
+  return(maxLambda+.1*maxLambda) # adding some wiggle room as well
 }

@@ -31,6 +31,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// glmnetInner_C
+arma::rowvec glmnetInner_C(const arma::rowvec& parameters_kMinus1, const arma::rowvec& gradients_kMinus1, const arma::mat& Hessian, const double lambda, const double alpha, const arma::rowvec& weights, const int maxIterIn, const double breakInner, const int verbose);
+RcppExport SEXP _linr_glmnetInner_C(SEXP parameters_kMinus1SEXP, SEXP gradients_kMinus1SEXP, SEXP HessianSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP weightsSEXP, SEXP maxIterInSEXP, SEXP breakInnerSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type parameters_kMinus1(parameters_kMinus1SEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type gradients_kMinus1(gradients_kMinus1SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Hessian(HessianSEXP);
+    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< const double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const int >::type maxIterIn(maxIterInSEXP);
+    Rcpp::traits::input_parameter< const double >::type breakInner(breakInnerSEXP);
+    Rcpp::traits::input_parameter< const int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(glmnetInner_C(parameters_kMinus1, gradients_kMinus1, Hessian, lambda, alpha, weights, maxIterIn, breakInner, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // BFGS_C
 arma::mat BFGS_C(const arma::rowvec& parameters_kMinus1, const arma::rowvec& gradients_kMinus1, const arma::mat& Hessian_kMinus1, const arma::rowvec& parameters_k, const arma::rowvec& gradients_k, const bool cautious, const double hessianEps);
 RcppExport SEXP _linr_BFGS_C(SEXP parameters_kMinus1SEXP, SEXP gradients_kMinus1SEXP, SEXP Hessian_kMinus1SEXP, SEXP parameters_kSEXP, SEXP gradients_kSEXP, SEXP cautiousSEXP, SEXP hessianEpsSEXP) {
@@ -114,6 +133,7 @@ RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurpose_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_linr_innerGLMNET", (DL_FUNC) &_linr_innerGLMNET, 10},
+    {"_linr_glmnetInner_C", (DL_FUNC) &_linr_glmnetInner_C, 9},
     {"_linr_BFGS_C", (DL_FUNC) &_linr_BFGS_C, 7},
     {"_linr_computeIndividualM2LL", (DL_FUNC) &_linr_computeIndividualM2LL, 4},
     {"_linr_computeGroupM2LL", (DL_FUNC) &_linr_computeGroupM2LL, 6},

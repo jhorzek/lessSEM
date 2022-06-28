@@ -30,6 +30,74 @@
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @md
+#' @examples 
+#' library(linr)
+#' 
+#' # Identical to regsem, linr builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Optional: Plot the model
+#' # semPlot::semPaths(lavaanModel, 
+#' #                   what = "est",
+#' #                   fade = FALSE)
+#' 
+#' regsem <- lasso(
+#'   # pass the fitted lavaan model
+#'   lavaanModel = lavaanModel,
+#'   # names of the regularized parameters:
+#'   regularized = paste0("l", 6:15),
+#'   # in case of lasso and adaptive lasso, we can specify the number of lambda
+#'   # values to use. linr will automatically find lambda_max and fit
+#'   # models for nLambda values between 0 and lambda_max. For the other
+#'   # penalty functions, lambdas must be specified explicitly
+#'   nLambdas = 50)
+#' 
+#' # use the plot-function to plot the regularized parameters:
+#' plot(regsem)
+#' 
+#' # elements of regsem can be accessed with the @ operator:
+#' regsem@parameters[1,]
+#' 
+#' # AIC and BIC:
+#' AIC(regsem)
+#' BIC(regsem)
+#' 
+#' # The best parameters can also be extracted with:
+#' coef(regsem, criterion = "AIC")
+#' coef(regsem, criterion = "BIC")
+#' 
+#' #### Advanced ###
+#' # Switching the optimizer # 
+#' # Use the "method" argument to switch the optimizer. The control argument
+#' # must also be changed to the corresponding function:
+#' regsemGlmnet <- lasso(
+#'   lavaanModel = lavaanModel,
+#'   regularized = paste0("l", 6:15),
+#'   nLambdas = 50,
+#'   method = "glmnet",
+#'   control = controlGlmnet())
+#' 
+#' # Note: The results are basically identical:
+#' regsemGlmnet@parameters - regsem@parameters
+#' 
+#' ## The fitted model can then be used as basis for an approximate cross-validation
+#' # (see ?linr::acv4lasso) or approximate influence functions
+#' # (see ?linr::ai4lasso)
 #' @export
 lasso <- function(lavaanModel,
                   regularized,
@@ -100,6 +168,83 @@ lasso <- function(lavaanModel,
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @md
+#' @examples 
+#' library(linr)
+#' 
+#' # Identical to regsem, linr builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Optional: Plot the model
+#' # semPlot::semPaths(lavaanModel, 
+#' #                   what = "est",
+#' #                   fade = FALSE)
+#' 
+#' # names of the regularized parameters:
+#' regularized = paste0("l", 6:15)
+#' 
+#' # define adaptive lasso weights:
+#' # We use the inverse of the absolute unregularized parameters 
+#' # (this is the default in adaptiveLasso and can also specified
+#' # by setting weights = NULL)
+#' weights <- 1/abs(getLavaanParameters(lavaanModel))
+#' weights[!names(weights) %in% regularized] <- 0
+#' 
+#' regsem <- adaptiveLasso(
+#'   # pass the fitted lavaan model
+#'   lavaanModel = lavaanModel,
+#'   # names of the regularized parameters:
+#'   regularized = regularized, 
+#'   # set adaptive lasso weights
+#'   weights = weights,
+#'   # in case of lasso and adaptive lasso, we can specify the number of lambda
+#'   # values to use. linr will automatically find lambda_max and fit
+#'   # models for nLambda values between 0 and lambda_max. For the other
+#'   # penalty functions, lambdas must be specified explicitly
+#'   nLambdas = 50)
+#' 
+#' # use the plot-function to plot the regularized parameters:
+#' plot(regsem)
+#' 
+#' # elements of regsem can be accessed with the @ operator:
+#' regsem@parameters[1,]
+#' 
+#' # AIC and BIC:
+#' AIC(regsem)
+#' BIC(regsem)
+#' 
+#' # The best parameters can also be extracted with:
+#' coef(regsem, criterion = "AIC")
+#' coef(regsem, criterion = "BIC")
+#' 
+#' #### Advanced ###
+#' # Switching the optimizer # 
+#' # Use the "method" argument to switch the optimizer. The control argument
+#' # must also be changed to the corresponding function:
+#' regsemGlmnet <- adaptiveLasso(
+#'   lavaanModel = lavaanModel,
+#'   regularized = regularized,
+#'   weights = weights,
+#'   nLambdas = 50,
+#'   method = "glmnet",
+#'   control = controlGlmnet())
+#' 
+#' # Note: The results are basically identical:
+#' regsemGlmnet@parameters - regsem@parameters
 #' @export
 adaptiveLasso <- function(lavaanModel,
                   regularized,
@@ -161,6 +306,69 @@ adaptiveLasso <- function(lavaanModel,
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @md
+#' @examples 
+#' library(linr)
+#' 
+#' # Identical to regsem, linr builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Optional: Plot the model
+#' # semPlot::semPaths(lavaanModel, 
+#' #                   what = "est",
+#' #                   fade = FALSE)
+#' 
+#' regsem <- ridge(
+#'   # pass the fitted lavaan model
+#'   lavaanModel = lavaanModel,
+#'   # names of the regularized parameters:
+#'   regularized = paste0("l", 6:15),
+#'   # for ridge regularization, the lambdas have to be defined
+#'   # explicitly:
+#'   lambdas = seq(0,1,length.out = 100))
+#' 
+#' # use the plot-function to plot the regularized parameters:
+#' plot(regsem)
+#' 
+#' # elements of regsem can be accessed with the @ operator:
+#' regsem@parameters[1,]
+#' 
+#' # Model selection should be done using cross-validation
+#' cv <- cv4ridge(regularizedSEM = regsem, k = 5)
+#' plot(cv)
+#' coef(cv) # get best fitting model parameters
+#' 
+#' #### Advanced ###
+#' # Switching the optimizer # 
+#' # Use the "method" argument to switch the optimizer. The control argument
+#' # must also be changed to the corresponding function:
+#' regsemGlmnet <- ridge(
+#'   lavaanModel = lavaanModel,
+#'   regularized = paste0("l", 6:15),
+#'   lambdas = seq(0,1,length.out = 100),
+#'   method = "glmnet",
+#'   control = controlGlmnet())
+#' 
+#' # Note: The results are basically identical:
+#' regsemGlmnet@parameters - regsem@parameters
+#' 
+#' ## The fitted model can then be used as basis for an approximate cross-validation
+#' # (see ?linr::acv4ridge) or approximate influence functions
+#' # (see ?linr::ai4ridge)
 #' @export
 ridge <- function(lavaanModel,
                   regularized,
@@ -225,9 +433,80 @@ ridge <- function(lavaanModel,
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
-#' for more details.
+#' the controlIsta() and controlGlmnet() functions.
 #' @md
+#' @examples 
+#' library(linr)
+#' 
+#' # Identical to regsem, linr builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Optional: Plot the model
+#' # semPlot::semPaths(lavaanModel, 
+#' #                   what = "est",
+#' #                   fade = FALSE)
+#' 
+#' # The implementation of elastic net is relatively flexible and also
+#' # encompasses lasso, adaptive lasso, and ridge regularization.
+#' # The function call is therefore slightly more complicated. If you 
+#' # are only looking for lasso, adaptive lasso or ridge, there are 
+#' # dedicated functions for that (see ?lasso, ?adaptiveLasso, ?ridge)
+#' 
+#' # elasticNet expects weights for each parameter. This way, we can
+#' # decide which parameters are regularized (all parameters with weight = 0
+#' # remain unregularized)
+#' # names of the regularized parameters:
+#' regularized = paste0("l", 6:15)
+#' weights <- getLavaanParameters(lavaanModel)
+#' weights[!names(weights) %in% regularized] <- 0
+#' 
+#' regsem <- elasticNet(
+#'   # pass the fitted lavaan model
+#'   lavaanModel = lavaanModel,
+#'   weights = weights, 
+#'   lambdas = seq(0,1,length.out = 20),
+#'   alpha = seq(0,1,length.out = 5))
+#' 
+#' # elements of regsem can be accessed with the @ operator:
+#' regsem@parameters[1,]
+#' 
+#' # use cross-validation to find the best parameters
+#' cv <- cv4elasticNet(
+#'   regularizedSEM = regsem, 
+#'   k = 5
+#' )
+#' cv
+#' 
+#' #### Advanced ###
+#' # Switching the optimizer # 
+#' # Use the "method" argument to switch the optimizer. The control argument
+#' # must also be changed to the corresponding function:
+#' regsemGlmnet <- elasticNet(
+#'   # pass the fitted lavaan model
+#'   lavaanModel = lavaanModel,
+#'   weights = weights, 
+#'   lambdas = seq(0,1,length.out = 20),
+#'   alpha = seq(0,1,length.out = 5),
+#'   method = "glmnet",
+#'   control = controlGlmnet())
+#' 
+#' # Note: The results are basically identical:
+#' regsemGlmnet@parameters - regsem@parameters 
 #' @export
 elasticNet <- function(lavaanModel,
                        weights,
@@ -251,6 +530,8 @@ elasticNet <- function(lavaanModel,
   
   if(method == "ista" && !is(control, "controlIsta")) 
     stop("control must be of class controlIsta. See ?controlIsta.")
+  if(method == "glmnet" && !is(control, "controlGlmnet")) 
+    stop("control must be of class controlGlmnet See ?controlGlmnet")
   
   if(!is(lavaanModel, "lavaan"))
     stop("lavaanModel must be of class lavaan")
@@ -373,7 +654,7 @@ elasticNet <- function(lavaanModel,
       eta = control$eta,
       maxIterOut = control$maxIterOut,
       maxIterIn = control$maxIterIn,
-      breakOuter = control$breakOuter,
+      breakOuter = N*control$breakOuter,
       convCritInner = control$convCritInner,
       sigma = control$sigma,
       stepSizeInheritance = control$stepSizeInheritance,

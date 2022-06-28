@@ -1,5 +1,6 @@
 #include <RcppArmadillo.h>
 #include <algorithm>
+#include "linr.hpp"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
@@ -87,4 +88,28 @@ arma::colvec innerGLMNET(const arma::colvec parameters,
     z_old = z;
   }
   return(stepDirection);
+}
+
+// [[Rcpp::export]]
+arma::rowvec glmnetInner_C(const arma::rowvec& parameters_kMinus1,
+            const arma::rowvec& gradients_kMinus1,
+            const arma::mat& Hessian,
+            const double lambda,
+            const double alpha,
+            const arma::rowvec& weights,
+            const int maxIterIn,
+            const double breakInner,
+            const int verbose
+){
+  return(
+    linr::glmnetInner(parameters_kMinus1,
+                    gradients_kMinus1,
+                    Hessian,
+                    lambda,
+                    alpha,
+                    weights,
+                    maxIterIn,
+                    breakInner,
+                    verbose)
+  );
 }

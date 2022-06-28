@@ -45,3 +45,67 @@ Method for Structural Equation Modeling. Psychometrika, 82(2),
 329–354. https://doi.org/10.1007/s11336-017-9566-9
 }
 }
+\examples{
+library(linr)
+
+# Identical to regsem, linr builds on the lavaan
+# package for model specification. The first step
+# therefore is to implement the model in lavaan.
+
+dataset <- simulateExampleData()
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           meanstructure = TRUE,
+                           std.lv = TRUE)
+
+# Optional: Plot the model
+# semPlot::semPaths(lavaanModel, 
+#                   what = "est",
+#                   fade = FALSE)
+
+regsem <- ridge(
+  # pass the fitted lavaan model
+  lavaanModel = lavaanModel,
+  # names of the regularized parameters:
+  regularized = paste0("l", 6:15),
+  # for ridge regularization, the lambdas have to be defined
+  # explicitly:
+  lambdas = seq(0,1,length.out = 100))
+
+# use the plot-function to plot the regularized parameters:
+plot(regsem)
+
+# elements of regsem can be accessed with the @ operator:
+regsem@parameters[1,]
+
+# Model selection should be done using cross-validation
+cv <- cv4ridge(regularizedSEM = regsem, k = 5)
+plot(cv)
+coef(cv) # get best fitting model parameters
+
+#### Advanced ###
+# Switching the optimizer # 
+# Use the "method" argument to switch the optimizer. The control argument
+# must also be changed to the corresponding function:
+regsemGlmnet <- ridge(
+  lavaanModel = lavaanModel,
+  regularized = paste0("l", 6:15),
+  lambdas = seq(0,1,length.out = 100),
+  method = "glmnet",
+  control = controlGlmnet())
+
+# Note: The results are basically identical:
+regsemGlmnet@parameters - regsem@parameters
+
+## The fitted model can then be used as basis for an approximate cross-validation
+# (see ?linr::acv4ridge) or approximate influence functions
+# (see ?linr::ai4ridge)
+}

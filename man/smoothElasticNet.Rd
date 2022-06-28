@@ -11,6 +11,7 @@ smoothElasticNet(
   nLambdas = NULL,
   alphas,
   epsilon,
+  tau,
   control = controlBFGS()
 )
 }
@@ -31,6 +32,8 @@ It will then generate nLambda values between 0 and the computed lambda.}
 in \link{0,1}. 0 = ridge, 1 = lasso.}
 
 \item{epsilon}{epsilon > 0; controls the smoothness of the approximation. Larger values = smoother}
+
+\item{tau}{parameters below threshold tau will be seen as zeroed}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.}
@@ -54,4 +57,53 @@ A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.
 Efficient L1 Regularized Logistic Regression. Proceedings of the
 Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408.
 }
+}
+\examples{
+library(linr)
+
+# Identical to regsem, linr builds on the lavaan
+# package for model specification. The first step
+# therefore is to implement the model in lavaan.
+
+dataset <- simulateExampleData()
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           meanstructure = TRUE,
+                           std.lv = TRUE)
+
+# Optional: Plot the model
+# semPlot::semPaths(lavaanModel,
+#                   what = "est",
+#                   fade = FALSE)
+
+# names of the regularized parameters:
+regularized = paste0("l", 6:15)
+
+# define adaptive lasso weights:
+# We use the inverse of the absolute unregularized parameters
+# (this is the default in adaptiveLasso and can also specified
+# by setting weights = NULL)
+weights <- getLavaanParameters(lavaanModel)
+weights[] <- 0
+weights[regularized] <- 1
+
+regsem <- smoothElasticNet(
+  # pass the fitted lavaan model
+  lavaanModel = lavaanModel,
+  weights = weights,
+  epsilon = 1e-10,
+  tau = 1e-4,
+  lambdas = seq(0,1,length.out = 50),
+  alphas = seq(0,1,length.out = 4))
+
+# elements of regsem can be accessed with the @ operator:
+regsem@parameters[1,]
 }

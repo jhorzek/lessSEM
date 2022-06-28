@@ -60,3 +60,81 @@ Method for Structural Equation Modeling. Psychometrika, 82(2),
 329–354. https://doi.org/10.1007/s11336-017-9566-9
 }
 }
+\examples{
+library(linr)
+
+# Identical to regsem, linr builds on the lavaan
+# package for model specification. The first step
+# therefore is to implement the model in lavaan.
+
+dataset <- simulateExampleData()
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           meanstructure = TRUE,
+                           std.lv = TRUE)
+
+# Optional: Plot the model
+# semPlot::semPaths(lavaanModel, 
+#                   what = "est",
+#                   fade = FALSE)
+
+# names of the regularized parameters:
+regularized = paste0("l", 6:15)
+
+# define adaptive lasso weights:
+# We use the inverse of the absolute unregularized parameters 
+# (this is the default in adaptiveLasso and can also specified
+# by setting weights = NULL)
+weights <- 1/abs(getLavaanParameters(lavaanModel))
+weights[!names(weights) \%in\% regularized] <- 0
+
+regsem <- adaptiveLasso(
+  # pass the fitted lavaan model
+  lavaanModel = lavaanModel,
+  # names of the regularized parameters:
+  regularized = regularized, 
+  # set adaptive lasso weights
+  weights = weights,
+  # in case of lasso and adaptive lasso, we can specify the number of lambda
+  # values to use. linr will automatically find lambda_max and fit
+  # models for nLambda values between 0 and lambda_max. For the other
+  # penalty functions, lambdas must be specified explicitly
+  nLambdas = 50)
+
+# use the plot-function to plot the regularized parameters:
+plot(regsem)
+
+# elements of regsem can be accessed with the @ operator:
+regsem@parameters[1,]
+
+# AIC and BIC:
+AIC(regsem)
+BIC(regsem)
+
+# The best parameters can also be extracted with:
+coef(regsem, criterion = "AIC")
+coef(regsem, criterion = "BIC")
+
+#### Advanced ###
+# Switching the optimizer # 
+# Use the "method" argument to switch the optimizer. The control argument
+# must also be changed to the corresponding function:
+regsemGlmnet <- adaptiveLasso(
+  lavaanModel = lavaanModel,
+  regularized = regularized,
+  weights = weights,
+  nLambdas = 50,
+  method = "glmnet",
+  control = controlGlmnet())
+
+# Note: The results are basically identical:
+regsemGlmnet@parameters - regsem@parameters
+}

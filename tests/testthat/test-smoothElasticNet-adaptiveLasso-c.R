@@ -53,7 +53,7 @@ test_that("testing smoothElasticNet-ridge-c", {
   names(weights) <- names(lavaanParameters)
   weights[paste0("f=~y",6:ncol(y))] <- 1
   
-  rsemBfgs <- smoothElasticNetValue(lavaanModel = modelFit, 
+  rsemBfgs <- smoothElasticNet(lavaanModel = modelFit, 
                                weights =  weights, 
                                alphas = 0, 
                                lambdas = lambdas,

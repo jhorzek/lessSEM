@@ -93,7 +93,7 @@ inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
     z.fill(arma::fill::zeros); 
     //z_old.fill(arma::fill::zeros);
     // iterate over parameters in random order
-    //std::random_shuffle(randOrder.begin(), randOrder.end());
+    std::random_shuffle(randOrder.begin(), randOrder.end());
     
     for(int p = 0; p < stepDirection.n_elem; p++){
       

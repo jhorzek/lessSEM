@@ -23,15 +23,65 @@
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
+#' @param tau parameters below threshold tau will be seen as zeroed
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @md
+#' @examples 
+#' library(linr)
+#' 
+#' # Identical to regsem, linr builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Optional: Plot the model
+#' # semPlot::semPaths(lavaanModel,
+#' #                   what = "est",
+#' #                   fade = FALSE)
+#' 
+#' regsem <- smoothLasso(
+#'   # pass the fitted lavaan model
+#'   lavaanModel = lavaanModel,
+#'   # names of the regularized parameters:
+#'   regularized = paste0("l", 6:15),
+#'   epsilon = 1e-10,
+#'   tau = 1e-4,
+#'   lambdas = seq(0,1,length.out = 50))
+#' 
+#' # use the plot-function to plot the regularized parameters:
+#' plot(regsem)
+#' 
+#' # elements of regsem can be accessed with the @ operator:
+#' regsem@parameters[1,]
+#' 
+#' # AIC and BIC:
+#' AIC(regsem)
+#' BIC(regsem)
+#' 
+#' # The best parameters can also be extracted with:
+#' coef(regsem, criterion = "AIC")
+#' coef(regsem, criterion = "BIC")
 #' @export
 smoothLasso <- function(lavaanModel,
                         regularized,
                         lambdas = NULL,
                         nLambdas = NULL,
                         epsilon,
+                        tau,
                         control = controlBFGS()){
   
   weights <- getLavaanParameters(lavaanModel)
@@ -45,13 +95,14 @@ smoothLasso <- function(lavaanModel,
     names(weights)
   ))
   
-  result <- smoohtElasticNet(
+  result <- smoothElasticNet(
     lavaanModel = lavaanModel,
     weights = weights,
     lambdas = lambdas,
     nLambdas = nLambdas,
     alphas = 1,
     epsilon = epsilon, 
+    tau = tau,
     control = control
   )
   return(result)
@@ -90,16 +141,76 @@ smoothLasso <- function(lavaanModel,
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
+#' @param tau parameters below threshold tau will be seen as zeroed
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @md
+#' @examples 
+#' library(linr)
+#' 
+#' # Identical to regsem, linr builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Optional: Plot the model
+#' # semPlot::semPaths(lavaanModel,
+#' #                   what = "est",
+#' #                   fade = FALSE)
+#' 
+#' # names of the regularized parameters:
+#' regularized = paste0("l", 6:15)
+#' 
+#' # define adaptive lasso weights:
+#' # We use the inverse of the absolute unregularized parameters
+#' # (this is the default in adaptiveLasso and can also specified
+#' # by setting weights = NULL)
+#' weights <- 1/abs(getLavaanParameters(lavaanModel))
+#' weights[!names(weights) %in% regularized] <- 0
+#' 
+#' regsem <- smoothAdaptiveLasso(
+#'   # pass the fitted lavaan model
+#'   lavaanModel = lavaanModel,
+#'   regularized = regularized,
+#'   weights = weights,
+#'   epsilon = 1e-10,
+#'   tau = 1e-4,
+#'   lambdas = seq(0,1,length.out = 50))
+#' 
+#' # use the plot-function to plot the regularized parameters:
+#' plot(regsem)
+#' 
+#' # elements of regsem can be accessed with the @ operator:
+#' regsem@parameters[1,]
+#' 
+#' # AIC and BIC:
+#' AIC(regsem)
+#' BIC(regsem)
+#' 
+#' # The best parameters can also be extracted with:
+#' coef(regsem, criterion = "AIC")
+#' coef(regsem, criterion = "BIC")
 #' @export
 smoothAdaptiveLasso <- function(lavaanModel,
                           regularized,
                           weights = NULL,
                           lambdas = NULL,
                           nLambdas = NULL,
-                          epsilon, 
+                          epsilon,
+                          tau,
                           control = controlBFGS()){
   if(is.null(weights)){
     weights <- 1/abs(getLavaanParameters(lavaanModel))
@@ -121,6 +232,7 @@ smoothAdaptiveLasso <- function(lavaanModel,
     nLambdas = nLambdas,
     alphas = 1,
     epsilon = epsilon, 
+    tau = tau,
     control = control
   )
   return(result)
@@ -150,6 +262,45 @@ smoothAdaptiveLasso <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
 #' @md
+#' @examples 
+#' library(linr)
+#' 
+#' # Identical to regsem, linr builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Optional: Plot the model
+#' # semPlot::semPaths(lavaanModel,
+#' #                   what = "est",
+#' #                   fade = FALSE)
+#' 
+#' # names of the regularized parameters:
+#' regularized = paste0("l", 6:15)
+#' 
+#' regsem <- ridgeBfgs(
+#'   # pass the fitted lavaan model
+#'   lavaanModel = lavaanModel,
+#'   regularized = regularized,
+#'   lambdas = seq(0,1,length.out = 50))
+#' 
+#' plot(regsem)
+#' 
+#' # elements of regsem can be accessed with the @ operator:
+#' regsem@parameters[1,]
 #' @export
 ridgeBfgs <- function(lavaanModel,
                   regularized,
@@ -174,6 +325,7 @@ ridgeBfgs <- function(lavaanModel,
     nLambdas = NULL,
     alphas = 0,
     epsilon = 0, # ridge is already smooth
+    tau = 0,
     control = control
   )
   return(result)
@@ -210,9 +362,58 @@ ridgeBfgs <- function(lavaanModel,
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
 #' in [0,1]. 0 = ridge, 1 = lasso.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
+#' @param tau parameters below threshold tau will be seen as zeroed
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
 #' @md
+#' @examples 
+#' library(linr)
+#' 
+#' # Identical to regsem, linr builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Optional: Plot the model
+#' # semPlot::semPaths(lavaanModel,
+#' #                   what = "est",
+#' #                   fade = FALSE)
+#' 
+#' # names of the regularized parameters:
+#' regularized = paste0("l", 6:15)
+#' 
+#' # define adaptive lasso weights:
+#' # We use the inverse of the absolute unregularized parameters
+#' # (this is the default in adaptiveLasso and can also specified
+#' # by setting weights = NULL)
+#' weights <- getLavaanParameters(lavaanModel)
+#' weights[] <- 0
+#' weights[regularized] <- 1
+#' 
+#' regsem <- smoothElasticNet(
+#'   # pass the fitted lavaan model
+#'   lavaanModel = lavaanModel,
+#'   weights = weights,
+#'   epsilon = 1e-10,
+#'   tau = 1e-4,
+#'   lambdas = seq(0,1,length.out = 50),
+#'   alphas = seq(0,1,length.out = 4))
+#' 
+#' # elements of regsem can be accessed with the @ operator:
+#' regsem@parameters[1,]
 #' @export
 smoothElasticNet <- function(lavaanModel,
                        weights,
@@ -220,6 +421,7 @@ smoothElasticNet <- function(lavaanModel,
                        nLambdas = NULL,
                        alphas,
                        epsilon, 
+                       tau,
                        control = controlBFGS()){
   
   inputArguments <- as.list(environment())
@@ -430,7 +632,7 @@ smoothElasticNet <- function(lavaanModel,
     
     rawParameters <- result$rawParameters
     fits$nonZeroParameters[it] <- length(rawParameters) - 
-      sum(abs(rawParameters[weights[names(rawParameters)] != 0]) <= epsilon)
+      sum(abs(rawParameters[weights[names(rawParameters)] != 0]) <= tau)
     fits$regM2LL[it] <- result$fit
     fits$convergence[it] <- result$convergence
     

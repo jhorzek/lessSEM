@@ -161,11 +161,11 @@ cv4elasticNet <- function(regularizedSEM,
   fits <- regularizedSEM@fits
   parameters <- regularizedSEM@parameters
   control <- regularizedSEM@inputArguments$control
-  adaptiveLassoWeights <- regularizedSEM@inputArguments$adaptiveLassoWeights
-  if(any(adaptiveLassoWeights != 1)) stop("automatic cross-validation is currently not supported for adaptiveLasso.")
-  adaptiveLassoWeights <- NULL
+  weights <- regularizedSEM@inputArguments$weights
+  if(!any(weights %in% c(0,1))) stop("automatic cross-validation is currently not supported for adaptiveLasso.")
   
-  tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
+  tuningParameters <- data.frame(lambda = fits$lambda, 
+                                 alpha = fits$alpha)
   
   cvfits <- data.frame(
     tuningParameters,

@@ -80,11 +80,10 @@ test_that("testing adaptive lasso", {
                            alphas = 1, 
                            lambdas = lambdas,
                            method = "glmnet",
-                           control = controlGlmnet(verbose = 0, 
-                                                   startingValues = "est")
+                           control = controlGlmnet()
   )
-  testthat::expect_equal(all(abs(rsemGlmnet@parameters[,rsemGlmnet@regularized] - 
-                                   lslxParameter[,regularized]) < .002), TRUE)
+  testthat::expect_equal(all(abs(rsemGlmnet@parameters[,names(lavaanParameters)] -
+                                   regsemPars[,names(lavaanParameters)]) < .1), TRUE)
   plot(rsemGlmnet)
   coef(rsemGlmnet)
   coef(rsemGlmnet, alpha = 1, lambda = lambdas[1])
@@ -97,7 +96,7 @@ test_that("testing adaptive lasso", {
   
   ## Test approximated cross-validation
   warning("Not testing approximate cross-validation.")
-  cv <- aCV4regularizedSEM(regularizedSEM = rsem, k = N)
+  # cv <- aCV4regularizedSEM(regularizedSEM = rsemIsta, k = N)
   # coef(cv)
   # coef(cv, alpha = 1, lambda = lambdas[1])
   # plot(cv)
