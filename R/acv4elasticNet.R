@@ -388,7 +388,6 @@ acv4enet_GLMNET_SEMCpp <- function(SEM,
     # if elastic net is used, we approximate the ridge part as well and add this here:
     if(alpha != 1){
       # ridge or elastic net are used
-      if(length(unique(adaptiveLassoWeights))!= 1) warning("Combining ridge and elastic net with adaptive lasso weights is unexplored territory.")
       # we multiply with the adaptive lasso weights.
       penaltyFunctionTuning <- list("lambda" = weights[weights != 0]*lambda*(1-alpha)*(Ntraining))
       penaltyFunctionArguments <- list("regularizedParameterLabels" = names(weights)[weights != 0])
