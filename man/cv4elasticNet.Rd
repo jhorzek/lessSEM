@@ -10,11 +10,11 @@ cv4elasticNet(regularizedSEM, k, returnSubsetParameters = FALSE)
 \item{regularizedSEM}{model of class regularizedSEM}
 
 \item{k}{the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
-See ?linr::aCV4regularizedSEM for an example}
+See ?lessSEM::aCV4regularizedSEM for an example}
 
 \item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
 
-\item{control}{parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details}
+\item{control}{parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details}
 }
 \description{
 Exact cross-validation for models of class regularizedSEM which have been fitted with elastic net penalty
@@ -22,10 +22,10 @@ These models can be fit with elasticNet() (see ?elasticNet)
 in this package.
 }
 \examples{
-library(linr)
+library(lessSEM)
 
 # Let's first set up a regularized model. The following steps are
-# explained in detail in ?linr::regularizeSEM
+# explained in detail in ?lessSEM::regularizeSEM
 dataset <- simulateExampleData()
 
 lavaanSyntax <- "
@@ -87,9 +87,9 @@ CV@subsetParameters[,,1] # first lambda value
 dimnames(CV@subsetParameters)[[3]][2]
 CV@subsetParameters[,,2] # second lambda value
 
-## Instead of letting linr create the subsets, you can
+## Instead of letting lessSEM create the subsets, you can
 # also pass your own subsets. As an example:
-subsets <- linr:::createSubsets(N = nrow(dataset), k  = 10)
+subsets <- lessSEM:::createSubsets(N = nrow(dataset), k  = 10)
 
 CV <- CV4regularizedSEM(regularizedSEM = regsem,
                           k = subsets

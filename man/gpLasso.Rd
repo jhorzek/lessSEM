@@ -30,7 +30,7 @@ to approximate the gradients}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
 
-\item{nLambdas}{alternative to lambda: If alpha = 1, linr can automatically
+\item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
 compute the first lambda value which sets all regularized parameters to zero.
 It will then generate nLambda values between 0 and the computed lambda.}
 
@@ -45,7 +45,7 @@ the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 for more details.}
 }
 \description{
-Optimizers in linr can also be used by other packages.
+Optimizers in lessSEM can also be used by other packages.
 gpLasso allows for combining lasso regularization and custom fitting functions
 with an interface similar to optim.
 }
@@ -82,7 +82,7 @@ Conference on Machine Learning, 28(2)(2), 37–45.
 # as there are specialized packages for linear regression
 # (e.g., glmnet)
 
-library(linr)
+library(lessSEM)
 set.seed(123)
 
 # first, we simulate data for our

@@ -15,21 +15,21 @@ ai4elasticNet(
 \item{regularizedSEM}{model of class regularizedSEM}
 
 \item{k}{the number of subset fold. We recommend leave-one-out influence functions; i.e. set k to the number of persons in the data set. Alternatively, 
-a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example}
+a matrix with pre-defined subsets can be passed to the function. See ?lessSEM::aCV4regularizedSEM for an example}
 
 \item{recomputeHessian}{if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.}
 
-\item{control}{parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details}
+\item{control}{parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details}
 }
 \description{
-Provides an approximate influence for models of class regularizedSEM. These models can be fit with ai4elasticNet() (see ?linr::ai4elasticNet)
+Provides an approximate influence for models of class regularizedSEM. These models can be fit with ai4elasticNet() (see ?lessSEM::ai4elasticNet)
 in this package.
 }
 \examples{
-library(linr)
+library(lessSEM)
 
 # Let's first set up a regularized model. The following steps are
-# explained in detail in ?linr::regularizeSEM
+# explained in detail in ?lessSEM::regularizeSEM
 dataset <- simulateExampleData()
 
 lavaanSyntax <- "

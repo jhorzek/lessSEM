@@ -3,9 +3,9 @@ setClass("Rcpp_SEMCpp")
 
 #' @export
 setMethod("show", "Rcpp_SEMCpp", function (object) {
-  cat("Internal C++ model representation of linr\n")
+  cat("Internal C++ model representation of lessSEM\n")
   cat("Parameters:\n")
-  print(linr:::getParameters(object))
+  print(lessSEM:::getParameters(object))
   cat("\n")
   cat(paste0("-2 log-Likelihood: ", object$m2LL))
 })
@@ -16,7 +16,7 @@ setMethod("logLik", "Rcpp_SEMCpp", function (object) {
     object$fit()
   }
   N <- nrow(object$rawData)
-  numberOfParameters <- length(linr:::getParameters(object))
+  numberOfParameters <- length(lessSEM:::getParameters(object))
   
   ll <- new("logLikelihood",
             logLik = -.5*object$m2LL,
@@ -27,7 +27,7 @@ setMethod("logLik", "Rcpp_SEMCpp", function (object) {
 
 #' @export
 setMethod("coef", "Rcpp_SEMCpp", function (object) {
-  return(linr:::getParameters(object, raw = FALSE))
+  return(lessSEM:::getParameters(object, raw = FALSE))
 })
 
 #' @export

@@ -1,5 +1,5 @@
-#ifndef LINR_H
-#define LINR_H
+#ifndef lessSEM_H
+#define lessSEM_H
 
 #include <RcppArmadillo.h>
 #include "ista_class.hpp"

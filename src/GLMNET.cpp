@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 #include <algorithm>
-#include "linr.hpp"
+#include "lessSEM.hpp"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
@@ -102,7 +102,7 @@ arma::rowvec glmnetInner_C(const arma::rowvec& parameters_kMinus1,
             const int verbose
 ){
   return(
-    linr::glmnetInner(parameters_kMinus1,
+    lessSEM::glmnetInner(parameters_kMinus1,
                     gradients_kMinus1,
                     Hessian,
                     lambda,

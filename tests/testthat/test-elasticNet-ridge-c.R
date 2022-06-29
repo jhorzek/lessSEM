@@ -1,7 +1,7 @@
 test_that("testing elasticNet-ridge-c", {
   library(lslx)
   library(lavaan)
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
@@ -48,7 +48,7 @@ test_that("testing elasticNet-ridge-c", {
   regularized <- paste0("y", 6:ncol(y),"<-f/g") 
   
   # replicate with regularizedSEM
-  lavaanParameters <- linr::getLavaanParameters(modelFit)
+  lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
   weights <- rep(0, length(lavaanParameters))
   names(weights) <- names(lavaanParameters)
   weights[paste0("f=~y",6:ncol(y))] <- 1
@@ -62,7 +62,7 @@ test_that("testing elasticNet-ridge-c", {
                                                startingValues = "est")
   )
   
-  rsemIsta2 <- linr::ridge(lavaanModel = modelFit,
+  rsemIsta2 <- lessSEM::ridge(lavaanModel = modelFit,
                            regularized = paste0("f=~y",6:ncol(y)),
                            lambdas = lambdas,
                            method = "ista"
@@ -83,7 +83,7 @@ test_that("testing elasticNet-ridge-c", {
                            control = controlGlmnet(verbose = 0, 
                                                    startingValues = "est")
   )
-  rsemGlmnet2 <- linr::ridge(lavaanModel = modelFit,
+  rsemGlmnet2 <- lessSEM::ridge(lavaanModel = modelFit,
                              regularized = paste0("f=~y",6:ncol(y)),
                              lambdas = lambdas,
                              method = "glmnet", 

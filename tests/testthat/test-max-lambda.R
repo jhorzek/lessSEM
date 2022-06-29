@@ -1,6 +1,6 @@
-test_that("testing adaptive lasso", {
+test_that("testing maxLambda", {
   library(regsem)
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
@@ -23,7 +23,7 @@ test_that("testing adaptive lasso", {
   modelFit = cfa(modelSyntax, y, meanstructure = TRUE)
   
   #### Regularize ####
-  lavaanParameters <- linr::getLavaanParameters(modelFit)
+  lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
   weights <- rep(0, length(lavaanParameters))
   names(weights) <- names(lavaanParameters)
   weights[paste0("f=~y",6:ncol(y))] <- 1/abs(lavaanParameters[paste0("f=~y",6:ncol(y))])

@@ -1,7 +1,7 @@
 test_that("testing smoothElasticNet-ridge-c", {
   library(lslx)
   library(lavaan)
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
@@ -48,7 +48,7 @@ test_that("testing smoothElasticNet-ridge-c", {
   regularized <- paste0("y", 6:ncol(y),"<-f/g") 
   
   # replicate with regularizedSEM
-  lavaanParameters <- linr::getLavaanParameters(modelFit)
+  lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
   weights <- rep(0, length(lavaanParameters))
   names(weights) <- names(lavaanParameters)
   weights[paste0("f=~y",6:ncol(y))] <- 1
@@ -58,6 +58,7 @@ test_that("testing smoothElasticNet-ridge-c", {
                                alphas = 0, 
                                lambdas = lambdas,
                                epsilon = 1e-8, 
+                               tau = 0,
                                control = controlBFGS(startingValues = "start", 
                                                      initialHessian = diag(100, length(lavaanParameters)),
                                                      breakOuter = 1e-5, 
@@ -85,13 +86,5 @@ test_that("testing smoothElasticNet-ridge-c", {
   coef(rsemGlmnet)
   coef(rsemGlmnet, alpha = 0, lambda = .1)
   
-  ## Test exact cross-validation
-  warning("Not testing approximate cross-validation")
-  # cvExact <- CV4regularizedSEM(regularizedSEM = rsem, k = N)
-  # coef(cvExact)
-  # coef(cvExact, rule = "1sd")
-  # coef(cvExact, rule = "penalized")
-  # coef(cvExact, alpha = 1, lambda = .1)
-  # plot(cvExact)
   
 })

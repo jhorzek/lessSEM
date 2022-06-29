@@ -1,6 +1,6 @@
 test_that("testing ista-lasso", {
   library(lavaan)
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   
   model1 <- ' 
@@ -28,12 +28,12 @@ test_that("testing ista-lasso", {
   scores <- -2*lavScores(model)
   gradients <- apply(scores,2,sum)
   
-  SEM <- linr:::SEMFromLavaan(lavaanModel = model, whichPars = "start")
-  SEM <- linr:::fit(SEM)
+  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = model, whichPars = "start")
+  SEM <- lessSEM:::fit(SEM)
   SEM$getGradients(T)
   eigen(SEM$impliedCovariance)$values
   
-  startingValues <- linr:::getParameters(SEM, TRUE)
+  startingValues <- lessSEM:::getParameters(SEM, TRUE)
   labels <- SEM$getParameterLabels()
   
   weights <- startingValues
@@ -66,10 +66,10 @@ test_that("testing ista-lasso", {
   unregularized$fit - -2*logLik(model)
   
   unregularized$rawParameters
-  unregularizedParam <- linr:::getParameters(SEM, raw = FALSE)
+  unregularizedParam <- lessSEM:::getParameters(SEM, raw = FALSE)
   
   testthat::expect_equal(all(round( unregularizedParam - 
-                                     linr::getLavaanParameters(model)[names(linr:::getParameters(SEM, raw = FALSE))],
+                                     lessSEM::getLavaanParameters(model)[names(lessSEM:::getParameters(SEM, raw = FALSE))],
                                    1) == 0),
                          TRUE)
   
@@ -82,7 +82,7 @@ test_that("testing ista-lasso", {
     1
   )
   lassoResult$rawParameters
-  lassoParam <- linr:::getParameters(SEM, raw = FALSE)
+  lassoParam <- lessSEM:::getParameters(SEM, raw = FALSE)
   testthat::expect_equal(any(lassoResult$rawParameters == 0),
                          TRUE)
   
@@ -95,11 +95,12 @@ test_that("testing ista-lasso", {
     .4
   )
   enetResult$rawParameters
-  enetParam <- linr:::getParameters(SEM, raw = FALSE)
+  enetParam <- lessSEM:::getParameters(SEM, raw = FALSE)
   
   control <- list(
     L0 = .1,
     eta = 2,
+    accelerate = TRUE,
     maxIterOut = 10000,
     maxIterIn = 1000,
     breakOuter = .00000000001,
@@ -117,7 +118,7 @@ test_that("testing ista-lasso", {
     1
   )
   lassoResultIsta$rawParameters
-  lassoParamIsta <- linr:::getParameters(SEM, raw = FALSE)
+  lassoParamIsta <- lessSEM:::getParameters(SEM, raw = FALSE)
   
   testthat::expect_equal(all(
     round(lassoParam -
@@ -132,7 +133,7 @@ test_that("testing ista-lasso", {
     .4
   )
   enetResultIsta$rawParameters
-  enetParamIsta <- linr:::getParameters(SEM, raw = FALSE)
+  enetParamIsta <- lessSEM:::getParameters(SEM, raw = FALSE)
   
   testthat::expect_equal(all(
     round(
@@ -141,7 +142,7 @@ test_that("testing ista-lasso", {
   
   N <- nrow(PoliticalDemocracy)
   
-  SEM <- linr::setParameters(SEM, names(enetResultIsta$rawParameters), 
+  SEM <- lessSEM::setParameters(SEM, names(enetResultIsta$rawParameters), 
                              enetResultIsta$rawParameters, raw = TRUE)
   testthat::expect_equal(enetResultIsta$fit -
                            (SEM$fit() + 
@@ -149,7 +150,7 @@ test_that("testing ista-lasso", {
     N*lambda_enet*(1-.4) * sum((enetResultIsta$rawParameters*weights)^2)) == 0, TRUE)
   
   
-  SEM <- linr::setParameters(SEM, names(enetResult$rawParameters), enetResult$rawParameters, raw = TRUE)
+  SEM <- lessSEM::setParameters(SEM, names(enetResult$rawParameters), enetResult$rawParameters, raw = TRUE)
   
   testthat::expect_equal(
     enetResult$fit - (

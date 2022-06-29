@@ -1,6 +1,6 @@
 test_that("testing optimization with PoliticalDemocracy", {
   library(lavaan)
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   modelSyntax <- ' 
   # latent variable definitions
@@ -24,11 +24,11 @@ test_that("testing optimization with PoliticalDemocracy", {
                data = PoliticalDemocracy, 
                meanstructure = TRUE)
   
-  regsem <- regularizeSEM(lavaanModel = model, 
-                          regularizedParameterLabels = c("a", "b", "c"),
-                          penalty = "lasso",
+  regsem <- lasso(lavaanModel = model, 
+                          regularized = c("a", "b", "c"),
                           lambdas = 0, 
-                          control = controlGLMNET(startingValues = "start"))
+                          control = controlIsta(startingValues = "start", 
+                                                breakOuter = 1e-10))
   testthat::expect_equal(abs(regsem@fits$m2LL[1] - (-2*logLik(model))) < 1e-3,TRUE)
   
 })

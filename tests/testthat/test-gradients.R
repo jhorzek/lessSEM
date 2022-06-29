@@ -1,6 +1,6 @@
 test_that("testing gradients", {
   library(lavaan)
-  library(linr)
+  library(lessSEM)
   
   model1 <- ' 
   # latent variable definitions
@@ -25,10 +25,10 @@ test_that("testing gradients", {
   scores <- -2*lavScores(model)
   gradients <- apply(scores,2,sum)
   
-  SEM <- linr:::SEMFromLavaan(lavaanModel = model)
-  SEM <- linr:::fit(SEM)
+  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = model)
+  SEM <- lessSEM:::fit(SEM)
   
-  gradientsAnalytic <- linr:::getGradients(SEM = SEM, raw = FALSE)
+  gradientsAnalytic <- lessSEM:::getGradients(SEM = SEM, raw = FALSE)
 
   testthat::expect_equal(round(sum(abs(gradientsAnalytic - gradients)),4),0)
   
@@ -44,12 +44,12 @@ test_that("testing gradients", {
   }
   
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
-  SEM <- linr:::SEMFromLavaan(lavaanModel = model)
-  SEM <- linr:::fit(SEM)
+  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = model)
+  SEM <- lessSEM:::fit(SEM)
   
   scores <- -2*lavScores(model)
   gradients <- apply(scores,2,sum)
   
-  gradientsAnalytic <- linr:::getGradients(SEM, raw = FALSE)
+  gradientsAnalytic <- lessSEM:::getGradients(SEM, raw = FALSE)
   testthat::expect_equal(round(sum(abs(gradientsAnalytic - gradients)),4),0)
 })

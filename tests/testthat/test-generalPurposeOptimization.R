@@ -1,5 +1,5 @@
 test_that("testing general purpose ista lasso", {
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   n <- 100
   df <- data.frame(
@@ -43,6 +43,7 @@ test_that("testing general purpose ista lasso", {
   control <- list(
     L0 = .1,
     eta = 2,
+    accelerate = TRUE,
     maxIterOut = 10,
     maxIterIn = 20,
     breakOuter = .00000001,
@@ -77,6 +78,7 @@ test_that("testing general purpose ista lasso", {
   control <- list(
     L0 = .1,
     eta = 2,
+    accelerate = TRUE,
     maxIterOut = 1000,
     maxIterIn = 1000,
     breakOuter = .00000001,

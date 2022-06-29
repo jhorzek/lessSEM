@@ -18,9 +18,9 @@ public:
   const int maxIterOut;
   const int maxIterIn;
   const double breakOuter;
-  const linr::convCritInnerIsta convCritInner;
+  const lessSEM::convCritInnerIsta convCritInner;
   const double sigma;
-  const linr::stepSizeInheritance stepSizeInh;
+  const lessSEM::stepSizeInheritance stepSizeInh;
   const int verbose; 
   
   // constructor
@@ -35,9 +35,9 @@ public:
     maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
     maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
     breakOuter(Rcpp::as<double> (control["breakOuter"])),
-    convCritInner(static_cast<linr::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
+    convCritInner(static_cast<lessSEM::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
     sigma(Rcpp::as<double> (control["sigma"])),
-    stepSizeInh(static_cast<linr::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
+    stepSizeInh(static_cast<lessSEM::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
     verbose(Rcpp::as<int> (control["verbose"])){}
   
   Rcpp::List optimize(
@@ -50,16 +50,16 @@ public:
     
     generalPurposeFitFramework gpFF(fitFunction, gradientFunction, userSuppliedElements);
     
-    linr::tuningParametersEnet tp;
+    lessSEM::tuningParametersEnet tp;
     tp.lambda = lambda_;
     tp.weights = weights;
     tp.alpha = alpha_;
     
-    linr::proximalOperatorLasso proximalOperatorLasso_;
-    linr::penaltyLASSO penalty_;
-    linr::penaltyRidge smoothPenalty_;
+    lessSEM::proximalOperatorLasso proximalOperatorLasso_;
+    lessSEM::penaltyLASSO penalty_;
+    lessSEM::penaltyRidge smoothPenalty_;
     
-    linr::control controlIsta = {
+    lessSEM::control controlIsta = {
       L0,
       eta,
       accelerate,
@@ -72,7 +72,7 @@ public:
       verbose
     };
     
-    linr::fitResults fitResults_ = linr::ista(
+    lessSEM::fitResults fitResults_ = lessSEM::ista(
       gpFF,
       startingValues_,
       proximalOperatorLasso_,
@@ -117,7 +117,7 @@ public:
   const int maxIterLine;
   const double breakOuter; // change in fit required to break the outer iteration
   const double breakInner;
-  const linr::convergenceCriteriaGlmnet convergenceCriterion; // this is related to the inner
+  const lessSEM::convergenceCriteriaGlmnet convergenceCriterion; // this is related to the inner
   // breaking condition. 
   const int verbose;
   
@@ -139,7 +139,7 @@ public:
     breakOuter(Rcpp::as<double> (control["breakOuter"])),
     breakInner(Rcpp::as<double> (control["breakInner"])),
     
-    convergenceCriterion(static_cast<linr::convergenceCriteriaGlmnet>(Rcpp::as<int> (control["convergenceCriterion"]))),
+    convergenceCriterion(static_cast<lessSEM::convergenceCriteriaGlmnet>(Rcpp::as<int> (control["convergenceCriterion"]))),
     verbose(Rcpp::as<int> (control["verbose"])){}
   
   Rcpp::List optimize(
@@ -154,16 +154,16 @@ public:
                                     gradientFunction,
                                     userSuppliedElements);
     
-    linr::tuningParametersEnet tp;
+    lessSEM::tuningParametersEnet tp;
     tp.lambda = lambda_;
     tp.weights = weights;
     tp.alpha = alpha_;
     
-    linr::proximalOperatorLasso proximalOperatorLasso_;
-    linr::penaltyLASSO penalty_;
-    linr::penaltyRidge smoothPenalty_;
+    lessSEM::proximalOperatorLasso proximalOperatorLasso_;
+    lessSEM::penaltyLASSO penalty_;
+    lessSEM::penaltyRidge smoothPenalty_;
     
-    linr::controlGLMNET control_ = {
+    lessSEM::controlGLMNET control_ = {
       initialHessian,
       stepSize,
       sigma,
@@ -178,7 +178,7 @@ public:
       verbose
     };
     
-    linr::fitResults fitResults_ = linr::glmnet(
+    lessSEM::fitResults fitResults_ = lessSEM::glmnet(
       gpFF,
       startingValues_,
       penalty_,

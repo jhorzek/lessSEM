@@ -6,14 +6,14 @@
 #' 
 #' @param lavaanModel model of class lavaan
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
-#' a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example
-#' @param raw controls if the cross-validation should use the internal transformations of linr. linr will use an exponential function for all variances to 
+#' a matrix with pre-defined subsets can be passed to the function. See ?lessSEM::aCV4regularizedSEM for an example
+#' @param raw controls if the cross-validation should use the internal transformations of lessSEM. lessSEM will use an exponential function for all variances to 
 #' avoid negative variances. This can result in better sub-group parameters, but may not be necessary and will also result in more difficult to interpret parameters.
 #' @examples 
 #' ## Approximate leave one out cross-validation for a lavaan model
 #' ### set up model in lavaan
 #' library(lavaan)
-#' library(linr)
+#' library(lessSEM)
 #' HS.model <- ' visual  =~ x1 + x2 + x3
 #'                     textual =~ x4 + x5 + x6
 #'                     speed   =~ x7 + x8 + x9 '
@@ -28,7 +28,7 @@
 #' # exactLOOCV <- rep(NA, nrow(HS))
 #' # for(i in 1:nrow(HS)){
 #' #   fit = sem(HS.model, HS[-i,], meanstructure = TRUE)
-#' #   exactLOOCV[i] <- linr:::computeIndividualM2LL(nObservedVariables = ncol(HS),
+#' #   exactLOOCV[i] <- lessSEM:::computeIndividualM2LL(nObservedVariables = ncol(HS),
 #' #                                                    rawData = as.numeric(HS[i,]),
 #' #                                                    impliedMeans = fit@implied$mean[[1]],
 #' #                                                    impliedCovariance = fit@implied$cov[[1]])
@@ -52,7 +52,7 @@ aCV4lavaan <- function(lavaanModel,
   if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
   
   N <- lavaan::lavInspect(lavaanModel, "nobs")
-  aCVSEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
+  aCVSEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, transformVariances = TRUE)
   
   # create subsets 
   if(is.matrix(k)){
@@ -61,7 +61,7 @@ aCV4lavaan <- function(lavaanModel,
     if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
     k <- ncol(subsets)
   }else{
-    subsets <- linr:::createSubsets(N = N, k = k)
+    subsets <- lessSEM:::createSubsets(N = N, k = k)
   }
   
   individualPenaltyFunction <- function(a,b,c) {
@@ -80,7 +80,7 @@ aCV4lavaan <- function(lavaanModel,
              dimnames = list(names(a), names(a))))
   }
   
-  aCV <- linr:::customACVRcpp_SEMCpp(SEM = aCVSEM, 
+  aCV <- lessSEM:::customACVRcpp_SEMCpp(SEM = aCVSEM, 
                                         subsets = subsets,
                                         raw = raw, 
                                         individualPenaltyFunction = individualPenaltyFunction,
@@ -94,13 +94,13 @@ aCV4lavaan <- function(lavaanModel,
 
 #' GLMNETACVRcpp_SEMCpp
 #' 
-#' internal function for approximate cross-validation based on the internal model representation of linr. The GLMNET part refers to the fact
+#' internal function for approximate cross-validation based on the internal model representation of lessSEM. The GLMNET part refers to the fact
 #' that this function uses the GLMNET optimizer for non-differentiable penalty functions. 
 #' 
 #' @param SEM model of class Rcpp_SEMCpp. Models of this class
 #' can be generated with the SEMFromLavaan-function.
 #' @param subsets list with subsets created with createSubsets()
-#' @param raw controls if the internal transformations of linr should be used.
+#' @param raw controls if the internal transformations of lessSEM should be used.
 #' @param regularizedParameterLabels vector with labels of regularized parameters
 #' @param lambda value of tuning parameter lambda
 #' @param alpha value of tuning parameter alpha (for elastic net)
@@ -120,17 +120,17 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     stop("SEM must be of class Rcpp_SEMCpp")
   }
   
-  parameters <- linr:::getParameters(SEM = SEM, raw = raw)
+  parameters <- lessSEM:::getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
   N <- nrow(dataSet)
   k <- ncol(subsets)
   
   # compute derivatives of -2log-Likelihood without penalty
   if(control$verbose != 0) cat("Computing scores\n")
-  scores <- linr:::getScores(SEM = SEM, raw = raw)
+  scores <- lessSEM:::getScores(SEM = SEM, raw = raw)
   if(is.null(hessianOfDifferentiablePart)){
     if(control$verbose != 0) cat("Computing Hessian\n\n")
-    hessian <- linr:::getHessian(SEM = SEM, raw = raw)
+    hessian <- lessSEM:::getHessian(SEM = SEM, raw = raw)
     
     hessianEV <- eigen(hessian, only.values = TRUE)$values
     if(any(hessianEV < 0)) {
@@ -170,17 +170,17 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
       # we multiply with the adaptive lasso weights.
       penaltyFunctionTuning <- list("lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*(Ntraining))
       penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels)
-      subGroupGradient <- subGroupGradient + linr::ridgeGradient(parameters = parameters,
+      subGroupGradient <- subGroupGradient + lessSEM::ridgeGradient(parameters = parameters,
                                                                     tuningParameters = penaltyFunctionTuning,
                                                                     penaltyFunctionArguments = penaltyFunctionArguments)
       if(is.null(hessianOfDifferentiablePart)){
-        subGroupHessian <- subGroupHessian + linr::ridgeHessian(parameters = parameters,
+        subGroupHessian <- subGroupHessian + lessSEM::ridgeHessian(parameters = parameters,
                                                                    tuningParameters = penaltyFunctionTuning,
                                                                    penaltyFunctionArguments = penaltyFunctionArguments)
       }
     }
     
-    direction <- try(linr:::innerGLMNET(parameters = parameters, 
+    direction <- try(lessSEM:::innerGLMNET(parameters = parameters, 
                                            N = Ntraining,
                                            subGroupGradient = subGroupGradient, 
                                            subGroupHessian = subGroupHessian, 
@@ -199,13 +199,13 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
     
     # compute out of sample fit
     parameters_s <- parameters + stepdirections[s,names(parameters)]
-    SEM <- linr:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
-    #SEM <- try(linr:::fit(SEM), silent = TRUE)
-    subsetParameters[s,names(parameters)] <- linr:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
+    SEM <- lessSEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
+    #SEM <- try(lessSEM:::fit(SEM), silent = TRUE)
+    subsetParameters[s,names(parameters)] <- lessSEM:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
     
     
     for(i in which(subsets[,s])){
-      leaveOutFits[s] <- leaveOutFits[s] + linr:::individualMinus2LogLikelihood(par = subsetParameters[s,], 
+      leaveOutFits[s] <- leaveOutFits[s] + lessSEM:::individualMinus2LogLikelihood(par = subsetParameters[s,], 
                                                                                    SEM = SEM, 
                                                                                    data = dataSet[i,], 
                                                                                    raw = FALSE)
@@ -230,7 +230,7 @@ GLMNETACVRcpp_SEMCpp <- function(SEM,
 #' 
 #' @param regularizedSEMWithCustomPenalty. model of class regularizedSEMWithCustomPenalty.
 #' @param k the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
-#' a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example
+#' a matrix with pre-defined subsets can be passed to the function. See ?lessSEM::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param recomputeHessian if set to FALSE, the Hessians from the quasi newton optimization with BFGS will be used. Otherwise the Hessian will be recomputed. We currently recommend setting recomputeHessian to TRUE
 #' @export
@@ -247,7 +247,7 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
   
   N <- nrow(data)
   
-  aCVSEM <- linr:::SEMFromLavaan(lavaanModel = regularizedSEMWithCustomPenalty@inputArguments$lavaanModel, transformVariances = TRUE, fit = FALSE)
+  aCVSEM <- lessSEM:::SEMFromLavaan(lavaanModel = regularizedSEMWithCustomPenalty@inputArguments$lavaanModel, transformVariances = TRUE, fit = FALSE)
   
   # create subsets 
   if(is.matrix(k)){
@@ -256,7 +256,7 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
     if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
     k <- ncol(subsets)
   }else{
-    subsets <- linr:::createSubsets(N = N, k = k)
+    subsets <- lessSEM:::createSubsets(N = N, k = k)
   }
   
   # extract elements for easier access
@@ -272,12 +272,12 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
   
   if(is.null(individualPenaltyFunctionGradient)){
     message("Using numDeriv to approximate the gradient of the individualPenaltyFunction.")
-    individualPenaltyFunctionGradient <- linr::genericGradientApproximiation
+    individualPenaltyFunctionGradient <- lessSEM::genericGradientApproximiation
     penaltyFunctionArguments <- c(penaltyFunctionArguments, individualPenaltyFunction = individualPenaltyFunction)
   }
   if(is.null(individualPenaltyFunctionHessian)){
     message("Using numDeriv to approximate the Hessian of the individualPenaltyFunction.")
-    individualPenaltyFunctionHessian <- linr::genericHessianApproximiation
+    individualPenaltyFunctionHessian <- lessSEM::genericHessianApproximiation
     penaltyFunctionArguments <- c(penaltyFunctionArguments, individualPenaltyFunction = individualPenaltyFunction)
   }
   
@@ -333,13 +333,13 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
     
     pars <- unlist(regularizedSEMWithCustomPenalty@parameters[ro,regularizedSEMWithCustomPenalty@parameterLabels])
     
-    aCVSEM <- linr:::setParameters(SEM = aCVSEM,
+    aCVSEM <- lessSEM:::setParameters(SEM = aCVSEM,
                                       labels = names(pars),
                                       values = pars,
                                       raw = FALSE)
-    aCVSEM <- linr:::fit(aCVSEM)
+    aCVSEM <- lessSEM:::fit(aCVSEM)
     
-    aCV <- linr:::customACVRcpp_SEMCpp(SEM = aCVSEM, 
+    aCV <- lessSEM:::customACVRcpp_SEMCpp(SEM = aCVSEM, 
                                           subsets = subsets,
                                           raw = TRUE, 
                                           individualPenaltyFunction = individualPenaltyFunction,
@@ -374,13 +374,13 @@ aCV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty,
 
 #' customACVRcpp_SEMCpp
 #' 
-#' internal function for approximate cross-validation based on the internal model representation of linr. The custom part refers to the fact
+#' internal function for approximate cross-validation based on the internal model representation of lessSEM. The custom part refers to the fact
 #' that this function uses a custom penalty function. 
 #' 
 #' @param SEM model of class Rcpp_SEMCpp. Models of this class
 #' can be generated with the SEMFromLavaan-function.
 #' @param subsets list with subsets created with createSubsets()
-#' @param raw controls if the internal transformations of linr should be used.
+#' @param raw controls if the internal transformations of lessSEM should be used.
 #' @param regularizedParameterLabels vector with labels of regularized parameters
 #' @param lambda value of tuning parameter lambda
 #' @param alpha value of tuning parameter alpha (for elastic net)
@@ -400,15 +400,15 @@ customACVRcpp_SEMCpp <- function(SEM,
     stop("SEM must be of class Rcpp_SEMCpp")
   }
   
-  parameters <- linr:::getParameters(SEM = SEM, raw = raw)
+  parameters <- lessSEM:::getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
   N <- nrow(dataSet)
   k <- ncol(subsets)
   
   # compute derivatives of -2log-Likelihood without penalty
-  scores <- linr:::getScores(SEM = SEM, raw = raw)
+  scores <- lessSEM:::getScores(SEM = SEM, raw = raw)
   if(is.null(hessianOfDifferentiablePart)){
-    hessian <- linr:::getHessian(SEM = SEM, raw = raw)
+    hessian <- lessSEM:::getHessian(SEM = SEM, raw = raw)
     
   }else{
     hessian <- hessianOfDifferentiablePart
@@ -462,11 +462,11 @@ customACVRcpp_SEMCpp <- function(SEM,
     
     # compute out of sample fit
     parameters_s <- parameters + stepdirections[s,names(parameters)]
-    SEM <- linr:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
-    subsetParameters[s,names(parameters)] <- linr:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
+    SEM <- lessSEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
+    subsetParameters[s,names(parameters)] <- lessSEM:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
     
     for(i in which(subsets[,s])){
-      leaveOutFits[s] <- leaveOutFits[s] + linr:::individualMinus2LogLikelihood(par = subsetParameters[s,], 
+      leaveOutFits[s] <- leaveOutFits[s] + lessSEM:::individualMinus2LogLikelihood(par = subsetParameters[s,], 
                                                                                    SEM = SEM, 
                                                                                    data = dataSet[i,], 
                                                                                    raw = FALSE)

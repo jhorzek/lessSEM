@@ -16,7 +16,7 @@ acv4elasticNet(
 \item{regularizedSEM}{model of class regularizedSEM}
 
 \item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
-a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example}
+a matrix with pre-defined subsets can be passed to the function. See ?lessSEM::aCV4regularizedSEM for an example}
 
 \item{recomputeHessian}{if set to FALSE, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed. We currently recommend setting recomputeHessian to TRUE}
 
@@ -29,10 +29,10 @@ approximate cross-validation for elastic net regularized SEM. These models can b
 in this package.
 }
 \examples{
-library(linr)
+library(lessSEM)
 
 # Let's first set up a regularized model. The following steps are
-# explained in detail in ?linr::regularizeSEM
+# explained in detail in ?lessSEM::regularizeSEM
 dataset <- simulateExampleData()
 
 lavaanSyntax <- "
@@ -111,9 +111,9 @@ aCV <- aCV4regularizedSEM(regularizedSEM = regsem,
                           
 )
 
-## Instead of letting linr create the subsets, you can
+## Instead of letting lessSEM create the subsets, you can
 # also pass your own subsets. As an example:
-subsets <- linr:::createSubsets(N = nrow(dataset), k  = 10)
+subsets <- lessSEM:::createSubsets(N = nrow(dataset), k  = 10)
 
 aCV <- aCV4regularizedSEM(regularizedSEM = regsem,
                           k = subsets

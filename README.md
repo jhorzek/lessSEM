@@ -1,49 +1,49 @@
-# linr
+# lessSEM
 
-linr (**l**inr **i**mplements **n**on-smooth **r**egsem) is an R package which provides regularized structural equation modeling (regularized SEM) with non-smooth penalty functions (e.g., lasso) building on lavaan. These non-smooth penalties make SEM *leaner*. As the name suggests, linr is heavily inspired by the [regsem](https://github.com/Rjacobucci/regsem) package.
+lessSEM (**l**essSEM **es**timates **s**parse **SEM**) is an R package which provides regularized structural equation modeling (regularized SEM) with non-smooth penalty functions (e.g., lasso) building on lavaan. lessSEM is heavily inspired by the [regsem](https://github.com/Rjacobucci/regsem) package which provides similar functionality.
 
-The objectives of linr are:
+The objectives of lessSEM are:
 
 1. to compare exact and approximate optimization of regularized SEM
 2. to provide optimizers for other SEM packages which can be used with an interface similar to optim
 
-linr also provides experimental functions for approximate cross-validation and approximate influence functions. 
+lessSEM also provides experimental functions for approximate cross-validation and approximate influence functions. 
 
 **Warning**: The package is relatively new and you may find more stable implementations of regularized SEM in the R packages [regsem](https://github.com/Rjacobucci/regsem) and [lslx](https://github.com/psyphh/lslx). 
 
-The following features are implemented in linr:
+The following features are implemented in lessSEM:
 
-- regularization of SEM with ridge, lasso, adaptive lasso, and elastic net (see ?linr::ridge, ?linr::lasso, ?linr::adaptiveLasso, ?linr::elasticNet)
-- automatic selection of $\lambda$ values for lasso and adaptive lasso (see ?linr::lasso, ?linr::adaptiveLasso)
-- approximate optimization of SEM with custom penalty functions using a BFGS optimizer or Rsolnp (see ?linr::smoothLasso, ?linr::smoothAdaptiveLasso, ?linr::smoothElasticNet, ?linr::regularizeSEMWithCustomPenaltyRsolnp)
-- exact cross-validation for regularized models (see ?linr::cv4ridge, ?linr::cv4lasso, ?linr::cv4adaptiveLasso, ?linr::cv4elasticNet)
-- UNDER CONSTRUCTION: approximate cross-validation (see ?linr::acv4elasticNet and ?linr::aCV4regularizedSEMWithCustomPenalty)
-- UNDER CONSTRUCTION: approximate influence functions for regularized SEM (see ?linr::ai4elasticNet)
+- regularization of SEM with ridge, lasso, adaptive lasso, and elastic net (see ?lessSEM::ridge, ?lessSEM::lasso, ?lessSEM::adaptiveLasso, ?lessSEM::elasticNet)
+- automatic selection of $\lambda$ values for lasso and adaptive lasso (see ?lessSEM::lasso, ?lessSEM::adaptiveLasso)
+- approximate optimization of SEM with custom penalty functions using a BFGS optimizer or Rsolnp (see ?lessSEM::smoothLasso, ?lessSEM::smoothAdaptiveLasso, ?lessSEM::smoothElasticNet, ?lessSEM::regularizeSEMWithCustomPenaltyRsolnp)
+- exact cross-validation for regularized models (see ?lessSEM::cv4ridge, ?lessSEM::cv4lasso, ?lessSEM::cv4adaptiveLasso, ?lessSEM::cv4elasticNet)
+- UNDER CONSTRUCTION: approximate cross-validation (see ?lessSEM::acv4elasticNet and ?lessSEM::aCV4regularizedSEMWithCustomPenalty)
+- UNDER CONSTRUCTION: approximate influence functions for regularized SEM (see ?lessSEM::ai4elasticNet)
 
-Currently, linr has the following optimizers:
+Currently, lessSEM has the following optimizers:
 
 - (variants of) iterative shrinkage and thresholding 
 - glmnet
 
 These are also available for other packages. There are two ways to implement them:
 
-1. using the R interface: (e.g., ?linr::gpLasso, ?linr::gpAdaptiveLasso, ?linr::gpElasticNet). This interface is similar to the optim optimizers in R
-2. All optimizers are implemented as C++ header-only files in linr. Thus, they can be accessed from other packages using C++. The documentation for this approach will follow soon.
+1. using the R interface: (e.g., ?lessSEM::gpLasso, ?lessSEM::gpAdaptiveLasso, ?lessSEM::gpElasticNet). This interface is similar to the optim optimizers in R
+2. All optimizers are implemented as C++ header-only files in lessSEM. Thus, they can be accessed from other packages using C++. The documentation for this approach will follow soon.
 
 # Installation
 
-If you want to install linr from GitHub, use the following commands in R:
+If you want to install lessSEM from GitHub, use the following commands in R:
 
     if(!require(devtools))install.packages("devtools")
   
-    devtools::install_github("jhorzek/linr")
+    devtools::install_github("jhorzek/lessSEM")
     
 
 # Example
 
-    library(linr)
+    library(lessSEM)
     
-    # Identical to regsem, linr builds on the lavaan
+    # Identical to regsem, lessSEM builds on the lavaan
     # package for model specification. The first step
     # therefore is to implement the model in lavaan.
     
@@ -72,7 +72,7 @@ If you want to install linr from GitHub, use the following commands in R:
       # names of the regularized parameters:
       regularized = paste0("l", 6:15),
       # in case of lasso and adaptive lasso, we can specify the number of lambda
-      # values to use. linr will automatically find lambda_max and fit
+      # values to use. lessSEM will automatically find lambda_max and fit
       # models for nLambda values between 0 and lambda_max. For the other
       # penalty functions, lambdas must be specified explicitly
       nLambdas = 50)

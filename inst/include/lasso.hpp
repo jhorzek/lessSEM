@@ -5,7 +5,7 @@
 #include "penalty.hpp"
 #include "enet.hpp" // for definition of tuning parameters
 
-namespace linr{
+namespace lessSEM{
 
 class proximalOperatorLasso: public proximalOperator<tuningParametersEnet>{
 public:

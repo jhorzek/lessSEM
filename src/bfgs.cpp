@@ -12,7 +12,7 @@ arma::mat BFGS_C(const arma::rowvec& parameters_kMinus1,
                  const bool cautious, 
                  const double hessianEps){
   
-  return(linr::BFGS(
+  return(lessSEM::BFGS(
     parameters_kMinus1, 
     gradients_kMinus1, 
     Hessian_kMinus1, 

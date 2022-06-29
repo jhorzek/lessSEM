@@ -25,7 +25,7 @@
 // The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
 
 
-namespace linr{
+namespace lessSEM{
 
 enum convergenceCriteriaBFGS{
   GLMNET_,
@@ -191,7 +191,7 @@ inline arma::rowvec bfgsLineSearch(
 }
 
 template<typename T> // T is the type of the tuning parameters
-inline linr::fitResults bfgsOptim(model& model_, 
+inline lessSEM::fitResults bfgsOptim(model& model_, 
                                Rcpp::NumericVector startingValuesRcpp,
                                smoothPenalty<T>& smoothPenalty_,
                                const T& tuningParameters, // tuning parameters are of type T
@@ -319,7 +319,7 @@ inline linr::fitResults bfgsOptim(model& model_,
     } 
     
     // Approximate Hessian using BFGS
-    Hessian_k = linr::BFGS(
+    Hessian_k = lessSEM::BFGS(
       parameters_kMinus1,
       gradients_kMinus1,
       Hessian_kMinus1,

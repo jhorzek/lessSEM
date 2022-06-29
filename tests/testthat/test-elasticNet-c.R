@@ -1,7 +1,7 @@
 test_that("testing elastic net-c", {
   library(lslx)
   library(lavaan)
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
@@ -32,7 +32,7 @@ test_that("testing elastic net-c", {
   
   fitLslx$penalize_coefficient(name = paste0("y", 6:ncol(y)," <- f"))
   
-  lambdas <- seq(0,.8,.05)
+  lambdas <- seq(0,2,.1)
   alpha <- .5
   fitLslx$fit(penalty_method = "elastic_net",lambda_grid = lambdas, delta_grid = alpha, loss = "ml")
   
@@ -49,7 +49,7 @@ test_that("testing elastic net-c", {
   regularized <- paste0("y", 6:ncol(y),"<-f/g") 
   
   # replicate with regularizedSEM
-  lavaanParameters <- linr::getLavaanParameters(modelFit)
+  lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
   weights <- rep(0, length(lavaanParameters))
   names(weights) <- names(lavaanParameters)
   weights[paste0("f=~y",6:ncol(y))] <- 1
@@ -87,7 +87,7 @@ test_that("testing elastic net-c", {
   
   cvExactIsta <- cv4elasticNet(regularizedSEM = rsemIsta, k = cvExactGlmnet@subsets)
   
-  testthat::expect_equal(all(abs(cvExactGlmnet@cvfits - cvExactIsta@cvfits) < .2), TRUE)
+  testthat::expect_equal(all(abs(cvExactGlmnet@cvfits - cvExactIsta@cvfits) < 1), TRUE)
   testthat::expect_equal(all(abs(coef(cvExactGlmnet) -
   coef(cvExactIsta)
   ) < .2), TRUE)

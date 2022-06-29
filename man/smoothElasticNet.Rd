@@ -24,7 +24,7 @@ getLavaanParameters(model) with your lavaan model object}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
 
-\item{nLambdas}{alternative to lambda: If alpha = 1, linr can automatically
+\item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
 compute the first lambda value which sets all regularized parameters to zero.
 It will then generate nLambda values between 0 and the computed lambda.}
 
@@ -59,9 +59,9 @@ Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408
 }
 }
 \examples{
-library(linr)
+library(lessSEM)
 
-# Identical to regsem, linr builds on the lavaan
+# Identical to regsem, lessSEM builds on the lavaan
 # package for model specification. The first step
 # therefore is to implement the model in lavaan.
 

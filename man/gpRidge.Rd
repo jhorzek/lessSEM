@@ -40,7 +40,7 @@ the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 for more details.}
 }
 \description{
-Optimizers in linr can also be used by other packages.
+Optimizers in lessSEM can also be used by other packages.
 gpRidge allows for combining ridge regularization and custom fitting functions
 with an interface similar to optim.
 }
@@ -77,7 +77,7 @@ Conference on Machine Learning, 28(2)(2), 37–45.
 # as there are specialized packages for linear regression
 # (e.g., glmnet)
 
-library(linr)
+library(lessSEM)
 set.seed(123)
 
 # first, we simulate data for our

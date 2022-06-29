@@ -1,7 +1,7 @@
 #ifndef FITRESULTS_H
 #define FITRESULTS_H
 
-namespace linr{
+namespace lessSEM{
 
 struct fitResults{
   double fit; // the final fit value (regularized fit)

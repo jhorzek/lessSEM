@@ -1,6 +1,6 @@
 #' gpLasso
 #' 
-#' Optimizers in linr can also be used by other packages. 
+#' Optimizers in lessSEM can also be used by other packages. 
 #' gpLasso allows for combining lasso regularization and custom fitting functions
 #' with an interface similar to optim.  
 #' 
@@ -34,7 +34,7 @@
 #' gradients of the objective function. If set to NULL, numDeriv will be used
 #' to approximate the gradients 
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, linr can automatically
+#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param additionalArguments additional argument passed to fn and gr
@@ -53,7 +53,7 @@
 #' # as there are specialized packages for linear regression
 #' # (e.g., glmnet)
 #' 
-#' library(linr)
+#' library(lessSEM)
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our
@@ -153,7 +153,7 @@ gpLasso <- function(par,
 
 #' gpAdaptiveLasso
 #' 
-#' Optimizers in linr can also be used by other packages. 
+#' Optimizers in lessSEM can also be used by other packages. 
 #' gpAdaptiveLasso allows for combining adaptive lasso regularization and custom fitting functions
 #' with an interface similar to optim.  
 #' 
@@ -187,7 +187,7 @@ gpLasso <- function(par,
 #' gradients of the objective function. If set to NULL, numDeriv will be used
 #' to approximate the gradients 
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, linr can automatically
+#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param weights labeled vector with adaptive lasso weights. NULL will use 1/abs(par)
@@ -207,7 +207,7 @@ gpLasso <- function(par,
 #' # as there are specialized packages for linear regression
 #' # (e.g., glmnet)
 #' 
-#' library(linr)
+#' library(lessSEM)
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our
@@ -316,7 +316,7 @@ gpAdaptiveLasso <- function(par,
 
 #' gpRidge
 #' 
-#' Optimizers in linr can also be used by other packages. 
+#' Optimizers in lessSEM can also be used by other packages. 
 #' gpRidge allows for combining ridge regularization and custom fitting functions
 #' with an interface similar to optim.  
 #' 
@@ -366,7 +366,7 @@ gpAdaptiveLasso <- function(par,
 #' # as there are specialized packages for linear regression
 #' # (e.g., glmnet)
 #' 
-#' library(linr)
+#' library(lessSEM)
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our
@@ -465,7 +465,7 @@ gpRidge <- function(par,
 
 #' gpElasticNet
 #' 
-#' Optimizers in linr can also be used by other packages. 
+#' Optimizers in lessSEM can also be used by other packages. 
 #' gpElasticNet allows for combining elastic net regularization and custom 
 #' fitting functions with an interface similar to optim.  
 #' 
@@ -500,7 +500,7 @@ gpRidge <- function(par,
 #' as input and returns the gradients of the objective function. 
 #' If set to NULL, numDeriv will be used to approximate the gradients 
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, linr can automatically
+#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
@@ -520,7 +520,7 @@ gpRidge <- function(par,
 #' # as there are specialized packages for linear regression
 #' # (e.g., glmnet)
 #' 
-#' library(linr)
+#' library(lessSEM)
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our

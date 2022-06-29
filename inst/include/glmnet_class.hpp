@@ -24,7 +24,7 @@
 // The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
 
 
-namespace linr{
+namespace lessSEM{
 
 enum convergenceCriteriaGlmnet{
   GLMNET,
@@ -310,7 +310,7 @@ inline arma::rowvec glmnetLineSearch(
 }
 
 
-inline linr::fitResults glmnet(model& model_, 
+inline lessSEM::fitResults glmnet(model& model_, 
                                Rcpp::NumericVector startingValuesRcpp,
                                penaltyLASSO& penalty_,
                                penaltyRidge& smoothPenalty_, 
@@ -456,7 +456,7 @@ inline linr::fitResults glmnet(model& model_,
     } 
     
     // Approximate Hessian using BFGS
-    Hessian_k = linr::BFGS(
+    Hessian_k = lessSEM::BFGS(
       parameters_kMinus1,
       gradients_kMinus1,
       Hessian_kMinus1,

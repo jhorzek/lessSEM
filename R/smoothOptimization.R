@@ -19,7 +19,7 @@
 #' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, linr can automatically
+#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
@@ -28,9 +28,9 @@
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @md
 #' @examples 
-#' library(linr)
+#' library(lessSEM)
 #' 
-#' # Identical to regsem, linr builds on the lavaan
+#' # Identical to regsem, lessSEM builds on the lavaan
 #' # package for model specification. The first step
 #' # therefore is to implement the model in lavaan.
 #' 
@@ -137,7 +137,7 @@ smoothLasso <- function(lavaanModel,
 #' the default weights will be used: the inverse of the absolute values of
 #' the unregularized parameter estimates
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, linr can automatically
+#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
@@ -146,9 +146,9 @@ smoothLasso <- function(lavaanModel,
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @md
 #' @examples 
-#' library(linr)
+#' library(lessSEM)
 #' 
-#' # Identical to regsem, linr builds on the lavaan
+#' # Identical to regsem, lessSEM builds on the lavaan
 #' # package for model specification. The first step
 #' # therefore is to implement the model in lavaan.
 #' 
@@ -212,8 +212,16 @@ smoothAdaptiveLasso <- function(lavaanModel,
                           epsilon,
                           tau,
                           control = controlBFGS()){
+  
   if(is.null(weights)){
-    weights <- 1/abs(getLavaanParameters(lavaanModel))
+    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+                                   transformVariances = TRUE,
+                                   whichPars = "est",
+                                   addMeans = control$addMeans, 
+                                   activeSet = control$activeSet)
+    
+    weights <- lessSEM::getParameters(SEM, raw = FALSE)
+    weights <- 1/abs(weights)
     weights[!names(weights) %in% regularized] <- 0
   }
   
@@ -263,9 +271,9 @@ smoothAdaptiveLasso <- function(lavaanModel,
 #' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
 #' @md
 #' @examples 
-#' library(linr)
+#' library(lessSEM)
 #' 
-#' # Identical to regsem, linr builds on the lavaan
+#' # Identical to regsem, lessSEM builds on the lavaan
 #' # package for model specification. The first step
 #' # therefore is to implement the model in lavaan.
 #' 
@@ -307,7 +315,13 @@ ridgeBfgs <- function(lavaanModel,
                   lambdas = NULL,
                   control = controlBFGS()){
   
-  weights <- getLavaanParameters(lavaanModel)
+  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+                                 transformVariances = TRUE,
+                                 whichPars = "est",
+                                 addMeans = control$addMeans, 
+                                 activeSet = control$activeSet)
+  
+  weights <- lessSEM::getParameters(SEM, raw = FALSE)
   weights[] <- 0
   weights[regularized] <- 1
   if(! all(regularized %in% names(weights))) stop(paste0(
@@ -356,7 +370,7 @@ ridgeBfgs <- function(lavaanModel,
 #' model. If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, linr can automatically
+#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
@@ -367,9 +381,9 @@ ridgeBfgs <- function(lavaanModel,
 #' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
 #' @md
 #' @examples 
-#' library(linr)
+#' library(lessSEM)
 #' 
-#' # Identical to regsem, linr builds on the lavaan
+#' # Identical to regsem, lessSEM builds on the lavaan
 #' # package for model specification. The first step
 #' # therefore is to implement the model in lavaan.
 #' 
@@ -452,28 +466,28 @@ smoothElasticNet <- function(lavaanModel,
   ### initialize model ####
   startingValues <- control$startingValues
   if(any(startingValues == "est")){
-    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                 transformVariances = TRUE,
                                 whichPars = "est",
                                 addMeans = control$addMeans, 
                                 activeSet = control$activeSet)
   }else if(any(startingValues == "start")){
-    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                 transformVariances = TRUE,
                                 whichPars = "start",
                                 addMeans = control$addMeans, 
                                 activeSet = control$activeSet)
   }else if(is.numeric(startingValues)){
     
-    if(!all(names(startingValues) %in% names(linr::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See linr::getLavaanParameters(lavaanModel).")
-    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
+    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                 transformVariances = TRUE,
                                 whichPars = "start", 
                                 fit = FALSE,
                                 addMeans = control$addMeans, 
                                 activeSet = control$activeSet)
-    SEM <- linr:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(linr:::fit(SEM))
+    SEM <- lessSEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
+    SEM <- try(lessSEM:::fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
       stop("Infeasible starting values.")
     
@@ -482,8 +496,8 @@ smoothElasticNet <- function(lavaanModel,
   }
   
   # get parameters
-  startingValues <- linr:::getParameters(SEM, raw = TRUE)
-  rawParameters <- linr:::getParameters(SEM, raw = TRUE)
+  startingValues <- lessSEM:::getParameters(SEM, raw = TRUE)
+  rawParameters <- lessSEM:::getParameters(SEM, raw = TRUE)
   
   # make sure that the weights are in the correct order
   if(is.null(names(weights))) stop("weights must have the same names as the parameters")
@@ -495,17 +509,17 @@ smoothElasticNet <- function(lavaanModel,
   initialHessian <- control$initialHessian
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
     
-    if(!all(rownames(initialHessian) %in% names(linr::getLavaanParameters(lavaanModel))) ||
-       !all(colnames(initialHessian) %in% names(linr::getLavaanParameters(lavaanModel)))
-    ) stop("initialHessian must have the parameter names as rownames and colnames. See linr::getLavaanParameters(lavaanModel).")
+    if(!all(rownames(initialHessian) %in% names(lessSEM::getLavaanParameters(lavaanModel))) ||
+       !all(colnames(initialHessian) %in% names(lessSEM::getLavaanParameters(lavaanModel)))
+    ) stop("initialHessian must have the parameter names as rownames and colnames. See lessSEM::getLavaanParameters(lavaanModel).")
     
   }else if(any(initialHessian == "compute")){
     
-    initialHessian <- linr:::getHessian(SEM = SEM, raw = TRUE)
+    initialHessian <- lessSEM:::getHessian(SEM = SEM, raw = TRUE)
     
   }else if(any(initialHessian == "scoreBased")){
     
-    scores <- linr:::getScores(SEM = SEM, raw = TRUE)
+    scores <- lessSEM:::getScores(SEM = SEM, raw = TRUE)
     FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
     rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
     for(score in 1:nrow(scores)){
@@ -566,6 +580,8 @@ smoothElasticNet <- function(lavaanModel,
     lambdas <- seq(0,
                    maxLambda,
                    length.out = nLambdas)
+    
+    inputArguments$lambdas <- lambdas
     
   }
   
@@ -636,12 +652,12 @@ smoothElasticNet <- function(lavaanModel,
     fits$regM2LL[it] <- result$fit
     fits$convergence[it] <- result$convergence
     
-    SEM <- linr::setParameters(SEM, 
+    SEM <- lessSEM::setParameters(SEM, 
                                names(rawParameters), 
                                values = rawParameters, 
                                raw = TRUE)
     fits$m2LL[it] <- SEM$fit()
-    transformedParameters <- linr:::getParameters(SEM,
+    transformedParameters <- lessSEM:::getParameters(SEM,
                                                   raw = FALSE)
     parameterEstimates[it, names(rawParameters)] <- transformedParameters[names(rawParameters)]
     
@@ -655,7 +671,7 @@ smoothElasticNet <- function(lavaanModel,
               alpha,
               " resulted in Error!")
       
-      SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
+      SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                   transformVariances = TRUE,
                                   whichPars = startingValues,
                                   addMeans = control$addMeans)

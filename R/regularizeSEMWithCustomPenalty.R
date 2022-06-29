@@ -15,9 +15,9 @@
 #' the next iteration?
 #' @param control option to set parameters of the optimizer; see ?Rsolnp::solnp
 #' @examples 
-#' library(linr)
+#' library(lessSEM)
 #' 
-#' # Identical to regsem, linr builds on the lavaan
+#' # Identical to regsem, lessSEM builds on the lavaan
 #' # package for model specification. The first step
 #' # therefore is to implement the model in lavaan.
 #' 
@@ -41,23 +41,23 @@
 #' #                   fade = FALSE)
 #' 
 #' ## Defining a custom penalty function is a bit more complicated than
-#' # using the default ones provided in regularizeSEM (see ?linr::regularizeSEM).
+#' # using the default ones provided in regularizeSEM (see ?lessSEM::regularizeSEM).
 #' # We start with the definition of the penalty function. Make sure that the derivatives
 #' # of this function are well defined (i.e., the function is smooth)!
 #' # We will use the lasso penalty as an example.
 #' 
 #' # The penalty function MUST accept three arguments; how you use them is up to you.
 #' 
-#' # The first argument are the parameters. linr will pass a vector with the current
+#' # The first argument are the parameters. lessSEM will pass a vector with the current
 #' # parameter values and their names to your function. The parameter labels will be
 #' # exactly the same as those used by lavaan! So you can check them before with:
 #' 
-#' linr::getLavaanParameters(lavaanModel)
+#' lessSEM::getLavaanParameters(lavaanModel)
 #' 
 #' # The vector passed to your function will look like the vector above.
 #' 
 #' # The second argument is called tuningParameters MUST be a data.frame with the
-#' # tuning-parameters. linr will automatically iterate over the rows of this object.
+#' # tuning-parameters. lessSEM will automatically iterate over the rows of this object.
 #' # In case of LASSO regularization there is only one tuning parameter: lambda.
 #' # Therefore, we specify the tuningParameters object as:
 #' 
@@ -99,7 +99,7 @@
 #'   return(penaltyLasso)
 #' }
 #' # Important: This penalty function is assumed to be for a single individual only.
-#' # linr will multiply it with sample size N to get the penalty value of the
+#' # lessSEM will multiply it with sample size N to get the penalty value of the
 #' # full sample!
 #' 
 #' #### Now we are ready to optimize! ####
@@ -152,28 +152,28 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   
   ### initialize model ####
   if(any(startingValues == "est")){
-    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "est",
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
   }else if(any(startingValues == "start")){
-    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start",
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
   }else if(is.numeric(startingValues)){
     
-    if(!all(names(startingValues) %in% names(linr::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See linr::getLavaanParameters(lavaanModel).")
-    SEM <- linr:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
+    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start", 
                                    fit = FALSE,
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
-    SEM <- linr:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(linr:::fit(SEM))
+    SEM <- lessSEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
+    SEM <- try(lessSEM:::fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) stop("Infeasible starting values.")
     
   }else{
@@ -181,7 +181,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   }
   
   # get parameters
-  parameters <- linr:::getParameters(SEM, raw = TRUE)
+  parameters <- lessSEM:::getParameters(SEM, raw = TRUE)
   
   # define fitting function
   fitfun <- function(parameters, 
@@ -190,7 +190,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
                      individualPenaltyFunction, 
                      tuningParameters,
                      penaltyFunctionArguments){
-    SEM <- try(linr:::setParameters(SEM = SEM, 
+    SEM <- try(lessSEM:::setParameters(SEM = SEM, 
                                        labels = names(parameters), 
                                        values = parameters, 
                                        raw = TRUE), 
@@ -198,7 +198,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
     if(is(SEM, "try-error")){
       return(99999999999999999)
     }
-    SEM <- try(linr:::fit(SEM), silent = TRUE)
+    SEM <- try(lessSEM:::fit(SEM), silent = TRUE)
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)){
       return(99999999999999999)
     }
@@ -263,12 +263,12 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
     # will be better if more iterations have to be done until convergence
     if(carryOverParameters) parametersInit <- result$pars
     
-    SEM <- try(linr:::setParameters(SEM = SEM, labels = names(result$pars), 
+    SEM <- try(lessSEM:::setParameters(SEM = SEM, labels = names(result$pars), 
                                        values = result$pars, raw = TRUE), 
                silent = TRUE)
-    SEM <- try(linr:::fit(SEM), silent = TRUE)
+    SEM <- try(lessSEM:::fit(SEM), silent = TRUE)
     
-    parameterEstimates[i, names(parameters)] <- linr:::getParameters(SEM, raw = FALSE)[names(parameters)]
+    parameterEstimates[i, names(parameters)] <- lessSEM:::getParameters(SEM, raw = FALSE)[names(parameters)]
     fits$m2LL[i] <- SEM$m2LL
     fits$regM2LL[i] <- SEM$m2LL + sampleSize*individualPenaltyFunction(result$pars, 
                                                                        currentTuningParameters, 

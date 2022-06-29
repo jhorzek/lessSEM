@@ -16,7 +16,7 @@ acv4adaptiveLasso(
 \item{regularizedSEM}{model of class regularizedSEM}
 
 \item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
-a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example}
+a matrix with pre-defined subsets can be passed to the function. See ?lessSEM::aCV4regularizedSEM for an example}
 
 \item{recomputeHessian}{if set to FALSE, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed. We currently recommend setting recomputeHessian to TRUE}
 

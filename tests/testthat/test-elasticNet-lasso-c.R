@@ -1,7 +1,7 @@
 test_that("testing elasticNet-lasso-c", {
   library(lslx)
   library(lavaan)
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   N <- 100
   l1 <- 1; l2 <- .2; l3 <- 0;
@@ -66,7 +66,7 @@ test_that("testing elasticNet-lasso-c", {
   }
   
   # replicate with regularizedSEM
-  lavaanParameters <- linr::getLavaanParameters(modelFit)
+  lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
   weights <- rep(0, length(lavaanParameters))
   names(weights) <- names(lavaanParameters)
   weights[paste0("f=~y",6:ncol(y))] <- 1
@@ -111,19 +111,10 @@ test_that("testing elasticNet-lasso-c", {
   testthat::expect_equal(all(round(BIC(rsemGlmnet)$BIC - (BICs))==0), TRUE)
   
   ## Test exact cross-validation
-  cvExact <- cv4elasticNet(regularizedSEM = rsemGlmnet, k = N)
+  cvExact <- cv4elasticNet(regularizedSEM = rsemGlmnet, k = 5)
   coef(cvExact)
   coef(cvExact, rule = "1sd")
   coef(cvExact, alpha = 1, lambda = lambdas[1])
   plot(cvExact)
-  
-  ## Test approximated cross-validation
-  cvApproximated <- acv4elasticNet(regularizedSEM = rsemGlmnet, 
-                                   k = N,
-                                   recomputeHessian = TRUE, 
-                                   returnSubsetParameters = FALSE)
-  plot(cvApproximated)
-  coef(cvApproximated)
-  testthat::expect_equal(all(coef(cvApproximated) - coef(cvExact) == 0), TRUE)
   
 })

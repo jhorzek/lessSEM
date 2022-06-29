@@ -18,9 +18,9 @@ public:
   const int maxIterOut;
   const int maxIterIn;
   const double breakOuter;
-  const linr::convCritInnerIsta convCritInner;
+  const lessSEM::convCritInnerIsta convCritInner;
   const double sigma;
-  const linr::stepSizeInheritance stepSizeInh;
+  const lessSEM::stepSizeInheritance stepSizeInh;
   const int verbose; 
   
   
@@ -36,9 +36,9 @@ public:
     maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
     maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
     breakOuter(Rcpp::as<double> (control["breakOuter"])),
-    convCritInner(static_cast<linr::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
+    convCritInner(static_cast<lessSEM::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
     sigma(Rcpp::as<double> (control["sigma"])),
-    stepSizeInh(static_cast<linr::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
+    stepSizeInh(static_cast<lessSEM::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
     verbose(Rcpp::as<int> (control["verbose"])){}
   
   Rcpp::List optimize(
@@ -51,16 +51,16 @@ public:
     
     int N = SEMFF.SEM.rawData.n_rows;
     
-    linr::tuningParametersEnet tp;
+    lessSEM::tuningParametersEnet tp;
     tp.alpha = alpha_;
     tp.lambda = lambda_*N;
     tp.weights = weights;
     
-    linr::proximalOperatorLasso proximalOperatorLasso_;
-    linr::penaltyLASSO penalty_;
-    linr::penaltyRidge smoothPenalty_;
+    lessSEM::proximalOperatorLasso proximalOperatorLasso_;
+    lessSEM::penaltyLASSO penalty_;
+    lessSEM::penaltyRidge smoothPenalty_;
     
-    linr::control controlIsta = {
+    lessSEM::control controlIsta = {
       L0,
       eta,
       accelerate,
@@ -73,7 +73,7 @@ public:
       verbose
     };
     
-    linr::fitResults fitResults_ = linr::ista(
+    lessSEM::fitResults fitResults_ = lessSEM::ista(
       SEMFF,
       startingValues_,
       proximalOperatorLasso_,
@@ -117,7 +117,7 @@ public:
   const int maxIterLine;
   const double breakOuter; // change in fit required to break the outer iteration
   const double breakInner;
-  const linr::convergenceCriteriaGlmnet convergenceCriterion; // this is related to the inner
+  const lessSEM::convergenceCriteriaGlmnet convergenceCriterion; // this is related to the inner
   // breaking condition. 
   const int verbose;
   
@@ -140,7 +140,7 @@ public:
     breakOuter(Rcpp::as<double> (control["breakOuter"])),
     breakInner(Rcpp::as<double> (control["breakInner"])),
     
-    convergenceCriterion(static_cast<linr::convergenceCriteriaGlmnet>(Rcpp::as<int> (control["convergenceCriterion"]))),
+    convergenceCriterion(static_cast<lessSEM::convergenceCriteriaGlmnet>(Rcpp::as<int> (control["convergenceCriterion"]))),
     verbose(Rcpp::as<int> (control["verbose"])){}
   
   void setHessian(arma::mat newHessian){
@@ -156,16 +156,16 @@ public:
     
     int N = SEMFF.SEM.rawData.n_rows;
     
-    linr::tuningParametersEnet tp;
+    lessSEM::tuningParametersEnet tp;
     tp.alpha = alpha_;
     tp.lambda = lambda_*N;
     tp.weights = weights;
     
-    linr::proximalOperatorLasso proximalOperatorLasso_;
-    linr::penaltyLASSO penalty_;
-    linr::penaltyRidge smoothPenalty_;
+    lessSEM::proximalOperatorLasso proximalOperatorLasso_;
+    lessSEM::penaltyLASSO penalty_;
+    lessSEM::penaltyRidge smoothPenalty_;
     
-    linr::controlGLMNET control_ = {
+    lessSEM::controlGLMNET control_ = {
       initialHessian,
       stepSize,
       sigma,
@@ -180,7 +180,7 @@ public:
       verbose
     };
     
-    linr::fitResults fitResults_ = linr::glmnet(
+    lessSEM::fitResults fitResults_ = lessSEM::glmnet(
       SEMFF,
       startingValues_,
       penalty_,
@@ -225,7 +225,7 @@ public:
   const int maxIterLine;
   const double breakOuter; // change in fit required to break the outer iteration
   const double breakInner;
-  const linr::convergenceCriteriaBFGS convergenceCriterion; // this is related to the inner
+  const lessSEM::convergenceCriteriaBFGS convergenceCriterion; // this is related to the inner
   // breaking condition. 
   const int verbose;
   
@@ -249,7 +249,7 @@ public:
     breakOuter(Rcpp::as<double> (control["breakOuter"])),
     breakInner(Rcpp::as<double> (control["breakInner"])),
     
-    convergenceCriterion(static_cast<linr::convergenceCriteriaBFGS>(Rcpp::as<int> (control["convergenceCriterion"]))),
+    convergenceCriterion(static_cast<lessSEM::convergenceCriteriaBFGS>(Rcpp::as<int> (control["convergenceCriterion"]))),
     verbose(Rcpp::as<int> (control["verbose"])){}
   
   void setHessian(arma::mat newHessian){
@@ -265,15 +265,15 @@ public:
     
     int N = SEMFF.SEM.rawData.n_rows;
     
-    linr::tuningParametersSmoothElasticNet tp;
+    lessSEM::tuningParametersSmoothElasticNet tp;
     tp.epsilon = epsilon;
     tp.alpha = alpha_;
     tp.lambda = lambda_*N;
     tp.weights = weights;
     
-    linr::smoothElasticNet smoothPenalty_;
+    lessSEM::smoothElasticNet smoothPenalty_;
     
-    linr::controlBFGS control_ = {
+    lessSEM::controlBFGS control_ = {
       initialHessian,
       stepSize,
       sigma,
@@ -288,7 +288,7 @@ public:
       verbose
     };
     
-    linr::fitResults fitResults_ = linr::bfgsOptim(
+    lessSEM::fitResults fitResults_ = lessSEM::bfgsOptim(
       SEMFF,
       startingValues_,
       smoothPenalty_,

@@ -23,7 +23,7 @@
 // Regularized Optimization Problems. Proceedings of the 30th International 
 // Conference on Machine Learning, 28(2)(2), 37–45.
 
-namespace linr{
+namespace lessSEM{
 
 enum convCritInnerIsta{
   istaCrit,
@@ -80,7 +80,7 @@ struct control{
 };
 
 template<typename T> // T is the type of the tuning parameters
-inline linr::fitResults ista(model& model_, 
+inline lessSEM::fitResults ista(model& model_, 
                              Rcpp::NumericVector startingValuesRcpp,
                              proximalOperator<T>& proximalOperator_, // proximalOperator takes the tuning parameters
                              // as input -> <T>

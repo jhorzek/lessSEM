@@ -2,13 +2,13 @@
 
 #' GLMNETApproximateInfluenceRcpp_SEMCpp
 #' 
-#' internal function for approximate influence based on the internal model representation of linr. The GLMNET part refers to the fact
+#' internal function for approximate influence based on the internal model representation of lessSEM. The GLMNET part refers to the fact
 #' that this function uses the GLMNET optimizer for non-differentiable penalty functions. 
 #' 
 #' @param SEM model of class Rcpp_SEMCpp. Models of this class
 #' can be generated with the SEMFromLavaan-function.
 #' @param subsets list with subsets created with createSubsets()
-#' @param raw controls if the internal transformations of linr should be used.
+#' @param raw controls if the internal transformations of lessSEM should be used.
 #' @param regularizedParameterLabels vector with labels of regularized parameters
 #' @param lambda value of tuning parameter lambda
 #' @param alpha value of tuning parameter alpha (for elastic net)
@@ -30,16 +30,16 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
     stop("SEM must be of class Rcpp_SEMCpp")
   }
   
-  parameters <- linr:::getParameters(SEM = SEM, raw = raw)
+  parameters <- lessSEM:::getParameters(SEM = SEM, raw = raw)
   dataSet <- SEM$rawData
   N <- nrow(dataSet)
   k <- ncol(subsets)
   
   # compute derivatives of -2log-Likelihood without penalty
   
-  scores <- linr:::getScores(SEM = SEM, raw = raw)
+  scores <- lessSEM:::getScores(SEM = SEM, raw = raw)
   if(is.null(hessianOfDifferentiablePart)){
-    hessian <- linr:::getHessian(SEM = SEM, raw = raw)
+    hessian <- lessSEM:::getHessian(SEM = SEM, raw = raw)
   }else{
     hessian <- hessianOfDifferentiablePart
   }
@@ -68,18 +68,18 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
       # we multiply with the adaptive lasso weights.
       penaltyFunctionTuning <- list("lambda" = unique(adaptiveLassoWeights)*lambda*(1-alpha)*(N-length(subsets[[s]])))
       penaltyFunctionArguments <- list("regularizedParameterLabels" = regularizedParameterLabels)
-      subGroupGradient <- subGroupGradient + linr::ridgeGradient(parameters = parameters,
+      subGroupGradient <- subGroupGradient + lessSEM::ridgeGradient(parameters = parameters,
                                                                     tuningParameters = penaltyFunctionTuning,
                                                                     penaltyFunctionArguments = penaltyFunctionArguments)
       if(is.null(hessianOfDifferentiablePart)){
-        subGroupHessian <- subGroupHessian + linr::ridgeHessian(parameters = parameters,
+        subGroupHessian <- subGroupHessian + lessSEM::ridgeHessian(parameters = parameters,
                                                                    tuningParameters = penaltyFunctionTuning,
                                                                    penaltyFunctionArguments = penaltyFunctionArguments)
       }
     }
     
     startDirection <- Sys.time()
-    direction <- linr:::innerGLMNET(parameters = parameters, 
+    direction <- lessSEM:::innerGLMNET(parameters = parameters, 
                                        N = (N-length(subsets[[s]])),
                                        subGroupGradient = subGroupGradient, 
                                        subGroupHessian = subGroupHessian, 
@@ -97,9 +97,9 @@ GLMNETApproximateInfluenceRcpp_SEMCpp <- function(SEM,
     
     # compute out of sample fit
     parameters_s <- parameters + stepdirections[s,names(parameters)]
-    SEM <- linr:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
-    SEM <- try(linr:::fit(SEM), silent = TRUE)
-    subsetParameters[subsetParameters$removedSubset == s, names(parameters)] <- linr:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
+    SEM <- lessSEM:::setParameters(SEM = SEM, labels = names(parameters), values = parameters_s, raw = raw)
+    SEM <- try(lessSEM:::fit(SEM), silent = TRUE)
+    subsetParameters[subsetParameters$removedSubset == s, names(parameters)] <- lessSEM:::getParameters(SEM = SEM, raw = FALSE)[names(parameters)]
     fits$fit[fits$removedSubset == s] <- SEM$m2LL 
     
     for(i in which(subsets[,s])){

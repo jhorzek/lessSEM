@@ -46,9 +46,9 @@ Method for Structural Equation Modeling. Psychometrika, 82(2),
 }
 }
 \examples{
-library(linr)
+library(lessSEM)
 
-# Identical to regsem, linr builds on the lavaan
+# Identical to regsem, lessSEM builds on the lavaan
 # package for model specification. The first step
 # therefore is to implement the model in lavaan.
 
@@ -106,6 +106,6 @@ regsemGlmnet <- ridge(
 regsemGlmnet@parameters - regsem@parameters
 
 ## The fitted model can then be used as basis for an approximate cross-validation
-# (see ?linr::acv4ridge) or approximate influence functions
-# (see ?linr::ai4ridge)
+# (see ?lessSEM::acv4ridge) or approximate influence functions
+# (see ?lessSEM::ai4ridge)
 }

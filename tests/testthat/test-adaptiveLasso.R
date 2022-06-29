@@ -1,6 +1,6 @@
 test_that("testing adaptive lasso", {
   library(regsem)
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
@@ -29,16 +29,14 @@ test_that("testing adaptive lasso", {
                             type = "alasso", 
                             n.lambda = 5,
                             gradFun = "ram")
-  plot(regsem_cvFit)
   
-  regsemPars <- linr::cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, lavaanModel = modelFit)
+  regsemPars <- lessSEM::cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, lavaanModel = modelFit)
   
   # replicate with regularizedSEM
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
-  rsem <- regularizeSEM(lavaanModel = modelFit, 
-                        regularizedParameterLabels = regularizedLavaan,
-                        penalty = "adaptiveLasso", 
-                        lambdas = regsem_cvFit$fits[,"lambda"])
+  rsem <- lessSEM::adaptiveLasso(lavaanModel = modelFit, 
+                                 regularized = regularizedLavaan,
+                                 lambdas = regsem_cvFit$fits[,"lambda"])
   plot(rsem)
   testthat::expect_equal(any(abs(rsem@parameters[,colnames(regsemPars)] - regsemPars) > .1),
                          FALSE)
@@ -46,18 +44,19 @@ test_that("testing adaptive lasso", {
   coef(rsem)
   coef(rsem, alpha = 1, lambda = .01)
   
-  ## Test approximated cross-validation
+  ## Test cross-validation
   
-  cv <- aCV4regularizedSEM(regularizedSEM = rsem, k = N)
+  cv <- cv4elasticNet(regularizedSEM = rsem, k = 5)
   coef(cv)
   coef(cv, alpha = 1, lambda = .01)
   plot(cv)
   
   # set automatic lambda:
-  rsem2 <- regularizeSEM(lavaanModel = modelFit, 
-                         regularizedParameterLabels = regularizedLavaan,
-                         penalty = "adaptiveLasso", 
-                         lambdas = NULL,
-                         nLambdas = 10)
+  rsem2 <- lessSEM::adaptiveLasso(lavaanModel = modelFit, 
+                                  regularized = regularizedLavaan,
+                                  nLambdas = 10)
   testthat::expect_equal(all(apply(rsem2@parameters[,regularizedLavaan] == 0,2,sum) > 0), TRUE)
+  cv <- cv4elasticNet(regularizedSEM = rsem2, k = 5)
+  coef(cv)
+  plot(cv)
 })

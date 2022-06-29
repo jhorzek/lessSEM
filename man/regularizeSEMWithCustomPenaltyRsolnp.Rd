@@ -38,9 +38,9 @@ the next iteration?}
 Optimize a SEM with custom penalty function using the Rsolnp optimizer (see ?Rsolnp::solnp). This optimizer is the default in regsem (see ?regsem::cv_regsem).
 }
 \examples{
-library(linr)
+library(lessSEM)
 
-# Identical to regsem, linr builds on the lavaan
+# Identical to regsem, lessSEM builds on the lavaan
 # package for model specification. The first step
 # therefore is to implement the model in lavaan.
 
@@ -64,23 +64,23 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   fade = FALSE)
 
 ## Defining a custom penalty function is a bit more complicated than
-# using the default ones provided in regularizeSEM (see ?linr::regularizeSEM).
+# using the default ones provided in regularizeSEM (see ?lessSEM::regularizeSEM).
 # We start with the definition of the penalty function. Make sure that the derivatives
 # of this function are well defined (i.e., the function is smooth)!
 # We will use the lasso penalty as an example.
 
 # The penalty function MUST accept three arguments; how you use them is up to you.
 
-# The first argument are the parameters. linr will pass a vector with the current
+# The first argument are the parameters. lessSEM will pass a vector with the current
 # parameter values and their names to your function. The parameter labels will be
 # exactly the same as those used by lavaan! So you can check them before with:
 
-linr::getLavaanParameters(lavaanModel)
+lessSEM::getLavaanParameters(lavaanModel)
 
 # The vector passed to your function will look like the vector above.
 
 # The second argument is called tuningParameters MUST be a data.frame with the
-# tuning-parameters. linr will automatically iterate over the rows of this object.
+# tuning-parameters. lessSEM will automatically iterate over the rows of this object.
 # In case of LASSO regularization there is only one tuning parameter: lambda.
 # Therefore, we specify the tuningParameters object as:
 
@@ -122,7 +122,7 @@ smoothLASSO <- function(
   return(penaltyLasso)
 }
 # Important: This penalty function is assumed to be for a single individual only.
-# linr will multiply it with sample size N to get the penalty value of the
+# lessSEM will multiply it with sample size N to get the penalty value of the
 # full sample!
 
 #### Now we are ready to optimize! ####

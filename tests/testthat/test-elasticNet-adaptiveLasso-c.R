@@ -1,6 +1,6 @@
 test_that("testing adaptive lasso", {
   library(regsem)
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
@@ -31,7 +31,7 @@ test_that("testing adaptive lasso", {
                             gradFun = "ram")
   plot(regsem_cvFit)
   
-  regsemPars <- linr::cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, 
+  regsemPars <- lessSEM::cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, 
                                                 lavaanModel = modelFit)
   
   ## reconstruct fit for regsem
@@ -49,7 +49,7 @@ test_that("testing adaptive lasso", {
   
   # replicate with regularizedSEM
   lambdas <- regsem_cvFit$fits[,"lambda"]
-  lavaanParameters <- linr::getLavaanParameters(modelFit)
+  lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
   weights <- rep(0, length(lavaanParameters))
   names(weights) <- names(lavaanParameters)
   weights[paste0("f=~y",6:ncol(y))] <- 1/abs(lavaanParameters[paste0("f=~y",6:ncol(y))])
@@ -94,18 +94,5 @@ test_that("testing adaptive lasso", {
   penalty <- N*lambdas*apply(regsemPars[,names(lavaanParameters)],1, function(x) sum(abs(x)*weights))
   testthat::expect_equal(all(round(rsemGlmnet@fits$regM2LL - (regsemM2LL+penalty))==0), TRUE)
   
-  ## Test approximated cross-validation
-  warning("Not testing approximate cross-validation.")
-  # cv <- aCV4regularizedSEM(regularizedSEM = rsemIsta, k = N)
-  # coef(cv)
-  # coef(cv, alpha = 1, lambda = lambdas[1])
-  # plot(cv)
-  # 
-  # # set automatic lambda:
-  # rsem2 <- regularizeSEM(lavaanModel = modelFit, 
-  #                        regularizedParameterLabels = regularizedLavaan,
-  #                        penalty = "adaptiveLasso", 
-  #                        lambdas = NULL,
-  #                        nLambdas = 10)
-  # testthat::expect_equal(all(apply(rsem2@parameters[,regularizedLavaan] == 0,2,sum) > 0), TRUE)
+
 })

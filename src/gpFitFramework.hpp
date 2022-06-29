@@ -1,9 +1,9 @@
 #ifndef GPFITFRAMEWORK_h
 #define GPFITFRAMEWORK_h
 #include "SEM.hpp"
-#include "linr.hpp"
+#include "lessSEM.hpp"
 
-class generalPurposeFitFramework: public linr::model{
+class generalPurposeFitFramework: public lessSEM::model{
 public:
   // functions
   Rcpp::Function fitFunction;

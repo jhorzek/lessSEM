@@ -5,7 +5,7 @@
 #include "smoothPenalty.hpp"
 #include "enet.hpp" // for definition of tuning parameters
 
-namespace linr{
+namespace lessSEM{
 
 class penaltyRidge: public smoothPenalty<tuningParametersEnet>{
 public:

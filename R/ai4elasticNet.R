@@ -1,18 +1,18 @@
 #' ai4elasticNet
 #' 
-#' Provides an approximate influence for models of class regularizedSEM. These models can be fit with ai4elasticNet() (see ?linr::ai4elasticNet)
+#' Provides an approximate influence for models of class regularizedSEM. These models can be fit with ai4elasticNet() (see ?lessSEM::ai4elasticNet)
 #' in this package.
 #' 
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of subset fold. We recommend leave-one-out influence functions; i.e. set k to the number of persons in the data set. Alternatively, 
-#' a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example
+#' a matrix with pre-defined subsets can be passed to the function. See ?lessSEM::aCV4regularizedSEM for an example
 #' @param recomputeHessian if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
 #' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
-#' library(linr)
+#' library(lessSEM)
 #' 
 #' # Let's first set up a regularized model. The following steps are
-#' # explained in detail in ?linr::regularizeSEM
+#' # explained in detail in ?lessSEM::regularizeSEM
 #' dataset <- simulateExampleData()
 #' 
 #' lavaanSyntax <- "
@@ -62,7 +62,7 @@ ai4elasticNet <- function(regularizedSEM,
     stop("regularizedSEM must be of class regularizedSEM")
   }
   if(!is(control, "controlGlmnet")){
-    stop("control must be of class controlGlmnet These objects can be generated with the controlGlmnet function. See ?linr::controlGlmnet")
+    stop("control must be of class controlGlmnet These objects can be generated with the controlGlmnet function. See ?lessSEM::controlGlmnet")
   }
   
   data <- try(lavaan::lavInspect(regularizedSEM@inputArguments$lavaanModel, "data"))
@@ -70,7 +70,7 @@ ai4elasticNet <- function(regularizedSEM,
   
   N <- nrow(data)
   
-  aCVSEM <- linr:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
+  aCVSEM <- lessSEM:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
                                  transformVariances = TRUE, 
                                  fit = FALSE)
   
@@ -81,7 +81,7 @@ ai4elasticNet <- function(regularizedSEM,
     if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
     k <- ncol(subsets)
   }else{
-    subsets <- linr:::createSubsets(N = N, k = k)
+    subsets <- lessSEM:::createSubsets(N = N, k = k)
   }
   
   # extract elements for easier access
@@ -119,11 +119,11 @@ ai4elasticNet <- function(regularizedSEM,
     alpha <- tuningParameters$alpha[ro]
     pars <- coef(regularizedSEM, lambda = lambda, alpha = alpha)
     
-    aCVSEM <- linr:::setParameters(SEM = aCVSEM,
+    aCVSEM <- lessSEM:::setParameters(SEM = aCVSEM,
                                    labels = names(pars),
                                    values = pars,
                                    raw = FALSE)
-    aCVSEM <- linr:::fit(aCVSEM)
+    aCVSEM <- lessSEM:::fit(aCVSEM)
     
     if(recomputeHessian){
       hessianOfDifferentiablePart <- NULL
@@ -135,7 +135,7 @@ ai4elasticNet <- function(regularizedSEM,
       hessianOfDifferentiablePart <- regularizedSEM@internalOptimization$HessiansOfDifferentiablePart$Hessian[[which(select)]]
     }
     
-    aInfluence <- try(linr:::acv4enet_GLMNET_SEMCpp(SEM = aCVSEM, 
+    aInfluence <- try(lessSEM:::acv4enet_GLMNET_SEMCpp(SEM = aCVSEM, 
                                                     subsets = subsets,
                                                     raw = TRUE, 
                                                     weights = weights, 

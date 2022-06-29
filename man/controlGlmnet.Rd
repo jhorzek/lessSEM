@@ -43,7 +43,7 @@ If set to "compute", the initial hessian will be computed. If set to a single va
 
 \item{maxIterLine}{Maximal number of iterations for the line search procedure}
 
-\item{convergenceCriterion}{which convergence criterion should be used for the outer iterations? possible are "GLMNET", "gradients", "fitChange"
+\item{convergenceCriterion}{which convergence criterion should be used for the outer iterations? possible are 0 = GLMNET, 1 = gradients, 2 = fitChange
 Note that in case of gradients and GLMNET, we divide the gradients (and the Hessian) of the log-Likelihood by N as it would otherwise be
 considerably more difficult for larger sample sizes to reach the convergence criteria.}
 

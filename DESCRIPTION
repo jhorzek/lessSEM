@@ -1,11 +1,14 @@
-Package: linr
+Package: lessSEM
 Type: Package
 Title: Regularization or structural equation models with non-smooth penalties
 Version: 1.0
 Date: 2022-04-03
 Author: Jannik H. Orzek
 Maintainer: Jannik H. Orzek <orzek@mpib-berlin.mpg.de>
-Description: linr provides regularized structural equation modeling (regularized SEM) with non-smooth penalty functions (e.g., lasso) building on lavaan
+Description: lessSEM provides regularized structural equation modeling 
+  (regularized SEM) with non-smooth penalty functions (e.g., lasso) building 
+  on lavaan. The package is heavily inspired by the 
+  [regsem](https://github.com/Rjacobucci/regsem) package
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.1.2

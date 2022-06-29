@@ -10,11 +10,11 @@ cv4ridge(regularizedSEM, k, returnSubsetParameters = FALSE)
 \item{regularizedSEM}{model of class regularizedSEM}
 
 \item{k}{the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
-See ?linr::aCV4regularizedSEM for an example}
+See ?lessSEM::aCV4regularizedSEM for an example}
 
 \item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
 
-\item{control}{parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details}
+\item{control}{parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details}
 }
 \description{
 Exact cross-validation for models of class regularizedSEM which have been fitted with ridge penalty
@@ -22,6 +22,6 @@ These models can be fit with ridge() (see ?ridge)
 in this package.
 }
 \examples{
-library(linr)
+library(lessSEM)
 
 }

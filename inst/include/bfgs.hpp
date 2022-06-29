@@ -1,7 +1,7 @@
 #ifndef BFGS_H
 #define BFGS_H
 
-namespace linr{
+namespace lessSEM{
   
   // BFGS
   //

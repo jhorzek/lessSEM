@@ -8,11 +8,11 @@
 #' 
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
-#' See ?linr::aCV4regularizedSEM for an example
+#' See ?lessSEM::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
-#' library(linr)
+#' library(lessSEM)
 #' 
 #' @export
 cv4lasso <- function(regularizedSEM, 
@@ -32,11 +32,11 @@ cv4lasso <- function(regularizedSEM,
 #' 
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
-#' See ?linr::aCV4regularizedSEM for an example
+#' See ?lessSEM::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
-#' library(linr)
+#' library(lessSEM)
 #' 
 #' @export
 cv4ridge <- function(regularizedSEM, 
@@ -56,14 +56,14 @@ cv4ridge <- function(regularizedSEM,
 #' 
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
-#' See ?linr::aCV4regularizedSEM for an example
+#' See ?lessSEM::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
-#' library(linr)
+#' library(lessSEM)
 #' 
 #' # Let's first set up a regularized model. The following steps are
-#' # explained in detail in ?linr::regularizeSEM
+#' # explained in detail in ?lessSEM::regularizeSEM
 #' dataset <- simulateExampleData()
 #' 
 #' lavaanSyntax <- "
@@ -125,9 +125,9 @@ cv4ridge <- function(regularizedSEM,
 #' dimnames(CV@subsetParameters)[[3]][2]
 #' CV@subsetParameters[,,2] # second lambda value
 #' 
-#' ## Instead of letting linr create the subsets, you can
+#' ## Instead of letting lessSEM create the subsets, you can
 #' # also pass your own subsets. As an example:
-#' subsets <- linr:::createSubsets(N = nrow(dataset), k  = 10)
+#' subsets <- lessSEM:::createSubsets(N = nrow(dataset), k  = 10)
 #' 
 #' CV <- CV4regularizedSEM(regularizedSEM = regsem,
 #'                           k = subsets
@@ -154,7 +154,7 @@ cv4elasticNet <- function(regularizedSEM,
     if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
     k <- ncol(subsets)
   }else{
-    subsets <- linr:::createSubsets(N = N, k = k)
+    subsets <- lessSEM:::createSubsets(N = N, k = k)
   }
   
   # extract elements for easier access
@@ -200,21 +200,21 @@ cv4elasticNet <- function(regularizedSEM,
   }
   
   # for CV - fits:
-  SEM <- linr:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel,
+  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel,
                               whichPars = "est", 
                               transformVariances = TRUE,
                               fit = FALSE, 
                               addMeans = TRUE, 
                               activeSet = NULL
   )
-  SEM <- linr:::fit(SEM)
+  SEM <- lessSEM:::fit(SEM)
   
   for(s in 1:k){
     cat("\n[",s, "/",k,"]\n")
     control_s <- control
     control_s$activeSet <- !subsets[,s]
     
-    regularizedSEM_s <- linr::elasticNet(
+    regularizedSEM_s <- lessSEM::elasticNet(
       lavaanModel = regularizedSEM@inputArguments$lavaanModel,
       weights = regularizedSEM@inputArguments$weights,
       lambdas = regularizedSEM@inputArguments$lambdas, 
@@ -240,7 +240,7 @@ cv4elasticNet <- function(regularizedSEM,
       for(i in which(subsets[,s])){
         
         cvfitsDetails[p, paste0("testSet",s)] <- cvfitsDetails[p, paste0("testSet",s)] + 
-          linr:::individualMinus2LogLikelihood(par = unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels]), 
+          lessSEM:::individualMinus2LogLikelihood(par = unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels]), 
                                                SEM = SEM, 
                                                data = data[i,,drop = FALSE], 
                                                raw = FALSE)
