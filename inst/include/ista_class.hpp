@@ -52,6 +52,10 @@ struct control{
   const double L0; // L0 controls the step size used in the first iteration
   const double eta; // eta controls by how much the step size changes in the
   // inner iterations with (eta^i)*L, where i is the inner iteration
+  const bool accelerate; // if true, the extrapolation parameter is used
+  // to accelerate ista (see, e.g., Parikh, N., & Boyd, S. (2013). 
+  // Proximal Algorithms. Foundations and Trends in Optimization, 1(3), 123–231., 
+  // p. 152)
   const int maxIterOut; // maximal number of outer iterations
   const int maxIterIn; // maximal number of inner iterations
   const double breakOuter; // change in fit required to break the outer iteration
@@ -61,7 +65,7 @@ struct control{
   // gist, as presented by Gong et al. (2013) (Equation 3)
   // 
   const double sigma; // sigma in (0,1) is used by the gist convergence criterion. larger
-  // simga enforce larger improvement in fit
+  // sigma enforce larger improvement in fit
   const stepSizeInheritance stepSizeIn; // how should step sizes be carried forward?
   // from iteration to iteration? 
   // initial resets the step size to L0 in each iteration
@@ -77,18 +81,22 @@ struct control{
 
 template<typename T> // T is the type of the tuning parameters
 inline linr::fitResults ista(model& model_, 
-                       Rcpp::NumericVector startingValuesRcpp,
-                       proximalOperator<T>& proximalOperator_, // proximalOperator takes the tuning parameters
-                       // as input -> <T>
-                       penalty<T>& penalty_, // penalty takes the tuning parameters
-                       smoothPenalty<T>& smoothPenalty_, // smoothPenalty takes the tuning parameters
-                       // as input -> <T>
-                       const T& tuningParameters, // tuning parameters are of type T
-                       const control& control_){
+                             Rcpp::NumericVector startingValuesRcpp,
+                             proximalOperator<T>& proximalOperator_, // proximalOperator takes the tuning parameters
+                             // as input -> <T>
+                             penalty<T>& penalty_, // penalty takes the tuning parameters
+                             smoothPenalty<T>& smoothPenalty_, // smoothPenalty takes the tuning parameters
+                             // as input -> <T>
+                             const T& tuningParameters, // tuning parameters are of type T
+                             const control& control_){
   if(control_.verbose != 0) {
     Rcpp::Rcout << "Optimizing with ista.\n" <<
       "Using " << convCritInnerIsta_txt.at(control_.convCritInner) << " as inner convergence criterion\n" <<
         "Using " << stepSizeInheritance_txt.at(control_.stepSizeIn) << " as step size inheritance\n" << 
+          "Tuning parameters: \n eta = " << control_.eta  << "\n" << 
+            " accelerate = " << control_.accelerate  << "\n" << 
+            " sigma = " << control_.sigma  << "\n" << 
+              " breakOuter = " << control_.breakOuter  << "\n" << 
           std::endl;
   }
   // separate labels and values
@@ -97,7 +105,9 @@ inline linr::fitResults ista(model& model_,
   
   // prepare parameter vectors
   arma::rowvec parameters_k = startingValues, 
-    parameters_kMinus1 = startingValues;
+    parameters_kMinus1 = startingValues,
+    parameters_kMinus2 = startingValues,
+    y_k = startingValues; // required for acceleration
   // the following elements will be required to judge the breaking condition
   arma::rowvec parameterChange(startingValues.n_elem);
   arma::rowvec gradientChange(startingValues.n_elem); // necessary for Barzilai Borwein
@@ -108,15 +118,15 @@ inline linr::fitResults ista(model& model_,
     smoothPenalty_.getValue(parameters_k, parameterLabels, tuningParameters), // ridge penalty part
     fit_kMinus1 = model_.fit(startingValues, parameterLabels) +
       smoothPenalty_.getValue(parameters_kMinus1, parameterLabels, tuningParameters), // ridge penalty part,
-    penalty_k = 0.0;
+      penalty_k = 0.0;
   double penalizedFit_k, penalizedFit_kMinus1;
-  arma::rowvec gradients_k, gradients_kMinus1;
+  arma::rowvec gradients_k, gradients_kMinus1, gradient_y_k;
   
   double ridgePenalty = 0.0;
   
   penalizedFit_k = fit_k + 
     penalty_.getValue(parameters_k, parameterLabels, tuningParameters); // lasso penalty part
-    
+  
   penalizedFit_kMinus1 = fit_kMinus1 + 
     penalty_.getValue(parameters_kMinus1, parameterLabels, tuningParameters); // lasso penalty part
   
@@ -131,6 +141,9 @@ inline linr::fitResults ista(model& model_,
   gradients_k = model_.gradients(parameters_k, parameterLabels) +
     smoothPenalty_.getGradients(parameters_k, parameterLabels, tuningParameters); // ridge part
   gradients_kMinus1 = model_.gradients(parameters_kMinus1, parameterLabels) +
+    smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
+  // for acceleration:
+  gradient_y_k = model_.gradients(parameters_kMinus1, parameterLabels) +
     smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
   
   // breaking flags
@@ -150,6 +163,29 @@ inline linr::fitResults ista(model& model_,
       
       if(control_.verbose == -99) Rcpp::Rcout << "L_k : " << L_k << std::endl;
       
+      if(control_.accelerate){
+        // with acceleration:
+        // apply proximal operator to get new parameters for given step size
+        // see Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations 
+        // and Trends in Optimization, 1(3), 123–231. p. 152
+
+        y_k = parameters_kMinus1 + 
+          (inner_iteration/(inner_iteration+3))*(parameters_kMinus1-parameters_kMinus2);
+        gradient_y_k = model_.gradients(y_k, 
+                                        parameterLabels) + 
+                                          smoothPenalty_.getGradients(y_k, 
+                                                                      parameterLabels, 
+                                                                      tuningParameters);
+        parameters_k = proximalOperator_.getParameters(
+          y_k,
+          gradient_y_k,
+          parameterLabels,
+          L_k,
+          tuningParameters
+        );
+        
+      }else{
+      
       // apply proximal operator to get new parameters for given step size
       parameters_k = proximalOperator_.getParameters(
         parameters_kMinus1,
@@ -158,6 +194,8 @@ inline linr::fitResults ista(model& model_,
         L_k,
         tuningParameters
       );
+        
+      }
       
       // compute new fit; if this fit is non-finite, we can jump to the next
       // iteration
@@ -241,9 +279,9 @@ inline linr::fitResults ista(model& model_,
         // compute gradients at new position
         gradients_k = model_.gradients(parameters_k, 
                                        parameterLabels) + 
-          smoothPenalty_.getGradients(parameters_k, 
-                                      parameterLabels, 
-                                      tuningParameters); // ridge part
+                                         smoothPenalty_.getGradients(parameters_k, 
+                                                                     parameterLabels, 
+                                                                     tuningParameters); // ridge part
         
         if(control_.verbose == -99){
           Rcpp::Rcout << "gradients_k\n: " << gradients_k << std::endl;
@@ -302,7 +340,7 @@ inline linr::fitResults ista(model& model_,
       
       parameterChange = parameters_k - parameters_kMinus1;
       gradientChange = gradients_k - gradients_kMinus1;
-
+      
       quadr = (parameterChange)*arma::trans(parameterChange);
       parchTimeGrad = parameterChange*arma::trans(gradientChange);
       if(control_.verbose == -99) Rcpp::Rcout << "quadr: " << quadr << std::endl;
@@ -315,7 +353,7 @@ inline linr::fitResults ista(model& model_,
          rand() % 100 < 25) {
         if(control_.verbose == -99) Rcpp::Rcout << "Resetting L_kMinus1 randomly " << std::endl;
         L_kMinus1 = control_.L0;// reset with 25% probability
-        }
+      }
       
     }else if(control_.stepSizeIn == istaStepInheritance){
       
@@ -328,6 +366,7 @@ inline linr::fitResults ista(model& model_,
     // for next iteration: save current values as previous values
     fit_kMinus1 = fit_k;
     penalizedFit_kMinus1 = penalizedFit_k;
+    parameters_kMinus2 = parameters_kMinus1;
     parameters_kMinus1 = parameters_k;
     gradients_kMinus1 = gradients_k;
     

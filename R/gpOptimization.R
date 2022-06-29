@@ -690,6 +690,7 @@ gpElasticNet <- function(par,
     controlIntern <- list(
       L0 = control$L0,
       eta = control$eta,
+      accelerate = control$accelerate,
       maxIterOut = control$maxIterOut,
       maxIterIn = control$maxIterIn,
       breakOuter = control$breakOuter,

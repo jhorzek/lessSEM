@@ -106,6 +106,9 @@ controlQuasiNewtonBFGS <- function(
 #' @param L0 L0 controls the step size used in the first iteration
 #' @param eta eta controls by how much the step size changes in the
 #' inner iterations with (eta^i)*L, where i is the inner iteration
+#' @param accelerate boolean: Should the acceleration outlined in 
+#' Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and Trends 
+#' in Optimization, 1(3), 123–231., p. 152 be used?
 #' @param maxIterOut maximal number of outer iterations
 #' @param maxIterIn maximal number of inner iterations
 #' @param breakOuter change in fit required to break the outer iteration. Note: The
@@ -130,12 +133,13 @@ controlIsta <- function(
     startingValues = "est",
     L0 = .1,
     eta = 2,
+    accelerate = TRUE,
     maxIterOut = 10000,
     maxIterIn = 1000,
     breakOuter = .00000001,
     convCritInner = 1,
     sigma = .1,
-    stepSizeInheritance = 3,
+    stepSizeInheritance = ifelse(accelerate,1,3),
     activeSet = NULL,
     verbose = 0
 ){

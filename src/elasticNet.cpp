@@ -14,6 +14,7 @@ public:
   // control optimizer
   const double L0;
   const double eta;
+  const bool accelerate;
   const int maxIterOut;
   const int maxIterIn;
   const double breakOuter;
@@ -31,6 +32,7 @@ public:
     weights(weights_),
     L0(Rcpp::as<double> (control["L0"])),
     eta(Rcpp::as<double> (control["eta"])),
+    accelerate(Rcpp::as<bool> (control["accelerate"])),
     maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
     maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
     breakOuter(Rcpp::as<double> (control["breakOuter"])),
@@ -61,6 +63,7 @@ public:
     linr::control controlIsta = {
       L0,
       eta,
+      accelerate,
       maxIterOut,
       maxIterIn,
       breakOuter*N,

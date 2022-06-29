@@ -9,12 +9,13 @@ controlIsta(
   startingValues = "est",
   L0 = 0.1,
   eta = 2,
+  accelerate = TRUE,
   maxIterOut = 10000,
   maxIterIn = 1000,
   breakOuter = 1e-08,
   convCritInner = 1,
   sigma = 0.1,
-  stepSizeInheritance = 3,
+  stepSizeInheritance = ifelse(accelerate, 1, 3),
   activeSet = NULL,
   verbose = 0
 )
@@ -30,6 +31,10 @@ values can be passed to the function which will then be used as starting values.
 
 \item{eta}{eta controls by how much the step size changes in the
 inner iterations with (eta^i)*L, where i is the inner iteration}
+
+\item{accelerate}{boolean: Should the acceleration outlined in 
+Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and Trends 
+in Optimization, 1(3), 123–231., p. 152 be used?}
 
 \item{maxIterOut}{maximal number of outer iterations}
 
