@@ -1,12 +1,14 @@
-Package: linr
+Package: lessSEM
 Type: Package
-Title: Provides approximate cross-validation procedures for (regularized) structural equation models
+Title: Regularization or structural equation models with non-smooth penalties
 Version: 1.0
 Date: 2022-04-03
 Author: Jannik H. Orzek
 Maintainer: Jannik H. Orzek <orzek@mpib-berlin.mpg.de>
-Description: linr builds on lavaan and provides optimization of regularized SEM with ridge, lasso, adpative lasso, and elastic net penalty using the GLMNET opitimizer
-  as well as approximate cross-validation and influence functions for models built with linr or with lavaan. 
+Description: lessSEM provides regularized structural equation modeling 
+  (regularized SEM) with non-smooth penalty functions (e.g., lasso) building 
+  on lavaan. The package is heavily inspired by the 
+  [regsem](https://github.com/Rjacobucci/regsem) package
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.1.2

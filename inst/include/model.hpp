@@ -3,7 +3,7 @@
 
 #include <RcppArmadillo.h>
 
-namespace linr{
+namespace lessSEM{
 
 class model{
 public:

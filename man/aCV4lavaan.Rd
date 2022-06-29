@@ -10,9 +10,9 @@ aCV4lavaan(lavaanModel, k, raw = FALSE)
 \item{lavaanModel}{model of class lavaan}
 
 \item{k}{the number of cross-validation folds. We recommend leave-one-out cross-validation; i.e. set k to the number of persons in the data set. Alternatively, 
-a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example}
+a matrix with pre-defined subsets can be passed to the function. See ?lessSEM::aCV4regularizedSEM for an example}
 
-\item{raw}{controls if the cross-validation should use the internal transformations of linr. linr will use an exponential function for all variances to 
+\item{raw}{controls if the cross-validation should use the internal transformations of lessSEM. lessSEM will use an exponential function for all variances to 
 avoid negative variances. This can result in better sub-group parameters, but may not be necessary and will also result in more difficult to interpret parameters.}
 }
 \description{
@@ -22,7 +22,7 @@ approximate cross-validation for models of class lavaan.
 ## Approximate leave one out cross-validation for a lavaan model
 ### set up model in lavaan
 library(lavaan)
-library(linr)
+library(lessSEM)
 HS.model <- ' visual  =~ x1 + x2 + x3
                     textual =~ x4 + x5 + x6
                     speed   =~ x7 + x8 + x9 '
@@ -37,7 +37,7 @@ aLOOCV <- aCV4lavaan(lavaanModel = fit, k = nrow(HS))
 # exactLOOCV <- rep(NA, nrow(HS))
 # for(i in 1:nrow(HS)){
 #   fit = sem(HS.model, HS[-i,], meanstructure = TRUE)
-#   exactLOOCV[i] <- linr:::computeIndividualM2LL(nObservedVariables = ncol(HS),
+#   exactLOOCV[i] <- lessSEM:::computeIndividualM2LL(nObservedVariables = ncol(HS),
 #                                                    rawData = as.numeric(HS[i,]),
 #                                                    impliedMeans = fit@implied$mean[[1]],
 #                                                    impliedCovariance = fit@implied$cov[[1]])

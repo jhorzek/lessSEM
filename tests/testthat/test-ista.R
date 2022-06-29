@@ -1,6 +1,6 @@
 test_that("testing ista-lasso", {
   library(lavaan)
-  library(linr)
+  library(lessSEM)
   
   model1 <- ' 
   # latent variable definitions
@@ -27,12 +27,12 @@ test_that("testing ista-lasso", {
   scores <- -2*lavScores(model)
   gradients <- apply(scores,2,sum)
   
-  SEM <- linr:::SEMFromLavaan(lavaanModel = model, whichPars = "start")
-  SEM <- linr:::fit(SEM)
+  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = model, whichPars = "start")
+  SEM <- lessSEM:::fit(SEM)
   SEM$getGradients(T)
   eigen(SEM$impliedCovariance)$values
   
-  startingValues <- linr:::getParameters(SEM, TRUE)
+  startingValues <- lessSEM:::getParameters(SEM, TRUE)
   labels <- SEM$getParameterLabels()
   
   weights <- startingValues
@@ -42,6 +42,7 @@ test_that("testing ista-lasso", {
   control <- list(
     L0 = .1,
     eta = 2,
+    accelerate = TRUE,
     maxIterOut = 2000,
     maxIterIn = 1000,
     breakOuter = .00000001,
@@ -53,8 +54,8 @@ test_that("testing ista-lasso", {
   
   IL <- new(istaEnet, weights, control)
   lassoResult <- IL$optimize(
-    SEM,
     startingValues,
+    SEM,
     0,
     1
   )
@@ -63,15 +64,15 @@ test_that("testing ista-lasso", {
   
   lassoResult$rawParameters
   
-  testthat::expect_equal(all(round(linr:::getParameters(SEM, raw = FALSE) - 
-                                     linr::getLavaanParameters(model)[names(linr:::getParameters(SEM, raw = FALSE))],
+  testthat::expect_equal(all(round(lessSEM:::getParameters(SEM, raw = FALSE) - 
+                                     lessSEM::getLavaanParameters(model)[names(lessSEM:::getParameters(SEM, raw = FALSE))],
                                    1) == 0),
                          TRUE)
   
   # lasso
   lassoResult <- IL$optimize(
-    SEM,
     startingValues,
+    SEM,
     100,
     1
   )
@@ -82,6 +83,7 @@ test_that("testing ista-lasso", {
   control <- list(
     L0 = .1,
     eta = 2,
+    accelerate = FALSE,
     maxIterOut = 10000,
     maxIterIn = 1000,
     breakOuter = .00000001,
@@ -95,8 +97,8 @@ test_that("testing ista-lasso", {
   
   # enet
   lassoResult <- IL$optimize(
-    SEM,
     startingValues,
+    SEM,
     100,
     .4
   )

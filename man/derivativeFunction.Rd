@@ -11,7 +11,7 @@ derivativeFunction(par, SEM, raw)
 
 \item{SEM}{model of class Rcpp_SEMCpp.}
 
-\item{raw}{controls if the internal transformations of linr is used.}
+\item{raw}{controls if the internal transformations of lessSEM is used.}
 }
 \description{
 internal function which returns the gradients of an object of class Rcpp_SEMCpp. This function can be used in optimizers

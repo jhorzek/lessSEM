@@ -13,7 +13,7 @@ individualMinus2LogLikelihood(par, SEM, data, raw)
 
 \item{data}{vector with data points for this single individual}
 
-\item{raw}{controls if the internal transformations of linr is used.}
+\item{raw}{controls if the internal transformations of lessSEM is used.}
 }
 \description{
 internal function which returns the -2 log Likelihood for a single subject

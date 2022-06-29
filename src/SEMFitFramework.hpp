@@ -1,9 +1,9 @@
 #ifndef SEMISTA_h
 #define SEMISTA_h
 #include "SEM.hpp"
-#include "linr.hpp"
+#include "lessSEM.hpp"
 
-class SEMFitFramework: public linr::model{
+class SEMFitFramework: public lessSEM::model{
 public:
   
   SEMCpp& SEM;

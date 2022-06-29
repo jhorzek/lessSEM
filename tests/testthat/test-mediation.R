@@ -1,6 +1,6 @@
 test_that("testing mediation model", {
   library(lavaan) 
-  library(linr)
+  library(lessSEM)
   N <- 100
   
   x_0 <- rnorm(n = N, mean = 0, sd = 1)
@@ -24,10 +24,9 @@ y ~~ y
   
   fitModel <- lavaan(model = lavaanModell, data = datensatz)
   
-  regsem <- regularizeSEM(lavaanModel = fitModel, 
-                          regularizedParameterLabels = c("mediator~x_1"),
-                          penalty = "lasso",
-                          lambdas = 0)
+  regsem <- lasso(lavaanModel = fitModel, 
+                  regularized = c("mediator~x_1"),
+                  lambdas = 0)
   
   testthat::expect_equal(abs(regsem@fits$m2LL[1] - (-2*logLik(fitModel))) < 1e-3,TRUE)
   

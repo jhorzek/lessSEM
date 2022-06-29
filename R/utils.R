@@ -4,7 +4,7 @@
 #' @param N number of persons in the data set
 #' @param loadings loadings of the latent variable on the manifest observations
 #' @examples 
-#' y <- linr::simulateExampleData()
+#' y <- lessSEM::simulateExampleData()
 #' @export
 simulateExampleData <- function(N = 100, # sample size
   loadings = c(rep(1,5), rep(.4,5), rep(0,5))

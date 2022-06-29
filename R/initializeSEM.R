@@ -34,7 +34,7 @@ SEMFromLavaan <- function(lavaanModel,
   meanstructure <- lavaanModel@Options$meanstructure
   fixedX <- lavaan::lavInspect(lavaanModel, "fixed.x")
   if(fixedX) {
-    warning("lavaanModel has option fixed.x set to TRUE. This is currently not fully supported by linr. Be sure to check the results.")
+    warning("lavaanModel has option fixed.x set to TRUE. This is currently not fully supported by lessSEM. Be sure to check the results.")
     checkFit <- FALSE
   }
   
@@ -64,12 +64,12 @@ SEMFromLavaan <- function(lavaanModel,
     
   }
   
-  internalData <- linr:::SEMdata(rawData)
+  internalData <- lessSEM:::SEMdata(rawData)
   
   # translate to RAM notation
   
   ## directed paths
-  AmatrixElements <- linr:::setAMatrix(model = lavaanModel, 
+  AmatrixElements <- lessSEM:::setAMatrix(model = lavaanModel, 
                                           lavaanParameterTable = lavaanParameterTable, 
                                           nLatent = nLatent, 
                                           nManifest = nManifest, 
@@ -77,7 +77,7 @@ SEMFromLavaan <- function(lavaanModel,
                                           manifestNames = manifestNames)
   
   ## undirected paths
-  SmatrixElements <- linr:::setSMatrix(model = lavaanModel, 
+  SmatrixElements <- lessSEM:::setSMatrix(model = lavaanModel, 
                                           lavaanParameterTable = lavaanParameterTable, 
                                           nLatent = nLatent, 
                                           nManifest = nManifest, 
@@ -86,7 +86,7 @@ SEMFromLavaan <- function(lavaanModel,
   
   
   ## Mean structure
-  MvectorElements <- linr:::setMVector(model = lavaanModel, 
+  MvectorElements <- lessSEM:::setMVector(model = lavaanModel, 
                                           lavaanParameterTable = lavaanParameterTable, 
                                           nLatent = nLatent, 
                                           nManifest = nManifest, 
@@ -128,7 +128,7 @@ SEMFromLavaan <- function(lavaanModel,
   }else if(whichPars == "start"){
     parameterValues <- lavaanModel@ParTable$start[lavaanModel@ParTable$free != 0]
   }else{
-    stop(paste0("Could not set the parameters of the model. Set whichPars to one of: 'est', 'start'. See ?linr:::SEMFromLavaan for more details."))
+    stop(paste0("Could not set the parameters of the model. Set whichPars to one of: 'est', 'start'. See ?lessSEM:::SEMFromLavaan for more details."))
   }
   
   # construct internal representation of parameters
@@ -261,11 +261,11 @@ SEMFromLavaan <- function(lavaanModel,
   # the following step is necessary if the parameters of the lavaanModel do not correspond to those in
   # the matrices of the lavaan object. This is, for instance, the case if the starting values
   # instead of the estimates are used.
-  parameters <- linr:::getParameters(SEM = SEMCpp, raw = TRUE)
-  SEMCpp <- linr:::setParameters(SEM = SEMCpp, labels = names(parameters), values = parameters, raw = TRUE)
+  parameters <- lessSEM:::getParameters(SEM = SEMCpp, raw = TRUE)
+  SEMCpp <- lessSEM:::setParameters(SEM = SEMCpp, labels = names(parameters), values = parameters, raw = TRUE)
   
   if(fit){
-    SEMCpp <- linr:::fit(SEM = SEMCpp)
+    SEMCpp <- lessSEM:::fit(SEM = SEMCpp)
     if(whichPars == "est" && checkFit){
       # check model fit
       if(round(SEMCpp$m2LL - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")

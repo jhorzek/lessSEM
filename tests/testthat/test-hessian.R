@@ -1,6 +1,6 @@
 test_that("testing hessian", {
   library(lavaan)
-  library(linr)
+  library(lessSEM)
   model1 <- ' 
   # latent variable definitions
      ind60 =~ x1 + x2 + x3
@@ -22,12 +22,12 @@ test_that("testing hessian", {
   PoliticalDemocracy[1:4,2] <- NA
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE, missing = "ML")
 
-  SEM <- linr:::SEMFromLavaan(lavaanModel = model)
-  SEM <- linr:::fit(SEM)
+  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = model)
+  SEM <- lessSEM:::fit(SEM)
   
-  hessian <- linr:::getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
+  hessian <- lessSEM:::getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
   
-  hessian2 <- numDeriv::hessian(func = linr:::fitFunction, x = linr:::getParameters(SEM), SEM = SEM, raw = FALSE)
+  hessian2 <- numDeriv::hessian(func = lessSEM:::fitFunction, x = lessSEM:::getParameters(SEM), SEM = SEM, raw = FALSE)
   
   testthat::expect_equal(abs(sum(hessian - hessian2)) < .001, TRUE)
   
@@ -44,12 +44,12 @@ test_that("testing hessian", {
   }
   
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
-  SEM <- linr:::SEMFromLavaan(lavaanModel = model)
-  SEM <- linr:::fit(SEM)
+  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = model)
+  SEM <- lessSEM:::fit(SEM)
   
-  hessian <- linr:::getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
+  hessian <- lessSEM:::getHessian(SEM = SEM, raw = FALSE, eps = 1e-8)
   
-  hessian2 <- numDeriv::hessian(func = linr:::fitFunction, x = linr:::getParameters(SEM), SEM = SEM, raw = FALSE)
+  hessian2 <- numDeriv::hessian(func = lessSEM:::fitFunction, x = lessSEM:::getParameters(SEM), SEM = SEM, raw = FALSE)
   
   testthat::expect_equal(abs(sum(hessian - hessian2)) < .001, TRUE)
 })

@@ -1,4 +1,4 @@
 library(testthat)
-library(linr)
+library(lessSEM)
 
-test_check("linr")
+test_check("lessSEM")

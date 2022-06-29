@@ -2,7 +2,7 @@
 #define PENALTY_H
 #include <RcppArmadillo.h>
 
-namespace linr{
+namespace lessSEM{
 
 template<class T>
 class penalty{

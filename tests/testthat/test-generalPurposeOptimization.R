@@ -1,5 +1,5 @@
 test_that("testing general purpose ista lasso", {
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   n <- 100
   df <- data.frame(
@@ -43,6 +43,7 @@ test_that("testing general purpose ista lasso", {
   control <- list(
     L0 = .1,
     eta = 2,
+    accelerate = TRUE,
     maxIterOut = 10,
     maxIterIn = 20,
     breakOuter = .00000001,
@@ -56,20 +57,20 @@ test_that("testing general purpose ista lasso", {
             weights, 
             control)
   
-  lassoResult <- IL$optimize(
+  unregularized <- IL$optimize(
+    b,
     fitFunction,
     gradientFunction,
     listElements,
-    b,
     0,
     1
   )
   
-  lassoResult$fit - sum((lmFit$residuals)^2)
+  unregularized$fit - sum((lmFit$residuals)^2)
   
-  lassoResult$rawParameters
+  unregularized$rawParameters
   
-  testthat::expect_equal(all(round(lassoResult$rawParameters -
+  testthat::expect_equal(all(round(unregularized$rawParameters -
                                      coef(lmFit),
                                    4) == 0),
                          TRUE)
@@ -77,6 +78,7 @@ test_that("testing general purpose ista lasso", {
   control <- list(
     L0 = .1,
     eta = 2,
+    accelerate = TRUE,
     maxIterOut = 1000,
     maxIterIn = 1000,
     breakOuter = .00000001,
@@ -91,10 +93,10 @@ test_that("testing general purpose ista lasso", {
             control)
   
   lassoResult <- IL$optimize(
+    b,
     fitFunction,
     gradientFunction,
     listElements,
-    b,
     500,
     1
   )
@@ -105,4 +107,38 @@ test_that("testing general purpose ista lasso", {
                                      coef(lm(y ~ 0+x4+x5, df)),
                                    4) == 0),
                          TRUE)
+  
+  control <- list(
+    initialHessian = diag(1,length(b)),
+    stepSize = .9,
+    sigma = 0,
+    gamma = 0,
+    maxIterOut = 1000,
+    maxIterIn = 1000,
+    maxIterLine = 1000,
+    breakOuter = 1e-6,
+    breakInner = 1e-5,
+    convergenceCriterion = 0, 
+    verbose = 0
+  )
+  IL <- new(glmnetEnetGeneralPurpose, 
+            weights, 
+            control)
+  
+  lassoResult <- IL$optimize(
+    b,
+    fitFunction,
+    gradientFunction,
+    listElements,
+    500,
+    1
+  )
+  lassoResult$fit
+  lassoResult$rawParameters
+  coef(lmFit)
+  testthat::expect_equal(all(round(lassoResult$rawParameters[c("b4", "b5")] -
+                                     coef(lm(y ~ 0+x4+x5, df)),
+                                   4) == 0),
+                         TRUE)
+  
 })

@@ -1,7 +1,6 @@
 test_that("testing ridge", {
   library(lslx)
-  library(lavaan)
-  library(linr)
+  library(lessSEM)
   set.seed(123)
   N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
@@ -49,18 +48,17 @@ test_that("testing ridge", {
   
   # replicate with regularizedSEM
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
-  rsem <- regularizeSEM(lavaanModel = modelFit, 
-                        regularizedParameterLabels = regularizedLavaan,
-                        penalty = "ridge", 
+  rsem <- ridge(lavaanModel = modelFit, 
+                        regularized = regularizedLavaan,
                         lambdas = lambdas)
-  testthat::expect_equal(all(round(rsem@parameters[,regularizedLavaan] - lslxParameter[,regularized],4)==0), TRUE)
+  testthat::expect_equal(all(round(rsem@parameters[,regularizedLavaan] - lslxParameter[,regularized],3)==0), TRUE)
   plot(rsem)
   coef(rsem)
   coef(rsem, alpha = 0, lambda = .1)
   
   ## Test approximated cross-validation
   
-  cv <- aCV4regularizedSEM(regularizedSEM = rsem, k = N)
+  cv <- cv4ridge(regularizedSEM = rsem, k = 5)
   coef(cv)
   coef(cv, alpha = 0, lambda = .1)
   plot(cv)

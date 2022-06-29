@@ -2,22 +2,30 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 innerGLMNET <- function(parameters, N, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak, useMultipleConvergenceCriteria) {
-    .Call(`_linr_innerGLMNET`, parameters, N, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak, useMultipleConvergenceCriteria)
+    .Call(`_lessSEM_innerGLMNET`, parameters, N, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak, useMultipleConvergenceCriteria)
+}
+
+glmnetInner_C <- function(parameters_kMinus1, gradients_kMinus1, Hessian, lambda, alpha, weights, maxIterIn, breakInner, verbose) {
+    .Call(`_lessSEM_glmnetInner_C`, parameters_kMinus1, gradients_kMinus1, Hessian, lambda, alpha, weights, maxIterIn, breakInner, verbose)
+}
+
+BFGS_C <- function(parameters_kMinus1, gradients_kMinus1, Hessian_kMinus1, parameters_k, gradients_k, cautious, hessianEps) {
+    .Call(`_lessSEM_BFGS_C`, parameters_kMinus1, gradients_kMinus1, Hessian_kMinus1, parameters_k, gradients_k, cautious, hessianEps)
 }
 
 computeIndividualM2LL <- function(nObservedVariables, rawData, impliedMeans, impliedCovariance) {
-    .Call(`_linr_computeIndividualM2LL`, nObservedVariables, rawData, impliedMeans, impliedCovariance)
+    .Call(`_lessSEM_computeIndividualM2LL`, nObservedVariables, rawData, impliedMeans, impliedCovariance)
 }
 
 computeGroupM2LL <- function(sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance) {
-    .Call(`_linr_computeGroupM2LL`, sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance)
+    .Call(`_lessSEM_computeGroupM2LL`, sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance)
 }
 
 computeImpliedCovariance <- function(Fmatrix, Amatrix, Smatrix) {
-    .Call(`_linr_computeImpliedCovariance`, Fmatrix, Amatrix, Smatrix)
+    .Call(`_lessSEM_computeImpliedCovariance`, Fmatrix, Amatrix, Smatrix)
 }
 
 computeImpliedMeans <- function(Fmatrix, Amatrix, Mvector) {
-    .Call(`_linr_computeImpliedMeans`, Fmatrix, Amatrix, Mvector)
+    .Call(`_lessSEM_computeImpliedMeans`, Fmatrix, Amatrix, Mvector)
 }
 

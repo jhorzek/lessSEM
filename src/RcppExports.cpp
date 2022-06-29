@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // innerGLMNET
 arma::colvec innerGLMNET(const arma::colvec parameters, const int N, const arma::colvec subGroupGradient, const arma::mat subGroupHessian, const double subGroupLambda, const Rcpp::LogicalVector regularized, const arma::colvec adaptiveLassoWeights, const int maxIter, const double epsBreak, const bool useMultipleConvergenceCriteria);
-RcppExport SEXP _linr_innerGLMNET(SEXP parametersSEXP, SEXP NSEXP, SEXP subGroupGradientSEXP, SEXP subGroupHessianSEXP, SEXP subGroupLambdaSEXP, SEXP regularizedSEXP, SEXP adaptiveLassoWeightsSEXP, SEXP maxIterSEXP, SEXP epsBreakSEXP, SEXP useMultipleConvergenceCriteriaSEXP) {
+RcppExport SEXP _lessSEM_innerGLMNET(SEXP parametersSEXP, SEXP NSEXP, SEXP subGroupGradientSEXP, SEXP subGroupHessianSEXP, SEXP subGroupLambdaSEXP, SEXP regularizedSEXP, SEXP adaptiveLassoWeightsSEXP, SEXP maxIterSEXP, SEXP epsBreakSEXP, SEXP useMultipleConvergenceCriteriaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -31,9 +31,45 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// glmnetInner_C
+arma::rowvec glmnetInner_C(const arma::rowvec& parameters_kMinus1, const arma::rowvec& gradients_kMinus1, const arma::mat& Hessian, const double lambda, const double alpha, const arma::rowvec& weights, const int maxIterIn, const double breakInner, const int verbose);
+RcppExport SEXP _lessSEM_glmnetInner_C(SEXP parameters_kMinus1SEXP, SEXP gradients_kMinus1SEXP, SEXP HessianSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP weightsSEXP, SEXP maxIterInSEXP, SEXP breakInnerSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type parameters_kMinus1(parameters_kMinus1SEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type gradients_kMinus1(gradients_kMinus1SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Hessian(HessianSEXP);
+    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< const double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const int >::type maxIterIn(maxIterInSEXP);
+    Rcpp::traits::input_parameter< const double >::type breakInner(breakInnerSEXP);
+    Rcpp::traits::input_parameter< const int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(glmnetInner_C(parameters_kMinus1, gradients_kMinus1, Hessian, lambda, alpha, weights, maxIterIn, breakInner, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// BFGS_C
+arma::mat BFGS_C(const arma::rowvec& parameters_kMinus1, const arma::rowvec& gradients_kMinus1, const arma::mat& Hessian_kMinus1, const arma::rowvec& parameters_k, const arma::rowvec& gradients_k, const bool cautious, const double hessianEps);
+RcppExport SEXP _lessSEM_BFGS_C(SEXP parameters_kMinus1SEXP, SEXP gradients_kMinus1SEXP, SEXP Hessian_kMinus1SEXP, SEXP parameters_kSEXP, SEXP gradients_kSEXP, SEXP cautiousSEXP, SEXP hessianEpsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type parameters_kMinus1(parameters_kMinus1SEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type gradients_kMinus1(gradients_kMinus1SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Hessian_kMinus1(Hessian_kMinus1SEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type parameters_k(parameters_kSEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type gradients_k(gradients_kSEXP);
+    Rcpp::traits::input_parameter< const bool >::type cautious(cautiousSEXP);
+    Rcpp::traits::input_parameter< const double >::type hessianEps(hessianEpsSEXP);
+    rcpp_result_gen = Rcpp::wrap(BFGS_C(parameters_kMinus1, gradients_kMinus1, Hessian_kMinus1, parameters_k, gradients_k, cautious, hessianEps));
+    return rcpp_result_gen;
+END_RCPP
+}
 // computeIndividualM2LL
 double computeIndividualM2LL(const int nObservedVariables, const arma::colvec& rawData, const arma::colvec& impliedMeans, const arma::mat& impliedCovariance);
-RcppExport SEXP _linr_computeIndividualM2LL(SEXP nObservedVariablesSEXP, SEXP rawDataSEXP, SEXP impliedMeansSEXP, SEXP impliedCovarianceSEXP) {
+RcppExport SEXP _lessSEM_computeIndividualM2LL(SEXP nObservedVariablesSEXP, SEXP rawDataSEXP, SEXP impliedMeansSEXP, SEXP impliedCovarianceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -47,7 +83,7 @@ END_RCPP
 }
 // computeGroupM2LL
 double computeGroupM2LL(const int sampleSize, const int nObservedVariables, const arma::colvec& observedMeans, const arma::mat& observedCov, const arma::colvec& impliedMeans, const arma::mat& impliedCovariance);
-RcppExport SEXP _linr_computeGroupM2LL(SEXP sampleSizeSEXP, SEXP nObservedVariablesSEXP, SEXP observedMeansSEXP, SEXP observedCovSEXP, SEXP impliedMeansSEXP, SEXP impliedCovarianceSEXP) {
+RcppExport SEXP _lessSEM_computeGroupM2LL(SEXP sampleSizeSEXP, SEXP nObservedVariablesSEXP, SEXP observedMeansSEXP, SEXP observedCovSEXP, SEXP impliedMeansSEXP, SEXP impliedCovarianceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -63,7 +99,7 @@ END_RCPP
 }
 // computeImpliedCovariance
 arma::mat computeImpliedCovariance(const arma::mat& Fmatrix, const arma::mat& Amatrix, const arma::mat& Smatrix);
-RcppExport SEXP _linr_computeImpliedCovariance(SEXP FmatrixSEXP, SEXP AmatrixSEXP, SEXP SmatrixSEXP) {
+RcppExport SEXP _lessSEM_computeImpliedCovariance(SEXP FmatrixSEXP, SEXP AmatrixSEXP, SEXP SmatrixSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -76,7 +112,7 @@ END_RCPP
 }
 // computeImpliedMeans
 arma::mat computeImpliedMeans(const arma::mat& Fmatrix, const arma::mat& Amatrix, const arma::colvec& Mvector);
-RcppExport SEXP _linr_computeImpliedMeans(SEXP FmatrixSEXP, SEXP AmatrixSEXP, SEXP MvectorSEXP) {
+RcppExport SEXP _lessSEM_computeImpliedMeans(SEXP FmatrixSEXP, SEXP AmatrixSEXP, SEXP MvectorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -89,22 +125,30 @@ END_RCPP
 }
 
 RcppExport SEXP _rcpp_module_boot_SEM_cpp();
+RcppExport SEXP _rcpp_module_boot_bfgsEnet_cpp();
+RcppExport SEXP _rcpp_module_boot_glmnetEnet_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnet_cpp();
+RcppExport SEXP _rcpp_module_boot_glmnetEnetGeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurpose_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_linr_innerGLMNET", (DL_FUNC) &_linr_innerGLMNET, 10},
-    {"_linr_computeIndividualM2LL", (DL_FUNC) &_linr_computeIndividualM2LL, 4},
-    {"_linr_computeGroupM2LL", (DL_FUNC) &_linr_computeGroupM2LL, 6},
-    {"_linr_computeImpliedCovariance", (DL_FUNC) &_linr_computeImpliedCovariance, 3},
-    {"_linr_computeImpliedMeans", (DL_FUNC) &_linr_computeImpliedMeans, 3},
+    {"_lessSEM_innerGLMNET", (DL_FUNC) &_lessSEM_innerGLMNET, 10},
+    {"_lessSEM_glmnetInner_C", (DL_FUNC) &_lessSEM_glmnetInner_C, 9},
+    {"_lessSEM_BFGS_C", (DL_FUNC) &_lessSEM_BFGS_C, 7},
+    {"_lessSEM_computeIndividualM2LL", (DL_FUNC) &_lessSEM_computeIndividualM2LL, 4},
+    {"_lessSEM_computeGroupM2LL", (DL_FUNC) &_lessSEM_computeGroupM2LL, 6},
+    {"_lessSEM_computeImpliedCovariance", (DL_FUNC) &_lessSEM_computeImpliedCovariance, 3},
+    {"_lessSEM_computeImpliedMeans", (DL_FUNC) &_lessSEM_computeImpliedMeans, 3},
     {"_rcpp_module_boot_SEM_cpp", (DL_FUNC) &_rcpp_module_boot_SEM_cpp, 0},
+    {"_rcpp_module_boot_bfgsEnet_cpp", (DL_FUNC) &_rcpp_module_boot_bfgsEnet_cpp, 0},
+    {"_rcpp_module_boot_glmnetEnet_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnet_cpp, 0},
     {"_rcpp_module_boot_istaEnet_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnet_cpp, 0},
+    {"_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp, 0},
     {"_rcpp_module_boot_istaEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetGeneralPurpose_cpp, 0},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_linr(DllInfo *dll) {
+RcppExport void R_init_lessSEM(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
