@@ -7,7 +7,7 @@
 #' @param k the number of subset fold. We recommend leave-one-out influence functions; i.e. set k to the number of persons in the data set. Alternatively, 
 #' a matrix with pre-defined subsets can be passed to the function. See ?linr::aCV4regularizedSEM for an example
 #' @param recomputeHessian if set to false, the Hessians from the quasi newton optimization with GLMNET will be used. Otherwise the Hessian will be recomputed.
-#' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
+#' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
 #' library(linr)
 #' 

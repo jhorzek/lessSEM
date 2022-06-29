@@ -10,7 +10,7 @@
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
 #' See ?linr::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
-#' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
+#' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
 #' library(linr)
 #' 
@@ -34,7 +34,7 @@ cv4lasso <- function(regularizedSEM,
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
 #' See ?linr::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
-#' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
+#' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
 #' library(linr)
 #' 
@@ -58,7 +58,7 @@ cv4ridge <- function(regularizedSEM,
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
 #' See ?linr::aCV4regularizedSEM for an example
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
-#' @param control parameters passed to the GLMNET optimizer. Note that only arguments of the inner iteration are used. See ?controlGLMNET for more details
+#' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
 #' library(linr)
 #' 

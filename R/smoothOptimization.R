@@ -524,7 +524,7 @@ smoothElasticNet <- function(lavaanModel,
     rownames(initialHessian) <- names(rawParameters)
     colnames(initialHessian) <- names(rawParameters)
   }else{
-    stop("Invalid initialHessian passed to GLMNET. See ?controlGLMNET for more information.")
+    stop("Invalid initialHessian passed to BFGS. See ?controlBFGS for more information.")
   }
   
   control$initialHessian <- initialHessian

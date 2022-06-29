@@ -1,6 +1,6 @@
 #' linr
 #'
-#' linr (**l**inr **i**s **n**ot **r**egsem) 
+#' linr (**l**inr **i**mplements **n**on-smooth **r**egsem) 
 #' is an R package which provides regularized 
 #' structural equation modeling (regularized SEM) 
 #' building on lavaan; that is, it makes SEM *leaner*.
@@ -11,7 +11,7 @@
 #'  and (2) to provide optimizers for other SEM packages which can be used with an 
 #'  interface similar to optim
 #'  
-#'  linr also also provides experimental functions for 
+#'  linr also provides experimental functions for 
 #'  approximate cross-validation and approximate influence functions.
 #'  
 #'  **Warning**: The package is relatively new and you may 
