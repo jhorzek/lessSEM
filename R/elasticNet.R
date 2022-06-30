@@ -26,6 +26,7 @@
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
+#' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -104,12 +105,14 @@ lasso <- function(lavaanModel,
                   lambdas = NULL,
                   nLambdas = NULL,
                   method = "ista", 
+                  modifyModel = lessSEM::modifyModel(),
                   control = controlIsta()){
   SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                  transformVariances = TRUE,
                                  whichPars = "est",
-                                 addMeans = control$addMeans, 
-                                 activeSet = control$activeSet)
+                                 addMeans = modifyModel$addMeans, 
+                                 activeSet = modifyModel$activeSet,
+                                 dataSet = modifyModel$dataSet)
   
   weights <- lessSEM::getParameters(SEM, raw = FALSE)
   weights[] <- 0
@@ -129,6 +132,7 @@ lasso <- function(lavaanModel,
     nLambdas = nLambdas,
     alphas = 1,
     method = method, 
+    modifyModel = modifyModel,
     control = control
   )
   return(result)
@@ -169,6 +173,7 @@ lasso <- function(lavaanModel,
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
+#' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -257,7 +262,8 @@ adaptiveLasso <- function(lavaanModel,
                   lambdas = NULL,
                   nLambdas = NULL,
                   method = "ista", 
-                  control = controlIsta()){
+                  modifyModel = lessSEM::modifyModel(),
+                  control = lessSEM::controlIsta()){
   if(is.null(weights)){
     weights <- 1/abs(getLavaanParameters(lavaanModel))
     weights[!names(weights) %in% regularized] <- 0
@@ -278,6 +284,7 @@ adaptiveLasso <- function(lavaanModel,
     nLambdas = nLambdas,
     alphas = 1,
     method = method, 
+    modifyModel = modifyModel,
     control = control
   )
   return(result)
@@ -307,6 +314,7 @@ adaptiveLasso <- function(lavaanModel,
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
+#' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -379,13 +387,15 @@ ridge <- function(lavaanModel,
                   regularized,
                   lambdas = NULL,
                   method = "ista", 
+                  modifyModel = lessSEM::modifyModel(),
                   control = controlIsta()){
   
   SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                  transformVariances = TRUE,
                                  whichPars = "est",
                                  addMeans = control$addMeans, 
-                                 activeSet = control$activeSet)
+                                 activeSet = control$activeSet,
+                                 dataSet = modifyModel$dataSet)
   
   weights <- lessSEM::getParameters(SEM, raw = FALSE)
   weights[] <- 0
@@ -443,6 +453,7 @@ ridge <- function(lavaanModel,
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
+#' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
 #' @md
@@ -525,6 +536,7 @@ elasticNet <- function(lavaanModel,
                        nLambdas = NULL,
                        alphas,
                        method = "ista", 
+                       modifyModel = lessSEM::modifyModel(),
                        control = controlIsta()){
   
   inputArguments <- as.list(environment())
@@ -561,14 +573,16 @@ elasticNet <- function(lavaanModel,
     SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                 transformVariances = TRUE,
                                 whichPars = "est",
-                                addMeans = control$addMeans, 
-                                activeSet = control$activeSet)
+                                addMeans = modifyModel$addMeans, 
+                                activeSet = modifyModel$activeSet,
+                                dataSet = modifyModel$dataSet)
   }else if(any(startingValues == "start")){
     SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                 transformVariances = TRUE,
                                 whichPars = "start",
-                                addMeans = control$addMeans, 
-                                activeSet = control$activeSet)
+                                addMeans = modifyModel$addMeans, 
+                                activeSet = modifyModel$activeSet,
+                                dataSet = modifyModel$dataSet)
   }else if(is.numeric(startingValues)){
     
     if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
@@ -576,8 +590,9 @@ elasticNet <- function(lavaanModel,
                                 transformVariances = TRUE,
                                 whichPars = "start", 
                                 fit = FALSE,
-                                addMeans = control$addMeans, 
-                                activeSet = control$activeSet)
+                                addMeans = modifyModel$addMeans, 
+                                activeSet = modifyModel$activeSet,
+                                dataSet = modifyModel$dataSet)
     SEM <- lessSEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
     SEM <- try(lessSEM:::fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
