@@ -24,6 +24,7 @@
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param tau parameters below threshold tau will be seen as zeroed
+#' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @md
@@ -82,9 +83,17 @@ smoothLasso <- function(lavaanModel,
                         nLambdas = NULL,
                         epsilon,
                         tau,
+                        modifyModel = lessSEM::modifyModel(),
                         control = controlBFGS()){
   
-  weights <- getLavaanParameters(lavaanModel)
+  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+                                 transformVariances = TRUE,
+                                 whichPars = "est",
+                                 addMeans = modifyModel$addMeans, 
+                                 activeSet = modifyModel$activeSet,
+                                 dataSet = modifyModel$dataSet)
+  
+  weights <- lessSEM::getParameters(SEM, raw = FALSE)
   weights[] <- 0
   weights[regularized] <- 1
   if(! all(regularized %in% names(weights))) stop(paste0(
@@ -103,6 +112,7 @@ smoothLasso <- function(lavaanModel,
     alphas = 1,
     epsilon = epsilon, 
     tau = tau,
+    modifyModel = modifyModel,
     control = control
   )
   return(result)
@@ -142,6 +152,7 @@ smoothLasso <- function(lavaanModel,
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param tau parameters below threshold tau will be seen as zeroed
+#' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @md
@@ -211,6 +222,7 @@ smoothAdaptiveLasso <- function(lavaanModel,
                           nLambdas = NULL,
                           epsilon,
                           tau,
+                          modifyModel = lessSEM::modifyModel(),
                           control = controlBFGS()){
   
   if(is.null(weights)){
@@ -218,7 +230,8 @@ smoothAdaptiveLasso <- function(lavaanModel,
                                    transformVariances = TRUE,
                                    whichPars = "est",
                                    addMeans = control$addMeans, 
-                                   activeSet = control$activeSet)
+                                   activeSet = control$activeSet,
+                                   dataSet = modifyModel$dataSet)
     
     weights <- lessSEM::getParameters(SEM, raw = FALSE)
     weights <- 1/abs(weights)
@@ -241,6 +254,7 @@ smoothAdaptiveLasso <- function(lavaanModel,
     alphas = 1,
     epsilon = epsilon, 
     tau = tau,
+    modifyModel = modifyModel,
     control = control
   )
   return(result)
@@ -267,6 +281,7 @@ smoothAdaptiveLasso <- function(lavaanModel,
 #' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
+#' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
 #' @md
@@ -313,13 +328,15 @@ smoothAdaptiveLasso <- function(lavaanModel,
 ridgeBfgs <- function(lavaanModel,
                   regularized,
                   lambdas = NULL,
+                  modifyModel = lessSEM::modifyModel(),
                   control = controlBFGS()){
   
   SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                  transformVariances = TRUE,
                                  whichPars = "est",
                                  addMeans = control$addMeans, 
-                                 activeSet = control$activeSet)
+                                 activeSet = control$activeSet,
+                                 dataSet = modifyModel$dataSet)
   
   weights <- lessSEM::getParameters(SEM, raw = FALSE)
   weights[] <- 0
@@ -340,6 +357,7 @@ ridgeBfgs <- function(lavaanModel,
     alphas = 0,
     epsilon = 0, # ridge is already smooth
     tau = 0,
+    modifyModel = modifyModel,
     control = control
   )
   return(result)
@@ -377,6 +395,7 @@ ridgeBfgs <- function(lavaanModel,
 #' in [0,1]. 0 = ridge, 1 = lasso.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param tau parameters below threshold tau will be seen as zeroed
+#' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
 #' @md
@@ -436,6 +455,7 @@ smoothElasticNet <- function(lavaanModel,
                        alphas,
                        epsilon, 
                        tau,
+                       modifyModel = lessSEM::modifyModel(),
                        control = controlBFGS()){
   
   inputArguments <- as.list(environment())
@@ -467,25 +487,27 @@ smoothElasticNet <- function(lavaanModel,
   startingValues <- control$startingValues
   if(any(startingValues == "est")){
     SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                transformVariances = TRUE,
-                                whichPars = "est",
-                                addMeans = control$addMeans, 
-                                activeSet = control$activeSet)
+                                   transformVariances = TRUE,
+                                   whichPars = "est",
+                                   addMeans = control$addMeans, 
+                                   activeSet = control$activeSet,
+                                   dataSet = modifyModel$dataSet)
   }else if(any(startingValues == "start")){
     SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                transformVariances = TRUE,
-                                whichPars = "start",
-                                addMeans = control$addMeans, 
-                                activeSet = control$activeSet)
+                                   transformVariances = TRUE,
+                                   whichPars = "start",
+                                   addMeans = control$addMeans, 
+                                   activeSet = control$activeSet,
+                                   dataSet = modifyModel$dataSet)
   }else if(is.numeric(startingValues)){
     
     if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
     SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                transformVariances = TRUE,
-                                whichPars = "start", 
-                                fit = FALSE,
-                                addMeans = control$addMeans, 
-                                activeSet = control$activeSet)
+                                   transformVariances = TRUE,
+                                   whichPars = "start",
+                                   addMeans = control$addMeans, 
+                                   activeSet = control$activeSet,
+                                   dataSet = modifyModel$dataSet)
     SEM <- lessSEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
     SEM <- try(lessSEM:::fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
@@ -672,9 +694,11 @@ smoothElasticNet <- function(lavaanModel,
               " resulted in Error!")
       
       SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                  transformVariances = TRUE,
-                                  whichPars = startingValues,
-                                  addMeans = control$addMeans)
+                                     transformVariances = TRUE,
+                                     whichPars = startingValues,
+                                     addMeans = control$addMeans, 
+                                     activeSet = control$activeSet,
+                                     dataSet = modifyModel$dataSet)
       
       regularizedModel$setHessian(controlIntern$initialHessian)
       
@@ -704,4 +728,24 @@ smoothElasticNet <- function(lavaanModel,
   
   return(results)
   
+}
+
+#' newTau
+#' 
+#' assign new value to parameter tau used by approximate optimization
+#' 
+#' @param regularizedSEM object fitted with approximate optimization
+#' @param tau new tau value
+newTau <- function(regularizedSEM, tau){
+  if(!is(regularizedSEM,"regularizedSEM")) stop("regularizedSEM must be of class regularizedSEM")
+  if(is.null(regularizedSEM@inputArguments$tau)) stop("Could not find tau in regularizedSEM. Did you use a smoothed penalty?")
+  
+  regularizedSEM@fits$nonZeroParameters <- 
+    length(regularizedSEM@parameterLabels) - 
+    apply(regularizedSEM@parameters[,
+                                    names(regularizedSEM@inputArguments$weights[regularizedSEM@parameterLabels] != 0)],
+          1,
+          function(x) sum(abs(x) < tau)
+    )
+  return(regularizedSEM)
 }

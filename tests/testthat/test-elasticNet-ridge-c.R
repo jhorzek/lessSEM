@@ -32,7 +32,7 @@ test_that("testing elasticNet-ridge-c", {
   
   fitLslx$penalize_coefficient(name = paste0("y", 6:ncol(y)," <- f"))
   
-  lambdas <- seq(0,.8,.05)
+  lambdas <- seq(0,50,1)
   fitLslx$fit(penalty_method = "ridge",lambda_grid = lambdas, loss = "ml")
   
   # extract fits
@@ -104,12 +104,11 @@ test_that("testing elasticNet-ridge-c", {
                                    rsemBfgs@parameters[,rsemBfgs@regularized]) < .002), TRUE)
   
   ## Test exact cross-validation
-  warning("Not testing approximate cross-validation")
-  # cvExact <- CV4regularizedSEM(regularizedSEM = rsem, k = N)
-  # coef(cvExact)
-  # coef(cvExact, rule = "1sd")
-  # coef(cvExact, rule = "penalized")
-  # coef(cvExact, alpha = 1, lambda = .1)
-  # plot(cvExact)
+  cvExact <- cv4ridge(regularizedSEM = rsemIsta, 
+                      k = N)
+  coef(cvExact)
+  coef(cvExact, rule = "1sd")
+  coef(cvExact, alpha = 0, lambda = lambdas[1])
+  plot(cvExact)
   
 })

@@ -9,18 +9,99 @@
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
 #' See ?lessSEM::aCV4regularizedSEM for an example
+#' @param dataSet optional: Pass the full, unscaled data set to the function. 
+#' This is important if the data has to be scaled prior to the analysis. If scaling
+#' is performed on the full sample, this will result in dependencies between the 
+#' subsets created by the cross-validation. To prevent this, pass the full data and use scaleData = TRUE,
+#' the scalingFunction, and the scalingArguments
+#' @param scaleData if set to TRUE, the subsets will be scaled using the scalingFunction
+#' @param scalingFunction this function is used to scale the subsets. It MUST take two arguments:
+#' first, the data set as matrix and second the scalingArguments. The latter can be anything you need
+#' for the scaling
+#' @param scalingArguments the second argument passed to scalingFunction. Can contain any number
+#' of arguments needed for the scaling
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
-#' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
 #' library(lessSEM)
 #' 
 #' @export
 cv4lasso <- function(regularizedSEM, 
                      k, 
+                     dataSet = NULL,
+                     scaleData = FALSE,
+                     scalingFunction = function(dataSet,scalingArguments) 
+                       scale(x = dataSet, 
+                             center = scalingArguments$center, 
+                             scale = scalingArguments$scale),
+                     scalingArguments = list("center" = TRUE, 
+                                             "scale" = TRUE),
                      returnSubsetParameters = FALSE){
   return(cv4elasticNet(regularizedSEM, 
-                                   k, 
-                                   returnSubsetParameters = FALSE))
+                       k,
+                       dataSet = dataSet,
+                       scalingFunction = scalingFunction,
+                       scalingArguments = scalingArguments,
+                       reweigh = FALSE,
+                       returnSubsetParameters = FALSE))
+  
+}
+
+#' cv4adaptiveLasso
+#' 
+#' Exact cross-validation for models of class regularizedSEM which have been 
+#' fitted with adaptive lasso penalty
+#' These models can be fit with adaptiveLasso() (see ?adaptiveLasso)
+#' in this package. A difficulty when cross-validating the adaptive lasso is
+#' that the weights are often based on the maximum likelihood estimates of 
+#' the full sample. Using the same weights for the subsets of the cross-validation
+#' can undermine the independence of these subsets. We therefore recommend reweighing
+#' the subsets. If you used the default weights in adaptiveLasso (setting weights = NULL)
+#' you can set reweigh = TRUE and cv4adaptiveLasso will automatically re-compute the
+#' MLE for each training set. These MLE_training_set will then be used to construct the weights
+#' as weight = 1/abs(MLE_training_set). For unregularized parameters, weights will be set to zero.
+#' You can also pass custom weights. To this end, you can pass a matrix with k rows and as many
+#' columns as there are parameters in your model to the reweigh argument. Note that you 
+#' should then also pass specific data sets instead of using e.g. k = 5.
+#' 
+#' @param regularizedSEM model of class regularizedSEM
+#' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
+#' See ?lessSEM::aCV4regularizedSEM for an example
+#' @param dataSet optional: Pass the full, unscaled data set to the function. 
+#' This is important if the data has to be scaled prior to the analysis. If scaling
+#' is performed on the full sample, this will result in dependencies between the 
+#' subsets created by the cross-validation. To prevent this, pass the full data and use scaleData = TRUE,
+#' the scalingFunction, and the scalingArguments
+#' @param scaleData if set to TRUE, the subsets will be scaled using the scalingFunction
+#' @param scalingFunction this function is used to scale the subsets. It MUST take two arguments:
+#' first, the data set as matrix and second the scalingArguments. The latter can be anything you need
+#' for the scaling
+#' @param scalingArguments the second argument passed to scalingFunction. Can contain any number
+#' of arguments needed for the scaling
+#' @param reweigh this is used when weight are not all 1 or 0 (in adaptive lasso). See ?cv4adaptiveLasso for details
+#' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
+#' @examples
+#' library(lessSEM)
+#' 
+#' @export
+cv4adaptiveLasso <- function(regularizedSEM, 
+                     k, 
+                     dataSet = NULL,
+                     scaleData = FALSE,
+                     scalingFunction = function(dataSet,scalingArguments) 
+                       scale(x = dataSet, 
+                             center = scalingArguments$center, 
+                             scale = scalingArguments$scale),
+                     scalingArguments = list("center" = TRUE, 
+                                             "scale" = TRUE),
+                     reweigh = FALSE,
+                     returnSubsetParameters = FALSE){
+  return(cv4elasticNet(regularizedSEM, 
+                       k,
+                       dataSet = dataSet,
+                       scalingFunction = scalingFunction,
+                       scalingArguments = scalingArguments,
+                       reweigh = reweigh,
+                       returnSubsetParameters = FALSE))
   
 }
 
@@ -33,17 +114,39 @@ cv4lasso <- function(regularizedSEM,
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
 #' See ?lessSEM::aCV4regularizedSEM for an example
+#' @param dataSet optional: Pass the full, unscaled data set to the function. 
+#' This is important if the data has to be scaled prior to the analysis. If scaling
+#' is performed on the full sample, this will result in dependencies between the 
+#' subsets created by the cross-validation. To prevent this, pass the full data and use scaleData = TRUE,
+#' the scalingFunction, and the scalingArguments
+#' @param scaleData if set to TRUE, the subsets will be scaled using the scalingFunction
+#' @param scalingFunction this function is used to scale the subsets. It MUST take two arguments:
+#' first, the data set as matrix and second the scalingArguments. The latter can be anything you need
+#' for the scaling
+#' @param scalingArguments the second argument passed to scalingFunction. Can contain any number
+#' of arguments needed for the scaling
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
-#' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
 #' library(lessSEM)
 #' 
 #' @export
 cv4ridge <- function(regularizedSEM, 
                      k, 
+                     dataSet = NULL,
+                     scaleData = FALSE,
+                     scalingFunction = function(dataSet,scalingArguments) 
+                       scale(x = dataSet, 
+                             center = scalingArguments$center, 
+                             scale = scalingArguments$scale),
+                     scalingArguments = list("center" = TRUE, 
+                                             "scale" = TRUE),
                      returnSubsetParameters = FALSE){
   return(cv4elasticNet(regularizedSEM, 
-                       k, 
+                       k,
+                       dataSet = dataSet,
+                       scalingFunction = scalingFunction,
+                       scalingArguments = scalingArguments,
+                       reweigh = FALSE,
                        returnSubsetParameters = FALSE))
   
 }
@@ -57,8 +160,19 @@ cv4ridge <- function(regularizedSEM,
 #' @param regularizedSEM model of class regularizedSEM
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
 #' See ?lessSEM::aCV4regularizedSEM for an example
+#' @param dataSet optional: Pass the full, unscaled data set to the function. 
+#' This is important if the data has to be scaled prior to the analysis. If scaling
+#' is performed on the full sample, this will result in dependencies between the 
+#' subsets created by the cross-validation. To prevent this, pass the full data and use scaleData = TRUE,
+#' the scalingFunction, and the scalingArguments
+#' @param scaleData if set to TRUE, the subsets will be scaled using the scalingFunction
+#' @param scalingFunction this function is used to scale the subsets. It MUST take two arguments:
+#' first, the data set as matrix and second the scalingArguments. The latter can be anything you need
+#' for the scaling
+#' @param scalingArguments the second argument passed to scalingFunction. Can contain any number
+#' of arguments needed for the scaling
+#' @param reweigh this is used when weight are not all 1 or 0 (in adaptive lasso). See ?cv4adaptiveLasso for details
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
-#' @param control parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details
 #' @examples
 #' library(lessSEM)
 #' 
@@ -136,14 +250,32 @@ cv4ridge <- function(regularizedSEM,
 #' @export
 cv4elasticNet <- function(regularizedSEM, 
                           k, 
+                          dataSet = NULL,
+                          scaleData = FALSE,
+                          scalingFunction = function(dataSet,scalingArguments) 
+                            scale(x = dataSet, 
+                                  center = scalingArguments$center, 
+                                  scale = scalingArguments$scale),
+                          scalingArguments = list("center" = TRUE, 
+                                                  "scale" = TRUE),
+                          reweigh = FALSE,
                           returnSubsetParameters = FALSE){
   
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
   }
   
-  data <- try(lavaan::lavInspect(regularizedSEM@inputArguments$lavaanModel, "data"))
-  if(is(data, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  lavaanData <- try(lavaan::lavInspect(regularizedSEM@inputArguments$lavaanModel, "data"))
+  if(is(lavaanData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  
+  if(is.null(dataSet)){
+    message("Reusing the data set from regularizedSEM. If your data was rescaled prior to the analysis, this may result in incorrect cross-validation results. Pass the data using the dataset argument and the scalingFunction to let this function rescale your data for each subset.")
+    data <- lavaanData
+  }else{
+    data <- dataSet[,colnames(lavaanData),drop = FALSE]
+    if(any(!colnames(lavaanData) %in% colnames(data))) 
+      stop("Not all variables present in the lavaanModel are in the dataSet")
+  }
   
   N <- nrow(data)
   
@@ -162,7 +294,8 @@ cv4elasticNet <- function(regularizedSEM,
   parameters <- regularizedSEM@parameters
   control <- regularizedSEM@inputArguments$control
   weights <- regularizedSEM@inputArguments$weights
-  if(!any(weights %in% c(0,1))) stop("automatic cross-validation is currently not supported for adaptiveLasso.")
+  modifyModel <- regularizedSEM@inputArguments$modifyModel
+  if(any(!weights %in% c(0,1))) message("Automatic cross-validation for adaptiveLasso requested. Note that using weights which are based on the full sample may undermine cross-validation. Use reweigh = TRUE to re-weight each subset with the inverse of the absolute MLE. Alternatively, pass a matrix as argument reweigh with weights for each subset.")
   
   tuningParameters <- data.frame(lambda = fits$lambda, 
                                  alpha = fits$alpha)
@@ -199,31 +332,68 @@ cv4elasticNet <- function(regularizedSEM,
     subsetParameters <- array(NA,dim = 1)
   }
   
-  # for CV - fits:
-  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel,
-                              whichPars = "est", 
-                              transformVariances = TRUE,
-                              fit = FALSE, 
-                              addMeans = TRUE, 
-                              activeSet = NULL
-  )
-  SEM <- lessSEM:::fit(SEM)
   
   for(s in 1:k){
     cat("\n[",s, "/",k,"]\n")
     control_s <- control
-    control_s$activeSet <- !subsets[,s]
+    # we need to pass the subset as our data set;
+    # if scaling is used, this must also be applied here
+    trainSet <- data[!subsets[,s],,drop = FALSE]
+    testSet <- data[subsets[,s],,drop = FALSE]
+    
+    if(scaleData){
+      if(sum(subsets[,s]) < 2 || sum(!subsets[,s]) < 2){
+        warning("Subsets too small for scaling. Skipping scaling.")
+      }else{
+        # It is important to not scale the data prior to the splitting
+        # Otherwise the data sets are not truly independent!
+        message("Scaling data sets ...")
+        trainSet <- scalingFunction(trainSet, scalingArguments)
+        testSet <- scalingFunction(testSet, scalingArguments)
+      }
+    }
+    
+    modifyModel$dataSet <- trainSet
+    
+    # check weights for adaptive Lasso
+    if(any(!weights %in% c(0,1)) && any(reweigh)){
+      if(is.matrix(reweigh)){
+        weights_s <- reweigh[s,]
+      }else{
+        # use default;
+        print(paste0("Computing new weights for sample ", s, "."))
+        
+        # optimize model: We set lambda = 0, so we get the MLE
+        MLE_s <- lessSEM::lasso(
+          lavaanModel = regularizedSEM@inputArguments$lavaanModel,
+          lambdas = 0, 
+          regularized = regularizedSEM@regularized,
+          method = regularizedSEM@inputArguments$method, 
+          modifyModel = modifyModel,
+          control = control_s
+        )
+        # MLE:
+        param_s <- coef(MLE_s, lambda = 0, alpha = 1)
+        weights_s <- 1/abs(param_s)
+        # set unregularized to 0:
+        weights_s[regularizedSEM@inputArguments$weights == 0] <- 0
+      }
+      
+    }else{
+      weights_s <- regularizedSEM@inputArguments$weights
+    }
     
     regularizedSEM_s <- lessSEM::elasticNet(
       lavaanModel = regularizedSEM@inputArguments$lavaanModel,
-      weights = regularizedSEM@inputArguments$weights,
+      weights = weights_s,
       lambdas = regularizedSEM@inputArguments$lambdas, 
       nLambdas = NULL, 
       alphas = regularizedSEM@inputArguments$alphas, 
       method = regularizedSEM@inputArguments$method, 
+      modifyModel = modifyModel,
       control = control_s
     )
-
+    
     if(returnSubsetParameters){
       for(ro in 1:nrow(tuningParameters)){
         dimname3 <- paste0(paste0(colnames(tuningParameters[ro,,drop = FALSE]),
@@ -235,16 +405,35 @@ cv4elasticNet <- function(regularizedSEM,
       }
     }
     
+    # to compute the out of sample fit, we also need a SEM with all individuals 
+    # if the test set
+    SEM_s <- lessSEM::SEMFromLavaan(
+      lavaanModel = regularizedSEM@inputArguments$lavaanModel,
+      whichPars = "start",
+      fit = FALSE, 
+      addMeans = modifyModel$addMeans,
+      activeSet = modifyModel$activeSet, 
+      dataSet = testSet, 
+      transformVariances = TRUE
+    )
+    
     for(p in 1:nrow(regularizedSEM_s@parameters)){
+      SEM_s <- lessSEM::setParameters(
+        SEM = SEM_s, 
+        labels =  
+          names(unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels])),
+        values = unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels]),
+        raw = FALSE)
+      cvfitsDetails[p, paste0("testSet",s)] <- SEM_s$fit()
       
-      for(i in which(subsets[,s])){
-        
-        cvfitsDetails[p, paste0("testSet",s)] <- cvfitsDetails[p, paste0("testSet",s)] + 
-          lessSEM:::individualMinus2LogLikelihood(par = unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels]), 
-                                               SEM = SEM, 
-                                               data = data[i,,drop = FALSE], 
-                                               raw = FALSE)
-      }
+      # for(i in which(subsets[,s])){
+      #   
+      #   cvfitsDetails[p, paste0("testSet",s)] <- cvfitsDetails[p, paste0("testSet",s)] + 
+      #     lessSEM:::individualMinus2LogLikelihood(par = unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels]), 
+      #                                             SEM = SEM, 
+      #                                             data = data[i,,drop = FALSE], 
+      #                                             raw = FALSE)
+      # }
       
     }
     
