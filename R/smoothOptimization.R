@@ -729,3 +729,23 @@ smoothElasticNet <- function(lavaanModel,
   return(results)
   
 }
+
+#' newTau
+#' 
+#' assign new value to parameter tau used by approximate optimization
+#' 
+#' @param regularizedSEM object fitted with approximate optimization
+#' @param tau new tau value
+newTau <- function(regularizedSEM, tau){
+  if(!is(regularizedSEM,"regularizedSEM")) stop("regularizedSEM must be of class regularizedSEM")
+  if(is.null(regularizedSEM@inputArguments$tau)) stop("Could not find tau in regularizedSEM. Did you use a smoothed penalty?")
+  
+  regularizedSEM@fits$nonZeroParameters <- 
+    length(regularizedSEM@parameterLabels) - 
+    apply(regularizedSEM@parameters[,
+                                    names(regularizedSEM@inputArguments$weights[regularizedSEM@parameterLabels] != 0)],
+          1,
+          function(x) sum(abs(x) < tau)
+    )
+  return(regularizedSEM)
+}
