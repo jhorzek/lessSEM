@@ -62,7 +62,8 @@ setMethod("coef", "regularizedSEM", function (object, criterion = NULL, lambda =
   if(is.null(lambda) && is.null(criterion)) return(object@parameters[object@parameters$alpha == alpha,])
   if(is.null(alpha) && is.null(criterion)) return(object@parameters[object@parameters$lambda == lambda,])
   if(!is.null(criterion) && criterion %in% c("AIC", "BIC")){
-    if(length(unique(object@parameters$alpha)) != 1 || unique(object@parameters$alpha) != 1) stop("Selection by criterion currently only supported for lasso type penalties.")
+    if(length(unique(object@fits$nonZeroParameters)) == 1) 
+      stop("Selection by criterion currently only supported for sparsity inducing penalties. Either none of your parameters was zeroed or the penalty used does not induce sparsity.")
     if(criterion == "AIC"){
       AICs <- AIC(object)
       bestAIC <- which(AICs$AIC == min(AICs$AIC))[1]

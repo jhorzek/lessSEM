@@ -54,6 +54,7 @@ public:
     tp.lambda = lambda_;
     tp.weights = weights;
     tp.alpha = alpha_;
+    lessSEM::tuningParametersEnet smoothTp = tp;
     
     lessSEM::proximalOperatorLasso proximalOperatorLasso_;
     lessSEM::penaltyLASSO penalty_;
@@ -79,6 +80,7 @@ public:
       penalty_,
       smoothPenalty_,
       tp,
+      smoothTp,
       controlIsta
     );
     

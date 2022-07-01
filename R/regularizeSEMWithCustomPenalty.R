@@ -227,7 +227,8 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
     "regM2LL"= rep(NA,nrow(tuningParameters)),
     "convergence" = rep(NA,nrow(tuningParameters))
   )
-  
+  fits <- cbind(tuningParameters,
+                fits)
   parameterEstimates <- as.data.frame(matrix(NA,nrow = nrow(tuningParameters), ncol = length(parameters)))
   colnames(parameterEstimates) <- names(parameters)
   parameterEstimates <- cbind(

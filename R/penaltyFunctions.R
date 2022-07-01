@@ -239,6 +239,26 @@ smoothElasticNetHessian <- function(parameters,
   return(lassoPart + ridgePart)
 }
 
+#### capped L1 ####
+#' smoothCappedL1Value
+#' 
+#' smoothed version of capped L1 penalty
+#' @param parameters vector with labeled parameter values
+#' @param tuningParameters list with field lambda (tuning parameter value)
+#' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
+#' @export
+smoothCappedL1Value <- function(parameters, 
+                             tuningParameters,
+                             penaltyFunctionArguments
+){
+  smoothAbs <- sqrt((parameters[penaltyFunctionArguments$regularizedParameterLabels ])^2 + 
+                      penaltyFunctionArguments$eps)
+  penalty <- sum(tuningParameters$lambda*
+                   ifelse(smoothAbs < tuningParameters$theta, smoothAbs, tuningParameters$theta)
+                 )
+  return(penalty)
+}
+
 #' genericGradientApproximiation
 #' 
 #' This function can be used to approximate the gradients of a generic penalty function with numDeriv

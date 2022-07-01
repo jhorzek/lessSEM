@@ -7,7 +7,8 @@
 // and ridge are defined.
 namespace lessSEM{
   
-  struct tuningParametersEnet{
+  class tuningParametersEnet{
+  public:
     double lambda;
     double alpha;
     arma::rowvec weights;

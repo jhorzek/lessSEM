@@ -4,7 +4,17 @@
 \alias{cv4elasticNet}
 \title{cv4elasticNet}
 \usage{
-cv4elasticNet(regularizedSEM, k, returnSubsetParameters = FALSE)
+cv4elasticNet(
+  regularizedSEM,
+  k,
+  dataSet = NULL,
+  scaleData = FALSE,
+  scalingFunction = function(dataSet, scalingArguments) scale(x = dataSet, center =
+    scalingArguments$center, scale = scalingArguments$scale),
+  scalingArguments = list(center = TRUE, scale = TRUE),
+  reweigh = FALSE,
+  returnSubsetParameters = FALSE
+)
 }
 \arguments{
 \item{regularizedSEM}{model of class regularizedSEM}
@@ -12,9 +22,24 @@ cv4elasticNet(regularizedSEM, k, returnSubsetParameters = FALSE)
 \item{k}{the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
 See ?lessSEM::aCV4regularizedSEM for an example}
 
-\item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
+\item{dataSet}{optional: Pass the full, unscaled data set to the function. 
+This is important if the data has to be scaled prior to the analysis. If scaling
+is performed on the full sample, this will result in dependencies between the 
+subsets created by the cross-validation. To prevent this, pass the full data and use scaleData = TRUE,
+the scalingFunction, and the scalingArguments}
 
-\item{control}{parameters passed to the glmnet optimizer. Note that only arguments of the inner iteration are used. See ?controlGlmnet for more details}
+\item{scaleData}{if set to TRUE, the subsets will be scaled using the scalingFunction}
+
+\item{scalingFunction}{this function is used to scale the subsets. It MUST take two arguments:
+first, the data set as matrix and second the scalingArguments. The latter can be anything you need
+for the scaling}
+
+\item{scalingArguments}{the second argument passed to scalingFunction. Can contain any number
+of arguments needed for the scaling}
+
+\item{reweigh}{this is used when weight are not all 1 or 0 (in adaptive lasso). See ?cv4adaptiveLasso for details}
+
+\item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
 }
 \description{
 Exact cross-validation for models of class regularizedSEM which have been fitted with elastic net penalty

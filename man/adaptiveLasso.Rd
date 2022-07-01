@@ -11,7 +11,8 @@ adaptiveLasso(
   lambdas = NULL,
   nLambdas = NULL,
   method = "ista",
-  control = controlIsta()
+  modifyModel = lessSEM::modifyModel(),
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{
@@ -36,6 +37,8 @@ It will then generate nLambda values between 0 and the computed lambda.}
 \item{method}{which optimizer should be used? Currently implemented are ista
 and glmnet. With ista, the control argument can be used to switch to related procedures
 (currently gist).}
+
+\item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet

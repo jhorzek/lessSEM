@@ -17,6 +17,25 @@ public:
 };
 
 // define some smooth penalties:
+template<class T>
+class noSmoothPenalty: public smoothPenalty<T>{
+public:
+  
+  double getValue(const arma::rowvec& parameterValues,
+                  const Rcpp::StringVector& parameterLabels,
+                  const T& tuningParameters) override
+                  {
+                    return(0.0);
+                  };
+  arma::rowvec getGradients(const arma::rowvec& parameterValues,
+                            const Rcpp::StringVector& parameterLabels,
+                            const T& tuningParameters) override
+                            {
+                              arma::rowvec gradients(parameterValues.n_elem);
+                              gradients.fill(0.0);
+                              return(gradients);
+                            };
+};
 
 struct tuningParametersSmoothElasticNet{
   double lambda;

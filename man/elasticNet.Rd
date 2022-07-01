@@ -11,6 +11,7 @@ elasticNet(
   nLambdas = NULL,
   alphas,
   method = "ista",
+  modifyModel = lessSEM::modifyModel(),
   control = controlIsta()
 )
 }
@@ -33,6 +34,8 @@ in \link{0,1}. 0 = ridge, 1 = lasso.}
 \item{method}{which optimizer should be used? Currently implemented are ista
 and glmnet. With ista, the control argument can be used to switch to related procedures
 (currently gist).}
+
+\item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}

@@ -130,6 +130,10 @@ RcppExport SEXP _rcpp_module_boot_glmnetEnet_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnet_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetEnetGeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaCappedL1_cpp();
+RcppExport SEXP _rcpp_module_boot_istaLSP_cpp();
+RcppExport SEXP _rcpp_module_boot_istaMcp_cpp();
+RcppExport SEXP _rcpp_module_boot_istaScad_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_lessSEM_innerGLMNET", (DL_FUNC) &_lessSEM_innerGLMNET, 10},
@@ -145,6 +149,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_istaEnet_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnet_cpp, 0},
     {"_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp, 0},
     {"_rcpp_module_boot_istaEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaCappedL1_cpp", (DL_FUNC) &_rcpp_module_boot_istaCappedL1_cpp, 0},
+    {"_rcpp_module_boot_istaLSP_cpp", (DL_FUNC) &_rcpp_module_boot_istaLSP_cpp, 0},
+    {"_rcpp_module_boot_istaMcp_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcp_cpp, 0},
+    {"_rcpp_module_boot_istaScad_cpp", (DL_FUNC) &_rcpp_module_boot_istaScad_cpp, 0},
     {NULL, NULL, 0}
 };
 
