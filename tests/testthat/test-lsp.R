@@ -24,9 +24,6 @@ test_that("testing lsp", {
   modelFit = cfa(modelSyntax, y, meanstructure = TRUE)
   
   lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
-  weights <- rep(0, length(lavaanParameters))
-  names(weights) <- names(lavaanParameters)
-  weights[paste0("f=~y",6:ncol(y))] <- 1
   lambdas = seq(0,.3,.1)
   thetas = seq(.1,.5,.1)
   
@@ -34,13 +31,13 @@ test_that("testing lsp", {
                   regularized = paste0("f=~y",6:ncol(y)), 
                   lambdas = lambdas,
                   thetas = thetas,
-                  control = controlIsta(convCritInner = 1)
+                  control = controlIsta()
   )
   
   testthat::expect_equal(
     all(abs(rsemIsta@fits$m2LL[rsemIsta@fits$lambda == 0] - 
               (-2*logLik(modelFit))
-    ) < 1e-5), 
+    ) < 1e-2), 
     TRUE)
   
   cv <- cv4lsp(regularizedSEM = rsemIsta, k = 5)
@@ -57,18 +54,18 @@ test_that("testing lsp", {
   
   #### Now we are ready to optimize! ####
   regsemApprox <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
-                                                       individualPenaltyFunction = smoothLsp,
+                                                       individualPenaltyFunction = smoothLspValue,
                                                        tuningParameters = tuningParameters,
                                                        penaltyFunctionArguments = penaltyFunctionArguments)
   for(th in rsemIsta@fits$theta){
     for(la in rsemIsta@fits$lambda){
       
       testthat::expect_equal(
-        round(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th & 
+        abs(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th & 
                                       rsemIsta@fits$lambda == la] -
                 regsemApprox@fits$regM2LL[regsemApprox@fits$theta == th & 
                                             regsemApprox@fits$lambda == la]
-        )==0,TRUE)
+        ) < 2,TRUE)
       testthat::expect_equal(
         all(
           abs(
@@ -76,7 +73,7 @@ test_that("testing lsp", {
                                   rsemIsta@fits$lambda == la,rsemIsta@parameterLabels]-
               regsemApprox@parameters[regsemApprox@fits$theta == th &
                                         regsemApprox@fits$lambda == la,rsemIsta@parameterLabels]
-          ) < .01
+          ) < .1
         ),
         TRUE
       )

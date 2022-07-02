@@ -22,20 +22,19 @@ public:
 
 inline double mcpPenalty(const double par, 
                          const double lambda_p,
-                         const double theta) {
+                         const double theta_p) {
   
   double absPar = std::abs(par);
   
-  if(absPar <= (lambda_p * theta)){
-    
+  if(absPar <= (lambda_p * theta_p)){
     return(
-      lambda_p * absPar - std::pow( par, 2 ) / (2*theta)
+      lambda_p * absPar - std::pow( par, 2 ) / (2.0 * theta_p)
     );
     
-  }else if(absPar > (lambda_p * theta)){
+  }else if(absPar > (lambda_p * theta_p)){
     
     return(
-    theta * std::pow(lambda_p, 2) / 2.0
+      theta_p * std::pow(lambda_p, 2) / 2.0
     );
     
   }else{

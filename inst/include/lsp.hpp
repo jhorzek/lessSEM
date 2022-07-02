@@ -21,6 +21,18 @@ public:
   arma::rowvec weights;
 };
 
+inline double lspPenalty(const double par, 
+                         const double lambda,
+                         const double theta) {
+  
+  return(
+    lambda * 
+      std::log(1.0 + std::abs(par) / theta)
+  );
+  
+}
+
+
 class proximalOperatorLSP: public proximalOperator<tuningParametersLSP>{
   
 public:
@@ -37,7 +49,7 @@ public:
     arma::rowvec parameters_kp1(parameterValues.n_elem);
     parameters_kp1.fill(arma::datum::nan);
     
-    double x, lambda_p, theta_p, abs_u_k;
+    double x, abs_u_k;
     Rcpp::String parameterLabel;
     std::vector<double> C(3, 0.0);
     std::vector<double> xVec(3, 0.0);
@@ -46,29 +58,36 @@ public:
     
     for(int p = 0; p < parameterValues.n_elem; p ++)
     {
-      lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
-      theta_p = tuningParameters.weights.at(p) * tuningParameters.theta;
+      if(tuningParameters.weights.at(p) == 0.0) 
+      {
+        // unregularized parameter
+        parameters_kp1.at(p) = u_k.at(p);
+        continue;
+      }
       
       abs_u_k = std::abs(u_k.at(p));
-      
+
       tempValue = std::pow(L,2) * 
-        std::pow(abs_u_k - theta_p, 2) -
-        4.0*L*(lambda_p - L*abs_u_k*theta_p);
+        std::pow(abs_u_k - tuningParameters.theta, 2) -
+        4.0*L*(tuningParameters.lambda - L*abs_u_k*tuningParameters.theta);
       
       if(tempValue >= 0){
         C.at(1) = std::max(
-          (L*(abs_u_k - theta_p) + std::sqrt(tempValue)) / (2*L), 
-             0.0);
+          (L*(abs_u_k - tuningParameters.theta) + std::sqrt(tempValue)) / (2*L), 
+          0.0);
         C.at(2) = std::max(
-          (L*(abs_u_k - theta_p) - std::sqrt(tempValue)) / (2*L),
-             0.0);
+          (L*(abs_u_k - tuningParameters.theta) - std::sqrt(tempValue)) / (2*L),
+          0.0);
         
         for(int c = 0; c < 3; c++){
           
-          xVec.at(c) = .5*std::pow(C.at(c) - u_k.at(p), 2) + 
-            (lambda_p/L)*std::log(1.0 + C.at(c)/theta_p);
+          xVec.at(c) = .5*std::pow(C.at(c) - abs_u_k, 2) +
+            (1.0/L)*
+            tuningParameters.lambda * 
+            std::log(1.0 + C.at(c) / tuningParameters.theta);
           
         }
+        
         x = C.at(std::distance(std::begin(xVec), 
                                std::min_element(xVec.begin(), xVec.end())));
         
@@ -102,8 +121,12 @@ public:
     
     for(int p = 0; p < parameterValues.n_elem; p ++){
       
-      penalty += tuningParameters.weights.at(p) * tuningParameters.lambda * 
-        std::log(1.0 + std::abs(parameterValues.at(p)) / tuningParameters.weights.at(p) * tuningParameters.theta);
+      // check if parameter is regularized
+      if(tuningParameters.weights.at(p) == 0.0 ) continue;
+      
+      penalty += lspPenalty(parameterValues.at(p),
+                            tuningParameters.lambda,
+                            tuningParameters.theta);
     }
     
     return penalty;
