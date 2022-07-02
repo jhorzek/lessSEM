@@ -259,6 +259,91 @@ smoothCappedL1Value <- function(parameters,
   return(penalty)
 }
 
+#### SCAD ####
+#' smoothScadValue
+#' 
+#' smoothed version of scad penalty
+#' @param parameters vector with labeled parameter values
+#' @param tuningParameters list with field lambda (tuning parameter value)
+#' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
+#' @export
+smoothScadValue <- function(parameters, 
+                                tuningParameters,
+                                penaltyFunctionArguments
+){
+  smoothAbs <- sqrt((parameters[penaltyFunctionArguments$regularizedParameterLabels ])^2 + 
+                      penaltyFunctionArguments$eps)
+  
+  penalty <- 0
+  
+  for(p in 1:length(smoothAbs)){
+    
+    if(smoothAbs[p] <= tuningParameters$lambda){
+      
+      penalty <- penalty + tuningParameters$lambda * smoothAbs[p]
+      
+    }else if((tuningParameters$lambda < smoothAbs[p]) &&
+             (smoothAbs[p] <= tuningParameters$lambda * tuningParameters$theta)
+             ){
+      
+      penalty <- penalty + (- smoothAbs[p]^2 + 
+                              2 * tuningParameters$theta * tuningParameters$lambda * 
+                              smoothAbs[p] - 
+                              tuningParameters$lambda^2) /(
+                                2*(tuningParameters$theta-1)
+                              ) 
+      
+    }else if(smoothAbs[p] > tuningParameters$lambda * tuningParameters$theta){
+      
+      penalty <- penalty + .5*(tuningParameters$theta + 1) * tuningParameters$lambda^2 
+        
+    }else{
+      stop("impossible scad value")
+    }
+    
+  }
+  
+  return(penalty)
+}
+
+#### MCP ####
+#' smoothMcpValue
+#' 
+#' smoothed version of mcp penalty
+#' @param parameters vector with labeled parameter values
+#' @param tuningParameters list with field lambda (tuning parameter value)
+#' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
+#' @export
+smoothMcpValue <- function(parameters, 
+                            tuningParameters,
+                            penaltyFunctionArguments
+){
+  smoothAbs <- sqrt((parameters[penaltyFunctionArguments$regularizedParameterLabels ])^2 + 
+                      penaltyFunctionArguments$eps)
+  
+  penalty <- 0
+  
+  for(p in 1:length(smoothAbs)){
+    
+    if(smoothAbs[p] <= (tuningParameters$theta * tuningParameters$lambda)){
+      
+      penalty <- penalty + tuningParameters$lambda * smoothAbs[p] -
+        .5*(1/tuningParameters$theta)*smoothAbs[p]^2 
+      
+    }else if(smoothAbs[p] > (tuningParameters$theta * tuningParameters$lambda)
+    ){
+      
+      penalty <- penalty + .5*(tuningParameters$lambda^2)*tuningParameters$theta
+      
+    }else{
+      stop("impossible mcp value")
+    }
+    
+  }
+  
+  return(penalty)
+}
+
 #' genericGradientApproximiation
 #' 
 #' This function can be used to approximate the gradients of a generic penalty function with numDeriv

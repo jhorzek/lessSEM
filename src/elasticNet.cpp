@@ -49,11 +49,11 @@ public:
     
     SEMFitFramework SEMFF(SEM_);
     
-    int N = SEMFF.SEM.rawData.n_rows;
+    int sampleSize = SEMFF.SEM.rawData.n_rows;
     
     lessSEM::tuningParametersEnet tp;
     tp.alpha = alpha_;
-    tp.lambda = lambda_*N;
+    tp.lambda = lambda_;
     tp.weights = weights;
     lessSEM::tuningParametersEnet smoothTp = tp;
     
@@ -67,10 +67,11 @@ public:
       accelerate,
       maxIterOut,
       maxIterIn,
-      breakOuter*N,
+      breakOuter,
       convCritInner,
       sigma,
       stepSizeInh,
+      sampleSize,
       verbose
     };
     

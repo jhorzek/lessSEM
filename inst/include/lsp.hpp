@@ -37,7 +37,7 @@ public:
     arma::rowvec parameters_kp1(parameterValues.n_elem);
     parameters_kp1.fill(arma::datum::nan);
     
-    double x, lambda_i, abs_u_k;
+    double x, lambda_p, theta_p, abs_u_k;
     Rcpp::String parameterLabel;
     std::vector<double> C(3, 0.0);
     std::vector<double> xVec(3, 0.0);
@@ -46,26 +46,27 @@ public:
     
     for(int p = 0; p < parameterValues.n_elem; p ++)
     {
-      lambda_i = tuningParameters.weights.at(p) * tuningParameters.lambda;
+      lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
+      theta_p = tuningParameters.weights.at(p) * tuningParameters.theta;
       
       abs_u_k = std::abs(u_k.at(p));
       
       tempValue = std::pow(L,2) * 
-        std::pow(abs_u_k - tuningParameters.theta, 2) -
-        4.0*L*(lambda_i - L*abs_u_k*tuningParameters.theta);
+        std::pow(abs_u_k - theta_p, 2) -
+        4.0*L*(lambda_p - L*abs_u_k*theta_p);
       
       if(tempValue >= 0){
         C.at(1) = std::max(
-          (L*(abs_u_k - tuningParameters.theta) + std::sqrt(tempValue)) / (2*L), 
+          (L*(abs_u_k - theta_p) + std::sqrt(tempValue)) / (2*L), 
              0.0);
         C.at(2) = std::max(
-          (L*(abs_u_k - tuningParameters.theta) - std::sqrt(tempValue)) / (2*L),
+          (L*(abs_u_k - theta_p) - std::sqrt(tempValue)) / (2*L),
              0.0);
         
         for(int c = 0; c < 3; c++){
           
-          xVec.at(c) = .5*std::pow(C.at(c) - abs_u_k, 2) + 
-            (lambda_i/L)*std::log(1.0 + C.at(c)/tuningParameters.theta);
+          xVec.at(c) = .5*std::pow(C.at(c) - u_k.at(p), 2) + 
+            (lambda_p/L)*std::log(1.0 + C.at(c)/theta_p);
           
         }
         x = C.at(std::distance(std::begin(xVec), 
@@ -102,7 +103,7 @@ public:
     for(int p = 0; p < parameterValues.n_elem; p ++){
       
       penalty += tuningParameters.weights.at(p) * tuningParameters.lambda * 
-        std::log(1.0 + std::abs(parameterValues.at(p)) / tuningParameters.theta);
+        std::log(1.0 + std::abs(parameterValues.at(p)) / tuningParameters.weights.at(p) * tuningParameters.theta);
     }
     
     return penalty;

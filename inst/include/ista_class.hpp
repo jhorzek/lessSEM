@@ -74,6 +74,7 @@ struct control{
   // barzilaiBorwein uses the Barzilai-Borwein procedure
   // stochasticBarzilaiBorwein uses the Barzilai-Borwein procedure, but sometimes
   // resets the step size; this can help when the optimizer is caught in a bad spot.
+  const int sampleSize; // can be used to scale the fitting function down
   const int verbose; // if set to a value > 0, the fit every verbose iterations
   // is printed. If set to -99 you will get the debug output which is horribly
   // convoluted
@@ -118,9 +119,9 @@ inline lessSEM::fitResults ista(
   arma::mat quadr, parchTimeGrad;
   
   // prepare fit elements
-  double fit_k = model_.fit(startingValues, parameterLabels) +
+  double fit_k = (1.0/control_.sampleSize)*model_.fit(startingValues, parameterLabels) +
     smoothPenalty_.getValue(parameters_k, parameterLabels, smoothTuningParameters), // ridge penalty part
-    fit_kMinus1 = model_.fit(startingValues, parameterLabels) +
+    fit_kMinus1 = (1.0/control_.sampleSize)*model_.fit(startingValues, parameterLabels) +
       smoothPenalty_.getValue(parameters_kMinus1, parameterLabels, smoothTuningParameters), // ridge penalty part,
       penalty_k = 0.0;
   double penalizedFit_k, penalizedFit_kMinus1;
@@ -142,12 +143,12 @@ inline lessSEM::fitResults ista(
   // prepare gradient elements 
   // NOTE: We combine the gradients of the smooth functions (the log-Likelihood)
   // of the model and the smooth penalty function (e.g., ridge)
-  gradients_k = model_.gradients(parameters_k, parameterLabels) +
+  gradients_k = (1.0/control_.sampleSize)*model_.gradients(parameters_k, parameterLabels) +
     smoothPenalty_.getGradients(parameters_k, parameterLabels, smoothTuningParameters); // ridge part
-  gradients_kMinus1 = model_.gradients(parameters_kMinus1, parameterLabels) +
+  gradients_kMinus1 = (1.0/control_.sampleSize)*model_.gradients(parameters_kMinus1, parameterLabels) +
     smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, smoothTuningParameters); // ridge part
   // for acceleration:
-  gradient_y_k = model_.gradients(parameters_kMinus1, parameterLabels) +
+  gradient_y_k = (1.0/control_.sampleSize)*model_.gradients(parameters_kMinus1, parameterLabels) +
     smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, smoothTuningParameters); // ridge part
   
   // breaking flags
@@ -175,11 +176,11 @@ inline lessSEM::fitResults ista(
         
         y_k = parameters_kMinus1 + 
           (inner_iteration/(inner_iteration+3))*(parameters_kMinus1-parameters_kMinus2);
-        gradient_y_k = model_.gradients(y_k, 
-                                        parameterLabels) + 
-                                          smoothPenalty_.getGradients(y_k, 
-                                                                      parameterLabels, 
-                                                                      smoothTuningParameters);
+        gradient_y_k = (1.0/control_.sampleSize)*model_.gradients(y_k, 
+                        parameterLabels) + 
+                          smoothPenalty_.getGradients(y_k, 
+                                                      parameterLabels, 
+                                                      smoothTuningParameters);
         parameters_k = proximalOperator_.getParameters(
           y_k,
           gradient_y_k,
@@ -203,7 +204,7 @@ inline lessSEM::fitResults ista(
       
       // compute new fit; if this fit is non-finite, we can jump to the next
       // iteration
-      fit_k = model_.fit(parameters_k, parameterLabels) +
+      fit_k = (1.0/control_.sampleSize)*model_.fit(parameters_k, parameterLabels) +
         smoothPenalty_.getValue(parameters_k, parameterLabels, smoothTuningParameters); // ridge penalty part
       if(control_.verbose == -99)
       {
@@ -281,11 +282,11 @@ inline lessSEM::fitResults ista(
       
       if(breakInner) {
         // compute gradients at new position
-        gradients_k = model_.gradients(parameters_k, 
-                                       parameterLabels) + 
-                                         smoothPenalty_.getGradients(parameters_k, 
-                                                                     parameterLabels, 
-                                                                     smoothTuningParameters); // ridge part
+        gradients_k = (1.0/control_.sampleSize)*model_.gradients(parameters_k, 
+                       parameterLabels) + 
+                         smoothPenalty_.getGradients(parameters_k, 
+                                                     parameterLabels, 
+                                                     smoothTuningParameters); // ridge part
         
         if(control_.verbose == -99){
           Rcpp::Rcout << "gradients_k\n: " << gradients_k << std::endl;
@@ -317,11 +318,11 @@ inline lessSEM::fitResults ista(
       continue;
     }
     
-    gradients_k = model_.gradients(parameters_k, 
-                                   parameterLabels) + 
-                                     smoothPenalty_.getGradients(parameters_k, 
-                                                                 parameterLabels, 
-                                                                 smoothTuningParameters); // ridge part
+    gradients_k = (1.0/control_.sampleSize)*model_.gradients(parameters_k, 
+                   parameterLabels) + 
+                     smoothPenalty_.getGradients(parameters_k, 
+                                                 parameterLabels, 
+                                                 smoothTuningParameters); // ridge part
     
     fits.at(outer_iteration+1) = penalizedFit_k;
     
@@ -379,8 +380,8 @@ inline lessSEM::fitResults ista(
   fitResults fitResults_;
   
   fitResults_.convergence = breakOuter;
-  fitResults_.fit = penalizedFit_k;
-  fitResults_.fits = fits;
+  fitResults_.fit = control_.sampleSize*penalizedFit_k; // rescale for -2log-Likelihood
+  fitResults_.fits = control_.sampleSize*fits; // rescale for -2log-Likelihood
   fitResults_.parameterValues = parameters_k;
   
   return(fitResults_);

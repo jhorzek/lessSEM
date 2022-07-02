@@ -70,6 +70,7 @@ public:
       convCritInner,
       sigma,
       stepSizeInh,
+      1,
       verbose
     };
     

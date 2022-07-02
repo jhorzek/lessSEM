@@ -29,3 +29,11 @@ computeImpliedMeans <- function(Fmatrix, Amatrix, Mvector) {
     .Call(`_lessSEM_computeImpliedMeans`, Fmatrix, Amatrix, Mvector)
 }
 
+mcpPenalty_C <- function(par, lambda_p, theta) {
+    .Call(`_lessSEM_mcpPenalty_C`, par, lambda_p, theta)
+}
+
+scadPenalty_C <- function(par, lambda_p, theta) {
+    .Call(`_lessSEM_scadPenalty_C`, par, lambda_p, theta)
+}
+

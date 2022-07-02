@@ -4,6 +4,14 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+// [[Rcpp::export]]
+double scadPenalty_C(const double par,
+                     const double lambda_p,
+                     const double theta){
+  return(lessSEM::scadPenalty(par, lambda_p, theta));
+}
+
+
 class istaScad{
   public:
     
@@ -47,11 +55,11 @@ class istaScad{
     
     SEMFitFramework SEMFF(SEM_);
     
-    int N = SEMFF.SEM.rawData.n_rows;
+    int sampleSize = SEMFF.SEM.rawData.n_rows;
     
     lessSEM::tuningParametersScad tp;
     tp.theta = theta_;
-    tp.lambda = lambda_*N;
+    tp.lambda = lambda_;
     tp.weights = weights;
     
     // we won't need the smooth penalty; but we need to specify some tuning 
@@ -69,10 +77,11 @@ class istaScad{
       accelerate,
       maxIterOut,
       maxIterIn,
-      breakOuter*N,
+      breakOuter,
       convCritInner,
       sigma,
       stepSizeInh,
+      sampleSize,
       verbose
     };
     

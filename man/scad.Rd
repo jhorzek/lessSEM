@@ -77,7 +77,7 @@ regsem <- scad(
   # names of the regularized parameters:
   regularized = paste0("l", 6:15),
   lambdas = seq(0,1,.1),
-  thetas = seq(0.1,1,.1), 
+  thetas = seq(2.1,3,.1), 
   control = controlIsta(convCritInner = 0)) # this convergence criterion
 # seems to work better here
 

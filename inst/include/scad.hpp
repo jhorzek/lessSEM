@@ -20,6 +20,40 @@ public:
   arma::rowvec weights;
 };
 
+inline double scadPenalty(const double par, 
+                          const double lambda_p,
+                          const double theta){
+  
+  double absPar = std::abs(par);
+  
+  if(absPar <= lambda_p){
+    
+    return(lambda_p * absPar);
+    
+  }else if((lambda_p < absPar) & (absPar <= lambda_p * theta)){
+    
+    return(
+      (-std::pow(par, 2) + 
+        2.0 * theta * lambda_p * absPar - std::pow(lambda_p,2))/
+          (2.0 * (theta - 1.0))
+    );
+    
+  }else if( absPar >  (lambda_p * theta)){
+    
+    return( ( theta + 1 ) * std::pow(lambda_p,2) / 2.0);
+    
+  }else{
+    
+    Rcpp::stop("Error while evaluating scad");
+    
+  }
+  
+  // the following should never be called:
+  return 0.0;
+  
+}
+
+
 class proximalOperatorScad: public proximalOperator<tuningParametersScad>{
   
 public:
@@ -36,7 +70,7 @@ public:
     arma::rowvec parameters_kp1(parameterValues.n_elem);
     parameters_kp1.fill(arma::datum::nan);
     
-    double lambda_i, abs_u_k;
+    double lambda_p, theta_p, abs_u_k;
     Rcpp::String parameterLabel;
     std::vector<double> x(3, 0.0);
     std::vector<double> h(3, 0.0);
@@ -45,64 +79,50 @@ public:
     for(int p = 0; p < parameterValues.n_elem; p ++)
     {
       
-      lambda_i = tuningParameters.weights.at(p) * tuningParameters.lambda;
+      lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
+      theta_p = tuningParameters.weights.at(p) * tuningParameters.theta;
       
       sign = (u_k.at(p) > 0);
       if(u_k.at(p) < 0) sign = -1;
       
       abs_u_k = std::abs(u_k.at(p));
       
-      x.at(0) = sign*std::min(lambda_i, std::max(
+      x.at(0) = sign*std::min(lambda_p, std::max(
         0.0,
-        abs_u_k - lambda_i/L
+        abs_u_k - lambda_p/L
       ));
       
-      x.at(1) = sign*std::min(tuningParameters.theta * lambda_i, 
+      x.at(1) = sign*std::min(theta_p * lambda_p, 
            std::max(
-             lambda_i,
-             (L * abs_u_k*(tuningParameters.theta - 1) - 
-               tuningParameters.theta*lambda_i)/
-                 ( L*(tuningParameters.theta - 2.0) )
+             lambda_p,
+             (L * abs_u_k*(theta_p - 1) - 
+               theta_p*lambda_p)/
+                 ( L*(theta_p - 2.0) )
            )
       );
       
-      x.at(2) = sign*std::max(tuningParameters.theta * lambda_i, 
+      x.at(2) = sign*std::max(theta_p * lambda_p, 
            abs_u_k);
       
-      double absPar, penalty;
+      double penalty;
       for(int c = 0; c < 3; c++){
         
         // scad penalty value:
-        absPar = std::abs(x.at(c));
+        penalty = scadPenalty(
+          x.at(c), 
+          lambda_p,
+          theta_p
+        );
         
-        if(absPar <= lambda_i){
-          
-          penalty = lambda_i * absPar;
-          
-        }else if((lambda_i < absPar) & (absPar <= lambda_i * tuningParameters.theta)){
-          
-          penalty = (-std::pow(x.at(c), 2) + 
-            2.0 * tuningParameters.theta * lambda_i * absPar - std::pow(lambda_i,2))/
-              (2.0 * (tuningParameters.theta - 1.0));
-          
-        }else if( absPar >  (lambda_i * tuningParameters.theta)){
-          
-          penalty = ( tuningParameters.theta + 1 ) * std::pow(lambda_i, 2) / 2.0;
-          
-        }else{
-          Rcpp::stop("Error while evaluating scad");
-        }
+        h.at(c) = .5*std::pow(x.at(c) - u_k.at(p), 2) // distance between parameters
+          + (1.0/L) * penalty; // add penalty value of scad:
         
-        
-        h.at(c) = .5*std::pow(x.at(c) - abs_u_k, 2) // distance between parameters
-        + (lambda_i/L) * penalty; // add penalty value of scad:
-          
       }
-      
       parameters_kp1.at(p) = x.at(std::distance(std::begin(h), 
                                   std::min_element(h.begin(), h.end())));
       
     }
+    
     return parameters_kp1;
   }
   
@@ -117,28 +137,16 @@ public:
   override {
     
     double penalty = 0.0;
-    double absPar, lambda_p;
+    double absPar, lambda_p, theta_p;
     for(int p = 0; p < parameterValues.n_elem; p ++){
       
-      absPar = std::abs(parameterValues.at(p));
       lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
-      if(absPar <= lambda_p){
-        
-        penalty += lambda_p * absPar;
-        
-      }else if(lambda_p < absPar <= lambda_p * tuningParameters.theta){
-        
-        penalty += (-std::pow(parameterValues.at(p), 2) + 
-          2.0 * tuningParameters.theta * lambda_p * absPar - std::pow(lambda_p,2))/
-          (2.0 * (tuningParameters.theta - 1.0));
-        
-      }else if( absPar >  lambda_p * tuningParameters.theta){
-        
-        penalty += ( tuningParameters.theta + 1 ) * std::pow(lambda_p,2) / 2.0;
-        
-      }else{
-        Rcpp::stop("Error while evaluating scad");
-      }
+      theta_p = tuningParameters.weights.at(p) * tuningParameters.theta;
+      
+      // scad penalty value:
+      penalty += scadPenalty(parameterValues.at(p), 
+                             lambda_p,
+                             tuningParameters.theta);
       
     }
     

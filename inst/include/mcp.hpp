@@ -12,155 +12,185 @@
 // The implementation directly follows that of Gong et al. (2013)
 
 namespace lessSEM{
+
+class tuningParametersMcp{
+public:
+  double lambda;
+  double theta;
+  arma::rowvec weights;
+};
+
+inline double mcpPenalty(const double par, 
+                         const double lambda_p,
+                         const double theta) {
   
-  class tuningParametersMcp{
-    public:
-      double lambda;
-    double theta;
-    arma::rowvec weights;
-  };
+  double absPar = std::abs(par);
   
-  class proximalOperatorMcp: public proximalOperator<tuningParametersMcp>{
+  if(absPar <= (lambda_p * theta)){
     
-    public:
+    return(
+      lambda_p * absPar - std::pow( par, 2 ) / (2*theta)
+    );
+    
+  }else if(absPar > (lambda_p * theta)){
+    
+    return(
+    theta * std::pow(lambda_p, 2) / 2.0
+    );
+    
+  }else{
+    Rcpp::stop("Error while evaluating mcp");
+  }
+  // The following should never be called:
+  return 0.0;
+}
+
+class proximalOperatorMcp: public proximalOperator<tuningParametersMcp>{
+  
+public:
+  
+  arma::rowvec getParameters(const arma::rowvec& parameterValues, 
+                             const arma::rowvec& gradientValues, 
+                             const Rcpp::StringVector& parameterLabels,
+                             const double L,
+                             const tuningParametersMcp& tuningParameters) 
+  override {
+    
+    arma::rowvec u_k = parameterValues - gradientValues/L;
+    
+    arma::rowvec parameters_kp1(parameterValues.n_elem);
+    parameters_kp1.fill(arma::datum::nan);
+    
+    double lambda_p, theta_p, abs_u_k;
+    Rcpp::String parameterLabel;
+    std::vector<double> C(3, 0.0);
+    std::vector<double> f(3, 0.0);
+    std::vector<double> x(2, 0.0);
+    std::vector<double> h(2, 0.0);
+    int sign, nval;
+    
+    for(int p = 0; p < parameterValues.n_elem; p ++)
+    {
+#ifdef printit
+      Rcpp::Rcout << "####### u_k for " << parameterLabels.at(p) << " = " <<  u_k.at(p) << "#######" << std::endl;
+#endif
+      lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
+      theta_p = tuningParameters.weights.at(p) * tuningParameters.theta;
       
-      arma::rowvec getParameters(const arma::rowvec& parameterValues, 
-                                 const arma::rowvec& gradientValues, 
-                                 const Rcpp::StringVector& parameterLabels,
-                                 const double L,
-                                 const tuningParametersMcp& tuningParameters) 
-    override {
+      sign = (u_k.at(p) > 0);
+      if(u_k.at(p) < 0) sign = -1;
       
-      arma::rowvec u_k = parameterValues - gradientValues/L;
+      abs_u_k = std::abs(u_k.at(p));
       
-      arma::rowvec parameters_kp1(parameterValues.n_elem);
-      parameters_kp1.fill(arma::datum::nan);
+      // compute z first; needed for x_1
+      C.at(1) = lambda_p * theta_p;
       
-      double lambda_i, abs_u_k, h_1, h_2;
-      Rcpp::String parameterLabel;
-      std::vector<double> C(3, 0.0);
-      std::vector<double> f(3, 0.0);
-      std::vector<double> x(2, 0.0);
-      int sign, nval;
-      
-      for(int p = 0; p < parameterValues.n_elem; p ++)
-      {
-        
-        lambda_i = tuningParameters.weights.at(p) * tuningParameters.lambda;
-        
-        sign = (u_k.at(p) > 0);
-        if(u_k.at(p) < 0) sign = -1;
-        
-        abs_u_k = std::abs(u_k.at(p));
-        
-        // compute z first; needed for x_1
-        C.at(1) = lambda_i * tuningParameters.theta;
-        
-        if(tuningParameters.theta - 1 != 0){
+      if(theta_p - 1 != 0){
         
         C.at(2) = std::min(
-          lambda_i * tuningParameters.theta,
+          C.at(1),
           std::max(
             0.0,
-            (tuningParameters.theta *(L*abs_u_k - lambda_i)) / 
-              (L * (tuningParameters.theta - 1.0))
+            (theta_p *(L*abs_u_k - lambda_p)) / 
+              (L * (theta_p - 1.0))
           )
         );
-          
-          nval = 3;
-          
-        }else{
-          
-          // only the first two values are valid otherwise
-          nval = 2;
-          
-        }
         
-        for(int c = 0; c < nval; c++){
-          f.at(c) = .5*std::pow( C.at(c) - abs_u_k , 2) + 
-            (lambda_i/L) * C.at(c) - std::pow(C.at(c),2)/(2*tuningParameters.theta);
-        }
+        nval = 3;
         
-        x.at(0) = sign * C.at(std::distance(std::begin(f), 
-                           std::min_element(f.begin(), f.end() - (3-nval))));
+      }else{
         
-        x.at(1) = sign * std::max( tuningParameters.theta * lambda_i, abs_u_k );
-        
-        double absPar, penalty;
-        for(int c = 0; c < 2; c++){
-          
-          absPar = std::abs(x.at(c));
-          
-          if(absPar <= lambda_i * tuningParameters.theta){
-            
-            penalty = lambda_i * absPar - std::pow( x.at(c), 2 ) / (2*tuningParameters.theta);
-            
-          }else if(absPar > lambda_i * tuningParameters.theta){
-            
-            penalty = tuningParameters.theta * std::pow(lambda_i, 2) / 2.0;
-            
-          }else{
-            Rcpp::stop("Error while evaluating mcp");
-          }
-          
-          f.at(c) = .5*std::pow( x.at(c) - abs_u_k , 2) + 
-            (lambda_i/L) * penalty;
-        }
-        
-        h_1 = .5*std::pow(x.at(0) - abs_u_k, 2) + 
-          (lambda_i/L)*std::log(1.0 + x.at(0)/tuningParameters.theta);
-        h_2 = .5*std::pow(x.at(1) - abs_u_k, 2) + 
-          (lambda_i/L)*std::log(1.0 + x.at(1)/tuningParameters.theta);
-        
-        if( h_1 <= h_2 ){
-          
-          parameters_kp1.at(p) = x.at(0);
-          
-        }else{
-          
-          parameters_kp1.at(p) = x.at(1);
-          
-        }
-        
-      }
-      return parameters_kp1;
-    }
-    
-  };
-  
-  class penaltyMcp: public penalty<tuningParametersMcp>{
-    public:
-      
-      double getValue(const arma::rowvec& parameterValues, 
-                      const Rcpp::StringVector& parameterLabels,
-                      const tuningParametersMcp& tuningParameters) 
-    override {
-      
-      double penalty = 0.0;
-      double absPar, lambda_p;
-      for(int p = 0; p < parameterValues.n_elem; p ++){
-        
-        absPar = std::abs(parameterValues.at(p));
-        lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
-        
-        if(absPar <= lambda_p * tuningParameters.theta){
-          
-          penalty += lambda_p * absPar - std::pow( parameterValues.at(p), 2 ) / (2*tuningParameters.theta);
-          
-        }else if(absPar > lambda_p * tuningParameters.theta){
-          
-          penalty += tuningParameters.theta * std::pow(lambda_p, 2) / 2.0;
-          
-        }else{
-          Rcpp::stop("Error while evaluating mcp");
-        }
+        // only the first two values are valid otherwise
+        nval = 2;
         
       }
       
-      return penalty;
+#ifdef printit
+      Rcpp::Rcout << " nval = " << nval << "\n";
+#endif
+      for(int w = 0; w < nval; w++){
+        f.at(w) = .5*std::pow( C.at(w) - abs_u_k , 2) + 
+          (lambda_p/L) * C.at(w) - 
+          std::pow(C.at(w),2)/(2*theta_p);
+#ifdef printit
+        Rcpp::Rcout << " w = " << w << ", C.at(w) = " << C.at(w)  << ", f = " << f.at(w) << "\n";
+#endif
+      }
+#ifdef printit 
+      Rcpp::Rcout << " min is achieved with C " << C.at(std::distance(std::begin(f), 
+                                              std::min_element(f.begin(), f.end() - (3-nval)))) << "\n";
+#endif
+      x.at(0) = sign * C.at(std::distance(std::begin(f), 
+                            std::min_element(f.begin(), f.end() - (3-nval))));
+      
+      x.at(1) = sign * std::max( theta_p * lambda_p, abs_u_k );
+#ifdef printit 
+      Rcpp::Rcout << "x_1 = " <<  x.at(0) << ", x_2 = " <<  x.at(1) << std::endl;
+#endif     
+      double absPar, penalty;
+      for(int c = 0; c < 2; c++){
+        
+        // mcp penalty value:
+        penalty = mcpPenalty(x.at(c), 
+                              lambda_p,
+                              theta_p);
+        
+#ifdef printit 
+        Rcpp::Rcout << "penalty = " <<  penalty << std::endl;
+#endif 
+        h.at(c) = .5*std::pow( x.at(c) - u_k.at(p) , 2) + 
+          (1.0/L) * penalty;
+#ifdef printit 
+        Rcpp::Rcout << " c = " << c << ", h = " << h.at(c) << "\n";   
+#endif 
+      }
+      
+      if( h.at(0) <= h.at(1) ){
+#ifdef printit 
+        Rcpp::Rcout << " h.at(0) -> " << x.at(0) << "\n";
+#endif 
+        parameters_kp1.at(p) = x.at(0);
+        
+      }else{
+#ifdef printit 
+        Rcpp::Rcout << " h.at(1) -> " << x.at(1) << "\n";
+#endif 
+        parameters_kp1.at(p) = x.at(1);
+        
+      }
+      
+    }
+    return parameters_kp1;
+  }
+  
+};
+
+class penaltyMcp: public penalty<tuningParametersMcp>{
+public:
+  
+  double getValue(const arma::rowvec& parameterValues, 
+                  const Rcpp::StringVector& parameterLabels,
+                  const tuningParametersMcp& tuningParameters) 
+  override {
+    
+    double penalty = 0.0;
+    double absPar, lambda_p, theta_p;
+    for(int p = 0; p < parameterValues.n_elem; p ++){
+      
+      lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
+      theta_p = tuningParameters.weights.at(p) * tuningParameters.theta;
+      
+      // mcp penalty value:
+      penalty += mcpPenalty(parameterValues.at(p), 
+                             lambda_p,
+                             theta_p);
+      
     }
     
-  };
+    return penalty;
+  }
   
+};
+
 }
 #endif

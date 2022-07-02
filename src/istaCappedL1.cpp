@@ -50,17 +50,17 @@ class istaCappedL1{
     
     SEMFitFramework SEMFF(SEM_);
     
-    int N = SEMFF.SEM.rawData.n_rows;
+    int sampleSize = SEMFF.SEM.rawData.n_rows;
     
     lessSEM::tuningParametersCappedL1 tp;
     tp.theta = theta_;
     tp.alpha = alpha_;
-    tp.lambda = lambda_*N;
+    tp.lambda = lambda_;
     tp.weights = weights;
     
     lessSEM::tuningParametersEnet smoothTp;
     smoothTp.alpha = alpha_;
-    smoothTp.lambda = lambda_*N;
+    smoothTp.lambda = lambda_;
     smoothTp.weights = weights;
     
     lessSEM::proximalOperatorCappedL1 proximalOperatorCappedL1_;
@@ -73,10 +73,11 @@ class istaCappedL1{
       accelerate,
       maxIterOut,
       maxIterIn,
-      breakOuter*N,
+      breakOuter,
       convCritInner,
       sigma,
       stepSizeInh,
+      sampleSize,
       verbose
     };
     
