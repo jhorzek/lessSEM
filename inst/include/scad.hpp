@@ -21,26 +21,26 @@ public:
 };
 
 inline double scadPenalty(const double par, 
-                          const double lambda_p,
+                          const double lambda,
                           const double theta){
   
   double absPar = std::abs(par);
   
-  if(absPar <= lambda_p){
+  if(absPar <= lambda){
     
-    return(lambda_p * absPar);
+    return(lambda * absPar);
     
-  }else if((lambda_p < absPar) & (absPar <= lambda_p * theta)){
+  }else if((lambda < absPar) & (absPar <= lambda * theta)){
     
     return(
       (-std::pow(par, 2) + 
-        2.0 * theta * lambda_p * absPar - std::pow(lambda_p,2))/
+        2.0 * theta * lambda * absPar - std::pow(lambda,2))/
           (2.0 * (theta - 1.0))
     );
     
-  }else if( absPar >  (lambda_p * theta)){
+  }else if( absPar >  (lambda * theta)){
     
-    return( ( theta + 1 ) * std::pow(lambda_p,2) / 2.0);
+    return( ( theta + 1 ) * std::pow(lambda,2) / 2.0);
     
   }else{
     
@@ -70,7 +70,7 @@ public:
     arma::rowvec parameters_kp1(parameterValues.n_elem);
     parameters_kp1.fill(arma::datum::nan);
     
-    double lambda_p, theta_p, abs_u_k;
+    double abs_u_k;
     Rcpp::String parameterLabel;
     std::vector<double> x(3, 0.0);
     std::vector<double> h(3, 0.0);
@@ -79,30 +79,40 @@ public:
     for(int p = 0; p < parameterValues.n_elem; p ++)
     {
       
-      lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
-      theta_p = tuningParameters.weights.at(p) * tuningParameters.theta;
+      if(tuningParameters.weights.at(p) == 0.0) 
+      {
+        // unregularized parameter
+        parameters_kp1.at(p) = u_k.at(p);
+        continue;
+      }
       
       sign = (u_k.at(p) > 0);
       if(u_k.at(p) < 0) sign = -1;
       
       abs_u_k = std::abs(u_k.at(p));
       
-      x.at(0) = sign*std::min(lambda_p, std::max(
-        0.0,
-        abs_u_k - lambda_p/L
-      ));
-      
-      x.at(1) = sign*std::min(theta_p * lambda_p, 
-           std::max(
-             lambda_p,
-             (L * abs_u_k*(theta_p - 1) - 
-               theta_p*lambda_p)/
-                 ( L*(theta_p - 2.0) )
-           )
+      x.at(0) = sign * std::min(
+        tuningParameters.lambda, 
+        std::max(
+          0.0,
+          abs_u_k - tuningParameters.lambda/L
+        )
       );
       
-      x.at(2) = sign*std::max(theta_p * lambda_p, 
-           abs_u_k);
+      x.at(1) = sign * std::min(
+        tuningParameters.theta * tuningParameters.lambda, 
+        std::max(
+          tuningParameters.lambda,
+          (L * abs_u_k*(tuningParameters.theta - 1.0) - 
+            tuningParameters.theta*tuningParameters.lambda)/
+              ( L*(tuningParameters.theta - 2.0) )
+        )
+      );
+      
+      x.at(2) = sign * std::max(
+        tuningParameters.theta * tuningParameters.lambda, 
+        abs_u_k
+      );
       
       double penalty;
       for(int c = 0; c < 3; c++){
@@ -110,16 +120,26 @@ public:
         // scad penalty value:
         penalty = scadPenalty(
           x.at(c), 
-          lambda_p,
-          theta_p
+          tuningParameters.lambda,
+          tuningParameters.theta
         );
         
-        h.at(c) = .5*std::pow(x.at(c) - u_k.at(p), 2) // distance between parameters
-          + (1.0/L) * penalty; // add penalty value of scad:
+        h.at(c) = .5 * std::pow(x.at(c) - u_k.at(p), 2) + // distance between parameters
+          (1.0/L) * penalty; // add penalty value of scad:
         
       }
+      
+      for(int c = 0; c < 3; c ++){
+        Rcpp::Rcout << "x.at("<<c<<") = " << x.at(c) << std::endl;
+        Rcpp::Rcout << "h.at("<<c<<") = " << h.at(c) << std::endl;
+      }
+
       parameters_kp1.at(p) = x.at(std::distance(std::begin(h), 
                                   std::min_element(h.begin(), h.end())));
+      
+      Rcpp::Rcout << "Selecting " << std::distance(std::begin(h), 
+                                         std::min_element(h.begin(), h.end()))
+        << ", x = " << parameters_kp1.at(p) << std::endl;
       
     }
     
@@ -137,15 +157,14 @@ public:
   override {
     
     double penalty = 0.0;
-    double absPar, lambda_p, theta_p;
+    double absPar;
     for(int p = 0; p < parameterValues.n_elem; p ++){
-      
-      lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
-      theta_p = tuningParameters.weights.at(p) * tuningParameters.theta;
+      // unregularized values:
+      if(tuningParameters.weights.at(p) == 0.0) continue;
       
       // scad penalty value:
       penalty += scadPenalty(parameterValues.at(p), 
-                             lambda_p,
+                             tuningParameters.lambda,
                              tuningParameters.theta);
       
     }

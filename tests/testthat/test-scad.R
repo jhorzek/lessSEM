@@ -24,15 +24,15 @@ test_that("testing scad", {
   
   #### Regularize ####
   lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
-  lambdas <- seq(0,.1,length.out = 3)
-  thetas <- seq(2.1,3,length.out = 3)
+  lambdas <- seq(0,.5,length.out = 5)
+  thetas <- seq(2.1,3,length.out = 5)
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   
   rsemIsta <- scad(lavaanModel = modelFit, 
                    regularized = regularizedLavaan, lambdas = lambdas, 
                    thetas = thetas, 
                    control = controlIsta(verbose = 0, 
-                                         convCritInner = 0,
+                                         convCritInner = 0, breakOuter = 1e-15,
                                          startingValues = "est")
   )
   
@@ -107,6 +107,15 @@ test_that("testing scad", {
                        regsemApprox@fits$regM2LL[regsemApprox@fits$theta == th & 
                                                    regsemApprox@fits$lambda == la]
                      ,3)))
+      
+      print(
+        max(abs(
+          rsemIsta@parameters[rsemIsta@fits$theta == th &
+                                rsemIsta@fits$lambda == la,rsemIsta@parameterLabels]-
+            regsemApprox@parameters[regsemApprox@fits$theta == th &
+                                      regsemApprox@fits$lambda == la,rsemIsta@parameterLabels]
+        ))
+      )
     }
   }
   
