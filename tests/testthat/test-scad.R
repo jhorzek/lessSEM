@@ -24,21 +24,26 @@ test_that("testing scad", {
   
   #### Regularize ####
   lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
-  lambdas <- seq(0,.5,length.out = 5)
-  thetas <- seq(2.1,3,length.out = 5)
+  lambdas <- 0.13
+  thetas <- 3.1
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   
   rsemIsta <- scad(lavaanModel = modelFit, 
                    regularized = regularizedLavaan, lambdas = lambdas, 
                    thetas = thetas, 
                    control = controlIsta(verbose = 0, 
-                                         convCritInner = 0, breakOuter = 1e-15,
-                                         startingValues = "est")
+                                         convCritInner = 1, breakOuter = 1e-15,
+                                         startingValues = "start")
   )
   
   coef(rsemIsta)
   coef(rsemIsta, criterion = "AIC")
   coef(rsemIsta, criterion = "BIC")
+  
+  testthat::expect_equal(
+    all(round(rsemIsta@fits$m2LL[rsemIsta@fits$lambda == 0] -
+            -2*logLik(modelFit)
+    ,4)==0),TRUE)
   
   # compare to smoothed version
   tuningParameters <- expand.grid(theta = thetas,
@@ -46,7 +51,7 @@ test_that("testing scad", {
   )
   
   penaltyFunctionArguments <- list(
-    eps = 0,
+    eps = 1e-10,
     regularizedParameterLabels = paste0("f=~y",6:ncol(y))
   )
   

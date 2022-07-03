@@ -11,6 +11,13 @@
 // Conference on Machine Learning, 28(2)(2), 37–45.
 // The implementation directly follows that of Gong et al. (2013)
 
+// The original software package is by Gong et al. is no longer online, but the files
+// are also in the package published by 
+// Cheng, W., Zhou, H., & Guo, Z. (2022). A Second Order Algorithm for 
+// MCP Regularized Optimization. IEEE Access, 10, 42802–42813. 
+// https://doi.org/10.1109/ACCESS.2020.3020834
+
+
 namespace lessSEM{
 
 class tuningParametersScad{
@@ -40,7 +47,7 @@ inline double scadPenalty(const double par,
     
   }else if( absPar >  (lambda * theta)){
     
-    return( ( theta + 1 ) * std::pow(lambda,2) / 2.0);
+    return( (( theta + 1.0 ) * std::pow(lambda,2)) / 2.0);
     
   }else{
     
@@ -75,6 +82,7 @@ public:
     std::vector<double> x(3, 0.0);
     std::vector<double> h(3, 0.0);
     int sign;
+    double thetaXlambda = tuningParameters.theta*tuningParameters.lambda;
     
     for(int p = 0; p < parameterValues.n_elem; p ++)
     {
@@ -100,17 +108,17 @@ public:
       );
       
       x.at(1) = sign * std::min(
-        tuningParameters.theta * tuningParameters.lambda, 
+        thetaXlambda, 
         std::max(
           tuningParameters.lambda,
-          (L * abs_u_k*(tuningParameters.theta - 1.0) - 
-            tuningParameters.theta*tuningParameters.lambda)/
+          ((L * abs_u_k*(tuningParameters.theta - 1.0)) - 
+            thetaXlambda)/
               ( L*(tuningParameters.theta - 2.0) )
         )
       );
       
       x.at(2) = sign * std::max(
-        tuningParameters.theta * tuningParameters.lambda, 
+        thetaXlambda, 
         abs_u_k
       );
       
@@ -126,7 +134,12 @@ public:
         
         h.at(c) = .5 * std::pow(x.at(c) - u_k.at(p), 2) + // distance between parameters
           (1.0/L) * penalty; // add penalty value of scad:
+        Rcpp::Rcout << "x.at("<<c<<") = " << x.at(c) << std::endl;
+        Rcpp::Rcout << "L = " << L << std::endl;
+        Rcpp::Rcout << ".5 * std::pow(x.at(c) - u_k.at(p), 2) = "<< .5 * std::pow(x.at(c) - u_k.at(p), 2) << std::endl;
+        Rcpp::Rcout << "(1.0/L) * penalty = "<< (1.0/L) * penalty << std::endl;
         
+        Rcpp::Rcout << "h.at("<<c<<") = " << h.at(c) << std::endl;
       }
       
       for(int c = 0; c < 3; c ++){

@@ -226,6 +226,11 @@ scad <- function(lavaanModel,
     lambda <- tuningGrid$lambda[it]
     theta <- tuningGrid$theta[it]
     
+    if(lambda == 0){
+      #reset the starting values; carry over can result in worse estimates
+      rawParameters <- startingValues
+    }
+    
     result <- try(regularizedModel$optimize(rawParameters,
                                             SEM,
                                             theta,

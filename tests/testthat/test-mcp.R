@@ -118,7 +118,8 @@ test_that("testing mcp", {
   )
   
   rsemIsta@fits$m2LL - (-2*logLik(modelFit))
-  rsemIsta@fits$regM2LL
+  rsemIsta@fits$regM2LL-
+    rsemIsta@fits$m2LL
   rsemIsta@fits$m2LL
   fits$m2LL
   
@@ -145,7 +146,12 @@ test_that("testing mcp", {
   
   regsemApprox@fits$regM2LL
   rsemIsta@fits$regM2LL
-  rsemIsta@fits$regM2LL
+  
+  regsemApprox@fits$m2LL
+  rsemIsta@fits$m2LL
+  
+  regsemApprox@fits$regM2LL - regsemApprox@fits$m2LL
+  rsemIsta@fits$regM2LL - rsemIsta@fits$m2LL
   
   regsemApprox@fits$m2LL
   fits$m2LL
@@ -155,6 +161,29 @@ test_that("testing mcp", {
   pars <- unlist(regsemApprox@parameters[sel,
                                          regsemApprox@parameterLabels]
   )
+  regsemApprox@fits$m2LL[sel]
+  SEM <- SEMFromLavaan(lavaanModel = modelFit)
+  SEM$setParameters(names(pars), pars, FALSE)
+  SEM$fit()
+  
+  rsemIsta <- mcp(lavaanModel = modelFit, 
+                  regularized = regularizedLavaan, 
+                  thetas = thetas[1],
+                  lambdas = lambdas[2],
+                  control = controlIsta( 
+                    accelerate = 0,
+                    maxIterOut = 2,
+                    stepSizeInheritance = 0,
+                    #maxIterIn = 0,
+                    #startingValues = pars,
+                    convCritInner = 1,
+                    eta = 2.1,
+                    L0 = 10000,
+                    verbose = -99)
+  )
+  rsemIsta@fits
+  regsemApprox@fits[sel,]
+  
   weights <- rsemIsta@inputArguments$weights
   lambda <- lambdas[2]
   theta <- thetas[1]
@@ -163,7 +192,7 @@ test_that("testing mcp", {
                                                      lambda_p = weights[p]*lambda, 
                                                      theta = theta)
   pen
-  regsemApprox@fits$regM2LL[sel] - regsemApprox@fits$m2LL[sel]
+  (1/N)*(regsemApprox@fits$regM2LL[sel] - regsemApprox@fits$m2LL[sel])
   
   pen2 <- smoothMcpValue(parameters = pars, 
                          tuningParameters = data.frame(
@@ -173,10 +202,6 @@ test_that("testing mcp", {
                          penaltyFunctionArguments = penaltyFunctionArguments)
   
   pen2
-  fits$penalty[
-    lslxParameter$lambda == lambdas[2] &
-      lslxParameter$theta == thetas[1]
-  ]
   
   for(p in 1:length(pars)) pen2 <- pen + smoothMcpValue(parameters = pars[p], 
                                                         tuningParameters = data.frame(

@@ -21,20 +21,20 @@ public:
 };
 
 inline double mcpPenalty(const double par, 
-                         const double lambda_p,
-                         const double theta_p) {
+                         const double lambda,
+                         const double theta) {
   
   double absPar = std::abs(par);
   
-  if(absPar <= (lambda_p * theta_p)){
+  if(absPar <= (lambda * theta)){
     return(
-      lambda_p * absPar - std::pow( par, 2 ) / (2.0 * theta_p)
+      lambda * absPar - std::pow( par, 2 ) / (2.0 * theta)
     );
     
-  }else if(absPar > (lambda_p * theta_p)){
+  }else if(absPar > (lambda * theta)){
     
     return(
-      theta_p * std::pow(lambda_p, 2) / 2.0
+      theta * std::pow(lambda, 2) / 2.0
     );
     
   }else{
@@ -60,7 +60,7 @@ public:
     arma::rowvec parameters_kp1(parameterValues.n_elem);
     parameters_kp1.fill(arma::datum::nan);
     
-    double lambda_p, theta_p, abs_u_k;
+    double abs_u_k, z;
     Rcpp::String parameterLabel;
     std::vector<double> C(3, 0.0);
     std::vector<double> f(3, 0.0);
@@ -73,8 +73,6 @@ public:
 #ifdef printit
       Rcpp::Rcout << "####### u_k for " << parameterLabels.at(p) << " = " <<  u_k.at(p) << "#######" << std::endl;
 #endif
-      lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
-      theta_p = tuningParameters.weights.at(p) * tuningParameters.theta;
       
       sign = (u_k.at(p) > 0);
       if(u_k.at(p) < 0) sign = -1;
@@ -82,16 +80,16 @@ public:
       abs_u_k = std::abs(u_k.at(p));
       
       // compute z first; needed for x_1
-      C.at(1) = lambda_p * theta_p;
+      C.at(1) = tuningParameters.lambda * tuningParameters.theta;
       
-      if(theta_p - 1 != 0){
+      if(tuningParameters.theta - 1.0 != 0.0){
         
         C.at(2) = std::min(
-          C.at(1),
+          tuningParameters.lambda * tuningParameters.theta,
           std::max(
             0.0,
-            (theta_p *(L*abs_u_k - lambda_p)) / 
-              (L * (theta_p - 1.0))
+            (tuningParameters.theta *(L*abs_u_k - tuningParameters.lambda)) / 
+              (L * (tuningParameters.theta - 1.0))
           )
         );
         
@@ -108,9 +106,9 @@ public:
       Rcpp::Rcout << " nval = " << nval << "\n";
 #endif
       for(int w = 0; w < nval; w++){
-        f.at(w) = .5*std::pow( C.at(w) - abs_u_k , 2) + 
-          (lambda_p/L) * C.at(w) - 
-          std::pow(C.at(w),2)/(2*theta_p);
+        f.at(w) = .5*std::pow( C.at(w) - abs_u_k , 2.0) + 
+          (tuningParameters.lambda/L) * C.at(w) - 
+          std::pow(C.at(w),2.0)/(2.0*tuningParameters.theta);
 #ifdef printit
         Rcpp::Rcout << " w = " << w << ", C.at(w) = " << C.at(w)  << ", f = " << f.at(w) << "\n";
 #endif
@@ -119,20 +117,22 @@ public:
       Rcpp::Rcout << " min is achieved with C " << C.at(std::distance(std::begin(f), 
                                               std::min_element(f.begin(), f.end() - (3-nval)))) << "\n";
 #endif
-      x.at(0) = sign * C.at(std::distance(std::begin(f), 
-                            std::min_element(f.begin(), f.end() - (3-nval))));
+      z = C.at(std::distance(std::begin(f), 
+                             std::min_element(f.begin(), f.end() - (3-nval))));
+      x.at(0) = sign * z;
       
-      x.at(1) = sign * std::max( theta_p * lambda_p, abs_u_k );
+      x.at(1) = sign * std::max( tuningParameters.theta * tuningParameters.lambda, 
+           abs_u_k );
 #ifdef printit 
       Rcpp::Rcout << "x_1 = " <<  x.at(0) << ", x_2 = " <<  x.at(1) << std::endl;
 #endif     
       double absPar, penalty;
       for(int c = 0; c < 2; c++){
-        
+        Rcpp::Rcout << "x.at(c) = " <<  x.at(c) << std::endl;
         // mcp penalty value:
         penalty = mcpPenalty(x.at(c), 
-                              lambda_p,
-                              theta_p);
+                              tuningParameters.lambda,
+                              tuningParameters.theta);
         
 #ifdef printit 
         Rcpp::Rcout << "penalty = " <<  penalty << std::endl;
@@ -173,16 +173,16 @@ public:
   override {
     
     double penalty = 0.0;
-    double absPar, lambda_p, theta_p;
+    double absPar;
     for(int p = 0; p < parameterValues.n_elem; p ++){
       
-      lambda_p = tuningParameters.weights.at(p) * tuningParameters.lambda;
-      theta_p = tuningParameters.weights.at(p) * tuningParameters.theta;
+      // unregularized values:
+      if(tuningParameters.weights.at(p) == 0.0) continue;
       
-      // mcp penalty value:
+      // scad penalty value:
       penalty += mcpPenalty(parameterValues.at(p), 
-                             lambda_p,
-                             theta_p);
+                             tuningParameters.lambda,
+                             tuningParameters.theta);
       
     }
     

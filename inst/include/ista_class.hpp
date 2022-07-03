@@ -129,6 +129,15 @@ inline lessSEM::fitResults ista(
   
   double ridgePenalty = 0.0;
   
+  if(control_.verbose == -99) Rcpp::Rcout << "initial fit: " << 
+    (1.0/control_.sampleSize)*model_.fit(startingValues, parameterLabels) << std::endl;
+  
+  if(control_.verbose == -99) Rcpp::Rcout << "initial smooth penalty value: " << 
+    smoothPenalty_.getValue(parameters_kMinus1, parameterLabels, smoothTuningParameters) << std::endl;
+  
+  if(control_.verbose == -99) Rcpp::Rcout << "initial penalty value: " << 
+    penalty_.getValue(parameters_k, parameterLabels, tuningParameters) << std::endl;
+  
   penalizedFit_k = fit_k + 
     penalty_.getValue(parameters_k, parameterLabels, tuningParameters); // lasso penalty part
   
@@ -165,7 +174,8 @@ inline lessSEM::fitResults ista(
     for(int inner_iteration = 0; inner_iteration < control_.maxIterIn; inner_iteration ++){
       // inner iteration: reduce step size until the convergence criterion is met
       L_k = std::pow(control_.eta, inner_iteration)*L_kMinus1;
-      
+      if(control_.verbose == -99) Rcpp::Rcout << "inner_iteration : " << inner_iteration << std::endl;
+      if(control_.verbose == -99) Rcpp::Rcout << "std::pow(control_.eta, inner_iteration) = " << std::pow(control_.eta, inner_iteration) << std::endl;
       if(control_.verbose == -99) Rcpp::Rcout << "L_k : " << L_k << std::endl;
       
       if(control_.accelerate){
