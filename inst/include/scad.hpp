@@ -99,6 +99,8 @@ public:
       
       abs_u_k = std::abs(u_k.at(p));
       
+      // assume that |u| <= lambda is
+      
       x.at(0) = sign * std::min(
         tuningParameters.lambda, 
         std::max(
@@ -106,6 +108,11 @@ public:
           abs_u_k - tuningParameters.lambda/L
         )
       );
+      
+      h.at(0) = .5 * std::pow(x.at(0) - u_k.at(p), 2) + // distance between parameters
+        (tuningParameters.lambda/L) * std::abs(x.at(0));
+      
+      // assume that lambda <= |u| <= theta*lambda
       
       x.at(1) = sign * std::min(
         thetaXlambda, 
@@ -117,36 +124,24 @@ public:
         )
       );
       
+      h.at(1) = .5 * std::pow(x.at(1) - u_k.at(p), 2) + // distance between parameters
+        (-std::pow(x.at(1),2) + 
+        2.0 * tuningParameters.theta * 
+        (tuningParameters.lambda / L) * std::abs(x.at(1)) - 
+        std::pow( tuningParameters.lambda / L , 2 ) ) /
+          (2.0*(tuningParameters.theta - 1.0)) ;
+      
+      // assume that |u| >= lambda*theta
       x.at(2) = sign * std::max(
         thetaXlambda, 
         abs_u_k
       );
       
-      double penalty;
-      for(int c = 0; c < 3; c++){
-        
-        // scad penalty value:
-        penalty = scadPenalty(
-          x.at(c), 
-          tuningParameters.lambda,
-          tuningParameters.theta
-        );
-        
-        h.at(c) = .5 * std::pow(x.at(c) - u_k.at(p), 2) + // distance between parameters
-          (1.0/L) * penalty; // add penalty value of scad:
-        Rcpp::Rcout << "x.at("<<c<<") = " << x.at(c) << std::endl;
-        Rcpp::Rcout << "L = " << L << std::endl;
-        Rcpp::Rcout << ".5 * std::pow(x.at(c) - u_k.at(p), 2) = "<< .5 * std::pow(x.at(c) - u_k.at(p), 2) << std::endl;
-        Rcpp::Rcout << "(1.0/L) * penalty = "<< (1.0/L) * penalty << std::endl;
-        
-        Rcpp::Rcout << "h.at("<<c<<") = " << h.at(c) << std::endl;
-      }
+      h.at(2) = .5 * std::pow(x.at(2) - u_k.at(p), 2) + // distance between parameters
+        ((tuningParameters.theta + 1.0) * 
+        std::pow(tuningParameters.lambda, 2)) /
+          (2.0*std::pow(L,2)) ;
       
-      for(int c = 0; c < 3; c ++){
-        Rcpp::Rcout << "x.at("<<c<<") = " << x.at(c) << std::endl;
-        Rcpp::Rcout << "h.at("<<c<<") = " << h.at(c) << std::endl;
-      }
-
       parameters_kp1.at(p) = x.at(std::distance(std::begin(h), 
                                   std::min_element(h.begin(), h.end())));
       
