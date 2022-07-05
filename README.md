@@ -7,28 +7,46 @@ The objectives of lessSEM are:
 1. to compare exact and approximate optimization of regularized SEM
 2. to provide optimizers for other SEM packages which can be used with an interface similar to optim
 
-lessSEM also provides experimental functions for approximate cross-validation and approximate influence functions. 
+**Warning**: The package is relatively new and you may find more stable implementations of regularized SEM in the R packages [regsem](https://github.com/Rjacobucci/regsem) and [lslx](https://github.com/psyphh/lslx). Finally, you may want to check out the julia package [StructuralEquationModels.jl](https://github.com/StructuralEquationModels/StructuralEquationModels.jl). They provide a more flexible implementation of (regularized) SEM with even more penalty functions.
 
-**Warning**: The package is relatively new and you may find more stable implementations of regularized SEM in the R packages [regsem](https://github.com/Rjacobucci/regsem) and [lslx](https://github.com/psyphh/lslx). 
+The following penalty functions are currently implemented in lessSEM:
 
-The following features are implemented in lessSEM:
+$$
+\begin{array}{l|llll}
+\text{penalty} & \text{function} & \text{smooth version} & \text{optimizer} & \text{reference}\\
+\hline
+\text{ridge} & p( x_j) = \lambda x_j^2 & \lambda x_j^2 & \text{bfgs, glmnet, ista} & \text{(Hoerl \& Kennard, 1970)}\\
+\text{lasso} & p( x_j) = \lambda| x_j| & \lambda\sqrt{ x_j^2 + \varepsilon}; \varepsilon > 0 & \text{bfgs, glmnet, ista} & \text{(Tibshirani, 1996)}\\
+\text{adaptiveLasso} & p( x_j) = \frac{1}{w_j}\lambda| x_j| & \frac{1}{w_j}\lambda\sqrt{ x_j^2 + \varepsilon}; \varepsilon > 0 & \text{bfgs, glmnet, ista} & \text{(Zou, 2006)}\\
+\text{elasticNet} & p( x_j) = \alpha\lambda| x_j| + (1-\alpha)\lambda x_j^2 & \alpha\lambda\sqrt{ x_j^2 + \varepsilon} + (1-\alpha)\lambda x_j^2; \varepsilon > 0 & \text{bfgs, glmnet, ista} & \text{(Zou \& Hastie, 2005)}\\
+\text{cappedL1} & p( x_j) = \lambda \min(| x_j|, \theta); \theta > 0 & -- & \text{ista} & \text{(Zhang, 2010)}\\
+\text{lsp} & p( x_j) = \lambda \log(1 + |x_j|\theta); \theta > 0 & -- & \text{ista} & \text{(Candès et al., 2008)} \\
+\text{scad} & p( x_j) = \begin{cases}
+\lambda |x_j| & \text{if } |x_j| \leq \theta\\
+\frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)} & \text{if } \lambda < |x_j| \leq \lambda\theta \\
+(\theta + 1) \lambda^2/2 & \text{if } |x_j| \geq \theta\lambda\\
+\end{cases}; \theta > 2 & -- & \text{ista} & \text{(Fan \& Li, 2001)} \\
+\text{mcp} & p( x_j) = 
+\begin{cases}
+\lambda |x_j| - x_j^2/(2\theta) & \text{if } |x_j| \leq \theta\lambda\\
+\theta\lambda^2/2 & \text{if } |x_j| > \lambda\theta
+\end{cases}; \theta > 0 & -- & \text{ista} & \text{(Zhang, 2010)}
+\end{array}
+$$
 
-- regularization of SEM with ridge, lasso, adaptive lasso, and elastic net (see ?lessSEM::ridge, ?lessSEM::lasso, ?lessSEM::adaptiveLasso, ?lessSEM::elasticNet)
-- automatic selection of $\lambda$ values for lasso and adaptive lasso (see ?lessSEM::lasso, ?lessSEM::adaptiveLasso)
-- approximate optimization of SEM with custom penalty functions using a BFGS optimizer or Rsolnp (see ?lessSEM::smoothLasso, ?lessSEM::smoothAdaptiveLasso, ?lessSEM::smoothElasticNet, ?lessSEM::regularizeSEMWithCustomPenaltyRsolnp)
-- exact cross-validation for regularized models (see ?lessSEM::cv4ridge, ?lessSEM::cv4lasso, ?lessSEM::cv4adaptiveLasso, ?lessSEM::cv4elasticNet)
-- UNDER CONSTRUCTION: approximate cross-validation (see ?lessSEM::acv4elasticNet and ?lessSEM::aCV4regularizedSEMWithCustomPenalty)
-- UNDER CONSTRUCTION: approximate influence functions for regularized SEM (see ?lessSEM::ai4elasticNet)
+"penalty" refers to the name of the function call in the lessSEM package (e.g., lasso is called with the lasso() function). Smooth functions are called with smoothLasso, smoothAdaptiveLasso, and smoothElasticNet. All general purpose implementations of the functions are called with prefix "gp" (e.g., gpLasso, gpScad, ...). More information can be found in the documentation of these functions. There, we also provide some examples. 
+
+Note that the tuning parameter $\lambda$ can be automatically determined in case of lasso and adaptiveLasso, but not for the other penalties. See ?lasso for more details.
 
 Currently, lessSEM has the following optimizers:
 
-- (variants of) iterative shrinkage and thresholding 
-- glmnet
+- (variants of) iterative shrinkage and thresholding (e.g., Beck & Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013)
+- glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
 
 These are also available for other packages. There are two ways to implement them:
 
 1. using the R interface: (e.g., ?lessSEM::gpLasso, ?lessSEM::gpAdaptiveLasso, ?lessSEM::gpElasticNet). This interface is similar to the optim optimizers in R
-2. All optimizers are implemented as C++ header-only files in lessSEM. Thus, they can be accessed from other packages using C++. The documentation for this approach will follow soon.
+2. All optimizers are implemented as C++ header-only files in lessSEM. Thus, they can be accessed from other packages using C++. The interface is similar to that of the [ensmallen](https://ensmallen.org/) library. The documentation for this approach will follow soon.
 
 # Installation
 
@@ -107,16 +125,43 @@ If you want to install lessSEM from GitHub, use the following commands in R:
 
 # References
 
-* Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
-* Jacobucci, R., Grimm, K. J., Brandmaier, A. M., Serang, S., Kievit, R. A., & Scharf, F. (2019). regsem: Regularized Structural Equation Modeling. https://CRAN.R-project.org/package=regsem
+## R - Packages / Software
+
+* [regsem](https://github.com/Rjacobucci/regsem): Jacobucci, R. (2017). regsem: Regularized Structural Equation Modeling. ArXiv:1703.08489 [Stat]. http://arxiv.org/abs/1703.08489
+* [lslx](https://github.com/psyphh/lslx): Huang, P.-H. (2020). lslx: Semi-confirmatory structural equation modeling via penalized likelihood. Journal of Statistical Software, 93(7). https://doi.org/10.18637/jss.v093.i07
+* [fasta](https://cran.r-project.org/web/packages/fasta/index.html): Another implementation of the fista algorithm (Beck & Teboulle, 2009)
+* [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M., Prabhu, R. G., Basak, S., Lou, Z., & Sanderson, C. (2031). The ensmallen library for ﬂexible numerical optimization. Journal of Machine Learning Research, 22, 1–6.
+
+## Regularized Structural Equation Modeling
+
 * Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
-* Huang, P.-H. (2020). lslx: Semi-Confirmatory Structural Equation Modeling via Penalized Likelihood. Journal of Statistical Software, 93(7). https://doi.org/10.18637/jss.v093.i07
+* Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+
+## Penalty Functions
+
+* Candès, E. J., Wakin, M. B., & Boyd, S. P. (2008). Enhancing Sparsity by Reweighted l1 Minimization. Journal of Fourier Analysis and Applications, 14(5–6), 877–905. https://doi.org/10.1007/s00041-008-9045-x
+* Fan, J., & Li, R. (2001). Variable selection via nonconcave penalized likelihood and its oracle properties. Journal of the American Statistical Association, 96(456), 1348–1360. https://doi.org/10.1198/016214501753382273
+* Hoerl, A. E., & Kennard, R. W. (1970). Ridge Regression: Biased Estimation for Nonorthogonal Problems. Technometrics, 12(1), 55–67. https://doi.org/10.1080/00401706.1970.10488634
+* Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. Journal of the Royal Statistical Society. Series B (Methodological), 58(1), 267–288.
+* Zhang, C.-H. (2010). Nearly unbiased variable selection under minimax concave penalty. The Annals of Statistics, 38(2), 894–942. https://doi.org/10.1214/09-AOS729
+* Zhang, T. (2010). Analysis of Multi-stage Convex Relaxation for Sparse Regularization. Journal of Machine Learning Research, 11, 1081–1107.
+* Zou, H. (2006). The adaptive lasso and its oracle properties. Journal of the American Statistical Association, 101(476), 1418–1429. https://doi.org/10.1198/016214506000000735
+* Zou, H., & Hastie, T. (2005). Regularization and variable selection via the elastic net. Journal of the Royal Statistical Society: Series B, 67(2), 301–320. https://doi.org/10.1111/j.1467-9868.2005.00503.x
+
+## Optimizer
+
+### GLMNET 
+
+* Friedman, J., Hastie, T., & Tibshirani, R. (2010). Regularization paths for generalized linear models via coordinate descent. Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
+* Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
+
+### Variants of ISTA
+
+* Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1), 183–202. https://doi.org/10.1137/080716542
+* Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). A general iterative shrinkage and thresholding algorithm for non-convex regularized optimization problems. Proceedings of the 30th International Conference on Machine Learning, 28(2)(2), 37–45.
+* Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and Trends in Optimization, 1(3), 123–231.
+
 
 # Important Notes
 
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
-AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
