@@ -1,6 +1,6 @@
 # lessSEM
 
-lessSEM (**l**essSEM **es**timates **s**parse **SEM**) is an R package which provides regularized structural equation modeling (regularized SEM) with non-smooth penalty functions (e.g., lasso) building on lavaan. lessSEM is heavily inspired by the [regsem](https://github.com/Rjacobucci/regsem) package which provides similar functionality.
+lessSEM (**l**essSEM **es**timates **s**parse **SEM**) is an R package which provides regularized structural equation modeling (regularized SEM) with non-smooth penalty functions (e.g., lasso) building on [lavaan](https://github.com/yrosseel/lavaan). lessSEM is heavily inspired by the [regsem](https://github.com/Rjacobucci/regsem) package which provides similar functionality.
 
 The objectives of lessSEM are:
 
@@ -13,19 +13,19 @@ The following penalty functions are currently implemented in lessSEM:
 
 ![](inst/penalty_functions.png)
 
-"penalty" refers to the name of the function call in the lessSEM package (e.g., lasso is called with the lasso() function). Smooth functions are called with smoothLasso, smoothAdaptiveLasso, and smoothElasticNet. All general purpose implementations of the functions are called with prefix "gp" (e.g., gpLasso, gpScad, ...). More information can be found in the documentation of these functions. There, we also provide some examples. 
-
-Note that the tuning parameter $\lambda$ can be automatically determined in case of lasso and adaptiveLasso, but not for the other penalties. See ?lasso for more details.
+"penalty" refers to the name of the function call in the lessSEM package (e.g., lasso is called with the lasso() function). Smooth functions are called with smoothLasso, smoothAdaptiveLasso, and smoothElasticNet. These are only implemented for the comparison of exact and approximate optimization and should not be used in most cases. The best model can be selected with the AIC, BIC, or cross-validaiton. Cross-validation functions are called cv4penalty (e.g., cv4lasso, cv4elasticNet, cv4scad).
 
 Currently, lessSEM has the following optimizers:
 
-- (variants of) iterative shrinkage and thresholding (e.g., Beck & Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013)
+- (variants of) iterative shrinkage and thresholding (e.g., Beck & Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013); optimization of cappedL1, lsp, scad, and mcp is based on Gong et al. (2013)
 - glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
 
-These are also available for other packages. There are two ways to implement them:
+**These are also available for other packages.** There are two ways to implement them:
 
-1. using the R interface: (e.g., ?lessSEM::gpLasso, ?lessSEM::gpAdaptiveLasso, ?lessSEM::gpElasticNet). This interface is similar to the optim optimizers in R
+1. using the R interface: All general purpose implementations of the functions are called with prefix "gp" (e.g., gpLasso, gpScad, ...). More information and examples can be found in the documentation of these functions (e.g., ?lessSEM::gpLasso, ?lessSEM::gpAdaptiveLasso, ?lessSEM::gpElasticNet). The interface is similar to the optim optimizers in R. 
 2. All optimizers are implemented as C++ header-only files in lessSEM. Thus, they can be accessed from other packages using C++. The interface is similar to that of the [ensmallen](https://ensmallen.org/) library. The documentation for this approach will follow soon.
+
+Similar to [regsem](https://github.com/Rjacobucci/regsem), lessSEM is specified using a model built in [lavaan](https://github.com/yrosseel/lavaan). lessSEM can handle missing data by means of full information maximum likelihood estimation and allows for equality constraints on parameters. However, [regsem](https://github.com/Rjacobucci/regsem) and [lslx](https://github.com/psyphh/lslx) offer even more features, such as multi-group penalties.
 
 # Installation
 

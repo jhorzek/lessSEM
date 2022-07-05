@@ -1,5 +1,6 @@
 setClass(Class = "regularizedSEM",
          representation = representation(
+           penalty = "character",
            parameters="data.frame",
            fits="data.frame", 
            parameterLabels = "character",
@@ -15,7 +16,7 @@ setClass(Class = "regularizedSEM",
 #' @export
 setMethod("show", "regularizedSEM", function (object) {
   #modelName <-deparse(substitute(object)) # get the name of the object
-  cat(paste0("#### Model of class regularizedSEM with ",object@inputArguments$penalty, " penalty ####\n\n"))
+  cat(paste0("#### Model of class regularizedSEM with ",object@penalty, " penalty ####\n\n"))
   cat("regularized parameters: ")
   cat(paste0(object@regularized, collapse = ", "))
   cat("\n\n")

@@ -80,205 +80,20 @@ lsp <- function(lavaanModel,
                 thetas,
                 modifyModel = lessSEM::modifyModel(),
                 control = controlIsta()){
-  inputArguments <- as.list(environment())
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
-  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                 transformVariances = TRUE,
-                                 whichPars = "est",
-                                 addMeans = modifyModel$addMeans, 
-                                 activeSet = modifyModel$activeSet,
-                                 dataSet = modifyModel$dataSet)
   
-  weights <- lessSEM::getParameters(SEM, raw = FALSE)
-  weights[] <- 0
-  weights[regularized] <- 1
-  if(! all(regularized %in% names(weights))) stop(paste0(
-    "You specified that the following parameters should be regularized:\n",
-    paste0(regularized, collapse = ", "), 
-    ". Not all of these parameters could be found in the model.\n",
-    "The model has the following parameters:\n",
-    names(weights)
-  ))
-  inputArguments$weights <- weights
-  
-  if(!is(control, "controlIsta")) 
-    stop("control must be of class controlIsta. See ?controlIsta.")
-  
-  if(!is(lavaanModel, "lavaan"))
-    stop("lavaanModel must be of class lavaan")
-  
-  if(lavaanModel@Options$estimator != "ML") 
-    stop("lavaanModel must be fit with ml estimator.")
-  
-  rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
-  if(is(rawData, "try-error")) 
-    stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
-  N <- nrow(rawData)
-  
-  ### initialize model ####
-  startingValues <- control$startingValues
-  if(any(startingValues == "est")){
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                   transformVariances = TRUE,
-                                   whichPars = "est",
-                                   addMeans = modifyModel$addMeans, 
-                                   activeSet = modifyModel$activeSet,
-                                   dataSet = modifyModel$dataSet)
-  }else if(any(startingValues == "start")){
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                   transformVariances = TRUE,
-                                   whichPars = "start",
-                                   addMeans = modifyModel$addMeans, 
-                                   activeSet = modifyModel$activeSet,
-                                   dataSet = modifyModel$dataSet)
-  }else if(is.numeric(startingValues)){
-    
-    if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel))))
-      stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                   transformVariances = TRUE,
-                                   whichPars = "start", 
-                                   fit = FALSE,
-                                   addMeans = modifyModel$addMeans, 
-                                   activeSet = modifyModel$activeSet,
-                                   dataSet = modifyModel$dataSet)
-    SEM <- lessSEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(lessSEM:::fit(SEM))
-    if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
-      stop("Infeasible starting values.")
-    
-  }else{
-    stop("Invalid startingValues passed to elasticNet. See e.g., ?controlIsta for more information.")
-  }
-  
-  # get parameters
-  startingValues <- lessSEM:::getParameters(SEM, raw = TRUE)
-  rawParameters <- lessSEM:::getParameters(SEM, raw = TRUE)
-  
-  # make sure that the weights are in the correct order
-  if(is.null(names(weights))) stop("weights must have the same names as the parameters")
-  if(length(weights) != length(rawParameters)) stop("weights must be of the same length as the parameter vector.")
-  if(any(!is.numeric(weights))) stop("weights must be numeric")
-  weights <- weights[names(rawParameters)]
-  
-  #### prepare regularized model object ####
-  
-  controlIntern <- list(
-    L0 = control$L0,
-    eta = control$eta,
-    accelerate = control$accelerate,
-    maxIterOut = control$maxIterOut,
-    maxIterIn = control$maxIterIn,
-    breakOuter = N*control$breakOuter,
-    convCritInner = control$convCritInner,
-    sigma = control$sigma,
-    stepSizeInheritance = control$stepSizeInheritance,
-    verbose = control$verbose
+  result <- lessSEM::regularizeSEMInternal(lavaanModel = lavaanModel, 
+                                 penalty = "lsp", 
+                                 weights = regularized,
+                                 tuningParameters = expand.grid(lambda = lambdas, 
+                                                                theta = thetas), 
+                                 method = "ista", 
+                                 modifyModel = modifyModel, 
+                                 control = control
   )
   
-  regularizedModel <- new(istaLSP, 
-                          weights, 
-                          controlIntern)
-  
-  #### define tuning parameters and prepare fit results ####
-  
-  tuningGrid <- expand.grid(
-    "theta" = thetas,
-    "lambda" = lambdas)
-  
-  fits <- data.frame(
-    tuningGrid,
-    "m2LL" = NA,
-    "regM2LL"= NA,
-    "nonZeroParameters" = NA,
-    "convergence" = NA
-  )
-  
-  parameterEstimates <- as.data.frame(matrix(NA,
-                                             nrow = nrow(tuningGrid), 
-                                             ncol = length(rawParameters)))
-  colnames(parameterEstimates) <- names(rawParameters)
-  parameterEstimates <- cbind(
-    tuningGrid,
-    parameterEstimates
-  )
-  
-  Hessians <- list(NULL)
-  
-  #### print progress ####
-  if(control$verbose == 0){
-    progressbar = txtProgressBar(min = 0, 
-                                 max = nrow(tuningGrid), 
-                                 initial = 0, 
-                                 style = 3)
-  }
-  
-  #### Iterate over all tuning parameter combinations and fit models ####
-  
-  for(it in 1:nrow(tuningGrid)){
-    if(control$verbose == 0){
-      setTxtProgressBar(progressbar,it)
-    }else{
-      cat(paste0("\nIteration [", it, "/", nrow(tuningGrid),"]\n"))
-    }
-    
-    lambda <- tuningGrid$lambda[it]
-    theta <- tuningGrid$theta[it]
-    
-    result <- try(regularizedModel$optimize(rawParameters,
-                                            SEM,
-                                            theta,
-                                            lambda
-    )
-    )
-    if(is(result, "try-error")) next
-    
-    rawParameters <- result$rawParameters
-    fits$nonZeroParameters[it] <- length(rawParameters) - 
-      sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
-    fits$regM2LL[it] <- result$fit
-    fits$convergence[it] <- result$convergence
-    
-    SEM <- lessSEM::setParameters(SEM, 
-                                  names(rawParameters), 
-                                  values = rawParameters, 
-                                  raw = TRUE)
-    fits$m2LL[it] <- SEM$fit()
-    transformedParameters <- lessSEM:::getParameters(SEM,
-                                                     raw = FALSE)
-    parameterEstimates[it, names(rawParameters)] <- transformedParameters[names(rawParameters)]
-    
-    # set initial values for next iteration
-    if(is(SEM, "try-Error")){
-      # reset
-      warning("Fit for lambda = ",
-              lambda, "theta = ", theta,
-              " resulted in Error!")
-      
-      SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                     transformVariances = TRUE,
-                                     whichPars = startingValues,
-                                     addMeans = control$addMeans)
-      
-      
-    }
-  }
-  
-  internalOptimization <- list(
-    "HessiansOfDifferentiablePart" = Hessians
-  )
-  
-  results <- new("regularizedSEM",
-                 parameters = parameterEstimates,
-                 fits = fits,
-                 parameterLabels = names(rawParameters),
-                 weights = weights,
-                 regularized = names(weights)[weights!=0],
-                 internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
-  
-  return(results)
+  return(result)
   
 }
 
@@ -308,16 +123,16 @@ lsp <- function(lavaanModel,
 #' 
 #' @export
 cv4lsp <- function(regularizedSEM, 
-                       k, 
-                       dataSet = NULL,
-                       scaleData = FALSE,
-                       scalingFunction = function(dataSet,scalingArguments) 
-                         scale(x = dataSet, 
-                               center = scalingArguments$center, 
-                               scale = scalingArguments$scale),
-                       scalingArguments = list("center" = TRUE, 
-                                               "scale" = TRUE),
-                       returnSubsetParameters = FALSE){
+                   k, 
+                   dataSet = NULL,
+                   scaleData = FALSE,
+                   scalingFunction = function(dataSet,scalingArguments) 
+                     scale(x = dataSet, 
+                           center = scalingArguments$center, 
+                           scale = scalingArguments$scale),
+                   scalingArguments = list("center" = TRUE, 
+                                           "scale" = TRUE),
+                   returnSubsetParameters = FALSE){
   
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
