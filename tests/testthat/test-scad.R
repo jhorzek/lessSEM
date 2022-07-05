@@ -24,16 +24,20 @@ test_that("testing scad", {
   
   #### Regularize ####
   lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
-  lambdas <- 0.13
-  thetas <- 3.1
+  lambdas <- seq(0,1,length.out = 5)
+  thetas <- seq(2.1,3,length.out = 5)
+  # plot scad to see what the penalty looks like
+  xs <- seq(-4,4,length.out = 1000)
+  pen <- rep(NA, length(xs))
+  for(i in 1:length(xs)) pen[i] <- scadPenalty_C(par = xs[i], lambda_p = lambdas[3], theta = thetas[3])
+  plot(xs, pen, type = "l")
+  
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   
   rsemIsta <- scad(lavaanModel = modelFit, 
                    regularized = regularizedLavaan, lambdas = lambdas, 
                    thetas = thetas, 
-                   control = controlIsta(verbose = 0, 
-                                         convCritInner = 1, breakOuter = 1e-15,
-                                         startingValues = "start")
+                   control = controlIsta()
   )
   
   coef(rsemIsta)
@@ -73,54 +77,33 @@ test_that("testing scad", {
   for(p in 1:length(pars)) pen <- pen + scadPenalty_C(par = pars[p], 
                                                      lambda_p = weights[p]*lambda, 
                                                      theta = theta)
-  pen
-  (1/N)*(regsemApprox@fits$regM2LL[sel] - regsemApprox@fits$m2LL[sel])
   
-  pen2 <- smoothScadValue(parameters = pars, 
-                         tuningParameters = data.frame(
-                           lambda = lambda,
-                           theta = theta
-                         ), 
-                         penaltyFunctionArguments = penaltyFunctionArguments)
-  
-  pen2
+  testthat::expect_equal(
+    all(round(pen -
+                (1/N)*(regsemApprox@fits$regM2LL[sel] - regsemApprox@fits$m2LL[sel])
+              ,4)==0),TRUE)
   
   for(th in rsemIsta@fits$theta){
     for(la in rsemIsta@fits$lambda){
       
-      # testthat::expect_equal(
-      #   round(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th & 
-      #                                 rsemIsta@fits$lambda == la] -
-      #           regsemApprox@fits$regM2LL[regsemApprox@fits$theta == th & 
-      #                                       regsemApprox@fits$lambda == la]
-      #   )==0,TRUE)
-      # testthat::expect_equal(
-      #   all(
-      #     abs(
-      #       rsemIsta@parameters[rsemIsta@fits$theta == th &
-      #                             rsemIsta@fits$lambda == la,rsemIsta@parameterLabels]-
-      #         regsemApprox@parameters[regsemApprox@fits$theta == th &
-      #                                   regsemApprox@fits$lambda == la,rsemIsta@parameterLabels]
-      #     ) < .01
-      #   ),
-      #   TRUE
-      # )
-      print(
-        paste0("lambda = ", la, " theta = ", th, " diff  =",
-               round(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th & 
-                                             rsemIsta@fits$lambda == la] -
-                       regsemApprox@fits$regM2LL[regsemApprox@fits$theta == th & 
-                                                   regsemApprox@fits$lambda == la]
-                     ,3)))
-      
-      print(
-        max(abs(
-          rsemIsta@parameters[rsemIsta@fits$theta == th &
-                                rsemIsta@fits$lambda == la,rsemIsta@parameterLabels]-
-            regsemApprox@parameters[regsemApprox@fits$theta == th &
-                                      regsemApprox@fits$lambda == la,rsemIsta@parameterLabels]
-        ))
+      testthat::expect_equal(
+        round(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
+                                      rsemIsta@fits$lambda == la] -
+                regsemApprox@fits$regM2LL[regsemApprox@fits$theta == th &
+                                            regsemApprox@fits$lambda == la]
+        )==0,TRUE)
+      testthat::expect_equal(
+        all(
+          abs(
+            rsemIsta@parameters[rsemIsta@fits$theta == th &
+                                  rsemIsta@fits$lambda == la,rsemIsta@parameterLabels]-
+              regsemApprox@parameters[regsemApprox@fits$theta == th &
+                                        regsemApprox@fits$lambda == la,rsemIsta@parameterLabels]
+          ) < .1
+        ),
+        TRUE
       )
+      
     }
   }
   
