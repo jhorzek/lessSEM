@@ -117,16 +117,16 @@ test_that("testing mcp", {
                   control = controlIsta(convCritInner = 0, verbose = 0)
   )
   
-  rsemIsta@fits$m2LL - (-2*logLik(modelFit))
-  rsemIsta@fits$regM2LL-
-    rsemIsta@fits$m2LL
-  rsemIsta@fits$m2LL
-  fits$m2LL
+  testthat::expect_equal(
+    all(round(rsemIsta@fits$m2LL[rsemIsta@fits$lambda == 0] -
+                -2*logLik(modelFit)
+              ,4)==0),TRUE)
   
-  rsemIsta@fits$regM2LL
-  fits$m2LL[fits$lambda == lambdas[2] & fits$theta == thetas[1]] +
-    fits$penalty[fits$lambda == lambdas[2] & fits$theta == thetas[1]]
-  
+  testthat::expect_equal(
+    all(round(rsemIsta@fits$m2LL -
+                fits$m2LL)==0),
+    TRUE
+  )
   
   # compare to smoothed version
   tuningParameters <- expand.grid(theta = thetas,
@@ -144,89 +144,46 @@ test_that("testing mcp", {
                                                        tuningParameters = tuningParameters,
                                                        penaltyFunctionArguments = penaltyFunctionArguments)
   
-  regsemApprox@fits$regM2LL
-  rsemIsta@fits$regM2LL
-  
-  regsemApprox@fits$m2LL
-  rsemIsta@fits$m2LL
-  
-  regsemApprox@fits$regM2LL - regsemApprox@fits$m2LL
-  rsemIsta@fits$regM2LL - rsemIsta@fits$m2LL
-  
-  regsemApprox@fits$m2LL
-  fits$m2LL
-  
   sel <- regsemApprox@parameters$theta == thetas[1] & 
     regsemApprox@parameters$lambda == lambdas[2]
   pars <- unlist(regsemApprox@parameters[sel,
                                          regsemApprox@parameterLabels]
   )
-  regsemApprox@fits$m2LL[sel]
-  SEM <- SEMFromLavaan(lavaanModel = modelFit)
-  SEM$setParameters(names(pars), pars, FALSE)
-  SEM$fit()
-  
-  rsemIsta <- mcp(lavaanModel = modelFit, 
-                  regularized = regularizedLavaan, 
-                  thetas = thetas[1],
-                  lambdas = lambdas[2],
-                  control = controlIsta( 
-                    accelerate = 0,
-                    maxIterOut = 2,
-                    stepSizeInheritance = 0,
-                    #maxIterIn = 0,
-                    #startingValues = pars,
-                    convCritInner = 1,
-                    eta = 2.1,
-                    L0 = 10000,
-                    verbose = -99)
-  )
-  rsemIsta@fits
-  regsemApprox@fits[sel,]
-  
   weights <- rsemIsta@inputArguments$weights
   lambda <- lambdas[2]
   theta <- thetas[1]
   pen <- 0
   for(p in 1:length(pars)) pen <- pen + mcpPenalty_C(par = pars[p], 
-                                                     lambda_p = weights[p]*lambda, 
-                                                     theta = theta)
-  pen
-  (1/N)*(regsemApprox@fits$regM2LL[sel] - regsemApprox@fits$m2LL[sel])
+                                                      lambda_p = weights[p]*lambda, 
+                                                      theta = theta)
   
-  pen2 <- smoothMcpValue(parameters = pars, 
-                         tuningParameters = data.frame(
-                           lambda = lambda,
-                           theta = theta
-                         ), 
-                         penaltyFunctionArguments = penaltyFunctionArguments)
+  testthat::expect_equal(
+    all(round(pen -
+                (1/N)*(regsemApprox@fits$regM2LL[sel] - regsemApprox@fits$m2LL[sel])
+              ,4)==0),TRUE)
   
-  pen2
-  
-  for(p in 1:length(pars)) pen2 <- pen + smoothMcpValue(parameters = pars[p], 
-                                                        tuningParameters = data.frame(
-                                                          lambda = weights[p]*lambda,
-                                                          theta = theta
-                                                        ), 
-                                                        penaltyFunctionArguments = penaltyFunctionArguments
-  )
-  
-  testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] - lslxParameter[,regularized]) < .002), TRUE)
-  plot(rsemIsta)
-  coef(rsemIsta)
-  coef(rsemIsta, alpha = 1, lambda = lambdas[1])
-  coef(rsemIsta, criterion = "AIC")
-  coef(rsemIsta, criterion = "BIC")
-  
-  testthat::expect_equal(all(round(rsemIsta@fits$regM2LL - (m2LLs + penalty))==0), TRUE)
-  testthat::expect_equal(all(round(AIC(rsemIsta)$AIC - (AICs))==0), TRUE)
-  testthat::expect_equal(all(round(BIC(rsemIsta)$BIC - (BICs))==0), TRUE)
-  
-  ## Test exact cross-validation
-  cvExact <- cv4elasticNet(regularizedSEM = rsemIsta, k = 5)
-  coef(cvExact)
-  coef(cvExact, rule = "1sd")
-  coef(cvExact, alpha = 1, lambda = lambdas[1])
-  plot(cvExact)
+  for(th in rsemIsta@fits$theta){
+    for(la in rsemIsta@fits$lambda){
+      
+      testthat::expect_equal(
+        round(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
+                                      rsemIsta@fits$lambda == la] -
+                regsemApprox@fits$regM2LL[regsemApprox@fits$theta == th &
+                                            regsemApprox@fits$lambda == la]
+        )==0,TRUE)
+      testthat::expect_equal(
+        all(
+          abs(
+            rsemIsta@parameters[rsemIsta@fits$theta == th &
+                                  rsemIsta@fits$lambda == la,rsemIsta@parameterLabels]-
+              regsemApprox@parameters[regsemApprox@fits$theta == th &
+                                        regsemApprox@fits$lambda == la,rsemIsta@parameterLabels]
+          ) < .1
+        ),
+        TRUE
+      )
+      
+    }
+  }
   
 })
