@@ -4,12 +4,12 @@
 \alias{plot,CV4RegularizedSEM,ANY-method}
 \title{plot}
 \usage{
-\S4method{plot}{CV4RegularizedSEM,ANY}(x, alpha = NULL, regularizedOnly = TRUE)
+\S4method{plot}{CV4RegularizedSEM,ANY}(x, what = "parameters", regularizedOnly = TRUE)
 }
 \arguments{
 \item{x}{object of class regularizedSEM}
 
-\item{alpha}{numeric: value of alpha for which parameters should be returned. Must be present in object. Required if elastic net was used}
+\item{what}{either "parameters" or "fit"}
 
 \item{regularizedOnly}{boolean: should only regularized parameters be plotted?``}
 }

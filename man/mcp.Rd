@@ -82,8 +82,13 @@ regsem <- mcp(
 # elements of regsem can be accessed with the @ operator:
 regsem@parameters[1,]
 
+# optional: plotting the paths requires installation of plotly
+# plot(regsem)
+
 # 5-fold cross-Validation
 cv <- cv4regularizedSEM(regularizedSEM = regsem,
                           k = 5)
 coef(cv)
+# optional: plotting the paths requires installation of plotly
+# plot(cv, what = "fit")
 }

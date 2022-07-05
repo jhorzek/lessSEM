@@ -15,7 +15,11 @@ setClass(Class = "CV4RegularizedSEM",
 #' @export
 setMethod("show", "CV4RegularizedSEM", function (object) {
   bestFit <- which(object@cvfits$cvfit == min(object@cvfits$cvfit))
-  cat(paste0("Best parameter estimates observed for: lambda = ", object@cvfits$lambda[bestFit], " & alpha = ", object@cvfits$alpha[bestFit], ":\n"))
+  tuningParameters <- object@parameters[,!colnames(object@parameters)%in%object@parameterLabels]
+  paste0(colnames(tuningParameters), " = ", tuningParameters[bestFit,])
+  cat(paste0("Best parameter estimates observed for: ",
+             paste0(colnames(tuningParameters), " = ", tuningParameters[bestFit,], collapse = "; "), 
+             ":\n"))
   
   parameters <- unlist(object@parameters[bestFit,object@parameterLabels])
   print(parameters)
@@ -46,24 +50,19 @@ setMethod("summary", "CV4RegularizedSEM", function (object) {
 #' coef
 #' 
 #' Returns the parameter estimates of an CV4RegularizedSEM
-#' 
-#' # References
-#' 
-#' Ternès, N., Rotolo, F., & Michiels, S. (2016). Empirical extensions of the lasso penalty to reduce the false discovery rate in high-dimensional Cox regression models: Extended lasso regression reducing false positives in Cox models. Statistics in Medicine, 35(15), 2561–2573. https://doi.org/10.1002/sim.6927
-#' 
+#'  
 #' @param object object of class regularizedSEM
 #' @param lambda numeric: value of lambda for which parameters should be returned. Must be present in object
 #' @param alpha numeric: value of alpha for which parameters should be returned. Must be present in object
-#' @param rule one of "min", "1sd", and "penalized". With "min", the parameters of the model with the lowest CV-fit value will be returned.
+#' @param rule one of "min" or "1sd". With "min", the parameters of the model with the lowest CV-fit value will be returned.
 #' With "1sd", the 1 standard deviation rule is used and the parameters with the larges lambda and a fit within 1 sd of the minimum will be returned.
-#' With "penalized", parameters with the additional reward for sparsity proposed by (Ternès et al., 2016) will be returned
 #' 
 #' @export
-setMethod("coef", "CV4RegularizedSEM", function (object, lambda = NULL, alpha = NULL, rule = "min") {
+setMethod("coef", "CV4RegularizedSEM", function (object, rule = "min") {
   
   if(is.null(lambda) && is.null(alpha)) {
     # using rule
-    if(!rule %in% c("min", "1sd", "penalized")) stop("rule must be one of: 'min', '1sd', 'penalized'.")
+    if(!rule %in% c("min", "1sd")) stop("rule must be one of: 'min', '1sd'.")
     if(rule == "min"){
       # return parameters of model with best cv fit
       bestFit <- which(object@cvfits$cvfit == min(object@cvfits$cvfit))
@@ -78,48 +77,9 @@ setMethod("coef", "CV4RegularizedSEM", function (object, lambda = NULL, alpha = 
       parameters <- unlist(object@parameters[select,object@parameterLabels])
       return(parameters)
     }
-    if(rule == "penalized"){
-      # Ternès, N., Rotolo, F., & Michiels, S. (2016). Empirical extensions of the lasso penalty to reduce the false discovery rate in high-dimensional Cox regression models: Extended lasso regression reducing false positives in Cox models. Statistics in Medicine, 35(15), 2561–2573. https://doi.org/10.1002/sim.6927
-      if(any(object@cvfits$alpha != 1)) stop("rule = 'penalized' only supported for lasso and adaptive lasso")
-      
-      cvFits <- object@cvfits$cvfit
-      parameters <- object@parameters[,object@regularized]
-      parameterWasZeroed <- apply(parameters==0,2,sum) > 0 # check if all parameters have been zeroed for at least one lambda
-      nNotZeroed <- apply(parameters != 0, 1, sum)
-      
-      if(!all(parameterWasZeroed)) {
-        warning("rule = 'penalized' requires that ALL regularized parameters have been set to zero for at least one lambda. This is not satisfied in the object passed here. Using the maximal lambda instead.")
-        lambdaMax <- which(object@cvfits$lambda == max(object@cvfits$lambda))
-      }else{
-        # the lambda for which all parameters were first zeroed provides the upper bound
-        lambdaMax <- min(which(nNotZeroed == 0))
-      }
-      lambdaMin <- which.min(cvFits) # the lambda which has the best cv fit provides the lower bound
-      
-      bestCVFit <- min(cvFits)
-      sparseCVFit <- cvFits[lambdaMax]
-      
-      bestNNonzeroParameter <- nNotZeroed[lambdaMin] 
-      
-      penalty <- ((sparseCVFit - bestCVFit)/bestNNonzeroParameter)*nNotZeroed[lambdaMin:lambdaMax] # note: we use the -2 log-Likelihood; our penalty term is therefore different from
-      # Ternès et al. (2016)
-      
-      cvFitsPenalized <- cvFits
-      cvFitsPenalized[] <- Inf
-      cvFitsPenalized[lambdaMin:lambdaMax] <- cvFits[lambdaMin:lambdaMax] + penalty
-      bestFit <- which.min(cvFitsPenalized)
-      
-      parameters <- unlist(object@parameters[bestFit,object@parameterLabels])
-      return(parameters)
-    }
     
   }
   
-  if(is.null(lambda)) return(object@parameters[object@parameters$alpha == alpha,object@parameterLabels])
-  if(is.null(alpha)) return(object@parameters[object@parameters$lambda == lambda,object@parameterLabels])
-  
-  pars <- object@parameters
-  pars <- unlist(pars[pars$lambda == lambda & pars$alpha == alpha, object@parameterLabels])
   return(pars)
 })
 
@@ -128,76 +88,92 @@ setMethod("coef", "CV4RegularizedSEM", function (object, lambda = NULL, alpha = 
 #' plots the regularized and unregularized parameters as well as the cross-validation fits for all levels of lambda
 #' 
 #' @param x object of class regularizedSEM
-#' @param alpha numeric: value of alpha for which parameters should be returned. Must be present in object. Required if elastic net was used
+#' @param what either "parameters" or "fit"
 #' @param regularizedOnly boolean: should only regularized parameters be plotted?``
 #' @export
-setMethod("plot", "CV4RegularizedSEM", function (x, alpha = NULL, regularizedOnly = TRUE) {
+setMethod("plot", "CV4RegularizedSEM", function (x, what = "parameters", regularizedOnly = TRUE) {
   
   parameters <- x@parameters
   fits <- x@cvfits
+  tuningParameters <- x@parameters[,!colnames(x@parameters)%in%x@parameterLabels,drop=FALSE]
+  tuningParameters <- tuningParameters[,apply(tuningParameters,2,function(x) length(unique(x)) > 1),drop=FALSE]
   
-  if(is.null(alpha)) {
-    alpha <- unique(parameters$alpha)[1]
-    
-    if(length(unique(parameters$alpha)) != 1) warning(paste0("Models for different values of alpha were fitted, but not alpha was provided to the plotting function. Plotting for alpha=", 
-                                                             alpha, ". You can specify specific alpha values with, for instance, plot(aCV4Regsem, alpha = .02)"))
-  }
-  if(!alpha %in% parameters$alpha){
-    stop(paste0("alpha=", alpha, " is was not tested in the model. Only found the following alpha values: "),
-         paste0(unique(parameters$alpha), collapse= ", "), "."
-    )
-  }
+  nTuning <- ncol(tuningParameters)
   
-  if(regularizedOnly){
-    fits <- fits[fits$alpha == alpha,, drop = FALSE]
-    parameters <- cbind(
-      lambda = parameters$lambda,
-      alpha = parameters$alpha,
-      coef(x, alpha = alpha)[,x@regularized, drop = FALSE]
-    )
-    parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@regularized)
+  if(nTuning > 2) 
+    stop("Plotting currently only supported for up to 2 tuning parameters")
+  if(nTuning == 2 & !("plotly" %in% rownames(installed.packages())))
+    stop("Plotting more than one tuning parameter requires the package plotly")
+  
+  if(what == "parameters"){
     
-    parameterPlot <- ggplot2::ggplot(data = parametersLong,
-                                     mapping = ggplot2::aes(x = lambda, y = value, group = name)) +
-      ggplot2::geom_line(colour = "#008080")+
-      ggplot2::ggtitle("Regularized Parameters")
+    if(regularizedOnly){
+      
+      parameters <- cbind(
+        tuningParameters,
+        parameters[,x@regularized, drop = FALSE]
+      )
+      parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@regularized)
+      
+    }else{
+      
+      parameters <- cbind(
+        tuningParameters,
+        parameters
+      )
+      parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@parameterLabels)
+      
+    }
     
-    fitPlot <- ggplot2::ggplot(data = fits,
-                               mapping = ggplot2::aes(x = lambda, y = cvfit), title = "cv-fit") +
-      ggplot2::geom_line()
+    if(nTuning == 1){
+      
+      ggplot2::ggplot(data = parametersLong,
+                      mapping = ggplot2::aes_string(x = colnames(tuningParameters), 
+                                                    y = "value", 
+                                                    group = "name")) +
+        ggplot2::geom_line(colour = "#008080")+
+        ggplot2::ggtitle("Regularized Parameters")
+      
+    }else{
+      parametersLong$name <- paste0(parametersLong$name, 
+                                    "_", 
+                                    unlist(parametersLong[,colnames(tuningParameters)[2]]))
+      parametersLong$tp1 <- unlist(parametersLong[,colnames(tuningParameters)[1]])
+      parametersLong$tp2 <- unlist(parametersLong[,colnames(tuningParameters)[2]])
+      plt <- plotly::plot_ly(parametersLong, 
+                             x = ~tp1, y = ~tp2, z = ~value, 
+                             type = 'scatter3d',
+                             mode = 'lines',
+                             opacity = 1,
+                             color = ~name,
+                             split = ~tp2,
+                             line = list(width = 6, 
+                                         reverscale = FALSE)
+      )
+      print(plt)
+      
+    }
     
   }else{
-    fits <- fits[fits$alpha == alpha,, drop = FALSE]
-    parameters <- cbind(
-      lambda = parameters$lambda,
-      alpha = parameters$alpha,
-      coef(x, alpha = alpha)
-    )
-    parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@parameterLabels)
-    parametersLong$regularized <- parametersLong$name %in% x@regularized
-    
-    parameterPlot <- ggplot2::ggplot(data = parametersLong,
-                                     mapping = ggplot2::aes(x = lambda, 
-                                                            y = value, 
-                                                            group = name, 
-                                                            color = regularized)) +
-      ggplot2::geom_line()+ 
-      ggplot2::scale_color_manual(values=c("FALSE"="gray","TRUE"="#008080")) +
-      ggplot2::ggtitle("Parameter Estimates")
-    
-    fitPlot <- ggplot2::ggplot(data = fits,
-                               mapping = ggplot2::aes(x = lambda, y = cvfit), title = "cv-fit") +
-      ggplot2::geom_line()
+    if(nTuning == 1){
+      
+      ggplot2::ggplot(data = fits,
+                      mapping = ggplot2::aes_string(x = colnames(tuningParameters), 
+                                                    y = "cvfit")) +
+        ggplot2::geom_line(colour = "#008080")+
+        ggplot2::ggtitle("Regularized Parameters")
+      
+    }else{
+      fits$tp1 <- unlist(fits[,colnames(tuningParameters)[1]])
+      fits$tp2 <- unlist(fits[,colnames(tuningParameters)[2]])
+      plotly::plot_ly(fits, 
+                      x = ~tp1, y = ~tp2, z = ~cvfit, 
+                      type = 'scatter3d', mode = 'lines',
+                      opacity = 1,
+                      split = ~tp2,
+                      line = list(width = 6, 
+                                  reverscale = FALSE))
+      
+    }
   }
-  
-  legendIs <- cowplot::get_legend(parameterPlot)
-  
-  plotIs <- cowplot::plot_grid(
-    parameterPlot + ggplot2::theme(legend.position="none"),
-    fitPlot,
-    align = 'vh',
-    hjust = -1,
-    nrow = 1
-  )
-  cowplot::plot_grid(plotIs, legendIs, rel_widths = c(3, .4))
 })

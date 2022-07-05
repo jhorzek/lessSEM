@@ -4,24 +4,18 @@
 \alias{coef,CV4RegularizedSEM-method}
 \title{coef}
 \usage{
-\S4method{coef}{CV4RegularizedSEM}(object, lambda = NULL, alpha = NULL, rule = "min")
+\S4method{coef}{CV4RegularizedSEM}(object, rule = "min")
 }
 \arguments{
 \item{object}{object of class regularizedSEM}
 
+\item{rule}{one of "min" or "1sd". With "min", the parameters of the model with the lowest CV-fit value will be returned.
+With "1sd", the 1 standard deviation rule is used and the parameters with the larges lambda and a fit within 1 sd of the minimum will be returned.}
+
 \item{lambda}{numeric: value of lambda for which parameters should be returned. Must be present in object}
 
 \item{alpha}{numeric: value of alpha for which parameters should be returned. Must be present in object}
-
-\item{rule}{one of "min", "1sd", and "penalized". With "min", the parameters of the model with the lowest CV-fit value will be returned.
-With "1sd", the 1 standard deviation rule is used and the parameters with the larges lambda and a fit within 1 sd of the minimum will be returned.
-With "penalized", parameters with the additional reward for sparsity proposed by (Ternès et al., 2016) will be returned}
 }
 \description{
 Returns the parameter estimates of an CV4RegularizedSEM
-}
-\details{
-# References
-
-Ternès, N., Rotolo, F., & Michiels, S. (2016). Empirical extensions of the lasso penalty to reduce the false discovery rate in high-dimensional Cox regression models: Extended lasso regression reducing false positives in Cox models. Statistics in Medicine, 35(15), 2561–2573. https://doi.org/10.1002/sim.6927
 }
