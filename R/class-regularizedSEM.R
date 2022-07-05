@@ -22,7 +22,7 @@ setMethod("show", "regularizedSEM", function (object) {
   cat("\n\n")
   cat(paste0("- Use coef(object) to get the parameter estimates of the model. With coef(object, lambda = x, delta = y) parameters estimates at the values x and y for lambda and delta can be extracted.\n\n"))
   cat(paste0("- Use plot(object) to plot the parameter estimates of the model.\n\n"))
-  cat(paste0("- Use aCV4regularizedSEM(object, k = k) to compute an approximate k-fold cross-valdidation.\n\n"))
+  cat(paste0("- Use cv4regularizedSEM(object, k = k) to compute a k-fold cross-valdidation.\n\n"))
   cat(paste0("- Information criteria can be compute with AIC(object) or BIC(object).\n\n"))
   cat("################################################\n")
 })
@@ -41,8 +41,8 @@ setMethod("summary", "regularizedSEM", function (object) {
              modelName, "lambda = x, delta = y) parameters estimates at the values x and y for lambda and delta can be extracted.\n\n"))
   cat(paste0("- Use plot(", modelName, 
              ") to plot the parameter estimates of the model.\n\n"))
-  cat(paste0("- Use aCV4regularizedSEM(", modelName, 
-             ", k = k) to compute an approximate k-fold cross-valdidation.\n\n"))
+  cat(paste0("- Use cv4regularizedSEM(", modelName, 
+             ", k = k) to compute a k-fold cross-valdidation.\n\n"))
   cat(paste0("- Information criteria can be compute with AIC(", modelName, 
              ") or BIC(", modelName, 
              ").\n\n"))

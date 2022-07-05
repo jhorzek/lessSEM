@@ -4,7 +4,7 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-class istaCappedL1GeneralPurpose{
+class istaScadGeneralPurpose{
   public:
     
     
@@ -24,7 +24,7 @@ class istaCappedL1GeneralPurpose{
   const int verbose; 
   
   // constructor
-  istaCappedL1GeneralPurpose(
+  istaScadGeneralPurpose(
     const Rcpp::NumericVector weights_,
     Rcpp::List control
   ):
@@ -46,27 +46,25 @@ class istaCappedL1GeneralPurpose{
     Rcpp::Function gradientFunction,
     Rcpp::List userSuppliedElements,
     double theta_,
-    double lambda_, 
-    double alpha_){
+    double lambda_){
     
     generalPurposeFitFramework gpFF(fitFunction, gradientFunction, userSuppliedElements);
     
-    lessSEM::tuningParametersCappedL1 tp;
+    int sampleSize = 1;
+    
+    lessSEM::tuningParametersScad tp;
     tp.theta = theta_;
-    tp.alpha = alpha_;
     tp.lambda = lambda_;
     tp.weights = weights;
     
-    lessSEM::tuningParametersEnet smoothTp;
-    smoothTp.alpha = alpha_;
-    smoothTp.lambda = lambda_;
-    smoothTp.weights = weights;
+    // we won't need the smooth penalty; but we need to specify some tuning 
+    // parameters for the function call
+    lessSEM::tuningParametersScad smoothTp;
+    smoothTp.lambda = 0.0;
     
-    lessSEM::proximalOperatorCappedL1 proximalOperatorCappedL1_;
-    lessSEM::penaltyCappedL1 penalty_;
-    lessSEM::penaltyRidge smoothPenalty_;
-    
-    const int sampleSize = 1;
+    lessSEM::proximalOperatorScad proximalOperatorScad_;
+    lessSEM::penaltyScad penalty_;
+    lessSEM::noSmoothPenalty<lessSEM::tuningParametersScad> smoothPenalty_;
     
     lessSEM::control controlIsta = {
       L0,
@@ -85,7 +83,7 @@ class istaCappedL1GeneralPurpose{
     lessSEM::fitResults fitResults_ = lessSEM::ista(
       gpFF,
       startingValues_,
-      proximalOperatorCappedL1_,
+      proximalOperatorScad_,
       penalty_,
       smoothPenalty_,
       tp,
@@ -110,12 +108,12 @@ class istaCappedL1GeneralPurpose{
   }
 };
 
-RCPP_EXPOSED_CLASS(istaCappedL1GeneralPurpose)
-  RCPP_MODULE(istaCappedL1GeneralPurpose_cpp){
+RCPP_EXPOSED_CLASS(istaScadGeneralPurpose)
+  RCPP_MODULE(istaScadGeneralPurpose_cpp){
     using namespace Rcpp;
-    Rcpp::class_<istaCappedL1GeneralPurpose>( "istaCappedL1GeneralPurpose" )
-      .constructor<Rcpp::NumericVector,Rcpp::List>("Creates a new istaCappedL1GeneralPurpose.")
+    Rcpp::class_<istaScadGeneralPurpose>( "istaScadGeneralPurpose" )
+      .constructor<Rcpp::NumericVector,Rcpp::List>("Creates a new istaScadGeneralPurpose")
     // methods
-    .method( "optimize", &istaCappedL1GeneralPurpose::optimize, "Optimizes the model. Expects fitFunction, gradientFunction, userSuppliedElements, labeled vector with starting values, theta, and lambda")
+    .method( "optimize", &istaScadGeneralPurpose::optimize, "Optimizes the model. Expects fitFunction, gradientFunction, userSuppliedElements, labeled vector with starting values, theta, and lambda")
     ;
   }
