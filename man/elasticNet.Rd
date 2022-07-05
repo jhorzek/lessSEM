@@ -6,26 +6,18 @@
 \usage{
 elasticNet(
   lavaanModel,
-  weights,
-  lambdas = NULL,
-  nLambdas = NULL,
+  regularized,
+  lambdas,
   alphas,
   method = "ista",
+  modifyModel = lessSEM::modifyModel(),
   control = controlIsta()
 )
 }
 \arguments{
 \item{lavaanModel}{model of class lavaan}
 
-\item{weights}{labeled vector with weights for each of the parameters in the
-model. If you are unsure what these parameters are called, use
-getLavaanParameters(model) with your lavaan model object}
-
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
-
-\item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
-compute the first lambda value which sets all regularized parameters to zero.
-It will then generate nLambda values between 0 and the computed lambda.}
 
 \item{alphas}{numeric vector with values of the tuning parameter alpha. Must be
 in \link{0,1}. 0 = ridge, 1 = lasso.}
@@ -34,8 +26,18 @@ in \link{0,1}. 0 = ridge, 1 = lasso.}
 and glmnet. With ista, the control argument can be used to switch to related procedures
 (currently gist).}
 
+\item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
+
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}
+
+\item{weights}{labeled vector with weights for each of the parameters in the
+model. If you are unsure what these parameters are called, use
+getLavaanParameters(model) with your lavaan model object}
+
+\item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
+compute the first lambda value which sets all regularized parameters to zero.
+It will then generate nLambda values between 0 and the computed lambda.}
 }
 \description{
 This function allows for regularization of models built in lavaan with the
@@ -67,8 +69,8 @@ library(lessSEM)
 dataset <- simulateExampleData()
 
 lavaanSyntax <- "
-f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
-     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
 f ~~ 1*f
 "
@@ -79,54 +81,43 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
                            std.lv = TRUE)
 
 # Optional: Plot the model
-# semPlot::semPaths(lavaanModel, 
+# semPlot::semPaths(lavaanModel,
 #                   what = "est",
 #                   fade = FALSE)
-
-# The implementation of elastic net is relatively flexible and also
-# encompasses lasso, adaptive lasso, and ridge regularization.
-# The function call is therefore slightly more complicated. If you 
-# are only looking for lasso, adaptive lasso or ridge, there are 
-# dedicated functions for that (see ?lasso, ?adaptiveLasso, ?ridge)
-
-# elasticNet expects weights for each parameter. This way, we can
-# decide which parameters are regularized (all parameters with weight = 0
-# remain unregularized)
-# names of the regularized parameters:
-regularized = paste0("l", 6:15)
-weights <- getLavaanParameters(lavaanModel)
-weights[!names(weights) \%in\% regularized] <- 0
 
 regsem <- elasticNet(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
-  weights = weights, 
+  # names of the regularized parameters:
+  regularized = paste0("l", 6:15),
   lambdas = seq(0,1,length.out = 20),
-  alpha = seq(0,1,length.out = 5))
+  alphas = seq(0,1,.1))
 
 # elements of regsem can be accessed with the @ operator:
 regsem@parameters[1,]
 
-# use cross-validation to find the best parameters
-cv <- cv4elasticNet(
-  regularizedSEM = regsem, 
-  k = 5
-)
-cv
+# optional: plotting the paths requires installation of plotly
+# plot(regsem)
+
+# 5-fold cross-Validation
+cv <- cv4regularizedSEM(regularizedSEM = regsem,
+                          k = 5)
+coef(cv)
+# optional: plotting the paths requires installation of plotly
+# plot(cv, what = "fit")
 
 #### Advanced ###
-# Switching the optimizer # 
+# Switching the optimizer #
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
 regsemGlmnet <- elasticNet(
-  # pass the fitted lavaan model
   lavaanModel = lavaanModel,
-  weights = weights, 
+  regularized = paste0("l", 6:15),
   lambdas = seq(0,1,length.out = 20),
-  alpha = seq(0,1,length.out = 5),
+  alphas = seq(0,1,.1),
   method = "glmnet",
   control = controlGlmnet())
 
 # Note: The results are basically identical:
-regsemGlmnet@parameters - regsem@parameters 
+regsemGlmnet@parameters - regsem@parameters
 }

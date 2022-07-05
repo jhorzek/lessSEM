@@ -74,30 +74,35 @@ struct control{
   // barzilaiBorwein uses the Barzilai-Borwein procedure
   // stochasticBarzilaiBorwein uses the Barzilai-Borwein procedure, but sometimes
   // resets the step size; this can help when the optimizer is caught in a bad spot.
+  const int sampleSize; // can be used to scale the fitting function down
   const int verbose; // if set to a value > 0, the fit every verbose iterations
   // is printed. If set to -99 you will get the debug output which is horribly
   // convoluted
 };
 
-template<typename T> // T is the type of the tuning parameters
-inline lessSEM::fitResults ista(model& model_, 
-                             Rcpp::NumericVector startingValuesRcpp,
-                             proximalOperator<T>& proximalOperator_, // proximalOperator takes the tuning parameters
-                             // as input -> <T>
-                             penalty<T>& penalty_, // penalty takes the tuning parameters
-                             smoothPenalty<T>& smoothPenalty_, // smoothPenalty takes the tuning parameters
-                             // as input -> <T>
-                             const T& tuningParameters, // tuning parameters are of type T
-                             const control& control_){
+template<typename T, typename U> // T is the type of the tuning parameters
+inline lessSEM::fitResults ista(
+    model& model_, 
+    Rcpp::NumericVector startingValuesRcpp,
+    proximalOperator<T>& proximalOperator_, // proximalOperator takes the tuning parameters
+    // as input -> <T>
+    penalty<T>& penalty_, // penalty takes the tuning parameters
+    smoothPenalty<U>& smoothPenalty_, // smoothPenalty takes the smooth tuning parameters
+    // as input -> <U>
+    const T& tuningParameters, // tuning parameters are of type T
+    const U& smoothTuningParameters, // tuning parameters are of type U
+    const control& control_
+)
+{
   if(control_.verbose != 0) {
     Rcpp::Rcout << "Optimizing with ista.\n" <<
       "Using " << convCritInnerIsta_txt.at(control_.convCritInner) << " as inner convergence criterion\n" <<
         "Using " << stepSizeInheritance_txt.at(control_.stepSizeIn) << " as step size inheritance\n" << 
           "Tuning parameters: \n eta = " << control_.eta  << "\n" << 
             " accelerate = " << control_.accelerate  << "\n" << 
-            " sigma = " << control_.sigma  << "\n" << 
-              " breakOuter = " << control_.breakOuter  << "\n" << 
-          std::endl;
+              " sigma = " << control_.sigma  << "\n" << 
+                " breakOuter = " << control_.breakOuter  << "\n" << 
+                  std::endl;
   }
   // separate labels and values
   const arma::rowvec startingValues = Rcpp::as<arma::rowvec>(startingValuesRcpp);
@@ -114,15 +119,24 @@ inline lessSEM::fitResults ista(model& model_,
   arma::mat quadr, parchTimeGrad;
   
   // prepare fit elements
-  double fit_k = model_.fit(startingValues, parameterLabels) +
-    smoothPenalty_.getValue(parameters_k, parameterLabels, tuningParameters), // ridge penalty part
-    fit_kMinus1 = model_.fit(startingValues, parameterLabels) +
-      smoothPenalty_.getValue(parameters_kMinus1, parameterLabels, tuningParameters), // ridge penalty part,
+  double fit_k = (1.0/control_.sampleSize)*model_.fit(startingValues, parameterLabels) +
+    smoothPenalty_.getValue(parameters_k, parameterLabels, smoothTuningParameters), // ridge penalty part
+    fit_kMinus1 = (1.0/control_.sampleSize)*model_.fit(startingValues, parameterLabels) +
+      smoothPenalty_.getValue(parameters_kMinus1, parameterLabels, smoothTuningParameters), // ridge penalty part,
       penalty_k = 0.0;
   double penalizedFit_k, penalizedFit_kMinus1;
   arma::rowvec gradients_k, gradients_kMinus1, gradient_y_k;
   
   double ridgePenalty = 0.0;
+  
+  if(control_.verbose == -99) Rcpp::Rcout << "initial fit: " << 
+    (1.0/control_.sampleSize)*model_.fit(startingValues, parameterLabels) << std::endl;
+  
+  if(control_.verbose == -99) Rcpp::Rcout << "initial smooth penalty value: " << 
+    smoothPenalty_.getValue(parameters_kMinus1, parameterLabels, smoothTuningParameters) << std::endl;
+  
+  if(control_.verbose == -99) Rcpp::Rcout << "initial penalty value: " << 
+    penalty_.getValue(parameters_k, parameterLabels, tuningParameters) << std::endl;
   
   penalizedFit_k = fit_k + 
     penalty_.getValue(parameters_k, parameterLabels, tuningParameters); // lasso penalty part
@@ -138,13 +152,13 @@ inline lessSEM::fitResults ista(model& model_,
   // prepare gradient elements 
   // NOTE: We combine the gradients of the smooth functions (the log-Likelihood)
   // of the model and the smooth penalty function (e.g., ridge)
-  gradients_k = model_.gradients(parameters_k, parameterLabels) +
-    smoothPenalty_.getGradients(parameters_k, parameterLabels, tuningParameters); // ridge part
-  gradients_kMinus1 = model_.gradients(parameters_kMinus1, parameterLabels) +
-    smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
+  gradients_k = (1.0/control_.sampleSize)*model_.gradients(parameters_k, parameterLabels) +
+    smoothPenalty_.getGradients(parameters_k, parameterLabels, smoothTuningParameters); // ridge part
+  gradients_kMinus1 = (1.0/control_.sampleSize)*model_.gradients(parameters_kMinus1, parameterLabels) +
+    smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, smoothTuningParameters); // ridge part
   // for acceleration:
-  gradient_y_k = model_.gradients(parameters_kMinus1, parameterLabels) +
-    smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
+  gradient_y_k = (1.0/control_.sampleSize)*model_.gradients(parameters_kMinus1, parameterLabels) +
+    smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, smoothTuningParameters); // ridge part
   
   // breaking flags
   bool breakInner = false, // if true, the inner iteration is exited
@@ -160,7 +174,8 @@ inline lessSEM::fitResults ista(model& model_,
     for(int inner_iteration = 0; inner_iteration < control_.maxIterIn; inner_iteration ++){
       // inner iteration: reduce step size until the convergence criterion is met
       L_k = std::pow(control_.eta, inner_iteration)*L_kMinus1;
-      
+      if(control_.verbose == -99) Rcpp::Rcout << "inner_iteration : " << inner_iteration << std::endl;
+      if(control_.verbose == -99) Rcpp::Rcout << "std::pow(control_.eta, inner_iteration) = " << std::pow(control_.eta, inner_iteration) << std::endl;
       if(control_.verbose == -99) Rcpp::Rcout << "L_k : " << L_k << std::endl;
       
       if(control_.accelerate){
@@ -168,14 +183,14 @@ inline lessSEM::fitResults ista(model& model_,
         // apply proximal operator to get new parameters for given step size
         // see Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations 
         // and Trends in Optimization, 1(3), 123–231. p. 152
-
+        
         y_k = parameters_kMinus1 + 
           (inner_iteration/(inner_iteration+3))*(parameters_kMinus1-parameters_kMinus2);
-        gradient_y_k = model_.gradients(y_k, 
-                                        parameterLabels) + 
-                                          smoothPenalty_.getGradients(y_k, 
-                                                                      parameterLabels, 
-                                                                      tuningParameters);
+        gradient_y_k = (1.0/control_.sampleSize)*model_.gradients(y_k, 
+                        parameterLabels) + 
+                          smoothPenalty_.getGradients(y_k, 
+                                                      parameterLabels, 
+                                                      smoothTuningParameters);
         parameters_k = proximalOperator_.getParameters(
           y_k,
           gradient_y_k,
@@ -185,22 +200,22 @@ inline lessSEM::fitResults ista(model& model_,
         );
         
       }else{
-      
-      // apply proximal operator to get new parameters for given step size
-      parameters_k = proximalOperator_.getParameters(
-        parameters_kMinus1,
-        gradients_kMinus1,
-        parameterLabels,
-        L_k,
-        tuningParameters
-      );
+        
+        // apply proximal operator to get new parameters for given step size
+        parameters_k = proximalOperator_.getParameters(
+          parameters_kMinus1,
+          gradients_kMinus1,
+          parameterLabels,
+          L_k,
+          tuningParameters
+        );
         
       }
       
       // compute new fit; if this fit is non-finite, we can jump to the next
       // iteration
-      fit_k = model_.fit(parameters_k, parameterLabels) +
-        smoothPenalty_.getValue(parameters_k, parameterLabels, tuningParameters); // ridge penalty part
+      fit_k = (1.0/control_.sampleSize)*model_.fit(parameters_k, parameterLabels) +
+        smoothPenalty_.getValue(parameters_k, parameterLabels, smoothTuningParameters); // ridge penalty part
       if(control_.verbose == -99)
       {
         Rcpp::Rcout << "fit_k : " << fit_k << std::endl;
@@ -277,11 +292,11 @@ inline lessSEM::fitResults ista(model& model_,
       
       if(breakInner) {
         // compute gradients at new position
-        gradients_k = model_.gradients(parameters_k, 
-                                       parameterLabels) + 
-                                         smoothPenalty_.getGradients(parameters_k, 
-                                                                     parameterLabels, 
-                                                                     tuningParameters); // ridge part
+        gradients_k = (1.0/control_.sampleSize)*model_.gradients(parameters_k, 
+                       parameterLabels) + 
+                         smoothPenalty_.getGradients(parameters_k, 
+                                                     parameterLabels, 
+                                                     smoothTuningParameters); // ridge part
         
         if(control_.verbose == -99){
           Rcpp::Rcout << "gradients_k\n: " << gradients_k << std::endl;
@@ -313,11 +328,11 @@ inline lessSEM::fitResults ista(model& model_,
       continue;
     }
     
-    gradients_k = model_.gradients(parameters_k, 
-                                   parameterLabels) + 
-                                     smoothPenalty_.getGradients(parameters_k, 
-                                                                 parameterLabels, 
-                                                                 tuningParameters); // ridge part
+    gradients_k = (1.0/control_.sampleSize)*model_.gradients(parameters_k, 
+                   parameterLabels) + 
+                     smoothPenalty_.getGradients(parameters_k, 
+                                                 parameterLabels, 
+                                                 smoothTuningParameters); // ridge part
     
     fits.at(outer_iteration+1) = penalizedFit_k;
     
@@ -375,8 +390,8 @@ inline lessSEM::fitResults ista(model& model_,
   fitResults fitResults_;
   
   fitResults_.convergence = breakOuter;
-  fitResults_.fit = penalizedFit_k;
-  fitResults_.fits = fits;
+  fitResults_.fit = control_.sampleSize*penalizedFit_k; // rescale for -2log-Likelihood
+  fitResults_.fits = control_.sampleSize*fits; // rescale for -2log-Likelihood
   fitResults_.parameterValues = parameters_k;
   
   return(fitResults_);

@@ -1,5 +1,6 @@
 setClass(Class = "regularizedSEM",
          representation = representation(
+           penalty = "character",
            parameters="data.frame",
            fits="data.frame", 
            parameterLabels = "character",
@@ -15,13 +16,13 @@ setClass(Class = "regularizedSEM",
 #' @export
 setMethod("show", "regularizedSEM", function (object) {
   #modelName <-deparse(substitute(object)) # get the name of the object
-  cat(paste0("#### Model of class regularizedSEM with ",object@inputArguments$penalty, " penalty ####\n\n"))
+  cat(paste0("#### Model of class regularizedSEM with ",object@penalty, " penalty ####\n\n"))
   cat("regularized parameters: ")
   cat(paste0(object@regularized, collapse = ", "))
   cat("\n\n")
   cat(paste0("- Use coef(object) to get the parameter estimates of the model. With coef(object, lambda = x, delta = y) parameters estimates at the values x and y for lambda and delta can be extracted.\n\n"))
   cat(paste0("- Use plot(object) to plot the parameter estimates of the model.\n\n"))
-  cat(paste0("- Use aCV4regularizedSEM(object, k = k) to compute an approximate k-fold cross-valdidation.\n\n"))
+  cat(paste0("- Use cv4regularizedSEM(object, k = k) to compute a k-fold cross-valdidation.\n\n"))
   cat(paste0("- Information criteria can be compute with AIC(object) or BIC(object).\n\n"))
   cat("################################################\n")
 })
@@ -40,8 +41,8 @@ setMethod("summary", "regularizedSEM", function (object) {
              modelName, "lambda = x, delta = y) parameters estimates at the values x and y for lambda and delta can be extracted.\n\n"))
   cat(paste0("- Use plot(", modelName, 
              ") to plot the parameter estimates of the model.\n\n"))
-  cat(paste0("- Use aCV4regularizedSEM(", modelName, 
-             ", k = k) to compute an approximate k-fold cross-valdidation.\n\n"))
+  cat(paste0("- Use cv4regularizedSEM(", modelName, 
+             ", k = k) to compute a k-fold cross-valdidation.\n\n"))
   cat(paste0("- Information criteria can be compute with AIC(", modelName, 
              ") or BIC(", modelName, 
              ").\n\n"))
@@ -54,15 +55,11 @@ setMethod("summary", "regularizedSEM", function (object) {
 #' 
 #' @param object object of class regularizedSEM
 #' @param criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
-#' @param lambda numeric: value of lambda for which parameters should be returned. Must be present in object
-#' @param alpha numeric: value of alpha for which parameters should be returned. Must be present in object
 #' @export
-setMethod("coef", "regularizedSEM", function (object, criterion = NULL, lambda = NULL, alpha = NULL) {
-  if(is.null(lambda) && is.null(alpha) && is.null(criterion)) return(object@parameters)
-  if(is.null(lambda) && is.null(criterion)) return(object@parameters[object@parameters$alpha == alpha,])
-  if(is.null(alpha) && is.null(criterion)) return(object@parameters[object@parameters$lambda == lambda,])
+setMethod("coef", "regularizedSEM", function (object, criterion = NULL) {
   if(!is.null(criterion) && criterion %in% c("AIC", "BIC")){
-    if(length(unique(object@parameters$alpha)) != 1 || unique(object@parameters$alpha) != 1) stop("Selection by criterion currently only supported for lasso type penalties.")
+    if(length(unique(object@fits$nonZeroParameters)) == 1) 
+      stop("Selection by criterion currently only supported for sparsity inducing penalties. Either none of your parameters was zeroed or the penalty used does not induce sparsity.")
     if(criterion == "AIC"){
       AICs <- AIC(object)
       bestAIC <- which(AICs$AIC == min(AICs$AIC))[1]
@@ -78,7 +75,6 @@ setMethod("coef", "regularizedSEM", function (object, criterion = NULL, lambda =
   }
   
   pars <- object@parameters
-  pars <- unlist(pars[pars$lambda == lambda & pars$alpha == alpha, object@parameterLabels])
   return(pars)
 })
 
@@ -89,31 +85,11 @@ setMethod("coef", "regularizedSEM", function (object, criterion = NULL, lambda =
 #' @param object object of class regularizedSEM
 #' @export
 setMethod("AIC", "regularizedSEM", function (object) {
+  if(!object@penalty %in% c("lasso", "adaptiveLasso", "cappedL1", "mcp", "scad"))
+    stop("AIC not supported for this penalty.")
+  
   fits <- object@fits
-  if(all(fits$alpha == 1)){
-    fits$AIC <- fits$m2LL + 2*fits$nonZeroParameters
-  }else{
-    warning("AIC for non-lasso models is experimental and should not be trusted. Use (approximate) cross-validation instead")
-    fits$AIC <- rep(NA, length(fits$m2LL))
-    tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
-    
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = object@inputArguments$lavaanModel, fit = FALSE)
-    
-    for(i in 1:nrow(tuningParameters)){
-      SEM <- lessSEM:::setParameters(SEM, 
-                                     labels = object@parameterLabels, 
-                                     values = coef(object, 
-                                                   lambda = tuningParameters$lambda[i], 
-                                                   alpha = tuningParameters$alpha[i]), 
-                                     raw = FALSE)
-      SEM <- lessSEM:::fit(SEM)
-      scores <- lessSEM:::getScores(SEM, raw = FALSE)
-      hessian <- lessSEM:::getHessian(SEM, raw = FALSE)
-      hessianInv <- solve(hessian)
-      twoTimesNpar <- sum(apply(scores, 1, function(x) t(x)%*%hessianInv%*%(x)))
-      fits$AIC[i] <- fits$m2LL[i] + twoTimesNpar
-    }
-  }
+  fits$AIC <- fits$m2LL + 2*fits$nonZeroParameters
   
   return(fits)
 })
@@ -128,32 +104,14 @@ setMethod("BIC", "regularizedSEM", function (object) {
   N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
   fits <- object@fits
   
-  if(all(fits$alpha == 1)){
-    fits$BIC <- fits$m2LL + log(N)*fits$nonZeroParameters
-  }else{
-    warning("BIC for non-lasso models is experimental and should not be trusted. Use (approximate) cross-validation instead")
-    fits$BIC <- rep(NA, length(fits$m2LL))
-    tuningParameters <- data.frame(lambda = fits$lambda, alpha = fits$alpha)
-    
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = object@inputArguments$lavaanModel, fit = FALSE)
-    
-    for(i in 1:nrow(tuningParameters)){
-      SEM <- lessSEM:::setParameters(SEM, 
-                                     labels = object@parameterLabels, 
-                                     values = coef(object, 
-                                                   lambda = tuningParameters$lambda[i], 
-                                                   alpha = tuningParameters$alpha[i]), 
-                                     raw = FALSE)
-      SEM <- lessSEM:::fit(SEM)
-      scores <- lessSEM:::getScores(SEM, raw = FALSE)
-      hessian <- lessSEM:::getHessian(SEM, raw = FALSE)
-      hessianInv <- solve(hessian)
-      npar <- .5*sum(apply(scores, 1, function(x) t(x)%*%hessianInv%*%(x))) # scores and hessian are for -2 log-Likelihood
-      fits$BIC[i] <- fits$m2LL[i] + log(N)*npar
-    }
-  }
-
+  if(!object@penalty %in% c("lasso", "adaptiveLasso", "cappedL1", "mcp", "scad"))
+    stop("BIC not supported for this penalty.")
+  
+  fits <- object@fits
+  fits$BIC <- fits$m2LL + log(N)*fits$nonZeroParameters
+  
   return(fits)
+  
 })
 
 #' plot
@@ -161,52 +119,66 @@ setMethod("BIC", "regularizedSEM", function (object) {
 #' plots the regularized and unregularized parameters for all levels of lambda
 #' 
 #' @param x object of class regularizedSEM
-#' @param alpha numeric: value of alpha for which parameters should be returned. Must be present in object. Required if elastic net was used
 #' @param regularizedOnly boolean: should only regularized parameters be plotted?``
 #' @export
-setMethod("plot", "regularizedSEM", function (x, alpha = NULL, regularizedOnly = TRUE) {
+setMethod("plot", "regularizedSEM", function (x, regularizedOnly = TRUE) {
   parameters <- x@parameters
-  if(is.null(alpha)) {
-    alpha <- unique(parameters$alpha)[1]
-    
-    if(length(unique(parameters$alpha)) != 1) warning(paste0("Models for different values of alpha were fitted, but not alpha was provided to the plotting function. Plotting for alpha=", 
-                                                             alpha, ". You can specify specific alpha values with, for instance, plot(aCV4Regsem, alpha = .02)"))
-  }
-  if(!alpha %in% parameters$alpha){
-    stop(paste0("alpha=", alpha, " is was not tested in the model. Only found the following alpha values: "),
-         paste0(unique(parameters$alpha), collapse= ", "), "."
-    )
-  }
+  tuningParameters <- x@parameters[,!colnames(x@parameters)%in%x@parameterLabels,drop=FALSE]
+  tuningParameters <- tuningParameters[,apply(tuningParameters,2,function(x) length(unique(x)) > 1),drop=FALSE]
+  
+  nTuning <- ncol(tuningParameters)
+  
+  if(nTuning > 2) 
+    stop("Plotting currently only supported for up to 2 tuning parameters")
+  if(nTuning == 2 & !("plotly" %in% rownames(installed.packages())))
+    stop("Plotting more than one tuning parameter requires the package plotly")
+  
   
   if(regularizedOnly){
+    
     parameters <- cbind(
-      lambda = x@fits$lambda,
-      alpha = x@fits$alpha,
-      coef(x, alpha = alpha)[,x@regularized, drop = FALSE]
+      tuningParameters,
+      parameters[,x@regularized, drop = FALSE]
     )
     parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@regularized)
     
+  }else{
+    
+    parameters <- cbind(
+      tuningParameters,
+      parameters
+    )
+    parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@parameterLabels)
+    
+  }
+  
+  if(nTuning == 1){
+    
     ggplot2::ggplot(data = parametersLong,
-                    mapping = ggplot2::aes(x = lambda, y = value, group = name)) +
+                    mapping = ggplot2::aes_string(x = colnames(tuningParameters), 
+                                                  y = "value", 
+                                                  group = "name")) +
       ggplot2::geom_line(colour = "#008080")+
       ggplot2::ggtitle("Regularized Parameters")
     
   }else{
-    parameters <- cbind(
-      lambda = x@fits$lambda,
-      alpha = x@fits$alpha,
-      coef(x, alpha = alpha)
+    parametersLong$name <- paste0(parametersLong$name, 
+                                  "_", 
+                                  unlist(parametersLong[,colnames(tuningParameters)[2]]))
+    parametersLong$tp1 <- unlist(parametersLong[,colnames(tuningParameters)[1]])
+    parametersLong$tp2 <- unlist(parametersLong[,colnames(tuningParameters)[2]])
+    plt <- plotly::plot_ly(parametersLong, 
+                           x = ~tp1, y = ~tp2, z = ~value, 
+                           type = 'scatter3d',
+                           mode = 'lines',
+                           opacity = 1,
+                           color = ~name,
+                           split = ~tp2,
+                           line = list(width = 6, 
+                                       reverscale = FALSE)
     )
-    parametersLong <- tidyr::pivot_longer(data = parameters, cols = x@parameterLabels)
-    parametersLong$regularized <- parametersLong$name %in% x@regularized
+    print(plt)
     
-    ggplot2::ggplot(data = parametersLong,
-                    mapping = ggplot2::aes(x = lambda, 
-                                           y = value, 
-                                           group = name, 
-                                           color = regularized)) +
-      ggplot2::geom_line()+ 
-      ggplot2::scale_color_manual(values=c("FALSE"="gray","TRUE"="#008080")) +
-      ggplot2::ggtitle("Parameter Estimates")
   }
+  
 })

@@ -4,7 +4,13 @@
 \alias{ridgeBfgs}
 \title{ridgeBfgs}
 \usage{
-ridgeBfgs(lavaanModel, regularized, lambdas = NULL, control = controlBFGS())
+ridgeBfgs(
+  lavaanModel,
+  regularized,
+  lambdas = NULL,
+  modifyModel = lessSEM::modifyModel(),
+  control = controlBFGS()
+)
 }
 \arguments{
 \item{lavaanModel}{model of class lavaan}
@@ -14,6 +20,8 @@ If you are unsure what these parameters are called, use
 getLavaanParameters(model) with your lavaan model object}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
+
+\item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.}

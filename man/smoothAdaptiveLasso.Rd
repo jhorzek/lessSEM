@@ -12,6 +12,7 @@ smoothAdaptiveLasso(
   nLambdas = NULL,
   epsilon,
   tau,
+  modifyModel = lessSEM::modifyModel(),
   control = controlBFGS()
 )
 }
@@ -37,6 +38,8 @@ It will then generate nLambda values between 0 and the computed lambda.}
 \item{epsilon}{epsilon > 0; controls the smoothness of the approximation. Larger values = smoother}
 
 \item{tau}{parameters below threshold tau will be seen as zeroed}
+
+\item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlBFGS function. See ?controlBFGS for more details.}

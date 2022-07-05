@@ -35,9 +35,23 @@
 #' @name lessSEM
 NULL
 
+# SEM Module
 Rcpp::loadModule("SEM_cpp", TRUE)
+
+# SEM optimization
 Rcpp::loadModule("istaEnet_cpp", TRUE)
 Rcpp::loadModule("istaEnetGeneralPurpose_cpp", TRUE)
+Rcpp::loadModule("istaCappedL1_cpp", TRUE)
+Rcpp::loadModule("istaLSP_cpp", TRUE)
+Rcpp::loadModule("istaScad_cpp", TRUE)
+Rcpp::loadModule("istaMcp_cpp", TRUE)
 Rcpp::loadModule("glmnetEnet_cpp", TRUE)
-Rcpp::loadModule("glmnetEnetGeneralPurpose_cpp", TRUE)
 Rcpp::loadModule("bfgsEnet_cpp", TRUE)
+
+# General Purpose
+Rcpp::loadModule("glmnetEnetGeneralPurpose_cpp", TRUE)
+Rcpp::loadModule("istaEnetGeneralPurpose_cpp", TRUE)
+Rcpp::loadModule("istaLspGeneralPurpose_cpp", TRUE)
+Rcpp::loadModule("istaMcpGeneralPurpose_cpp", TRUE)
+Rcpp::loadModule("istaScadGeneralPurpose_cpp", TRUE)
+Rcpp::loadModule("istaCappedL1GeneralPurpose_cpp", TRUE)

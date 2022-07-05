@@ -5,7 +5,6 @@
 \title{controlIsta}
 \usage{
 controlIsta(
-  addMeans = TRUE,
   startingValues = "est",
   L0 = 0.1,
   eta = 2,
@@ -16,13 +15,10 @@ controlIsta(
   convCritInner = 1,
   sigma = 0.1,
   stepSizeInheritance = ifelse(accelerate, 1, 3),
-  activeSet = NULL,
   verbose = 0
 )
 }
 \arguments{
-\item{addMeans}{If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average}
-
 \item{startingValues}{option to provide initial starting values. Only used for the first lambda. Three options are supported. Setting to "est" will use the estimates
 from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
 values can be passed to the function which will then be used as starting values.}
@@ -50,8 +46,6 @@ depends directly on the sample size}
 
 \item{sigma}{sigma in (0,1) is used by the gist convergence criterion. larger
 simga enforce larger improvement in fit}
-
-\item{activeSet}{Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.}
 
 \item{verbose}{if set to a value > 0, the fit every "verbose" iterations is printed. 
 If set to -99 you will get the debug output which is horribly convoluted}

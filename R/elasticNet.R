@@ -82,6 +82,12 @@
 #' coef(regsem, criterion = "AIC")
 #' coef(regsem, criterion = "BIC")
 #' 
+#' # 5-fold cross-Validation
+#' cv <- cv4regularizedSEM(regularizedSEM = regsem, 
+#'                           k = 5)
+#' coef(cv)
+#' 
+#' 
 #' #### Advanced ###
 #' # Switching the optimizer # 
 #' # Use the "method" argument to switch the optimizer. The control argument
@@ -95,10 +101,6 @@
 #' 
 #' # Note: The results are basically identical:
 #' regsemGlmnet@parameters - regsem@parameters
-#' 
-#' ## The fitted model can then be used as basis for an approximate cross-validation
-#' # (see ?lessSEM::acv4lasso) or approximate influence functions
-#' # (see ?lessSEM::ai4lasso)
 #' @export
 lasso <- function(lavaanModel,
                   regularized,
@@ -107,30 +109,23 @@ lasso <- function(lavaanModel,
                   method = "ista", 
                   modifyModel = lessSEM::modifyModel(),
                   control = controlIsta()){
-  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                 transformVariances = TRUE,
-                                 whichPars = "est",
-                                 addMeans = modifyModel$addMeans, 
-                                 activeSet = modifyModel$activeSet,
-                                 dataSet = modifyModel$dataSet)
   
-  weights <- lessSEM::getParameters(SEM, raw = FALSE)
-  weights[] <- 0
-  weights[regularized] <- 1
-  if(! all(regularized %in% names(weights))) stop(paste0(
-    "You specified that the following parameters should be regularized:\n",
-    paste0(regularized, collapse = ", "), 
-    ". Not all of these parameters could be found in the model.\n",
-    "The model has the following parameters:\n",
-    names(weights)
-  ))
+  if(is.null(lambdas) && is.null(nLambdas)){
+    stop("Specify either lambdas or nLambdas")
+  }
   
-  result <- elasticNet(
+  if(!is.null(nLambdas)){
+    tuningParameters <- data.frame(nLambdas = nLambdas)
+  }else{
+    tuningParameters <- data.frame(lambda = lambdas,
+                                   alpha = 1)
+  }
+  
+  result <- regularizeSEMInternal(
     lavaanModel = lavaanModel,
-    weights = weights,
-    lambdas = lambdas,
-    nLambdas = nLambdas,
-    alphas = 1,
+    penalty = "lasso",
+    weights = regularized,
+    tuningParameters = tuningParameters,
     method = method, 
     modifyModel = modifyModel,
     control = control
@@ -188,8 +183,8 @@ lasso <- function(lavaanModel,
 #' dataset <- simulateExampleData()
 #' 
 #' lavaanSyntax <- "
-#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
-#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
 #'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
 #' f ~~ 1*f
 #' "
@@ -200,27 +195,15 @@ lasso <- function(lavaanModel,
 #'                            std.lv = TRUE)
 #' 
 #' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel, 
+#' # semPlot::semPaths(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
-#' 
-#' # names of the regularized parameters:
-#' regularized = paste0("l", 6:15)
-#' 
-#' # define adaptive lasso weights:
-#' # We use the inverse of the absolute unregularized parameters 
-#' # (this is the default in adaptiveLasso and can also specified
-#' # by setting weights = NULL)
-#' weights <- 1/abs(getLavaanParameters(lavaanModel))
-#' weights[!names(weights) %in% regularized] <- 0
 #' 
 #' regsem <- adaptiveLasso(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
-#'   regularized = regularized, 
-#'   # set adaptive lasso weights
-#'   weights = weights,
+#'   regularized = paste0("l", 6:15),
 #'   # in case of lasso and adaptive lasso, we can specify the number of lambda
 #'   # values to use. lessSEM will automatically find lambda_max and fit
 #'   # models for nLambda values between 0 and lambda_max. For the other
@@ -241,14 +224,21 @@ lasso <- function(lavaanModel,
 #' coef(regsem, criterion = "AIC")
 #' coef(regsem, criterion = "BIC")
 #' 
+#' # 5-fold cross-Validation
+#' # with new weights for each subset
+#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
+#'                           k = 5,
+#'                           reweigh = TRUE)
+#' coef(cv)
+#' 
+#' 
 #' #### Advanced ###
-#' # Switching the optimizer # 
+#' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
 #' regsemGlmnet <- adaptiveLasso(
 #'   lavaanModel = lavaanModel,
-#'   regularized = regularized,
-#'   weights = weights,
+#'   regularized = paste0("l", 6:15),
 #'   nLambdas = 50,
 #'   method = "glmnet",
 #'   control = controlGlmnet())
@@ -257,36 +247,35 @@ lasso <- function(lavaanModel,
 #' regsemGlmnet@parameters - regsem@parameters
 #' @export
 adaptiveLasso <- function(lavaanModel,
-                  regularized,
-                  weights = NULL,
-                  lambdas = NULL,
-                  nLambdas = NULL,
-                  method = "ista", 
-                  modifyModel = lessSEM::modifyModel(),
-                  control = lessSEM::controlIsta()){
-  if(is.null(weights)){
-    weights <- 1/abs(getLavaanParameters(lavaanModel))
-    weights[!names(weights) %in% regularized] <- 0
+                          regularized,
+                          weights = NULL,
+                          lambdas = NULL,
+                          nLambdas = NULL,
+                          method = "ista", 
+                          modifyModel = lessSEM::modifyModel(),
+                          control = lessSEM::controlIsta()){
+  if(is.null(lambdas) && is.null(nLambdas)){
+    stop("Specify either lambdas or nLambdas")
+  }
+  if(!is.null(nLambdas)){
+    tuningParameters <- data.frame(nLambdas = nLambdas)
+  }else{
+    tuningParameters <- data.frame(lambda = lambdas,
+                                   alpha = 1)
   }
   
-  if(! all(regularized %in% names(weights))) stop(paste0(
-    "You specified that the following parameters should be regularized:\n",
-    paste0(regularized, collapse = ", "), 
-    ". Not all of these parameters could be found in the model.\n",
-    "The model has the following parameters:\n",
-    names(weights)
-  ))
+  if(is.null(weights)) weights <- regularized
   
-  result <- elasticNet(
+  result <- regularizeSEMInternal(
     lavaanModel = lavaanModel,
+    penalty = "adaptiveLasso",
     weights = weights,
-    lambdas = lambdas,
-    nLambdas = nLambdas,
-    alphas = 1,
+    tuningParameters = tuningParameters,
     method = method, 
     modifyModel = modifyModel,
     control = control
   )
+  
   return(result)
   
 }
@@ -329,8 +318,8 @@ adaptiveLasso <- function(lavaanModel,
 #' dataset <- simulateExampleData()
 #' 
 #' lavaanSyntax <- "
-#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
-#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
 #'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
 #' f ~~ 1*f
 #' "
@@ -341,7 +330,7 @@ adaptiveLasso <- function(lavaanModel,
 #'                            std.lv = TRUE)
 #' 
 #' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel, 
+#' # semPlot::semPaths(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
@@ -350,9 +339,7 @@ adaptiveLasso <- function(lavaanModel,
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
 #'   regularized = paste0("l", 6:15),
-#'   # for ridge regularization, the lambdas have to be defined
-#'   # explicitly:
-#'   lambdas = seq(0,1,length.out = 100))
+#'   lambdas = seq(0,1,length.out = 20))
 #' 
 #' # use the plot-function to plot the regularized parameters:
 #' plot(regsem)
@@ -360,61 +347,42 @@ adaptiveLasso <- function(lavaanModel,
 #' # elements of regsem can be accessed with the @ operator:
 #' regsem@parameters[1,]
 #' 
-#' # Model selection should be done using cross-validation
-#' cv <- cv4ridge(regularizedSEM = regsem, k = 5)
-#' plot(cv)
-#' coef(cv) # get best fitting model parameters
+#' # 5-fold cross-Validation
+#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
+#'                           k = 5)
+#' coef(cv)
+#' 
 #' 
 #' #### Advanced ###
-#' # Switching the optimizer # 
+#' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
 #' regsemGlmnet <- ridge(
 #'   lavaanModel = lavaanModel,
 #'   regularized = paste0("l", 6:15),
-#'   lambdas = seq(0,1,length.out = 100),
+#'   lambdas = seq(0,1,length.out = 20),
 #'   method = "glmnet",
 #'   control = controlGlmnet())
 #' 
 #' # Note: The results are basically identical:
 #' regsemGlmnet@parameters - regsem@parameters
-#' 
-#' ## The fitted model can then be used as basis for an approximate cross-validation
-#' # (see ?lessSEM::acv4ridge) or approximate influence functions
-#' # (see ?lessSEM::ai4ridge)
 #' @export
 ridge <- function(lavaanModel,
                   regularized,
-                  lambdas = NULL,
+                  lambdas,
                   method = "ista", 
                   modifyModel = lessSEM::modifyModel(),
                   control = controlIsta()){
   
-  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                 transformVariances = TRUE,
-                                 whichPars = "est",
-                                 addMeans = control$addMeans, 
-                                 activeSet = control$activeSet,
-                                 dataSet = modifyModel$dataSet)
   
-  weights <- lessSEM::getParameters(SEM, raw = FALSE)
-  weights[] <- 0
-  weights[regularized] <- 1
-  if(! all(regularized %in% names(weights))) stop(paste0(
-    "You specified that the following parameters should be regularized:\n",
-    paste0(regularized, collapse = ", "), 
-    ". Not all of these parameters could be found in the model.\n",
-    "The model has the following parameters:\n",
-    names(weights)
-  ))
-  
-  result <- elasticNet(
+  result <- regularizeSEMInternal(
     lavaanModel = lavaanModel,
-    weights = weights,
-    lambdas = lambdas,
-    nLambdas = NULL,
-    alphas = 0,
+    penalty = "ridge",
+    weights = regularized,
+    tuningParameters = data.frame(lambda = lambdas,
+                                   alpha = 0),
     method = method, 
+    modifyModel = modifyModel,
     control = control
   )
   return(result)
@@ -467,8 +435,8 @@ ridge <- function(lavaanModel,
 #' dataset <- simulateExampleData()
 #' 
 #' lavaanSyntax <- "
-#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
-#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
 #'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
 #' f ~~ 1*f
 #' "
@@ -479,364 +447,67 @@ ridge <- function(lavaanModel,
 #'                            std.lv = TRUE)
 #' 
 #' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel, 
+#' # semPlot::semPaths(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
-#' 
-#' # The implementation of elastic net is relatively flexible and also
-#' # encompasses lasso, adaptive lasso, and ridge regularization.
-#' # The function call is therefore slightly more complicated. If you 
-#' # are only looking for lasso, adaptive lasso or ridge, there are 
-#' # dedicated functions for that (see ?lasso, ?adaptiveLasso, ?ridge)
-#' 
-#' # elasticNet expects weights for each parameter. This way, we can
-#' # decide which parameters are regularized (all parameters with weight = 0
-#' # remain unregularized)
-#' # names of the regularized parameters:
-#' regularized = paste0("l", 6:15)
-#' weights <- getLavaanParameters(lavaanModel)
-#' weights[!names(weights) %in% regularized] <- 0
 #' 
 #' regsem <- elasticNet(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
-#'   weights = weights, 
+#'   # names of the regularized parameters:
+#'   regularized = paste0("l", 6:15),
 #'   lambdas = seq(0,1,length.out = 20),
-#'   alpha = seq(0,1,length.out = 5))
+#'   alphas = seq(0,1,.1))
 #' 
 #' # elements of regsem can be accessed with the @ operator:
 #' regsem@parameters[1,]
 #' 
-#' # use cross-validation to find the best parameters
-#' cv <- cv4elasticNet(
-#'   regularizedSEM = regsem, 
-#'   k = 5
-#' )
-#' cv
+#' # optional: plotting the paths requires installation of plotly
+#' # plot(regsem)
+#' 
+#' # 5-fold cross-Validation
+#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
+#'                           k = 5)
+#' coef(cv)
+#' # optional: plotting the paths requires installation of plotly
+#' # plot(cv, what = "fit")
 #' 
 #' #### Advanced ###
-#' # Switching the optimizer # 
+#' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
 #' regsemGlmnet <- elasticNet(
-#'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
-#'   weights = weights, 
+#'   regularized = paste0("l", 6:15),
 #'   lambdas = seq(0,1,length.out = 20),
-#'   alpha = seq(0,1,length.out = 5),
+#'   alphas = seq(0,1,.1),
 #'   method = "glmnet",
 #'   control = controlGlmnet())
 #' 
 #' # Note: The results are basically identical:
-#' regsemGlmnet@parameters - regsem@parameters 
+#' regsemGlmnet@parameters - regsem@parameters
 #' @export
 elasticNet <- function(lavaanModel,
-                       weights,
-                       lambdas = NULL,
-                       nLambdas = NULL,
+                       regularized,
+                       lambdas,
                        alphas,
                        method = "ista", 
                        modifyModel = lessSEM::modifyModel(),
                        control = controlIsta()){
   
-  inputArguments <- as.list(environment())
+  if(any(alphas < 0) || any(alphas > 1)) 
+    stop("alpha must be between 0 and 1.")
   
-  if(! method %in% c("ista", "glmnet")) 
-    stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  
-  if(is.null(lambdas) && is.null(nLambdas)) 
-    stop("Specify lambdas or nLambdas")
-  if(!is.null(lambdas) && !is.null(nLambdas))
-    stop("Specify either lambdas or nLambdas, not both")
-  if(!is.null(nLambdas) && any(alphas != 1))
-    stop("nLambdas only supported for lasso type penalty (alpha = 1).")
-  
-  if(method == "ista" && !is(control, "controlIsta")) 
-    stop("control must be of class controlIsta. See ?controlIsta.")
-  if(method == "glmnet" && !is(control, "controlGlmnet")) 
-    stop("control must be of class controlGlmnet See ?controlGlmnet")
-  
-  if(!is(lavaanModel, "lavaan"))
-    stop("lavaanModel must be of class lavaan")
-  
-  if(lavaanModel@Options$estimator != "ML") 
-    stop("lavaanModel must be fit with ml estimator.")
-  
-  rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
-  if(is(rawData, "try-error")) 
-    stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
-  N <- nrow(rawData)
-  
-  ### initialize model ####
-  startingValues <- control$startingValues
-  if(any(startingValues == "est")){
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                transformVariances = TRUE,
-                                whichPars = "est",
-                                addMeans = modifyModel$addMeans, 
-                                activeSet = modifyModel$activeSet,
-                                dataSet = modifyModel$dataSet)
-  }else if(any(startingValues == "start")){
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                transformVariances = TRUE,
-                                whichPars = "start",
-                                addMeans = modifyModel$addMeans, 
-                                activeSet = modifyModel$activeSet,
-                                dataSet = modifyModel$dataSet)
-  }else if(is.numeric(startingValues)){
-    
-    if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                transformVariances = TRUE,
-                                whichPars = "start", 
-                                fit = FALSE,
-                                addMeans = modifyModel$addMeans, 
-                                activeSet = modifyModel$activeSet,
-                                dataSet = modifyModel$dataSet)
-    SEM <- lessSEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(lessSEM:::fit(SEM))
-    if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
-      stop("Infeasible starting values.")
-    
-  }else{
-    stop("Invalid startingValues passed to elasticNet. See e.g., ?controlIsta for more information.")
-  }
-  
-  # get parameters
-  startingValues <- lessSEM:::getParameters(SEM, raw = TRUE)
-  rawParameters <- lessSEM:::getParameters(SEM, raw = TRUE)
-  
-  # make sure that the weights are in the correct order
-  if(is.null(names(weights))) stop("weights must have the same names as the parameters")
-  if(length(weights) != length(rawParameters)) stop("weights must be of the same length as the parameter vector.")
-  if(any(!is.numeric(weights))) stop("weights must be numeric")
-  weights <- weights[names(rawParameters)]
-  
-  #### glmnet requires an initial Hessian ####
-  if(method == "glmnet"){
-    initialHessian <- control$initialHessian
-    if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
-      
-      if(!all(rownames(initialHessian) %in% names(lessSEM::getLavaanParameters(lavaanModel))) ||
-         !all(colnames(initialHessian) %in% names(lessSEM::getLavaanParameters(lavaanModel)))
-      ) stop("initialHessian must have the parameter names as rownames and colnames. See lessSEM::getLavaanParameters(lavaanModel).")
-      
-    }else if(any(initialHessian == "compute")){
-      
-      initialHessian <- lessSEM:::getHessian(SEM = SEM, raw = TRUE)
-      
-    }else if(any(initialHessian == "scoreBased")){
-      
-      scores <- lessSEM:::getScores(SEM = SEM, raw = TRUE)
-      FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
-      rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
-      for(score in 1:nrow(scores)){
-        FisherInformation <- FisherInformation + t(-.5*scores[score,, drop = FALSE]) %*%(-.5*scores[score,, drop = FALSE]) # we are using the -2 log-Likelihood
-      }
-      
-      initialHessian <- -2*(-FisherInformation) # negative log-likelihood
-      # make symmetric; just in case...
-      initialHessian <- .5*(initialHessian + t(initialHessian))
-      while(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
-        diag(initialHessian) <- diag(initialHessian) + 1e-4
-      }
-      
-    }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
-      initialHessian <- diag(initialHessian,length(rawParameters))
-      rownames(initialHessian) <- names(rawParameters)
-      colnames(initialHessian) <- names(rawParameters)
-    }else{
-      stop("Invalid initialHessian passed to glmnet See ?controlGlmnet for more information.")
-    }
-    
-    control$initialHessian <- initialHessian
-  }
-  
-  #### prepare regularized model object ####
-  if(method == "glmnet"){
-    
-    controlIntern <- list(
-      initialHessian = control$initialHessian,
-      stepSize = control$stepSize,
-      sigma = control$sigma,
-      gamma = control$gamma,
-      maxIterOut = control$maxIterOut,
-      maxIterIn = control$maxIterIn,
-      maxIterLine = control$maxIterLine,
-      breakOuter = N*control$breakOuter,
-      breakInner = N*control$breakInner,
-      convergenceCriterion = control$convergenceCriterion, 
-      verbose = control$verbose
-    )
-    
-    regularizedModel <- new(glmnetEnet, 
-                            weights, 
-                            controlIntern)
-    
-  }else if(method == "ista"){
-    
-    controlIntern <- list(
-      L0 = control$L0,
-      eta = control$eta,
-      accelerate = control$accelerate,
-      maxIterOut = control$maxIterOut,
-      maxIterIn = control$maxIterIn,
-      breakOuter = N*control$breakOuter,
-      convCritInner = control$convCritInner,
-      sigma = control$sigma,
-      stepSizeInheritance = control$stepSizeInheritance,
-      verbose = control$verbose
-    )
-    
-    regularizedModel <- new(istaEnet, 
-                            weights, 
-                            controlIntern)
-  }
-  
-  #### define tuning parameters and prepare fit results ####
-  ## get max lambda ##
-  if(!is.null(nLambdas)){
-    message(paste0(
-      "Automatically selecting the maximal lambda value.\n",
-      "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
-    )
-    
-    maxLambda <- getMaxLambda_C(regularizedModel = regularizedModel,
-                              SEM = SEM,
-                              rawParameters = rawParameters,
-                              weights = weights,
-                              N = N)
-    lambdas <- seq(0,
-                   maxLambda,
-                   length.out = nLambdas)
-    
-    inputArguments$lambdas = lambdas
-    
-  }
-  
-  tuningGrid <- expand.grid("lambda" = lambdas, 
-                            "alpha" = alphas)
-  
-  fits <- data.frame(
-    tuningGrid,
-    "m2LL" = NA,
-    "regM2LL"= NA,
-    "nonZeroParameters" = NA,
-    "convergence" = NA
+  result <- regularizeSEMInternal(
+    lavaanModel = lavaanModel,
+    penalty = "elasticNet",
+    weights = regularized,
+    tuningParameters = expand.grid(lambda = lambdas,
+                                   alpha = alphas),
+    method = method, 
+    modifyModel = modifyModel,
+    control = control
   )
-  
-  parameterEstimates <- as.data.frame(matrix(NA,
-                                             nrow = nrow(tuningGrid), 
-                                             ncol = length(rawParameters)))
-  colnames(parameterEstimates) <- names(rawParameters)
-  parameterEstimates <- cbind(
-    tuningGrid,
-    parameterEstimates
-  )
-  
-  if(method == "glmnet" && control$saveHessian){
-    Hessians <- list(
-      "lambda" = tuningGrid$lambda,
-      "alpha" = tuningGrid$alpha,
-      "Hessian" = lapply(1:nrow(tuningGrid), 
-                         matrix, 
-                         data= NA, 
-                         nrow=nrow(initialHessian), 
-                         ncol=ncol(initialHessian))
-    )
-  }else{
-    Hessians <- list(NULL)
-  }
-  
-  #### print progress ####
-  if(control$verbose == 0){
-    progressbar = txtProgressBar(min = 0, 
-                                 max = nrow(tuningGrid), 
-                                 initial = 0, 
-                                 style = 3)
-  }
-  
-  #### Iterate over all tuning parameter combinations and fit models ####
-  
-  for(it in 1:nrow(tuningGrid)){
-    if(control$verbose == 0){
-      setTxtProgressBar(progressbar,it)
-    }else{
-      cat(paste0("\nIteration [", it, "/", nrow(tuningGrid),"]\n"))
-    }
-    
-    lambda <- tuningGrid$lambda[it]
-    alpha <- tuningGrid$alpha[it]
-    
-    result <- try(regularizedModel$optimize(rawParameters,
-                                            SEM,
-                                            lambda,
-                                            alpha)
-    )
-    if(is(result, "try-error")) next
-    
-    rawParameters <- result$rawParameters
-    fits$nonZeroParameters[it] <- length(rawParameters) - 
-      sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
-    fits$regM2LL[it] <- result$fit
-    fits$convergence[it] <- result$convergence
-    
-    SEM <- lessSEM::setParameters(SEM, 
-                               names(rawParameters), 
-                               values = rawParameters, 
-                               raw = TRUE)
-    fits$m2LL[it] <- SEM$fit()
-    transformedParameters <- lessSEM:::getParameters(SEM,
-                                                  raw = FALSE)
-    parameterEstimates[it, names(rawParameters)] <- transformedParameters[names(rawParameters)]
-    
-    if(method == "glmnet" && control$saveHessian) 
-      Hessians$Hessian[[it]] <- result$Hessian
-    
-    # set initial values for next iteration
-    if(is(SEM, "try-Error")){
-      # reset
-      warning("Fit for lambda = ",
-              lambda, "alpha = ", 
-              alpha,
-              " resulted in Error!")
-      
-      SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                  transformVariances = TRUE,
-                                  whichPars = startingValues,
-                                  addMeans = control$addMeans)
-      
-      if(method == "glmnet"){
-        regularizedModel$setHessian(controlIntern$initialHessian)
-      }
-      
-    }else{
-      
-      if(method == "glmnet"){
-        if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
-        
-        # set Hessian for next iteration
-        regularizedModel$setHessian(result$Hessian)
-        
-      }
-      
-    }
-    
-  }
-  
-  internalOptimization <- list(
-    "HessiansOfDifferentiablePart" = Hessians
-  )
-  
-  results <- new("regularizedSEM",
-                 parameters = parameterEstimates,
-                 fits = fits,
-                 parameterLabels = names(rawParameters),
-                 weights = weights,
-                 regularized = names(weights)[weights!=0],
-                 internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
-  
-  return(results)
+  return(result)
   
 }

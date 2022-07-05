@@ -123,13 +123,47 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// mcpPenalty_C
+double mcpPenalty_C(const double par, const double lambda_p, const double theta);
+RcppExport SEXP _lessSEM_mcpPenalty_C(SEXP parSEXP, SEXP lambda_pSEXP, SEXP thetaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double >::type par(parSEXP);
+    Rcpp::traits::input_parameter< const double >::type lambda_p(lambda_pSEXP);
+    Rcpp::traits::input_parameter< const double >::type theta(thetaSEXP);
+    rcpp_result_gen = Rcpp::wrap(mcpPenalty_C(par, lambda_p, theta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// scadPenalty_C
+double scadPenalty_C(const double par, const double lambda_p, const double theta);
+RcppExport SEXP _lessSEM_scadPenalty_C(SEXP parSEXP, SEXP lambda_pSEXP, SEXP thetaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double >::type par(parSEXP);
+    Rcpp::traits::input_parameter< const double >::type lambda_p(lambda_pSEXP);
+    Rcpp::traits::input_parameter< const double >::type theta(thetaSEXP);
+    rcpp_result_gen = Rcpp::wrap(scadPenalty_C(par, lambda_p, theta));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 RcppExport SEXP _rcpp_module_boot_SEM_cpp();
+RcppExport SEXP _rcpp_module_boot_istaCappedL1_cpp();
 RcppExport SEXP _rcpp_module_boot_bfgsEnet_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetEnet_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnet_cpp();
+RcppExport SEXP _rcpp_module_boot_istaCappedL1GeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetEnetGeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaLspGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaMcpGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaScadGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaLSP_cpp();
+RcppExport SEXP _rcpp_module_boot_istaMcp_cpp();
+RcppExport SEXP _rcpp_module_boot_istaScad_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_lessSEM_innerGLMNET", (DL_FUNC) &_lessSEM_innerGLMNET, 10},
@@ -139,12 +173,22 @@ static const R_CallMethodDef CallEntries[] = {
     {"_lessSEM_computeGroupM2LL", (DL_FUNC) &_lessSEM_computeGroupM2LL, 6},
     {"_lessSEM_computeImpliedCovariance", (DL_FUNC) &_lessSEM_computeImpliedCovariance, 3},
     {"_lessSEM_computeImpliedMeans", (DL_FUNC) &_lessSEM_computeImpliedMeans, 3},
+    {"_lessSEM_mcpPenalty_C", (DL_FUNC) &_lessSEM_mcpPenalty_C, 3},
+    {"_lessSEM_scadPenalty_C", (DL_FUNC) &_lessSEM_scadPenalty_C, 3},
     {"_rcpp_module_boot_SEM_cpp", (DL_FUNC) &_rcpp_module_boot_SEM_cpp, 0},
+    {"_rcpp_module_boot_istaCappedL1_cpp", (DL_FUNC) &_rcpp_module_boot_istaCappedL1_cpp, 0},
     {"_rcpp_module_boot_bfgsEnet_cpp", (DL_FUNC) &_rcpp_module_boot_bfgsEnet_cpp, 0},
     {"_rcpp_module_boot_glmnetEnet_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnet_cpp, 0},
     {"_rcpp_module_boot_istaEnet_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnet_cpp, 0},
+    {"_rcpp_module_boot_istaCappedL1GeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaCappedL1GeneralPurpose_cpp, 0},
     {"_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp, 0},
     {"_rcpp_module_boot_istaEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaLspGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaLspGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaMcpGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcpGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaScadGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaScadGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaLSP_cpp", (DL_FUNC) &_rcpp_module_boot_istaLSP_cpp, 0},
+    {"_rcpp_module_boot_istaMcp_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcp_cpp, 0},
+    {"_rcpp_module_boot_istaScad_cpp", (DL_FUNC) &_rcpp_module_boot_istaScad_cpp, 0},
     {NULL, NULL, 0}
 };
 
