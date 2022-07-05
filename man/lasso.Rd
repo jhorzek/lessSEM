@@ -106,6 +106,12 @@ BIC(regsem)
 coef(regsem, criterion = "AIC")
 coef(regsem, criterion = "BIC")
 
+# 5-fold cross-Validation
+cv <- cv4regularizedSEM(regularizedSEM = regsem, 
+                          k = 5)
+coef(cv)
+
+
 #### Advanced ###
 # Switching the optimizer # 
 # Use the "method" argument to switch the optimizer. The control argument
@@ -119,8 +125,4 @@ regsemGlmnet <- lasso(
 
 # Note: The results are basically identical:
 regsemGlmnet@parameters - regsem@parameters
-
-## The fitted model can then be used as basis for an approximate cross-validation
-# (see ?lessSEM::acv4lasso) or approximate influence functions
-# (see ?lessSEM::ai4lasso)
 }

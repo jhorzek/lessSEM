@@ -31,12 +31,12 @@
 #' # Identical to regsem, lessSEM builds on the lavaan
 #' # package for model specification. The first step
 #' # therefore is to implement the model in lavaan.
-#' set.seed(123)
+#' 
 #' dataset <- simulateExampleData()
 #' 
 #' lavaanSyntax <- "
-#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
-#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
 #'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
 #' f ~~ 1*f
 #' "
@@ -47,7 +47,7 @@
 #'                            std.lv = TRUE)
 #' 
 #' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel, 
+#' # semPlot::semPaths(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
@@ -56,45 +56,16 @@
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
 #'   regularized = paste0("l", 6:15),
-#'   lambdas = seq(0,1,.1),
-#'   thetas = .1, # we "protect" paramter estimates which are above .1 in absolute
-#'   # value. These parameters contribute to the -2log-Likelihood as usual, 
-#'   # but are penalized as if they were of value .1
-#'   control = controlIsta())
-#' 
-#' # use the plot-function to plot the regularized parameters:
-#' plot(regsem)
+#'   lambdas = seq(0,1,length.out = 20),
+#'   thetas = seq(0.01,2,length.out = 5))
 #' 
 #' # elements of regsem can be accessed with the @ operator:
 #' regsem@parameters[1,]
 #' 
-#' # AIC and BIC:
-#' AIC(regsem)
-#' BIC(regsem)
-#' 
-#' # The best parameters can also be extracted with:
-#' coef(regsem, criterion = "AIC")
-#' coef(regsem, criterion = "BIC")
-#' 
-#' # Note: theta is also a tuning parameter, so you may want to test
-#' # multiple theta as well
-#' regsem <- cappedL1(
-#'   lavaanModel = lavaanModel,
-#'   regularized = paste0("l", 6:15),
-#'   lambdas = seq(0,1,.1),
-#'   thetas = seq(0.1,1,.1),
-#'   control = controlIsta()) 
-#' 
-#' # The best parameters can also be extracted with:
-#' coef(regsem, criterion = "AIC")
-#' coef(regsem, criterion = "BIC")
-#' 
-#' # cross-validation
-#' cv <- cv4cappedL1(regularizedSEM = regsem, 
-#'                   k = 5)
-#' # currently lacks a correct definition of coef, etc. Elements 
-#' # can be accessed as follows:
-#' cv@cvfits
+#' # 5-fold cross-Validation
+#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
+#'                           k = 5)
+#' coef(cv)
 #' @export
 cappedL1 <- function(lavaanModel,
                      regularized,
