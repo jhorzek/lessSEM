@@ -60,8 +60,6 @@ setMethod("summary", "CV4RegularizedSEM", function (object) {
 #' @export
 setMethod("coef", "CV4RegularizedSEM", function (object, rule = "min") {
   
-  if(is.null(lambda) && is.null(alpha)) {
-    # using rule
     if(!rule %in% c("min", "1sd")) stop("rule must be one of: 'min', '1sd'.")
     if(rule == "min"){
       # return parameters of model with best cv fit
@@ -78,8 +76,6 @@ setMethod("coef", "CV4RegularizedSEM", function (object, rule = "min") {
       return(parameters)
     }
     
-  }
-  
   return(pars)
 })
 

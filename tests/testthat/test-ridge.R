@@ -1,5 +1,6 @@
-test_that("testing ridge", {
+test_that("testing elasticNet-ridge-c", {
   library(lslx)
+  library(lavaan)
   library(lessSEM)
   set.seed(123)
   N <- 50
@@ -31,7 +32,7 @@ test_that("testing ridge", {
   
   fitLslx$penalize_coefficient(name = paste0("y", 6:ncol(y)," <- f"))
   
-  lambdas <- seq(0,.8,.05)
+  lambdas <- seq(0,50,1)
   fitLslx$fit(penalty_method = "ridge",lambda_grid = lambdas, loss = "ml")
   
   # extract fits
@@ -47,20 +48,41 @@ test_that("testing ridge", {
   regularized <- paste0("y", 6:ncol(y),"<-f/g") 
   
   # replicate with regularizedSEM
-  regularizedLavaan <- paste0("f=~y",6:ncol(y))
-  rsem <- ridge(lavaanModel = modelFit, 
-                        regularized = regularizedLavaan,
-                        lambdas = lambdas)
-  testthat::expect_equal(all(round(rsem@parameters[,regularizedLavaan] - lslxParameter[,regularized],3)==0), TRUE)
-  plot(rsem)
-  coef(rsem)
-  coef(rsem, alpha = 0, lambda = .1)
   
-  ## Test approximated cross-validation
+  rsemIsta <- ridge(lavaanModel = modelFit, 
+                    regularized = paste0("f=~y",6:ncol(y)),
+                    lambdas = lambdas,
+                    method = "ista",
+                    control = controlIsta()
+  )
   
-  cv <- cv4ridge(regularizedSEM = rsem, k = 5)
-  coef(cv)
-  coef(cv, alpha = 0, lambda = .1)
-  plot(cv)
+  testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] - lslxParameter[,regularized]) < .002), TRUE)
+  plot(rsemIsta)
+  coef(rsemIsta)
+  
+  rsemGlmnet <- ridge(lavaanModel = modelFit, 
+                      regularized = paste0("f=~y",6:ncol(y)),
+                      lambdas = lambdas,
+                      method = "glmnet",
+                      control = controlGlmnet()
+  )
+  
+  testthat::expect_equal(all(abs(rsemGlmnet@parameters[,rsemGlmnet@regularized] - lslxParameter[,regularized]) < .002), TRUE)
+  plot(rsemGlmnet)
+  coef(rsemGlmnet)
+  
+  rsemBfgs <- ridgeBfgs(lavaanModel = modelFit,
+                        regularized = paste0("f=~y",6:ncol(y)),
+                        lambdas = lambdas
+  )
+  testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] -
+                                   rsemBfgs@parameters[,rsemBfgs@regularized]) < .002), TRUE)
+  
+  ## Test exact cross-validation
+  cvExact <- cv4regularizedSEM(regularizedSEM = rsemIsta, 
+                               k = 5)
+  coef(cvExact)
+  coef(cvExact, rule = "1sd")
+  plot(cvExact)
   
 })

@@ -34,7 +34,10 @@ test_that("testing elastic net-c", {
   
   lambdas <- seq(0,2,.1)
   alpha <- .5
-  fitLslx$fit(penalty_method = "elastic_net",lambda_grid = lambdas, delta_grid = alpha, loss = "ml")
+  fitLslx$fit(penalty_method = "elastic_net",
+              lambda_grid = lambdas, 
+              delta_grid = alpha, 
+              loss = "ml")
   
   # extract fits
   lslxParameter <- matrix(NA, 
@@ -50,42 +53,35 @@ test_that("testing elastic net-c", {
   
   # replicate with regularizedSEM
   lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
-  weights <- rep(0, length(lavaanParameters))
-  names(weights) <- names(lavaanParameters)
-  weights[paste0("f=~y",6:ncol(y))] <- 1
   
   rsemIsta <- elasticNet(lavaanModel = modelFit, 
-                         weights =  weights, 
+                         regularized =  paste0("f=~y",6:ncol(y)), 
                          alphas = alpha, 
                          lambdas = lambdas,
                          method = "ista",
-                         control = controlIsta(verbose = 0, 
-                                               startingValues = "est")
+                         control = controlIsta()
   )
   
   testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] - lslxParameter[,regularized]) < .002), TRUE)
   plot(rsemIsta)
   coef(rsemIsta)
-  coef(rsemIsta, alpha = alpha, lambda = .1)
-  
+
   rsemGlmnet <- elasticNet(lavaanModel = modelFit, 
-                           weights =  weights, 
+                           regularized =  paste0("f=~y",6:ncol(y)), 
                            alphas = alpha, 
                            lambdas = lambdas,
                            method = "glmnet",
-                           control = controlGlmnet(verbose = 0, 
-                                                   startingValues = "est")
+                           control = controlGlmnet()
   )
   testthat::expect_equal(all(abs(rsemGlmnet@parameters[,rsemGlmnet@regularized] - lslxParameter[,regularized]) < .002), TRUE)
   testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] - lslxParameter[,regularized]) < .002), TRUE)
   plot(rsemGlmnet)
   coef(rsemGlmnet)
-  coef(rsemGlmnet, alpha = alpha, lambda = .1)
-  
+
   ## Test exact cross-validation
-  cvExactGlmnet <- cv4elasticNet(regularizedSEM = rsemGlmnet, k = 5)
+  cvExactGlmnet <- cv4regularizedSEM(regularizedSEM = rsemGlmnet, k = 5)
   
-  cvExactIsta <- cv4elasticNet(regularizedSEM = rsemIsta, k = cvExactGlmnet@subsets)
+  cvExactIsta <- cv4regularizedSEM(regularizedSEM = rsemIsta, k = cvExactGlmnet@subsets)
   
   testthat::expect_equal(all(abs(cvExactGlmnet@cvfits - cvExactIsta@cvfits) < 1), TRUE)
   testthat::expect_equal(all(abs(coef(cvExactGlmnet) -

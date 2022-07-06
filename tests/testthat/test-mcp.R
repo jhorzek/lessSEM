@@ -103,6 +103,20 @@ test_that("testing mcp", {
           lslxParameter$theta == thetas[th]
       ] <-  m2LL + log(N)*(length(coefficents) - sum(regularizedCoefficients == 0) -1)
       
+      
+      fits$penalty[
+        lslxParameter$lambda == lambdas[l] &
+          lslxParameter$theta == thetas[th]
+      ] <- 0
+      for(r in regularized){
+        fits$penalty[
+          lslxParameter$lambda == lambdas[l] &
+            lslxParameter$theta == thetas[th]
+        ] <- fits$penalty[
+          lslxParameter$lambda == lambdas[l] &
+            lslxParameter$theta == thetas[th]
+        ] + N * mcpPenalty_C(coefficents[r], lambda_p = lambdas[l], theta = thetas[th])
+      }
     }
   }
   
@@ -122,11 +136,27 @@ test_that("testing mcp", {
                 -2*logLik(modelFit)
               ,4)==0),TRUE)
   
-  testthat::expect_equal(
-    all(round(rsemIsta@fits$m2LL -
-                fits$m2LL)==0),
-    TRUE
-  )
+  for(th in rsemIsta@fits$theta){
+    for(la in rsemIsta@fits$lambda){
+      print(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
+                                    rsemIsta@fits$lambda == la] -
+              (fits$m2LL[fits$theta == th &
+                           fits$lambda == la]
+               + fits$penalty[fits$theta == th &
+                                fits$lambda == la]
+              ))
+      testthat::expect_equal(
+        round(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
+                                      rsemIsta@fits$lambda == la] -
+                (fits$m2LL[fits$theta == th &
+                                            fits$lambda == la]
+                 + fits$penalty[fits$theta == th &
+                              fits$lambda == la]
+                 )
+        )==0,TRUE)
+      
+    }
+  }
   
   # compare to smoothed version
   tuningParameters <- expand.grid(theta = thetas,
@@ -149,7 +179,10 @@ test_that("testing mcp", {
   pars <- unlist(regsemApprox@parameters[sel,
                                          regsemApprox@parameterLabels]
   )
-  weights <- rsemIsta@inputArguments$weights
+  weights <- lavaanParameters
+  weights[] <- 0
+  weights[rsemIsta@inputArguments$weights] <- 1
+  weights
   lambda <- lambdas[2]
   theta <- thetas[1]
   pen <- 0

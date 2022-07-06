@@ -28,32 +28,26 @@ test_that("testing maxLambda", {
   names(weights) <- names(lavaanParameters)
   weights[paste0("f=~y",6:ncol(y))] <- 1/abs(lavaanParameters[paste0("f=~y",6:ncol(y))])
   
-  rsemIsta <- elasticNet(lavaanModel = modelFit, 
-                         weights =  weights, 
-                         alphas = 1, 
+  rsemIsta <- lasso(lavaanModel = modelFit, 
+                         regularized = paste0("f=~y",6:ncol(y)), 
                          nLambdas = 30,
                          method = "ista",
-                         control = controlIsta(verbose = 0, 
-                                               startingValues = "est")
+                         control = controlIsta()
   )
-  testthat::expect_equal(all(coef(rsemIsta, alpha = 1, lambda = max(rsemIsta@fits$lambda))[weights!=0] == 0),
-                         TRUE)
+  testthat::expect_equal(any(apply(rsemIsta@parameters[,rsemIsta@regularized] == 0, 1, all)), TRUE)
   
   plot(rsemIsta)
   coef(rsemIsta)
   coef(rsemIsta, criterion = "AIC")
   coef(rsemIsta, criterion = "BIC")
   
-  rsemGlmnet <- elasticNet(lavaanModel = modelFit, 
-                           weights =  weights, 
-                           alphas = 1, 
+  rsemGlmnet <- lasso(lavaanModel = modelFit, 
+                           regularized = paste0("f=~y",6:ncol(y)), 
                            nLambdas = 30,
                            method = "glmnet",
-                           control = controlGlmnet(verbose = 0, 
-                                                   startingValues = "est")
+                           control = controlGlmnet()
   )
-  testthat::expect_equal(all(coef(rsemGlmnet, alpha = 1, lambda = max(rsemGlmnet@fits$lambda))[weights!=0] == 0),
-                         TRUE)
+  testthat::expect_equal(any(apply(rsemGlmnet@parameters[,rsemGlmnet@regularized] == 0, 1, all)), TRUE)
   
   plot(rsemGlmnet)
   coef(rsemGlmnet)

@@ -220,7 +220,7 @@ cv4regularizedSEM <- function(regularizedSEM,
           control = control_s
         )
         # MLE:
-        param_s <- coef(MLE_s, lambda = 0, alpha = 1)
+        param_s <- unlist(MLE_s@parameters[,MLE_s@parameterLabels])
         weights_s <- 1/abs(param_s)
         # set unregularized to 0:
         if(!is.numeric(regularizedSEM@inputArguments$weights)){

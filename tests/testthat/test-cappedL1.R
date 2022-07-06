@@ -34,22 +34,22 @@ test_that("testing cappedL1", {
                        regularized = paste0("f=~y",6:ncol(y)), 
                        lambdas = lambdas,
                        thetas = thetas,
-                       control = controlIsta(convCritInner = 0)
+                       control = controlIsta()
   )
   testthat::expect_equal(
     all(abs(rsemIsta@fits$m2LL[rsemIsta@fits$lambda == 0] - 
               (-2*logLik(modelFit))
-    ) < 1e-5), 
+    ) < 1e-4), 
     TRUE)
   
-  cv <- cv4cappedL1(regularizedSEM = rsemIsta, k = 5)
+  cv <- cv4regularizedSEM(regularizedSEM = rsemIsta, k = 5)
   
   rsemIstaLasso <- lasso(lavaanModel = modelFit, 
                          regularized = paste0("f=~y",6:ncol(y)), 
                          lambdas = lambdas,
                          control = controlIsta(convCritInner = 0)
   )
-  cvLasso <- cv4lasso(regularizedSEM = rsemIstaLasso, 
+  cvLasso <- cv4regularizedSEM(regularizedSEM = rsemIstaLasso, 
                       k = cv@subsets)
   cv@cvfits[which.min(cv@cvfits$cvfit)[1],]
   coef(cv)
