@@ -293,6 +293,236 @@ cv4regularizedSEM <- function(regularizedSEM,
   )
 }
 
+
+#' cv4regularizedSEMApprox
+#' 
+#' cross-validation for regularized structural equation models with approximated penalty function
+#' 
+#' @param regularizedSEM model of class regularizedSEM
+#' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
+#' See ?lessSEM::aCV4regularizedSEM for an example
+#' @param dataSet optional: Pass the full, unscaled data set to the function. 
+#' This is important if the data has to be scaled prior to the analysis. If scaling
+#' is performed on the full sample, this will result in dependencies between the 
+#' subsets created by the cross-validation. To prevent this, pass the full data and use scaleData = TRUE,
+#' the scalingFunction, and the scalingArguments
+#' @param scaleData if set to TRUE, the subsets will be scaled using the scalingFunction
+#' @param scalingFunction this function is used to scale the subsets. It MUST take two arguments:
+#' first, the data set as matrix and second the scalingArguments. The latter can be anything you need
+#' for the scaling
+#' @param scalingArguments the second argument passed to scalingFunction.
+#' @param reweigh this is used for the adaptive lasso. When the weights are based on the full
+#' sample, this may undermine the cross-validation. Set reweigh = TRUE to create new
+#' weigths for each subset. This will use the default weights (inverse of MLE). Alternatively,
+#' you can pass a matrix with k rows and nParameters columns with weights.
+#' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
+#' @export
+cv4regularizedSEMApprox <- function(regularizedSEM, 
+                                    k, 
+                                    dataSet = NULL,
+                                    scaleData = FALSE,
+                                    scalingFunction = function(dataSet,scalingArguments) 
+                                      scale(x = dataSet, 
+                                            center = scalingArguments$center, 
+                                            scale = scalingArguments$scale),
+                                    scalingArguments = list("center" = TRUE, 
+                                                            "scale" = TRUE),
+                                    reweigh = FALSE,
+                                    returnSubsetParameters = FALSE){
+  
+  if(!is(regularizedSEM, "regularizedSEM")){
+    stop("regularizedSEM must be of class regularizedSEM")
+  }
+  
+  lavaanData <- try(lavaan::lavInspect(regularizedSEM@inputArguments$lavaanModel,
+                                       "data"))
+  if(is(lavaanData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+  
+  if(is.null(dataSet)){
+    message("Reusing the data set from regularizedSEM. If your data was rescaled prior to the analysis, this may result in incorrect cross-validation results. Pass the data using the dataset argument and the scalingFunction to let this function rescale your data for each subset.")
+    data <- lavaanData
+  }else{
+    data <- dataSet[,colnames(lavaanData),drop = FALSE]
+    if(any(!colnames(lavaanData) %in% colnames(data))) 
+      stop("Not all variables present in the lavaanModel are in the dataSet")
+  }
+  
+  N <- nrow(data)
+  
+  # create subsets 
+  if(is.matrix(k)){
+    subsets <- k
+    if(!is.logical(subsets)) stop("k must be a matrix with booleans (TRUE, FALSE)")
+    if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
+    k <- ncol(subsets)
+  }else{
+    subsets <- lessSEM:::createSubsets(N = N, k = k)
+  }
+  
+  # extract elements for easier access
+  fits <- regularizedSEM@fits
+  parameters <- regularizedSEM@parameters
+  control <- regularizedSEM@inputArguments$control
+  weights <- regularizedSEM@inputArguments$weights
+  modifyModel <- regularizedSEM@inputArguments$modifyModel
+  epsilon <- regularizedSEM@inputArguments$epsilon
+  tau <- regularizedSEM@inputArguments$tau
+  
+  if(any(!fits$alpha %in% c(0,1))) 
+    message("Automatic cross-validation for adaptiveLasso requested. Note that using weights which are based on the full sample may undermine cross-validation. Use reweigh = TRUE to re-weight each subset with the inverse of the absolute MLE. Alternatively, pass a matrix as argument reweigh with weights for each subset.")
+  
+  tuningParameters <- parameters[,!colnames(parameters)%in%regularizedSEM@parameterLabels, drop = FALSE]
+  
+  cvfits <- data.frame(
+    tuningParameters,
+    cvfit = NA
+  )
+  
+  cvfitsDetails <- as.data.frame(matrix(0,nrow = nrow(cvfits), ncol = k))
+  colnames(cvfitsDetails) <- paste0("testSet", 1:k)
+  cvfitsDetails <- cbind(
+    tuningParameters,
+    cvfitsDetails
+  )
+  
+  if(returnSubsetParameters){
+    subsetParameters <- array(NA, 
+                              dim = c(k, length(regularizedSEM@parameterLabels), nrow(tuningParameters)),
+                              dimnames = list(paste0("trainSet", 1:k),
+                                              regularizedSEM@parameterLabels,
+                                              NULL))
+    dimname3 <- c()
+    for(ro in 1:nrow(tuningParameters)){
+      dimname3 <- c(dimname3, 
+                    paste0(paste0(colnames(tuningParameters[ro,,drop = FALSE]),
+                                  "=", 
+                                  tuningParameters[ro,]), 
+                           collapse = "; ")
+      )
+    }
+    dimnames(subsetParameters)[[3]] <- dimname3
+  }else{
+    subsetParameters <- array(NA,dim = 1)
+  }
+  
+  
+  for(s in 1:k){
+    cat("\n[",s, "/",k,"]\n")
+    control_s <- control
+    # we need to pass the subset as our data set;
+    # if scaling is used, this must also be applied here
+    trainSet <- data[!subsets[,s],,drop = FALSE]
+    testSet <- data[subsets[,s],,drop = FALSE]
+    
+    if(scaleData){
+      if(sum(subsets[,s]) < 2 || sum(!subsets[,s]) < 2){
+        warning("Subsets too small for scaling. Skipping scaling.")
+      }else{
+        # It is important to not scale the data prior to the splitting
+        # Otherwise the data sets are not truly independent!
+        message("Scaling data sets ...")
+        trainSet <- scalingFunction(trainSet, scalingArguments)
+        testSet <- scalingFunction(testSet, scalingArguments)
+      }
+    }
+    
+    modifyModel$dataSet <- trainSet
+    
+    # check weights for adaptive Lasso
+    if(any(!fits$alpha %in% c(0,1)) && any(reweigh)){
+      if(is.matrix(reweigh)){
+        weights_s <- reweigh[s,]
+      }else{
+        # use default;
+        print(paste0("Computing new weights for sample ", s, "."))
+        
+        # optimize model: We set lambda = 0, so we get the MLE
+        MLE_s <- lessSEM::smoothLasso(
+          lavaanModel = regularizedSEM@inputArguments$lavaanModel,
+          lambdas = 0,
+          regularized = regularizedSEM@regularized,
+          tau = tau,
+          epsilon = epsilon,
+          modifyModel = modifyModel,
+          control = control_s
+        )
+        # MLE:
+        param_s <- unlist(MLE_s@parameters[,MLE_s@parameterLabels])
+        weights_s <- 1/abs(param_s)
+        # set unregularized to 0:
+        if(!is.numeric(regularizedSEM@inputArguments$weights)){
+          weights_s[!names(weights_s) %in% regularizedSEM@inputArguments$weights] <- 0
+        }else{
+          weights_s[regularizedSEM@inputArguments$weights == 0] <- 0
+        }
+      }
+      
+    }else{
+      weights_s <- regularizedSEM@inputArguments$weights
+    }
+    
+    regularizedSEM_s <- smoothElasticNet(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
+                                         weights = weights_s, 
+                                         lambdas = unique(tuningParameters$lambda), 
+                                         alphas = unique(tuningParameters$alpha),
+                                         modifyModel = modifyModel,
+                                         tau = tau,
+                                         epsilon = epsilon,
+                                         control = control_s
+    )
+    
+    if(returnSubsetParameters){
+      for(ro in 1:nrow(tuningParameters)){
+        dimname3 <- paste0(paste0(colnames(tuningParameters[ro,,drop = FALSE]),
+                                  "=", 
+                                  tuningParameters[ro,]), 
+                           collapse = "; ")
+        
+        subsetParameters[s,,dimname3] <- as.matrix(regularizedSEM_s@parameters[ro,dimnames(subsetParameters)[[2]]])
+      }
+    }
+    
+    # to compute the out of sample fit, we also need a SEM with all individuals 
+    # if the test set
+    SEM_s <- lessSEM::SEMFromLavaan(
+      lavaanModel = regularizedSEM@inputArguments$lavaanModel,
+      whichPars = "start",
+      fit = FALSE, 
+      addMeans = modifyModel$addMeans,
+      activeSet = modifyModel$activeSet, 
+      dataSet = testSet, 
+      transformVariances = TRUE
+    )
+    
+    for(p in 1:nrow(regularizedSEM_s@parameters)){
+      SEM_s <- lessSEM::setParameters(
+        SEM = SEM_s, 
+        labels =  
+          names(unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels])),
+        values = unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels]),
+        raw = FALSE)
+      cvfitsDetails[p, paste0("testSet",s)] <- SEM_s$fit()
+      
+    }
+    
+  }
+  
+  cvfits$cvfit <- apply(cvfitsDetails[,paste0("testSet",1:k)],1,sum)
+  
+  return(
+    new("CV4RegularizedSEM",
+        parameters=parameters,
+        cvfits = cvfits,
+        parameterLabels = regularizedSEM@parameterLabels,
+        regularized = regularizedSEM@parameterLabels[regularizedSEM@inputArguments$weights != 0],
+        cvfitsDetails = cvfitsDetails, 
+        subsets = subsets,
+        subsetParameters = subsetParameters)
+  )
+}
+
+
+
 #' createSubsets
 #' 
 #' create subsets for cross-validation
