@@ -111,7 +111,7 @@ public:
   double lambda;
   const arma::rowvec weights;
   // control optimizer
-  const arma::mat initialHessian;
+  arma::mat initialHessian;
   const double stepSize;
   const double sigma;
   const double gamma;
@@ -144,6 +144,10 @@ public:
     
     convergenceCriterion(static_cast<lessSEM::convergenceCriteriaGlmnet>(Rcpp::as<int> (control["convergenceCriterion"]))),
     verbose(Rcpp::as<int> (control["verbose"])){}
+  
+  void setHessian(arma::mat newHessian){
+    initialHessian = newHessian;
+  }
   
   Rcpp::List optimize(
       Rcpp::NumericVector startingValues_, 
@@ -219,6 +223,7 @@ RCPP_EXPOSED_CLASS(glmnetEnetGeneralPurpose)
       .constructor<Rcpp::NumericVector,Rcpp::List>("Creates a new glmnetEnetGeneralPurpose.")
     // methods
     .method( "optimize", &glmnetEnetGeneralPurpose::optimize, "Optimizes the model. Expects fitFunction, gradientFunction, userSuppliedElements, labeled vector with starting values and lambda")
+    .method( "setHessian", &glmnetEnetGeneralPurpose::setHessian, "Change the initial Hessian matrix.")
     ;
   }
 

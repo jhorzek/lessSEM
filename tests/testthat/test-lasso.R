@@ -66,14 +66,9 @@ test_that("testing elasticNet-lasso-c", {
   }
   
   # replicate with regularizedSEM
-  lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
-  weights <- rep(0, length(lavaanParameters))
-  names(weights) <- names(lavaanParameters)
-  weights[paste0("f=~y",6:ncol(y))] <- 1
-  
-  rsemIsta <- elasticNet(lavaanModel = modelFit, 
-                         weights =  weights, 
-                         alphas = 1, 
+
+  rsemIsta <- lasso(lavaanModel = modelFit, 
+                         regularized = paste0("f=~y",6:ncol(y)), 
                          lambdas = lambdas,
                          method = "ista",
                          control = controlIsta(verbose = 0, 
@@ -83,7 +78,6 @@ test_that("testing elasticNet-lasso-c", {
   testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] - lslxParameter[,regularized]) < .002), TRUE)
   plot(rsemIsta)
   coef(rsemIsta)
-  coef(rsemIsta, alpha = 1, lambda = lambdas[1])
   coef(rsemIsta, criterion = "AIC")
   coef(rsemIsta, criterion = "BIC")
   
@@ -91,18 +85,15 @@ test_that("testing elasticNet-lasso-c", {
   testthat::expect_equal(all(round(AIC(rsemIsta)$AIC - (AICs))==0), TRUE)
   testthat::expect_equal(all(round(BIC(rsemIsta)$BIC - (BICs))==0), TRUE)
   
-  rsemGlmnet <- elasticNet(lavaanModel = modelFit, 
-                           weights =  weights, 
-                           alphas = 1, 
+  rsemGlmnet <- lasso(lavaanModel = modelFit, 
+                      regularized = paste0("f=~y",6:ncol(y)), 
                            lambdas = lambdas,
                            method = "glmnet",
-                           control = controlGlmnet(verbose = 0, 
-                                                   startingValues = "est")
+                           control = controlGlmnet()
   )
   testthat::expect_equal(all(abs(rsemGlmnet@parameters[,rsemGlmnet@regularized] - lslxParameter[,regularized]) < .002), TRUE)
   plot(rsemGlmnet)
   coef(rsemGlmnet)
-  coef(rsemGlmnet, alpha = 1, lambda = lambdas[1])
   coef(rsemGlmnet, criterion = "AIC")
   coef(rsemGlmnet, criterion = "BIC")
   
@@ -111,10 +102,9 @@ test_that("testing elasticNet-lasso-c", {
   testthat::expect_equal(all(round(BIC(rsemGlmnet)$BIC - (BICs))==0), TRUE)
   
   ## Test exact cross-validation
-  cvExact <- cv4elasticNet(regularizedSEM = rsemGlmnet, k = 5)
+  cvExact <- cv4regularizedSEM(regularizedSEM = rsemGlmnet, k = 5)
   coef(cvExact)
   coef(cvExact, rule = "1sd")
-  coef(cvExact, alpha = 1, lambda = lambdas[1])
   plot(cvExact)
   
 })

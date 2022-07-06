@@ -35,7 +35,8 @@ test_that("testing scad", {
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   
   rsemIsta <- scad(lavaanModel = modelFit, 
-                   regularized = regularizedLavaan, lambdas = lambdas, 
+                   regularized = regularizedLavaan, 
+                   lambdas = lambdas, 
                    thetas = thetas, 
                    control = controlIsta()
   )
@@ -70,7 +71,9 @@ test_that("testing scad", {
   pars <- unlist(regsemApprox@parameters[sel,
                                          regsemApprox@parameterLabels]
   )
-  weights <- rsemIsta@inputArguments$weights
+  weights <- lavaanParameters
+  weights[] <- 0
+  weights[rsemIsta@inputArguments$weights] <- 1
   lambda <- lambdas[2]
   theta <- thetas[1]
   pen <- 0

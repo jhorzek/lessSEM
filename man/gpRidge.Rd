@@ -40,13 +40,36 @@ the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 for more details.}
 }
 \description{
-Optimizers in lessSEM can also be used by other packages.
-gpRidge allows for combining ridge regularization and custom fitting functions
-with an interface similar to optim.
+Implements ridge regularization for general purpose optimization problems.
+The penalty function is given by:
+\deqn{p( x_j) = \lambda x_j^2}
+Note that ridge regularization will not set any of the parameters to zero
+but result in a shrinkage towards zero.
 }
 \details{
-For more details on GLMNET, see:
+The interface is similar to that of optim. Users have to supply a vector
+with starting values (important: This vector \emph{must} have labels) and a fitting
+function. This fitting functions \emph{must} take exactly 3 arguments:
 \enumerate{
+\item A vector with current parameter estimates
+\item A vector with labels of parameters
+\item Any additional arguments used by the function contained in a single list
+(called additionalArguments below)
+}
+
+The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
+will be used to approximate the gradients. Supplying a gradient function
+can result in considerable speed improvements.
+
+Ridge regularization:
+\itemize{
+\item Hoerl, A. E., & Kennard, R. W. (1970). Ridge Regression: Biased Estimation
+for Nonorthogonal Problems. Technometrics, 12(1), 55–67.
+https://doi.org/10.1080/00401706.1970.10488634
+}
+
+For more details on GLMNET, see:
+\itemize{
 \item Friedman, J., Hastie, T., & Tibshirani, R. (2010).
 Regularization Paths for Generalized Linear Models via Coordinate Descent.
 Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
@@ -59,7 +82,7 @@ The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.11
 }
 
 For more details on ISTA, see:
-\enumerate{
+\itemize{
 \item Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding
 Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
 183–202. https://doi.org/10.1137/080716542
@@ -67,6 +90,8 @@ Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
 A General Iterative Shrinkage and Thresholding Algorithm for Non-convex
 Regularized Optimization Problems. Proceedings of the 30th International
 Conference on Machine Learning, 28(2)(2), 37–45.
+\item Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and
+Trends in Optimization, 1(3), 123–231.
 }
 }
 \examples{

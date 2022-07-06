@@ -42,6 +42,10 @@ test_that("testing readme", {
   # elements of regsem can be accessed with the @ operator:
   regsem@parameters[1,]
   
+  # k-fold cross-valiation
+  cv4regularizedSEM(regularizedSEM = regsem, 
+                    k = 5)
+  
   # AIC and BIC:
   AIC(regsem)
   BIC(regsem)

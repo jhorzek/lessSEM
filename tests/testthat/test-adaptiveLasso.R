@@ -41,15 +41,13 @@ test_that("testing adaptive lasso", {
   testthat::expect_equal(any(abs(rsem@parameters[,colnames(regsemPars)] - regsemPars) > .1),
                          FALSE)
   coef(rsem)
-  coef(rsem, alpha = 1, lambda = .01)
   
   ## Test cross-validation
   
-  cv <- cv4adaptiveLasso(regularizedSEM = rsem, 
-                      k = 5, 
-                      reweigh = TRUE)
+  cv <- cv4regularizedSEM(regularizedSEM = rsem, 
+                          k = 5, 
+                          reweigh = TRUE)
   coef(cv)
-  coef(cv, alpha = 1, lambda = .01)
   plot(cv)
   
   # set automatic lambda:
@@ -57,14 +55,14 @@ test_that("testing adaptive lasso", {
                                   regularized = regularizedLavaan,
                                   nLambdas = 10)
   testthat::expect_equal(all(apply(rsem2@parameters[,regularizedLavaan] == 0,2,sum) > 0), TRUE)
-  cv <- cv4adaptiveLasso(regularizedSEM = rsem2, 
-                         k = 5)
+  cv <- cv4regularizedSEM(regularizedSEM = rsem2, 
+                          k = 5)
   coef(cv)
   plot(cv)
   
   # also try with re-passing data:
-  cv <- cv4adaptiveLasso(regularizedSEM = rsem2, 
-                      dataSet = y, 
-                      scaleData = TRUE, 
-                      k = 5)
+  cv <- cv4regularizedSEM(regularizedSEM = rsem2, 
+                         dataSet = y, 
+                         scaleData = FALSE, 
+                         k = 5)
 })
