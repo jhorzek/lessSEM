@@ -24,14 +24,14 @@
 #' @md
 #' @export
 gpOptimizationInternal <- function(par,
-                                  weights,
-                                  fn,
-                                  gr = NULL,
-                                  additionalArguments,
-                                  penalty,
-                                  tuningParameters,
-                                  method,
-                                  control){
+                                   weights,
+                                   fn,
+                                   gr = NULL,
+                                   additionalArguments,
+                                   penalty,
+                                   tuningParameters,
+                                   method,
+                                   control){
   
   inputArguments <- as.list(environment())
   
@@ -52,8 +52,13 @@ gpOptimizationInternal <- function(par,
   # gradient function
   if(is.null(gr)){
     
-    additionalArguments$fn <- fn
-    
+    # The following is necessary to ensure that the arguments are called 
+    # correclty even if the user does not use the naming of our examples:
+    additionalArguments$fn <- function(par, parameterLabels, additionalArguments
+    ){
+      return(fn(par, parameterLabels, additionalArguments))
+    }
+    # gradient funciton using numDeriv:
     gr <- function(par, parameterLabels, additionalArguments){
       grad <- numDeriv::grad(func = additionalArguments$fn, 
                              x = par, 
@@ -101,7 +106,14 @@ gpOptimizationInternal <- function(par,
       
     }else if(any(initialHessian == "compute")){
       
-      initialHessian <- numDeriv::hessian(func = fn, x = par)
+      initialHessian <- numDeriv::hessian(func = 
+                                            function(par, parameterLabels, additionalArguments
+                                            ){
+                                              return(fn(par, parameterLabels, additionalArguments))
+                                            }, 
+                                          x = par,
+                                          parameterLabels = parameterLabels,
+                                          additionalArguments = additionalArguments)
       
     }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
       initialHessian <- diag(initialHessian,length(par))
@@ -311,7 +323,7 @@ gpOptimizationInternal <- function(par,
       sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
     fits$regM2LL[it] <- result$fit
     fits$convergence[it] <- result$convergence
-    fits$m2LL[it] <- fn(par, parameterLabels, additionalArguments)
+    fits$m2LL[it] <- fn(rawParameters, parameterLabels, additionalArguments)
     
     if(method == "glmnet" && control$saveHessian) 
       Hessians$Hessian[[it]] <- result$Hessian

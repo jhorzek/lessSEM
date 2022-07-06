@@ -120,8 +120,8 @@
 #'        regsemApprox@parameters[,regsemExact@parameterLabels])
 #' # Note that the parameter estimates are basically identical.
 #' 
-#' ## To select a model, we used the approximate cross-validation function:
-#' aCV <- aCV4regularizedSEMWithCustomPenalty(regularizedSEMWithCustomPenalty = regsemApprox,
+#' ## To select a model, we used the cross-validation function:
+#' aCV <- cv4regularizedSEMWithCustomPenalty(regularizedSEMWithCustomPenalty = regsemApprox,
 #'                                            k = nrow(dataset))
 #' plot(aCV)
 #' # To extract the best parameter estimates:

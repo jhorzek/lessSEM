@@ -13,7 +13,7 @@ The following penalty functions are currently implemented in lessSEM:
 
 ![](inst/penalty_functions.png)
 
-"penalty" refers to the name of the function call in the lessSEM package (e.g., lasso is called with the lasso() function). Smooth functions are called with smoothLasso, smoothAdaptiveLasso, and smoothElasticNet. These are only implemented for the comparison of exact and approximate optimization and should not be used in most cases. The best model can be selected with the AIC, BIC, or cross-validaiton. Cross-validation functions are called cv4penalty (e.g., cv4lasso, cv4elasticNet, cv4scad).
+"penalty" refers to the name of the function call in the lessSEM package (e.g., lasso is called with the lasso() function). Smooth functions are called with smoothLasso, smoothAdaptiveLasso, and smoothElasticNet. These are only implemented for the comparison of exact and approximate optimization and should not be used in most cases. The best model can be selected with the AIC, BIC, or cross-validaiton. Cross-validation is implemented in teh cv4regularizedSEM function (see ?lessSEM::cv4regularizedSEM).
 
 Currently, lessSEM has the following optimizers:
 

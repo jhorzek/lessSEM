@@ -1,4 +1,4 @@
-#' CV4regularizedSEMWithCustomPenalty
+#' cv4regularizedSEMWithCustomPenalty
 #' 
 #' Exact cross-validation for models of class regularizedSEMWithCustomPenalty. These models can be fit with regularizedSEMWithCustomPenalty.() (see ?regularizedSEMWithCustomPenalty.)
 #' in this package.
@@ -54,11 +54,11 @@
 #'                                                penaltyFunctionArguments = penaltyFunctionArguments)
 #' 
 #' ## true cross-validation
-#' CV <- CV4regularizedSEMWithCustomPenalty(regularizedSEMWithCustomPenalty = regsemApprox,
+#' CV <- cv4regularizedSEMWithCustomPenalty(regularizedSEMWithCustomPenalty = regsemApprox,
 #'                                          k = 5)
 #' plot(CV)
 #' @export
-CV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, k, returnSubsetParameters = FALSE){
+cv4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, k, returnSubsetParameters = FALSE){
   if(!is(regularizedSEMWithCustomPenalty, "regularizedSEMWithCustomPenalty")){
     stop("regularizedSEMWithCustomPenalty must be of class regularizedSEMWithCustomPenalty")
   }
@@ -182,7 +182,7 @@ CV4regularizedSEMWithCustomPenalty <- function(regularizedSEMWithCustomPenalty, 
   cvfits$cvfit <- apply(cvfitsDetails[,paste0("testSet",1:k)],1,sum)
   
   return(
-    new("CV4regularizedSEMWithCustomPenalty",
+    new("cv4regularizedSEMWithCustomPenalty",
         parameters=parameters,
         tuningParameters = tuningParameters,
         cvfits = cvfits,

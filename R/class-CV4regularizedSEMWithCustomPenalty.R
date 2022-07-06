@@ -1,4 +1,4 @@
-setClass(Class = "CV4regularizedSEMWithCustomPenalty",
+setClass(Class = "cv4regularizedSEMWithCustomPenalty",
          representation = representation(
            parameters="data.frame",
            tuningParameters="data.frame",
@@ -13,7 +13,7 @@ setClass(Class = "CV4regularizedSEMWithCustomPenalty",
 #' show
 #' 
 #' @export
-setMethod("show", "CV4regularizedSEMWithCustomPenalty", function (object) {
+setMethod("show", "cv4regularizedSEMWithCustomPenalty", function (object) {
   bestFit <- which(object@cvfits$cvfit == min(object@cvfits$cvfit))
   cat(paste0("Best parameter estimates observed for: ", paste0(names(object@tuningParameters), " = ", object@tuningParameters[bestFit,]), collapse = ", "), "\n\n")
   
@@ -24,7 +24,7 @@ setMethod("show", "CV4regularizedSEMWithCustomPenalty", function (object) {
 #' summary
 #' 
 #' @export
-setMethod("summary", "CV4regularizedSEMWithCustomPenalty", function (object) {
+setMethod("summary", "cv4regularizedSEMWithCustomPenalty", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Exact Cross Validation Results ####\n\n"))
   
@@ -43,12 +43,12 @@ setMethod("summary", "CV4regularizedSEMWithCustomPenalty", function (object) {
 
 #' coef
 #' 
-#' Returns the parameter estimates of an CV4regularizedSEMWithCustomPenalty
+#' Returns the parameter estimates of an cv4regularizedSEMWithCustomPenalty
 #' 
 #' @param object object of class regularizedSEM
 #' 
 #' @export
-setMethod("coef", "CV4regularizedSEMWithCustomPenalty", function (object) {
+setMethod("coef", "cv4regularizedSEMWithCustomPenalty", function (object) {
   
   bestFit <- which(object@cvfits$cvfit == min(object@cvfits$cvfit))
   parameters <- unlist(object@parameters[bestFit,object@parameterLabels])
@@ -60,9 +60,9 @@ setMethod("coef", "CV4regularizedSEMWithCustomPenalty", function (object) {
 #' 
 #' plots the cross-validation fits
 #' 
-#' @param x object of class CV4regularizedSEMWithCustomPenalty
+#' @param x object of class cv4regularizedSEMWithCustomPenalty
 #' @export
-setMethod("plot", "CV4regularizedSEMWithCustomPenalty", function (x) {
+setMethod("plot", "cv4regularizedSEMWithCustomPenalty", function (x) {
   
   parameters <- x@parameters
   fits <- x@cvfits
