@@ -86,8 +86,6 @@ namespace lessSEM{
       
       // check again...
       if(!Hessian_k.is_sympd()){
-        Rcpp::Rcout << eigenValues << std::endl;
-        Rcpp::Rcout << diagMat.diag() << std::endl;
         // return non-updated hessian
         Rcpp::warning("Invalid Hessian. Returning previous Hessian");
         return(Hessian_kMinus1);
