@@ -110,6 +110,8 @@ cv4regularizedSEM <- function(regularizedSEM,
     stop("regularizedSEM must be of class regularizedSEM")
   }
   
+  misc <- list()
+  
   lavaanData <- try(lavaan::lavInspect(regularizedSEM@inputArguments$lavaanModel,
                                        "data"))
   if(is(lavaanData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
@@ -164,7 +166,7 @@ cv4regularizedSEM <- function(regularizedSEM,
     # https://stackoverflow.com/questions/11693599/alternative-to-expand-grid-for-data-frames
     subsetParameters <- merge(tuningParameters,
           data.frame(
-      trainSet = paste0("trainSet", 1:k)
+      trainSet = 1:k
       ), 
       by=NULL)
 
@@ -181,7 +183,19 @@ cv4regularizedSEM <- function(regularizedSEM,
     subsetParameters <- data.frame(NA)
   }
   
-  
+  if(regularizedSEM@penalty == "adaptiveLasso" && any(reweigh)){
+    # save weights for inspection
+    misc$newWeights <- data.frame(
+      trainSet = 1:k)
+    misc$newWeights <- cbind(misc$newWeights,
+      matrix(NA,
+             nrow = k, 
+             ncol = length(regularizedSEM@parameterLabels),
+             dimnames = list(NULL, regularizedSEM@parameterLabels)
+      )
+    )
+  }
+    
   for(s in 1:k){
     cat("\n[",s, "/",k,"]\n")
     control_s <- control
@@ -230,7 +244,10 @@ cv4regularizedSEM <- function(regularizedSEM,
         }else{
           weights_s[regularizedSEM@inputArguments$weights == 0] <- 0
         }
+        
       }
+      misc$newWeights[misc$newWeights$trainSet == s,
+                      names(weights_s)] <- weights_s
       
     }else{
       weights_s <- regularizedSEM@inputArguments$weights
@@ -249,7 +266,7 @@ cv4regularizedSEM <- function(regularizedSEM,
       for(ro in 1:nrow(tuningParameters)){
         
         sel <- apply(subsetParameters[,colnames(tuningParameters)], 1, function(x) all(x == tuningParameters[ro,]))
-        sel <- sel & subsetParameters$trainSet == paste0("trainSet",s)
+        sel <- sel & subsetParameters$trainSet == s
         if(sum(sel) != 1) stop("Something went wrong while saving the subset parameters")
         subsetParameters[sel,regularizedSEM@parameterLabels] <- 
           as.matrix(regularizedSEM_s@parameters[ro,regularizedSEM@parameterLabels])
@@ -288,10 +305,11 @@ cv4regularizedSEM <- function(regularizedSEM,
         parameters=parameters,
         cvfits = cvfits,
         parameterLabels = regularizedSEM@parameterLabels,
-        regularized = regularizedSEM@parameterLabels[regularizedSEM@inputArguments$weights != 0],
+        regularized = regularizedSEM@regularized,
         cvfitsDetails = cvfitsDetails, 
         subsets = subsets,
-        subsetParameters = subsetParameters)
+        subsetParameters = subsetParameters,
+        misc = misc)
   )
 }
 
@@ -335,6 +353,8 @@ cv4regularizedSEMApprox <- function(regularizedSEM,
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
   }
+  
+  misc <- list()
   
   lavaanData <- try(lavaan::lavInspect(regularizedSEM@inputArguments$lavaanModel,
                                        "data"))
@@ -392,7 +412,7 @@ cv4regularizedSEMApprox <- function(regularizedSEM,
     # https://stackoverflow.com/questions/11693599/alternative-to-expand-grid-for-data-frames
     subsetParameters <- merge(tuningParameters,
                               data.frame(
-                                trainSet = paste0("trainSet", 1:k)
+                                trainSet = 1:k
                               ), 
                               by=NULL)
     
@@ -407,6 +427,19 @@ cv4regularizedSEMApprox <- function(regularizedSEM,
     
   }else{
     subsetParameters <- data.frame(NA)
+  }
+  
+  if(regularizedSEM@penalty == "adaptiveLasso" && any(reweigh)){
+    # save weights for inspection
+    misc$newWeights <- data.frame(
+      trainSet = 1:k)
+    misc$newWeights <- cbind(misc$newWeights,
+                             matrix(NA,
+                                    nrow = k, 
+                                    ncol = length(regularizedSEM@parameterLabels),
+                                    dimnames = list(NULL, regularizedSEM@parameterLabels)
+                             )
+    )
   }
   
   for(s in 1:k){
@@ -460,6 +493,9 @@ cv4regularizedSEMApprox <- function(regularizedSEM,
         }
       }
       
+      misc$newWeights[misc$newWeights$trainSet == s,
+                      names(weights_s)] <- weights_s
+      
     }else{
       weights_s <- regularizedSEM@inputArguments$weights
     }
@@ -478,7 +514,7 @@ cv4regularizedSEMApprox <- function(regularizedSEM,
       for(ro in 1:nrow(tuningParameters)){
         
         sel <- apply(subsetParameters[,colnames(tuningParameters)], 1, function(x) all(x == tuningParameters[ro,]))
-        sel <- sel & subsetParameters$trainSet == paste0("trainSet",s)
+        sel <- sel & subsetParameters$trainSet == s
         if(sum(sel) != 1) stop("Something went wrong while saving the subset parameters")
         subsetParameters[sel,regularizedSEM@parameterLabels] <- 
           as.matrix(regularizedSEM_s@parameters[ro,regularizedSEM@parameterLabels])
@@ -517,10 +553,11 @@ cv4regularizedSEMApprox <- function(regularizedSEM,
         parameters=parameters,
         cvfits = cvfits,
         parameterLabels = regularizedSEM@parameterLabels,
-        regularized = regularizedSEM@parameterLabels[regularizedSEM@inputArguments$weights != 0],
+        regularized = regularizedSEM@regularized,
         cvfitsDetails = cvfitsDetails, 
         subsets = subsets,
-        subsetParameters = subsetParameters)
+        subsetParameters = subsetParameters,
+        misc = misc)
   )
 }
 
