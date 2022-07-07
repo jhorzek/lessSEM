@@ -6,7 +6,7 @@ setClass(Class = "CV4RegularizedSEM",
            regularized = "character",
            cvfitsDetails="data.frame", 
            subsets = "matrix",
-           subsetParameters = "array"
+           subsetParameters = "data.frame"
          )
 )
 

@@ -11,62 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// innerGLMNET
-arma::colvec innerGLMNET(const arma::colvec parameters, const int N, const arma::colvec subGroupGradient, const arma::mat subGroupHessian, const double subGroupLambda, const Rcpp::LogicalVector regularized, const arma::colvec adaptiveLassoWeights, const int maxIter, const double epsBreak, const bool useMultipleConvergenceCriteria);
-RcppExport SEXP _lessSEM_innerGLMNET(SEXP parametersSEXP, SEXP NSEXP, SEXP subGroupGradientSEXP, SEXP subGroupHessianSEXP, SEXP subGroupLambdaSEXP, SEXP regularizedSEXP, SEXP adaptiveLassoWeightsSEXP, SEXP maxIterSEXP, SEXP epsBreakSEXP, SEXP useMultipleConvergenceCriteriaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::colvec >::type parameters(parametersSEXP);
-    Rcpp::traits::input_parameter< const int >::type N(NSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec >::type subGroupGradient(subGroupGradientSEXP);
-    Rcpp::traits::input_parameter< const arma::mat >::type subGroupHessian(subGroupHessianSEXP);
-    Rcpp::traits::input_parameter< const double >::type subGroupLambda(subGroupLambdaSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::LogicalVector >::type regularized(regularizedSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec >::type adaptiveLassoWeights(adaptiveLassoWeightsSEXP);
-    Rcpp::traits::input_parameter< const int >::type maxIter(maxIterSEXP);
-    Rcpp::traits::input_parameter< const double >::type epsBreak(epsBreakSEXP);
-    Rcpp::traits::input_parameter< const bool >::type useMultipleConvergenceCriteria(useMultipleConvergenceCriteriaSEXP);
-    rcpp_result_gen = Rcpp::wrap(innerGLMNET(parameters, N, subGroupGradient, subGroupHessian, subGroupLambda, regularized, adaptiveLassoWeights, maxIter, epsBreak, useMultipleConvergenceCriteria));
-    return rcpp_result_gen;
-END_RCPP
-}
-// glmnetInner_C
-arma::rowvec glmnetInner_C(const arma::rowvec& parameters_kMinus1, const arma::rowvec& gradients_kMinus1, const arma::mat& Hessian, const double lambda, const double alpha, const arma::rowvec& weights, const int maxIterIn, const double breakInner, const int verbose);
-RcppExport SEXP _lessSEM_glmnetInner_C(SEXP parameters_kMinus1SEXP, SEXP gradients_kMinus1SEXP, SEXP HessianSEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP weightsSEXP, SEXP maxIterInSEXP, SEXP breakInnerSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type parameters_kMinus1(parameters_kMinus1SEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type gradients_kMinus1(gradients_kMinus1SEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type Hessian(HessianSEXP);
-    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< const double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type weights(weightsSEXP);
-    Rcpp::traits::input_parameter< const int >::type maxIterIn(maxIterInSEXP);
-    Rcpp::traits::input_parameter< const double >::type breakInner(breakInnerSEXP);
-    Rcpp::traits::input_parameter< const int >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(glmnetInner_C(parameters_kMinus1, gradients_kMinus1, Hessian, lambda, alpha, weights, maxIterIn, breakInner, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
-// BFGS_C
-arma::mat BFGS_C(const arma::rowvec& parameters_kMinus1, const arma::rowvec& gradients_kMinus1, const arma::mat& Hessian_kMinus1, const arma::rowvec& parameters_k, const arma::rowvec& gradients_k, const bool cautious, const double hessianEps);
-RcppExport SEXP _lessSEM_BFGS_C(SEXP parameters_kMinus1SEXP, SEXP gradients_kMinus1SEXP, SEXP Hessian_kMinus1SEXP, SEXP parameters_kSEXP, SEXP gradients_kSEXP, SEXP cautiousSEXP, SEXP hessianEpsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type parameters_kMinus1(parameters_kMinus1SEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type gradients_kMinus1(gradients_kMinus1SEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type Hessian_kMinus1(Hessian_kMinus1SEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type parameters_k(parameters_kSEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type gradients_k(gradients_kSEXP);
-    Rcpp::traits::input_parameter< const bool >::type cautious(cautiousSEXP);
-    Rcpp::traits::input_parameter< const double >::type hessianEps(hessianEpsSEXP);
-    rcpp_result_gen = Rcpp::wrap(BFGS_C(parameters_kMinus1, gradients_kMinus1, Hessian_kMinus1, parameters_k, gradients_k, cautious, hessianEps));
-    return rcpp_result_gen;
-END_RCPP
-}
 // computeIndividualM2LL
 double computeIndividualM2LL(const int nObservedVariables, const arma::colvec& rawData, const arma::colvec& impliedMeans, const arma::mat& impliedCovariance);
 RcppExport SEXP _lessSEM_computeIndividualM2LL(SEXP nObservedVariablesSEXP, SEXP rawDataSEXP, SEXP impliedMeansSEXP, SEXP impliedCovarianceSEXP) {
@@ -166,9 +110,6 @@ RcppExport SEXP _rcpp_module_boot_istaMcp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaScad_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_lessSEM_innerGLMNET", (DL_FUNC) &_lessSEM_innerGLMNET, 10},
-    {"_lessSEM_glmnetInner_C", (DL_FUNC) &_lessSEM_glmnetInner_C, 9},
-    {"_lessSEM_BFGS_C", (DL_FUNC) &_lessSEM_BFGS_C, 7},
     {"_lessSEM_computeIndividualM2LL", (DL_FUNC) &_lessSEM_computeIndividualM2LL, 4},
     {"_lessSEM_computeGroupM2LL", (DL_FUNC) &_lessSEM_computeGroupM2LL, 6},
     {"_lessSEM_computeImpliedCovariance", (DL_FUNC) &_lessSEM_computeImpliedCovariance, 3},
