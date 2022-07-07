@@ -563,6 +563,13 @@ smoothElasticNet <- function(lavaanModel,
     stop("Invalid initialHessian passed to BFGS. See ?controlBFGS for more information.")
   }
   
+  if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
+    warning("Initial Hessian not positive definite. Using diagonal matrix instead")
+    initialHessian <- diag(100,length(rawParameters))
+    rownames(initialHessian) <- names(rawParameters)
+    colnames(initialHessian) <- names(rawParameters)
+  }
+  
   control$initialHessian <- initialHessian
   
   #### prepare regularized model object ####
@@ -598,7 +605,8 @@ smoothElasticNet <- function(lavaanModel,
                                 SEM = SEM,
                                 rawParameters = rawParameters,
                                 weights = weights,
-                                N = N)
+                                N = N,
+                                approx = TRUE)
     lambdas <- seq(0,
                    maxLambda,
                    length.out = nLambdas)
@@ -717,7 +725,20 @@ smoothElasticNet <- function(lavaanModel,
     "HessiansOfDifferentiablePart" = Hessians
   )
   
+  if(any(!weights %in% c(0,1))){
+    penalty <- "adaptiveLasso"
+  }else if(any(!tuningGrid$alpha %in% c(0,1))){
+    penalty <- "elasticNet"
+  }else if(all(tuningGrid$alpha == 1)){
+    penalty <- "lasso"
+  }else if(all(tuningGrid$alpha == 0)){
+    penalty <- "ridge"
+  }else{
+    stop("Unknown penalty")
+  }
+  
   results <- new("regularizedSEM",
+                 penalty = penalty,
                  parameters = parameterEstimates,
                  fits = fits,
                  parameterLabels = names(rawParameters),

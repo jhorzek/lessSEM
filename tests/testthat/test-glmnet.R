@@ -144,10 +144,11 @@ test_that("testing ista-lasso", {
   
   SEM <- lessSEM::setParameters(SEM, names(enetResultIsta$rawParameters), 
                              enetResultIsta$rawParameters, raw = TRUE)
-  testthat::expect_equal(enetResultIsta$fit -
+  testthat::expect_equal(abs(
+    enetResultIsta$fit -
                            (SEM$fit() + 
     N*lambda_enet*.4* sum(abs(enetResultIsta$rawParameters*weights)) +
-    N*lambda_enet*(1-.4) * sum((enetResultIsta$rawParameters*weights)^2)) == 0, TRUE)
+    N*lambda_enet*(1-.4) * sum((enetResultIsta$rawParameters*weights)^2))) < 1e-8, TRUE)
   
   
   SEM <- lessSEM::setParameters(SEM, names(enetResult$rawParameters), enetResult$rawParameters, raw = TRUE)

@@ -11,14 +11,18 @@ getMaxLambda_C <- function(regularizedModel,
                          SEM,
                          rawParameters,
                          weights,
-                         N){
+                         N,
+                         approx  = FALSE){
   
-  lambda <- .Machine$double.xmax^(.05)
+  lambda <- ifelse(approx,
+                   .Machine$double.xmax^(.01),
+                   .Machine$double.xmax^(.05)
+  )
   result <- regularizedModel$optimize(
     rawParameters,
     SEM,
     lambda,
-    1
+    1 # alpha = 1
   )
   
   sparseParameters <- result$rawParameters
