@@ -138,13 +138,13 @@ test_that("testing mcp", {
   
   for(th in rsemIsta@fits$theta){
     for(la in rsemIsta@fits$lambda){
-      print(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
-                                    rsemIsta@fits$lambda == la] -
-              (fits$m2LL[fits$theta == th &
-                           fits$lambda == la]
-               + fits$penalty[fits$theta == th &
-                                fits$lambda == la]
-              ))
+      # print(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
+      #                               rsemIsta@fits$lambda == la] -
+      #         (fits$m2LL[fits$theta == th &
+      #                      fits$lambda == la]
+      #          + fits$penalty[fits$theta == th &
+      #                           fits$lambda == la]
+      #         ))
       testthat::expect_equal(
         round(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
                                       rsemIsta@fits$lambda == la] -

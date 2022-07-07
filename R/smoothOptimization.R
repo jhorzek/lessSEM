@@ -731,7 +731,7 @@ smoothElasticNet <- function(lavaanModel,
     penalty <- "elasticNet"
   }else if(all(tuningGrid$alpha == 1)){
     penalty <- "lasso"
-  }else if(all(tuningGrid$alpha == 1)){
+  }else if(all(tuningGrid$alpha == 0)){
     penalty <- "ridge"
   }else{
     stop("Unknown penalty")
