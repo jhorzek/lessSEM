@@ -1,4 +1,4 @@
-test_that("testing cross-validation", {
+test_that("testing cross-validation for approximated fit", {
   library(regsem)
   library(lessSEM)
   set.seed(123)
@@ -23,14 +23,15 @@ test_that("testing cross-validation", {
   modelFit = cfa(modelSyntax, y, meanstructure = TRUE)
   
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
-  rsem <- lessSEM::lasso(lavaanModel = modelFit, 
-                         regularized = regularizedLavaan,
-                         nLambdas = 30, 
-                         control = controlIsta(breakOuter = 1e-5))
+  rsem <- lessSEM::smoothLasso(lavaanModel = modelFit, 
+                         regularized = regularizedLavaan, 
+                         epsilon = 1e-7, 
+                         tau = 1e-4,
+                         nLambdas = 10)
   
   ## Test cross-validation
   
-  cv <- cv4regularizedSEM(regularizedSEM = rsem, 
+  cv <- cv4regularizedSEMApprox(regularizedSEM = rsem, 
                           k = 5, 
                           returnSubsetParameters = TRUE)
   
@@ -56,9 +57,9 @@ test_that("testing cross-validation", {
     testSet <- subsets[,trainSet]
     
     SEM <- lessSEM::setParameters(SEM = SEM, 
-                           labels = parameterLabels, 
-                           values = unlist(pars[ro, parameterLabels]),
-                           raw = FALSE)
+                                  labels = parameterLabels, 
+                                  values = unlist(pars[ro, parameterLabels]),
+                                  raw = FALSE)
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
@@ -76,7 +77,7 @@ test_that("testing cross-validation", {
   testthat::expect_equal(all(abs(cv@cvfits$cvfit)< 1e-6), TRUE)
   
   # test standardization
-  cv <- cv4regularizedSEM(regularizedSEM = rsem, 
+  cv <- cv4regularizedSEMApprox(regularizedSEM = rsem, 
                           k = 5, 
                           returnSubsetParameters = TRUE,
                           scaleData = TRUE,
@@ -94,7 +95,7 @@ test_that("testing cross-validation", {
   cvfits <- cv@cvfits
   
   parameterLabels <- cv@parameterLabels
-
+  
   for(ro in 1:nrow(pars)){
     
     trainSet <- pars$trainSet[ro]
@@ -122,10 +123,12 @@ test_that("testing cross-validation", {
   
   # test reweighing
   
-  rsem2 <- lessSEM::adaptiveLasso(lavaanModel = modelFit, 
+  rsem2 <- lessSEM::smoothAdaptiveLasso(lavaanModel = modelFit, 
                                   regularized = regularizedLavaan,
+                                  epsilon = 1e-8, 
+                                  tau = 1e-4,
                                   nLambdas = 50)
-  cv <- cv4regularizedSEM(regularizedSEM = rsem2, 
+  cv <- cv4regularizedSEMApprox(regularizedSEM = rsem2, 
                           k = 5, 
                           reweigh = TRUE)
   
@@ -157,10 +160,10 @@ test_that("testing cross-validation", {
   colnames(y2) <- yNames
   y2 <- y2[,colnames(ySorted)]
   
-  cv <- cv4regularizedSEM(regularizedSEM = rsem2, 
+  cv <- cv4regularizedSEMApprox(regularizedSEM = rsem2, 
                           dataSet = y2, 
                           scaleData = FALSE, 
-                          k = 3,
+                          k = 5,
                           returnSubsetParameters = TRUE)
   subsets <- cv@subsets
   pars <- cv@subsetParameters

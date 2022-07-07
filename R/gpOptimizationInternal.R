@@ -222,7 +222,7 @@ gpOptimizationInternal <- function(par,
                                 weights)
     
     tuningParameters <- data.frame(
-      lambdas = seq(0,
+      lambda = seq(0,
                     maxLambda,
                     length.out = tuningParameters$nLambdas),
       alpha = 1

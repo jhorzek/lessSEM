@@ -465,7 +465,7 @@ cv4regularizedSEMApprox <- function(regularizedSEM,
     modifyModel$dataSet <- trainSet
     
     # check weights for adaptive Lasso
-    if(any(!fits$alpha %in% c(0,1)) && any(reweigh)){
+    if(regularizedSEM@penalty == "adaptiveLasso" && any(reweigh)){
       if(is.matrix(reweigh)){
         weights_s <- reweigh[s,]
       }else{
