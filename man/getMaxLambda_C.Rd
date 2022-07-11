@@ -4,7 +4,14 @@
 \alias{getMaxLambda_C}
 \title{getMaxLambda_C}
 \usage{
-getMaxLambda_C(regularizedModel, SEM, rawParameters, weights, N)
+getMaxLambda_C(
+  regularizedModel,
+  SEM,
+  rawParameters,
+  weights,
+  N,
+  approx = FALSE
+)
 }
 \arguments{
 \item{regularizedModel}{Model combining likelihood and lasso type penalty}

@@ -7,12 +7,12 @@
 #' y <- lessSEM::simulateExampleData()
 #' @export
 simulateExampleData <- function(N = 100, # sample size
-  loadings = c(rep(1,5), rep(.4,5), rep(0,5))
+                                loadings = c(rep(1,5), rep(.4,5), rep(0,5))
 ){
   
   f <- matrix(rnorm(N, 0, 1), ncol = 1) # latent factor
   L <- matrix(loadings, 
-    nrow = 1) # loadings
+              nrow = 1) # loadings
   # covariances
   covs <- diag(max(L^2)+.2, length(loadings))
   
@@ -27,4 +27,73 @@ simulateExampleData <- function(N = 100, # sample size
   
   return(y)
   
+}
+
+#' noDotDotDot
+#' 
+#' remplaces the dot dot dot part of the fitting and gradient fuction
+#' @param fn fit or gradient function. IMPORTANT: THE FIRST ARGUMENT TO
+#' THE FUNCTION MUST BE THE PARAMETER VECTOR
+#' @param ... additional arguments
+#' @return list with (1) new function which wraps fn and (2) list with arguments passed to fn
+noDotDotDot <- function(fn, ...){
+  
+  dotdotdot <- list(...)
+  fnUser <- fn
+  
+  argsAre <- formalArgs(fnUser)
+  
+  if(any(!names(dotdotdot) %in% argsAre)){
+    warning(paste0(
+      "You passed the following argument(s) using ...: ", 
+            paste0(names(dotdotdot)[!names(dotdotdot) %in% argsAre], collapse = ", "),
+      ". The fitting function or gradient function seems to not use all of these arguments."
+    )
+    )
+  }
+  
+  namesOfPar <- argsAre[1] # the first argument is the parameter vector
+  
+  if(length(argsAre) == 1) {
+    additionalArguments <- list("fnUser" = fnUser)
+    eval(
+      parse(
+        text = paste('fn <- function(par, parameterLabels, additionalArguments) { 
+                          names(par) <- parameterLabels
+                          return(additionalArguments$fnUser(', namesOfPar, ' = par))}', 
+                     sep='')
+      )
+    )
+    
+    return(list("fn" = fn,
+                "additionalArguments" = additionalArguments
+    ))
+    
+    
+  }
+  
+  
+  namesOfAdditional <- argsAre[2:length(argsAre)]
+  
+  fnArgs <- c(
+    paste0(namesOfPar[1]," = par"), 
+    paste0(namesOfAdditional, " = ", "additionalArguments$", namesOfAdditional)
+  )
+  
+  
+  body <- paste0(
+    "additionalArguments$fnUser(", 
+    paste0(fnArgs, collapse = ", "), 
+    ")")
+  
+  additionalArguments <- dotdotdot
+  additionalArguments$fnUser <- fnUser
+  rm(fn)
+  eval(parse(text = paste('fn <- function(par, parameterLabels, additionalArguments) { 
+                          names(par) <- parameterLabels
+                          return(' , body , ')}', sep='')))
+  
+  return(list("fn" = fn,
+              "additionalArguments" = additionalArguments
+  ))
 }

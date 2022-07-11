@@ -47,7 +47,7 @@ fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.
 \pkg{lessSEM} will then automatically switch to full information maximum likelihood
 as well.
 
-Elastic net regularization:
+CappedL1 regularization:
 \itemize{
 \item Zhang, T. (2010). Analysis of Multi-stage Convex Relaxation for Sparse Regularization.
 Journal of Machine Learning Research, 11, 1081–1107.

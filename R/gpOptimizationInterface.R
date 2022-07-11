@@ -7,12 +7,9 @@
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
-#' function. This fitting functions _must_ take exactly 3 arguments:
-#' 
-#' 1. A vector with current parameter estimates
-#' 2. A vector with labels of parameters
-#' 3. Any additional arguments used by the function contained in a single list
-#' (called additionalArguments below)
+#' function. This fitting functions _must_ take a labeled vector with parameter
+#' values as first argument. The remaining arguments are passed with the ... argument.
+#' This is similar to optim.
 #' 
 #' The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 #' will be used to approximate the gradients. Supplying a gradient function
@@ -58,7 +55,7 @@
 #' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
-#' @param additionalArguments additional argument passed to fn and gr
+#' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
@@ -78,50 +75,36 @@
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our
-#' # linear regression. The model is given by
-#' # y = b1*x1 + b2*x2 + b3*x3 + b4*x4 + b5*x5 
-#' n <- 100
-#' df <- data.frame(
-#'   x1 = rnorm(n),
-#'   x2 = rnorm(n),
-#'   x3 = rnorm(n),
-#'   x4 = rnorm(n),
-#'   x5 = rnorm(n)
-#' )
-#' df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + rnorm(n,0,.3) 
+#' # linear regression.
+#' N <- 100 # number of persons
+#' p <- 10 # number of predictors
+#' X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+#' b <- c(rep(1,4), 
+#'        rep(0,6)) # true regression weights
+#' y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
 #' 
 #' # First, we must construct a fiting function
 #' # which returns a single value. We will use
 #' # the residual sum squared as fitting function.
-#' # The optimizer expects that this function takes
-#' # EXACTLY three arguments:
-#' # 1) a vector with parameter values (par)
-#' # 2) a vector with labels for these parameters (parameterLabels)
-#' # 3) an additional argument which allows for passing anything
-#' # else your function needs to run to the function.
 #' 
 #' # Let's start setting up the fitting function:
-#' fittingFunction <- function(par, parameterLabels, additionalArguments){
-#'   # Our function needs the observed data 
-#'   # y and X. These are not part of the first two arguments
-#'   # and must therefore be passed in the function with the 
-#'   # third argument (additionalArguments). Here, we will use a list
-#'   # and pass the arguments in through that list:
-#'   pred <- additionalArguments$X %*% matrix(par, ncol = 1)
-#'   sse <- sum((additionalArguments$y - pred)^2)
-#'   return(sse)
+#' fittingFunction <- function(par, y, X, N){
+#'   # par is the parameter vector
+#'   # y is the observed dependent variable
+#'   # X is the design matrix
+#'   # N is the sample size
+#'   pred <- X %*% matrix(par, ncol = 1) #be explicit here: 
+#'   # we need par to be a column vector
+#'   sse <- sum((y - pred)^2)
+#'   # we scale with .5/N to get the same results as glmnet
+#'   return((.5/N)*sse)
 #' }
-#' # Now we need to construct the list additionalArguments used
-#' # by fittingFunction
-#' additionalArguments <- list(X = as.matrix(df[,grepl("x", colnames(df))]), 
-#'                             y = df$y)
-#' 
 #' 
 #' # let's define the starting values:
-#' b <- rep(0,5)
-#' names(b) <- paste0("b",1:5)
+#' b <- rep(0,p)
+#' names(b) <- paste0("b", 1:length(b))
 #' # names of regularized parameters
-#' regularized <- paste0("b",1:5)
+#' regularized <- paste0("b",1:p)
 #' 
 #' # optimize
 #' lassoPen <- gpLasso(
@@ -129,10 +112,21 @@
 #'   regularized = regularized, 
 #'   fn = fittingFunction, 
 #'   nLambdas = 100, 
-#'   additionalArguments = additionalArguments
+#'   X = X,
+#'   y = y,
+#'   N = N
 #' )
 #' plot(lassoPen)
 #' AIC(lassoPen)
+#' 
+#' # for comparison:
+#' #library(glmnet)
+#' #coef(glmnet(x = X,
+#' #            y = y, 
+#' #            lambda = lassoPen@fits$lambda[20],
+#' #            intercept = FALSE,
+#' #            standardize = FALSE))[,1]
+#' #lassoPen@parameters[20,]
 #' @export
 gpLasso <- function(par,
                     regularized,
@@ -140,10 +134,24 @@ gpLasso <- function(par,
                     gr = NULL,
                     lambdas = NULL,
                     nLambdas = NULL,
-                    additionalArguments,
+                    ...,
                     method = "ista", 
                     control = controlIsta()
 ){
+  
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
   
   if(is.null(lambdas) && is.null(nLambdas)){
     stop("Specify either lambdas or nLambdas")
@@ -180,12 +188,9 @@ gpLasso <- function(par,
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
-#' function. This fitting functions _must_ take exactly 3 arguments:
-#' 
-#' 1. A vector with current parameter estimates
-#' 2. A vector with labels of parameters
-#' 3. Any additional arguments used by the function contained in a single list
-#' (called additionalArguments below)
+#' function. This fitting functions _must_ take a labeled vector with parameter
+#' values as first argument. The remaining arguments are passed with the ... argument.
+#' This is similar to optim.
 #' 
 #' The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 #' will be used to approximate the gradients. Supplying a gradient function
@@ -232,7 +237,7 @@ gpLasso <- function(par,
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param weights labeled vector with adaptive lasso weights. NULL will use 1/abs(par)
-#' @param additionalArguments additional argument passed to fn and gr
+#' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
@@ -252,69 +257,66 @@ gpLasso <- function(par,
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our
-#' # linear regression. The model is given by
-#' # y = b1*x1 + b2*x2 + b3*x3 + b4*x4 + b5*x5 
-#' n <- 100
-#' df <- data.frame(
-#'   x1 = rnorm(n),
-#'   x2 = rnorm(n),
-#'   x3 = rnorm(n),
-#'   x4 = rnorm(n),
-#'   x5 = rnorm(n)
-#' )
-#' df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + rnorm(n,0,.3) 
+#' # linear regression.
+#' N <- 100 # number of persons
+#' p <- 10 # number of predictors
+#' X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+#' b <- c(rep(1,4), 
+#'        rep(0,6)) # true regression weights
+#' y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
 #' 
 #' # First, we must construct a fiting function
 #' # which returns a single value. We will use
 #' # the residual sum squared as fitting function.
-#' # The optimizer expects that this function takes
-#' # EXACTLY three arguments:
-#' # 1) a vector with parameter values (par)
-#' # 2) a vector with labels for these parameters (parameterLabels)
-#' # 3) an additional argument which allows for passing anything
-#' # else your function needs to run to the function.
 #' 
 #' # Let's start setting up the fitting function:
-#' fittingFunction <- function(par, parameterLabels, additionalArguments){
-#'   # Our function needs the observed data 
-#'   # y and X. These are not part of the first two arguments
-#'   # and must therefore be passed in the function with the 
-#'   # third argument (additionalArguments). Here, we will use a list
-#'   # and pass the arguments in through that list:
-#'   pred <- additionalArguments$X %*% matrix(par, ncol = 1)
-#'   sse <- sum((additionalArguments$y - pred)^2)
-#'   return(sse)
+#' fittingFunction <- function(par, y, X, N){
+#'   # par is the parameter vector
+#'   # y is the observed dependent variable
+#'   # X is the design matrix
+#'   # N is the sample size
+#'   pred <- X %*% matrix(par, ncol = 1) #be explicit here: 
+#'   # we need par to be a column vector
+#'   sse <- sum((y - pred)^2)
+#'   # we scale with .5/N to get the same results as glmnet
+#'   return((.5/N)*sse)
 #' }
-#' # Now we need to construct the list additionalArguments used
-#' # by fittingFunction
-#' additionalArguments <- list(X = as.matrix(df[,grepl("x", colnames(df))]), 
-#'                             y = df$y)
-#' 
 #' 
 #' # let's define the starting values:
-#' b <- rep(0,5)
-#' names(b) <- paste0("b",1:5)
+#' b <- c(solve(t(X)%*%X)%*%t(X)%*%y) # we will use the lm estimates
+#' names(b) <- paste0("b", 1:length(b))
 #' # names of regularized parameters
-#' regularized <- paste0("b",1:5)
+#' regularized <- paste0("b",1:p)
 #' 
-#' # for our weights, we need the unregularized parameter
-#' # estimates
-#' mle <- coef(lm(y~ 0+., data = df))
-#' weights <- 1/abs(mle)
-#' names(weights) <- paste0("b",1:5)
-#' weights[!names(weights) %in% regularized] <- 0
+#' # define the weight for each of the parameters
+#' weights <- 1/abs(b)
+#' # we will re-scale the weights for equivalence to glmnet.
+#' # see ?glmnet for more details
+#' weights <- length(b)*weights/sum(weights)
 #' 
 #' # optimize
-#' alasso <- gpAdaptiveLasso(
+#' adpativeLassoPen <- gpAdaptiveLasso(
 #'   par = b, 
 #'   regularized = regularized, 
 #'   weights = weights,
 #'   fn = fittingFunction, 
-#'   nLambdas = 100, 
-#'   additionalArguments = additionalArguments
+#'   lambdas = seq(0,1,.01), 
+#'   X = X,
+#'   y = y,
+#'   N = N
 #' )
-#' plot(alasso)
-#' AIC(alasso)
+#' plot(adpativeLassoPen)
+#' AIC(adpativeLassoPen)
+#' 
+#' # for comparison:
+#' # library(glmnet)
+#' # coef(glmnet(x = X,
+#' #            y = y,
+#' #            penalty.factor = weights,
+#' #            lambda = adpativeLassoPen@fits$lambda[20],
+#' #            intercept = FALSE,
+#' #            standardize = FALSE))[,1]
+#' # adpativeLassoPen@parameters[20,]
 #' @export
 gpAdaptiveLasso <- function(par,
                             regularized,
@@ -323,12 +325,28 @@ gpAdaptiveLasso <- function(par,
                             gr = NULL,
                             lambdas = NULL,
                             nLambdas = NULL,
-                            additionalArguments = NULL,
+                            ...,
                             method = "ista", 
                             control = controlIsta()){
+  
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
+  
   if(is.null(weights)){
     weights <- 1/abs(par)
     weights[!names(weights) %in% regularized] <- 0
+    message("Building weights based on par as weights = 1/abs(par).")
   }
   
   if(! all(regularized %in% names(weights))) stop(paste0(
@@ -339,18 +357,28 @@ gpAdaptiveLasso <- function(par,
     names(weights)
   ))
   
-  result <- gpElasticNet(
-    par = par,
-    fn = fn,
-    gr = gr,
-    weights = weights,
-    lambdas = lambdas,
-    nLambdas = nLambdas,
-    alphas = 1,
-    additionalArguments = additionalArguments,
-    method = method,
-    control = control
+  if(is.null(lambdas) && is.null(nLambdas)){
+    stop("Specify either lambdas or nLambdas")
+  }
+  
+  if(!is.null(nLambdas)){
+    tuningParameters <- data.frame(nLambdas = nLambdas)
+  }else{
+    tuningParameters <- data.frame(lambda = lambdas,
+                                   alpha = 1)
+  }
+  
+  result <- lessSEM::gpOptimizationInternal(par = par,
+                                            fn = fn,
+                                            gr = gr,
+                                            additionalArguments = additionalArguments,
+                                            penalty = "adaptiveLasso", 
+                                            weights = weights,
+                                            tuningParameters = tuningParameters, 
+                                            method = method,
+                                            control = control
   )
+  
   return(result)
   
 }
@@ -365,12 +393,9 @@ gpAdaptiveLasso <- function(par,
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
-#' function. This fitting functions _must_ take exactly 3 arguments:
-#' 
-#' 1. A vector with current parameter estimates
-#' 2. A vector with labels of parameters
-#' 3. Any additional arguments used by the function contained in a single list
-#' (called additionalArguments below)
+#' function. This fitting functions _must_ take a labeled vector with parameter
+#' values as first argument. The remaining arguments are passed with the ... argument.
+#' This is similar to optim.
 #' 
 #' The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 #' will be used to approximate the gradients. Supplying a gradient function
@@ -414,7 +439,7 @@ gpAdaptiveLasso <- function(par,
 #' gradients of the objective function. If set to NULL, numDeriv will be used
 #' to approximate the gradients 
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param additionalArguments additional argument passed to fn and gr
+#' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
@@ -434,95 +459,103 @@ gpAdaptiveLasso <- function(par,
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our
-#' # linear regression. The model is given by
-#' # y = b1*x1 + b2*x2 + b3*x3 + b4*x4 + b5*x5 
-#' n <- 100
-#' df <- data.frame(
-#'   x1 = rnorm(n),
-#'   x2 = rnorm(n),
-#'   x3 = rnorm(n),
-#'   x4 = rnorm(n),
-#'   x5 = rnorm(n)
-#' )
-#' df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + rnorm(n,0,.3) 
+#' # linear regression.
+#' N <- 100 # number of persons
+#' p <- 10 # number of predictors
+#' X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+#' b <- c(rep(1,4),
+#'        rep(0,6)) # true regression weights
+#' y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
 #' 
 #' # First, we must construct a fiting function
 #' # which returns a single value. We will use
 #' # the residual sum squared as fitting function.
-#' # The optimizer expects that this function takes
-#' # EXACTLY three arguments:
-#' # 1) a vector with parameter values (par)
-#' # 2) a vector with labels for these parameters (parameterLabels)
-#' # 3) an additional argument which allows for passing anything
-#' # else your function needs to run to the function.
 #' 
 #' # Let's start setting up the fitting function:
-#' fittingFunction <- function(par, parameterLabels, additionalArguments){
-#'   # Our function needs the observed data 
-#'   # y and X. These are not part of the first two arguments
-#'   # and must therefore be passed in the function with the 
-#'   # third argument (additionalArguments). Here, we will use a list
-#'   # and pass the arguments in through that list:
-#'   pred <- additionalArguments$X %*% matrix(par, ncol = 1)
-#'   sse <- sum((additionalArguments$y - pred)^2)
-#'   return(sse)
+#' fittingFunction <- function(par, y, X, N){
+#'   # par is the parameter vector
+#'   # y is the observed dependent variable
+#'   # X is the design matrix
+#'   # N is the sample size
+#'   pred <- X %*% matrix(par, ncol = 1) #be explicit here:
+#'   # we need par to be a column vector
+#'   sse <- sum((y - pred)^2)
+#'   # we scale with .5/N to get the same results as glmnet
+#'   return((.5/N)*sse)
 #' }
-#' # Now we need to construct the list additionalArguments used
-#' # by fittingFunction
-#' additionalArguments <- list(X = as.matrix(df[,grepl("x", colnames(df))]), 
-#'                             y = df$y)
-#' 
 #' 
 #' # let's define the starting values:
-#' b <- rep(0,5)
-#' names(b) <- paste0("b",1:5)
+#' b <- c(solve(t(X)%*%X)%*%t(X)%*%y) # we will use the lm estimates
+#' names(b) <- paste0("b", 1:length(b))
 #' # names of regularized parameters
-#' regularized <- paste0("b",1:5)
-#' 
-#' fittingFunction(b, names(b), additionalArguments)
+#' regularized <- paste0("b",1:p)
 #' 
 #' # optimize
-#' ridgeFit <- gpRidge(
-#'   par = b, 
-#'   regularized = regularized, 
-#'   fn = fittingFunction, 
-#'   lambdas = seq(0,100,1),
-#'   additionalArguments = additionalArguments
+#' ridgePen <- gpRidge(
+#'   par = b,
+#'   regularized = regularized,
+#'   fn = fittingFunction,
+#'   lambdas = seq(0,1,.01),
+#'   X = X,
+#'   y = y,
+#'   N = N
 #' )
-#' plot(ridgeFit)
+#' plot(ridgePen)
+#' 
+#' # for comparison:
+#' # fittingFunction <- function(par, y, X, N, lambda){
+#' #   pred <- X %*% matrix(par, ncol = 1) 
+#' #   sse <- sum((y - pred)^2)
+#' #   return((.5/N)*sse + lambda * sum(par^2))
+#' # }
+#' # 
+#' # optim(par = b, 
+#' #       fn = fittingFunction, 
+#' #       y = y,
+#' #       X = X,
+#' #       N = N,
+#' #       lambda =  ridgePen@fits$lambda[20], 
+#' #       method = "BFGS")$par
+#' # ridgePen@parameters[20,]
 #' @export
 gpRidge <- function(par,
                     regularized,
                     fn,
                     gr = NULL,
                     lambdas,
-                    additionalArguments,
+                    ...,
                     method = "ista", 
                     control = controlIsta()){
   
-  weights <- par
-  weights[] <- 0
-  weights[regularized] <- 1
-  if(! all(regularized %in% names(weights))) stop(paste0(
-    "You specified that the following parameters should be regularized:\n",
-    paste0(regularized, collapse = ", "), 
-    ". Not all of these parameters could be found in the model.\n",
-    "The model has the following parameters:\n",
-    names(weights)
-  ))
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
   
-  result <- gpElasticNet(
-    par = par,
-    fn = fn,
-    gr = gr,
-    weights = weights,
-    lambdas = lambdas,
-    nLambdas = NULL,
-    alphas = 0,
-    additionalArguments = additionalArguments,
-    method = method,
-    control = control
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
+  
+  
+  tuningParameters <- data.frame(lambda = lambdas,
+                                 alpha = 0)
+  
+  result <- lessSEM::gpOptimizationInternal(par = par,
+                                            fn = fn,
+                                            gr = gr,
+                                            additionalArguments = additionalArguments,
+                                            penalty = "ridge", 
+                                            weights = regularized,
+                                            tuningParameters = tuningParameters, 
+                                            method = method,
+                                            control = control
   )
+  
   return(result)
   
 }
@@ -539,12 +572,9 @@ gpRidge <- function(par,
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
-#' function. This fitting functions _must_ take exactly 3 arguments:
-#' 
-#' 1. A vector with current parameter estimates
-#' 2. A vector with labels of parameters
-#' 3. Any additional arguments used by the function contained in a single list
-#' (called additionalArguments below)
+#' function. This fitting functions _must_ take a labeled vector with parameter
+#' values as first argument. The remaining arguments are passed with the ... argument.
+#' This is similar to optim.
 #' 
 #' The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 #' will be used to approximate the gradients. Supplying a gradient function
@@ -593,7 +623,7 @@ gpRidge <- function(par,
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
 #' in [0,1]. 0 = ridge, 1 = lasso.
-#' @param additionalArguments additional argument passed to fn and gr
+#' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
@@ -612,311 +642,111 @@ gpRidge <- function(par,
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our
-#' # linear regression. The model is given by
-#' # y = b1*x1 + b2*x2 + b3*x3 + b4*x4 + b5*x5 
-#' n <- 100
-#' df <- data.frame(
-#'   x1 = rnorm(n),
-#'   x2 = rnorm(n),
-#'   x3 = rnorm(n),
-#'   x4 = rnorm(n),
-#'   x5 = rnorm(n)
-#' )
-#' df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + rnorm(n,0,.3) 
+#' # linear regression.
+#' N <- 100 # number of persons
+#' p <- 10 # number of predictors
+#' X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+#' b <- c(rep(1,4),
+#'        rep(0,6)) # true regression weights
+#' y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
 #' 
 #' # First, we must construct a fiting function
 #' # which returns a single value. We will use
 #' # the residual sum squared as fitting function.
-#' # The optimizer expects that this function takes
-#' # EXACTLY three arguments:
-#' # 1) a vector with parameter values (par)
-#' # 2) a vector with labels for these parameters (parameterLabels)
-#' # 3) an additional argument which allows for passing anything
-#' # else your function needs to run to the function.
 #' 
 #' # Let's start setting up the fitting function:
-#' fittingFunction <- function(par, parameterLabels, additionalArguments){
-#'   # Our function needs the observed data 
-#'   # y and X. These are not part of the first two arguments
-#'   # and must therefore be passed in the function with the 
-#'   # third argument (additionalArguments). Here, we will use a list
-#'   # and pass the arguments in through that list:
-#'   pred <- additionalArguments$X %*% matrix(par, ncol = 1)
-#'   sse <- sum((additionalArguments$y - pred)^2)
-#'   return(sse)
+#' fittingFunction <- function(par, y, X, N){
+#'   # par is the parameter vector
+#'   # y is the observed dependent variable
+#'   # X is the design matrix
+#'   # N is the sample size
+#'   pred <- X %*% matrix(par, ncol = 1) #be explicit here:
+#'   # we need par to be a column vector
+#'   sse <- sum((y - pred)^2)
+#'   # we scale with .5/N to get the same results as glmnet
+#'   return((.5/N)*sse)
 #' }
-#' # Now we need to construct the list additionalArguments used
-#' # by fittingFunction
-#' additionalArguments <- list(X = as.matrix(df[,grepl("x", colnames(df))]), 
-#'                             y = df$y)
-#' 
 #' 
 #' # let's define the starting values:
-#' b <- rep(0,5)
-#' names(b) <- paste0("b",1:5)
-#' # and the weights used by the elastic net
-#' weights <- b
-#' weights[] <- 1
+#' b <- c(solve(t(X)%*%X)%*%t(X)%*%y) # we will use the lm estimates
+#' names(b) <- paste0("b", 1:length(b))
+#' # names of regularized parameters
+#' regularized <- paste0("b",1:p)
 #' 
 #' # optimize
-#' enet <- gpElasticNet(
-#'   par = b, 
-#'   weights = weights, 
-#'   fn = fittingFunction, 
-#'   lambdas = seq(0,100,1), 
-#'   alphas = 1, 
-#'   additionalArguments = additionalArguments
+#' elasticNetPen <- gpElasticNet(
+#'   par = b,
+#'   regularized = regularized,
+#'   fn = fittingFunction,
+#'   lambdas = seq(0,1,.1),
+#'   alphas = c(0, .5, 1),
+#'   X = X,
+#'   y = y,
+#'   N = N
 #' )
-#' plot(enet)
-#' AIC(enet)
+#' 
+#' # optional: plot requires plotly package
+#' # plot(elasticNetPen)
+#' 
+#' # for comparison:
+#' fittingFunction <- function(par, y, X, N, lambda, alpha){
+#'   pred <- X %*% matrix(par, ncol = 1)
+#'   sse <- sum((y - pred)^2)
+#'   return((.5/N)*sse + (1-alpha)*lambda * sum(par^2) + alpha*lambda *sum(sqrt(par^2 + 1e-8)))
+#' }
+#' 
+#' round(
+#'   optim(par = b,
+#'       fn = fittingFunction,
+#'       y = y,
+#'       X = X,
+#'       N = N,
+#'       lambda =  elasticNetPen@fits$lambda[15],
+#'       alpha =  elasticNetPen@fits$alpha[15],
+#'       method = "BFGS")$par,
+#'   4)
+#' elasticNetPen@parameters[15,]
 #' @export
 gpElasticNet <- function(par,
-                         weights,
+                         regularized,
                          fn,
                          gr = NULL,
-                         lambdas = NULL,
-                         nLambdas = NULL,
+                         lambdas,
                          alphas,
-                         additionalArguments,
+                         ...,
                          method = "ista", 
                          control = controlIsta()){
   
-  inputArguments <- as.list(environment())
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
   
-  parameterLabels <- names(par)
-  if(is.null(parameterLabels)) stop("par has no labels.")
-  rawParameters <- par
-  
-  if(! method %in% c("ista", "glmnet")) 
-    stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  
-  if(is.null(lambdas) && is.null(nLambdas)) 
-    stop("Specify lambdas or nLambdas")
-  if(!is.null(lambdas) && !is.null(nLambdas))
-    stop("Specify either lambdas or nLambdas, not both")
-  if(!is.null(nLambdas) && any(alphas != 1))
-    stop("nLambdas only supported for lasso type penalty (alpha = 1).")
-  
-  if(method == "ista" && !is(control, "controlIsta")) 
-    stop("control must be of class controlIsta. See ?controlIsta.")
-  if(method == "glmnet" && !is(control, "controlGlmnet")) 
-    stop("control must be of class controlGlmnet See ?controlGlmnet")
-  
-  # gradient function
-  if(is.null(gr)){
+  if(!is.null(gr)){
     
-    additionalArguments$fn <- fn
-    
-    gr <- function(par, parameterLabels, additionalArguments){
-      grad <- numDeriv::grad(func = additionalArguments$fn, 
-                             x = par, 
-                             parameterLabels = parameterLabels,
-                             additionalArguments = additionalArguments)
-      names(grad) <- names(par)
-      return(grad)
-    }
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
     
   }
   
-  # check functions
-  check_fn <- fn(par, parameterLabels, additionalArguments)
-  if(length(check_fn) != 1) stop("fn returns more than one element!")
-  check_fn <- gr(par, parameterLabels, additionalArguments)
-  if(length(check_fn) != length(par)) stop("gr has different length than par!")
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
   
-  # make sure that the weights are in the correct order
-  if(is.null(names(weights))) stop("weights must have the same names as the parameters")
-  if(length(weights) != length(par)) stop("weights must be of the same length as the parameter vector.")
-  if(any(!is.numeric(weights))) stop("weights must be numeric")
-  weights <- weights[names(par)]
+  tuningParameters <- expand.grid(lambda = lambdas,
+                                  alpha = alphas)
   
-  #### glmnet requires an initial Hessian ####
-  if(method == "glmnet"){
-    initialHessian <- control$initialHessian
-    if(is.matrix(initialHessian) && 
-       nrow(initialHessian) == length(rawParameters) && 
-       ncol(initialHessian) == length(rawParameters)){
-      
-    }else if(any(initialHessian == "compute")){
-      
-      initialHessian <- numDeriv::hessian(func = fn, x = par)
-      
-    }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
-      initialHessian <- diag(initialHessian,length(rawParameters))
-      rownames(initialHessian) <- names(rawParameters)
-      colnames(initialHessian) <- names(rawParameters)
-    }else{
-      stop("Invalid initialHessian passed to GLMNET. See ?controlGLMNET for more information.")
-    }
-    
-    control$initialHessian <- initialHessian
-  }
   
-  #### prepare regularized model object ####
-  if(method == "glmnet"){
-    
-    controlIntern <- list(
-      initialHessian = control$initialHessian,
-      stepSize = control$stepSize,
-      sigma = control$sigma,
-      gamma = control$gamma,
-      maxIterOut = control$maxIterOut,
-      maxIterIn = control$maxIterIn,
-      maxIterLine = control$maxIterLine,
-      breakOuter = control$breakOuter,
-      breakInner = control$breakInner,
-      convergenceCriterion = control$convergenceCriterion, 
-      verbose = control$verbose
-    )
-    
-    regularizedModel <- new(glmnetEnetGeneralPurpose, 
-                            weights, 
-                            controlIntern)
-    
-  }else if(method == "ista"){
-    
-    controlIntern <- list(
-      L0 = control$L0,
-      eta = control$eta,
-      accelerate = control$accelerate,
-      maxIterOut = control$maxIterOut,
-      maxIterIn = control$maxIterIn,
-      breakOuter = control$breakOuter,
-      convCritInner = control$convCritInner,
-      sigma = control$sigma,
-      stepSizeInheritance = control$stepSizeInheritance,
-      verbose = control$verbose
-    )
-    
-    regularizedModel <- new(istaEnetGeneralPurpose, 
-                            weights, 
-                            controlIntern)
-  }
-  
-  #### define tuning parameters and prepare fit results ####
-  ## get max lambda ##
-  if(!is.null(nLambdas)){
-    message(paste0(
-      "Automatically selecting the maximal lambda value.\n",
-      "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
-    )
-    
-    maxLambda <- gpGetMaxLambda(regularizedModel,
-                                par,
-                                fn,
-                                gr,
-                                additionalArguments,
-                                weights)
-    lambdas <- seq(0,
-                   maxLambda,
-                   length.out = nLambdas)
-    
-  }
-  
-  tuningGrid <- expand.grid("lambda" = lambdas, 
-                            "alpha" = alphas)
-  
-  fits <- data.frame(
-    tuningGrid,
-    "m2LL" = NA,
-    "regM2LL"= NA,
-    "nonZeroParameters" = NA,
-    "convergence" = NA
+  result <- lessSEM::gpOptimizationInternal(par = par,
+                                            fn = fn,
+                                            gr = gr,
+                                            additionalArguments = additionalArguments,
+                                            penalty = "elasticNet", 
+                                            weights = regularized,
+                                            tuningParameters = tuningParameters, 
+                                            method = method,
+                                            control = control
   )
   
-  parameterEstimates <- as.data.frame(matrix(NA,
-                                             nrow = nrow(tuningGrid), 
-                                             ncol = length(rawParameters)))
-  colnames(parameterEstimates) <- names(rawParameters)
-  parameterEstimates <- cbind(
-    tuningGrid,
-    parameterEstimates
-  )
-  
-  if(method == "glmnet" && control$saveHessian){
-    Hessians <- list(
-      "lambda" = tuningGrid$lambda,
-      "alpha" = tuningGrid$alpha,
-      "Hessian" = lapply(1:nrow(tuningGrid), 
-                         matrix, 
-                         data= NA, 
-                         nrow=nrow(initialHessian), 
-                         ncol=ncol(initialHessian))
-    )
-  }else{
-    Hessians <- list(NULL)
-  }
-  
-  #### print progress ####
-  if(control$verbose == 0){
-    progressbar = txtProgressBar(min = 0, 
-                                 max = nrow(tuningGrid), 
-                                 initial = 0, 
-                                 style = 3)
-  }
-  
-  #### Iterate over all tuning parameter combinations and fit models ####
-  
-  for(it in 1:nrow(tuningGrid)){
-    if(control$verbose == 0){
-      setTxtProgressBar(progressbar,it)
-    }else{
-      cat(paste0("\nIteration [", it, "/", nrow(tuningGrid),"]\n"))
-    }
-    
-    lambda <- tuningGrid$lambda[it]
-    alpha <- tuningGrid$alpha[it]
-    
-    result <- try(
-      regularizedModel$optimize( par,
-                                 fn,
-                                 gr,
-                                 additionalArguments,
-                                 lambda,
-                                 alpha)
-    )
-    if(is(result, "try-error")) next
-    
-    rawParameters <- result$rawParameters
-    parameterEstimates[it, names(rawParameters)] <- rawParameters[names(rawParameters)]
-    
-    fits$nonZeroParameters[it] <- length(rawParameters) - 
-      sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
-    fits$regM2LL[it] <- result$fit
-    fits$convergence[it] <- result$convergence
-    fits$m2LL[it] <- fn(par, parameterLabels, additionalArguments)
-    
-    if(method == "glmnet" && control$saveHessian) 
-      Hessians$Hessian[[it]] <- result$Hessian
-    
-    # set initial values for next iteration
-    
-    
-    if(method == "glmnet"){
-      if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
-      
-      # set Hessian for next iteration
-      regularizedModel$setHessian(result$Hessian)
-      
-    }
-    
-  }
-  
-  internalOptimization <- list(
-    "HessiansOfDifferentiablePart" = Hessians
-  )
-  
-  results <- new("gpRegularized",
-                 parameters = parameterEstimates,
-                 fits = fits,
-                 parameterLabels = names(rawParameters),
-                 weights = weights,
-                 regularized = names(weights)[weights!=0],
-                 internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
-  
-  return(results)
-  
+  return(result)
 }
 
 
@@ -932,12 +762,9 @@ gpElasticNet <- function(par,
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
-#' function. This fitting functions _must_ take exactly 3 arguments:
-#' 
-#' 1. A vector with current parameter estimates
-#' 2. A vector with labels of parameters
-#' 3. Any additional arguments used by the function contained in a single list
-#' (called additionalArguments below)
+#' function. This fitting functions _must_ take a labeled vector with parameter
+#' values as first argument. The remaining arguments are passed with the ... argument.
+#' This is similar to optim.
 #' 
 #' The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 #' will be used to approximate the gradients. Supplying a gradient function
@@ -978,7 +805,7 @@ gpElasticNet <- function(par,
 #' @param gr R function which takes the parameters AND their labels
 #' as input and returns the gradients of the objective function. 
 #' If set to NULL, numDeriv will be used to approximate the gradients 
-#' @param additionalArguments additional argument passed to fn and gr
+#' @param ... additional arguments passed to fn and gr
 #' @param regularized vector with names of parameters which are to be regularized.
 #' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
@@ -996,76 +823,108 @@ gpElasticNet <- function(par,
 #' # as there are specialized packages for linear regression
 #' # (e.g., glmnet)
 #' 
+#' # This example shows how to use the optimizers
+#' # for other objective functions. We will use
+#' # a linear regression as an example. Note that
+#' # this is not a useful application of the optimizers
+#' # as there are specialized packages for linear regression
+#' # (e.g., glmnet)
+#' 
 #' library(lessSEM)
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our
-#' # linear regression. The model is given by
-#' # y = b1*x1 + b2*x2 + b3*x3 + b4*x4 + b5*x5 
-#' n <- 100
-#' df <- data.frame(
-#'   x1 = rnorm(n),
-#'   x2 = rnorm(n),
-#'   x3 = rnorm(n),
-#'   x4 = rnorm(n),
-#'   x5 = rnorm(n)
-#' )
-#' df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + rnorm(n,0,.3) 
+#' # linear regression.
+#' N <- 100 # number of persons
+#' p <- 10 # number of predictors
+#' X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+#' b <- c(rep(1,4),
+#'        rep(0,6)) # true regression weights
+#' y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
 #' 
 #' # First, we must construct a fiting function
 #' # which returns a single value. We will use
 #' # the residual sum squared as fitting function.
-#' # The optimizer expects that this function takes
-#' # EXACTLY three arguments:
-#' # 1) a vector with parameter values (par)
-#' # 2) a vector with labels for these parameters (parameterLabels)
-#' # 3) an additional argument which allows for passing anything
-#' # else your function needs to run to the function.
 #' 
 #' # Let's start setting up the fitting function:
-#' fittingFunction <- function(par, parameterLabels, additionalArguments){
-#'   # Our function needs the observed data 
-#'   # y and X. These are not part of the first two arguments
-#'   # and must therefore be passed in the function with the 
-#'   # third argument (additionalArguments). Here, we will use a list
-#'   # and pass the arguments in through that list:
-#'   pred <- additionalArguments$X %*% matrix(par, ncol = 1)
-#'   sse <- sum((additionalArguments$y - pred)^2)
-#'   return(sse)
+#' fittingFunction <- function(par, y, X, N){
+#'   # par is the parameter vector
+#'   # y is the observed dependent variable
+#'   # X is the design matrix
+#'   # N is the sample size
+#'   pred <- X %*% matrix(par, ncol = 1) #be explicit here:
+#'   # we need par to be a column vector
+#'   sse <- sum((y - pred)^2)
+#'   # we scale with .5/N to get the same results as glmnet
+#'   return((.5/N)*sse)
 #' }
-#' # Now we need to construct the list additionalArguments used
-#' # by fittingFunction
-#' additionalArguments <- list(X = as.matrix(df[,grepl("x", colnames(df))]), 
-#'                             y = df$y)
-#' 
 #' 
 #' # let's define the starting values:
-#' b <- rep(0,5)
-#' names(b) <- paste0("b",1:5)
+#' b <- c(solve(t(X)%*%X)%*%t(X)%*%y) # we will use the lm estimates
+#' names(b) <- paste0("b", 1:length(b))
 #' # names of regularized parameters
-#' regularized <- paste0("b",1:5)
+#' regularized <- paste0("b",1:p)
 #' 
 #' # optimize
-#' penModel <- gpCappedL1(
-#'   par = b, 
-#'   regularized = regularized, 
-#'   fn = fittingFunction, 
-#'   lambdas = seq(0,100,length.out = 10),
-#'   thetas = seq(.1,10,length.out = 10),
-#'   additionalArguments = additionalArguments
+#' cL1 <- gpCappedL1(
+#'   par = b,
+#'   regularized = regularized,
+#'   fn = fittingFunction,
+#'   lambdas = seq(0,1,.1),
+#'   thetas = c(0.001, .5, 1),
+#'   X = X,
+#'   y = y,
+#'   N = N
 #' )
-#' # optional: plot requires package plotly
-#' # plot(penModel)
-#' AIC(penModel)
+#' 
+#' # optional: plot requires plotly package
+#' # plot(cL1)
+#' 
+#' # for comparison
+#' 
+#' fittingFunction <- function(par, y, X, N, lambda, theta){
+#'   pred <- X %*% matrix(par, ncol = 1)
+#'   sse <- sum((y - pred)^2)
+#'   smoothAbs <- sqrt(par^2 + 1e-8)
+#'   pen <- lambda * ifelse(smoothAbs < theta, smoothAbs, theta)
+#'   return((.5/N)*sse + sum(pen))
+#' }
+#' 
+#' round(
+#'   optim(par = b,
+#'       fn = fittingFunction,
+#'       y = y,
+#'       X = X,
+#'       N = N,
+#'       lambda =  cL1@fits$lambda[15],
+#'       theta =  cL1@fits$theta[15],
+#'       method = "BFGS")$par,
+#'   4)
+#' cL1@parameters[15,]
 #' @export
 gpCappedL1 <- function(par,
                        fn,
                        gr = NULL,
-                       additionalArguments = list(),
+                       ...,
                        regularized,
                        lambdas,
                        thetas,
                        control = controlIsta()){
+  
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
+  
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- lessSEM::gpOptimizationInternal(par = par,
@@ -1094,16 +953,13 @@ gpCappedL1 <- function(par,
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
-#' function. This fitting functions _must_ take exactly 3 arguments:
-#' 
-#' 1. A vector with current parameter estimates
-#' 2. A vector with labels of parameters
-#' 3. Any additional arguments used by the function contained in a single list
-#' (called additionalArguments below)
+#' function. This fitting functions _must_ take a labeled vector with parameter
+#' values as first argument. The remaining arguments are passed with the ... argument.
+#' This is similar to optim.
 #' 
 #' The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 #' will be used to approximate the gradients. Supplying a gradient function
-#' can result in considerable speed improvements.  
+#' can result in considerable speed improvements.   
 #' 
 #' lsp regularization:
 #' 
@@ -1134,14 +990,107 @@ gpCappedL1 <- function(par,
 #' Conference on Machine Learning, 28(2)(2), 37–45.
 #' * Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
 #' Trends in Optimization, 1(3), 123–231.
+#' # This example shows how to use the optimizers
+#' # for other objective functions. We will use
+#' # a linear regression as an example. Note that
+#' # this is not a useful application of the optimizers
+#' # as there are specialized packages for linear regression
+#' # (e.g., glmnet)
+#' 
+#' library(lessSEM)
+#' set.seed(123)
+#' 
+#' # first, we simulate data for our
+#' # linear regression.
+#' N <- 100 # number of persons
+#' p <- 10 # number of predictors
+#' X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+#' b <- c(rep(1,4),
+#'        rep(0,6)) # true regression weights
+#' y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
+#' 
+#' # First, we must construct a fiting function
+#' # which returns a single value. We will use
+#' # the residual sum squared as fitting function.
+#' 
+#' # Let's start setting up the fitting function:
+#' fittingFunction <- function(par, y, X, N){
+#'   # par is the parameter vector
+#'   # y is the observed dependent variable
+#'   # X is the design matrix
+#'   # N is the sample size
+#'   pred <- X %*% matrix(par, ncol = 1) #be explicit here:
+#'   # we need par to be a column vector
+#'   sse <- sum((y - pred)^2)
+#'   # we scale with .5/N to get the same results as glmnet
+#'   return((.5/N)*sse)
+#' }
+#' 
+#' # let's define the starting values:
+#' b <- c(solve(t(X)%*%X)%*%t(X)%*%y) # we will use the lm estimates
+#' names(b) <- paste0("b", 1:length(b))
+#' # names of regularized parameters
+#' regularized <- paste0("b",1:p)
+#' 
+#' # optimize
+#' lspPen <- gpLsp(
+#'   par = b,
+#'   regularized = regularized,
+#'   fn = fittingFunction,
+#'   lambdas = seq(0,1,.1),
+#'   thetas = c(0.001, .5, 1),
+#'   X = X,
+#'   y = y,
+#'   N = N
+#' )
+#' 
+#' # optional: plot requires plotly package
+#' # plot(lspPen)
+#' 
+#' # for comparison
+#' 
+#' fittingFunction <- function(par, y, X, N, lambda, theta){
+#'   pred <- X %*% matrix(par, ncol = 1)
+#'   sse <- sum((y - pred)^2)
+#'   smoothAbs <- sqrt(par^2 + 1e-8)
+#'   pen <- lambda * log(1.0 + smoothAbs / theta)
+#'   return((.5/N)*sse + sum(pen))
+#' }
+#' 
+#' round(
+#'   optim(par = b,
+#'       fn = fittingFunction,
+#'       y = y,
+#'       X = X,
+#'       N = N,
+#'       lambda =  lspPen@fits$lambda[15],
+#'       theta =  lspPen@fits$theta[15],
+#'       method = "BFGS")$par,
+#'   4)
+#' lspPen@parameters[15,]
+#' @export
 gpLsp <- function(par,
                   fn,
                   gr = NULL,
-                  additionalArguments = list(),
+                  ...,
                   regularized,
                   lambdas,
                   thetas,
                   control = controlIsta()){
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
+  
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- lessSEM::gpOptimizationInternal(par = par,
@@ -1172,12 +1121,9 @@ gpLsp <- function(par,
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
-#' function. This fitting functions _must_ take exactly 3 arguments:
-#' 
-#' 1. A vector with current parameter estimates
-#' 2. A vector with labels of parameters
-#' 3. Any additional arguments used by the function contained in a single list
-#' (called additionalArguments below)
+#' function. This fitting functions _must_ take a labeled vector with parameter
+#' values as first argument. The remaining arguments are passed with the ... argument.
+#' This is similar to optim.
 #' 
 #' The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 #' will be used to approximate the gradients. Supplying a gradient function
@@ -1211,14 +1157,115 @@ gpLsp <- function(par,
 #' Conference on Machine Learning, 28(2)(2), 37–45.
 #' * Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
 #' Trends in Optimization, 1(3), 123–231.
+#' 
+#' @param par labeled vector with starting values
+#' @param fn R function which takes the parameters AND their labels 
+#' as input and returns the fit value (a single value)
+#' @param gr R function which takes the parameters AND their labels
+#' as input and returns the gradients of the objective function. 
+#' If set to NULL, numDeriv will be used to approximate the gradients 
+#' @param ... additional arguments passed to fn and gr
+#' @param regularized vector with names of parameters which are to be regularized.
+#' If you are unsure what these parameters are called, use 
+#' getLavaanParameters(model) with your lavaan model object
+#' @param lambdas numeric vector: values for the tuning parameter lambda
+#' @param thetas numeric vector: values for the tuning parameter theta
+#' @param control used to control the optimizer. This element is generated with 
+#' the controlIsta (see ?controlIsta)
+#' @md
+#' @examples 
+#' # This example shows how to use the optimizers
+#' # for other objective functions. We will use
+#' # a linear regression as an example. Note that
+#' # this is not a useful application of the optimizers
+#' # as there are specialized packages for linear regression
+#' # (e.g., glmnet)
+#' 
+#' library(lessSEM)
+#' set.seed(123)
+#' 
+#' # first, we simulate data for our
+#' # linear regression.
+#' N <- 100 # number of persons
+#' p <- 10 # number of predictors
+#' X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+#' b <- c(rep(1,4),
+#'        rep(0,6)) # true regression weights
+#' y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
+#' 
+#' # First, we must construct a fiting function
+#' # which returns a single value. We will use
+#' # the residual sum squared as fitting function.
+#' 
+#' # Let's start setting up the fitting function:
+#' fittingFunction <- function(par, y, X, N){
+#'   # par is the parameter vector
+#'   # y is the observed dependent variable
+#'   # X is the design matrix
+#'   # N is the sample size
+#'   pred <- X %*% matrix(par, ncol = 1) #be explicit here:
+#'   # we need par to be a column vector
+#'   sse <- sum((y - pred)^2)
+#'   # we scale with .5/N to get the same results as glmnet
+#'   return((.5/N)*sse)
+#' }
+#' 
+#' # let's define the starting values:
+#' # first, let's add an intercept
+#' X <- cbind(1, X)
+#' 
+#' b <- c(solve(t(X)%*%X)%*%t(X)%*%y) # we will use the lm estimates
+#' names(b) <- paste0("b", 0:(length(b)-1))
+#' # names of regularized parameters
+#' regularized <- paste0("b",1:p)
+#' 
+#' # optimize
+#' mcpPen <- gpMcp(
+#'   par = b,
+#'   regularized = regularized,
+#'   fn = fittingFunction,
+#'   lambdas = seq(0,1,.1),
+#'   thetas = c(1.001, 1.5, 2),
+#'   X = X,
+#'   y = y,
+#'   N = N
+#' )
+#' 
+#' # optional: plot requires plotly package
+#' # plot(mcpPen)
+#' 
+#' # for comparison
+#' library(ncvreg)
+#' mcpFit <- ncvreg(X = X[,-1], 
+#'                  y = y, 
+#'                  penalty = "MCP",
+#'                  lambda =  mcpPen@fits$lambda[15],
+#'                  gamma =  mcpPen@fits$theta[15])
+#' coef(mcpFit)
+#' mcpPen@parameters[15,]
 gpMcp <- function(par,
                   fn,
                   gr = NULL,
-                  additionalArguments = list(),
+                  ...,
                   regularized,
                   lambdas,
                   thetas,
                   control = controlIsta()){
+  
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
+  
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- lessSEM::gpOptimizationInternal(par = par,
@@ -1251,12 +1298,9 @@ gpMcp <- function(par,
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
-#' function. This fitting functions _must_ take exactly 3 arguments:
-#' 
-#' 1. A vector with current parameter estimates
-#' 2. A vector with labels of parameters
-#' 3. Any additional arguments used by the function contained in a single list
-#' (called additionalArguments below)
+#' function. This fitting functions _must_ take a labeled vector with parameter
+#' values as first argument. The remaining arguments are passed with the ... argument.
+#' This is similar to optim.
 #' 
 #' The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 #' will be used to approximate the gradients. Supplying a gradient function
@@ -1298,13 +1342,12 @@ gpMcp <- function(par,
 #' @param gr R function which takes the parameters AND their labels
 #' as input and returns the gradients of the objective function. 
 #' If set to NULL, numDeriv will be used to approximate the gradients 
-#' @param additionalArguments additional argument passed to fn and gr
+#' @param ... additional arguments passed to fn and gr
 #' @param regularized vector with names of parameters which are to be regularized.
 #' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param thetas parameters whose absolute value is above this threshold will be penalized with
-#' a constant (theta)
+#' @param thetas numeric vector: values for the tuning parameter theta
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @md
@@ -1320,72 +1363,87 @@ gpMcp <- function(par,
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our
-#' # linear regression. The model is given by
-#' # y = b1*x1 + b2*x2 + b3*x3 + b4*x4 + b5*x5 
-#' n <- 100
-#' df <- data.frame(
-#'   x1 = rnorm(n),
-#'   x2 = rnorm(n),
-#'   x3 = rnorm(n),
-#'   x4 = rnorm(n),
-#'   x5 = rnorm(n)
-#' )
-#' df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + rnorm(n,0,.3) 
+#' # linear regression.
+#' N <- 100 # number of persons
+#' p <- 10 # number of predictors
+#' X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+#' b <- c(rep(1,4),
+#'        rep(0,6)) # true regression weights
+#' y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
 #' 
 #' # First, we must construct a fiting function
 #' # which returns a single value. We will use
 #' # the residual sum squared as fitting function.
-#' # The optimizer expects that this function takes
-#' # EXACTLY three arguments:
-#' # 1) a vector with parameter values (par)
-#' # 2) a vector with labels for these parameters (parameterLabels)
-#' # 3) an additional argument which allows for passing anything
-#' # else your function needs to run to the function.
 #' 
 #' # Let's start setting up the fitting function:
-#' fittingFunction <- function(par, parameterLabels, additionalArguments){
-#'   # Our function needs the observed data 
-#'   # y and X. These are not part of the first two arguments
-#'   # and must therefore be passed in the function with the 
-#'   # third argument (additionalArguments). Here, we will use a list
-#'   # and pass the arguments in through that list:
-#'   pred <- additionalArguments$X %*% matrix(par, ncol = 1)
-#'   sse <- sum((additionalArguments$y - pred)^2)
-#'   return(sse)
+#' fittingFunction <- function(par, y, X, N){
+#'   # par is the parameter vector
+#'   # y is the observed dependent variable
+#'   # X is the design matrix
+#'   # N is the sample size
+#'   pred <- X %*% matrix(par, ncol = 1) #be explicit here:
+#'   # we need par to be a column vector
+#'   sse <- sum((y - pred)^2)
+#'   # we scale with .5/N to get the same results as glmnet
+#'   return((.5/N)*sse)
 #' }
-#' # Now we need to construct the list additionalArguments used
-#' # by fittingFunction
-#' additionalArguments <- list(X = as.matrix(df[,grepl("x", colnames(df))]), 
-#'                             y = df$y)
-#' 
 #' 
 #' # let's define the starting values:
-#' b <- rep(0,5)
-#' names(b) <- paste0("b",1:5)
+#' # first, let's add an intercept
+#' X <- cbind(1, X)
+#' 
+#' b <- c(solve(t(X)%*%X)%*%t(X)%*%y) # we will use the lm estimates
+#' names(b) <- paste0("b", 0:(length(b)-1))
 #' # names of regularized parameters
-#' regularized <- paste0("b",1:5)
+#' regularized <- paste0("b",1:p)
 #' 
 #' # optimize
-#' penModel <- gpScad(
-#'   par = b, 
-#'   regularized = regularized, 
-#'   fn = fittingFunction, 
-#'   lambdas = seq(0,100,length.out = 10),
-#'   thetas = seq(2.1,10,length.out = 10),
-#'   additionalArguments = additionalArguments
+#' scadPen <- gpScad(
+#'   par = b,
+#'   regularized = regularized,
+#'   fn = fittingFunction,
+#'   lambdas = seq(0,1,.1),
+#'   thetas = c(2.001, 2.5, 5),
+#'   X = X,
+#'   y = y,
+#'   N = N
 #' )
-#' # optional: plot requires package plotly
-#' # plot(penModel)
-#' AIC(penModel)
+#' 
+#' # optional: plot requires plotly package
+#' # plot(scadPen)
+#' 
+#' # for comparison
+#' library(ncvreg)
+#' scadFit <- ncvreg(X = X[,-1], 
+#'                  y = y, 
+#'                  penalty = "SCAD",
+#'                  lambda =  scadPen@fits$lambda[15],
+#'                  gamma =  scadPen@fits$theta[15])
+#' coef(scadFit)
+#' scadPen@parameters[15,]
 #' @export
 gpScad <- function(par,
                    fn,
                    gr = NULL,
-                   additionalArguments = list(),
+                   ...,
                    regularized,
                    lambdas,
                    thetas,
                    control = controlIsta()){
+  
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
