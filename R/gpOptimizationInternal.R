@@ -71,10 +71,43 @@ gpOptimizationInternal <- function(par,
   }
   
   # check functions
+  parameterLabels <- names(par)
   check_fn <- fn(par, parameterLabels, additionalArguments)
   if(length(check_fn) != 1) stop("fn returns more than one element!")
+  check_fnIsColVec <- try(
+    fn(matrix(par, ncol = 1), parameterLabels, additionalArguments),
+    silent = TRUE
+                   )
+  check_fnIsRowVec <- try(
+    fn(matrix(par, nrow = 1), parameterLabels, additionalArguments),
+    silent = TRUE
+  )
+  if(is(check_fnIsRowVec, "try-error") & !is(check_fnIsColVec, "try-error")){
+    fn_usr <- fn
+    fn <- function(par, parameterLabels, additionalArguments
+    ){
+      return(fn_usr(matrix(par, ncol = 1), parameterLabels, additionalArguments))
+    }
+   }
+                   
+  
   check_fn <- gr(par, parameterLabels, additionalArguments)
   if(length(check_fn) != length(par)) stop("gr has different length than par!")
+  check_fnIsColVec <- try(
+    gr(matrix(par, ncol = 1), parameterLabels, additionalArguments),
+    silent = TRUE
+  )
+  check_fnIsRowVec <- try(
+    gr(matrix(par, nrow = 1), parameterLabels, additionalArguments),
+    silent = TRUE
+  )
+  if(is(check_fnIsRowVec, "try-error") & !is(check_fnIsColVec, "try-error")){
+    gr_usr <- gr
+    gr <- function(par, parameterLabels, additionalArguments
+    ){
+      return(gr_usr(matrix(par, ncol = 1), parameterLabels, additionalArguments))
+    }
+  }
   
   # make sure that the weights are in the correct order
   par <- par

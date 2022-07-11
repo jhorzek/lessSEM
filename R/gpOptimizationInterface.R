@@ -9,8 +9,8 @@
 #' with starting values (important: This vector _must_ have labels) and a fitting
 #' function. This fitting functions _must_ take exactly 3 arguments:
 #' 
-#' 1. A vector with current parameter estimates
-#' 2. A vector with labels of parameters
+#' 1. A row-vector with current parameter estimates
+#' 2. A row-vector with labels of parameters
 #' 3. Any additional arguments used by the function contained in a single list
 #' (called additionalArguments below)
 #' 
