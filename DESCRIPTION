@@ -13,5 +13,10 @@ License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.1.2
 Imports: Rcpp (>= 1.0.8), ggplot2, patchwork, tidyr, lavaan
-Suggests: plotly, Rsolnp
+Suggests: 
+    knitr,
+    plotly,
+    rmarkdown,
+    Rsolnp
 LinkingTo: Rcpp, RcppArmadillo
+VignetteBuilder: knitr
