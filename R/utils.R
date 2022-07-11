@@ -38,6 +38,8 @@ simulateExampleData <- function(N = 100, # sample size
 #' @return list with (1) new function which wraps fn and (2) list with arguments passed to fn
 noDotDotDot <- function(fn, ...){
   
+  # see Barranka, https://stackoverflow.com/questions/26164078/r-define-a-function-from-character-string
+  
   dotdotdot <- list(...)
   fnUser <- fn
   
