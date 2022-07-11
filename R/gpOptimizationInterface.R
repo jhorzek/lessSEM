@@ -7,12 +7,8 @@
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
-#' function. This fitting functions _must_ take exactly 3 arguments:
-#' 
-#' 1. A row-vector with current parameter estimates
-#' 2. A row-vector with labels of parameters
-#' 3. Any additional arguments used by the function contained in a single list
-#' (called additionalArguments below)
+#' function. This fitting functions _must_ take a labeled vector with parameter
+#' values as first argument. The remaining arguments are passed with ...
 #' 
 #' The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 #' will be used to approximate the gradients. Supplying a gradient function
@@ -78,50 +74,36 @@
 #' set.seed(123)
 #' 
 #' # first, we simulate data for our
-#' # linear regression. The model is given by
-#' # y = b1*x1 + b2*x2 + b3*x3 + b4*x4 + b5*x5 
-#' n <- 100
-#' df <- data.frame(
-#'   x1 = rnorm(n),
-#'   x2 = rnorm(n),
-#'   x3 = rnorm(n),
-#'   x4 = rnorm(n),
-#'   x5 = rnorm(n)
-#' )
-#' df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + rnorm(n,0,.3) 
+#' # linear regression.
+#' N <- 100 # number of persons
+#' p <- 10 # number of predictors
+#' X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+#' b <- c(rep(1,4), 
+#'        rep(0,6)) # true regression weights
+#' y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
 #' 
 #' # First, we must construct a fiting function
 #' # which returns a single value. We will use
 #' # the residual sum squared as fitting function.
-#' # The optimizer expects that this function takes
-#' # EXACTLY three arguments:
-#' # 1) a vector with parameter values (par)
-#' # 2) a vector with labels for these parameters (parameterLabels)
-#' # 3) an additional argument which allows for passing anything
-#' # else your function needs to run to the function.
 #' 
 #' # Let's start setting up the fitting function:
-#' fittingFunction <- function(par, parameterLabels, additionalArguments){
-#'   # Our function needs the observed data 
-#'   # y and X. These are not part of the first two arguments
-#'   # and must therefore be passed in the function with the 
-#'   # third argument (additionalArguments). Here, we will use a list
-#'   # and pass the arguments in through that list:
-#'   pred <- additionalArguments$X %*% matrix(par, ncol = 1)
-#'   sse <- sum((additionalArguments$y - pred)^2)
-#'   return(sse)
+#' fittingFunction <- function(par, y, X, N){
+#'   # par is the parameter vector
+#'   # y is the observed dependent variable
+#'   # X is the design matrix
+#'   # N is the sample size
+#'   pred <- X %*% matrix(par, ncol = 1) #be explicit here: 
+#'   # we need par to be a column vector
+#'   sse <- sum((y - pred)^2)
+#'   # we scale with .5/N to get the same results as glmnet
+#'   return((.5/N)*sse)
 #' }
-#' # Now we need to construct the list additionalArguments used
-#' # by fittingFunction
-#' additionalArguments <- list(X = as.matrix(df[,grepl("x", colnames(df))]), 
-#'                             y = df$y)
-#' 
 #' 
 #' # let's define the starting values:
-#' b <- rep(0,5)
-#' names(b) <- paste0("b",1:5)
+#' b <- rep(0,p)
+#' names(b) <- paste0("b", 1:length(b))
 #' # names of regularized parameters
-#' regularized <- paste0("b",1:5)
+#' regularized <- paste0("b",1:p)
 #' 
 #' # optimize
 #' lassoPen <- gpLasso(
@@ -129,10 +111,21 @@
 #'   regularized = regularized, 
 #'   fn = fittingFunction, 
 #'   nLambdas = 100, 
-#'   additionalArguments = additionalArguments
+#'   X = X,
+#'   y = y,
+#'   N = N
 #' )
 #' plot(lassoPen)
 #' AIC(lassoPen)
+#' 
+#' # for comparison:
+#' #library(glmnet)
+#' #coef(glmnet(x = X,
+#' #            y = y, 
+#' #            lambda = lassoPen@fits$lambda[20],
+#' #            intercept = FALSE,
+#' #            standardize = FALSE))[,1]
+#' #lassoPen@parameters[20,]
 #' @export
 gpLasso <- function(par,
                     regularized,
@@ -140,10 +133,24 @@ gpLasso <- function(par,
                     gr = NULL,
                     lambdas = NULL,
                     nLambdas = NULL,
-                    additionalArguments,
+                    ...,
                     method = "ista", 
                     control = controlIsta()
 ){
+  
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
   
   if(is.null(lambdas) && is.null(nLambdas)){
     stop("Specify either lambdas or nLambdas")
@@ -323,12 +330,28 @@ gpAdaptiveLasso <- function(par,
                             gr = NULL,
                             lambdas = NULL,
                             nLambdas = NULL,
-                            additionalArguments = NULL,
+                            ...,
                             method = "ista", 
                             control = controlIsta()){
+  
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
+  
   if(is.null(weights)){
     weights <- 1/abs(par)
     weights[!names(weights) %in% regularized] <- 0
+    message("Building weights based on par as weights = 1/abs(par).")
   }
   
   if(! all(regularized %in% names(weights))) stop(paste0(
@@ -339,18 +362,28 @@ gpAdaptiveLasso <- function(par,
     names(weights)
   ))
   
-  result <- gpElasticNet(
-    par = par,
-    fn = fn,
-    gr = gr,
-    weights = weights,
-    lambdas = lambdas,
-    nLambdas = nLambdas,
-    alphas = 1,
-    additionalArguments = additionalArguments,
-    method = method,
-    control = control
+  if(is.null(lambdas) && is.null(nLambdas)){
+    stop("Specify either lambdas or nLambdas")
+  }
+  
+  if(!is.null(nLambdas)){
+    tuningParameters <- data.frame(nLambdas = nLambdas)
+  }else{
+    tuningParameters <- data.frame(lambda = lambdas,
+                                   alpha = 1)
+  }
+  
+  result <- lessSEM::gpOptimizationInternal(par = par,
+                                            fn = fn,
+                                            gr = gr,
+                                            additionalArguments = additionalArguments,
+                                            penalty = "adaptiveLasso", 
+                                            weights = regularized,
+                                            tuningParameters = tuningParameters, 
+                                            method = method,
+                                            control = control
   )
+  
   return(result)
   
 }
@@ -496,33 +529,39 @@ gpRidge <- function(par,
                     fn,
                     gr = NULL,
                     lambdas,
-                    additionalArguments,
+                    ...,
                     method = "ista", 
                     control = controlIsta()){
   
-  weights <- par
-  weights[] <- 0
-  weights[regularized] <- 1
-  if(! all(regularized %in% names(weights))) stop(paste0(
-    "You specified that the following parameters should be regularized:\n",
-    paste0(regularized, collapse = ", "), 
-    ". Not all of these parameters could be found in the model.\n",
-    "The model has the following parameters:\n",
-    names(weights)
-  ))
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
   
-  result <- gpElasticNet(
-    par = par,
-    fn = fn,
-    gr = gr,
-    weights = weights,
-    lambdas = lambdas,
-    nLambdas = NULL,
-    alphas = 0,
-    additionalArguments = additionalArguments,
-    method = method,
-    control = control
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
+  
+  
+  tuningParameters <- data.frame(lambda = lambdas,
+                                 alpha = 0)
+  
+  result <- lessSEM::gpOptimizationInternal(par = par,
+                                            fn = fn,
+                                            gr = gr,
+                                            additionalArguments = additionalArguments,
+                                            penalty = "ridge", 
+                                            weights = regularized,
+                                            tuningParameters = tuningParameters, 
+                                            method = method,
+                                            control = control
   )
+  
   return(result)
   
 }
@@ -671,252 +710,45 @@ gpRidge <- function(par,
 #' AIC(enet)
 #' @export
 gpElasticNet <- function(par,
-                         weights,
+                         regularized,
                          fn,
                          gr = NULL,
-                         lambdas = NULL,
-                         nLambdas = NULL,
+                         lambdas,
                          alphas,
-                         additionalArguments,
+                         ...,
                          method = "ista", 
                          control = controlIsta()){
   
-  inputArguments <- as.list(environment())
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
   
-  parameterLabels <- names(par)
-  if(is.null(parameterLabels)) stop("par has no labels.")
-  rawParameters <- par
-  
-  if(! method %in% c("ista", "glmnet")) 
-    stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  
-  if(is.null(lambdas) && is.null(nLambdas)) 
-    stop("Specify lambdas or nLambdas")
-  if(!is.null(lambdas) && !is.null(nLambdas))
-    stop("Specify either lambdas or nLambdas, not both")
-  if(!is.null(nLambdas) && any(alphas != 1))
-    stop("nLambdas only supported for lasso type penalty (alpha = 1).")
-  
-  if(method == "ista" && !is(control, "controlIsta")) 
-    stop("control must be of class controlIsta. See ?controlIsta.")
-  if(method == "glmnet" && !is(control, "controlGlmnet")) 
-    stop("control must be of class controlGlmnet See ?controlGlmnet")
-  
-  # gradient function
-  if(is.null(gr)){
+  if(!is.null(gr)){
     
-    additionalArguments$fn <- fn
-    
-    gr <- function(par, parameterLabels, additionalArguments){
-      grad <- numDeriv::grad(func = additionalArguments$fn, 
-                             x = par, 
-                             parameterLabels = parameterLabels,
-                             additionalArguments = additionalArguments)
-      names(grad) <- names(par)
-      return(grad)
-    }
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
     
   }
   
-  # check functions
-  check_fn <- fn(par, parameterLabels, additionalArguments)
-  if(length(check_fn) != 1) stop("fn returns more than one element!")
-  check_fn <- gr(par, parameterLabels, additionalArguments)
-  if(length(check_fn) != length(par)) stop("gr has different length than par!")
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
   
-  # make sure that the weights are in the correct order
-  if(is.null(names(weights))) stop("weights must have the same names as the parameters")
-  if(length(weights) != length(par)) stop("weights must be of the same length as the parameter vector.")
-  if(any(!is.numeric(weights))) stop("weights must be numeric")
-  weights <- weights[names(par)]
+  tuningParameters <- data.frame(lambda = lambdas,
+                                 alpha = alphas)
   
-  #### glmnet requires an initial Hessian ####
-  if(method == "glmnet"){
-    initialHessian <- control$initialHessian
-    if(is.matrix(initialHessian) && 
-       nrow(initialHessian) == length(rawParameters) && 
-       ncol(initialHessian) == length(rawParameters)){
-      
-    }else if(any(initialHessian == "compute")){
-      
-      initialHessian <- numDeriv::hessian(func = fn, x = par)
-      
-    }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
-      initialHessian <- diag(initialHessian,length(rawParameters))
-      rownames(initialHessian) <- names(rawParameters)
-      colnames(initialHessian) <- names(rawParameters)
-    }else{
-      stop("Invalid initialHessian passed to GLMNET. See ?controlGLMNET for more information.")
-    }
-    
-    control$initialHessian <- initialHessian
-  }
   
-  #### prepare regularized model object ####
-  if(method == "glmnet"){
-    
-    controlIntern <- list(
-      initialHessian = control$initialHessian,
-      stepSize = control$stepSize,
-      sigma = control$sigma,
-      gamma = control$gamma,
-      maxIterOut = control$maxIterOut,
-      maxIterIn = control$maxIterIn,
-      maxIterLine = control$maxIterLine,
-      breakOuter = control$breakOuter,
-      breakInner = control$breakInner,
-      convergenceCriterion = control$convergenceCriterion, 
-      verbose = control$verbose
-    )
-    
-    regularizedModel <- new(glmnetEnetGeneralPurpose, 
-                            weights, 
-                            controlIntern)
-    
-  }else if(method == "ista"){
-    
-    controlIntern <- list(
-      L0 = control$L0,
-      eta = control$eta,
-      accelerate = control$accelerate,
-      maxIterOut = control$maxIterOut,
-      maxIterIn = control$maxIterIn,
-      breakOuter = control$breakOuter,
-      convCritInner = control$convCritInner,
-      sigma = control$sigma,
-      stepSizeInheritance = control$stepSizeInheritance,
-      verbose = control$verbose
-    )
-    
-    regularizedModel <- new(istaEnetGeneralPurpose, 
-                            weights, 
-                            controlIntern)
-  }
-  
-  #### define tuning parameters and prepare fit results ####
-  ## get max lambda ##
-  if(!is.null(nLambdas)){
-    message(paste0(
-      "Automatically selecting the maximal lambda value.\n",
-      "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
-    )
-    
-    maxLambda <- gpGetMaxLambda(regularizedModel,
-                                par,
-                                fn,
-                                gr,
-                                additionalArguments,
-                                weights)
-    lambdas <- seq(0,
-                   maxLambda,
-                   length.out = nLambdas)
-    
-  }
-  
-  tuningGrid <- expand.grid("lambda" = lambdas, 
-                            "alpha" = alphas)
-  
-  fits <- data.frame(
-    tuningGrid,
-    "m2LL" = NA,
-    "regM2LL"= NA,
-    "nonZeroParameters" = NA,
-    "convergence" = NA
+  result <- lessSEM::gpOptimizationInternal(par = par,
+                                            fn = fn,
+                                            gr = gr,
+                                            additionalArguments = additionalArguments,
+                                            penalty = "elasticNet", 
+                                            weights = regularized,
+                                            tuningParameters = tuningParameters, 
+                                            method = method,
+                                            control = control
   )
   
-  parameterEstimates <- as.data.frame(matrix(NA,
-                                             nrow = nrow(tuningGrid), 
-                                             ncol = length(rawParameters)))
-  colnames(parameterEstimates) <- names(rawParameters)
-  parameterEstimates <- cbind(
-    tuningGrid,
-    parameterEstimates
-  )
-  
-  if(method == "glmnet" && control$saveHessian){
-    Hessians <- list(
-      "lambda" = tuningGrid$lambda,
-      "alpha" = tuningGrid$alpha,
-      "Hessian" = lapply(1:nrow(tuningGrid), 
-                         matrix, 
-                         data= NA, 
-                         nrow=nrow(initialHessian), 
-                         ncol=ncol(initialHessian))
-    )
-  }else{
-    Hessians <- list(NULL)
-  }
-  
-  #### print progress ####
-  if(control$verbose == 0){
-    progressbar = txtProgressBar(min = 0, 
-                                 max = nrow(tuningGrid), 
-                                 initial = 0, 
-                                 style = 3)
-  }
-  
-  #### Iterate over all tuning parameter combinations and fit models ####
-  
-  for(it in 1:nrow(tuningGrid)){
-    if(control$verbose == 0){
-      setTxtProgressBar(progressbar,it)
-    }else{
-      cat(paste0("\nIteration [", it, "/", nrow(tuningGrid),"]\n"))
-    }
-    
-    lambda <- tuningGrid$lambda[it]
-    alpha <- tuningGrid$alpha[it]
-    
-    result <- try(
-      regularizedModel$optimize( par,
-                                 fn,
-                                 gr,
-                                 additionalArguments,
-                                 lambda,
-                                 alpha)
-    )
-    if(is(result, "try-error")) next
-    
-    rawParameters <- result$rawParameters
-    parameterEstimates[it, names(rawParameters)] <- rawParameters[names(rawParameters)]
-    
-    fits$nonZeroParameters[it] <- length(rawParameters) - 
-      sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
-    fits$regM2LL[it] <- result$fit
-    fits$convergence[it] <- result$convergence
-    fits$m2LL[it] <- fn(par, parameterLabels, additionalArguments)
-    
-    if(method == "glmnet" && control$saveHessian) 
-      Hessians$Hessian[[it]] <- result$Hessian
-    
-    # set initial values for next iteration
-    
-    
-    if(method == "glmnet"){
-      if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
-      
-      # set Hessian for next iteration
-      regularizedModel$setHessian(result$Hessian)
-      
-    }
-    
-  }
-  
-  internalOptimization <- list(
-    "HessiansOfDifferentiablePart" = Hessians
-  )
-  
-  results <- new("gpRegularized",
-                 parameters = parameterEstimates,
-                 fits = fits,
-                 parameterLabels = names(rawParameters),
-                 weights = weights,
-                 regularized = names(weights)[weights!=0],
-                 internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
-  
-  return(results)
-  
+  return(result)
 }
 
 
@@ -1061,11 +893,26 @@ gpElasticNet <- function(par,
 gpCappedL1 <- function(par,
                        fn,
                        gr = NULL,
-                       additionalArguments = list(),
+                       ...,
                        regularized,
                        lambdas,
                        thetas,
                        control = controlIsta()){
+  
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
+  
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- lessSEM::gpOptimizationInternal(par = par,
@@ -1137,11 +984,25 @@ gpCappedL1 <- function(par,
 gpLsp <- function(par,
                   fn,
                   gr = NULL,
-                  additionalArguments = list(),
+                  ...,
                   regularized,
                   lambdas,
                   thetas,
                   control = controlIsta()){
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
+  
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- lessSEM::gpOptimizationInternal(par = par,
@@ -1214,11 +1075,26 @@ gpLsp <- function(par,
 gpMcp <- function(par,
                   fn,
                   gr = NULL,
-                  additionalArguments = list(),
+                  ...,
                   regularized,
                   lambdas,
                   thetas,
                   control = controlIsta()){
+  
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
+  
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- lessSEM::gpOptimizationInternal(par = par,
@@ -1381,11 +1257,25 @@ gpMcp <- function(par,
 gpScad <- function(par,
                    fn,
                    gr = NULL,
-                   additionalArguments = list(),
+                   ...,
                    regularized,
                    lambdas,
                    thetas,
                    control = controlIsta()){
+  
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
+  fn <- removeDotDotDot$fn
+  additionalArguments <- removeDotDotDot$additionalArguments
+  
+  if(!is.null(gr)){
+    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
+    gr <- removeDotDotDot$fn
+    
+  }
+  
+  # remove the ... stuff so that it does not interfere with anything else
+  rm("...")
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
