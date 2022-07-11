@@ -8,7 +8,7 @@ gpLsp(
   par,
   fn,
   gr = NULL,
-  additionalArguments = list(),
+  ...,
   regularized,
   lambdas,
   thetas,
@@ -24,16 +24,13 @@ where \eqn{\theta > 0}.
 \details{
 The interface is similar to that of optim. Users have to supply a vector 
 with starting values (important: This vector _must_ have labels) and a fitting
-function. This fitting functions _must_ take exactly 3 arguments:
-
-1. A vector with current parameter estimates
-2. A vector with labels of parameters
-3. Any additional arguments used by the function contained in a single list
-(called additionalArguments below)
+function. This fitting functions _must_ take a labeled vector with parameter
+values as first argument. The remaining arguments are passed with the ... argument.
+This is similar to optim.
 
 The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 will be used to approximate the gradients. Supplying a gradient function
-can result in considerable speed improvements.  
+can result in considerable speed improvements.   
 
 lsp regularization:
 
@@ -64,4 +61,82 @@ Regularized Optimization Problems. Proceedings of the 30th International
 Conference on Machine Learning, 28(2)(2), 37–45.
 * Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
 Trends in Optimization, 1(3), 123–231.
+# This example shows how to use the optimizers
+# for other objective functions. We will use
+# a linear regression as an example. Note that
+# this is not a useful application of the optimizers
+# as there are specialized packages for linear regression
+# (e.g., glmnet)
+
+library(lessSEM)
+set.seed(123)
+
+# first, we simulate data for our
+# linear regression.
+N <- 100 # number of persons
+p <- 10 # number of predictors
+X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+b <- c(rep(1,4),
+       rep(0,6)) # true regression weights
+y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
+
+# First, we must construct a fiting function
+# which returns a single value. We will use
+# the residual sum squared as fitting function.
+
+# Let's start setting up the fitting function:
+fittingFunction <- function(par, y, X, N){
+  # par is the parameter vector
+  # y is the observed dependent variable
+  # X is the design matrix
+  # N is the sample size
+  pred <- X %*% matrix(par, ncol = 1) #be explicit here:
+  # we need par to be a column vector
+  sse <- sum((y - pred)^2)
+  # we scale with .5/N to get the same results as glmnet
+  return((.5/N)*sse)
+}
+
+# let's define the starting values:
+b <- c(solve(t(X)%*%X)%*%t(X)%*%y) # we will use the lm estimates
+names(b) <- paste0("b", 1:length(b))
+# names of regularized parameters
+regularized <- paste0("b",1:p)
+
+# optimize
+lspPen <- gpLsp(
+  par = b,
+  regularized = regularized,
+  fn = fittingFunction,
+  lambdas = seq(0,1,.1),
+  thetas = c(0.001, .5, 1),
+  X = X,
+  y = y,
+  N = N
+)
+
+# optional: plot requires plotly package
+# plot(lspPen)
+
+# for comparison
+
+fittingFunction <- function(par, y, X, N, lambda, theta){
+  pred <- X %*% matrix(par, ncol = 1)
+  sse <- sum((y - pred)^2)
+  smoothAbs <- sqrt(par^2 + 1e-8)
+  pen <- lambda * log(1.0 + smoothAbs / theta)
+  return((.5/N)*sse + sum(pen))
+}
+
+round(
+  optim(par = b,
+      fn = fittingFunction,
+      y = y,
+      X = X,
+      N = N,
+      lambda =  lspPen@fits$lambda[15],
+      theta =  lspPen@fits$theta[15],
+      method = "BFGS")$par,
+  4)
+lspPen@parameters[15,]
 }

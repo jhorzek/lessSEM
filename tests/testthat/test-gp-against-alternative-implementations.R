@@ -1,12 +1,75 @@
 test_that("testing general purpose optimization", {
   library(lessSEM)
-  library(ncvreg)
   library(glmnet)
+  library(ncvreg)
+  set.seed(123)
+  
+  # first, we simulate data for our
+  # linear regression.
+  N <- 100 # number of persons
+  p <- 10 # number of predictors
+  X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+  b <- c(rep(1,4),
+         rep(0,6)) # true regression weights
+  y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
+  
+  # First, we must construct a fiting function
+  # which returns a single value. We will use
+  # the residual sum squared as fitting function.
+  
+  # Let's start setting up the fitting function:
+  sseFun <- function(par, y, X, N){
+    # par is the parameter vector
+    # y is the observed dependent variable
+    # X is the design matrix
+    # N is the sample size
+    pred <- X %*% matrix(par, ncol = 1) #be explicit here:
+    # we need par to be a column vector
+    sse <- sum((y - pred)^2)
+    # we scale with .5/N to get the same results as glmnet
+    return((.5/N)*sse)
+  }
+  
+  # add intercept
+  Xext <- cbind(1,X)
+  
+  # let's define the starting values:
+  b <- c(solve(t(Xext)%*%Xext)%*%t(Xext)%*%y) # we will use the lm estimates
+  names(b) <- paste0("b", 1:length(b))
+  # names of regularized parameters
+  regularized <- paste0("b",2:length(b))
+
+  
+  # optimize
+  ridgePen <- gpRidge(
+    par = b,
+    regularized = regularized,
+    fn = sseFun,
+    lambdas = seq(0,1,.1),
+    X = Xext,
+    y = y,
+    N = N
+  )
+  
+  # for comparison:
+  fittingFunction <- function(par, y, X, N, lambda){
+    pred <- X %*% matrix(par, ncol = 1)
+    sse <- sum((y - pred)^2)
+    return((.5/N)*sse + lambda * sum(par[2:length(par)]^2))
+  }
+  
+  testthat::expect_equal(
+    all(round(optim(par = b,
+                    fn = fittingFunction,
+                    y = y,
+                    X = Xext,
+                    N = N,
+                    lambda =  ridgePen@fits$lambda[3],
+                    method = "BFGS")$par - 
+                ridgePen@parameters[3,ridgePen@parameterLabels], 4) == 0), TRUE)
   
   ## Testing lasso
-  X <- scale(Prostate$X)
-  y <- Prostate$y
-  
+  X <- scale(X)
   out <- glmnet(x = X, 
                 y = y, 
                 lambda = seq(0,.8,.1),
@@ -24,30 +87,19 @@ test_that("testing general purpose optimization", {
   }
   
   # with lessSEM
-  adda <- list(X = X, y = y)
+  lassoPen <- gpLasso(
+    par = b, 
+    regularized = regularized, 
+    fn = sseFun, 
+    lambdas = lambdas, 
+    X = cbind(1,X),
+    y = y,
+    N = N
+  )
   
-  fitFunction <- function(b, parameterLabels, adda){
-    N <- length(adda$y)
-    pred <- b[1] + adda$X%*%(b[2:length(b)])
-    sse <- (.5/N)*sum((adda$y - pred)^2)
-    return(sse)
-  }
-  
-  # initialize
-  b <- rep(0, ncol(X)+1)
-  names(b) <- paste0("b",0:(length(b)-1))
-  fitFunction(matrix(b,nrow = 1), names(b), adda)
-  
-  lassoFit <- gpLasso(par = b, 
-                      regularized = paste0("b", 1:ncol(X)), 
-                      fn = fitFunction, 
-                      lambdas = lambdas, 
-                      additionalArguments = adda, 
-                      method = "glmnet", 
-                      control = controlGlmnet())
-  testthat::expect_equal(all(round(lassoFit@fits$regM2LL-
+  testthat::expect_equal(all(round(lassoPen@fits$regM2LL-
                                      penSse,3)==0), TRUE)
-  testthat::expect_equal(all(round(lassoFit@fits$m2LL-
+  testthat::expect_equal(all(round(lassoPen@fits$m2LL-
                                      sse,3)==0), TRUE)
   
   
@@ -68,12 +120,13 @@ test_that("testing general purpose optimization", {
   }
   
   mcpFitGp <- gpMcp(par = b, 
-                    regularized = paste0("b", 1:ncol(X)), 
-                    fn = fitFunction, 
+                    regularized = regularized, 
+                    fn = sseFun, 
                     lambdas = lambdas, 
                     thetas = thetas,
-                    additionalArguments = adda, 
-                    control = controlIsta())
+                    X = cbind(1,X),
+                    y = y,
+                    N = N)
   
   testthat::expect_equal(all(round(mcpFitGp@fits$regM2LL-
                                      penSse,3)<=0), TRUE)
@@ -97,12 +150,13 @@ test_that("testing general purpose optimization", {
   }
   
   scadFitGp <- gpScad(par = b, 
-                      regularized = paste0("b", 1:ncol(X)), 
-                      fn = fitFunction, 
-                      lambdas = lambdas, 
-                      thetas = thetas,
-                      additionalArguments = adda, 
-                      control = controlIsta())
+                     regularized = regularized, 
+                     fn = sseFun, 
+                     lambdas = lambdas, 
+                     thetas = thetas,
+                     X = cbind(1,X),
+                     y = y,
+                     N = N)
   
   testthat::expect_equal(all(round(scadFitGp@fits$regM2LL-
                                      penSse,3)<=0), TRUE)

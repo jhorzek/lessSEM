@@ -8,7 +8,7 @@ gpScad(
   par,
   fn,
   gr = NULL,
-  additionalArguments = list(),
+  ...,
   regularized,
   lambdas,
   thetas,
@@ -25,7 +25,7 @@ as input and returns the fit value (a single value)}
 as input and returns the gradients of the objective function.
 If set to NULL, numDeriv will be used to approximate the gradients}
 
-\item{additionalArguments}{additional argument passed to fn and gr}
+\item{...}{additional arguments passed to fn and gr}
 
 \item{regularized}{vector with names of parameters which are to be regularized.
 If you are unsure what these parameters are called, use
@@ -33,8 +33,7 @@ getLavaanParameters(model) with your lavaan model object}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
 
-\item{thetas}{parameters whose absolute value is above this threshold will be penalized with
-a constant (theta)}
+\item{thetas}{numeric vector: values for the tuning parameter theta}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta (see ?controlIsta)}
@@ -53,13 +52,9 @@ where \eqn{\theta > 2}.
 \details{
 The interface is similar to that of optim. Users have to supply a vector
 with starting values (important: This vector \emph{must} have labels) and a fitting
-function. This fitting functions \emph{must} take exactly 3 arguments:
-\enumerate{
-\item A vector with current parameter estimates
-\item A vector with labels of parameters
-\item Any additional arguments used by the function contained in a single list
-(called additionalArguments below)
-}
+function. This fitting functions \emph{must} take a labeled vector with parameter
+values as first argument. The remaining arguments are passed with the ... argument.
+This is similar to optim.
 
 The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 will be used to approximate the gradients. Supplying a gradient function
@@ -110,61 +105,62 @@ library(lessSEM)
 set.seed(123)
 
 # first, we simulate data for our
-# linear regression. The model is given by
-# y = b1*x1 + b2*x2 + b3*x3 + b4*x4 + b5*x5 
-n <- 100
-df <- data.frame(
-  x1 = rnorm(n),
-  x2 = rnorm(n),
-  x3 = rnorm(n),
-  x4 = rnorm(n),
-  x5 = rnorm(n)
-)
-df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + rnorm(n,0,.3) 
+# linear regression.
+N <- 100 # number of persons
+p <- 10 # number of predictors
+X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+b <- c(rep(1,4),
+       rep(0,6)) # true regression weights
+y <- X\%*\%matrix(b,ncol = 1) + rnorm(N,0,.2)
 
 # First, we must construct a fiting function
 # which returns a single value. We will use
 # the residual sum squared as fitting function.
-# The optimizer expects that this function takes
-# EXACTLY three arguments:
-# 1) a vector with parameter values (par)
-# 2) a vector with labels for these parameters (parameterLabels)
-# 3) an additional argument which allows for passing anything
-# else your function needs to run to the function.
 
 # Let's start setting up the fitting function:
-fittingFunction <- function(par, parameterLabels, additionalArguments){
-  # Our function needs the observed data 
-  # y and X. These are not part of the first two arguments
-  # and must therefore be passed in the function with the 
-  # third argument (additionalArguments). Here, we will use a list
-  # and pass the arguments in through that list:
-  pred <- additionalArguments$X \%*\% matrix(par, ncol = 1)
-  sse <- sum((additionalArguments$y - pred)^2)
-  return(sse)
+fittingFunction <- function(par, y, X, N){
+  # par is the parameter vector
+  # y is the observed dependent variable
+  # X is the design matrix
+  # N is the sample size
+  pred <- X \%*\% matrix(par, ncol = 1) #be explicit here:
+  # we need par to be a column vector
+  sse <- sum((y - pred)^2)
+  # we scale with .5/N to get the same results as glmnet
+  return((.5/N)*sse)
 }
-# Now we need to construct the list additionalArguments used
-# by fittingFunction
-additionalArguments <- list(X = as.matrix(df[,grepl("x", colnames(df))]), 
-                            y = df$y)
-
 
 # let's define the starting values:
-b <- rep(0,5)
-names(b) <- paste0("b",1:5)
+# first, let's add an intercept
+X <- cbind(1, X)
+
+b <- c(solve(t(X)\%*\%X)\%*\%t(X)\%*\%y) # we will use the lm estimates
+names(b) <- paste0("b", 0:(length(b)-1))
 # names of regularized parameters
-regularized <- paste0("b",1:5)
+regularized <- paste0("b",1:p)
 
 # optimize
-penModel <- gpScad(
-  par = b, 
-  regularized = regularized, 
-  fn = fittingFunction, 
-  lambdas = seq(0,100,length.out = 10),
-  thetas = seq(2.1,10,length.out = 10),
-  additionalArguments = additionalArguments
+scadPen <- gpScad(
+  par = b,
+  regularized = regularized,
+  fn = fittingFunction,
+  lambdas = seq(0,1,.1),
+  thetas = c(2.001, 2.5, 5),
+  X = X,
+  y = y,
+  N = N
 )
-# optional: plot requires package plotly
-# plot(penModel)
-AIC(penModel)
+
+# optional: plot requires plotly package
+# plot(scadPen)
+
+# for comparison
+library(ncvreg)
+scadFit <- ncvreg(X = X[,-1], 
+                 y = y, 
+                 penalty = "SCAD",
+                 lambda =  scadPen@fits$lambda[15],
+                 gamma =  scadPen@fits$theta[15])
+coef(scadFit)
+scadPen@parameters[15,]
 }
