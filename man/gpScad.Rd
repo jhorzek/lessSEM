@@ -40,8 +40,63 @@ a constant (theta)}
 the controlIsta (see ?controlIsta)}
 }
 \description{
-This function allows for regularization of custom penatly functions with the
-scad penalty.
+Implements scad regularization for general purpose optimization problems.
+The penalty function is given by:
+\deqn{p( x_j) = \begin{cases}
+\lambda |x_j| & \text{if } |x_j| \leq \theta\\
+\frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)} & 
+\text{if } \lambda < |x_j| \leq \lambda\theta \\
+(\theta + 1) \lambda^2/2 & \text{if } |x_j| \geq \theta\lambda\\
+\end{cases}}
+where \eqn{\theta > 2}.
+}
+\details{
+The interface is similar to that of optim. Users have to supply a vector
+with starting values (important: This vector \emph{must} have labels) and a fitting
+function. This fitting functions \emph{must} take exactly 3 arguments:
+\enumerate{
+\item A vector with current parameter estimates
+\item A vector with labels of parameters
+\item Any additional arguments used by the function contained in a single list
+(called additionalArguments below)
+}
+
+The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
+will be used to approximate the gradients. Supplying a gradient function
+can result in considerable speed improvements.
+
+scad regularization:
+\itemize{
+\item Fan, J., & Li, R. (2001). Variable selection via nonconcave penalized
+likelihood and its oracle properties. Journal of the American Statistical Association,
+96(456), 1348–1360. https://doi.org/10.1198/016214501753382273
+}
+
+For more details on GLMNET, see:
+\itemize{
+\item Friedman, J., Hastie, T., & Tibshirani, R. (2010).
+Regularization Paths for Generalized Linear Models via Coordinate Descent.
+Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
+\item Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
+A Comparison of Optimization Methods and Software for Large-scale
+L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+\item Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012).
+An improved GLMNET for l1-regularized logistic regression.
+The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
+}
+
+For more details on ISTA, see:
+\itemize{
+\item Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding
+Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
+183–202. https://doi.org/10.1137/080716542
+\item Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013).
+A General Iterative Shrinkage and Thresholding Algorithm for Non-convex
+Regularized Optimization Problems. Proceedings of the 30th International
+Conference on Machine Learning, 28(2)(2), 37–45.
+\item Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and
+Trends in Optimization, 1(3), 123–231.
+}
 }
 \examples{
 # This example shows how to use the optimizers

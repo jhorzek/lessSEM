@@ -5,19 +5,16 @@
 \alias{lessSEM}
 \title{lessSEM}
 \description{
-lessSEM (**l**inr **i**mplements **n**on-smooth **r**egsem) 
+lessSEM (**l**essSEM **e**stimates **s**parse **SEMr**) 
 is an R package which provides regularized 
 structural equation modeling (regularized SEM) 
-building on lavaan; that is, it makes SEM *leaner*.
- As the name suggests, lessSEM is heavily inspired by
- the [regsem](https://github.com/Rjacobucci/regsem) package.
+building on lavaan.
+lessSEM is heavily inspired by the [regsem](https://github.com/Rjacobucci/regsem) 
+package.
  
  The objectives of lessSEM are (1) to compare exact and approximate optimization of regularized SEM
  and (2) to provide optimizers for other SEM packages which can be used with an 
  interface similar to optim
- 
- lessSEM also provides experimental functions for 
- approximate cross-validation and approximate influence functions.
  
  **Warning**: The package is relatively new and you may 
  find more stable implementations of regularized SEM in the 

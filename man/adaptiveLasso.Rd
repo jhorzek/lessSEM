@@ -48,7 +48,8 @@ for more details.}
 Implements adaptive lasso regularization for structural equation models.
 The penalty function is given by:
 \deqn{p( x_j) = p( x_j) = \frac{1}{w_j}\lambda| x_j|}
-Adaptive lasso regularization will set parameters to zero if \eqn{\lambda} is large enough
+Adaptive lasso regularization will set parameters to zero if \eqn{\lambda}
+is large enough.
 }
 \details{
 Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
