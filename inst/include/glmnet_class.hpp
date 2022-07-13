@@ -39,21 +39,43 @@ const std::vector<std::string> convergenceCriteriaGlmnet_txt = {
 
 
 struct controlGLMNET{
-  const arma::mat initialHessian;
-  const double stepSize;
-  const double sigma;
-  const double gamma;
-  const int maxIterOut; // maximal number of outer iterations
-  const int maxIterIn; // maximal number of inner iterations
-  const int maxIterLine;
-  const double breakOuter; // change in fit required to break the outer iteration
-  const double breakInner;
-  const convergenceCriteriaGlmnet convergenceCriterion; // this is related to the inner
+  arma::mat initialHessian;
+  double stepSize;
+  double sigma;
+  double gamma;
+  int maxIterOut; // maximal number of outer iterations
+  int maxIterIn; // maximal number of inner iterations
+  int maxIterLine;
+  double breakOuter; // change in fit required to break the outer iteration
+  double breakInner;
+  convergenceCriteriaGlmnet convergenceCriterion; // this is related to the inner
   // breaking condition. 
-  const int verbose; // if set to a value > 0, the fit every verbose iterations
+  int verbose; // if set to a value > 0, the fit every verbose iterations
   // is printed. If set to -99 you will get the debug output which is horribly
   // convoluted
 };
+
+inline controlGLMNET controlGlmnetDefault(){
+  arma::mat initialHessian(1,1);
+  initialHessian.fill(1.0);
+  controlGLMNET defaultIs ={
+    initialHessian, // initial hessian will be diagonal with 100 as diagonal values
+    .9, // stepSize;
+    1e-5, // sigma
+    0, // gamma
+    1000, //maxIterOut; // maximal number of outer iterations
+    1000, // maxIterIn; // maximal number of inner iterations
+    500, // maxIterLine;
+    1e-8, // breakOuter; // change in fit required to break the outer iteration
+    1e-10, // breakInner;
+    fitChange, // convergenceCriterion; // this is related to the inner
+    // breaking condition. 
+    0 // verbose; // if set to a value > 0, the fit every verbose iterations
+    // is printed. If set to -99 you will get the debug output which is horribly
+    // convoluted
+  };
+  return(defaultIs);
+}
 
 inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
                                 const arma::rowvec& gradients_kMinus1,
@@ -167,8 +189,8 @@ inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
   if(HessTimesZ.max() >= breakInner){
     if(verbose == -99) Rcpp::Rcout << 
       "Inner iteration did not converge: " << 
-      HessTimesZ.max() << 
-      std::endl;
+        HessTimesZ.max() << 
+          std::endl;
   }
   return(stepDirection);
   
@@ -283,8 +305,8 @@ inline arma::rowvec glmnetLineSearch(
     
     if(verbose == -99 ) Rcpp::Rcout << "comparing " << 
       f_k - f_0 << 
-      " and " << sigma*currentStepSize*compareTo(0,0) << 
-        std::endl;
+        " and " << sigma*currentStepSize*compareTo(0,0) << 
+          std::endl;
     converged = f_k - f_0 <=  sigma*currentStepSize*compareTo(0,0);
     
     if(converged){
@@ -311,11 +333,13 @@ inline arma::rowvec glmnetLineSearch(
 
 
 inline lessSEM::fitResults glmnet(model& model_, 
-                               Rcpp::NumericVector startingValuesRcpp,
-                               penaltyLASSO& penalty_,
-                               penaltyRidge& smoothPenalty_, 
-                               const tuningParametersEnet tuningParameters, // tuning parameters are of type T
-                               const controlGLMNET& control_){
+                                  Rcpp::NumericVector startingValuesRcpp,
+                                  penaltyLASSO& penalty_,
+                                  penaltyRidge& smoothPenalty_, 
+                                  const tuningParametersEnet tuningParameters, // tuning parameters are of type T
+                                  const controlGLMNET& control_ = controlGlmnetDefault())
+{
+  
   if(control_.verbose != 0) {
     Rcpp::Rcout << "Optimizing with glmnet.\n" <<
       std::endl;
@@ -373,8 +397,18 @@ inline lessSEM::fitResults glmnet(model& model_,
                                                                                   tuningParameters); // ridge part
   
   // prepare Hessian elements
-  arma::mat Hessian_k = control_.initialHessian,
+  arma::mat Hessian_k(startingValues.n_elem,startingValues.n_elem, arma::fill::zeros), 
+  Hessian_kMinus1(startingValues.n_elem,startingValues.n_elem, arma::fill::zeros);
+  if(control_.initialHessian.n_cols == 1 & control_.initialHessian.n_rows == 1){
+    // Hessian comes from default initializer and has to be redefined
+    double hessianValue = control_.initialHessian(0,0);
+    Hessian_k.diag().fill(hessianValue);
+    Hessian_kMinus1.diag().fill(hessianValue);
+    
+  }else{
+    Hessian_k = control_.initialHessian;
     Hessian_kMinus1 = control_.initialHessian;
+  }
   
   // breaking flags
   bool breakOuter = false; // if true, the outer iteration is exited
