@@ -39,25 +39,25 @@ const std::vector<std::string> convergenceCriteriaGlmnet_txt = {
 
 
 struct controlGLMNET{
-  const arma::mat initialHessian;
-  const double stepSize;
-  const double sigma;
-  const double gamma;
-  const int maxIterOut; // maximal number of outer iterations
-  const int maxIterIn; // maximal number of inner iterations
-  const int maxIterLine;
-  const double breakOuter; // change in fit required to break the outer iteration
-  const double breakInner;
-  const convergenceCriteriaGlmnet convergenceCriterion; // this is related to the inner
+  arma::mat initialHessian;
+  double stepSize;
+  double sigma;
+  double gamma;
+  int maxIterOut; // maximal number of outer iterations
+  int maxIterIn; // maximal number of inner iterations
+  int maxIterLine;
+  double breakOuter; // change in fit required to break the outer iteration
+  double breakInner;
+  convergenceCriteriaGlmnet convergenceCriterion; // this is related to the inner
   // breaking condition. 
-  const int verbose; // if set to a value > 0, the fit every verbose iterations
+  int verbose; // if set to a value > 0, the fit every verbose iterations
   // is printed. If set to -99 you will get the debug output which is horribly
   // convoluted
 };
 
-inline controlGLMNET controlGlmnetDetault(){
+inline controlGLMNET controlGlmnetDefault(){
   arma::mat initialHessian(1,1);
-  initialHessian.fill(100);
+  initialHessian.fill(1.0);
   controlGLMNET defaultIs ={
     initialHessian, // initial hessian will be diagonal with 100 as diagonal values
     .9, // stepSize;
@@ -68,7 +68,7 @@ inline controlGLMNET controlGlmnetDetault(){
     500, // maxIterLine;
     1e-8, // breakOuter; // change in fit required to break the outer iteration
     1e-10, // breakInner;
-    GLMNET, // convergenceCriterion; // this is related to the inner
+    fitChange, // convergenceCriterion; // this is related to the inner
     // breaking condition. 
     0 // verbose; // if set to a value > 0, the fit every verbose iterations
     // is printed. If set to -99 you will get the debug output which is horribly
@@ -337,7 +337,7 @@ inline lessSEM::fitResults glmnet(model& model_,
                                   penaltyLASSO& penalty_,
                                   penaltyRidge& smoothPenalty_, 
                                   const tuningParametersEnet tuningParameters, // tuning parameters are of type T
-                                  const controlGLMNET& control_ = controlGlmnetDetault())
+                                  const controlGLMNET& control_ = controlGlmnetDefault())
 {
   
   if(control_.verbose != 0) {
@@ -397,13 +397,14 @@ inline lessSEM::fitResults glmnet(model& model_,
                                                                                   tuningParameters); // ridge part
   
   // prepare Hessian elements
-  arma::mat Hessian_k(startingValues.n_elem,startingValues.n_elem), 
-  Hessian_kMinus1(startingValues.n_elem,startingValues.n_elem);
+  arma::mat Hessian_k(startingValues.n_elem,startingValues.n_elem, arma::fill::zeros), 
+  Hessian_kMinus1(startingValues.n_elem,startingValues.n_elem, arma::fill::zeros);
   if(control_.initialHessian.n_cols == 1 & control_.initialHessian.n_rows == 1){
     // Hessian comes from default initializer and has to be redefined
     double hessianValue = control_.initialHessian(0,0);
-    Hessian_k.diag(hessianValue);
-    Hessian_kMinus1.diag(hessianValue);
+    Hessian_k.diag().fill(hessianValue);
+    Hessian_kMinus1.diag().fill(hessianValue);
+    
   }else{
     Hessian_k = control_.initialHessian;
     Hessian_kMinus1 = control_.initialHessian;

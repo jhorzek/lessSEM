@@ -49,24 +49,24 @@ const std::vector<std::string> stepSizeInheritance_txt = {
 };
 
 struct control{
-  const double L0; // L0 controls the step size used in the first iteration
-  const double eta; // eta controls by how much the step size changes in the
+  double L0; // L0 controls the step size used in the first iteration
+  double eta; // eta controls by how much the step size changes in the
   // inner iterations with (eta^i)*L, where i is the inner iteration
-  const bool accelerate; // if true, the extrapolation parameter is used
+  bool accelerate; // if true, the extrapolation parameter is used
   // to accelerate ista (see, e.g., Parikh, N., & Boyd, S. (2013). 
   // Proximal Algorithms. Foundations and Trends in Optimization, 1(3), 123–231., 
   // p. 152)
-  const int maxIterOut; // maximal number of outer iterations
-  const int maxIterIn; // maximal number of inner iterations
-  const double breakOuter; // change in fit required to break the outer iteration
-  const convCritInnerIsta convCritInner; // this is related to the inner
+  int maxIterOut; // maximal number of outer iterations
+  int maxIterIn; // maximal number of inner iterations
+  double breakOuter; // change in fit required to break the outer iteration
+  convCritInnerIsta convCritInner; // this is related to the inner
   // breaking condition. 
   // ista, as presented by Beck & Teboulle (2009); see Remark 3.1 on p. 191 (ISTA with backtracking)
   // gist, as presented by Gong et al. (2013) (Equation 3)
   // 
-  const double sigma; // sigma in (0,1) is used by the gist convergence criterion. larger
+  double sigma; // sigma in (0,1) is used by the gist convergence criterion. larger
   // sigma enforce larger improvement in fit
-  const stepSizeInheritance stepSizeIn; // how should step sizes be carried forward?
+  stepSizeInheritance stepSizeIn; // how should step sizes be carried forward?
   // from iteration to iteration? 
   // initial resets the step size to L0 in each iteration
   // istaStepInheritance takes the previous step size as initial value for the 
@@ -74,8 +74,8 @@ struct control{
   // barzilaiBorwein uses the Barzilai-Borwein procedure
   // stochasticBarzilaiBorwein uses the Barzilai-Borwein procedure, but sometimes
   // resets the step size; this can help when the optimizer is caught in a bad spot.
-  const int sampleSize; // can be used to scale the fitting function down
-  const int verbose; // if set to a value > 0, the fit every verbose iterations
+  int sampleSize; // can be used to scale the fitting function down
+  int verbose; // if set to a value > 0, the fit every verbose iterations
   // is printed. If set to -99 you will get the debug output which is horribly
   // convoluted
 };
