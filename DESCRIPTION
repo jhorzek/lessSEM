@@ -12,11 +12,17 @@ Description: lessSEM provides regularized structural equation modeling
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.1.2
-Imports: Rcpp (>= 1.0.8), ggplot2, patchwork, tidyr, lavaan, methods
+Imports: Rcpp (>= 1.0.8), ggplot2, patchwork, tidyr, lavaan, methods, numDeriv, utils, stats, graphics
 Suggests: 
     knitr,
     plotly,
     rmarkdown,
-    Rsolnp
+    Rsolnp,
+    testthat,
+    glmnet,
+    ncvreg,
+    regsem,
+    lslx,
+    mvtnorm
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr

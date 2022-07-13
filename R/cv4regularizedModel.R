@@ -44,7 +44,7 @@
 #'   lavaanModel = lavaanModel,
 #'   regularized = paste0("l", 6:15),
 #'   lambdas = seq(0,1,.1),
-#'   control = controlIsta())
+#'   control = controlIsta()
 #' )
 #' 
 #' # standard cross-validation
