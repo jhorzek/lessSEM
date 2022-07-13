@@ -80,6 +80,22 @@ struct control{
   // convoluted
 };
 
+inline control controlDefault(){
+  control defaultIs ={
+    .1, //L0
+  2, // eta
+  true, //accelerate
+  1000, // maxIterOut
+  10000, // maxIterIn
+  .00000001, //breakOuter
+  gistCrit, // convCritInner
+  .1, // sigma
+  istaStepInheritance, // stepSizeInheritance
+  0 // verbose
+  };
+  return(defaultIs);
+}
+
 template<typename T, typename U> // T is the type of the tuning parameters
 inline lessSEM::fitResults ista(
     model& model_, 
@@ -91,7 +107,7 @@ inline lessSEM::fitResults ista(
     // as input -> <U>
     const T& tuningParameters, // tuning parameters are of type T
     const U& smoothTuningParameters, // tuning parameters are of type U
-    const control& control_
+    const control& control_ = controlDefault()
 )
 {
   if(control_.verbose != 0) {

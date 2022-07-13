@@ -113,7 +113,7 @@ If you want to install lessSEM from GitHub, use the following commands in R:
 * [regsem](https://github.com/Rjacobucci/regsem): Jacobucci, R. (2017). regsem: Regularized Structural Equation Modeling. ArXiv:1703.08489 [Stat]. http://arxiv.org/abs/1703.08489
 * [lslx](https://github.com/psyphh/lslx): Huang, P.-H. (2020). lslx: Semi-confirmatory structural equation modeling via penalized likelihood. Journal of Statistical Software, 93(7). https://doi.org/10.18637/jss.v093.i07
 * [fasta](https://cran.r-project.org/web/packages/fasta/index.html): Another implementation of the fista algorithm (Beck & Teboulle, 2009)
-* [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M., Prabhu, R. G., Basak, S., Lou, Z., & Sanderson, C. (2031). The ensmallen library for ﬂexible numerical optimization. Journal of Machine Learning Research, 22, 1–6.
+* [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M., Prabhu, R. G., Basak, S., Lou, Z., & Sanderson, C. (2021). The ensmallen library for ﬂexible numerical optimization. Journal of Machine Learning Research, 22, 1–6.
 
 ## Regularized Structural Equation Modeling
 
