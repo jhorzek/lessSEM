@@ -151,6 +151,12 @@ in R:
     # Note: The results are basically identical:
     regsemGlmnet@parameters - regsem@parameters
 
+# Miscellaneous
+
+You will find a short introduction to the optimizer interfaces in the
+vignette “The-optimizer-interface” and a derivation of the scad and mcp
+used by the package in the vignette “SCAD-and-MCP”.
+
 # References
 
 ## R - Packages / Software

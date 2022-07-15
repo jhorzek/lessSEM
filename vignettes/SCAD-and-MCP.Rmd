@@ -1,5 +1,5 @@
 ---
-title: "SCAD and MCP: Derivations of the implementation used in lessSEM"
+title: "SCAD-and-MCP"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{SCAD-and-MCP}
