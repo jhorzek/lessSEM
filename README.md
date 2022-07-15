@@ -17,13 +17,13 @@ The objectives of lessSEM are:
     an interface similar to optim
 
 **Warning**: The package is relatively new and you may find more stable
-implementations of regularized SEM in the R packages
+implementations of regularized SEM in the more mature R packages
 [regsem](https://github.com/Rjacobucci/regsem) and
 [lslx](https://github.com/psyphh/lslx). Finally, you may want to check
 out the julia package
 [StructuralEquationModels.jl](https://github.com/StructuralEquationModels/StructuralEquationModels.jl).
 They provide a more flexible implementation of (regularized) SEM with
-even more penalty functions.
+very interesting penalty functions.
 
 The following penalty functions are currently implemented in lessSEM:
 
@@ -35,7 +35,7 @@ called with smoothLasso, smoothAdaptiveLasso, and smoothElasticNet.
 These are only implemented for the comparison of exact and approximate
 optimization and should not be used in most cases. The best model can be
 selected with the AIC, BIC, or cross-validaiton. Cross-validation is
-implemented in teh cv4regularizedSEM function (see
+implemented in the cv4regularizedSEM function (see
 ?lessSEM::cv4regularizedSEM).
 
 Currently, lessSEM has the following optimizers:
@@ -60,8 +60,9 @@ implement them:
     interface is similar to that of the
     [ensmallen](https://ensmallen.org/) library. We have implemented a
     simple example for elastic net regularization of linear regressions
-    in the [lessLM](https://github.com/jhorzek/lessLM) package. More
-    documentation will follow soon.
+    in the [lessLM](https://github.com/jhorzek/lessLM) package. You can
+    also find more details on the general design of the optimizer
+    interface in the vignette “The-optimizer-interface”
 
 Similar to [regsem](https://github.com/Rjacobucci/regsem), lessSEM is
 specified using a model built in
