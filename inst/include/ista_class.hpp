@@ -91,6 +91,7 @@ inline control controlDefault(){
   gistCrit, // convCritInner
   .1, // sigma
   istaStepInheritance, // stepSizeInheritance
+  1, // sample size
   0 // verbose
   };
   return(defaultIs);
