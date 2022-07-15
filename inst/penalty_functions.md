@@ -9,7 +9,7 @@ $$
 \text{cappedL1} & p( x_j) = \lambda \min(| x_j|, \theta); \theta > 0 & -- & \text{ista} & \text{(Zhang, 2010)}\\
 \text{lsp} & p( x_j) = \lambda \log(1 + |x_j|\theta); \theta > 0 & -- & \text{ista} & \text{(Candès et al., 2008)} \\
 \text{scad} & p( x_j) = \begin{cases}
-\lambda |x_j| & \text{if } |x_j| \leq \theta\\
+\lambda |x_j| & \text{if } |x_j| \leq \lambda\\
 \frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)} & \text{if } \lambda < |x_j| \leq \lambda\theta \\
 (\theta + 1) \lambda^2/2 & \text{if } |x_j| \geq \theta\lambda\\
 \end{cases}; \theta > 2 & -- & \text{ista} & \text{(Fan \& Li, 2001)} \\

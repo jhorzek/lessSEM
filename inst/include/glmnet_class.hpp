@@ -336,7 +336,7 @@ inline lessSEM::fitResults glmnet(model& model_,
                                   Rcpp::NumericVector startingValuesRcpp,
                                   penaltyLASSO& penalty_,
                                   penaltyRidge& smoothPenalty_, 
-                                  const tuningParametersEnet tuningParameters, // tuning parameters are of type T
+                                  const tuningParametersEnet tuningParameters,
                                   const controlGLMNET& control_ = controlGlmnetDefault())
 {
   

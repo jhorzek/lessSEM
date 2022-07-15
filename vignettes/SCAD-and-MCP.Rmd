@@ -1,5 +1,5 @@
 ---
-title: "SCAD and MCP: Derivations of the implementation used in lessSEM"
+title: "SCAD-and-MCP"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{SCAD-and-MCP}
@@ -14,8 +14,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-We implemented variants of the iterative shrinkage and thresholding (e.g., Beck & Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013) optimizer for all penalty functions. 
-Solutions for the lasso, cappedL1, mcp, and scad are proposed by Gong et al. (2013). Unfortunately, we could not get the mcp and scad to work in lessSEM, which is most likely due to us misunderstanding the derivation presented by Gong et al. (2013). The current implementation is based on the same idea as that used by Gong et al. (2013) and is outlined in the following.
+We implemented variants of the iterative shrinkage and thresholding 
+(e.g., Beck & Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013) optimizer 
+for all penalty functions. Solutions for the lasso, cappedL1, mcp, and scad are 
+proposed by Gong et al. (2013). Unfortunately, we could not get the mcp and scad 
+to work in lessSEM, which is most likely due to us misunderstanding the derivation 
+presented by Gong et al. (2013). The current implementation is based on the same 
+idea as that used by Gong et al. (2013) and is outlined in the following.
 
 
 # SCAD
@@ -28,18 +33,22 @@ $$p(x) = \begin{cases}
 (\theta + 1) \lambda^2/2 & \text{if } |x| \geq \theta\lambda\\
 \end{cases}$$
 
-with $\theta > 2$ and $\lambda > 0$. For the proximal operator we are searching a solution for the function
-$\hat x  = \arg\min_x \frac 12 (x-u)^2 + \frac 1t p(x)$. The idea of Gong et al. (2013) is to minimze this function for each of the regions mentioned above and to compare these minima to find the global minimum.
+with $\theta > 2$ and $\lambda \geq 0$. For the proximal operator we are searching 
+a solution for the function
+$\hat x  = \arg\min_x \frac 12 (x-u)^2 + \frac 1t p(x)$. The idea of 
+Gong et al. (2013) is to minimze this function for each of the regions 
+mentioned above and to compare these minima to find the global minimum.
 
-## Assume: $|x| \leq \theta$
+## Assume: $|x| \leq \lambda$
 
-Assuming that the solution is in the region $|x| \leq \theta$, the scad is identical to the lasso. It follows:
+Assuming that the solution is in the region $|x| \leq \lambda$, the scad is 
+identical to the lasso. It follows:
 
 $$\hat x = \text{sign} (u)\max(0,|u|-\lambda / t)$$
-If we also take the border $|x| \leq \theta$ into account, it follows:
+If we also take the border $|x| \leq \lambda$ into account, it follows:
 
-1. If $x > 0$: $\hat x = \min(\lambda, \text{sign} (u)\max(0,|u|-\lambda / t))$
-2. If $x < 0$: $\hat x = \max(-\lambda, \text{sign} (u)\max(0,|u|-\lambda / t))$
+1. If $x \geq 0$: $\hat x = \min(\lambda, \text{sign} (u)\max(0,|u|-\lambda / t))$
+2. If $x \leq 0$: $\hat x = \max(-\lambda, \text{sign} (u)\max(0,|u|-\lambda / t))$
 
 Combined:
 
@@ -48,7 +57,10 @@ $$\hat x = \text{sign}(u)\max(\lambda, \max(0,|u|-\lambda / t))$$
 
 ## Assume: $\lambda < |x| \leq \lambda\theta$
 
-Assuming that the solution is in the region  $\lambda < |x| \leq \lambda\theta$, the critical section of the absolute value function ($x=0$) is avoided. Therefore, the derivative with respect to $x$ is defined and can be set to zero. The solution is given by:
+Assuming that the solution is in the region  $\lambda < |x| \leq \lambda\theta$, 
+the critical section of the absolute value function ($x=0$) is avoided. 
+Therefore, the derivative with respect to $x$ is defined and can be set to zero. 
+The solution is given by:
 
 $$
 \hat x = \begin{cases}
@@ -61,14 +73,15 @@ with $v = (1-\frac{1}{t(\theta-1)})$. Also accounting for the borders gives:
 
 $$
 \hat x = \begin{cases}
-\min(\lambda\theta, \max(\lambda, \frac{u}{v} - \frac{\theta\lambda}{t(\theta-1)v}) & \text{if } x > 0\\
-\max(-\lambda\theta, \min(-\lambda, \frac{u}{v} + \frac{\theta\lambda}{t(\theta-1)v}) & \text{if } x < 0\\
+\min(\lambda\theta, \max(\lambda, \frac{u}{v} - \frac{\theta\lambda}{t(\theta-1)v}) & \text{if } x \geq 0\\
+\max(-\lambda\theta, \min(-\lambda, \frac{u}{v} + \frac{\theta\lambda}{t(\theta-1)v}) & \text{if } x \leq 0\\
 \end{cases}
 $$
 
 Derivation:
 
-The penalty is given by $\frac{-x^2 + 2\theta\lambda |x| - \lambda^2}{2(\theta -1)}$. Differentiation with respect to $x$ gives:
+The penalty is given by $\frac{-x^2 + 2\theta\lambda |x| - \lambda^2}{2(\theta -1)}$. 
+Differentiation with respect to $x$ gives:
 
 $$
 \begin{aligned}
@@ -79,13 +92,16 @@ $$
 
 (Note: as indicated above, $x \neq 0$ because $\lambda < |x| \leq \lambda\theta$. This $\partial |x| = \text{sign}(x)*1$.)
 
-Now we combine the differentiation of the penalty with the differentiation of $\frac 12 (x-u)^2$ and set to 0:
+Now we combine the differentiation of the penalty with the differentiation of 
+$\frac 12 (x-u)^2$ and set to 0:
 $$x-u + \frac 1t \frac{-x + \theta\lambda \text{sign}(x)}{(\theta -1)} := 0$$
 We get the equations above as solution.
 
 ## Assume: $|x| \geq \theta\lambda$
 
-As $x \neq 0$, the differentiation with respect to $x$ is defined. The penalty is given by $(\theta + 1) \lambda^2/2$. Differentiating with respect to $x$ gives $0$ as solution. It follows:
+As $x \neq 0$, the differentiation with respect to $x$ is defined. 
+The penalty is given by $(\theta + 1) \lambda^2/2$. Differentiating with 
+respect to $x$ gives $0$ as solution. It follows:
 
 
 $$x-u + \frac 1t 0 := 0 \Rightarrow \hat x = u$$
@@ -96,7 +112,9 @@ $$\hat x = \text{sign}(u) \min(\theta\lambda, |u|)$$
 
 ## combining the solutions
 
-We now have minima for each section of the penalty function. To find the global minimum, we have to compute $\frac 12 (x-u)^2 + \frac 1t p(x)$ for each proposed solution and then select the one which results in the smallest value.
+We now have minima for each section of the penalty function. 
+To find the global minimum, we have to compute $\frac 12 (x-u)^2 + \frac 1t p(x)$ 
+for each proposed solution and then select the one which results in the smallest value.
 
 
 # MCP
@@ -113,9 +131,10 @@ $$
 
 ## Assume: $|x| \leq \theta\lambda$
 
-### Assume that the solution is given by $x > 0$. 
+### Assume that the solution is given by $x \geq 0$. 
 
-Then $\frac{\partial}{\partial x}p(x) = \lambda - \frac x\theta$. It follows that the minimum of $f(x) = \frac 12 (x-u)^2 + \frac 1t p(x)$ is given by
+Then $\frac{\partial}{\partial x}p(x) = \lambda - \frac x\theta$. 
+It follows that the minimum of $f(x) = \frac 12 (x-u)^2 + \frac 1t p(x)$ is given by
 
 $$
 \begin{aligned}
@@ -130,9 +149,10 @@ Respecting the borders:
 $$x = \max(0,\min(\frac u v - \frac{1}{tv}\lambda, \theta\lambda))$$
 
 
-### Assume that the solution is given by $x < 0$.
+### Assume that the solution is given by $x \leq 0$.
 
-Then $\frac{\partial}{\partial x}p(x) = -\lambda - \frac x\theta$. It follows that the minimum of $f(x) = \frac 12 (x-u)^2 + \frac 1t p(x)$ is given by
+Then $\frac{\partial}{\partial x}p(x) = -\lambda - \frac x\theta$. 
+It follows that the minimum of $f(x) = \frac 12 (x-u)^2 + \frac 1t p(x)$ is given by
 
 $$
 \begin{aligned}
@@ -148,15 +168,22 @@ $$x = \min(0,\max(\frac u v + \frac{1}{tv}\lambda, -\theta\lambda))$$
 
 ## Assume $|x| \geq \theta\lambda$
 
-In this case, the differentiation with respect to $x$ is well defined. We get $\frac{\partial}{\partial x}p(x) = 0$ and $x = u$ as minimum of the function. Respecting the borders:
+In this case, the differentiation with respect to $x$ is well defined. 
+We get $\frac{\partial}{\partial x}p(x) = 0$ and $x = u$ as minimum of the function. 
+Respecting the borders:
 $$x = \text{sign}(u)\max(\theta\lambda, |u|)$$
 
-Finally, we are going to compare all proposed minima and select the one which actually minimizes the function.
+Finally, we are going to compare all proposed minima and select the one which 
+actually minimizes the function.
 
 
 # References
 
-* Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1), 183–202. https://doi.org/10.1137/080716542
-* Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). A general iterative shrinkage and thresholding algorithm for non-convex regularized optimization problems. Proceedings of the 30th International Conference on Machine Learning, 28(2)(2), 37–45.
-* Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and Trends in Optimization, 1(3), 123–231.
+* Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding Algorithm 
+for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1), 183–202. https://doi.org/10.1137/080716542
+* Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). A general iterative 
+shrinkage and thresholding algorithm for non-convex regularized optimization problems. 
+Proceedings of the 30th International Conference on Machine Learning, 28(2)(2), 37–45.
+* Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and Trends in 
+Optimization, 1(3), 123–231.
 

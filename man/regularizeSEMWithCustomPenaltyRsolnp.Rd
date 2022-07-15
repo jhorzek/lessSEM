@@ -133,20 +133,12 @@ regsemApprox <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = lavaanModel,
 
 # let's compare the results to an exact optimization:
 
-regsemExact <- regularizeSEM(
+regsemExact <- lasso(
   lavaanModel = lavaanModel,
-  regularizedParameterLabels = paste0("l", 6:15),
-  penalty = "lasso",
+  regularized = paste0("l", 6:15),
   lambdas = tuningParameters$lambda)
 
 head(regsemExact@parameters[,regsemExact@parameterLabels] -
        regsemApprox@parameters[,regsemExact@parameterLabels])
 # Note that the parameter estimates are basically identical.
-
-## To select a model, we used the cross-validation function:
-aCV <- cv4regularizedSEMWithCustomPenalty(regularizedSEMWithCustomPenalty = regsemApprox,
-                                           k = nrow(dataset))
-plot(aCV)
-# To extract the best parameter estimates:
-coef(aCV)
 }
