@@ -94,17 +94,17 @@
 #'                           reweigh = TRUE)
 #' @export
 cv4regularizedSEM <- function(regularizedSEM, 
-                                k, 
-                                dataSet = NULL,
-                                scaleData = FALSE,
-                                scalingFunction = function(dataSet,scalingArguments) 
-                                  scale(x = dataSet, 
-                                        center = scalingArguments$center, 
-                                        scale = scalingArguments$scale),
-                                scalingArguments = list("center" = TRUE, 
-                                                        "scale" = TRUE),
-                                reweigh = FALSE,
-                                returnSubsetParameters = FALSE){
+                              k, 
+                              dataSet = NULL,
+                              scaleData = FALSE,
+                              scalingFunction = function(dataSet,scalingArguments) 
+                                scale(x = dataSet, 
+                                      center = scalingArguments$center, 
+                                      scale = scalingArguments$scale),
+                              scalingArguments = list("center" = TRUE, 
+                                                      "scale" = TRUE),
+                              reweigh = FALSE,
+                              returnSubsetParameters = FALSE){
   
   if(!is(regularizedSEM, "regularizedSEM")){
     stop("regularizedSEM must be of class regularizedSEM")
@@ -165,11 +165,11 @@ cv4regularizedSEM <- function(regularizedSEM,
     # Holger Brandl at 
     # https://stackoverflow.com/questions/11693599/alternative-to-expand-grid-for-data-frames
     subsetParameters <- merge(tuningParameters,
-          data.frame(
-      trainSet = 1:k
-      ), 
-      by=NULL)
-
+                              data.frame(
+                                trainSet = 1:k
+                              ), 
+                              by=NULL)
+    
     subsetParameters <- cbind(
       subsetParameters,
       matrix(NA,
@@ -177,7 +177,7 @@ cv4regularizedSEM <- function(regularizedSEM,
              ncol = length(regularizedSEM@parameterLabels),
              dimnames = list(NULL, regularizedSEM@parameterLabels)
       )
-      )
+    )
     
   }else{
     subsetParameters <- data.frame(NA)
@@ -188,14 +188,14 @@ cv4regularizedSEM <- function(regularizedSEM,
     misc$newWeights <- data.frame(
       trainSet = 1:k)
     misc$newWeights <- cbind(misc$newWeights,
-      matrix(NA,
-             nrow = k, 
-             ncol = length(regularizedSEM@parameterLabels),
-             dimnames = list(NULL, regularizedSEM@parameterLabels)
-      )
+                             matrix(NA,
+                                    nrow = k, 
+                                    ncol = length(regularizedSEM@parameterLabels),
+                                    dimnames = list(NULL, regularizedSEM@parameterLabels)
+                             )
     )
   }
-    
+  
   for(s in 1:k){
     cat("\n[",s, "/",k,"]\n")
     control_s <- control

@@ -1,6 +1,6 @@
-#' lasso
+#' cvLasso
 #' 
-#' Implements lasso regularization for structural equation models.
+#' Implements cross-validated lasso regularization for structural equation models.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \lambda |x_j|}
 #' Lasso regularization will set parameters to zero if \eqn{\lambda} is large enough
@@ -89,73 +89,43 @@
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- lasso(
+#' regsem <- cvLasso(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
 #'   regularized = paste0("l", 6:15),
-#'   # in case of lasso and adaptive lasso, we can specify the number of lambda
-#'   # values to use. lessSEM will automatically find lambda_max and fit
-#'   # models for nLambda values between 0 and lambda_max. For the other
-#'   # penalty functions, lambdas must be specified explicitly
-#'   nLambdas = 50)
+#'   lambdas = seq(0,1,.1),
+#'   k = 5, # number of cross-validation folds
+#'   standardize = TRUE) # automatic standardization
 #' 
-#' # use the plot-function to plot the regularized parameters:
+#' # use the plot-function to plot the cross-validation fit:
 #' plot(regsem)
 #' 
 #' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
-#' 
-#' # AIC and BIC:
-#' AIC(regsem)
-#' BIC(regsem)
+#' regsem@parameters
 #' 
 #' # The best parameters can also be extracted with:
-#' coef(regsem, criterion = "AIC")
-#' coef(regsem, criterion = "BIC")
-#' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem, 
-#'                           k = 5)
-#' coef(cv)
-#' 
-#' 
-#' #### Advanced ###
-#' # Switching the optimizer # 
-#' # Use the "method" argument to switch the optimizer. The control argument
-#' # must also be changed to the corresponding function:
-#' regsemGlmnet <- lasso(
-#'   lavaanModel = lavaanModel,
-#'   regularized = paste0("l", 6:15),
-#'   nLambdas = 50,
-#'   method = "glmnet",
-#'   control = controlGlmnet())
-#' 
-#' # Note: The results are basically identical:
-#' regsemGlmnet@parameters - regsem@parameters
+#' coef(regsem)
 #' @export
-lasso <- function(lavaanModel,
+cvLasso <- function(lavaanModel,
                   regularized,
-                  lambdas = NULL,
-                  nLambdas = NULL,
-                  method = "ista", 
+                  lambdas,
+                  k = 5,
+                  standardize = FALSE,
+                  returnSubsetParameters = FALSE,
+                  method = "glmnet", 
                   modifyModel = lessSEM::modifyModel(),
-                  control = controlIsta()){
+                  control = controlGlmnet()){
   
-  if(is.null(lambdas) && is.null(nLambdas)){
-    stop("Specify either lambdas or nLambdas")
-  }
-  
-  if(!is.null(nLambdas)){
-    tuningParameters <- data.frame(nLambdas = nLambdas)
-  }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
-  }
   
-  result <- regularizeSEMInternal(
+  result <- cvRegularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "lasso",
+    k = k,
+    standardize = standardize,
+    returnSubsetParameters = returnSubsetParameters,
     weights = regularized,
     tuningParameters = tuningParameters,
     method = method, 
@@ -166,15 +136,15 @@ lasso <- function(lavaanModel,
   
 }
 
-#' adaptiveLasso
+#' cvAdaptiveLasso
 #' 
-#' Implements adaptive lasso regularization for structural equation models.
+#' Implements cross-validated adaptive lasso regularization for structural equation models.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = p( x_j) = \frac{1}{w_j}\lambda| x_j|}
 #' Adaptive lasso regularization will set parameters to zero if \eqn{\lambda} 
 #' is large enough.
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -263,77 +233,46 @@ lasso <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- adaptiveLasso(
+#' regsem <- cvAdaptiveLasso(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
 #'   regularized = paste0("l", 6:15),
-#'   # in case of lasso and adaptive lasso, we can specify the number of lambda
-#'   # values to use. lessSEM will automatically find lambda_max and fit
-#'   # models for nLambda values between 0 and lambda_max. For the other
-#'   # penalty functions, lambdas must be specified explicitly
-#'   nLambdas = 50)
+#'   lambdas = seq(0,1,.1))
 #' 
-#' # use the plot-function to plot the regularized parameters:
+#' # use the plot-function to plot the cross-validation fit
 #' plot(regsem)
 #' 
 #' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
-#' 
-#' # AIC and BIC:
-#' AIC(regsem)
-#' BIC(regsem)
+#' regsem@parameters
 #' 
 #' # The best parameters can also be extracted with:
-#' coef(regsem, criterion = "AIC")
-#' coef(regsem, criterion = "BIC")
-#' 
-#' # 5-fold cross-Validation
-#' # with new weights for each subset
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5,
-#'                           reweigh = TRUE)
-#' coef(cv)
-#' 
-#' 
-#' #### Advanced ###
-#' # Switching the optimizer #
-#' # Use the "method" argument to switch the optimizer. The control argument
-#' # must also be changed to the corresponding function:
-#' regsemGlmnet <- adaptiveLasso(
-#'   lavaanModel = lavaanModel,
-#'   regularized = paste0("l", 6:15),
-#'   nLambdas = 50,
-#'   method = "glmnet",
-#'   control = controlGlmnet())
-#' 
-#' # Note: The results are basically identical:
-#' regsemGlmnet@parameters - regsem@parameters
+#' coef(regsem)
 #' @export
-adaptiveLasso <- function(lavaanModel,
+cvAdaptiveLasso <- function(lavaanModel,
                           regularized,
                           weights = NULL,
-                          lambdas = NULL,
-                          nLambdas = NULL,
+                          lambdas,
+                          k = 5,
+                          standardize = FALSE,
+                          returnSubsetParameters = FALSE,
                           method = "ista", 
                           modifyModel = lessSEM::modifyModel(),
                           control = lessSEM::controlIsta()){
-  if(is.null(lambdas) && is.null(nLambdas)){
-    stop("Specify either lambdas or nLambdas")
-  }
-  if(!is.null(nLambdas)){
-    tuningParameters <- data.frame(nLambdas = nLambdas)
-  }else{
+
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
-  }
   
   if(is.null(weights)) weights <- regularized
   
-  result <- regularizeSEMInternal(
+  result <- cvRegularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "adaptiveLasso",
     weights = weights,
+    k = k,
+    standardize = standardize,
+    returnSubsetParameters = returnSubsetParameters,
+    weights = regularized,
     tuningParameters = tuningParameters,
     method = method, 
     modifyModel = modifyModel,
@@ -344,7 +283,7 @@ adaptiveLasso <- function(lavaanModel,
   
 }
 
-#' ridge
+#' cvRidge
 #' 
 #' Implements ridge regularization for structural equation models.
 #' The penalty function is given by:
@@ -352,7 +291,7 @@ adaptiveLasso <- function(lavaanModel,
 #' Note that ridge regularization will not set any of the parameters to zero
 #' but result in a shrinkage towards zero. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -434,53 +373,40 @@ adaptiveLasso <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- ridge(
+#' regsem <- cvRidge(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
 #'   regularized = paste0("l", 6:15),
 #'   lambdas = seq(0,1,length.out = 20))
 #' 
-#' # use the plot-function to plot the regularized parameters:
+#' # use the plot-function to plot the cross-validation fit:
 #' plot(regsem)
 #' 
 #' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' regsem@parameters
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' 
-#' 
-#' #### Advanced ###
-#' # Switching the optimizer #
-#' # Use the "method" argument to switch the optimizer. The control argument
-#' # must also be changed to the corresponding function:
-#' regsemGlmnet <- ridge(
-#'   lavaanModel = lavaanModel,
-#'   regularized = paste0("l", 6:15),
-#'   lambdas = seq(0,1,length.out = 20),
-#'   method = "glmnet",
-#'   control = controlGlmnet())
-#' 
-#' # Note: The results are basically identical:
-#' regsemGlmnet@parameters - regsem@parameters
 #' @export
-ridge <- function(lavaanModel,
+cvRidge <- function(lavaanModel,
                   regularized,
                   lambdas,
+                  k = 5,
+                  standardize = FALSE,
+                  returnSubsetParameters = FALSE,
                   method = "ista", 
                   modifyModel = lessSEM::modifyModel(),
                   control = controlIsta()){
   
   
-  result <- regularizeSEMInternal(
+  result <- cvRegularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "ridge",
     weights = regularized,
+    k = k,
+    standardize = standardize,
+    returnSubsetParameters = returnSubsetParameters,
     tuningParameters = data.frame(lambda = lambdas,
-                                   alpha = 0),
+                                  alpha = 0),
     method = method, 
     modifyModel = modifyModel,
     control = control
@@ -489,7 +415,7 @@ ridge <- function(lavaanModel,
   
 }
 
-#' elasticNet
+#' cvElasticNet
 #' 
 #' Implements elastic net regularization for structural equation models.
 #' The penalty function is given by:
@@ -499,7 +425,7 @@ ridge <- function(lavaanModel,
 #' to lasso regularization. In between, elastic net is a compromise between the shrinkage of
 #' the lasso and the ridge penalty. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -584,7 +510,7 @@ ridge <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- elasticNet(
+#' regsem <- cvElasticNet(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -593,37 +519,20 @@ ridge <- function(lavaanModel,
 #'   alphas = seq(0,1,.1))
 #' 
 #' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' regsem@parameters
 #' 
-#' # optional: plotting the paths requires installation of plotly
+#' # optional: plotting the cross-validation fit requires installation of plotly
 #' # plot(regsem)
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
-#' 
-#' #### Advanced ###
-#' # Switching the optimizer #
-#' # Use the "method" argument to switch the optimizer. The control argument
-#' # must also be changed to the corresponding function:
-#' regsemGlmnet <- elasticNet(
-#'   lavaanModel = lavaanModel,
-#'   regularized = paste0("l", 6:15),
-#'   lambdas = seq(0,1,length.out = 20),
-#'   alphas = seq(0,1,.1),
-#'   method = "glmnet",
-#'   control = controlGlmnet())
-#' 
-#' # Note: The results are basically identical:
-#' regsemGlmnet@parameters - regsem@parameters
+#' coef(regsem)
 #' @export
-elasticNet <- function(lavaanModel,
+cvElasticNet <- function(lavaanModel,
                        regularized,
                        lambdas,
                        alphas,
+                       k = 5,
+                       standardize = FALSE,
+                       returnSubsetParameters = FALSE,
                        method = "ista", 
                        modifyModel = lessSEM::modifyModel(),
                        control = controlIsta()){
@@ -631,10 +540,13 @@ elasticNet <- function(lavaanModel,
   if(any(alphas < 0) || any(alphas > 1)) 
     stop("alpha must be between 0 and 1.")
   
-  result <- regularizeSEMInternal(
+  result <- cvRegularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "elasticNet",
     weights = regularized,
+    k = k,
+    standardize = standardize,
+    returnSubsetParameters = returnSubsetParameters,
     tuningParameters = expand.grid(lambda = lambdas,
                                    alpha = alphas),
     method = method, 
@@ -646,7 +558,7 @@ elasticNet <- function(lavaanModel,
 }
 
 
-#' cappedL1
+#' cvCappedL1
 #' 
 #' Implements cappedL1 regularization for structural equation models.
 #' The penalty function is given by:
@@ -656,7 +568,7 @@ elasticNet <- function(lavaanModel,
 #' above \eqn{\theta}. As adding a constant to the fitting function will not change its
 #' minimum, larger parameters can stay unregularized while smaller ones are set to zero.
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -735,7 +647,7 @@ elasticNet <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- cappedL1(
+#' regsem <- cvCappedL1(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -744,29 +656,30 @@ elasticNet <- function(lavaanModel,
 #'   thetas = seq(0.01,2,length.out = 5))
 #' 
 #' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' regsem@parameters
 #' 
-#' # optional: plotting the paths requires installation of plotly
+#' # optional: plotting the cross-validation fit requires installation of plotly
 #' # plot(regsem)
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
+#' coef(regsem)
 #' @export
-cappedL1 <- function(lavaanModel,
+cvCappedL1 <- function(lavaanModel,
                      regularized,
                      lambdas,
                      thetas,
+                     k = 5,
+                     standardize = FALSE,
+                     returnSubsetParameters = FALSE,
                      modifyModel = lessSEM::modifyModel(),
                      control = controlIsta()){
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM::regularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- lessSEM::cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "cappedL1", 
                                            weights = regularized,
+                                           k = k,
+                                           standardize = standardize,
+                                           returnSubsetParameters = returnSubsetParameters,
                                            tuningParameters = expand.grid(lambda = lambdas, 
                                                                           theta = thetas,
                                                                           alpha = 1), 
@@ -779,14 +692,14 @@ cappedL1 <- function(lavaanModel,
   
 }
 
-#' lsp
+#' cvLsp
 #' 
 #' Implements lsp regularization for structural equation models.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \lambda \log(1 + |x_j|\theta)}
 #' where \eqn{\theta > 0}. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -866,7 +779,7 @@ cappedL1 <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- lsp(
+#' regsem <- cvLsp(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -875,30 +788,31 @@ cappedL1 <- function(lavaanModel,
 #'   thetas = seq(0.01,2,length.out = 5))
 #' 
 #' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' regsem@parameters
 #' 
-#' # optional: plotting the paths requires installation of plotly
+#' # optional: plotting the cross-validation fit requires installation of plotly
 #' # plot(regsem)
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
+#' coef(regsem)
 #' @export
-lsp <- function(lavaanModel,
+cvLsp <- function(lavaanModel,
                 regularized,
                 lambdas,
                 thetas,
+                k = 5,
+                standardize = FALSE,
+                returnSubsetParameters = FALSE,
                 modifyModel = lessSEM::modifyModel(),
                 control = controlIsta()){
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM::regularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- lessSEM::cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "lsp", 
                                            weights = regularized,
+                                           k = k,
+                                           standardize = standardize,
+                                           returnSubsetParameters = returnSubsetParameters,
                                            tuningParameters = expand.grid(lambda = lambdas, 
                                                                           theta = thetas), 
                                            method = "ista", 
@@ -910,7 +824,7 @@ lsp <- function(lavaanModel,
   
 }
 
-#' mcp
+#' cvMcp
 #' 
 #' Implements mcp regularization for structural equation models.
 #' The penalty function is given by:
@@ -920,7 +834,7 @@ lsp <- function(lavaanModel,
 #' \end{cases}}
 #' where \eqn{\theta > 0}. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -999,7 +913,7 @@ lsp <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- mcp(
+#' regsem <- cvMcp(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -1008,29 +922,30 @@ lsp <- function(lavaanModel,
 #'   thetas = seq(0.01,2,length.out = 5))
 #' 
 #' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' regsem@parameters
 #' 
-#' # optional: plotting the paths requires installation of plotly
+#' # optional: plotting the cross-validation fit requires installation of plotly
 #' # plot(regsem)
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
+#' coef(regsem)
 #' @export
-mcp <- function(lavaanModel,
+cvMcp <- function(lavaanModel,
                 regularized,
                 lambdas,
                 thetas,
+                k = 5,
+                standardize = FALSE,
+                returnSubsetParameters = FALSE,
                 modifyModel = lessSEM::modifyModel(),
                 control = controlIsta()){
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
-  result <- lessSEM::regularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- lessSEM::cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "mcp", 
                                            weights = regularized,
+                                           k = k,
+                                           standardize = standardize,
+                                           returnSubsetParameters = returnSubsetParameters,
                                            tuningParameters = expand.grid(lambda = lambdas, 
                                                                           theta = thetas), 
                                            method = "ista", 
@@ -1042,7 +957,7 @@ mcp <- function(lavaanModel,
   
 }
 
-#' scad
+#' cvScad
 #' 
 #' Implements scad regularization for structural equation models.
 #' The penalty function is given by:
@@ -1054,7 +969,7 @@ mcp <- function(lavaanModel,
 #' \end{cases}}
 #' where \eqn{\theta > 2}. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -1134,7 +1049,7 @@ mcp <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- scad(
+#' regsem <- cvScad(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -1143,30 +1058,31 @@ mcp <- function(lavaanModel,
 #'   thetas = seq(2.01,5,length.out = 5))
 #' 
 #' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' regsem@parameters
 #' 
-#' # optional: plotting the paths requires installation of plotly
+#' # optional: plotting the cross-validation fit requires installation of plotly
 #' # plot(regsem)
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
+#' coef(regsem)
 #' @export
-scad <- function(lavaanModel,
+cvScad <- function(lavaanModel,
                  regularized,
                  lambdas,
                  thetas,
+                 k = 5,
+                 standardize = FALSE,
+                 returnSubsetParameters = FALSE,
                  modifyModel = lessSEM::modifyModel(),
                  control = controlIsta()){
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
-  result <- lessSEM::regularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- lessSEM::cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "scad", 
                                            weights = regularized,
+                                           k = k,
+                                           standardize = standardize,
+                                           returnSubsetParameters = returnSubsetParameters,
                                            tuningParameters = expand.grid(lambda = lambdas, 
                                                                           theta = thetas), 
                                            method = "ista", 

@@ -42,6 +42,14 @@ test_that("testing adaptive lasso", {
                          FALSE)
   coef(rsem)
   
+  rsem2 <- lessSEM::adaptiveLasso(lavaanModel = modelFit, 
+                                 regularized = regularizedLavaan,
+                                 lambdas = regsem_cvFit$fits[,"lambda"],
+                                 method = "ista",
+                                 control = controlIsta(startingValues = "start"))
+  testthat::expect_equal(any(abs(rsem@parameters[,colnames(regsemPars)] - rsem2@parameters[,colnames(regsemPars)]) > .001),
+                         FALSE)
+  
   ## Test cross-validation
   
   cv <- cv4regularizedSEM(regularizedSEM = rsem, 

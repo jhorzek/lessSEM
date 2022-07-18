@@ -27,14 +27,14 @@ regularizeSEMInternal <- function(lavaanModel,
                                   control){
   
   inputArguments <- as.list(environment())
-
+  
   if(! method %in% c("ista", "glmnet")) 
     stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
   if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) 
     stop(paste0(
       "glmnet only supports the following penalty functions: ",
       paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet"), collapse = ", ")
-      )
+    )
     )
   
   if(method == "ista" && !is(control, "controlIsta")) 
@@ -56,8 +56,11 @@ regularizeSEMInternal <- function(lavaanModel,
   ### initialize model ####
   startingValues <- control$startingValues
   
-  if(!any(startingValues == "est") & penalty == "adaptiveLasso" & !is.numeric(weights))
-    stop("When using adaptiveLasso, use est as starting values or specify weights by hand.")
+  if(!any(startingValues == "est") & penalty == "adaptiveLasso" & !is.numeric(weights)){
+    createAdaptiveLassoWeights <- TRUE
+  }else{
+    createAdaptiveLassoWeights <- FALSE
+  }
   
   if(any(startingValues == "est")){
     SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
@@ -101,8 +104,31 @@ regularizeSEMInternal <- function(lavaanModel,
   if(!is.numeric(weights)){
     regularized <- weights
     if(penalty == "adaptiveLasso"){
-      weights <- 1/abs(startingValues)
-      weights[!names(weights) %in% regularized] <- 0
+      
+      if(createAdaptiveLassoWeights){
+        control_s <- control
+        control_s$verbose <- 0
+        # optimize model: We set lambda = 0, so we get the MLE
+        cat("Computing MLE for adaptive lasso...\n")
+        MLE <- lessSEM::lasso(
+          lavaanModel = lavaanModel,
+          lambdas = 0, 
+          regularized = regularized,
+          method = method, 
+          modifyModel = modifyModel,
+          control = control_s
+        )
+        
+        # MLE:
+        MLEs <- unlist(MLE@parameters[,MLE@parameterLabels])
+        weights <- 1/abs(MLEs)
+        weights[!names(weights) %in% regularized] <- 0
+      }else{
+        
+        weights <- 1/abs(startingValues)
+        weights[!names(weights) %in% regularized] <- 0
+        
+      }
     }else{
       weights <- startingValues
       weights[] <- 0
@@ -228,7 +254,7 @@ regularizeSEMInternal <- function(lavaanModel,
     }else{
       stop("Unknow penalty selected.")
     }
-
+    
   }
   
   #### define tuning parameters and prepare fit results ####
@@ -309,9 +335,9 @@ regularizeSEMInternal <- function(lavaanModel,
     if(penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")){
       
       result <- try(regularizedModel$optimize(rawParameters,
-                                                    SEM,
-                                                    tuningParameters$lambda[it],
-                                                    tuningParameters$alpha[it])
+                                              SEM,
+                                              tuningParameters$lambda[it],
+                                              tuningParameters$alpha[it])
       )
       
     }else if(penalty %in% c("lsp", "scad", "mcp")){
@@ -363,7 +389,7 @@ regularizeSEMInternal <- function(lavaanModel,
                      paste0(names(tuningParameters),
                             tuningParameters[it,], 
                             sep = " = "),
-              " resulted in Error!"))
+                     " resulted in Error!"))
       
       SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
                                      transformVariances = TRUE,
