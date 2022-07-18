@@ -40,7 +40,7 @@ Note that ridge regularization will not set any of the parameters to zero
 but result in a shrinkage towards zero.
 }
 \details{
-Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 most standard SEM are supported. \pkg{lessSEM} also provides full information
 maximum likelihood for missing data. To use this functionality,
 fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.

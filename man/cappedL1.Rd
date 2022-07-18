@@ -40,7 +40,7 @@ above \eqn{\theta}. As adding a constant to the fitting function will not change
 minimum, larger parameters can stay unregularized while smaller ones are set to zero.
 }
 \details{
-Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 most standard SEM are supported. \pkg{lessSEM} also provides full information
 maximum likelihood for missing data. To use this functionality,
 fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.
