@@ -10,10 +10,6 @@
 #' @param lavaanModel model of class lavaan 
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
 #' See ?lessSEM::cvLasso for an example
-#' @param reweigh this is used for the adaptive lasso. When the weights are based on the full
-#' sample, this may undermine the cross-validation. Set reweigh = TRUE to create new
-#' weigths for each subset. This will use the default weights (inverse of MLE). Alternatively,
-#' you can pass a matrix with k rows and nParameters columns with weights.
 #' @param standardize should training and test sets be standardized?
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param penalty string: name of the penalty used in the model
@@ -32,7 +28,6 @@ cvRegularizeSEMInternal <- function(lavaanModel,
                                     standardize,
                                     penalty,
                                     weights,
-                                    reweigh,
                                     returnSubsetParameters,
                                     tuningParameters,
                                     method, 
@@ -72,9 +67,9 @@ cvRegularizeSEMInternal <- function(lavaanModel,
   
   if(all(apply(rawData, 2, function(x) abs(mean(x)) <= 1e-5))) 
     warning(paste0("It seems that you standardized your data before fitting your lavaan model. ",
-    "Note that this can undermine the results of the cross-validation due to dependencies between ",
-    "the subsets. Consider re-fitting your model with unstandardized data and use standardize = TRUE ",
-    "to automatically standardize the subsets.")
+                   "Note that this can undermine the results of the cross-validation due to dependencies between ",
+                   "the subsets. Consider re-fitting your model with unstandardized data and use standardize = TRUE ",
+                   "to automatically standardize the subsets.")
     )
   
   # create subsets 
@@ -89,10 +84,10 @@ cvRegularizeSEMInternal <- function(lavaanModel,
   
   if(penalty == "adaptiveLasso") 
     message(paste0("Automatic cross-validation for adaptiveLasso requested. ", 
-                    "Note that using weights which are based on the full sample ",
-                    "may undermine cross-validation. Use reweigh = TRUE to re-weight ",
-                    "each subset with the inverse of the absolute MLE. ",
-                    "Alternatively, pass a matrix as argument reweigh with weights for each subset.")
+                   "Note that using weights which are based on the full sample ",
+                   "may undermine cross-validation. If the default is used (weights = NULL),",
+                   "weights for each subset will be computed using the inverse of the absolute MLE. ",
+                   "Alternatively, pass a matrix as weights argument with weights for each subset.")
     )
   
   cvfits <- data.frame(
@@ -129,7 +124,7 @@ cvRegularizeSEMInternal <- function(lavaanModel,
     subsetParameters <- data.frame(NA)
   }
   
-  if(penalty == "adaptiveLasso" && any(reweigh)){
+  if(penalty == "adaptiveLasso"){
     # save weights for inspection
     misc$newWeights <- data.frame(
       trainSet = 1:k)
@@ -158,7 +153,7 @@ cvRegularizeSEMInternal <- function(lavaanModel,
         # Otherwise the data sets are not truly independent!
         message("Standardizing data sets ...")
         trainSet <- scale(trainSet, center = TRUE, scale = TRUE)
-
+        
         means <- attr(trainSet, "scaled:center")
         standardDeviations <- attr(trainSet, "scaled:scale")
         
@@ -171,21 +166,29 @@ cvRegularizeSEMInternal <- function(lavaanModel,
     modifyModel$dataSet <- trainSet
     
     # check weights for adaptive Lasso
-    if(penalty == "adaptiveLasso" && any(reweigh)){
-      if(is.matrix(reweigh)){
-        weights_s <- reweigh[s,]
-      }else{
-        
-        # use default;
-        print(paste0("Computing new weights for sample ", s, "."))
-        control_s$startingValues <- "start" # will result in new weights
+    ## option one: user provided weights
+    if(penalty == "adaptiveLasso" && is.numeric(weights)){
+      if(is.vector(weights)){
+        warning("Using the same weights for all cv folds.")
         weights_s <- weights
-        
       }
-      misc$newWeights[misc$newWeights$trainSet == s,
-                      names(weights_s)] <- weights_s
+      if(is.matrix(weights) && nrow(weights) == k){
+        weights_s <- weights[s,]
+      }else{
+        stop("Could not set the weights. Expected either a vector or a matrix with k rows")
+      }
+    }
+    
+    # option 2: the default
+    if(penalty == "adaptiveLasso" && is.character(weights)){
+      # weights are only specifying the names of the regularized parameters
+      # use default;
+      print(paste0("Computing new weights for sample ", s, "."))
+      control_s$startingValues <- "start" # will result in new weights
+      weights_s <- weights
       
-    }else{
+    }
+    if(penalty != "adaptiveLasso"){
       weights_s <- weights
     }
     
@@ -197,6 +200,13 @@ cvRegularizeSEMInternal <- function(lavaanModel,
                                               modifyModel = modifyModel,
                                               control = control_s
     )
+    
+    if(penalty == "adaptiveLasso"){
+      
+      misc$newWeights[misc$newWeights$trainSet == s,
+                      names(regularizedSEM_s@weights)] <- regularizedSEM_s@weights
+      
+    }
     
     if(returnSubsetParameters){
       for(ro in 1:nrow(tuningParameters)){
@@ -237,17 +247,17 @@ cvRegularizeSEMInternal <- function(lavaanModel,
   cvfits$cvfit <- apply(cvfitsDetails[,paste0("testSet",1:k)],1,sum)
   
   # now, fit the full model
-
+  
   tp <- tuningParameters[which.min(cvfits$cvfit)[1],]
   if(standardize) rawData <- scale(rawData)
   modifyModel$dataSet <- rawData
   regularizedSEM_full <- regularizeSEMInternal(lavaanModel = lavaanModel, 
-                                            penalty = penalty, 
-                                            weights = weights_s, 
-                                            tuningParameters = tp, 
-                                            method = method,
-                                            modifyModel = modifyModel,
-                                            control = control
+                                               penalty = penalty, 
+                                               weights = weights_s, 
+                                               tuningParameters = tp, 
+                                               method = method,
+                                               modifyModel = modifyModel,
+                                               control = control
   )
   
   return(
