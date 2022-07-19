@@ -137,7 +137,7 @@ in R:
     # cross-validation
     cv <- cvLasso(lavaanModel = lavaanModel,
                   regularized = paste0("l", 6:15),
-                  nLambdas = 50,
+                  lambdas = seq(0,1,.1),
                   standardize = TRUE)
 
     # get best model according to cross-validation:
