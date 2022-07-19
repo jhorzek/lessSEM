@@ -36,7 +36,6 @@ the controlBFGS function. See ?controlBFGS for more details.}
 Implements cross-validated smooth lasso regularization for structural equation models.
 The penalty function is given by:
 \deqn{p( x_j) = \lambda \sqrt{(x_j + \epsilon)^2}}
-Lasso regularization will set parameters to zero if \eqn{\lambda} is large enough
 }
 \details{
 Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,

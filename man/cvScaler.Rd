@@ -18,5 +18,5 @@ scaled test set
 }
 \description{
 uses the means and standard deviations of the training set to standardize
-the test set. See, e.g., https://scikit-learn.org/stable/modules/cross_validation.html
+the test set. See, e.g., https://scikit-learn.org/stable/modules/cross_validation.html .
 }

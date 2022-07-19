@@ -3,7 +3,7 @@
 #' Combination of regularized structural equation model and cross-validation
 #' 
 #' Internal function: This function computes the regularized models
-#' for all penaltiy functions which are implemented for glmnet and gist.
+#' for all penalty functions which are implemented for glmnet and gist.
 #' Use the dedicated penalty functions (e.g., lessSEM::cvLasso) to penalize
 #' the model.
 #' 
@@ -277,7 +277,7 @@ cvRegularizeSEMInternal <- function(lavaanModel,
 #' cvScaler
 #' 
 #' uses the means and standard deviations of the training set to standardize
-#' the test set. See, e.g., https://scikit-learn.org/stable/modules/cross_validation.html
+#' the test set. See, e.g., https://scikit-learn.org/stable/modules/cross_validation.html .
 #' 
 #' @param testSet test data set
 #' @param means means of the training set

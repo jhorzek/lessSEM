@@ -2,7 +2,7 @@
 % Please edit documentation in R/cvRegularizeSmoothSEMInterface.R
 \name{cvRidgeBfgs}
 \alias{cvRidgeBfgs}
-\title{cvRidgeBfgsBfgs}
+\title{cvRidgeBfgs}
 \usage{
 cvRidgeBfgs(
   lavaanModel,
@@ -30,14 +30,14 @@ getLavaanParameters(model) with your lavaan model object}
 the controlBFGS function. See ?controlBFGS for more details.}
 }
 \description{
-Implements ridge regularization for structural equation models.
+Implements cross-validated ridge regularization for structural equation models.
 The penalty function is given by:
 \deqn{p( x_j) = \lambda x_j^2}
 Note that ridge regularization will not set any of the parameters to zero
 but result in a shrinkage towards zero.
 }
 \details{
-Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 most standard SEM are supported. \pkg{lessSEM} also provides full information
 maximum likelihood for missing data. To use this functionality,
 fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.

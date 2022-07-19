@@ -1,15 +1,15 @@
 #' cvRegularizeSmoothSEMInternal
 #' 
-#' Combination of regularized structural equation model and cross-validation
+#' Combination of smoothly regularized structural equation model and cross-validation
 #' 
 #' Internal function: This function computes the regularized models
-#' for all penaltiy functions which are implemented for glmnet and gist.
+#' for all penalty functions which are implemented for bfgs.
 #' Use the dedicated penalty functions (e.g., lessSEM::cvSmoothLasso) to penalize
 #' the model.
 #' 
 #' @param lavaanModel model of class lavaan 
 #' @param k the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
-#' See ?lessSEM::cvLasso for an example
+#' See ?lessSEM::cvSmoothLasso for an example
 #' @param standardize should training and test sets be standardized?
 #' @param returnSubsetParameters if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned
 #' @param penalty string: name of the penalty used in the model

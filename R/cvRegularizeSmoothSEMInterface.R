@@ -3,7 +3,6 @@
 #' Implements cross-validated smooth lasso regularization for structural equation models.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \lambda \sqrt{(x_j + \epsilon)^2}}
-#' Lasso regularization will set parameters to zero if \eqn{\lambda} is large enough
 #' 
 #' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
@@ -113,10 +112,8 @@ cvSmoothLasso <- function(lavaanModel,
 #' Implements cross-validated smooth adaptive lasso regularization for structural equation models.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = p( x_j) = \frac{1}{w_j}\lambda\sqrt{(x_j + \epsilon)^2}}
-#' Adaptive lasso regularization will set parameters to zero if \eqn{\lambda} 
-#' is large enough.
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -226,15 +223,15 @@ cvSmoothAdaptiveLasso <- function(lavaanModel,
   
 }
 
-#' cvRidgeBfgsBfgs
+#' cvRidgeBfgs
 #' 
-#' Implements ridge regularization for structural equation models.
+#' Implements cross-validated ridge regularization for structural equation models.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \lambda x_j^2}
 #' Note that ridge regularization will not set any of the parameters to zero
 #' but result in a shrinkage towards zero. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -332,15 +329,15 @@ cvRidgeBfgs <- function(lavaanModel,
 
 #' cvSmoothElasticNet
 #' 
-#' Implements elastic net regularization for structural equation models.
+#' Implements cross-validated  smooth elastic net regularization for structural equation models.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \alpha\lambda\sqrt{(x_j + \epsilon)^2} + (1-\alpha)\lambda x_j^2}
-#' Note that the elastic net combines ridge and lasso regularization. If \eqn{\alpha = 0}, 
+#' Note that the smooth elastic net combines ridge and smooth lasso regularization. If \eqn{\alpha = 0}, 
 #' the elastic net reduces to ridge regularization. If \eqn{\alpha = 1} it reduces
-#' to lasso regularization. In between, elastic net is a compromise between the shrinkage of
+#' to smooth lasso regularization. In between, elastic net is a compromise between the shrinkage of
 #' the lasso and the ridge penalty. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -363,9 +360,6 @@ cvRidgeBfgs <- function(lavaanModel,
 #' model. If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
-#' compute the first lambda value which sets all regularized parameters to zero.
-#' It will then generate nLambda values between 0 and the computed lambda.
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
 #' in [0,1]. 0 = ridge, 1 = lasso.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 

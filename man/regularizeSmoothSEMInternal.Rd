@@ -37,7 +37,7 @@ the controlBFGS function. See ?controlBFGS for more details.}
 }
 \description{
 Internal function: This function computes the regularized models
-for all smooth penaltiy functions which are implemented for bfgs.
+for all smooth penalty functions which are implemented for bfgs.
 Use the dedicated penalty functions (e.g., lessSEM::smoothLasso) to penalize
 the model.
 }

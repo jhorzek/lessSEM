@@ -35,22 +35,18 @@ the controlBFGS function. See ?controlBFGS for more details.}
 \item{weights}{labeled vector with weights for each of the parameters in the
 model. If you are unsure what these parameters are called, use
 getLavaanParameters(model) with your lavaan model object}
-
-\item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
-compute the first lambda value which sets all regularized parameters to zero.
-It will then generate nLambda values between 0 and the computed lambda.}
 }
 \description{
-Implements elastic net regularization for structural equation models.
+Implements cross-validated  smooth elastic net regularization for structural equation models.
 The penalty function is given by:
 \deqn{p( x_j) = \alpha\lambda\sqrt{(x_j + \epsilon)^2} + (1-\alpha)\lambda x_j^2}
-Note that the elastic net combines ridge and lasso regularization. If \eqn{\alpha = 0},
+Note that the smooth elastic net combines ridge and smooth lasso regularization. If \eqn{\alpha = 0},
 the elastic net reduces to ridge regularization. If \eqn{\alpha = 1} it reduces
-to lasso regularization. In between, elastic net is a compromise between the shrinkage of
+to smooth lasso regularization. In between, elastic net is a compromise between the shrinkage of
 the lasso and the ridge penalty.
 }
 \details{
-Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 most standard SEM are supported. \pkg{lessSEM} also provides full information
 maximum likelihood for missing data. To use this functionality,
 fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.

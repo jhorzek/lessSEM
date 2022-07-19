@@ -48,7 +48,7 @@ Combination of regularized structural equation model and cross-validation
 }
 \details{
 Internal function: This function computes the regularized models
-for all penaltiy functions which are implemented for glmnet and gist.
+for all penalty functions which are implemented for glmnet and gist.
 Use the dedicated penalty functions (e.g., lessSEM::cvLasso) to penalize
 the model.
 }

@@ -43,11 +43,9 @@ the controlBFGS function. See ?controlBFGS for more details.}
 Implements cross-validated smooth adaptive lasso regularization for structural equation models.
 The penalty function is given by:
 \deqn{p( x_j) = p( x_j) = \frac{1}{w_j}\lambda\sqrt{(x_j + \epsilon)^2}}
-Adaptive lasso regularization will set parameters to zero if \eqn{\lambda}
-is large enough.
 }
 \details{
-Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 most standard SEM are supported. \pkg{lessSEM} also provides full information
 maximum likelihood for missing data. To use this functionality,
 fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.

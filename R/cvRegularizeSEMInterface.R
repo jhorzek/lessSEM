@@ -467,8 +467,8 @@ cvRidge <- function(lavaanModel,
 #' Trends in Optimization, 1(3), 123–231.
 #' 
 #' @param lavaanModel model of class lavaan 
-#' @param weights labeled vector with weights for each of the parameters in the 
-#' model. If you are unsure what these parameters are called, use 
+#' @param regularized vector with names of parameters which are to be regularized.
+#' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically

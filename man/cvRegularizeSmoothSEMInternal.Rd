@@ -21,7 +21,7 @@ cvRegularizeSmoothSEMInternal(
 \item{lavaanModel}{model of class lavaan}
 
 \item{k}{the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function.
-See ?lessSEM::cvLasso for an example}
+See ?lessSEM::cvSmoothLasso for an example}
 
 \item{standardize}{should training and test sets be standardized?}
 
@@ -42,11 +42,11 @@ model.}
 the controlBFGS function. See ?controlBFGS for more details.}
 }
 \description{
-Combination of regularized structural equation model and cross-validation
+Combination of smoothly regularized structural equation model and cross-validation
 }
 \details{
 Internal function: This function computes the regularized models
-for all penaltiy functions which are implemented for glmnet and gist.
+for all penalty functions which are implemented for bfgs.
 Use the dedicated penalty functions (e.g., lessSEM::cvSmoothLasso) to penalize
 the model.
 }

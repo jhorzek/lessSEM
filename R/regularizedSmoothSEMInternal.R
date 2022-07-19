@@ -1,7 +1,7 @@
 #' regularizeSmoothSEMInternal
 #' 
 #' Internal function: This function computes the regularized models
-#' for all smooth penaltiy functions which are implemented for bfgs.
+#' for all smooth penalty functions which are implemented for bfgs.
 #' Use the dedicated penalty functions (e.g., lessSEM::smoothLasso) to penalize
 #' the model.
 #' 
@@ -347,9 +347,9 @@ newTau <- function(regularizedSEM, tau){
   regularizedSEM@fits$nonZeroParameters <- 
     length(regularizedSEM@parameterLabels) - 
     apply(regularizedSEM@parameters[,
-                                    names(regularizedSEM@inputArguments$weights[regularizedSEM@parameterLabels] != 0)],
+                                    names(regularizedSEM@weights[regularizedSEM@parameterLabels] != 0)],
           1,
-          function(x) sum(abs(x) < tau)
+          function(x) sum(abs(x) <= tau)
     )
   return(regularizedSEM)
 }
