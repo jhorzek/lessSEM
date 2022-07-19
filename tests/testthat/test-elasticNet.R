@@ -78,15 +78,4 @@ test_that("testing elastic net-c", {
   plot(rsemGlmnet)
   coef(rsemGlmnet)
 
-  ## Test exact cross-validation
-  cvExactGlmnet <- cv4regularizedSEM(regularizedSEM = rsemGlmnet, k = 5)
-  
-  cvExactIsta <- cv4regularizedSEM(regularizedSEM = rsemIsta, k = cvExactGlmnet@subsets)
-  
-  testthat::expect_equal(all(abs(cvExactGlmnet@cvfits - cvExactIsta@cvfits) < 1), TRUE)
-  testthat::expect_equal(all(abs(coef(cvExactGlmnet) -
-  coef(cvExactIsta)
-  ) < .2), TRUE)
-  
-  plot(cvExactIsta)
 })

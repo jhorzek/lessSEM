@@ -5,7 +5,7 @@
 #' \deqn{p( x_j) = \lambda |x_j|}
 #' Lasso regularization will set parameters to zero if \eqn{\lambda} is large enough
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -114,11 +114,6 @@
 #' coef(regsem, criterion = "AIC")
 #' coef(regsem, criterion = "BIC")
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem, 
-#'                           k = 5)
-#' coef(cv)
-#' 
 #' 
 #' #### Advanced ###
 #' # Switching the optimizer # 
@@ -174,7 +169,7 @@ lasso <- function(lavaanModel,
 #' Adaptive lasso regularization will set parameters to zero if \eqn{\lambda} 
 #' is large enough.
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -288,13 +283,6 @@ lasso <- function(lavaanModel,
 #' coef(regsem, criterion = "AIC")
 #' coef(regsem, criterion = "BIC")
 #' 
-#' # 5-fold cross-Validation
-#' # with new weights for each subset
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5,
-#'                           reweigh = TRUE)
-#' coef(cv)
-#' 
 #' 
 #' #### Advanced ###
 #' # Switching the optimizer #
@@ -352,7 +340,7 @@ adaptiveLasso <- function(lavaanModel,
 #' Note that ridge regularization will not set any of the parameters to zero
 #' but result in a shrinkage towards zero. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -447,11 +435,6 @@ adaptiveLasso <- function(lavaanModel,
 #' # elements of regsem can be accessed with the @ operator:
 #' regsem@parameters[1,]
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' 
 #' 
 #' #### Advanced ###
 #' # Switching the optimizer #
@@ -499,7 +482,7 @@ ridge <- function(lavaanModel,
 #' to lasso regularization. In between, elastic net is a compromise between the shrinkage of
 #' the lasso and the ridge penalty. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -598,13 +581,6 @@ ridge <- function(lavaanModel,
 #' # optional: plotting the paths requires installation of plotly
 #' # plot(regsem)
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
-#' 
 #' #### Advanced ###
 #' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
@@ -656,7 +632,7 @@ elasticNet <- function(lavaanModel,
 #' above \eqn{\theta}. As adding a constant to the fitting function will not change its
 #' minimum, larger parameters can stay unregularized while smaller ones are set to zero.
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -748,13 +724,6 @@ elasticNet <- function(lavaanModel,
 #' 
 #' # optional: plotting the paths requires installation of plotly
 #' # plot(regsem)
-#' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
 #' @export
 cappedL1 <- function(lavaanModel,
                      regularized,
@@ -786,7 +755,7 @@ cappedL1 <- function(lavaanModel,
 #' \deqn{p( x_j) = \lambda \log(1 + |x_j|\theta)}
 #' where \eqn{\theta > 0}. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -879,13 +848,6 @@ cappedL1 <- function(lavaanModel,
 #' 
 #' # optional: plotting the paths requires installation of plotly
 #' # plot(regsem)
-#' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
 #' @export
 lsp <- function(lavaanModel,
                 regularized,
@@ -920,7 +882,7 @@ lsp <- function(lavaanModel,
 #' \end{cases}}
 #' where \eqn{\theta > 0}. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -1012,13 +974,6 @@ lsp <- function(lavaanModel,
 #' 
 #' # optional: plotting the paths requires installation of plotly
 #' # plot(regsem)
-#' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
 #' @export
 mcp <- function(lavaanModel,
                 regularized,
@@ -1054,7 +1009,7 @@ mcp <- function(lavaanModel,
 #' \end{cases}}
 #' where \eqn{\theta > 2}. 
 #' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
@@ -1147,13 +1102,6 @@ mcp <- function(lavaanModel,
 #' 
 #' # optional: plotting the paths requires installation of plotly
 #' # plot(regsem)
-#' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
 #' @export
 scad <- function(lavaanModel,
                  regularized,

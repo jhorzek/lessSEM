@@ -3,11 +3,13 @@
 #' simulate data for a simple CFA model
 #' @param N number of persons in the data set
 #' @param loadings loadings of the latent variable on the manifest observations
+#' @param percentMissing percentage of missing data
 #' @examples 
 #' y <- lessSEM::simulateExampleData()
 #' @export
 simulateExampleData <- function(N = 100, # sample size
-                                loadings = c(rep(1,5), rep(.4,5), rep(0,5))
+                                loadings = c(rep(1,5), rep(.4,5), rep(0,5)),
+                                percentMissing = 0
 ){
   
   f <- matrix(rnorm(N, 0, 1), ncol = 1) # latent factor
@@ -24,6 +26,17 @@ simulateExampleData <- function(N = 100, # sample size
   
   yNames <- paste0("y", 1:ncol(y))
   colnames(y) <- yNames
+  
+  if(percentMissing != 0){
+    
+    allPoints <- expand.grid(row = 1:nrow(y),
+                             col = 1:ncol(y))
+    missing <- sample(size = round(nrow(allPoints)*percentMissing/100),
+                      x = 1:nrow(allPoints))
+    for(i in missing){
+      y[allPoints$row[i], allPoints$col[i]] <- NA
+    }
+  }
   
   return(y)
   
@@ -48,7 +61,7 @@ noDotDotDot <- function(fn, ...){
   if(any(!names(dotdotdot) %in% argsAre)){
     warning(paste0(
       "You passed the following argument(s) using ...: ", 
-            paste0(names(dotdotdot)[!names(dotdotdot) %in% argsAre], collapse = ", "),
+      paste0(names(dotdotdot)[!names(dotdotdot) %in% argsAre], collapse = ", "),
       ". The fitting function or gradient function seems to not use all of these arguments."
     )
     )

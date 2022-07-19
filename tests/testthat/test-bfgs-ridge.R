@@ -1,4 +1,4 @@
-test_that("testing approximate lasso", {
+test_that("testing bfgs ridge", {
   library(lavaan)
   library(lessSEM)
   set.seed(123)
@@ -24,17 +24,16 @@ test_that("testing approximate lasso", {
   
   
   # regularize 
+  lambdas <- seq(0,1,.1)
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
-  rsem <- lasso(lavaanModel = modelFit, 
-                        regularized = regularizedLavaan,
-                        nLambdas = 30)
+  rsem <- ridge(lavaanModel = modelFit, 
+                regularized = regularizedLavaan,
+                lambdas = lambdas)
   
-  lambdas <- rsem@fits$lambda 
+ 
   
-  apprRegsem <- smoothLasso(lavaanModel = modelFit, 
-                            regularized = regularizedLavaan, 
-                            epsilon = 1e-7, 
-                            tau = 1e-4,
+  apprRegsem <- ridgeBfgs(lavaanModel = modelFit, 
+                            regularized = regularizedLavaan,
                             lambdas = lambdas)
   
   parameterDifference <- apprRegsem@parameters[,rsem@parameterLabels] - rsem@parameters[,rsem@parameterLabels]
@@ -44,12 +43,11 @@ test_that("testing approximate lasso", {
   
   # with Rsolnp:
   penaltyFunctionArguments <- list(
-    regularizedParameterLabels = regularizedLavaan,
-    eps = 1e-7 # note: the optimization works better, if eps is NOT set to 0! This is especially true for aLOOCV
+    regularizedParameterLabels = regularizedLavaan
   )
   tuningParameters <- data.frame("lambda" = lambdas)
   apprRegsem4 <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit, 
-                                                      individualPenaltyFunction = smoothLASSOValue, 
+                                                      individualPenaltyFunction = ridgeValue, 
                                                       tuningParameters = tuningParameters, 
                                                       penaltyFunctionArguments = penaltyFunctionArguments)
   parameterDifference4 <- apprRegsem4@parameters[,rsem@parameterLabels] - rsem@parameters[,rsem@parameterLabels]

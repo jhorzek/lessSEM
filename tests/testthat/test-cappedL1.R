@@ -42,18 +42,12 @@ test_that("testing cappedL1", {
     ) < 1e-4), 
     TRUE)
   
-  cv <- cv4regularizedSEM(regularizedSEM = rsemIsta, k = 5)
-  
   rsemIstaLasso <- lasso(lavaanModel = modelFit, 
                          regularized = paste0("f=~y",6:ncol(y)), 
                          lambdas = lambdas,
                          control = controlIsta(convCritInner = 0)
   )
-  cvLasso <- cv4regularizedSEM(regularizedSEM = rsemIstaLasso, 
-                      k = cv@subsets)
-  cv@cvfits[which.min(cv@cvfits$cvfit)[1],]
-  coef(cv)
-  coef(cvLasso)
+  
   coef(rsemIsta, criterion = "AIC")
   coef(rsemIsta, criterion = "BIC")
   

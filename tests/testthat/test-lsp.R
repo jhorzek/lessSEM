@@ -40,8 +40,6 @@ test_that("testing lsp", {
     ) < 1e-2), 
     TRUE)
   
-  cv <- cv4regularizedSEM(regularizedSEM = rsemIsta, k = 5)
-  
   # compare to smoothed version
   tuningParameters <- expand.grid(theta = thetas,
                                   lambda = lambdas
