@@ -78,11 +78,4 @@ test_that("testing elasticNet-ridge-c", {
   testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] -
                                    rsemBfgs@parameters[,rsemBfgs@regularized]) < .002), TRUE)
   
-  ## Test exact cross-validation
-  cvExact <- cv4regularizedSEM(regularizedSEM = rsemIsta, 
-                               k = 5)
-  coef(cvExact)
-  coef(cvExact, rule = "1sd")
-  plot(cvExact)
-  
 })

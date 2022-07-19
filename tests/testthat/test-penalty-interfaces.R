@@ -32,11 +32,6 @@ f ~~ 1*f
   
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
   
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                            k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
-  
   regsem <-  try(lasso(
     # pass the fitted lavaan model
     lavaanModel = lavaanModel,
@@ -46,11 +41,7 @@ f ~~ 1*f
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
-  
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
+
   
   regsem <- try(lasso(
     # pass the fitted lavaan model
@@ -64,11 +55,6 @@ f ~~ 1*f
   
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
   
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
-  
   regsem <-  try(lasso(
     # pass the fitted lavaan model
     lavaanModel = lavaanModel,
@@ -80,19 +66,6 @@ f ~~ 1*f
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
   
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
-  
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5, scaleData = TRUE, 
-                                scalingFunction = function(x, scalingArguments) 
-                                  scale(x, center = scalingArguments$center, scale = scalingArguments$scale), 
-                                scalingArguments = list("scale" = TRUE, "center" = TRUE) )
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
-  
   regsem <-  try(ridge(
     # pass the fitted lavaan model
     lavaanModel = lavaanModel,
@@ -102,11 +75,6 @@ f ~~ 1*f
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
-  
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
   
   regsem <-  try(ridge(
     # pass the fitted lavaan model
@@ -119,11 +87,6 @@ f ~~ 1*f
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
   
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
-  
   regsem <-  try(adaptiveLasso(
     # pass the fitted lavaan model
     lavaanModel = lavaanModel,
@@ -134,10 +97,6 @@ f ~~ 1*f
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
   
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
   
   regsem <-  try(adaptiveLasso(
     # pass the fitted lavaan model
@@ -149,16 +108,6 @@ f ~~ 1*f
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
   
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
-  
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5, 
-                                reweigh = TRUE)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
   
   regsem <-  try(adaptiveLasso(
     # pass the fitted lavaan model
@@ -170,10 +119,6 @@ f ~~ 1*f
     control = controlGlmnet())
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
   
   regsem <-  try(adaptiveLasso(
     # pass the fitted lavaan model
@@ -186,10 +131,6 @@ f ~~ 1*f
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
   
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
   
   regsem <-  try(elasticNet(
     # pass the fitted lavaan model
@@ -201,10 +142,6 @@ f ~~ 1*f
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
   
   regsem <-  try(elasticNet(
     # pass the fitted lavaan model
@@ -218,10 +155,6 @@ f ~~ 1*f
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
   
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
   
   regsem <-  try(cappedL1(
     # pass the fitted lavaan model
@@ -233,11 +166,6 @@ f ~~ 1*f
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
-
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
   
   regsem <-  try(lsp(
     # pass the fitted lavaan model
@@ -249,10 +177,6 @@ f ~~ 1*f
     control = controlIsta())
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
   
   regsem <-  try(mcp(
     # pass the fitted lavaan model
@@ -264,10 +188,6 @@ f ~~ 1*f
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
   
   regsem <-  try(scad(
     # pass the fitted lavaan model
@@ -279,9 +199,5 @@ f ~~ 1*f
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
-  cv <- try(cv4regularizedSEM(regularizedSEM = regsem,
-                                k = 5)
-  )
-  testthat::expect_equal(is(cv, "try-error"), FALSE)
 }
 )

@@ -42,10 +42,6 @@ test_that("testing readme", {
   # elements of regsem can be accessed with the @ operator:
   regsem@parameters[1,]
   
-  # k-fold cross-valiation
-  cv4regularizedSEM(regularizedSEM = regsem, 
-                    k = 5)
-  
   # AIC and BIC:
   AIC(regsem)
   BIC(regsem)
@@ -53,6 +49,15 @@ test_that("testing readme", {
   # The best parameters can also be extracted with:
   coef(regsem, criterion = "AIC")
   coef(regsem, criterion = "BIC")
+  
+  # cross-validation
+  cv <- cvLasso(lavaanModel = lavaanModel,
+                regularized = paste0("l", 6:15),
+                nLambdas = 50,
+                standardize = TRUE)
+  
+  # get best model according to cross-validation:
+  coef(cv)
   
   #### Advanced ###
   # Switching the optimizer # 

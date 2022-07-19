@@ -114,11 +114,6 @@
 #' coef(regsem, criterion = "AIC")
 #' coef(regsem, criterion = "BIC")
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem, 
-#'                           k = 5)
-#' coef(cv)
-#' 
 #' 
 #' #### Advanced ###
 #' # Switching the optimizer # 
@@ -288,13 +283,6 @@ lasso <- function(lavaanModel,
 #' coef(regsem, criterion = "AIC")
 #' coef(regsem, criterion = "BIC")
 #' 
-#' # 5-fold cross-Validation
-#' # with new weights for each subset
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5,
-#'                           reweigh = TRUE)
-#' coef(cv)
-#' 
 #' 
 #' #### Advanced ###
 #' # Switching the optimizer #
@@ -447,11 +435,6 @@ adaptiveLasso <- function(lavaanModel,
 #' # elements of regsem can be accessed with the @ operator:
 #' regsem@parameters[1,]
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' 
 #' 
 #' #### Advanced ###
 #' # Switching the optimizer #
@@ -598,13 +581,6 @@ ridge <- function(lavaanModel,
 #' # optional: plotting the paths requires installation of plotly
 #' # plot(regsem)
 #' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
-#' 
 #' #### Advanced ###
 #' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
@@ -748,13 +724,6 @@ elasticNet <- function(lavaanModel,
 #' 
 #' # optional: plotting the paths requires installation of plotly
 #' # plot(regsem)
-#' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
 #' @export
 cappedL1 <- function(lavaanModel,
                      regularized,
@@ -879,13 +848,6 @@ cappedL1 <- function(lavaanModel,
 #' 
 #' # optional: plotting the paths requires installation of plotly
 #' # plot(regsem)
-#' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
 #' @export
 lsp <- function(lavaanModel,
                 regularized,
@@ -1012,13 +974,6 @@ lsp <- function(lavaanModel,
 #' 
 #' # optional: plotting the paths requires installation of plotly
 #' # plot(regsem)
-#' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
 #' @export
 mcp <- function(lavaanModel,
                 regularized,
@@ -1147,13 +1102,6 @@ mcp <- function(lavaanModel,
 #' 
 #' # optional: plotting the paths requires installation of plotly
 #' # plot(regsem)
-#' 
-#' # 5-fold cross-Validation
-#' cv <- cv4regularizedSEM(regularizedSEM = regsem,
-#'                           k = 5)
-#' coef(cv)
-#' # optional: plotting the paths requires installation of plotly
-#' # plot(cv, what = "fit")
 #' @export
 scad <- function(lavaanModel,
                  regularized,

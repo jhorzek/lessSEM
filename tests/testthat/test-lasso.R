@@ -101,10 +101,5 @@ test_that("testing elasticNet-lasso-c", {
   testthat::expect_equal(all(round(AIC(rsemGlmnet)$AIC - (AICs))==0), TRUE)
   testthat::expect_equal(all(round(BIC(rsemGlmnet)$BIC - (BICs))==0), TRUE)
   
-  ## Test exact cross-validation
-  cvExact <- cv4regularizedSEM(regularizedSEM = rsemGlmnet, k = 5)
-  coef(cvExact)
-  coef(cvExact, rule = "1sd")
-  plot(cvExact)
   
 })
