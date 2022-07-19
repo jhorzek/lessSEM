@@ -81,6 +81,7 @@ First, start with lavaan:
 ```{r}
 library(lavaan)
 library(lessSEM)
+set.seed(4321)
 # let's simulate data for a simple 
 # cfa with 7 observed variables
 data <- lessSEM::simulateExampleData(N = 50, 
@@ -120,13 +121,13 @@ table above. For instance, let's have a look at the lasso penalty:
 ```{r, eval = FALSE}
 fitLasso <- lasso(lavaanModel = lavaanModel, 
                   regularized = regularized,
-                  nLambdas = 10)
+                  nLambdas = 50)
 ```
 
 ```{r, include = FALSE}
 fitLasso <- lasso(lavaanModel = lavaanModel, 
                   regularized = regularized,
-                  nLambdas = 10)
+                  nLambdas = 50)
 ```
 
 Plot the paths to see what is going on:
@@ -137,7 +138,7 @@ plot(fitLasso)
 
 Note that the parameters are pulled towards zero as $\lambda$ increases. Note also
 that we did not specify specific values for $\lambda$ in the lasso function above.
-Instead, we only specified how many lambdas we want to have (`nLambdas=10`).
+Instead, we only specified how many lambdas we want to have (`nLambdas=50`).
 If we use the lasso or adaptive lasso, **lessSEM** can automatically compute 
 which $\lambda$ is necessary to set all parameters to zero. This is currently
 not supported for any of the other penalties. 
