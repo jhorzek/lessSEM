@@ -157,6 +157,14 @@ in R:
     # Note: The results are basically identical:
     regsemGlmnet@parameters - regsem@parameters
 
+# A more thorough introduction
+
+You will find a short introduction to regularized SEM with the
+**lessSEM** package in the vignette “lessSEM” (see
+`vignette('lessSEM', package = 'lessSEM')`). More information is also
+provided in the documentation of the individual functions (e.g., see
+?lessSEM::scad)
+
 # Miscellaneous
 
 You will find a short introduction to the optimizer interfaces in the
@@ -167,6 +175,10 @@ used by the package in the vignette “SCAD-and-MCP”.
 
 ## R - Packages / Software
 
+-   [lavaan](https://github.com/yrosseel/lavaan) Rosseel, Y. (2012).
+    lavaan: An R Package for Structural Equation Modeling. Journal of
+    Statistical Software, 48(2), 1–36.
+    <https://doi.org/10.18637/jss.v048.i02>
 -   [regsem](https://github.com/Rjacobucci/regsem): Jacobucci, R.
     (2017). regsem: Regularized Structural Equation Modeling.
     ArXiv:1703.08489 \[Stat\]. <http://arxiv.org/abs/1703.08489>
