@@ -82,7 +82,7 @@ test_that("testing cross-validation for elasticNet", {
       sigma = SEM$impliedCovariance,
       log = TRUE
     ))
-    sel <- cv@cvfits$lambda == pars$lambda[ro] & cv@cvfits$theta == pars$theta[ro]
+    sel <- cv@cvfits$lambda == pars$lambda[ro] & cv@cvfits$alpha == pars$alpha[ro]
     if(sum(sel) != 1) stop("Error when selecting cv target")
     cv@cvfits[sel,"cvfit"] <- cv@cvfits[sel,"cvfit"] - m2LL
     
@@ -94,13 +94,14 @@ test_that("testing cross-validation for elasticNet", {
   subset <- sample(1:5, 1)
   subsetPars <- pars[pars$trainSet == subset,]
   
-  subsetCappedL1 <- elasticNet(lavaanModel = modelFit, 
+  subsetElasticNet <- elasticNet(lavaanModel = modelFit, 
                              regularized = regularizedLavaan,
                              lambdas = lambdas,
                              alphas = alphas,
                              modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
   
-  testthat::expect_equal(all(abs(subsetCappedL1@parameters - subsetPars[,colnames(subsetCappedL1@parameters)])< 1e-3), TRUE)
+  testthat::expect_equal(all(abs(subsetElasticNet@parameters - 
+                                   subsetPars[,colnames(subsetElasticNet@parameters)])< 1e-3), TRUE)
   
   # test standardization
   cv <- cvElasticNet(lavaanModel = modelFit, 
@@ -140,7 +141,7 @@ test_that("testing cross-validation for elasticNet", {
       sigma = SEM$impliedCovariance,
       log = TRUE
     ))
-    sel <- cvfits$lambda == pars$lambda[ro] & cvfits$theta == pars$theta[ro]
+    sel <- cvfits$lambda == pars$lambda[ro] & cvfits$alpha == pars$alpha[ro]
     if(sum(sel) != 1) stop("Error when selecting cv target")
     cvfits[sel,"cvfit"] <- cvfits[sel,"cvfit"] - m2LL
     

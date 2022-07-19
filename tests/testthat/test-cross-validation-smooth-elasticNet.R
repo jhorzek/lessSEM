@@ -1,4 +1,4 @@
-test_that("testing cross-validation for lasso", {
+test_that("testing cross-validation for smooth elasticNet", {
   library(regsem)
   library(lessSEM)
   set.seed(123)
@@ -23,29 +23,36 @@ test_that("testing cross-validation for lasso", {
   modelFit = cfa(modelSyntax, y, meanstructure = TRUE)
   
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
-  rsem <- lessSEM::lasso(lavaanModel = modelFit, 
-                         regularized = regularizedLavaan,
-                         nLambdas = 30, 
-                         control = controlIsta(breakOuter = 1e-5))
   
-  lambdas <- rsem@fits$lambda
+  lambdas <- seq(0,1,.1)
+  alphas <- c(0,.3,1)
+  rsem <- lessSEM::smoothElasticNet(lavaanModel = modelFit, 
+                                    regularized = regularizedLavaan,
+                                    lambdas = lambdas,
+                                    alphas = alphas,
+                                    epsilon = 1e-8,
+                                    tau = 0)
   
   ## Test cross-validation
   
-  cv <- cvLasso(lavaanModel = modelFit, 
-                regularized = regularizedLavaan,
-                lambdas = lambdas, 
-                returnSubsetParameters = TRUE)
+  cv <- cvSmoothElasticNet(lavaanModel = modelFit, 
+                           regularized = regularizedLavaan,
+                           lambdas = lambdas,
+                           alphas = alphas,
+                           epsilon = 1e-8,
+                           returnSubsetParameters = TRUE)
   
   testthat::expect_equal(all(cv@regularized == rsem@regularized), TRUE)
   selected <- which.min(cv@cvfits$cvfit)
   testthat::expect_equal(all(abs(cv@parameters - rsem@parameters[selected,]) < 1e-2), TRUE)
   testthat::expect_equal(ncol(cv@subsets), 5)
   
-  cv3 <- cvLasso(lavaanModel = modelFit, 
-                 regularized = regularizedLavaan,
-                 lambdas = lambdas,
-                 k = 3)
+  cv3 <- cvSmoothElasticNet(lavaanModel = modelFit, 
+                            regularized = regularizedLavaan,
+                            lambdas = lambdas,
+                            alphas = alphas,
+                            epsilon = 1e-8,
+                            k = 3)
   testthat::expect_equal(ncol(cv3@subsets), 3)
   
   coef(cv)
@@ -79,7 +86,7 @@ test_that("testing cross-validation for lasso", {
       sigma = SEM$impliedCovariance,
       log = TRUE
     ))
-    sel <- cv@cvfits$lambda == pars$lambda[ro]
+    sel <- cv@cvfits$lambda == pars$lambda[ro] & cv@cvfits$alpha == pars$alpha[ro]
     if(sum(sel) != 1) stop("Error when selecting cv target")
     cv@cvfits[sel,"cvfit"] <- cv@cvfits[sel,"cvfit"] - m2LL
     
@@ -91,19 +98,24 @@ test_that("testing cross-validation for lasso", {
   subset <- sample(1:5, 1)
   subsetPars <- pars[pars$trainSet == subset,]
   
-  subsetLasso <- lasso(lavaanModel = modelFit, 
-                         regularized = regularizedLavaan,
-                         lambdas = lambdas,
-                       modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
+  subsetEnet <- smoothElasticNet(lavaanModel = modelFit, 
+                                 regularized = regularizedLavaan,
+                                 lambdas = lambdas,
+                                 alphas = alphas,
+                                 epsilon = 1e-8,
+                                 tau = 0,
+                                 modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
   
-  testthat::expect_equal(all(abs(subsetLasso@parameters - subsetPars[,colnames(subsetLasso@parameters)])< 1e-3), TRUE)
+  testthat::expect_equal(all(abs(subsetEnet@parameters - subsetPars[,colnames(subsetEnet@parameters)])< 1e-3), TRUE)
   
   # test standardization
-  cv <- cvLasso(lavaanModel = modelFit, 
-                regularized = regularizedLavaan,
-                lambdas = lambdas, 
-                returnSubsetParameters = TRUE,
-                standardize = TRUE)
+  cv <- cvSmoothElasticNet(lavaanModel = modelFit, 
+                           regularized = regularizedLavaan,
+                           lambdas = lambdas, 
+                           alphas = alphas,
+                           returnSubsetParameters = TRUE,
+                           standardize = TRUE,
+                           epsilon = 1e-8)
   
   subsets <- cv@subsets
   pars <- cv@subsetParameters
@@ -135,13 +147,12 @@ test_that("testing cross-validation for lasso", {
       sigma = SEM$impliedCovariance,
       log = TRUE
     ))
-    sel <- cvfits$lambda == pars$lambda[ro]
+    sel <- cvfits$lambda == pars$lambda[ro] & cvfits$alpha == pars$alpha[ro]
     if(sum(sel) != 1) stop("Error when selecting cv target")
     cvfits[sel,"cvfit"] <- cvfits[sel,"cvfit"] - m2LL
     
   }
   
   testthat::expect_equal(all(abs(cvfits$cvfit)< 1e-6), TRUE)
-  
-  
-})
+}
+)

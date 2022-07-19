@@ -1,10 +1,10 @@
-#' cvRegularizeSEMInternal
+#' cvRegularizeSmoothSEMInternal
 #' 
 #' Combination of regularized structural equation model and cross-validation
 #' 
 #' Internal function: This function computes the regularized models
 #' for all penaltiy functions which are implemented for glmnet and gist.
-#' Use the dedicated penalty functions (e.g., lessSEM::cvLasso) to penalize
+#' Use the dedicated penalty functions (e.g., lessSEM::cvSmoothLasso) to penalize
 #' the model.
 #' 
 #' @param lavaanModel model of class lavaan 
@@ -16,39 +16,33 @@
 #' @param weights labeled vector with weights for each of the parameters in the 
 #' model.
 #' @param tuningParameters data.frame with tuning parameter values
-#' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta() and controlGlmnet() functions.
+#' the controlBFGS function. See ?controlBFGS for more details.
 #' @md
-cvRegularizeSEMInternal <- function(lavaanModel,
+cvRegularizeSmoothSEMInternal <- function(lavaanModel,
                                     k,
                                     standardize,
                                     penalty,
                                     weights,
                                     returnSubsetParameters,
                                     tuningParameters,
-                                    method, 
+                                    epsilon,
                                     modifyModel,
                                     control){
   
   inputArguments <- as.list(environment())
   
-  if(! method %in% c("ista", "glmnet")) 
-    stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) 
+  if(!penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) 
     stop(paste0(
-      "glmnet only supports the following penalty functions: ",
+      "bfgs only supports the following penalty functions: ",
       paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet"), collapse = ", ")
     )
     )
   
-  if(method == "ista" && !is(control, "controlIsta")) 
-    stop("control must be of class controlIsta. See ?controlIsta.")
-  if(method == "glmnet" && !is(control, "controlGlmnet")) 
-    stop("control must be of class controlGlmnet See ?controlGlmnet")
+  if(!is(control, "controlBFGS")) 
+    stop("control must be of class controlBfgs See ?controlBfgs.")
   
   if(!is(lavaanModel, "lavaan"))
     stop("lavaanModel must be of class lavaan")
@@ -192,11 +186,12 @@ cvRegularizeSEMInternal <- function(lavaanModel,
       weights_s <- weights
     }
     
-    regularizedSEM_s <- regularizeSEMInternal(lavaanModel = lavaanModel, 
+    regularizedSEM_s <- regularizeSmoothSEMInternal(lavaanModel = lavaanModel, 
                                               penalty = penalty, 
                                               weights = weights_s, 
                                               tuningParameters = tuningParameters, 
-                                              method = method,
+                                              epsilon = epsilon,
+                                              tau = 0,
                                               modifyModel = modifyModel,
                                               control = control_s
     )
@@ -251,11 +246,12 @@ cvRegularizeSEMInternal <- function(lavaanModel,
   tp <- tuningParameters[which.min(cvfits$cvfit)[1],]
   if(standardize) rawData <- scale(rawData)
   modifyModel$dataSet <- rawData
-  regularizedSEM_full <- regularizeSEMInternal(lavaanModel = lavaanModel, 
+  regularizedSEM_full <- regularizeSmoothSEMInternal(lavaanModel = lavaanModel, 
                                                penalty = penalty, 
                                                weights = weights_s, 
                                                tuningParameters = tp, 
-                                               method = method,
+                                               epsilon = epsilon,
+                                               tau = 0,
                                                modifyModel = modifyModel,
                                                control = control
   )
@@ -271,25 +267,4 @@ cvRegularizeSEMInternal <- function(lavaanModel,
         subsetParameters = subsetParameters,
         misc = misc)
   )
-}
-
-
-#' cvScaler
-#' 
-#' uses the means and standard deviations of the training set to standardize
-#' the test set. See, e.g., https://scikit-learn.org/stable/modules/cross_validation.html
-#' 
-#' @param testSet test data set
-#' @param means means of the training set
-#' @param standardDeviations standard deviations of the training set
-#' @returns scaled test set
-cvScaler <- function(testSet, means, standardDeviations){
-  if(any(names(means) != colnames(testSet))) stop("Mismatch in names of means and testSet.")
-  if(any(names(standardDeviations) != colnames(testSet))) stop("Mismatch in names of standardDeviations and testSet.")
-  
-  centered <- t(apply(testSet, 1, function(x) x-means))
-  scaled <- t(apply(centered, 1, function(x) x/standardDeviations))
-  colnames(scaled) <- colnames(testSet)
-  
-  return(scaled)
 }

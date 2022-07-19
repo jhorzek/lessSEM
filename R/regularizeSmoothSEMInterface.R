@@ -19,9 +19,6 @@
 #' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
-#' compute the first lambda value which sets all regularized parameters to zero.
-#' It will then generate nLambda values between 0 and the computed lambda.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param tau parameters below threshold tau will be seen as zeroed
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
@@ -79,25 +76,16 @@
 #' @export
 smoothLasso <- function(lavaanModel,
                         regularized,
-                        lambdas = NULL,
-                        nLambdas = NULL,
+                        lambdas,
                         epsilon,
                         tau,
                         modifyModel = lessSEM::modifyModel(),
                         control = controlBFGS()){
   
-  if(is.null(lambdas) && is.null(nLambdas)){
-    stop("Specify either lambdas or nLambdas")
-  }
+  tuningParameters <- data.frame(lambda = lambdas,
+                                 alpha = 1)
   
-  if(!is.null(nLambdas)){
-    tuningParameters <- data.frame(nLambdas = nLambdas)
-  }else{
-    tuningParameters <- data.frame(lambda = lambdas,
-                                   alpha = 1)
-  }
-  
-  result <- regularizedSmoothSEMInternal(
+  result <- regularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "lasso",
     weights = regularized,
@@ -139,9 +127,6 @@ smoothLasso <- function(lavaanModel,
 #' the default weights will be used: the inverse of the absolute values of
 #' the unregularized parameter estimates
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
-#' compute the first lambda value which sets all regularized parameters to zero.
-#' It will then generate nLambda values between 0 and the computed lambda.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param tau parameters below threshold tau will be seen as zeroed
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
@@ -210,26 +195,19 @@ smoothLasso <- function(lavaanModel,
 smoothAdaptiveLasso <- function(lavaanModel,
                                 regularized,
                                 weights = NULL,
-                                lambdas = NULL,
-                                nLambdas = NULL,
+                                lambdas,
                                 epsilon,
                                 tau,
                                 modifyModel = lessSEM::modifyModel(),
                                 control = controlBFGS()){
   
-  if(is.null(lambdas) && is.null(nLambdas)){
-    stop("Specify either lambdas or nLambdas")
-  }
-  if(!is.null(nLambdas)){
-    tuningParameters <- data.frame(nLambdas = nLambdas)
-  }else{
-    tuningParameters <- data.frame(lambda = lambdas,
-                                   alpha = 1)
-  }
+  
+  tuningParameters <- data.frame(lambda = lambdas,
+                                 alpha = 1)
   
   if(is.null(weights)) weights <- regularized
   
-  result <- regularizedSmoothSEMInternal(
+  result <- regularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "adaptiveLasso",
     weights = weights,
@@ -313,7 +291,7 @@ ridgeBfgs <- function(lavaanModel,
                       modifyModel = lessSEM::modifyModel(),
                       control = controlBFGS()){
   
-  result <- regularizedSmoothSEMInternal(
+  result <- regularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "ridge",
     weights = regularized,
@@ -348,8 +326,8 @@ ridgeBfgs <- function(lavaanModel,
 #' Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408.
 #' 
 #' @param lavaanModel model of class lavaan 
-#' @param weights labeled vector with weights for each of the parameters in the 
-#' model. If you are unsure what these parameters are called, use 
+#' @param regularized vector with names of parameters which are to be regularized.
+#' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
@@ -413,7 +391,7 @@ ridgeBfgs <- function(lavaanModel,
 #' regsem@parameters[1,]
 #' @export
 smoothElasticNet <- function(lavaanModel,
-                             weights,
+                             regularized,
                              lambdas = NULL,
                              nLambdas = NULL,
                              alphas,
@@ -425,7 +403,7 @@ smoothElasticNet <- function(lavaanModel,
   if(any(alphas < 0) || any(alphas > 1)) 
     stop("alpha must be between 0 and 1.")
   
-  result <- regularizedSmoothSEMInternal(
+  result <- regularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "elasticNet",
     weights = regularized,
@@ -437,5 +415,5 @@ smoothElasticNet <- function(lavaanModel,
     control = control
   )
   return(result)
-    
+  
 }

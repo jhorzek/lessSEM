@@ -1,4 +1,4 @@
-#' regularizedSmoothSEMInternal
+#' regularizeSmoothSEMInternal
 #' 
 #' Internal function: This function computes the regularized models
 #' for all smooth penaltiy functions which are implemented for bfgs.
@@ -14,10 +14,10 @@
 #' @param tau parameters below threshold tau will be seen as zeroed
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlBfgs() function.
+#' the controlBFGS function. See ?controlBFGS for more details.
 #' @md
 #' @export
-regularizedSmoothSEMInternal <- function(lavaanModel,
+regularizeSmoothSEMInternal <- function(lavaanModel,
                                          penalty,
                                          weights,
                                          tuningParameters,
@@ -36,7 +36,7 @@ regularizedSmoothSEMInternal <- function(lavaanModel,
     )
     )
   
-  if(!is(control, "controlBfgs")) 
+  if(!is(control, "controlBFGS")) 
     stop("control must be of class controlBfgs See ?controlBfgs.")
   
   if(!is(lavaanModel, "lavaan"))
@@ -107,11 +107,10 @@ regularizedSmoothSEMInternal <- function(lavaanModel,
         control_s$verbose <- 0
         # optimize model: We set lambda = 0, so we get the MLE
         cat("Computing MLE for adaptive lasso...\n")
-        MLE <- lessSEM::lasso(
+        MLE <- lessSEM::ridgeBfgs(
           lavaanModel = lavaanModel,
           lambdas = 0, 
           regularized = regularized,
-          method = method, 
           modifyModel = modifyModel,
           control = control_s
         )
@@ -166,9 +165,6 @@ regularizedSmoothSEMInternal <- function(lavaanModel,
     initialHessian <- -2*(-FisherInformation) # negative log-likelihood
     # make symmetric; just in case...
     initialHessian <- .5*(initialHessian + t(initialHessian))
-    while(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
-      diag(initialHessian) <- diag(initialHessian) + 1e-4
-    }
     
   }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
     initialHessian <- diag(initialHessian,length(rawParameters))
@@ -176,6 +172,14 @@ regularizedSmoothSEMInternal <- function(lavaanModel,
     colnames(initialHessian) <- names(rawParameters)
   }else{
     stop("Invalid initialHessian passed to glmnet See ?controlGlmnet for more information.")
+  }
+  
+  if(any(eigen(initialHessian, only.values = )$values < 0)){
+    # make positive definite
+    # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
+    eigenValues = eigen(initialHessian, only.values = )$values
+    diagMat = diag(-1.1*min(eigenValues), nrow(initialHessian), ncol(initialHessian))
+    initialHessian = initialHessian +  diagMat
   }
   
   control$initialHessian <- initialHessian
@@ -202,30 +206,6 @@ regularizedSmoothSEMInternal <- function(lavaanModel,
                           controlIntern)
   
   #### define tuning parameters and prepare fit results ####
-  ## get max lambda ##
-  if(!is.null(tuningParameters$nLambdas)){
-    # for lasso type penalties, the maximal lambda value can be determined
-    # automatically
-    message(paste0(
-      "Automatically selecting the maximal lambda value.\n",
-      "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
-    )
-    
-    maxLambda <- getMaxLambda_C(regularizedModel = regularizedModel,
-                                SEM = SEM,
-                                rawParameters = rawParameters,
-                                weights = weights,
-                                N = N)
-    tuningParameters <- data.frame(
-      lambda = seq(0,
-                   maxLambda,
-                   length.out = tuningParameters$nLambdas),
-      alpha = 1
-    )
-    
-    inputArguments$tuningParameters = tuningParameters
-    
-  }
   
   fits <- data.frame(
     tuningParameters,
@@ -285,7 +265,7 @@ regularizedSmoothSEMInternal <- function(lavaanModel,
     
     rawParameters <- result$rawParameters
     fits$nonZeroParameters[it] <- length(rawParameters) - 
-      sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
+      sum(abs(rawParameters[weights[names(rawParameters)] != 0]) <= tau)
     fits$regM2LL[it] <- result$fit
     fits$convergence[it] <- result$convergence
     

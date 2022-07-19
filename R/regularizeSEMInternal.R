@@ -170,9 +170,6 @@ regularizeSEMInternal <- function(lavaanModel,
       initialHessian <- -2*(-FisherInformation) # negative log-likelihood
       # make symmetric; just in case...
       initialHessian <- .5*(initialHessian + t(initialHessian))
-      while(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
-        diag(initialHessian) <- diag(initialHessian) + 1e-4
-      }
       
     }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
       initialHessian <- diag(initialHessian,length(rawParameters))
@@ -182,7 +179,17 @@ regularizeSEMInternal <- function(lavaanModel,
       stop("Invalid initialHessian passed to glmnet See ?controlGlmnet for more information.")
     }
     
+    if(any(eigen(initialHessian, only.values = )$values < 0)){
+      # make positive definite
+      # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
+      eigenValues = eigen(initialHessian, only.values = )$values
+      diagMat = diag(-1.1*min(eigenValues), nrow(initialHessian), ncol(initialHessian))
+      initialHessian = initialHessian +  diagMat
+    }
+    
     control$initialHessian <- initialHessian
+    
+    
   }
   
   #### prepare regularized model object ####

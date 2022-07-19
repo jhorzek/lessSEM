@@ -1,4 +1,4 @@
-test_that("testing cross-validation for approximated fit", {
+test_that("testing cross-validation for adaptive lasso", {
   library(regsem)
   library(lessSEM)
   set.seed(123)
@@ -23,19 +23,29 @@ test_that("testing cross-validation for approximated fit", {
   modelFit = cfa(modelSyntax, y, meanstructure = TRUE)
   
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
-  rsem <- lessSEM::smoothLasso(lavaanModel = modelFit, 
-                         regularized = regularizedLavaan, 
-                         epsilon = 1e-7, 
-                         tau = 1e-4,
-                         nLambdas = 10)
+  rsem <- lessSEM::adaptiveLasso(lavaanModel = modelFit, 
+                         regularized = regularizedLavaan,
+                         nLambdas = 30)
+  
+  lambdas <- rsem@fits$lambda
   
   ## Test cross-validation
   
-  cv <- cv4regularizedSEMApprox(regularizedSEM = rsem, 
-                          k = 5, 
-                          returnSubsetParameters = TRUE)
+  cv <- cvAdaptiveLasso(lavaanModel = modelFit, 
+                regularized = regularizedLavaan,
+                lambdas = lambdas, 
+                returnSubsetParameters = TRUE)
   
   testthat::expect_equal(all(cv@regularized == rsem@regularized), TRUE)
+  selected <- which.min(cv@cvfits$cvfit)
+  testthat::expect_equal(all(abs(cv@parameters - rsem@parameters[selected,]) < 1e-2), TRUE)
+  testthat::expect_equal(ncol(cv@subsets), 5)
+  
+  cv3 <- cvAdaptiveLasso(lavaanModel = modelFit, 
+                 regularized = regularizedLavaan,
+                 lambdas = lambdas,
+                 k = 3)
+  testthat::expect_equal(ncol(cv3@subsets), 3)
   
   coef(cv)
   plot(cv)
@@ -76,19 +86,24 @@ test_that("testing cross-validation for approximated fit", {
   
   testthat::expect_equal(all(abs(cv@cvfits$cvfit)< 1e-6), TRUE)
   
+  # test subset parameters
+  subset <- sample(1:5, 1)
+  subsetPars <- pars[pars$trainSet == subset,]
+  
+  subsetLasso <- adaptiveLasso(lavaanModel = modelFit, 
+                       regularized = regularizedLavaan,
+                       lambdas = lambdas,
+                       control = controlIsta(startingValues = "start"),
+                       modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
+  
+  testthat::expect_equal(all(abs(subsetLasso@parameters - subsetPars[,colnames(subsetLasso@parameters)])< 1e-3), TRUE)
+  
   # test standardization
-  cv <- cv4regularizedSEMApprox(regularizedSEM = rsem, 
-                          k = 5, 
-                          returnSubsetParameters = TRUE,
-                          scaleData = TRUE,
-                          scalingFunction = function(x,arg){
-                            scale(x, center = arg$center, scale = arg$scale)
-                          },
-                          scalingArguments = list(
-                            center = TRUE, scale = TRUE
-                          )
-                          
-  )
+  cv <- cvAdaptiveLasso(lavaanModel = modelFit, 
+                regularized = regularizedLavaan,
+                lambdas = lambdas, 
+                returnSubsetParameters = TRUE,
+                standardize = TRUE)
   
   subsets <- cv@subsets
   pars <- cv@subsetParameters
@@ -98,8 +113,15 @@ test_that("testing cross-validation for approximated fit", {
   
   for(ro in 1:nrow(pars)){
     
-    trainSet <- pars$trainSet[ro]
-    testSet <- subsets[,trainSet]
+    trainSet <- ySorted[!subsets[,pars$trainSet[ro]],]
+    testSet <- ySorted[subsets[,pars$trainSet[ro]],]
+    
+    means <- apply(trainSet,2,mean)
+    standardDeviations <- apply(trainSet,2,sd)
+    
+    testSet <- lessSEM::cvScaler(testSet = testSet, 
+                                 means = means, 
+                                 standardDeviations = standardDeviations)
     
     SEM <- lessSEM::setParameters(SEM = SEM, 
                                   labels = parameterLabels, 
@@ -108,7 +130,7 @@ test_that("testing cross-validation for approximated fit", {
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
-      x = scale(ySorted[testSet,], center = TRUE, scale = TRUE), 
+      x = testSet, 
       mean = SEM$impliedMeans,
       sigma = SEM$impliedCovariance,
       log = TRUE
@@ -123,17 +145,12 @@ test_that("testing cross-validation for approximated fit", {
   
   # test reweighing
   
-  rsem2 <- lessSEM::smoothAdaptiveLasso(lavaanModel = modelFit, 
-                                  regularized = regularizedLavaan,
-                                  epsilon = 1e-8, 
-                                  tau = 1e-4,
-                                  nLambdas = 50)
-  cv <- cv4regularizedSEMApprox(regularizedSEM = rsem2, 
-                          k = 5, 
-                          reweigh = TRUE)
+  rsem2 <- lessSEM::cvAdaptiveLasso(lavaanModel = modelFit, 
+                                    regularized = regularizedLavaan,
+                                    lambdas = lambdas)
   
-  subsets <- cv@subsets
-  weights <- cv@misc$newWeights
+  subsets <- rsem2@subsets
+  weights <- rsem2@misc$newWeights
   
   for(i in weights$trainSet){
     
@@ -149,33 +166,39 @@ test_that("testing cross-validation for approximated fit", {
     
   }
   
-  # also try with passing new data:
-  f2 <- matrix(rnorm(N, 0, 1), ncol = 1)
-  y2 <- matrix(NA, nrow = N, ncol = ncol(L))
+  # test custom weights
+  weights[,rsem2@regularized] <- runif(nrow(weights[,rsem2@regularized])*ncol(weights[,rsem2@regularized]), .5,10)
+  rsem3 <- lessSEM::cvAdaptiveLasso(lavaanModel = modelFit, 
+                                    regularized = regularizedLavaan,
+                                    weights = as.matrix(weights[,2:ncol(weights)]),
+                                    lambdas = lambdas)
   
-  for(i in 1:N){
-    y2[i,] <- L*f2[i,] +  mvtnorm::rmvnorm(1, sigma = diag(covs))
-  }
+  testthat::expect_equal(all(rsem3@misc$newWeights - weights == 0), TRUE)
   
-  colnames(y2) <- yNames
-  y2 <- y2[,colnames(ySorted)]
+  rsem4 <- lessSEM::cvAdaptiveLasso(lavaanModel = modelFit, 
+                                    regularized = regularizedLavaan,
+                                    weights = as.matrix(weights[,2:ncol(weights)]),
+                                    lambdas = lambdas,
+                                    standardize = TRUE,
+                                    returnSubsetParameters = TRUE)
   
-  cv <- cv4regularizedSEMApprox(regularizedSEM = rsem2, 
-                          dataSet = y2, 
-                          scaleData = FALSE, 
-                          k = 5,
-                          returnSubsetParameters = TRUE)
-  subsets <- cv@subsets
-  pars <- cv@subsetParameters
-  cvfits <- cv@cvfits
+  subsets <- rsem4@subsets
+  pars <- rsem4@subsetParameters
+  cvfits <- rsem4@cvfits
   
-  parameterLabels <- cv@parameterLabels
-  
+  parameterLabels <- rsem4@parameterLabels
   
   for(ro in 1:nrow(pars)){
     
-    trainSet <- pars$trainSet[ro]
-    testSet <- subsets[,trainSet]
+    trainSet <- ySorted[!subsets[,pars$trainSet[ro]],]
+    testSet <- ySorted[subsets[,pars$trainSet[ro]],]
+    
+    means <- apply(trainSet,2,mean)
+    standardDeviations <- apply(trainSet,2,sd)
+    
+    testSet <- lessSEM::cvScaler(testSet = testSet, 
+                                 means = means, 
+                                 standardDeviations = standardDeviations)
     
     SEM <- lessSEM::setParameters(SEM = SEM, 
                                   labels = parameterLabels, 
@@ -184,7 +207,7 @@ test_that("testing cross-validation for approximated fit", {
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
-      x = y2[testSet,], 
+      x = testSet, 
       mean = SEM$impliedMeans,
       sigma = SEM$impliedCovariance,
       log = TRUE
@@ -196,4 +219,7 @@ test_that("testing cross-validation for approximated fit", {
   }
   
   testthat::expect_equal(all(abs(cvfits$cvfit)< 1e-6), TRUE)
+  
+  
+  
 })
