@@ -330,15 +330,16 @@ gpAdaptiveLasso <- function(par,
                             method = "ista", 
                             control = controlIsta()){
   
-  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
-  fn <- removeDotDotDot$fn
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, fnName = "fn", ... = ...)
+  fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
-    gr <- removeDotDotDot$fn
-    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, fnName = "gr", ...)
+    gr <- removeDotDotDot[[1]]
+    additionalArguments <- c(additionalArguments, 
+                             removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
   }
   
   # remove the ... stuff so that it does not interfere with anything else
@@ -528,15 +529,16 @@ gpRidge <- function(par,
                     method = "ista", 
                     control = controlIsta()){
   
-  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
-  fn <- removeDotDotDot$fn
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, fnName = "fn", ... = ...)
+  fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
-    gr <- removeDotDotDot$fn
-    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, fnName = "gr", ...)
+    gr <- removeDotDotDot[[1]]
+    additionalArguments <- c(additionalArguments, 
+                             removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
   }
   
   # remove the ... stuff so that it does not interfere with anything else
@@ -718,15 +720,16 @@ gpElasticNet <- function(par,
                          method = "ista", 
                          control = controlIsta()){
   
-  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
-  fn <- removeDotDotDot$fn
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, fnName = "fn", ... = ...)
+  fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
-    gr <- removeDotDotDot$fn
-    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, fnName = "gr", ...)
+    gr <- removeDotDotDot[[1]]
+    additionalArguments <- c(additionalArguments, 
+                             removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
   }
   
   # remove the ... stuff so that it does not interfere with anything else
@@ -912,15 +915,16 @@ gpCappedL1 <- function(par,
                        thetas,
                        control = controlIsta()){
   
-  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
-  fn <- removeDotDotDot$fn
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, fnName = "fn", ... = ...)
+  fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
-    gr <- removeDotDotDot$fn
-    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, fnName = "gr", ...)
+    gr <- removeDotDotDot[[1]]
+    additionalArguments <- c(additionalArguments, 
+                             removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
   }
   
   # remove the ... stuff so that it does not interfere with anything else
@@ -1078,15 +1082,16 @@ gpLsp <- function(par,
                   lambdas,
                   thetas,
                   control = controlIsta()){
-  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
-  fn <- removeDotDotDot$fn
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, fnName = "fn", ... = ...)
+  fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
-    gr <- removeDotDotDot$fn
-    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, fnName = "gr", ...)
+    gr <- removeDotDotDot[[1]]
+    additionalArguments <- c(additionalArguments, 
+                             removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
   }
   
   # remove the ... stuff so that it does not interfere with anything else
@@ -1253,15 +1258,16 @@ gpMcp <- function(par,
                   thetas,
                   control = controlIsta()){
   
-  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
-  fn <- removeDotDotDot$fn
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, fnName = "fn", ... = ...)
+  fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
-    gr <- removeDotDotDot$fn
-    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, fnName = "gr", ...)
+    gr <- removeDotDotDot[[1]]
+    additionalArguments <- c(additionalArguments, 
+                             removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
   }
   
   # remove the ... stuff so that it does not interfere with anything else
@@ -1432,15 +1438,16 @@ gpScad <- function(par,
                    thetas,
                    control = controlIsta()){
   
-  removeDotDotDot <- lessSEM::noDotDotDot(fn, ... = ...)
-  fn <- removeDotDotDot$fn
+  removeDotDotDot <- lessSEM::noDotDotDot(fn, fnName = "fn", ... = ...)
+  fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM::noDotDotDot(gr, ...)
-    gr <- removeDotDotDot$fn
-    
+    removeDotDotDot <- lessSEM::noDotDotDot(gr, fnName = "gr", ...)
+    gr <- removeDotDotDot[[1]]
+    additionalArguments <- c(additionalArguments, 
+                             removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
   }
   
   # remove the ... stuff so that it does not interfere with anything else
