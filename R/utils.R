@@ -49,7 +49,7 @@ simulateExampleData <- function(N = 100, # sample size
 #' THE FUNCTION MUST BE THE PARAMETER VECTOR
 #' @param ... additional arguments
 #' @return list with (1) new function which wraps fn and (2) list with arguments passed to fn
-noDotDotDot <- function(fn, ...){
+noDotDotDot <- function(fn, fnName, ...){
   
   # see Barranka, https://stackoverflow.com/questions/26164078/r-define-a-function-from-character-string
   
@@ -70,19 +70,23 @@ noDotDotDot <- function(fn, ...){
   namesOfPar <- argsAre[1] # the first argument is the parameter vector
   
   if(length(argsAre) == 1) {
-    additionalArguments <- list("fnUser" = fnUser)
+    additionalArguments <- list(fnUser)
+    names(additionalArguments) <- paste0(fnName, "User")
     eval(
       parse(
         text = paste('fn <- function(par, parameterLabels, additionalArguments) { 
                           names(par) <- parameterLabels
-                          return(additionalArguments$fnUser(', namesOfPar, ' = par))}', 
+                          return(additionalArguments$', fnName, 'User(', namesOfPar, ' = par))}', 
                      sep='')
       )
     )
     
-    return(list("fn" = fn,
+    ret <- list("fn" = fn,
                 "additionalArguments" = additionalArguments
-    ))
+    )
+    names(ret) <- c(paste0(fnName, "User"), "additionalArguments")
+    
+    return(ret)
     
     
   }
@@ -97,18 +101,22 @@ noDotDotDot <- function(fn, ...){
   
   
   body <- paste0(
-    "additionalArguments$fnUser(", 
+    "additionalArguments$", fnName, "User(", 
     paste0(fnArgs, collapse = ", "), 
     ")")
   
-  additionalArguments <- dotdotdot
-  additionalArguments$fnUser <- fnUser
+  additionalArguments <- c(dotdotdot, fnUser)
+  names(additionalArguments) <- c(names(dotdotdot), paste0(fnName, "User"))
+  
   rm(fn)
   eval(parse(text = paste('fn <- function(par, parameterLabels, additionalArguments) { 
                           names(par) <- parameterLabels
                           return(' , body , ')}', sep='')))
   
-  return(list("fn" = fn,
-              "additionalArguments" = additionalArguments
-  ))
+  ret <- list(fn,
+              additionalArguments
+  )
+  names(ret) <- c(paste0(fnName, "User"), "additionalArguments")
+  
+  return(ret)
 }
