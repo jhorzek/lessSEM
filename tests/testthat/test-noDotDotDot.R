@@ -7,14 +7,14 @@ test_that("testing noDotDotDot", {
   }
   
   out <- try(
-    lessSEM::noDotDotDot(fn = fn, x = 1, y = "a", z = 1)
+    lessSEM::noDotDotDot(fn = fn, fnName = "fn")
   )
   
   testthat::expect_equal(is(out, "list"), TRUE)
   
   # try calling the function
   
-  testthat::expect_equal(out$fn(1, "a", additionalArguments = out$additionalArguments) == 1, 
+  testthat::expect_equal(out$fnUser(1, "a", additionalArguments = out$additionalArguments) == 1, 
                          c(a = TRUE))
   
   # test function that takes additional arguments
@@ -23,14 +23,14 @@ test_that("testing noDotDotDot", {
   }
   
   out <- try(
-    lessSEM::noDotDotDot(fn = fn, x = 1, y = "a", z = 1)
+    lessSEM::noDotDotDot(fn = fn, fnName = "fn", x = 1, y = "a", z = 1)
   )
   
   testthat::expect_equal(is(out, "list"), TRUE)
   
   # try calling the function
   
-  testthat::expect_equal(out$fn(1, "a", additionalArguments = out$additionalArguments) == 1, 
+  testthat::expect_equal(out$fnUser(1, "a", additionalArguments = out$additionalArguments) == 1, 
                          c(a = TRUE))
   
 })

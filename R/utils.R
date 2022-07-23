@@ -81,8 +81,8 @@ noDotDotDot <- function(fn, fnName, ...){
       )
     )
     
-    ret <- list("fn" = fn,
-                "additionalArguments" = additionalArguments
+    ret <- list(fn,
+                additionalArguments
     )
     names(ret) <- c(paste0(fnName, "User"), "additionalArguments")
     
