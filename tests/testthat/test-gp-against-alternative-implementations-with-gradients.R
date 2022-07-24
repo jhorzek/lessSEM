@@ -108,27 +108,22 @@ test_that("testing general purpose optimization with gr", {
     N = N
   )
   
-  testthat::expect_equal(all(round(lassoPen@fits$regM2LL-
-                                     penSse,3)==0), TRUE)
-  testthat::expect_equal(all(round(lassoPen@fits$m2LL-
-                                     sse,3)==0), TRUE)
+  testthat::expect_equal(all(abs(t(lassoPen@parameters[,lassoPen@parameterLabels]) -
+                                   coef(out)) <.0001), TRUE)
+  
+  testthat::expect_equal(all(abs(lassoPen@fits$regM2LL-
+                                   penSse) <.0001), TRUE)
   
   
+  X <- ncvreg::std(X)
+  attr(X, "center") <- NULL
+  attr(X, "scale") <- NULL
+  attr(X, "nonsingular") <- NULL
   
   mcpFit <- ncvreg(X = X, y = y, penalty = "MCP", nlambda = 30)
   lambdas <- mcpFit$lambda
   thetas <- mcpFit$gamma
   coefs <- coef(mcpFit)
-  
-  sse <- rep(NA, length(lambdas)) # only one theta was tested
-  penSse <- sse
-  
-  for(l in 1:length(lambdas)){
-    N <- length(y)
-    sse[l] <- (.5/N)*sum((y - coefs[1,l] - (X %*% coefs[-1,l,drop=FALSE]))^2)
-    penSse[l] <- sse[l] + 
-      lambdas[l] * sum(abs(coefs[-1,l]))
-  }
   
   mcpFitGp <- gpMcp(par = b, 
                     regularized = regularized, 
@@ -140,8 +135,8 @@ test_that("testing general purpose optimization with gr", {
                     y = y,
                     N = N)
   
-  testthat::expect_equal(all(round(mcpFitGp@fits$regM2LL-
-                                     penSse,3)<=0), TRUE)
+  testthat::expect_equal(all(abs(t(mcpFitGp@parameters[,mcpFitGp@parameterLabels]) -
+                                   coef(mcpFit)) <.001), TRUE)
   
   # plot(mcpFit)
   # plot(mcpFitGp)
@@ -150,16 +145,6 @@ test_that("testing general purpose optimization with gr", {
   lambdas <- scadFit$lambda
   thetas <- scadFit$gamma
   coefs <- coef(scadFit)
-  
-  sse <- rep(NA, length(lambdas)) # only one theta was tested
-  penSse <- sse
-  
-  for(l in 1:length(lambdas)){
-    N <- length(y)
-    sse[l] <- (.5/N)*sum((y - coefs[1,l] - (X %*% coefs[-1,l,drop=FALSE]))^2)
-    penSse[l] <- sse[l] + 
-      lambdas[l] * sum(abs(coefs[-1,l]))
-  }
   
   scadFitGp <- gpScad(par = b, 
                       regularized = regularized, 
@@ -171,8 +156,8 @@ test_that("testing general purpose optimization with gr", {
                       y = y,
                       N = N)
   
-  testthat::expect_equal(all(round(scadFitGp@fits$regM2LL-
-                                     penSse,3)<=0), TRUE)
+  testthat::expect_equal(all(abs(t(scadFitGp@parameters[,scadFitGp@parameterLabels]) -
+                                   coef(scadFit)) <.001), TRUE)
   
   # plot(scadFit)
   # plot(scadFitGp)

@@ -4,12 +4,18 @@
 \alias{simulateExampleData}
 \title{simulateExampleData}
 \usage{
-simulateExampleData(N = 100, loadings = c(rep(1, 5), rep(0.4, 5), rep(0, 5)))
+simulateExampleData(
+  N = 100,
+  loadings = c(rep(1, 5), rep(0.4, 5), rep(0, 5)),
+  percentMissing = 0
+)
 }
 \arguments{
 \item{N}{number of persons in the data set}
 
 \item{loadings}{loadings of the latent variable on the manifest observations}
+
+\item{percentMissing}{percentage of missing data}
 }
 \description{
 simulate data for a simple CFA model

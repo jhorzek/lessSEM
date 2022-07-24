@@ -14,6 +14,7 @@
 #' as input and returns the gradients of the objective function. 
 #' If set to NULL, numDeriv will be used to approximate the gradients 
 #' @param additionalArguments additional argument passed to fn and gr
+#' @param isCpp boolean: are fn and gr C++ function pointers?
 #' @param penalty string: name of the penalty used in the model
 #' @param tuningParameters data.frame with tuning parameter values
 #' @param method which optimizer should be used? Currently implemented are ista
@@ -28,6 +29,7 @@ gpOptimizationInternal <- function(par,
                                    fn,
                                    gr = NULL,
                                    additionalArguments,
+                                   isCpp = FALSE,
                                    penalty,
                                    tuningParameters,
                                    method,
@@ -72,40 +74,55 @@ gpOptimizationInternal <- function(par,
   
   # check functions
   parameterLabels <- names(par)
-  check_fn <- fn(par, parameterLabels, additionalArguments)
-  if(length(check_fn) != 1) stop("fn returns more than one element!")
-  check_fnIsColVec <- try(
-    fn(matrix(par, ncol = 1), parameterLabels, additionalArguments),
-    silent = TRUE
-                   )
-  check_fnIsRowVec <- try(
-    fn(matrix(par, nrow = 1), parameterLabels, additionalArguments),
-    silent = TRUE
-  )
-  if(is(check_fnIsRowVec, "try-error") & !is(check_fnIsColVec, "try-error")){
-    fn_usr <- fn
-    fn <- function(par, parameterLabels, additionalArguments
-    ){
-      return(fn_usr(matrix(par, ncol = 1), parameterLabels, additionalArguments))
-    }
-   }
-                   
   
-  check_fn <- gr(par, parameterLabels, additionalArguments)
-  if(length(check_fn) != length(par)) stop("gr has different length than par!")
-  check_fnIsColVec <- try(
-    gr(matrix(par, ncol = 1), parameterLabels, additionalArguments),
-    silent = TRUE
-  )
-  check_fnIsRowVec <- try(
-    gr(matrix(par, nrow = 1), parameterLabels, additionalArguments),
-    silent = TRUE
-  )
-  if(is(check_fnIsRowVec, "try-error") & !is(check_fnIsColVec, "try-error")){
-    gr_usr <- gr
-    gr <- function(par, parameterLabels, additionalArguments
-    ){
-      return(gr_usr(matrix(par, ncol = 1), parameterLabels, additionalArguments))
+  if(!isCpp){
+    
+    check_fn <- fn(par, parameterLabels, additionalArguments)
+    
+    if(length(check_fn) != 1) stop("fn returns more than one element!")
+    check_fnIsColVec <- try(
+      fn(matrix(par, ncol = 1), parameterLabels, additionalArguments),
+      silent = TRUE
+    )
+    # we can also check if the function may expect a column vector instead of 
+    # a row vector:
+    
+    check_fnIsRowVec <- try(
+      fn(matrix(par, nrow = 1), parameterLabels, additionalArguments),
+      silent = TRUE
+    )
+    if(is(check_fnIsRowVec, "try-error") & !is(check_fnIsColVec, "try-error")){
+      fn_usr <- fn
+      fn <- function(par, parameterLabels, additionalArguments
+      ){
+        return(fn_usr(matrix(par, ncol = 1), parameterLabels, additionalArguments))
+      }
+    }
+  }
+  
+  if(!isCpp){
+    
+    check_fn <- gr(par, parameterLabels, additionalArguments)
+    
+    if(length(check_fn) != length(par)) stop("gr has different length than par!")
+    
+    # we can also check if the function may expect a column vector instead of 
+    # a row vector:
+    
+    check_fnIsColVec <- try(
+      gr(matrix(par, ncol = 1), parameterLabels, additionalArguments),
+      silent = TRUE
+    )
+    check_fnIsRowVec <- try(
+      gr(matrix(par, nrow = 1), parameterLabels, additionalArguments),
+      silent = TRUE
+    )
+    if(is(check_fnIsRowVec, "try-error") & !is(check_fnIsColVec, "try-error")){
+      gr_usr <- gr
+      gr <- function(par, parameterLabels, additionalArguments
+      ){
+        return(gr_usr(matrix(par, ncol = 1), parameterLabels, additionalArguments))
+      }
     }
   }
   
@@ -177,9 +194,19 @@ gpOptimizationInternal <- function(par,
       verbose = control$verbose
     )
     
-    regularizedModel <- new(glmnetEnetGeneralPurpose, 
-                            weights, 
-                            controlIntern)
+    if(isCpp){
+      
+      regularizedModel <- new(glmnetEnetGeneralPurposeCpp, 
+                              weights, 
+                              controlIntern)
+      
+    }else{
+      
+      regularizedModel <- new(glmnetEnetGeneralPurpose, 
+                              weights, 
+                              controlIntern)
+      
+    }
     
   }else if(method == "ista"){
     
@@ -198,33 +225,76 @@ gpOptimizationInternal <- function(par,
     
     if(penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")){
       
-      regularizedModel <- new(istaEnetGeneralPurpose, 
-                              weights, 
-                              controlIntern)
+      if(isCpp){
+        regularizedModel <- new(istaEnetGeneralPurposeCpp, 
+                                weights, 
+                                controlIntern)
+      }else{
+        regularizedModel <- new(istaEnetGeneralPurpose, 
+                                weights, 
+                                controlIntern)
+      }
+      
       
     }else if(penalty == "cappedL1"){
       
-      regularizedModel <- new(istaCappedL1GeneralPurpose, 
-                              weights, 
-                              controlIntern)
+      if(isCpp){
+        regularizedModel <- new(istaCappedL1GeneralPurposeCpp, 
+                                weights, 
+                                controlIntern)
+      }else{
+        regularizedModel <- new(istaCappedL1GeneralPurpose, 
+                                weights, 
+                                controlIntern)
+      }
       
     }else if(penalty == "lsp"){
       
-      regularizedModel <- new(istaLspGeneralPurpose, 
-                              weights, 
-                              controlIntern)
+      if(isCpp){
+        
+        regularizedModel <- new(istaLspGeneralPurposeCpp, 
+                                weights, 
+                                controlIntern)
+        
+      }else{
+        
+        regularizedModel <- new(istaLspGeneralPurpose, 
+                                weights, 
+                                controlIntern)
+        
+      }
       
     }else if(penalty  == "scad"){
       
-      regularizedModel <- new(istaScadGeneralPurpose, 
-                              weights, 
-                              controlIntern)
+      if(isCpp){
+        
+        regularizedModel <- new(istaScadGeneralPurposeCpp, 
+                                weights, 
+                                controlIntern)
+        
+      }else{
+        
+        regularizedModel <- new(istaScadGeneralPurpose, 
+                                weights, 
+                                controlIntern)
+        
+      }
       
     }else if(penalty == "mcp"){
       
-      regularizedModel <- new(istaMcpGeneralPurpose, 
-                              weights, 
-                              controlIntern)
+      if(isCpp){
+        
+        regularizedModel <- new(istaMcpGeneralPurposeCpp, 
+                                weights, 
+                                controlIntern)
+        
+      }else{
+        
+        regularizedModel <- new(istaMcpGeneralPurpose, 
+                                weights, 
+                                controlIntern)
+        
+      }
       
     }else{
       stop("Unknow penalty selected.")
@@ -256,8 +326,8 @@ gpOptimizationInternal <- function(par,
     
     tuningParameters <- data.frame(
       lambda = seq(0,
-                    maxLambda,
-                    length.out = tuningParameters$nLambdas),
+                   maxLambda,
+                   length.out = tuningParameters$nLambdas),
       alpha = 1
     )
     
@@ -356,7 +426,7 @@ gpOptimizationInternal <- function(par,
       sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
     fits$regM2LL[it] <- result$fit
     fits$convergence[it] <- result$convergence
-    fits$m2LL[it] <- fn(rawParameters, parameterLabels, additionalArguments)
+    if(!isCpp) fits$m2LL[it] <- fn(rawParameters, parameterLabels, additionalArguments)
     
     if(method == "glmnet" && control$saveHessian) 
       Hessians$Hessian[[it]] <- result$Hessian

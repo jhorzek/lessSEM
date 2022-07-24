@@ -120,3 +120,47 @@ noDotDotDot <- function(fn, fnName, ...){
   
   return(ret)
 }
+
+#' makePtrs
+#' 
+#' This function helps you create the pointers necessary to use the Cpp interface
+#' 
+#' @param fitFunName name of your C++ fit function (IMPORTANT: This must be the name
+#' used in C++)
+#' @param gradFunName name of your C++ gradient function (IMPORTANT: This must be the name
+#' used in C++)
+#' @export
+makePtrs <- function(fitFunName, gradFunName){
+  
+  makePtrsSyntax <- paste0(
+    '
+// INSTRUCTIONS: ADD THE FOLLOWING LINES TO YOUR C++ FUNCTIONS
+
+// IF RCPPARMADILLO IS NOT IMPORTED YET, UNCOMMENT THE FOLLOWING TWO LINES
+// // [[Rcpp::depends(RcppArmadillo)]]
+// #include <RcppArmadillo.h>
+
+// https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
+                Rcpp::List& //additional elements
+);
+typedef Rcpp::XPtr<fitFunPtr> fitFunPtr_t;
+
+typedef arma::rowvec (*gradientFunPtr)(const Rcpp::NumericVector&, //parameters
+                      Rcpp::List& //additional elements
+);
+typedef Rcpp::XPtr<gradientFunPtr> gradientFunPtr_t;
+
+// [[Rcpp::export]]
+fitFunPtr_t ', fitFunName,'Ptr() {
+        return(fitFunPtr_t(new fitFunPtr(&',fitFunName,')));
+}
+
+// [[Rcpp::export]]
+gradientFunPtr_t ', gradFunName,'Ptr() {
+        return(gradientFunPtr_t(new gradientFunPtr(&',gradFunName,')));
+}
+'
+  )
+  return(makePtrsSyntax)
+}

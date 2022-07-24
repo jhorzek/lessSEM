@@ -13,6 +13,7 @@ gpOptimizationInternal(
   penalty,
   tuningParameters,
   method,
+  isCpp = FALSE,
   control
 )
 }
