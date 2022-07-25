@@ -1,4 +1,4 @@
-test_that("testing general purpose optimization", {
+test_that("testing general purpose optimization with gr", {
   library(lessSEM)
   library(glmnet)
   library(ncvreg)
@@ -30,6 +30,14 @@ test_that("testing general purpose optimization", {
     return((.5/N)*sse)
   }
   
+  sseGrad <- function(par, y, X, N){
+    
+      gradients = (-2.0*t(X) %*% y + 2.0*t(X)%*%X%*%matrix(par,ncol = 1))
+      
+      gradients = (.5/length(y))*gradients
+      return(t(gradients))
+  }
+  
   # add intercept
   Xext <- cbind(1,X)
   
@@ -38,13 +46,15 @@ test_that("testing general purpose optimization", {
   names(b) <- paste0("b", 1:length(b))
   # names of regularized parameters
   regularized <- paste0("b",2:length(b))
-
+  
+  sseGrad(b,y,Xext,N)
   
   # optimize
   ridgePen <- gpRidge(
     par = b,
     regularized = regularized,
     fn = sseFun,
+    gr = sseGrad,
     lambdas = seq(0,1,.1),
     X = Xext,
     y = y,
@@ -91,6 +101,7 @@ test_that("testing general purpose optimization", {
     par = b, 
     regularized = regularized, 
     fn = sseFun, 
+    gr = sseGrad,
     lambdas = lambdas, 
     X = cbind(1,X),
     y = y,
@@ -117,6 +128,7 @@ test_that("testing general purpose optimization", {
   mcpFitGp <- gpMcp(par = b, 
                     regularized = regularized, 
                     fn = sseFun, 
+                    gr = sseGrad,
                     lambdas = lambdas, 
                     thetas = thetas,
                     X = cbind(1,X),
@@ -135,13 +147,14 @@ test_that("testing general purpose optimization", {
   coefs <- coef(scadFit)
   
   scadFitGp <- gpScad(par = b, 
-                     regularized = regularized, 
-                     fn = sseFun, 
-                     lambdas = lambdas, 
-                     thetas = thetas,
-                     X = cbind(1,X),
-                     y = y,
-                     N = N)
+                      regularized = regularized, 
+                      fn = sseFun, 
+                      gr = sseGrad,
+                      lambdas = lambdas, 
+                      thetas = thetas,
+                      X = cbind(1,X),
+                      y = y,
+                      N = N)
   
   testthat::expect_equal(all(abs(t(scadFitGp@parameters[,scadFitGp@parameterLabels]) -
                                    coef(scadFit)) <.001), TRUE)
@@ -149,3 +162,4 @@ test_that("testing general purpose optimization", {
   # plot(scadFit)
   # plot(scadFitGp)
 })
+

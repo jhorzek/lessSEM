@@ -41,17 +41,17 @@ $$
 \begin{array}{l|ll}
 \text{penalty} & \text{function} & \text{reference}\\
 \hline
-\text{ridge} & p( x_j) = \lambda x_j^2 & \text{(Hoerl \& Kennard, 1970)}\\
+\text{ridge} & p( x_j) = \lambda x_j^2 & \text{(Hoerl & Kennard, 1970)}\\
 \text{lasso} & p( x_j) = \lambda| x_j| & \text{(Tibshirani, 1996)}\\
 \text{adaptiveLasso} & p( x_j) = \frac{1}{w_j}\lambda| x_j| & \text{(Zou, 2006)}\\
-\text{elasticNet} & p( x_j) = \alpha\lambda|x_j| + (1-\alpha)\lambda x_j^2 & \text{(Zou \& Hastie, 2005)}\\
+\text{elasticNet} & p( x_j) = \alpha\lambda|x_j| + (1-\alpha)\lambda x_j^2 & \text{(Zou & Hastie, 2005)}\\
 \text{cappedL1} & p( x_j) = \lambda \min(| x_j|, \theta); \theta > 0 & \text{(Zhang, 2010)}\\
 \text{lsp} & p( x_j) = \lambda \log(1 + |x_j|\theta); \theta > 0 & \text{(Candès et al., 2008)} \\
 \text{scad} & p( x_j) = \begin{cases}
 \lambda |x_j| & \text{if } |x_j| \leq \lambda\\
 \frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)} & \text{if } \lambda < |x_j| \leq \lambda\theta \\
 (\theta + 1) \lambda^2/2 & \text{if } |x_j| \geq \theta\lambda\\
-\end{cases}; \theta > 2 & \text{(Fan \& Li, 2001)} \\
+\end{cases}; \theta > 2 & \text{(Fan & Li, 2001)} \\
 \text{mcp} & p( x_j) = 
 \begin{cases}
 \lambda |x_j| - x_j^2/(2\theta) & \text{if } |x_j| \leq \theta\lambda\\
@@ -65,7 +65,7 @@ $$
 The objectives of **lessSEM** are two-fold
 
 1. We wanted to test general purpose optimizers (the default in regsem 1.8.0 is solnp) 
-agains specialized optimizers (the default in lslx is a variant of GLMNET)
+against specialized optimizers (the default in lslx is a variant of GLMNET)
 2. To make the optimizers used within **lessSEM** available for other researchers
 in order to simplify the implementation of new regularized SEM
 
@@ -81,11 +81,12 @@ First, start with lavaan:
 ```{r}
 library(lavaan)
 library(lessSEM)
+set.seed(4321)
 # let's simulate data for a simple 
 # cfa with 7 observed variables
 data <- lessSEM::simulateExampleData(N = 50, 
                                      loadings = c(rep(1,4),
-                                                          rep(0,3))
+                                                  rep(0,3))
 )
 head(data)
 
@@ -120,13 +121,13 @@ table above. For instance, let's have a look at the lasso penalty:
 ```{r, eval = FALSE}
 fitLasso <- lasso(lavaanModel = lavaanModel, 
                   regularized = regularized,
-                  nLambdas = 10)
+                  nLambdas = 50)
 ```
 
 ```{r, include = FALSE}
 fitLasso <- lasso(lavaanModel = lavaanModel, 
                   regularized = regularized,
-                  nLambdas = 10)
+                  nLambdas = 50)
 ```
 
 Plot the paths to see what is going on:
@@ -137,7 +138,7 @@ plot(fitLasso)
 
 Note that the parameters are pulled towards zero as $\lambda$ increases. Note also
 that we did not specify specific values for $\lambda$ in the lasso function above.
-Instead, we only specified how many lambdas we want to have (`nLambdas=10`).
+Instead, we only specified how many $\lambda$s we want to have (`nLambdas=50`).
 If we use the lasso or adaptive lasso, **lessSEM** can automatically compute 
 which $\lambda$ is necessary to set all parameters to zero. This is currently
 not supported for any of the other penalties. 
@@ -254,7 +255,7 @@ that you already use the full information maximum likelihood method in **lavaan*
 # and 10 % missing data
 data <- lessSEM::simulateExampleData(N = 100, 
                                      loadings = c(rep(1,4),
-                                                          rep(0,3)),
+                                                  rep(0,3)),
                                      percentMissing = 10
 )
 head(data)
@@ -293,13 +294,20 @@ To check if **lessSEM** did actually use the full information maximum
 likelihood, we can compare the 2log-likelihood of **lavaan** and **lessSEM**
 when no penalty is used ($\lambda = 0$):
 
+```{r, include = FALSE}
+fitLasso <- lasso(lavaanModel = lavaanModel, 
+                  regularized = regularized,
+                  lambdas = 0)
+```
 ```{r, eval = FALSE}
 fitLasso <- lasso(lavaanModel = lavaanModel, 
                   regularized = regularized,
                   lambdas = 0)
-
+```
+```{r, eval = TRUE}
 fitLasso@fits$m2LL
 ```
+
 
 Compare this to:
 ```{r}
@@ -310,10 +318,61 @@ Compare this to:
 ## More information
 
 We provide more information in the documentation of the individual functions.
-For instance, see ?lasso for more details on the lasso penalty. If you
-are interested in the general purpose interface, have a look at ?gpLasso,
-?gpMcp, etc. To get more details on implementing the **lessSEM** optimizers in
-your own package, have a look at the vignette "The-optimizer-interface" (`vignette('The-optimizer-interface')`) and at the [lessLM](https://github.com/jhorzek/lessLM) package.
+For instance, see `?lessSEM::lasso` for more details on the lasso penalty. If you
+are interested in the general purpose interface, have a look at `?lessEM::gpLasso`,
+`?lesssEM::gpMcp`, etc. To get more details on implementing the **lessSEM** optimizers in
+your own package, have a look at the vignettes `vignette('General-Purpose-Optimization')` and 
+`vignette('The-optimizer-interface')` and at the [lessLM](https://github.com/jhorzek/lessLM) package.
+
+## Table of the most relevant functions
+
+Fitting _regularized SEM_:
+
+| function name | what it does |
+| --- | --- |
+| ridge | ridge regularization of SEM |
+| cvRidge | cross-validated ridge regularization of SEM |
+| lasso | lasso regularization of SEM |
+| cvLasso | cross-validated lasso regularization of SEM |
+| adaptiveLasso | adaptive lasso regularization of SEM |
+| cvAdaptiveLasso | cross-validated adaptive lasso regularization of SEM |
+| elasticNet | elastic net regularization of SEM |
+| cvElasticNet | cross-validated elastic net regularization of SEM |
+| cappedL1 | cappedL1 regularization of SEM |
+| cvCappedL1 | cross-validated cappedL1 regularization of SEM |
+| lsp | lsp regularization of SEM |
+| cvLsp | cross-validated lsp regularization of SEM |
+| mcp | mcp regularization of SEM |
+| cvMcp | cross-validated mcp regularization of SEM |
+| scad | scad regularization of SEM |
+| cvScad | cross-validated scad regularization of SEM |
+
+Using the optimizers in **lessSEM** for _general purpose optimization_:
+
+| function name | what it does |
+| --- | --- |
+| gpRidge | ridge regularization for general purpose optimization |
+| gpLasso | lasso regularization for general purpose optimization |
+| gpAdaptiveLasso | adaptive lasso regularization for general purpose optimization |
+| gpElasticNet | elastic net regularization for general purpose optimization |
+| gpCappedL1 | cappedL1 regularization for general purpose optimization |
+| gpLsp | lsp regularization for general purpose optimization |
+| gpMcp | mcp regularization for general purpose optimization |
+| gpScad | scad regularization for general purpose optimization |
+
+Using the optimizers in **lessSEM** for _general purpose optimization with C++ functions_:
+
+| function name | what it does |
+| --- | --- |
+| gpRidgeCpp | ridge regularization for general purpose optimization |
+| gpLassoCpp | lasso regularization for general purpose optimization |
+| gpAdaptiveLassoCpp | adaptive lasso regularization for general purpose optimization |
+| gpElasticNetCpp | elastic net regularization for general purpose optimization |
+| gpCappedL1Cpp | cappedL1 regularization for general purpose optimization |
+| gpLspCpp | lsp regularization for general purpose optimization |
+| gpMcpCpp | mcp regularization for general purpose optimization |
+| gpScadCpp | scad regularization for general purpose optimization |
+
 
 # References
 

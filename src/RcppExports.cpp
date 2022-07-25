@@ -100,11 +100,17 @@ RcppExport SEXP _rcpp_module_boot_bfgsEnet_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetEnet_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnet_cpp();
 RcppExport SEXP _rcpp_module_boot_istaCappedL1GeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaCappedL1GeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetEnetGeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_glmnetEnetGeneralPurposeCpp_cpp();
+RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaLspGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaLspGeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaMcpGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaMcpGeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaScadGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaScadGeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaLSP_cpp();
 RcppExport SEXP _rcpp_module_boot_istaMcp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaScad_cpp();
@@ -122,11 +128,17 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_glmnetEnet_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnet_cpp, 0},
     {"_rcpp_module_boot_istaEnet_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnet_cpp, 0},
     {"_rcpp_module_boot_istaCappedL1GeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaCappedL1GeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaCappedL1GeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaCappedL1GeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp, 0},
     {"_rcpp_module_boot_istaEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_glmnetEnetGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnetGeneralPurposeCpp_cpp, 0},
+    {"_rcpp_module_boot_istaEnetGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetGeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_istaLspGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaLspGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaLspGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaLspGeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_istaMcpGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcpGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaMcpGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcpGeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_istaScadGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaScadGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaScadGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaScadGeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_istaLSP_cpp", (DL_FUNC) &_rcpp_module_boot_istaLSP_cpp, 0},
     {"_rcpp_module_boot_istaMcp_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcp_cpp, 0},
     {"_rcpp_module_boot_istaScad_cpp", (DL_FUNC) &_rcpp_module_boot_istaScad_cpp, 0},

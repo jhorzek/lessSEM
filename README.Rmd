@@ -39,13 +39,13 @@ The following penalty functions are currently implemented in lessSEM:
 ![](inst/penalty_functions.png)
 
 "penalty" refers to the name of the function call in the lessSEM package 
-(e.g., lasso is called with the lasso() function). Smooth functions are called 
-with smoothLasso, smoothAdaptiveLasso, and smoothElasticNet. 
+(e.g., lasso is called with the `lasso()` function). Smooth functions are called 
+with `smoothLasso`, `smoothAdaptiveLasso`, and `smoothElasticNet`. 
 These are only implemented for the comparison of exact and approximate optimization 
 and should not be used in most cases. The best model can be selected with the 
-AIC, or BIC. If you want to use cross-validation instead, use cvLasso, cvAdaptiveLasso,
-etc. instead (see, e.g.,  ?lessSEM::cvLasso). The smooth versions are called
-cvSmoothLasso, etc.
+AIC, or BIC. If you want to use cross-validation instead, use `cvLasso`, `cvAdaptiveLasso`,
+etc. instead (see, e.g.,  `?lessSEM::cvLasso`). The smooth versions are called
+`cvSmoothLasso`, etc.
 
 Currently, lessSEM has the following optimizers:
 
@@ -54,20 +54,23 @@ Gong et al., 2013; Parikh & Boyd, 2013); optimization of cappedL1, lsp, scad,
 and mcp is based on Gong et al. (2013)
 - glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
 
-**These are also available for other packages.** There are two ways to implement them:
+**These are also available for other packages.** There are trhee ways to implement them
+which are documented in the `General-Purpose-Optimization` vignette. In short, these are:
 
 1. using the R interface: All general purpose implementations of the functions 
-are called with prefix "gp" (e.g., gpLasso, gpScad, ...). More information and 
-examples can be found in the documentation of these functions (e.g., ?lessSEM::gpLasso, 
-?lessSEM::gpAdaptiveLasso, ?lessSEM::gpElasticNet). The interface is similar to 
+are called with prefix "gp" (`gpLasso`, `gpScad`, ...). More information and 
+examples can be found in the documentation of these functions (e.g., `?lessSEM::gpLasso`, 
+`?lessSEM::gpAdaptiveLasso`, `?lessSEM::gpElasticNet`). The interface is similar to 
 the optim optimizers in R. 
+2. using Rcpp, we can pass C++ function pointers to the general purpose optimizers
+`gpLassoCpp`, `gpScadCpp`, ... (e.g., `?lessSEM::gpLassoCpp`)
 2. All optimizers are implemented as C++ header-only files in lessSEM. Thus, 
 they can be accessed from other packages using C++. The interface is similar 
 to that of the [ensmallen](https://ensmallen.org/) library. We have implemented
 a simple example for elastic net regularization of linear regressions in the 
 [lessLM](https://github.com/jhorzek/lessLM) package. You can also find more 
 details on the general design of the optimizer interface in the vignette 
-"The-optimizer-interface"
+`The-optimizer-interface`
 
 Similar to [regsem](https://github.com/Rjacobucci/regsem), lessSEM is specified 
 using a model built in [lavaan](https://github.com/yrosseel/lavaan). lessSEM 
@@ -163,16 +166,16 @@ If you want to install lessSEM from GitHub, use the following commands in R:
     
 # A more thorough introduction
 
-You will find a short introduction to regularized SEM with the **lessSEM**
+You will find a short introduction to regularized SEM with the lessSEM
 package in the vignette "lessSEM" (see 
 ``vignette('lessSEM', package = 'lessSEM')``). More information is also
-provided in the documentation of the individual functions (e.g., see ?lessSEM::scad)
+provided in the documentation of the individual functions (e.g., see `?lessSEM::scad`)
 
 # Miscellaneous
 
 You will find a short introduction to the optimizer interfaces in the vignette 
-"The-optimizer-interface" and a derivation of the scad and mcp used by the
-package in the vignette "SCAD-and-MCP".
+`The-optimizer-interface` and a derivation of the scad and mcp used by the
+package in the vignette `SCAD-and-MCP`.
 
 # References
 

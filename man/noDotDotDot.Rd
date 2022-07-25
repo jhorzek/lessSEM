@@ -4,7 +4,7 @@
 \alias{noDotDotDot}
 \title{noDotDotDot}
 \usage{
-noDotDotDot(fn, ...)
+noDotDotDot(fn, fnName, ...)
 }
 \arguments{
 \item{fn}{fit or gradient function. IMPORTANT: THE FIRST ARGUMENT TO
