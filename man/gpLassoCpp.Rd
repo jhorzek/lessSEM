@@ -194,8 +194,8 @@ l1@parameters
 #library(glmnet)
 #coef(glmnet(x = X,
 #            y = y, 
-#            lambda = l1@fits$lambda[20],
-#            intercept = FALSE,
-#            standardize = FALSE))[,1]
-#l1@parameters[20,]
+#            lambda = l1@fits$lambda[2],
+#            intercept = TRUE,
+#            standardize = FALSE))[,2]
+#l1@parameters[2,]
 }

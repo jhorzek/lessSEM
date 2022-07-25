@@ -47,15 +47,10 @@ Note that ridge regularization will not set any of the parameters to zero
 but result in a shrinkage towards zero.
 }
 \details{
-The interface is similar to that of optim. Users have to supply a vector
-with starting values (important: This vector \emph{must} have labels) and a fitting
-function. This fitting functions \emph{must} take a labeled vector with parameter
-values as first argument. The remaining arguments are passed with the additionalArguments argument.
-This is similar to optim.
-
-The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
-will be used to approximate the gradients. Supplying a gradient function
-can result in considerable speed improvements.
+The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector
+with starting values (important: This vector \emph{must} have labels), a fitting
+function, and a gradient function. These fitting functions \emph{must} take an const Rcpp::NumericVector& with parameter
+values as first argument and an Rcpp::List& as second argument
 
 Ridge regularization:
 \itemize{
@@ -92,72 +87,104 @@ Trends in Optimization, 1(3), 123–231.
 }
 \examples{
 # This example shows how to use the optimizers
-# for other objective functions. We will use
+# for C++ objective functions. We will use
 # a linear regression as an example. Note that
 # this is not a useful application of the optimizers
 # as there are specialized packages for linear regression
 # (e.g., glmnet)
 
+library(Rcpp)
 library(lessSEM)
-set.seed(123)
 
-# first, we simulate data for our
-# linear regression.
+linreg <- '
+// [[Rcpp::depends(RcppArmadillo)]]
+#include <RcppArmadillo.h>
+
+// [[Rcpp::export]]
+double fitfunction(const Rcpp::NumericVector& parameters, Rcpp::List& data){
+  // extract all required elements:
+  arma::colvec b = Rcpp::as<arma::colvec>(parameters);
+  arma::colvec y = Rcpp::as<arma::colvec>(data["y"]); // the dependent variable
+  arma::mat X = Rcpp::as<arma::mat>(data["X"]); // the design matrix
+  
+  // compute the sum of squared errors:
+    arma::mat sse = arma::trans(y-X*b)*(y-X*b);
+    
+    // other packages, such as glmnet, scale the sse with 
+    // 1/(2*N), where N is the sample size. We will do that here as well
+    
+    sse *= 1.0/(2.0 * y.n_elem);
+    
+    // note: We must return a double, but the sse is a matrix
+    // To get a double, just return the single value that is in 
+    // this matrix:
+      return(sse(0,0));
+}
+
+// [[Rcpp::export]]
+arma::rowvec gradientfunction(const Rcpp::NumericVector& parameters, Rcpp::List& data){
+  // extract all required elements:
+  arma::colvec b = Rcpp::as<arma::colvec>(parameters);
+  arma::colvec y = Rcpp::as<arma::colvec>(data["y"]); // the dependent variable
+  arma::mat X = Rcpp::as<arma::mat>(data["X"]); // the design matrix
+  
+  // note: we want to return our gradients as row-vector; therefore,
+  // we have to transpose the resulting column-vector:
+    arma::rowvec gradients = arma::trans(-2.0*X.t() * y + 2.0*X.t()*X*b);
+    
+    // other packages, such as glmnet, scale the sse with 
+    // 1/(2*N), where N is the sample size. We will do that here as well
+    
+    gradients *= (.5/y.n_rows);
+    
+    return(gradients);
+}
+
+// https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
+                Rcpp::List& //additional elements
+);
+typedef Rcpp::XPtr<fitFunPtr> fitFunPtr_t;
+
+typedef arma::rowvec (*gradientFunPtr)(const Rcpp::NumericVector&, //parameters
+                      Rcpp::List& //additional elements
+);
+typedef Rcpp::XPtr<gradientFunPtr> gradientFunPtr_t;
+
+// [[Rcpp::export]]
+fitFunPtr_t fitfunPtr() {
+        return(fitFunPtr_t(new fitFunPtr(&fitfunction)));
+}
+
+// [[Rcpp::export]]
+gradientFunPtr_t gradfunPtr() {
+        return(gradientFunPtr_t(new gradientFunPtr(&gradientfunction)));
+}
+'
+
+Rcpp::sourceCpp(code = linreg)
+
+ffp <- fitfunPtr()
+gfp <- gradfunPtr()
+
 N <- 100 # number of persons
 p <- 10 # number of predictors
 X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
-b <- c(rep(1,4),
+b <- c(rep(1,4), 
        rep(0,6)) # true regression weights
 y <- X\%*\%matrix(b,ncol = 1) + rnorm(N,0,.2)
 
-# First, we must construct a fiting function
-# which returns a single value. We will use
-# the residual sum squared as fitting function.
+data <- list("y" = y,
+             "X" = cbind(1,X))
+parameters <- rep(0, ncol(data$X))
+names(parameters) <- paste0("b", 0:(length(parameters)-1))
 
-# Let's start setting up the fitting function:
-fittingFunction <- function(par, y, X, N){
-  # par is the parameter vector
-  # y is the observed dependent variable
-  # X is the design matrix
-  # N is the sample size
-  pred <- X \%*\% matrix(par, ncol = 1) #be explicit here:
-  # we need par to be a column vector
-  sse <- sum((y - pred)^2)
-  # we scale with .5/N to get the same results as glmnet
-  return((.5/N)*sse)
-}
+r <- gpRidgeCpp(par = parameters, 
+                 regularized = paste0("b", 1:(length(b)-1)),
+                 fn = ffp, 
+                 gr = gfp, 
+                 lambdas = seq(0,1,.1), 
+                 additionalArguments = data)
 
-# let's define the starting values:
-b <- c(solve(t(X)\%*\%X)\%*\%t(X)\%*\%y) # we will use the lm estimates
-names(b) <- paste0("b", 1:length(b))
-# names of regularized parameters
-regularized <- paste0("b",1:p)
-
-# optimize
-ridgePen <- gpRidge(
-  par = b,
-  regularized = regularized,
-  fn = fittingFunction,
-  lambdas = seq(0,1,.01),
-  X = X,
-  y = y,
-  N = N
-)
-plot(ridgePen)
-
-# for comparison:
-# fittingFunction <- function(par, y, X, N, lambda){
-#   pred <- X \%*\% matrix(par, ncol = 1) 
-#   sse <- sum((y - pred)^2)
-#   return((.5/N)*sse + lambda * sum(par^2))
-# }
-# 
-# optim(par = b, 
-#       fn = fittingFunction, 
-#       y = y,
-#       X = X,
-#       N = N,
-#       lambda =  ridgePen@fits$lambda[20], 
-#       method = "BFGS")$par
-# ridgePen@parameters[20,]
+r@parameters
 }

@@ -321,7 +321,8 @@ We provide more information in the documentation of the individual functions.
 For instance, see `?lessSEM::lasso` for more details on the lasso penalty. If you
 are interested in the general purpose interface, have a look at `?lessEM::gpLasso`,
 `?lesssEM::gpMcp`, etc. To get more details on implementing the **lessSEM** optimizers in
-your own package, have a look at the vignette "The-optimizer-interface" (`vignette('The-optimizer-interface')`) and at the [lessLM](https://github.com/jhorzek/lessLM) package.
+your own package, have a look at the vignettes `vignette('General-Purpose-Optimization')` and 
+`vignette('The-optimizer-interface')` and at the [lessLM](https://github.com/jhorzek/lessLM) package.
 
 ## Table of the most relevant functions
 
@@ -358,6 +359,19 @@ Using the optimizers in **lessSEM** for _general purpose optimization_:
 | gpLsp | lsp regularization for general purpose optimization |
 | gpMcp | mcp regularization for general purpose optimization |
 | gpScad | scad regularization for general purpose optimization |
+
+Using the optimizers in **lessSEM** for _general purpose optimization with C++ functions_:
+
+| function name | what it does |
+| --- | --- |
+| gpRidgeCpp | ridge regularization for general purpose optimization |
+| gpLassoCpp | lasso regularization for general purpose optimization |
+| gpAdaptiveLassoCpp | adaptive lasso regularization for general purpose optimization |
+| gpElasticNetCpp | elastic net regularization for general purpose optimization |
+| gpCappedL1Cpp | cappedL1 regularization for general purpose optimization |
+| gpLspCpp | lsp regularization for general purpose optimization |
+| gpMcpCpp | mcp regularization for general purpose optimization |
+| gpScadCpp | scad regularization for general purpose optimization |
 
 
 # References

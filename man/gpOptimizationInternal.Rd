@@ -10,10 +10,10 @@ gpOptimizationInternal(
   fn,
   gr = NULL,
   additionalArguments,
+  isCpp = FALSE,
   penalty,
   tuningParameters,
   method,
-  isCpp = FALSE,
   control
 )
 }
@@ -31,6 +31,8 @@ as input and returns the gradients of the objective function.
 If set to NULL, numDeriv will be used to approximate the gradients}
 
 \item{additionalArguments}{additional argument passed to fn and gr}
+
+\item{isCpp}{boolean: are fn and gr C++ function pointers?}
 
 \item{penalty}{string: name of the penalty used in the model}
 
