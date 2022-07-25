@@ -54,7 +54,7 @@ Gong et al., 2013; Parikh & Boyd, 2013); optimization of cappedL1, lsp, scad,
 and mcp is based on Gong et al. (2013)
 - glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
 
-**These are also available for other packages.** There are trhee ways to implement them
+**These are also available for other packages.** There are three ways to implement them
 which are documented in the `General-Purpose-Optimization` vignette. In short, these are:
 
 1. using the R interface: All general purpose implementations of the functions 
