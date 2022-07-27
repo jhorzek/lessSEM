@@ -323,7 +323,7 @@ regularizeSEMInternal <- function(lavaanModel,
   
   #### print progress ####
   if(control$verbose == 0){
-    progressbar = txtProgressBar(min = 0, 
+    progressbar = utils::txtProgressBar(min = 0, 
                                  max = nrow(tuningParameters), 
                                  initial = 0, 
                                  style = 3)
@@ -333,7 +333,7 @@ regularizeSEMInternal <- function(lavaanModel,
   
   for(it in 1:nrow(tuningParameters)){
     if(control$verbose == 0){
-      setTxtProgressBar(progressbar,it)
+      utils::setTxtProgressBar(progressbar,it)
     }else{
       cat(paste0("\nIteration [", it, "/", nrow(tuningParameters),"]\n"))
     }
