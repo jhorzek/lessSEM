@@ -6,6 +6,9 @@
 \usage{
 \S4method{AIC}{Rcpp_SEMCpp}(object)
 }
+\arguments{
+\item{object}{object of class Rcpp_SEMCpp}
+}
 \value{
 AIC values
 }

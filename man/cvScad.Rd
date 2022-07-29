@@ -35,16 +35,12 @@ it belongs to. See ?lessSEM::createSubsets for an example of how this matrix sho
 \item{standardize}{Standardizing your data prior to the analysis can undermine the cross-
 validation. Set standardize=TRUE to automatically standardize the data.}
 
+\item{returnSubsetParameters}{set to TRUE to return the parameters for each training set}
+
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with
-the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
-for more details.}
-
-\item{returnSubsets}{set to TRUE to return the parameters for each training set}
-
-\item{method}{which optimizer should be used? Currently implemented are ista and glmnet.
-With ista, the control argument can be used to switch to related procedures (currently gist).}
+the controlIsta function. See ?controlIsta}
 }
 \value{
 model of class cvRegularizedSEM

@@ -337,7 +337,7 @@ ridgeBfgs <- function(lavaanModel,
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
-#' in [0,1]. 0 = ridge, 1 = lasso.
+#' between 0 and 1. 0 = ridge, 1 = lasso.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param tau parameters below threshold tau will be seen as zeroed
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.

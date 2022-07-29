@@ -24,6 +24,7 @@ setClass(Class = "gpRegularized",
 )
 
 #' show
+#' 
 #' @param object object of class gpRegularized
 #' @export
 setMethod("show", "gpRegularized", function (object) {
@@ -39,6 +40,7 @@ setMethod("show", "gpRegularized", function (object) {
 })
 
 #' summary
+#' 
 #' @param object object of class gpRegularized
 #' @export
 setMethod("summary", "gpRegularized", function (object) {

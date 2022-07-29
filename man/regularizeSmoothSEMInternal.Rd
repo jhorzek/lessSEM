@@ -30,6 +30,8 @@ model.}
 
 \item{tau}{parameters below threshold tau will be seen as zeroed}
 
+\item{method}{optimizer used. Currently only "bfgs" is supported.}
+
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with

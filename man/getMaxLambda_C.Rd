@@ -23,6 +23,8 @@ getMaxLambda_C(
 \item{weights}{weights given to each parameter in the penalty function}
 
 \item{N}{sample size}
+
+\item{approx}{When set to TRUE, .Machine$double.xmax^(.01) is used instead of .Machine$double.xmax^(.05)}
 }
 \value{
 first lambda value which sets all regularized parameters to zero (plus some tolerance)

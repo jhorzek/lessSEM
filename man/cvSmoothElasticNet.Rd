@@ -20,24 +20,31 @@ cvSmoothElasticNet(
 \arguments{
 \item{lavaanModel}{model of class lavaan}
 
+\item{regularized}{vector with names of parameters which are to be regularized.
+If you are unsure what these parameters are called, use
+getLavaanParameters(model) with your lavaan model object}
+
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
 
 \item{alphas}{numeric vector with values of the tuning parameter alpha. Must be
-in \link{0,1}. 0 = ridge, 1 = lasso.}
+between 0 and 1. 0 = ridge, 1 = lasso.}
 
 \item{epsilon}{epsilon > 0; controls the smoothness of the approximation. Larger values = smoother}
+
+\item{k}{the number of cross-validation folds. Alternatively, you can pass
+a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.}
+
+\item{standardize}{Standardizing your data prior to the analysis can undermine the cross-
+validation. Set standardize=TRUE to automatically standardize the data.}
+
+\item{returnSubsetParameters}{set to TRUE to return the parameters for each training set}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with
-the controlBFGS function. See ?controlBFGS for more details.}
-
-\item{weights}{labeled vector with weights for each of the parameters in the
-model. If you are unsure what these parameters are called, use
-getLavaanParameters(model) with your lavaan model object}
-}
-\value{
-model of class cvRegularizedSEM
+the controlBFGS function. See ?controlBFGS
+for more details.}
 }
 \description{
 Implements cross-validated  smooth elastic net regularization for structural equation models.

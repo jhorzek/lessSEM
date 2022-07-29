@@ -19,7 +19,7 @@
 #' 1 = gist, as presented by Gong et al. (2013) (Equation 3)
 #' @param sigma sigma in (0,1) is used by the gist convergence criterion. larger
 #'  simga enforce larger improvement in fit
-#' @param stepSizeIn how should step sizes be carried forward from iteration to iteration? 
+#' @param stepSizeInheritance how should step sizes be carried forward from iteration to iteration? 
 #' 0 = resets the step size to L0 in each iteration
 #' 1 = takes the previous step size as initial value for the next iteration
 #' 3 = Barzilai-Borwein procedure 
@@ -130,7 +130,6 @@ controlGlmnet <- function(
 #' @returns object of class controlBFGS
 #' @export
 controlBFGS <- function(
-    addMeans = TRUE,
     startingValues = "est",
     initialHessian = ifelse(all(startingValues=="est"),"compute",1),
     saveHessian = FALSE,

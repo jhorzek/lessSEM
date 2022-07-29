@@ -20,9 +20,9 @@ enum status {
   fitted
 };
 
-//' SEMCpp
+//' @name SEMCpp
 //' 
-//' internal SEM representation
+//' @title internal SEM representation
 //' 
 //' @field new Creates a new SEMCpp.
 //' @field A Matrix with directed effects

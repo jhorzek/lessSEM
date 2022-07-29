@@ -5,7 +5,6 @@
 \title{controlBFGS}
 \usage{
 controlBFGS(
-  addMeans = TRUE,
   startingValues = "est",
   initialHessian = ifelse(all(startingValues == "est"), "compute", 1),
   saveHessian = FALSE,

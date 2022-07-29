@@ -27,6 +27,15 @@ getLavaanParameters(model) with your lavaan model object}
 
 \item{epsilon}{epsilon > 0; controls the smoothness of the approximation. Larger values = smoother}
 
+\item{k}{the number of cross-validation folds. Alternatively, you can pass
+a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.}
+
+\item{standardize}{Standardizing your data prior to the analysis can undermine the cross-
+validation. Set standardize=TRUE to automatically standardize the data.}
+
+\item{returnSubsetParameters}{set to TRUE to return the parameters for each training set}
+
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with

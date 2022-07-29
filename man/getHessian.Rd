@@ -25,5 +25,5 @@ to each parameter
 returns the Hessian of a model of class Rcpp_SEMCpp. This is the internal 
 model representation. Models of this class
 can be generated with the SEMFromLavaan-function. The function is adapted 
-from \link[lavaan]{lav_model_hessian}.
+from lavaan::lav_model_hessian.
 }

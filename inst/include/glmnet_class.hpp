@@ -223,6 +223,7 @@ inline arma::rowvec glmnetLineSearch(
   gradients_k.fill(arma::datum::nan);
   arma::rowvec parameters_k(gradients_kMinus1.n_rows);
   parameters_k.fill(arma::datum::nan);
+  Rcpp::NumericVector randomNumber;
   
   double fit_k; // new fit value of differentiable part
   double p_k; // new penalty value
@@ -250,7 +251,9 @@ inline arma::rowvec glmnetLineSearch(
   }else{
     currentStepSize = stepSize;
   }
-  if(rand() % 100 < 25){
+  
+  randomNumber = Rcpp::runif(1,0.0,1.0);
+  if(randomNumber.at(0) < 0.25){
     Rcpp::NumericVector tmp = Rcpp::runif(1,.5,.99);
     currentStepSize = tmp.at(0);
   }

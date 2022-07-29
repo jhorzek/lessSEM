@@ -6,6 +6,9 @@
 \usage{
 \S4method{show}{cvRegularizedSEM}(object)
 }
+\arguments{
+\item{object}{object of class cvRegularizedSEM}
+}
 \description{
 show
 }

@@ -6,6 +6,9 @@
 \usage{
 \S4method{show}{Rcpp_SEMCpp}(object)
 }
+\arguments{
+\item{object}{object of class Rcpp_SEMCpp}
+}
 \description{
 show
 }

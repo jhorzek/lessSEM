@@ -6,6 +6,7 @@
 #' @param rawParameters labeled vector with starting values
 #' @param weights weights given to each parameter in the penalty function
 #' @param N sample size
+#' @param approx When set to TRUE, .Machine$double.xmax^(.01) is used instead of .Machine$double.xmax^(.05)
 #' @returns first lambda value which sets all regularized parameters to zero (plus some tolerance)
 #' @export
 getMaxLambda_C <- function(regularizedModel, 

@@ -19,6 +19,8 @@ gpElasticNetCpp(
 \arguments{
 \item{par}{labeled vector with starting values}
 
+\item{regularized}{vector with names of parameters which are to be regularized.}
+
 \item{fn}{R function which takes the parameters AND their labels
 as input and returns the fit value (a single value)}
 
@@ -29,7 +31,7 @@ If set to NULL, numDeriv will be used to approximate the gradients}
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
 
 \item{alphas}{numeric vector with values of the tuning parameter alpha. Must be
-in \link{0,1}. 0 = ridge, 1 = lasso.}
+between 0 and 1. 0 = ridge, 1 = lasso.}
 
 \item{additionalArguments}{list with additional arguments passed to fn and gr}
 
@@ -39,13 +41,6 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}
-
-\item{weights}{labeled vector with weights for each of the parameters in the
-model.}
-
-\item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
-compute the first lambda value which sets all regularized parameters to zero.
-It will then generate nLambda values between 0 and the computed lambda.}
 }
 \value{
 Object of class gpRegularized
@@ -60,7 +55,7 @@ to lasso regularization. In between, elastic net is a compromise between the shr
 the lasso and the ridge penalty.
 }
 \details{
-The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector
+The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector
 with starting values (important: This vector \emph{must} have labels), a fitting
 function, and a gradient function. These fitting functions \emph{must} take an const Rcpp::NumericVector& with parameter
 values as first argument and an Rcpp::List& as second argument

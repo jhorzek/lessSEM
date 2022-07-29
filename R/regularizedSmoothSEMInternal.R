@@ -13,6 +13,7 @@
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param tau parameters below threshold tau will be seen as zeroed
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method optimizer used. Currently only "bfgs" is supported.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @returns regularizedSEM

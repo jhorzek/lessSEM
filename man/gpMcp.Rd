@@ -27,9 +27,7 @@ If set to NULL, numDeriv will be used to approximate the gradients}
 
 \item{...}{additional arguments passed to fn and gr}
 
-\item{regularized}{vector with names of parameters which are to be regularized.
-If you are unsure what these parameters are called, use
-getLavaanParameters(model) with your lavaan model object}
+\item{regularized}{vector with names of parameters which are to be regularized.}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
 

@@ -24,7 +24,7 @@ getLavaanParameters(model) with your lavaan model object}
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
 
 \item{alphas}{numeric vector with values of the tuning parameter alpha. Must be
-in \link{0,1}. 0 = ridge, 1 = lasso.}
+between 0 and 1. 0 = ridge, 1 = lasso.}
 
 \item{method}{which optimizer should be used? Currently implemented are ista
 and glmnet. With ista, the control argument can be used to switch to related procedures

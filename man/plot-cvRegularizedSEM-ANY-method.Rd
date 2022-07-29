@@ -7,7 +7,7 @@
 \S4method{plot}{cvRegularizedSEM,ANY}(x)
 }
 \arguments{
-\item{x}{object of class regularizedSEM}
+\item{x}{object of class cvRegularizedSEM}
 }
 \description{
 plots the regularized and unregularized parameters as well as the cross-validation fits for all levels of lambda

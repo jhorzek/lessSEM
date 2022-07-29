@@ -5,7 +5,7 @@
 #' \deqn{p( x_j) = \lambda |x_j|}
 #' Lasso regularization will set parameters to zero if \eqn{\lambda} is large enough
 #' 
-#' The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector 
+#' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels), a fitting
 #' function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
 #' values as first argument and an Rcpp::List& as second argument
@@ -223,7 +223,7 @@ gpLassoCpp <- function(par,
 #' \deqn{p( x_j) = p( x_j) = \frac{1}{w_j}\lambda| x_j|}
 #' Adaptive lasso regularization will set parameters to zero if \eqn{\lambda} is large enough.
 #' 
-#' The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector 
+#' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels), a fitting
 #' function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
 #' values as first argument and an Rcpp::List& as second argument
@@ -448,7 +448,7 @@ gpAdaptiveLassoCpp <- function(par,
 #' Note that ridge regularization will not set any of the parameters to zero
 #' but result in a shrinkage towards zero. 
 #' 
-#' The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector 
+#' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels), a fitting
 #' function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
 #' values as first argument and an Rcpp::List& as second argument
@@ -649,7 +649,7 @@ gpRidgeCpp <- function(par,
 #' to lasso regularization. In between, elastic net is a compromise between the shrinkage of
 #' the lasso and the ridge penalty. 
 #' 
-#' The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector 
+#' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels), a fitting
 #' function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
 #' values as first argument and an Rcpp::List& as second argument
@@ -684,19 +684,15 @@ gpRidgeCpp <- function(par,
 #' Trends in Optimization, 1(3), 123–231.
 #'  
 #' @param par labeled vector with starting values
-#' @param weights labeled vector with weights for each of the parameters in the 
-#' model.
+#' @param regularized vector with names of parameters which are to be regularized.
 #' @param fn R function which takes the parameters AND their labels 
 #' as input and returns the fit value (a single value)
 #' @param gr R function which takes the parameters AND their labels
 #' as input and returns the gradients of the objective function. 
 #' If set to NULL, numDeriv will be used to approximate the gradients 
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
-#' compute the first lambda value which sets all regularized parameters to zero.
-#' It will then generate nLambda values between 0 and the computed lambda.
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
-#' in [0,1]. 0 = ridge, 1 = lasso.
+#' between 0 and 1. 0 = ridge, 1 = lasso.
 #' @param additionalArguments list with additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -856,7 +852,7 @@ gpElasticNetCpp <- function(par,
 #' above \eqn{\theta}. As adding a constant to the fitting function will not change its
 #' minimum, larger parameters can stay unregularized while smaller ones are set to zero.
 #' 
-#' The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector 
+#' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels), a fitting
 #' function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
 #' values as first argument and an Rcpp::List& as second argument
@@ -1054,7 +1050,7 @@ gpCappedL1Cpp <- function(par,
 #' \deqn{p( x_j) = \lambda \log(1 + |x_j|\theta)}
 #' where \eqn{\theta > 0}. 
 #' 
-#' The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector 
+#' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels), a fitting
 #' function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
 #' values as first argument and an Rcpp::List& as second argument 
@@ -1095,7 +1091,22 @@ gpCappedL1Cpp <- function(par,
 #' # as there are specialized packages for linear regression
 #' # (e.g., glmnet)
 #' 
-#' @examples 
+#' @param par labeled vector with starting values
+#' @param fn R function which takes the parameters AND their labels 
+#' as input and returns the fit value (a single value)
+#' @param gr R function which takes the parameters AND their labels
+#' as input and returns the gradients of the objective function. 
+#' If set to NULL, numDeriv will be used to approximate the gradients 
+#' @param additionalArguments list with additional arguments passed to fn and gr
+#' @param regularized vector with names of parameters which are to be regularized.
+#' If you are unsure what these parameters are called, use 
+#' getLavaanParameters(model) with your lavaan model object
+#' @param lambdas numeric vector: values for the tuning parameter lambda
+#' @param thetas numeric vector: values for the tuning parameter theta
+#' @param control used to control the optimizer. This element is generated with 
+#' the controlIsta (see ?controlIsta)
+#' @returns Object of class gpRegularized
+#' @examples  
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1243,7 +1254,7 @@ gpLspCpp <- function(par,
 #' \end{cases}}
 #' where \eqn{\theta > 0}. 
 #' 
-#' The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector 
+#' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels), a fitting
 #' function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
 #' values as first argument and an Rcpp::List& as second argument
@@ -1444,7 +1455,7 @@ gpMcpCpp <- function(par,
 #' \end{cases}}
 #' where \eqn{\theta > 2}.  
 #' 
-#' The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector 
+#' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels), a fitting
 #' function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
 #' values as first argument and an Rcpp::List& as second argument

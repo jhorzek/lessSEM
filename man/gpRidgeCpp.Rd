@@ -50,7 +50,7 @@ Note that ridge regularization will not set any of the parameters to zero
 but result in a shrinkage towards zero.
 }
 \details{
-The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector
+The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector
 with starting values (important: This vector \emph{must} have labels), a fitting
 function, and a gradient function. These fitting functions \emph{must} take an const Rcpp::NumericVector& with parameter
 values as first argument and an Rcpp::List& as second argument

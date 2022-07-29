@@ -626,19 +626,16 @@ gpRidge <- function(par,
 #' Trends in Optimization, 1(3), 123–231.
 #'  
 #' @param par labeled vector with starting values
-#' @param weights labeled vector with weights for each of the parameters in the 
-#' model.
+#' @param regularized vector with names of parameters which are to be regularized.
 #' @param fn R function which takes the parameters AND their labels 
 #' as input and returns the fit value (a single value)
 #' @param gr R function which takes the parameters AND their labels
 #' as input and returns the gradients of the objective function. 
 #' If set to NULL, numDeriv will be used to approximate the gradients 
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
-#' compute the first lambda value which sets all regularized parameters to zero.
-#' It will then generate nLambda values between 0 and the computed lambda.
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
-#' in [0,1]. 0 = ridge, 1 = lasso.
+#' between 0 and 1. 0 = ridge, 1 = lasso.
+#' @param regularized vector with names of parameters which are to be regularized.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -825,8 +822,6 @@ gpElasticNet <- function(par,
 #' If set to NULL, numDeriv will be used to approximate the gradients 
 #' @param ... additional arguments passed to fn and gr
 #' @param regularized vector with names of parameters which are to be regularized.
-#' If you are unsure what these parameters are called, use 
-#' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas parameters whose absolute value is above this threshold will be penalized with
 #' a constant (theta)
@@ -968,8 +963,6 @@ gpCappedL1 <- function(par,
 #' 
 #' Implements lsp regularization for general purpose optimization problems.
 #' The penalty function is given by:
-#' \deqn{p( x_j) = \lambda \log(1 + |x_j|\theta)}
-#' where \eqn{\theta > 0}. 
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
@@ -1017,6 +1010,20 @@ gpCappedL1 <- function(par,
 #' # as there are specialized packages for linear regression
 #' # (e.g., glmnet)
 #' 
+#' @param par labeled vector with starting values
+#' @param fn R function which takes the parameters AND their labels 
+#' as input and returns the fit value (a single value)
+#' @param gr R function which takes the parameters AND their labels
+#' as input and returns the gradients of the objective function. 
+#' If set to NULL, numDeriv will be used to approximate the gradients 
+#' @param ... additional arguments passed to fn and gr
+#' @param regularized vector with names of parameters which are to be regularized.
+#' @param lambdas numeric vector: values for the tuning parameter lambda
+#' @param thetas numeric vector: values for the tuning parameter theta
+#' @param control used to control the optimizer. This element is generated with 
+#' the controlIsta (see ?controlIsta)
+#' @returns Object of class gpRegularized
+#' @examples 
 #' library(lessSEM)
 #' set.seed(123)
 #' 
@@ -1187,8 +1194,6 @@ gpLsp <- function(par,
 #' If set to NULL, numDeriv will be used to approximate the gradients 
 #' @param ... additional arguments passed to fn and gr
 #' @param regularized vector with names of parameters which are to be regularized.
-#' If you are unsure what these parameters are called, use 
-#' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas numeric vector: values for the tuning parameter theta
 #' @param control used to control the optimizer. This element is generated with 
@@ -1367,8 +1372,6 @@ gpMcp <- function(par,
 #' If set to NULL, numDeriv will be used to approximate the gradients 
 #' @param ... additional arguments passed to fn and gr
 #' @param regularized vector with names of parameters which are to be regularized.
-#' If you are unsure what these parameters are called, use 
-#' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas numeric vector: values for the tuning parameter theta
 #' @param control used to control the optimizer. This element is generated with 

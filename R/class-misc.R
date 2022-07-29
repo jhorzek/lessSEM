@@ -1,84 +1,84 @@
 #' @name Rcpp_istaScadGeneralPurpose
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaScadGeneralPurpose
-NULL
+setClass("Rcpp_istaScadGeneralPurpose")
 
 #' @name Rcpp_bfgsEnet
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::bfgsEnet
-NULL
+setClass("Rcpp_bfgsEnet")
 
 #' @name Rcpp_istaEnet
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaEnet
-NULL
+setClass("Rcpp_istaEnet")
 
 #' @name Rcpp_istaCappedL1GeneralPurposeCpp
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaCappedL1GeneralPurposeCpp
-NULL
+setClass("Rcpp_istaCappedL1GeneralPurposeCpp")
 
 #' @name Rcpp_istaCappedL1GeneralPurpose
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaCappedL1GeneralPurpose
-NULL
+setClass("Rcpp_istaCappedL1GeneralPurpose")
 
 #' @name Rcpp_istaEnetGeneralPurposeCpp
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaEnetGeneralPurposeCpp
-NULL
+setClass("Rcpp_istaEnetGeneralPurposeCpp")
 
 #' @name Rcpp_istaLspGeneralPurpose
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaLspGeneralPurpose
-NULL
+setClass("Rcpp_istaLspGeneralPurpose")
 
 #' @name Rcpp_istaEnetGeneralPurpose
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaEnetGeneralPurpose
-NULL
+setClass("Rcpp_istaEnetGeneralPurpose")
 
 #' @name Rcpp_glmnetEnet
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::glmnetEnet
-NULL
+setClass("Rcpp_glmnetEnet")
 
 #' @name Rcpp_istaMcp
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaMcp
-NULL
+setClass("Rcpp_istaMcp")
 
 #' @name Rcpp_istaLSP
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaLSP
-NULL
+setClass("Rcpp_istaLSP")
 
 #' @name Rcpp_istaScad
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaScad
-NULL
+setClass("Rcpp_istaScad")
 
 #' @name Rcpp_istaScadGeneralPurposeCpp
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaScadGeneralPurposeCpp
-NULL
+setClass("Rcpp_istaScadGeneralPurposeCpp")
 
 #' @name Rcpp_istaMcpGeneralPurposeCpp
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaMcpGeneralPurposeCpp
-NULL
+setClass("Rcpp_istaMcpGeneralPurposeCpp")
 
 #' @name Rcpp_istaLspGeneralPurposeCpp
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaLspGeneralPurposeCpp
-NULL
+setClass("Rcpp_istaLspGeneralPurposeCpp")
 
 #' @name Rcpp_istaCappedL1
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::istaCappedL1
-NULL
+setClass("Rcpp_istaCappedL1")
 
 #' @name Rcpp_glmnetEnetGeneralPurpose
 #' 
 #' @title Wrapper for C++ module. See ?lessSEM::glmnetEnetGeneralPurpose
-NULL
+setClass("Rcpp_glmnetEnetGeneralPurpose")

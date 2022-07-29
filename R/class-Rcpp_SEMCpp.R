@@ -6,6 +6,8 @@
 setClass("Rcpp_SEMCpp")
 
 #' show
+#' 
+#' @param object object of class Rcpp_SEMCpp
 #' @export
 setMethod("show", "Rcpp_SEMCpp", function (object) {
   cat("Internal C++ model representation of lessSEM\n")
@@ -17,6 +19,7 @@ setMethod("show", "Rcpp_SEMCpp", function (object) {
 
 #' logLik
 #' 
+#' @param object object of class Rcpp_SEMCpp
 #' @returns log-likelihood of the model
 #' @export
 setMethod("logLik", "Rcpp_SEMCpp", function (object) {
@@ -34,6 +37,8 @@ setMethod("logLik", "Rcpp_SEMCpp", function (object) {
 })
 
 #' coef
+#' 
+#' @param object object of class Rcpp_SEMCpp
 #' @returns all coefficients of the model in transformed form
 #' @export
 setMethod("coef", "Rcpp_SEMCpp", function (object) {
@@ -41,6 +46,8 @@ setMethod("coef", "Rcpp_SEMCpp", function (object) {
 })
 
 #' AIC
+#' 
+#' @param object object of class Rcpp_SEMCpp
 #' @returns AIC values
 #' @export
 setMethod("AIC", "Rcpp_SEMCpp", function (object) {
@@ -53,6 +60,8 @@ setMethod("AIC", "Rcpp_SEMCpp", function (object) {
 })
 
 #' BIC
+#' 
+#' @param object object of class Rcpp_SEMCpp
 #' @returns BIC values
 #' @export
 setMethod("BIC", "Rcpp_SEMCpp", function (object) {

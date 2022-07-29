@@ -15,6 +15,32 @@ gpLspCpp(
   control = controlIsta()
 )
 }
+\arguments{
+\item{par}{labeled vector with starting values}
+
+\item{fn}{R function which takes the parameters AND their labels 
+as input and returns the fit value (a single value)}
+
+\item{gr}{R function which takes the parameters AND their labels
+as input and returns the gradients of the objective function. 
+If set to NULL, numDeriv will be used to approximate the gradients}
+
+\item{additionalArguments}{list with additional arguments passed to fn and gr}
+
+\item{regularized}{vector with names of parameters which are to be regularized.
+If you are unsure what these parameters are called, use 
+getLavaanParameters(model) with your lavaan model object}
+
+\item{lambdas}{numeric vector: values for the tuning parameter lambda}
+
+\item{thetas}{numeric vector: values for the tuning parameter theta}
+
+\item{control}{used to control the optimizer. This element is generated with 
+the controlIsta (see ?controlIsta)}
+}
+\value{
+Object of class gpRegularized
+}
 \description{
 Implements lsp regularization for general purpose optimization problems with C++ functions.
 The penalty function is given by:
@@ -22,7 +48,7 @@ The penalty function is given by:
 where \eqn{\theta > 0}.
 }
 \details{
-The interface is inspired by optim, but a bit more restrictuve. Users have to supply a vector 
+The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 with starting values (important: This vector _must_ have labels), a fitting
 function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
 values as first argument and an Rcpp::List& as second argument 
@@ -64,6 +90,7 @@ Trends in Optimization, 1(3), 123–231.
 # (e.g., glmnet)
 }
 \examples{
+ 
 # This example shows how to use the optimizers
 # for C++ objective functions. We will use
 # a linear regression as an example. Note that

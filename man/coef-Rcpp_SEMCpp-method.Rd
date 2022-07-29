@@ -6,6 +6,9 @@
 \usage{
 \S4method{coef}{Rcpp_SEMCpp}(object)
 }
+\arguments{
+\item{object}{object of class Rcpp_SEMCpp}
+}
 \value{
 all coefficients of the model in transformed form
 }

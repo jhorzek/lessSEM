@@ -15,11 +15,33 @@ gpLsp(
   control = controlIsta()
 )
 }
+\arguments{
+\item{par}{labeled vector with starting values}
+
+\item{fn}{R function which takes the parameters AND their labels 
+as input and returns the fit value (a single value)}
+
+\item{gr}{R function which takes the parameters AND their labels
+as input and returns the gradients of the objective function. 
+If set to NULL, numDeriv will be used to approximate the gradients}
+
+\item{...}{additional arguments passed to fn and gr}
+
+\item{regularized}{vector with names of parameters which are to be regularized.}
+
+\item{lambdas}{numeric vector: values for the tuning parameter lambda}
+
+\item{thetas}{numeric vector: values for the tuning parameter theta}
+
+\item{control}{used to control the optimizer. This element is generated with 
+the controlIsta (see ?controlIsta)}
+}
+\value{
+Object of class gpRegularized
+}
 \description{
 Implements lsp regularization for general purpose optimization problems.
 The penalty function is given by:
-\deqn{p( x_j) = \lambda \log(1 + |x_j|\theta)}
-where \eqn{\theta > 0}.
 }
 \details{
 The interface is similar to that of optim. Users have to supply a vector 
@@ -67,7 +89,8 @@ Trends in Optimization, 1(3), 123–231.
 # this is not a useful application of the optimizers
 # as there are specialized packages for linear regression
 # (e.g., glmnet)
-
+}
+\examples{
 library(lessSEM)
 set.seed(123)
 
@@ -78,7 +101,7 @@ p <- 10 # number of predictors
 X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
 b <- c(rep(1,4),
        rep(0,6)) # true regression weights
-y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
+y <- X\%*\%matrix(b,ncol = 1) + rnorm(N,0,.2)
 
 # First, we must construct a fiting function
 # which returns a single value. We will use
@@ -90,7 +113,7 @@ fittingFunction <- function(par, y, X, N){
   # y is the observed dependent variable
   # X is the design matrix
   # N is the sample size
-  pred <- X %*% matrix(par, ncol = 1) #be explicit here:
+  pred <- X \%*\% matrix(par, ncol = 1) #be explicit here:
   # we need par to be a column vector
   sse <- sum((y - pred)^2)
   # we scale with .5/N to get the same results as glmnet
@@ -98,7 +121,7 @@ fittingFunction <- function(par, y, X, N){
 }
 
 # let's define the starting values:
-b <- c(solve(t(X)%*%X)%*%t(X)%*%y) # we will use the lm estimates
+b <- c(solve(t(X)\%*\%X)\%*\%t(X)\%*\%y) # we will use the lm estimates
 names(b) <- paste0("b", 1:length(b))
 # names of regularized parameters
 regularized <- paste0("b",1:p)
@@ -121,7 +144,7 @@ lspPen <- gpLsp(
 # for comparison
 
 fittingFunction <- function(par, y, X, N, lambda, theta){
-  pred <- X %*% matrix(par, ncol = 1)
+  pred <- X \%*\% matrix(par, ncol = 1)
   sse <- sum((y - pred)^2)
   smoothAbs <- sqrt(par^2 + 1e-8)
   pen <- lambda * log(1.0 + smoothAbs / theta)

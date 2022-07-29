@@ -10,6 +10,8 @@ noDotDotDot(fn, fnName, ...)
 \item{fn}{fit or gradient function. IMPORTANT: THE FIRST ARGUMENT TO
 THE FUNCTION MUST BE THE PARAMETER VECTOR}
 
+\item{fnName}{name of the function fn}
+
 \item{...}{additional arguments}
 }
 \value{

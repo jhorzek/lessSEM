@@ -6,6 +6,9 @@
 \usage{
 \S4method{logLik}{Rcpp_SEMCpp}(object)
 }
+\arguments{
+\item{object}{object of class Rcpp_SEMCpp}
+}
 \value{
 log-likelihood of the model
 }

@@ -26,6 +26,8 @@ setClass(Class = "cvRegularizedSEM",
 )
 
 #' show
+#' 
+#' @param object object of class cvRegularizedSEM
 #' @export
 setMethod("show", "cvRegularizedSEM", function (object) {
   bestFit <- unlist(object@parameters)
@@ -38,6 +40,7 @@ setMethod("show", "cvRegularizedSEM", function (object) {
 
 #' summary
 #' 
+#' @param object object of class cvRegularizedSEM
 #' @export
 setMethod("summary", "cvRegularizedSEM", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
@@ -61,7 +64,7 @@ setMethod("summary", "cvRegularizedSEM", function (object) {
 #' 
 #' Returns the parameter estimates of an cvRegularizedSEM
 #'  
-#' @param object object of class regularizedSEM
+#' @param object object of class cvRegularizedSEM
 #' @returns the parameter estimates of an cvRegularizedSEM
 #' @export
 setMethod("coef", "cvRegularizedSEM", function (object) {
@@ -72,7 +75,7 @@ setMethod("coef", "cvRegularizedSEM", function (object) {
 #' 
 #' plots the regularized and unregularized parameters as well as the cross-validation fits for all levels of lambda
 #' 
-#' @param x object of class regularizedSEM
+#' @param x object of class cvRegularizedSEM
 #' @export
 setMethod("plot", "cvRegularizedSEM", function (x) {
   

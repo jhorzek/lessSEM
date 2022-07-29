@@ -385,7 +385,7 @@ inline lessSEM::fitResults ista(
       
       randomNumber = Rcpp::runif(1,0.0,1.0);
       if((control_.stepSizeIn == stochasticBarzilaiBorwein) && 
-         (randomNumber(0,0) < 0.25)) {
+         (randomNumber.at(0) < 0.25)) {
         if(control_.verbose == -99) Rcpp::Rcout << "Resetting L_kMinus1 randomly " << std::endl;
         L_kMinus1 = control_.L0;// reset with 25% probability
       }

@@ -30,7 +30,7 @@ compute the first lambda value which sets all regularized parameters to zero.
 It will then generate nLambda values between 0 and the computed lambda.}
 
 \item{alphas}{numeric vector with values of the tuning parameter alpha. Must be
-in \link{0,1}. 0 = ridge, 1 = lasso.}
+between 0 and 1. 0 = ridge, 1 = lasso.}
 
 \item{epsilon}{epsilon > 0; controls the smoothness of the approximation. Larger values = smoother}
 
