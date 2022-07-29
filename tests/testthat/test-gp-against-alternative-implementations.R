@@ -148,4 +148,30 @@ test_that("testing general purpose optimization", {
   
   # plot(scadFit)
   # plot(scadFitGp)
+  
+  # test automatic lambda
+  b[] <- rnorm(length(b))
+  lassoPen <- gpLasso(
+    par = b, 
+    regularized = regularized, 
+    fn = sseFun, 
+    nLambdas = 10, 
+    X = cbind(1,X),
+    y = y,
+    N = N
+  )
+  
+  testthat::expect_equal(any(apply(lassoPen@parameters[,regularized],1,function(x) all(x==0))), TRUE)
+  
+  lassoPen <- gpAdaptiveLasso(
+    par = b, 
+    regularized = regularized, 
+    fn = sseFun, 
+    nLambdas = 10, 
+    X = cbind(1,X),
+    y = y,
+    N = N
+  )
+  
+  testthat::expect_equal(any(apply(lassoPen@parameters[,regularized],1,function(x) all(x==0))), TRUE)
 })
