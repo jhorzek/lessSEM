@@ -3,7 +3,6 @@
 .RData
 .Ruserdata
 inst/doc
-doc
 Meta
 src/*.o
 src/*.so
@@ -12,5 +11,6 @@ src/*/*.o
 src/*/*.so
 src/*/*.dll
 src/Makevars
-/doc/
+/doc/*
+!/doc/*.html
 /Meta/

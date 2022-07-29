@@ -75,8 +75,8 @@ gpGetMaxLambda <- function(regularizedModel,
   )
   
   sparseParameters <- result$rawParameters
-  gradients <- gradientFunction(par,
-                                names(par),
+  gradients <- gradientFunction(sparseParameters,
+                                names(sparseParameters),
                                 userSuppliedArguments)
   
   # define maxLambda as the maximal gradient of the regularized parameters

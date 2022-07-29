@@ -230,7 +230,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   
   Hessians <- list(NULL)
   
-  progressbar = txtProgressBar(min = 0, 
+  progressbar = utils::txtProgressBar(min = 0, 
                                max = nrow(tuningParameters), 
                                initial = 0, 
                                style = 3)
@@ -239,7 +239,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   
   for(i in 1:nrow(tuningParameters)){
     
-    setTxtProgressBar(progressbar,i)
+    utils::setTxtProgressBar(progressbar,i)
     
     currentTuningParameters <- tuningParameters[i,,drop = FALSE]
     

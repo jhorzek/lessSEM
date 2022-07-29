@@ -52,12 +52,14 @@
 #' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
-#' compute the first lambda value which sets all regularized parameters to zero.
-#' It will then generate nLambda values between 0 and the computed lambda.
-#' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsets set to TRUE to return the parameters for each training set
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
@@ -196,12 +198,14 @@ cvLasso <- function(lavaanModel,
 #' the default weights will be used: the inverse of the absolute values of
 #' the unregularized parameter estimates
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
-#' compute the first lambda value which sets all regularized parameters to zero.
-#' It will then generate nLambda values between 0 and the computed lambda.
-#' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsets set to TRUE to return the parameters for each training set
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
@@ -338,9 +342,14 @@ cvAdaptiveLasso <- function(lavaanModel,
 #' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsets set to TRUE to return the parameters for each training set
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
@@ -476,12 +485,18 @@ cvRidge <- function(lavaanModel,
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
 #' in [0,1]. 0 = ridge, 1 = lasso.
-#' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsets set to TRUE to return the parameters for each training set
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta() and controlGlmnet() functions.
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -616,9 +631,18 @@ cvElasticNet <- function(lavaanModel,
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas parameters whose absolute value is above this threshold will be penalized with
 #' a constant (theta)
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsets set to TRUE to return the parameters for each training set
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -748,9 +772,18 @@ cvCappedL1 <- function(lavaanModel,
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas parameters whose absolute value is above this threshold will be penalized with
 #' a constant (theta)
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsets set to TRUE to return the parameters for each training set
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -882,9 +915,18 @@ cvLsp <- function(lavaanModel,
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas parameters whose absolute value is above this threshold will be penalized with
 #' a constant (theta)
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsets set to TRUE to return the parameters for each training set
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -1018,9 +1060,18 @@ cvMcp <- function(lavaanModel,
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas parameters whose absolute value is above this threshold will be penalized with
 #' a constant (theta)
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsets set to TRUE to return the parameters for each training set
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @md
 #' @examples 
 #' library(lessSEM)

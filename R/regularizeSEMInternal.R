@@ -279,12 +279,21 @@ regularizeSEMInternal <- function(lavaanModel,
                                 rawParameters = rawParameters,
                                 weights = weights,
                                 N = N)
-    tuningParameters <- data.frame(
-      lambda = seq(0,
-                   maxLambda,
-                   length.out = tuningParameters$nLambdas),
-      alpha = 1
-    )
+    if(tuningParameters$reverse){
+      tuningParameters <- data.frame(
+        lambda = rev(seq(0,
+                         maxLambda,
+                         length.out = tuningParameters$nLambdas)),
+        alpha = 1
+      )
+    }else{
+      tuningParameters <- data.frame(
+        lambda = seq(0,
+                     maxLambda,
+                     length.out = tuningParameters$nLambdas),
+        alpha = 1
+      )
+    }
     
     inputArguments$tuningParameters = tuningParameters
     
@@ -323,17 +332,17 @@ regularizeSEMInternal <- function(lavaanModel,
   
   #### print progress ####
   if(control$verbose == 0){
-    progressbar = txtProgressBar(min = 0, 
-                                 max = nrow(tuningParameters), 
-                                 initial = 0, 
-                                 style = 3)
+    progressbar = utils::txtProgressBar(min = 0, 
+                                        max = nrow(tuningParameters), 
+                                        initial = 0, 
+                                        style = 3)
   }
   
   #### Iterate over all tuning parameter combinations and fit models ####
   
   for(it in 1:nrow(tuningParameters)){
     if(control$verbose == 0){
-      setTxtProgressBar(progressbar,it)
+      utils::setTxtProgressBar(progressbar,it)
     }else{
       cat(paste0("\nIteration [", it, "/", nrow(tuningParameters),"]\n"))
     }

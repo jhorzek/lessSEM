@@ -26,8 +26,9 @@ test_that("testing smooth lasso", {
   # regularize 
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   rsem <- lasso(lavaanModel = modelFit, 
-                        regularized = regularizedLavaan,
-                        nLambdas = 30)
+                regularized = regularizedLavaan,
+                reverse = FALSE,
+                nLambdas = 30)
   
   lambdas <- rsem@fits$lambda 
   

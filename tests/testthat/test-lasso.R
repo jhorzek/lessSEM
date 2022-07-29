@@ -101,5 +101,15 @@ test_that("testing elasticNet-lasso-c", {
   testthat::expect_equal(all(round(AIC(rsemGlmnet)$AIC - (AICs))==0), TRUE)
   testthat::expect_equal(all(round(BIC(rsemGlmnet)$BIC - (BICs))==0), TRUE)
   
+  # set automatic lambda:
+  rsem2 <- lessSEM::lasso(lavaanModel = modelFit, 
+                                  regularized = paste0("f=~y",6:ncol(y)),
+                                  nLambdas = 10)
+  testthat::expect_equal(all(apply(rsem2@parameters[,paste0("f=~y",6:ncol(y))] == 0,2,sum) > 0), TRUE)
   
+  rsem2 <- lessSEM::lasso(lavaanModel = modelFit, 
+                                  regularized = paste0("f=~y",6:ncol(y)),
+                                  reverse = FALSE,
+                                  nLambdas = 10)
+  testthat::expect_equal(all(apply(rsem2@parameters[,paste0("f=~y",6:ncol(y))] == 0,2,sum) > 0), TRUE)
 })

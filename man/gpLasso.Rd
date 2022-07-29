@@ -11,6 +11,7 @@ gpLasso(
   gr = NULL,
   lambdas = NULL,
   nLambdas = NULL,
+  reverse = TRUE,
   ...,
   method = "ista",
   control = controlIsta()
@@ -33,6 +34,10 @@ to approximate the gradients}
 \item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
 compute the first lambda value which sets all regularized parameters to zero.
 It will then generate nLambda values between 0 and the computed lambda.}
+
+\item{reverse}{if set to TRUE and nLambdas is used, lessSEM will start with the
+largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
+the smallest lambda and gradually increase it.}
 
 \item{...}{additional arguments passed to fn and gr}
 

@@ -90,18 +90,10 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 # names of the regularized parameters:
 regularized = paste0("l", 6:15)
 
-# define adaptive lasso weights:
-# We use the inverse of the absolute unregularized parameters
-# (this is the default in adaptiveLasso and can also specified
-# by setting weights = NULL)
-weights <- getLavaanParameters(lavaanModel)
-weights[] <- 0
-weights[regularized] <- 1
-
 regsem <- smoothElasticNet(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
-  weights = weights,
+  regularized = regularized,
   epsilon = 1e-10,
   tau = 1e-4,
   lambdas = seq(0,1,length.out = 50),

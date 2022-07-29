@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>A short introduction to regularized SEM with lessSEM</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">A short introduction to regularized SEM
+with lessSEM</h1>
+
+
+
+<div id="regularized-structural-equation-modeling" class="section level2">
+<h2>Regularized Structural Equation Modeling</h2>
+<p>Regularized structural equation modeling (REGSEM) has been proposed
+by Jacobucci et al. (2016) and Huang et al. (2017). The objective is to
+reduce overfitting in small samples and to allow for more flexibility.
+The general idea is to regularize some parameters towards zero. To this
+end, a penalty function <span class="math inline">\(p(\pmb\theta)\)</span> is added to the vanilla
+objective function. In lessSEM, this objective function is given by the
+full information maximum likelihood function <span class="math inline">\(F_{\text{ML}}(\pmb\theta)\)</span>. The new
+objective function is defined as:</p>
+<p><span class="math display">\[F_{\text{REGSEM},\lambda}(\pmb\theta) =
+F_{\text{ML}}(\pmb\theta)+ \lambda N p(\pmb\theta)\]</span></p>
+<ul>
+<li><span class="math inline">\(F_{\text{ML}}(\pmb\theta)\)</span> wants
+all parameters to be close to the ordinary maximum likelihood
+estimates</li>
+<li><span class="math inline">\(p(\pmb\theta)\)</span> wants regularized
+parameters to be close to zero</li>
+<li><span class="math inline">\(\lambda\)</span> allows us to fine tune
+which of the two forces mentioned above gets more influence on the final
+parameter estimates</li>
+<li><span class="math inline">\(N\)</span> is the sample size. Scaling
+with <span class="math inline">\(N\)</span> is done to stay consistent
+with results returned by <strong>regsem</strong> and
+<strong>lslx</strong>.</li>
+</ul>
+<p>There are many different penalty functions which could be used. In
+<strong>lessSEM</strong>, we have implemented the following
+functions:</p>
+<p><span class="math display">\[
+\begin{array}{l|ll}
+\text{penalty} &amp; \text{function} &amp; \text{reference}\\
+\hline
+\text{ridge} &amp; p( x_j) = \lambda x_j^2 &amp; \text{(Hoerl &amp;
+Kennard, 1970)}\\
+\text{lasso} &amp; p( x_j) = \lambda| x_j| &amp; \text{(Tibshirani,
+1996)}\\
+\text{adaptiveLasso} &amp; p( x_j) = \frac{1}{w_j}\lambda| x_j| &amp;
+\text{(Zou, 2006)}\\
+\text{elasticNet} &amp; p( x_j) = \alpha\lambda|x_j| + (1-\alpha)\lambda
+x_j^2 &amp; \text{(Zou &amp; Hastie, 2005)}\\
+\text{cappedL1} &amp; p( x_j) = \lambda \min(| x_j|, \theta); \theta
+&gt; 0 &amp; \text{(Zhang, 2010)}\\
+\text{lsp} &amp; p( x_j) = \lambda \log(1 + |x_j|\theta); \theta &gt; 0
+&amp; \text{(Candès et al., 2008)} \\
+\text{scad} &amp; p( x_j) = \begin{cases}
+\lambda |x_j| &amp; \text{if } |x_j| \leq \lambda\\
+\frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)} &amp;
+\text{if } \lambda &lt; |x_j| \leq \lambda\theta \\
+(\theta + 1) \lambda^2/2 &amp; \text{if } |x_j| \geq \theta\lambda\\
+\end{cases}; \theta &gt; 2 &amp; \text{(Fan &amp; Li, 2001)} \\
+\text{mcp} &amp; p( x_j) =
+\begin{cases}
+\lambda |x_j| - x_j^2/(2\theta) &amp; \text{if } |x_j| \leq
+\theta\lambda\\
+\theta\lambda^2/2 &amp; \text{if } |x_j| &gt; \lambda\theta
+\end{cases}; \theta &gt; 0 &amp; \text{(Zhang, 2010)}
+\end{array}
+\]</span></p>
+</div>
+<div id="objectives" class="section level2">
+<h2>Objectives</h2>
+<p>The objectives of <strong>lessSEM</strong> are two-fold</p>
+<ol style="list-style-type: decimal">
+<li>We wanted to test general purpose optimizers (the default in regsem
+1.8.0 is solnp) against specialized optimizers (the default in lslx is a
+variant of GLMNET)</li>
+<li>To make the optimizers used within <strong>lessSEM</strong>
+available for other researchers in order to simplify the implementation
+of new regularized SEM</li>
+</ol>
+</div>
+<div id="regularizing-sem" class="section level2">
+<h2>Regularizing SEM</h2>
+<p><strong>lessSEM</strong> is heavily inspired by the
+<strong>regsem</strong> package. It also builds on
+<strong>lavaan</strong> to set up the model.</p>
+<div id="setting-up-a-model" class="section level3">
+<h3>Setting up a model</h3>
+<p>First, start with lavaan:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lavaan)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; This is lavaan 0.6-12</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lavaan is FREE software! Please report any bugs.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lessSEM)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4321</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># let&#39;s simulate data for a simple </span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># cfa with 7 observed variables</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> lessSEM<span class="sc">::</span><span class="fu">simulateExampleData</span>(<span class="at">N =</span> <span class="dv">50</span>, </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">loadings =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>,<span class="dv">4</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                                                  <span class="fu">rep</span>(<span class="dv">0</span>,<span class="dv">3</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              y1         y2         y3         y4          y5         y6</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1,] -0.1737175 -0.1970204  1.1888412  1.8520403  0.16257957  1.8825526</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2,] -1.5179940  0.9029781 -0.1726986 -0.3596920 -0.02092956 -0.5798953</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3,]  0.6136418  0.2578986 -0.1359237  0.7703602  0.23502463  0.2001872</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4,] -0.5920933  0.2157830  1.6784758  1.8568433 -0.60458482  0.2219578</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [5,]  0.0763996 -1.1442382 -2.8122156  0.4899892  0.03453494  2.0457604</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [6,]  2.2504896  2.9742206  0.4353705  1.2338364  0.04693253 -0.6438847</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              y7</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1,]  1.1383999</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2,]  0.9020861</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3,]  0.7986506</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4,]  0.4736751</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [5,] -2.6721417</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [6,] -1.1386235</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co"># we assume a single factor structure</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>lavaanSyntax <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="st">      f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + l6*y6 + l7*y7 </span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="st">      f ~~ 1*f</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="st">      &quot;</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co"># estimate the model with lavaan</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>lavaanModel <span class="ot">&lt;-</span> <span class="fu">cfa</span>(lavaanSyntax, </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> data)</span></code></pre></div>
+<p>Next, decide which parameters should be regularized. Let’s go with
+l5-l7. In <strong>lessSEM</strong>, we always use the parameter labels
+to specify which parameters should be regularized!</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>regularized <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;l5&quot;</span>, <span class="st">&quot;l6&quot;</span>, <span class="st">&quot;l7&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># tip: we can use paste to make this easier:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>regularized <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;l&quot;</span>, <span class="dv">5</span><span class="sc">:</span><span class="dv">7</span>)</span></code></pre></div>
+<p>Finally, we set up the regularized model. To this end, we must first
+decide which penalty function we want to use. If we want to shrink
+parameters without setting them to zero, we can use ridge
+regularization. Otherwise, we must use any of the other penalty
+functions mentioned above. In <strong>lessSEM</strong>, there is a
+dedicated function for each of these penalties. The names of these
+functions are identical to the “penalty” column in the table above. For
+instance, let’s have a look at the lasso penalty:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fitLasso <span class="ot">&lt;-</span> <span class="fu">lasso</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">regularized =</span> regularized,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">nLambdas =</span> <span class="dv">50</span>)</span></code></pre></div>
+<p>Plot the paths to see what is going on:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fitLasso)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAIAAACb4TnXAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAgAElEQVR4nO2deVwTR//HZ3NAEhIODZeK4AGCAgICghwqHiiX4kXVPtVSjypetbbifdQq9ab2UbFWqxaPtlKhqODFfSmiqCBGQatyhHBEAoQkJPn9sY/5UcgFuSCZ9x+8NjO7M59d8snMzu58BxEKhQACgagGjKYFQCDaDDQYBKJCoMEgEBUCDQaBqBBoMAhEhUCDQSAqRNsMdu7cOeTf4HC4oUOHLlmypLKyUg0CXF1d586d27NjHRwcPv/8c+Xq8fPzCw0NFZsVFxfX6VpZWlpOnz79wYMHytWgdG7durVjxw5Nq5ALnKYFqIRly5bZ2dmh22w2+9GjR2fOnMnPz3/48KG+vr5mtUlh8ODBZmZmaq40KipqyJAhAAA+n//q1av4+HhfX9+ioqJRo0apWYn8ZGVlHT16dNeuXZoWIhvtNNi8efMmTZrUMSUqKur48ePp6emBgYGaUiWFpqYmQ0PD1NRU9Vc9f/58Hx8f0cdFixb5+voeOHDg119/lb8QVL+cO/N4PBwOhyBIt3QqhW7pVAra1kWUxJQpUwAA5eXlopTHjx8HBwebmZmZmprOnTuXRqN13P/atWve3t4mJiaTJ09+/PixpaXloUOH0CxbW9sVK1Z03BmPx//www9i6z179qynp6eRkRGVSp08eXJubq4oy8PD46uvvrp165anp2dUVBQAwMnJCe0i0ul0pAve3t7yKD9x4sSYMWOMjIzGjx+flpbW3Qvl4+Njamr6/PnzHuiXvr+3t/eKFSuWLFlCIpHIZPKkSZMqKipKS0snT55sbGxsY2MTFxfXUYmk0/Tz89uzZ09zczOCIKJ/ipRr0lUng8FYsWKFjY0NiUQaNWrUyZMnu3uV5EdXDMZgMAAAgwYNQj9mZmZ6eXkxGIzNmzevX78+Pz/fy8vr1atXaO6ff/45e/ZsKpW6Z88eKpXq6+vb2NjYg0pjYmIiIyNtbGwOHDiwZMmSioqK6dOnNzQ0iHYoLS1dsGCBn5/fokWLOh5obGyc3IGDBw8CABwdHWUq37Fjx8qVK42NjXfu3Dl8+PCgoCCRVeSkpaWFyWQaGxv3QL/M/c+fP5+dnR0XF7dz5868vLyAgICJEyeOGzfup59+MjAwWLlypUitlNM8ffp0ZGQkkUgsLCz89NNPZV6Trjpnzpx5+fLl0NDQ77//nkqlrlix4o8//ujWVeoGQu0C7djcuXNHlMJms7OysoYMGeLm5sblctFENzc3T0/P9vZ29GN1dbWxsfGCBQuEQiGfz7ezs5s6dapAIEBzFy5cCAA4ePAg+nH48OFffvllx0pxOFxMTAy67eLiMmfOHHR77Nixtra2olpycnI6anN3dwcApKWlicpxdHRcvHhxpzNis9nOzs62trYsFku68urqaiKRGBYWxufz0dw9e/YAAEJCQsReK/SXOzs7G/3I5/NpNNqMGTMAAEeOHOmBfun7e3l5GRgYVFZWoh8jIiIAAMeOHUM/JiQkAAB+++039KOU0xQKhVu3biWTyaJ6pe/cSee7d+9EJygUCplM5siRIzdu3Cj2EimOdt6DTZ48uVOKm5vbvXv38Hg8AKC6urqoqOjMmTNYLBbNtbCwmD59OtqhKikpodFoe/bsEd0kLFu2LD4+vgcyMjMzMRiMqJa3b98CANra2kQ72NnZTZgwQXoha9euffHiRV5eHplMlq48LS2NzWZv2rQJg/lfx2T16tXfffed9PJ9fX07pcyfP3/NmjU90C9zfw8PjwEDBqDb48aNu3LlSnh4OPoRvQ9Ed5Z+mp2QZ+eOOvX19REEuXbtWnh4uLW1tZGRUUlJifRLpAjaabCOo4hcLrewsDAhIWHbtm0//vgjAODly5cAgMjIyMjIyI5HofarqKgAAAwfPlyUPmzYsJ7J0NPTu3v3bkpKSllZGY1GQ+vtiI2NjfQSLl++fOrUqWPHjrm6uspUjnaK0J4kiqGhobW1tfQqRKOIAAADAwO0NeiZfpn7k8lk0TbqB7QvKvqIIv00OyHPzh11mpqa7tq1a+fOnUOHDvXw8AgICJg/f76Tk1PXkpWCdhqs6yhiREREXFzcDz/8QCQSCQQCAODEiRMeHh5dj+VyuQCAjmNcHf/3YhEIBGLTv/nmm4MHD/r7+48fP37+/PlmZmboWIsIEokkpdhXr14tW7Zs5syZq1atQlOkK8fhxPw3pVcBuowiKqJf5v5yIv00e7BzJ53btm375JNPrl69evv27UOHDsXExBw8eHD9+vU9kCoT7TRYV7y8vH7//ffa2lpra+uhQ4cCABAEGTNmjGiHW7duoRtoe1VeXu7i4oKmoG1aR4QdJtG9f/9erMEaGhoOHz68Y8eOnTt3oimlpaXyC+ZwOPPmzTMxMTlz5owoUbpytCEqKSkZO3YsmsLj8SoqKkRDO92iu/oVPN+OSD9NRXYGADQ2NlZVVdna2kZHR0dHR9fU1MyYMWPbtm3r1q0Tda2ViK6MIqLPl5uamgAAVCrVx8cnNjaWyWSiuY8ePQoKCrp79y4AYNSoUYMGDer4tf755587FdWx83P27FmxNZaXlwsEAtEtBwAgKSlJfsHr169/+vTppUuXTExMRInSlQcEBJBIJHS4Bc09deoUeso9oLv6FTzfjkg/TRTROcqzc0cKCgocHR1v3ryJfrSwsPDw8MBgMELVzDzWlRbMwMAAAPDPP/+gve19+/ZNmTLF19f3s88+w+PxsbGxVCoVvbPX19fft2/ff/7zn1mzZgUGBmZnZ5eVlYEOHTA/P7+TJ0+uXbvW398/Ozv72LFjYt8OGTVqlLm5+ffff9/c3Gxubn79+vXs7GwAQFJS0pgxYywsLKSovXHjxvHjx0NDQ1ksVsenz1OmTJGi3MzMbMOGDbt37w4MDAwLC3v+/PnZs2d7/EJGd/Urcr5dkXKaAAADA4OWlpZffvnF39/f1tZW+s6d8PHxGThwYGRk5OrVqy0tLXNyci5durR06VKZNwI9REWjk5qi6zA9SlFREQDAzc1NlFJYWDh16tT+/fubm5vPmTOHRqN13P/ixYvOzs79+/f/5JNPnj17BgA4c+YMmvXhw4fFixdTqVQAAPrvtLe3FztM/+DBA19fXzKZPHz48LVr17JYrEWLFpHJZHQw2t3dfebMmR0rFQ3Tx8TEiP1ntbW1yVT+3//+183NjUKh+Pr6pqamfvnll3IO03elu/ql7+/l5dVRyU8//QQAaG5uRj/W1dUBAE6fPi3PP+iff/4ZO3YsgUA4fvy4zJ276nz27FlYWJi5uTmRSHRwcNi3bx+Hw5F0ERQEEcKYHP+Gz+efPn3a1dVVNJh28+bNoKCggoICUQpKY2MjHo/vODIGgXQCGkwMnp6edDr9ypUrTk5ONBpt8eLFFAoF7fBAIN1CVwY5usXly5cHDBjg7e1NJpPd3NzMzc0vX76saVGQPglswSTy/v17BoMxfPhwCoWiaS2Qvgo0GASiQmAXEQJRIdBgEIgKgQaDQFQINBgEokKgwSAQFQINBoGoEGgwCESFaNXb9OgLo10hkUhEIrG+vl7B8g0NDXs8+0MEhULBYDAfPnzoDWJMTEy4XG5LS4sihWAwGBKJ1NzcrEghCIL079+fxWJxOBxFytHT08NgMB3jFPQAPB5vZGTEZDLb29vlr1dsQDjYgkEgKgQaDAJRIdBgEIgKgQaDQFQINBgEokKgwSAQFQINBoGoEF0xWJNiT1cgkJ6hEwarbW11PHHi9JMnmhYC0Tl0wmBmJNIsB4fNWVlXyso0rQWiW2jVq1JSODx16pu6uq/S0kxJpIDBgzUtB6Ir6EQLBgDAIMiJKVN8Bw1afPPmg5oaTcuB6Aq6YjAAgB4W+0tgoK2JyX+uX69Q+F1bCEQedMhgAACKnt7l0FCKnt7cxMTa1lZNy4FoP7plMACAKZH454wZbXz+nMTED3DsHqJitCouoqSpRFgsFofDdcx9Wls75eJFZzOzvyMi9OVeVgOPx/N4PAVFoisvKqUcxQvR09MTCATyz3oSC4IgWCxWwUIAAPr6+u3t7Xw+X5FCMBgMgiCKF4LH49EVveU8RCgUoksBdkKrDCZpSiWRSCQSiR2XuwcAZLx7Nz85OWjo0FNTp2I6rGcpBQqFwmKxFBRJoVAQBFHKxE3FxRgbG/N4vF4y4bJfv37Nzc29ZMKloaEhk8mU36h6enpiI0Br1TC99B+LTrn+gwYdmzRpxe3bVAJhn7+/UqqQswQEUc7vmrIKUbAc0VI9WiNGdHi3WjCx6VplsO4yy9aW2da2MTPT3MBgXYcFSCEQZaHTBgMARDo5vW9u3pufb0YiLXBw0LQciLah6wYDAGzz8qK3tHydnm5KIk2xtta0HIhWoXPD9F1BEORoQID/oEFfpKQUwpc8IEoFGgwAAPAYzK/TpztSqQuvX6c1NmpaDkR7gAb7H0Qc7rfg4P5E4tykpErFRpwhEBHQYP9PPwLhj7AwAMAnf//NhC95QJQBNNi/GEgmXwwJqWpuXnTjBkextwEgEAAN1pVR/fufCwoqrKn58tYtvha95gLRCNBgYvAdOPD0tGk3X7/emJGhaS2Qvg00mHimDxkS4+9/rqTkUGGhprVA+jDwQbNEFjs6VjY3/1BQYE4ifTpypKblQPok0GDS2Dx2LL2l5ZuMDCqROG3IEE3LgfQ9YBdRGgiCHAkICLSxWZqaml9drWk5kL4HNJgMsAhycupUZ1PThcnJT2prNS0H0seABpMNAYu9EBxsYWAw48qVdwrPcYToFKo1WElJyerVqxctWnT69GmBQCBPrvyJ6qQfgXAlNBRBkLlJSVXwRSqI3KjQYHw+/9ChQ0uXLo2Li3v58mVmZqbMXPkT1c8gCiVlwYIWHm/GX3+9h+0YRD5UaLDi4mIqlers7EwgEEJDQ9PT02Xmyp+oEez69UsMD+cKBGF//fWPwkE1ILqACofpa2trrays0G0rKysGgyEzV/5ElLa2tuzsbHTbxsbG3NxcrBIsFgsA0NfXV/CMMBiMg5nZzYiI4N9/D792bZe/P1a+aDkd0dPTQxBEwdAuaDlcLlfBQgh0Op/P71Z0qsrm5sp/N+BKiSqFIAgej+fz+WqLKtXM49W2tAjEvQ2HQRAMFivg8zvl/jFzppR6xaar0GAsFotIJKLbRCKxUxwlsbnyJ6Iwmczo6Gh0e9GiRatXr5aiR2zQn+5CoVCcKZTMyMiAc+cir19XvEBIH4JEImElBPmT9PuiQoORyWQ6nY5us9lsMpksM1f+RBRTU9PExER0m0KhNEqYK0kgEAgEApPJVPyM0OBkxgDkLlxY06PRDhKJhMFgFAxyBgAwMDBQMNwaAIBCofB4PJlBztLevj1SWPiexbLv12/+yJFuZmb/ykYQfX19jmKR0gCCUMhkdltbu2LBHnF4PCIh7GQzj3ehpCT1zRuhUDiKSh1vZeVEpYqN2IfFYgkEArutTfDvllBKsD0cDqfusG3m5uaiAYmqqqpO/TexufInomCx2IEDB4o+1tXViVWChtRSsO+BliMqBA+A1b9/MuSEQqFgMBjFQ+MbGho2db+D2gkTY2Mul9uCk/Y1eMVkbsnMdLew+O/kyeMGDOi6g7LiIvbv35/FYqkoLmLCy5fbsrNZXO43Hh7z7e0HSP3f4fF4IyMjJpPZqV2S8hWS1LKpcJBj9OjR1dXVFRUVAoEgJSXF/2PsQRqNxmazxebKnwhRD+0Cwao7d0xJpAvBwWLd1ft5/eHD3KSk5bdujTY1zVmw4Gt3d+nuUi4qbMGwWGx0dHRsbCyHw/H09Jw4cSKavnHjxr179zo4OHTNFXuIpHIgauDHoqJHtbUJM2aQ8XhNa+k2XIHgx4cPjz582I9AODt9esjQoerXoFWhsyV1EUkkEpFIlBRYW34MDQ2VEvIag8F8UHj9JKWIMTEx4XK5ku7lSurrp/7xR6Sj43e+vlIK6Z1dxLyqqm8yMl42Nn46cuTOceMoenryFyKpiyi9XkNDw67p8G16iHh4AsHau3cHUyhbvL01raV7MFpbN9679+eLFy5mZrfnznU2NdWgGGgwiHgO3L9fUl+fPGsWQe7VZzSOQCj89enTHVlZAqFwn7//546Oci7roTqgwSBieEinH3v0aJWr6xgJz+57IaX19RvS0x/U1Myxt9/p7W1OImlaEQDQYJCucPj8dffujTAx+cbDQ9Na5KKFx9t///6pJ0+sKJS/Zs2aPGSIgssXKRFoMEhnvsvLK2cyb86Zo9cXOoepb95sysysaWlZ6eLyracn5eNLP70EaDDIvyiorv75yZNNY8eO1ujYgDy8Y7E2Z2WlvH7tN2jQ72Fhw42NNa1IDNBgkP+ntb191Z07TlRqlKurprVIgycQxBUXH7h/n4THH588eY6dHaLpwQxJQINB/p9t2dk1LS0XQ0LwEt4N7w3cr6nZkJb2orHxPyNHbvX2NlZ4koRKgQaD/I97b99eKCn5ztfX1sRE01rE09DWtjs39+Lz56Oo1OuzZrlbWGhakWygwSAAAPCBw1mfluZpabnU2VnTWsQgFAqvvHixIyeHy+fv9vVd4uSE68VtbEegwSAAALAxM7Oxre1aeLjGn8x25UVDwzcZGXlVVSFDh+7197c0MNC0om4ADQYBNyoqrtJoRyZOtBH3Np0GaePzDz14cPzxY3MS6WJISF9c4BcaTNepY7O/Tk+fOHjwwl62Bvy9t2+/zcioam5e4eKywcODKHXSWq+lT4qGKJGVN2/yhcIfAwJ6z0h3dUvL1qyspPLysZaWF4KCHPr317SingMNptOcKy5OfvXq1NSpFr3jxoYvFJ568iSmoACPwcQGBMy3t+89tu8Z0GC6S3VLy4bbt0NtbcNtbTWtBQAACiorlyUmPmUw5js47Bg3rh+BoGlFSkCrDIaXMOsWDaklKVd+MBiMUgpBQ5RpVoxQKFyfno7DYI5Pn67gY2UMBqOgmA8czr78/J8fPx5qYnJt9uzxH6P09QAsFqv4vwmHw6F/5W8/JcXk0CqD4STcB6MGk5QrPwiCKKUQZZWjSCGnHj++8+bNn3PnmpPJCsZXRBAEg8H0TIxQKLz8/Pnm9PRWHm/f5MkrXF0RxUKjowZT8PKibsFisfIbTANxEdUPm80Wm462GJJy5UcpheBwOAwGo1kxrz982Jqe/om9/cwRI7hcroJi0BasB4W8YjK/SU/PrqycNmRIjL//aBsbFovVppqoUt0Cj8cTCAQOh9OtkAFEcS/ya5XBIPLAFwpX3bnTj0j83s9PUxo4fP6RwsJjRUVmBgbng4KmDxnS1wczJAENpnP899GjBzU1V8LCDLsTB0aJpL17tzEj4x2LtczZ+VtPT4M+GK9KfqDBdIsXDQ37799f4uw8UYGBhB5Db23dnZv7+4sXLmZmp6ZOdekUIVgbgQbTIdoFglV371oaGGzx8lJz1Xyh8JenT9EHXEcDAhb0/QdccgINpkPsv3//CYORFB6u5l7Zo9raDenpTxmMCHv7XT4+2vGAS06gwXSFIjr92KNHa9zcxlpaqq3SJi53b37+2WfPbE1MEsPDvftm8G1FgAbTCdr4/FV376o5UNRVGm17Tg6Ly900dmyUq2tvniWtOqDBdILdubn/NDXdnjtXPYGiXjGZGzMyMt+/n2pjE+Pvb6WMldn6KNBg2k9+dfUvT59uHjt2pOpfS+/4gOvc9OlBmlhvoVcBDablsLjclbdvjzE3X+Xmpuq6RA+4lo8e/a2nJ6lvzuBSLvASaDlbs7Pr2Ow/wsJ6sJy0/FQ3N69PTb326pWHhcWv06eroansK0CDaTO33ry5+Pz5Pn//YSoLyskXCn8uLo4pKMAiyOGJExc6OPTCqB4aBBpMa2loa/sqLc1/0KAvHB1VVEVhTc23GRnP6ur+4+S0xdNTpx5wyQk0mNbybUZGW3t7rGpiATA5nD15eRdKS0eYmCTPnh0wfLjiy7prJdBg2smfNFriq1c/TZo0SAVD5Enl5dEZGc083tfu7uvGjCFo9du6CgINpoXUtLRszsqaPmRIhL29ckt+0dCwMTMzp7Jy+pAhe/38VOFeLUO1BispKTl58mRTU5Ofn19kZGSnWZ9ic/Pz8+Pj4xsaGoYNG7Z69WpTU1MAwIYNG2g0GnpUcHDw8uXLVSq7TyMUCtfdu4cAcEipq8W38HgHHzyIKy62MDC4EBQ0bcgQJRauxajQYHw+/9ChQ+vWrbOzs9uxY0dmZuaECROk59bW1h49enT37t2DBw/+5ZdfTpw4sX37dgAAnU6Pj48nEAhA8txsCMq5kpK7b9/+On26qZJWyhIKhYnl5TtycupaW1e5un7l7t5HQxRqBBV+WYuLi6lUqrOzM4FACA0NTU9Pl5lbWlrq7OxsZ2dHIBBmzJjx4sULAAA6/ZtCoeDxeDweLym6CAQA8KapaWduboS9fbCSXqF4wmCE/fXX0tTUESYmmfPnb/bygu7qFiq8WLW1tVYfZ/VZWVkxGAyZuV5eXu7u7mhieXn5sGHDAAA1NTUAgDVr1tTX1zs4OERFRZn01uU/NItAKFxz966hnt4eX1/FS2Ow2Xvz8y8+f25jaAj7hD1GhQZjsViiMCBEIrGpqUlmLuHjg5SsrKyzZ89GR0cDADgczsiRI5cvX25kZBQbGxsXF4emAwAYDMaSJUvQ7dmzZy9cuFCsEjSQk+K2xGAwSikEAKAKMQdyc/OrqpLnzx8i97o+WCyWQCDo/Tt2AJfPP3b//vfZ2QCAvQEBazw9pb8ijF5exQPRAQAMDAxIii1ejj6TEBt/pruFGBoaCoVCOQ/h8/li05VssNTU1MTERADA0qVLyWQynU5H09lsNplM7rinpFwWixUbG1tXV7dr1y5ra2sAwIgRIzZt2oTmhoSEoHdlKAQCYfLkyej28OHDJYUfQwPcKRicDACgp6enlEJUIeZ5Xd2uzMwv3dwmWlnJXziBQODz+TweT5SSUlGx8d698sbGz5ycdvr7m5FIgM/nSvj2oKAB5DoW0jOIRGJ7e7ukb6qcoGEnFS9EX1+fx+MJFIshB5RusMDAwMDAQHS7qKgoMzMT3a6qqjI3N++4p7m5eddcHo+3fft2JyenLVu2iB6PouOHdnZ2AAAcDtfxl5JCoaxevVr0sa6uTqwqEomEw+FaWloUPDssFqt4IWiQM+WKaRcIvkhOtiCRNrq7d6tkPT09Ho+HHvKysXFrdva9t289LSxuzZ072tQUCIXylIbBYEgkkoJnhCAIkUjkcDic3hG2TV9fn81mKx62TYWDHKNHj66urq6oqBAIBCkpKf7+/mg6jUZjs9lic/Py8ohEYmRkZMeXDxgMRkxMTG1trUAgSE5O9lJ7PInez4EHD54yGMenTOlZLAAmh7MlK2v85csvGhripk5NnjWr96+A3ldQ4T0YFouNjo6OjY3lcDienp4TPz6W2bhx4969ex0cHLrmvnr16tmzZ2FhYeiehoaGv/32m4+PD51O37JlC4/Hc3FxEd10QVCKGYxjRUVr3Nw8ur+kKl8o/Pnx412Zmez29nVjxqx2c4ODhMoFkXkbx2Qyr169Wl1dvXXr1idPnowaNarXDpRL6SISicT6+noFyzc0NOw0VNMDKBQKBoP58OGDUsSw29sDrlzRx2JvdX+2cub79ztyc0sYjJm2ttu9vXv8WgbaRVTwXUQEQfr3789isXpJF9HIyIjJZHari2gobvlCGT9X7969mzZtWn19PZ1O37p167Jly5qbm69fv27dB9ca1Ep25+W9bWq6PW9et9z1+sOHHTk5N1+/HmNpeWfhQmeVTWaByLgHW7Fihaura2VlJRpN/+rVq1Qq9auvvlKLNogMMt+//+XJk+juxAJo4nJ35eb6XrpURKf/OGlSXmSk98CBKhWp48howTIzM+/evSvqEw4cOHDbtm1z5sxRvTCIDD5wOGvv3fOwsFjp6irP/nyh8OLz53vz81lc7koXl3Vjxhjg8XBypKqRYTAjI6NO3Vkul0uB71D3Ar6+fbuBzU6YMUOeWAA5lZVbs7Of1dWFDhu208dnMPwPqgsZBgsKCtqxY0dCQgL68fnz52vXrhWN8kE0xc3Xry88fXpg/PghRkbS9/ynqWlnTk5yRYUTlZoYHj5O90J/ahYZBtu/f394eLiZmVl7e7ulpSWdTg8PD9+/f796xEHEUt/W9nVa2iQbm0WjRknZrZnHO/rw4YlHj4z09Y9MnLgARsvQBLK7iPfu3SsoKHj+/LmRkZGjo6Nt71jPV5fZkJbGFQhOhYQgEh6xCITCS2Vle/PzmW1ty11cvhozhqKhlYogMgyGPq6xt7e3/zg3Fk0xktUzgaiIS2VlyRUVp6ZOHUShiH0ol1tVtTUr62ldXciwYTvHjbMW93AGojZkGMxYwhMS+d8yhiiRdyzW1qysGcOHh4vrR3S83bo2c6YPHH/vBcgwWFlZmWibx+MVFxdv3rx5y5YtKlYFEQM63YuIw+0fP75TFovLPfrw4cnHj40JBHi71auQYbARI0Z0/Ojo6GhhYTFt2rT58+fDwXo1c+rJk+zKyoshIR3DDwo+Pt36wOF86eKyDt5u9TK6/WanhYWFQCDQg/9F9fKysfH7vLxFo0ZN6fCSmujp1lQbm71+fvB2qxciw2AlJSUdPzKZzH379o0YMUJfX1+VqiD/Al361YxE2unjg6a8aWrac/t2Io3mbGqapJML2/UVZBjMsUvUZTMzs/Pnz6tMD0QMhwsLH9fW/jVzJhmPb+JyDxcW/vzkST8CITYg4BN7e3i71ZuRYbCucxAMDAxUJgYihse1tUcfPlzp4jLW0vLXZ89iCgpaeLyVLi7bJkwQKDYpA6IGxBusoKBA+mFjx45VgRhIZ9r4/Kg7d4YbG48bOHDi5ctlDQ0zhg/fPm6cFYVC1tNrggbr9Yg3mMxp+fA5mHr4Lje3gsl0t7RckCNST5sAABmZSURBVJzsamZ2ffbsHkxbhmgQ8TOaZQbl6Z2TmiUFNsJgMFgsVvGwRzgcTv4prpLAYrEIgshTzs3y8plXrmAQxIJM3jNx4oJRozqGKlGKGBwOJxQKFYzBhCAIBoNRsBAAAB6P5/P5CgZyQmPIKV4Iennlb0gEAoHYkT/xLZgU/9TV1QUFBd2/f1/OitWJpHn4aMgAZc3SV7AQeUIG8ASCuOLi7/LyEAT5yt19tZsbCYfrVLVSxJiYmHC5XAUDQikxZEBra2vvCRnQ3NzcrZAB3TCYiOLi4qVLl75+/VqU0traamNjI7dUSLe59ebNztzcl42NWAzmrxkz4BB8n0ZGyIA1a9aQSKTDhw+3t7cfPHjw6NGjpqamoulhEOVCa2ycn5y88Pp1vlAIANjn5wfd1deR0YIVFRX9/fffEyZMSExMpFKpwcHBBAJh27Ztv//+u3r06Qh1bPa+goL40tKBZPKRgIC9eXkTrKwWS53uBekTyGjBiEQier84YsSI0tJSAICnp+e9e/fUIU034AoEx4qKPH/77a+XLzd7eeUuXHj3zRuuQHBUNUu/QtSMDIN5eXnt2bPn9evXo0eP/uOPP5hMZmpqKnwRUSkIhcKk8vJx8fHf5+fPHD684NNP17i5Jbx8mVxRcWD8+IH/DuUP6aPIMNjhw4dramoSEhLCwsK4XK65ufnSpUtXrVqlHnFaTBGdHpKQ8EVKirWh4b2IiMMTJ5oSiVXNzduys0OGDRM73QvSF5FxD2ZtbV1aWioUChEEyc7OTktL69+//7hx49QjTit5z2JtS0+/XFIyzNj4t+DgwI9DsgKhcOWdO0Qc7lCHdUAhfR0ZBhswYMCCBQsWLVrk5uZGJpNDQ0PVI0sraeHxfiwqOvH4MQmP3+vvv2jUKHyH5XBPPXmSW1l5KTS043QvSF9HhsF27dr1+++/e3h4ODg4LFq0aOHChQPgwHH3EQiFl8vK9ubnN3I4X7q5bfHzw/z7cSqtsfH7vLzFjo6TBg/WlEiIKpBxD7Zy5cr09PTKysoVK1YkJyfb2NhMmzbt4sWL6hGnHWS+fz/p99/X3rs3xsIia/78/ZMmmfy7jWoXCFbduWNuYLAd9r21DrnWB7OwsIiKirp79+7Zs2cfPnwoaaVWSCdeNjZ+ev367MREDIJcmznz3PTpQ8VF4zr44EExg3Fs0iSyMlZhhfQqZIcMYLPZt2/f/uuvv5KSktra2oKDgyMiItSgrE/T0NZ24MGDc8+eUYnEY5MmzRsxQtK0yGIG48eiojVubvClDa1EhsHmzJmTkpLC5/ODgoKOHz8eGhqq4BrVWg+Xzz/99OnhwkIen7/e3T3K1VXKknZtfP6K27dtTUy+8fRUp0iI2pBhsPb29lOnToWGhsIYUjIRCoWJ5eV78vLesVgRI0Zs9vKykDX7e1dOzj8fPtyeN08Po8K1fCEaRIbBrl27ph4dfZ28qqqdublFdLr/oEFnp093olJlHpL5/v0vT59u8/aWf3UvSJ8DLsirKM/r6/cWFKS8fu3Qr9/l0FA5x9mbuNxure4F6aNAg/Wcf5qa9t+//yeNZmlgEBsQEGFvL89SXSgbMzLkX90L0ndRrcFKSkpOnjzZ1NTk5+cXGRmJ+fedhtjcDRs20Gg0dIfg4ODly5fLLEf90FtbjxQWXigtpeDxu3x8Pnd01O9ODIVEGu1PGu3IxIkyV/eC9HVUaDA+n3/o0KF169bZ2dnt2LEjMzNzQoe37CTl0un0+Ph4AoEAAECNJL0cNcPkcH569OhUcTEWQdaNGbPCxaW7D69qWlpW3Lgxxdr605EjVSQS0ntQYVNQXFxMpVKdnZ0JBEJoaGh6errMXDSUAoVCwePxeDweDQ0ivRy10drevj8vz+PChZOPHy92dHz42WffeHh0111CoXDFjRsAgKMBAaqRCeldqLAFq62ttbKyQretrKwYDIbM3JqaGgDAmjVr6uvrHRwcoqKiTExMpJTT0tLy559/otuOjo6iRcw6gcPhAABEIrFnJ8Ll888+ebI/P7+ezf6Po2O0t/fAnj60+KW4+GZ5+eXZs60VHjnEYrE9PiMRaPgkBctRViHgY8gaRcrB4XBoYClFCkF/2fX19fFy/4BKkq1Cg7FYLNFFJxKJnUIgic3lcDgjR45cvny5kZFRbGxsXFxcdHS0lHJYLNaxY8fQ7UWLFo0ZM0aKnh7EJOYLhfFPnuxIT/+HyZw3atTuiRPtFDDGayZza0bGf5ydI7oEJO8ZSomyjMFg5P8aSQEn+Xm6/Ojr6ytl2QOlzAnu1k+GpPhTSjZYampqYmIiAGDp0qVkMplOp6PpbDab/O8pumJzR4wYsWnTJjQxJCRk+/btkvZEsbCwKCwsFH2sq6sTqwoN21ZfXy//iQiFwhuvX+8rKHjR0DDZ2vpsYKAjlWpIoUiqQiYCoXDhtWtkPH5/QACPx+slMeR6W9g2FovVe8K2MZnMboVtMxS3uo2SDRYYGBgYGIhuFxUVZWZmottVVVXm5uYd9zQ3N++ai44f2tnZAQBwOBz6yyp2T5WS8e7d9/n5j2prvSwtk2fNGmtpqXiZx4qK8quqLoeGmsDpXrqECgc5Ro8eXV1dXVFRIRAIUlJS/P390XQajcZms8XmMhiMmJiY2tpagUCQnJyMRvCWVI4qKKypmZWYOCcpqV0guBwa+reS3FVSX7//wYMvnJwC4HQvHUOF92BYLDY6Ojo2NpbD4Xh6ek6cOBFN37hx4969ex0cHLrm+vj40On0LVu28Hg8FxeXJUuWSClHuTxvaNibn5/y+vVwY+PTgYFhw4YpK6gTVyBYefu2taEhnO6lg4iPTd9H6dk92Jumpv3371+l0SwNDL7x9IwYMQInYUSoZ7c9O3Nz44qLk2fNGmNuDuQLnS0P8B5MLFp+D9a3qGlpOVxY+FtpqaGe3m4fn8+dnJT+Vvv9mpqTjx9/7eExRvW3jpBeiI4arLGt7dijR6efPMFjMF97eHw5erSBCmYTt/B4q+7cGUWlrpP6/ACixeicwVp4vLji4v8+esTl879wdl7j5qa6KE5bsrKqm5vjIyLwmn55EqIpdMhgXD7/fGnp4QcPmBzOAgeHrz08LFW5HG7qmzfxz5/v8/e3NTFRXS2QXo5OGEwgFJ4vLt52715lc/PM4cOjx45V9WvsDW1t69PS/AcN+kJJL21A+ig6YTAEgNiCgqHGxr9On+5saqqGGr9JT29rb4+FCzjoPLphMARJW7SIp9g4svxcKStLKi8/MWXKIBjIROfRlZtvQ2W8QioP1S0tW7Ozg4YOnWNnp54aIb0ZXTGYehAKhavv3tXDYo+o5nUTSJ9DJ7qIauPMs2cZ7979FhwMF3CAoMAWTGn809T0XV7eAgeHQLhIPOQj0GDKQSAUrrpzx1BPb5ePj6a1QHoRsIuoHH569KiguvpKWJixukZTIH0C2IIpAVpj4/77979wdp74MXYIBIICDaYoPIFgxe3bA8jkbd7emtYC6XXALqKiHC4sLKmrS5o1i6SMqC8QLUOrvhOSAhKJonApWD4Gg+lUSHFtbezDh6vd3f2sreUsBIvFIgiiCjE9AEEQLBarYDnKKgQAoHh8KxwOh8FgFJxGjH5hRJE55UFS2DbYRew5HD5/eUrKUGPjzbBzCJGAVrVgkmabo79DCs5FBwDo6+t3LGRHTg6toeHG7NkIn8/h8+UsBJ3TrnQxPYNEIvH5fAXLwWAwOBxOwUIQBCGTyTweT8FyhEKh4pcXbUh5PF63QgaITYctWA+5X1MTV1y83t3d1cxM01ogvRdosJ7A4fNX37njCGMBQGShVV1EtRH78OFbFuv23LkwFgBEOvD70W1ef/jwY1HRMmdnRznWiYXoONBg3WZTZmZ/IvFbT09NC4H0AWAXsXskvHx59+3bs9OmqSLMG0T7gC1YN2jicHbk5AQMHhwybJimtUD6BtBg3WB7RsYHDueA5hawhfQ5oMHkpZjBOFVU9JW7+2AYygYiN9BgciEQCqMzM4cYG0e5umpaC6QvAQc55OJ8SUlhTc3fERFKXx0Cot3Ar4tsGtra9hUUhNvaTh06VNNaIH0MaDDZ7MjJ4fL5MNgGpAdAg8ngfk3NlbKy6LFjVbpSBERbgQaTRrtAsCEtbWT//l84OWlaC6RPAgc5pHHqyZOyhobE8HBJi8pCINJRrcFKSkpOnjzZ1NTk5+cXGRnZaVp119yrV6+eO3eu4z4XLlwwMjLasGEDjUZDU4KDg5cvX65S2Si1ra2HHjxY4ODgPWCAGqqDaCUqNBifzz906NC6devs7Ox27NiRmZk5ocM7EGJzw8PDw8LC0B2ePn16/fp1IyMjAACdTo+PjycQCEBy8AOlszkrC4vBbBs3Tj3VQbQSFX5Zi4uLqVSqs7MzgUAIDQ1NT0+XmYvBYPB4PB6Px2Aw8fHxaEuFrhhPoVDQLPnjkChCxrt3ia9ebfXy6g+jzEMUQIUtWG1trdXHQJxWVlYMBkP+3JSUFCcnJzMzMwBATU0NAGDNmjX19fUODg5RUVEmKl6Ulcvnb8rKcjUz+3TkSJVWBNF6VGgwFotFJBLRbSKR2NTUJGdue3v733//HRMTg37kcDgjR45cvny5kZFRbGxsXFxcdHQ0mlVTUxMSEoJuL1q0aPXq1VL0UOWeH7knM7OCyby/dKlZl+Uw5S9EOkopRymFEIlE0T9CEQjKaOopFApFGa96kslkxQsxNjaWf2dJ4XGUbLDU1NTExEQAwNKlS8lkMp1OR9PZbHanc5aSm5OTM2jQINHpjRgxYtOmTeh2SEjI9u3bRXsaGhpu3rwZ3bazs2uWsIalnp4eHo9vaWmR5xT+aWram5W1xMXFjkLpVCCBQED7q4pAIBAQBGGz2YqXo7gYpUSVQhBET09P8UIMDAza2trkD+QkFhwOhyAIj8dTpBAsFkskEltbWwUCgZyHoKG1xOhRREdXAgMDAwMD0e2ioqLMzEx0u6qqytzcvOOe5ubmknLT0tI8O8wXRscP7ezsAAA4HK5jbEoSiTRr1izRx7q6OrGq0Fs7Ob+OX9++Tcbjvxkzpuv+enp6in+n0TtMxctRihgikdje3q5gORgMBovFKlgIajDFw7ahUfEUFIPH44lEIpfL7dVh20aPHl1dXV1RUSEQCFJSUvz9/dF0Go3GZrMl5XI4nOLiYjc3N1E5DAYjJiamtrZWIBAkJyd7eXmpTvONiorUN292+fgYwUVSIMpAhfdgWCw2Ojo6NjaWw+F4enpO/Liq6saNG/fu3evg4CA2t6yszMzMzMLCQlSOj48PnU7fsmULj8dzcXFZsmSJigS38fnbsrO9LC3h8soQZYEoGMW7VyGpi0gikYhEYn19vfTDv8/P/+nRo3sREQ79+ondwdDQsNNQTQ+gUCgYDObDhw8KlqMUMSYmJlwuV867U0lgMBgSiSTpBlhOEATp378/i8XqJV1EIyMjJpPZrS6ioaFh13T4BtD/KGcyjz96tNLFRZK7IJAeAA32P77JyDAzMPjaw0PTQiBaBXzZFwAArtJoWe/f/zp9OlzjC6JcYAsGmnm8nbm5E62sguGEZYiygQYD+/LzG9jsfR+fE0AgSkTXDfa8oeHMs2fr3N2Hdee9GAhETnTaYEKh8Ou0tEFk8poOz7UhECWi0/f0F8vKHtTUXAkN1VfLFBiIDqK7LVhDW9vu3NyQoUMDBg/WtBaI1qK7BtuTl8dub9/t66tpIRBtRkcN9qi2Nv758289Pa1goHmIKtFFg/GFwq/T0uxMTJaPHq1pLRAtRxcHOc48ffqsri5h5ky4wjJE1ejcN4zBZv9w//48e3vfgQM1rQWi/eicwbZmZSEA7IDB2CBqQbcMlvb2bcLLl9u8vU2VEeYFApGJDhmsjc//NiNjjLk5DMYGURtaNciBhgHuCgaDQRDk2JMn75ub/5w3z6Snrx3icDhJVcgPFotFEETxcpQiBoPB6Ovriw2HJD8IgmAwGMXFAABIJJKC4d8QBEEQRF+xkCoIggAAyGSy/PP9JcWf0iqDSZqHTyKRylmsI/n5q1xdrfX1ezxdH4YMEIsSQwa0trb2npABzc3N3QoZINbVOtFFFAiFK65ftzAw+MrdXdNaILqFVrVgkihnMsvq6k5MngwnLEPUjE584WxNTCrWruWyWJoWAtE5dKKLCACgSAi8CoGoFF0xGASiEaDBIBAVAg0GgagQaDAIRIVAg0EgKgQaDAJRIdBgEIgK0arliyTx4MGDR48eLVu2TNNCAADgxo0bHA4nPDxc00IAAOD8+fNDhgzx8/PTtBDA5XLj4uKmTJlib2+vaS2gqqrq6tWr8+fPV3wVbJ1owYqLiy9fvqxpFf8jPT09NTVV0yr+R0JCwoMHDzStAgAA2tvbz5079+rVK00LAQAAOp1+7ty5hoYGxYvSCYNBIJoCGgwCUSE6cQ/W1NTU3Nw8YMAATQsBAICGhgaBQKB4514p0Ol0AoGglLmSCiIQCKqrq01MTEgkkqa1AC6Xy2AwzMzM8Hi8gkXphMEgEE0Bu4gQiArp2/PBSkpKTp482dTU5OfnFxkZifl3IFGxufInqkFMfn5+fHx8Q0PDsGHDVq9ebWpqCgDYsGEDjUZDjwoODl6+fLkalIitVCOX5erVq+fOneu4z4ULF4yMjBS/LHKeUW5uroeHh6hzqOgXRthnaW9v//zzz4uLi9ls9rfffpuWliYzV/5ENYih0+kREREvXrxgs9k//fTTrl270J0//fTTpqYmLpfL5XLb29vVoERspZq6LHw+n/uRhw8f7t69W5JC5YpBef/+fUREREtLi5RDunVl+nAXsbi4mEqlOjs7EwiE0NDQ9PR0mbnyJ6pBTGlpqbOzs52dHYFAmDFjxosXLwAAaLQWCoWCx+PxeDy2+wuX9UCJ2Eo1dVkwGAwqA4PBxMfHoy2V4pdFnjP64Ycf1q1b19raKv2Qbl2ZPtxFrK2ttbKyQretrKwYDIbMXPkT1SDGy8vL/WMQnvLy8mHDhgEAampqAABr1qypr693cHCIiooyMTFRtRKxlWrqsohISUlxcnIyMzOTpFC5YgAAGzduBADMmTNH+iHdujJ9uAVjsVjEjwF6iURipxhmYnPlT1SDGAKBQCaTAQBZWVlnz55dsGABAIDD4YwcOXLnzp3nz58nkUhxcXFqUCK2Uk1dFpT29va///575syZ6EfFL4tMMfIf0q1y+rDByGSyKPwdm81Gv6zSc+VPVIMYAACLxdqzZ8/Vq1d37dqFvoM3YsSITZs29evXD4vFhoSEPH78WA1KxFaqwcsCAMjJyRk0aJDxxxCxil8WmWLkP6Rb5fRhg5mbm1dWVqLbVVVV5ubmMnPlT1SDGB6Pt3379gEDBhw5csTa2hrNpdFoorEyHA7XgwedPVAitlJNXRaUtLQ0tw4r0yt+WWSKkf+QbpXThw02evTo6urqiooKgUCQkpLi7++PptNoNDabLTZX/kQ1iMnLyyMSiZGRkWigZhQGgxETE1NbWysQCJKTk728vNSgRGylmrosAAAOh1NcXNzRYIpfFpli5D+kW1emb7/JUVZWduLECQ6H4+np+fnnn6Pf1PDw8L179zo4OIjNlT9R1WLOnDlz7do10eGGhoa//fYbACAhIeHmzZs8Hs/FxWXZsmU9eHWoB5dFbKUauSwAgOLi4uPHj3e60VL8ssgUg+4zZ84c9E5PyiHyX5m+bTAIpJfTh7uIEEjvBxoMAlEh0GAQiAqBBoNAVAg0GASiQqDBIBAVAg2mDfD5fARBCgoKFCmkoKBAziddFArl7t27itSlO0CDQSAqBBoMAlEh0GDaxqtXr2bOnGlubm5oaDhhwoTi4mI0HY/HHz9+3MrKysDAICAgoLKyct26dRYWFmZmZj/++KPo8MzMTHd3dyMjo/Hjx4uOffXq1bRp04yNjV1dXZOSkmTWBREBDaZthIWFNTU1Xbp0KTExUSgULl26VJR16NChS5cu3bhx48WLF7a2toaGhhkZGTNmzFi/fj2TyUT3iYyM3LRpU3JyMplMHj9+fH19fWtr6/jx4/l8flJS0rZt21atWiWa8yulLsj/6EFsA0hvo729HQCQn58vEAgOHjxYUVGBpp8/f55KpaLbOBzuwoUL6HZUVJS9vT26/fr1awDAs2fP8vPzAQDXrl1D01tbW83MzA4ePPjzzz+bmJh8+PABTUdfUL5z546UuiAi+nDIAEhXEASJiopKSkr65ZdfysrK7t271zF8hWiiu4mJiWgGWqe59xMmTEA3iETiuHHjnj9/TqFQPD09DQ0N0fTJkyfLUxcEBXYRtYrm5mZvb+8DBw4YGRktXrz4yJEjkvaUZ0Qei8Xq6el1so2+vj6aIn9dugxswbSKtLS00tLSmpoatF2Kj4/vbgkZGRlhYWEAgLa2tpycnO3bt+vp6Z05c4bFYlEoFABAbm4un89XSl26AGzBtIr+/ftzudyEhIR3794lJCRs2bKltbW1rq5O/hLQXl9eXt68efMAAJ999tn8+fMJBMKcOXNyc3Nv3LixdOlSdDKi4nXpAtBgWsW4ceO+//77rVu3uri4XLp0KTU11draOigoSM7DBwwYsHHjxujo6GnTprW1tWVlZRkYGJBIpMzMTABAUFBQdHR0TEzM0KFDFa9LR4AzmiEQFQJbMAhEhUCDQSAqBBoMAlEh0GAQiAqBBoNAVAg0GASiQqDBIBAVAg0GgagQaDAIRIVAg0EgKuT/AK14NXJDoOZMAAAAAElFTkSuQmCC" /><!-- --></p>
+<p>Note that the parameters are pulled towards zero as <span class="math inline">\(\lambda\)</span> increases. Note also that we did
+not specify specific values for <span class="math inline">\(\lambda\)</span> in the lasso function above.
+Instead, we only specified how many <span class="math inline">\(\lambda\)</span>s we want to have
+(<code>nLambdas=50</code>). If we use the lasso or adaptive lasso,
+<strong>lessSEM</strong> can automatically compute which <span class="math inline">\(\lambda\)</span> is necessary to set all
+parameters to zero. This is currently not supported for any of the other
+penalties.</p>
+<p>You can access all parameters with the <code>coef()</code>
+function:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">coef</span>(fitLasso))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        lambda alpha        l2        l3        l4          l5          l6</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.000000000     1 0.7239911 0.7319714 0.5688589 -0.05622015 0.016591710</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.002112025     1 0.7242654 0.7318633 0.5687060 -0.05506829 0.014203036</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.004224049     1 0.7245894 0.7317031 0.5684930 -0.05392301 0.011791388</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.006336074     1 0.7249131 0.7315301 0.5682727 -0.05277968 0.009377992</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.008448099     1 0.7252368 0.7313554 0.5680530 -0.05163668 0.006964831</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 0.010560124     1 0.7255639 0.7311850 0.5678360 -0.05049303 0.004552467</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            l7    y1~~y1   y2~~y2   y3~~y3   y4~~y4    y5~~y5    y6~~y6   y7~~y7</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 -0.08937208 0.8492389 1.177799 1.949500 1.082941 0.5684487 0.9625806 1.525471</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 -0.08589407 0.8492376 1.177435 1.949581 1.083041 0.5684875 0.9626112 1.525689</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 -0.08231974 0.8492041 1.176999 1.949721 1.083205 0.5685261 0.9626434 1.525927</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 -0.07873998 0.8491637 1.176565 1.949879 1.083380 0.5685652 0.9626760 1.526167</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 -0.07516016 0.8491271 1.176137 1.950043 1.083557 0.5686048 0.9627089 1.526410</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 -0.07158089 0.8491003 1.175711 1.950209 1.083736 0.5686451 0.9627420 1.526655</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        y1~1      y2~1      y3~1      y4~1        y5~1       y6~1       y7~1</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.1295361 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.1295361 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.1295361 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.1295361 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.1295361 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 0.1295361 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span></code></pre></div>
+<p>Now, let’s assume you also want to try out the scad penalty. In this
+case, all you have to do is to replace the <code>lasso()</code> function
+with the <code>scad()</code> function:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fitScad <span class="ot">&lt;-</span> <span class="fu">scad</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">regularized =</span> regularized,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">1</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">thetas =</span> <span class="fu">seq</span>(<span class="fl">2.1</span>, <span class="dv">5</span>,<span class="at">length.out =</span> <span class="dv">4</span>))</span></code></pre></div>
+<p>The scad penalty has two tuning parmeters <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\theta\)</span>. The naming follows that used by
+Gong et al. (2013). We can plot the results again, however this requires
+the <strong>plotly</strong> package and is currently not supported in
+Rmarkdown.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fitScad)</span></code></pre></div>
+<p>The parameter estimates can again be accessed with the
+<code>coef()</code> function:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">coef</span>(fitScad))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   lambda theta        l2        l3        l4          l5         l6          l7</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    0.0   2.1 0.7239911 0.7319714 0.5688589 -0.05622015 0.01659171 -0.08937208</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    0.1   2.1 0.7520576 0.7532832 0.5741473  0.00000000 0.00000000  0.00000000</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    0.2   2.1 0.7522396 0.7535498 0.5742082  0.00000000 0.00000000  0.00000000</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    0.3   2.1 0.7522622 0.7535810 0.5742190  0.00000000 0.00000000  0.00000000</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    0.4   2.1 0.7522598 0.7535800 0.5742161  0.00000000 0.00000000  0.00000000</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    0.5   2.1 0.7522600 0.7535788 0.5742161  0.00000000 0.00000000  0.00000000</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y1~~y1   y2~~y2   y3~~y3   y4~~y4    y5~~y5    y6~~y6   y7~~y7      y1~1</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.8492389 1.177799 1.949500 1.082941 0.5684487 0.9625806 1.525471 0.1295361</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.8808792 1.148010 1.927707 1.080401 0.5710366 0.9628056 1.532010 0.1295361</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.8811526 1.147820 1.927432 1.080365 0.5710366 0.9628056 1.532010 0.1295361</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.8811879 1.147800 1.927406 1.080360 0.5710366 0.9628056 1.532010 0.1295361</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.8811854 1.147798 1.927400 1.080360 0.5710366 0.9628056 1.532010 0.1295361</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 0.8811825 1.147800 1.927403 1.080362 0.5710366 0.9628056 1.532010 0.1295361</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        y2~1      y3~1      y4~1        y5~1       y6~1       y7~1</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span></code></pre></div>
+</div>
+<div id="selecting-a-model" class="section level3">
+<h3>Selecting a model</h3>
+<p>To select a model and report the final parameter estimates, you can
+use the AIC or BIC (other information criteria are also possible, but
+currently not implemented). There are two ways to use these information
+criteria.</p>
+<p>First, you can compute them and select the model yourself:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>AICs <span class="ot">&lt;-</span> <span class="fu">AIC</span>(fitLasso)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(AICs)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        lambda alpha     m2LL  regM2LL nonZeroParameters convergence      AIC</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.000000000     1 1070.810 1070.810                20        TRUE 1110.810</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.002112025     1 1070.810 1070.827                20        TRUE 1110.810</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.004224049     1 1070.811 1070.843                20        TRUE 1110.811</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.006336074     1 1070.813 1070.858                20        TRUE 1110.813</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.008448099     1 1070.816 1070.872                20        TRUE 1110.816</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 0.010560124     1 1070.819 1070.886                20        TRUE 1110.819</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>fitLasso<span class="sc">@</span>parameters[<span class="fu">which.min</span>(AICs<span class="sc">$</span>AIC),]</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       lambda alpha        l2        l3        l4 l5 l6 l7    y1~~y1   y2~~y2</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50 0.1034892     1 0.7522326 0.7535454 0.5741936  0  0  0 0.8811466 1.147823</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y3~~y3   y4~~y4    y5~~y5    y6~~y6  y7~~y7      y1~1      y2~1      y3~1</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50 1.927444 1.080353 0.5710319 0.9628056 1.53201 0.1295361 0.1446137 0.4210241</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         y4~1        y5~1       y6~1       y7~1</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50 0.1480334 -0.05439108 0.05590112 0.02733187</span></span></code></pre></div>
+<p>An easier way is to use the <code>coef()</code> function again:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fitLasso, <span class="at">criterion =</span> <span class="st">&quot;AIC&quot;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       lambda alpha        l2        l3        l4 l5 l6 l7    y1~~y1   y2~~y2</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50 0.1034892     1 0.7522326 0.7535454 0.5741936  0  0  0 0.8811466 1.147823</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y3~~y3   y4~~y4    y5~~y5    y6~~y6  y7~~y7      y1~1      y2~1      y3~1</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50 1.927444 1.080353 0.5710319 0.9628056 1.53201 0.1295361 0.1446137 0.4210241</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         y4~1        y5~1       y6~1       y7~1</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50 0.1480334 -0.05439108 0.05590112 0.02733187</span></span></code></pre></div>
+<div id="cross-validation" class="section level4">
+<h4>Cross-Validation</h4>
+<p>A very good alternative to information criteria is the use of
+cross-validation. In <strong>lessSEM</strong>, there is a dedicated
+cross-validation function for each of the penalties discussed above.
+Let’s look at the <code>lsp()</code> penalty this time. Now, for your
+non-cross-validated lsp, you would use</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fitLsp <span class="ot">&lt;-</span> <span class="fu">lsp</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">regularized =</span> regularized,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">1</span>),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">thetas =</span> <span class="fu">seq</span>(.<span class="dv">1</span>,<span class="dv">2</span>,<span class="at">length.out =</span> <span class="dv">4</span>))</span></code></pre></div>
+<p>To use a cross-validated version of the lsp, simply use the
+<code>cv</code> prefix. The function is called <code>cvLsp()</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fitCvLsp <span class="ot">&lt;-</span> <span class="fu">cvLsp</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">regularized =</span> regularized,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">1</span>),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">thetas =</span> <span class="fu">seq</span>(.<span class="dv">1</span>,<span class="dv">2</span>,<span class="at">length.out =</span> <span class="dv">4</span>))</span></code></pre></div>
+<p>The best model can now be accessed with</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fitCvLsp)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          l2          l3          l4          l5          l6          l7 </span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.75203790  0.75325437  0.57414066  0.00000000  0.00000000  0.00000000 </span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y1~~y1      y2~~y2      y3~~y3      y4~~y4      y5~~y5      y6~~y6 </span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.88084961  1.14803077  1.92773697  1.08040457  0.57103655  0.96280562 </span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y7~~y7        y1~1        y2~1        y3~1        y4~1        y5~1 </span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1.53201041  0.12953609  0.14461369  0.42102411  0.14803336 -0.05439108 </span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        y6~1        y7~1 </span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.05590112  0.02733187</span></span></code></pre></div>
+</div>
+</div>
+<div id="missing-data" class="section level3">
+<h3>Missing Data</h3>
+<p>Most psychological data sets will have missing data. In
+<strong>lessSEM</strong>, we follow the example of
+<strong>regsem</strong> and use the full information maximum likelihood
+function to account for this missingness. Identical to
+<strong>regsem</strong>, <strong>lessSEM</strong> expects that you
+already use the full information maximum likelihood method in
+<strong>lavaan</strong>.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># let&#39;s simulate data for a simple </span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># cfa with 7 observed variables</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># and 10 % missing data</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> lessSEM<span class="sc">::</span><span class="fu">simulateExampleData</span>(<span class="at">N =</span> <span class="dv">100</span>, </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">loadings =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>,<span class="dv">4</span>),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                                                  <span class="fu">rep</span>(<span class="dv">0</span>,<span class="dv">3</span>)),</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">percentMissing =</span> <span class="dv">10</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               y1         y2         y3          y4         y5        y6</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1,]  0.60367543 -0.3206755 -0.5712115  0.36626658  0.6138552 0.8207451</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2,]  0.37497661  2.0100766 -1.5925242 -0.02983920  0.2409065 1.1250778</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3,]          NA  0.8134143  1.7803075  3.27710938 -0.3651732        NA</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4,] -0.04379503  0.1369219 -1.9424719  0.40304282 -0.6435542 1.5412868</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [5,] -0.32969221         NA -1.6536493 -2.20991516  1.2462449 0.6725163</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [6,]  0.61738032  0.9116425  0.9196841  0.03340633  0.5553805 0.1209500</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              y7</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1,]  0.6346473</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [2,]  0.8865902</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [3,] -0.8283463</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [4,]  0.0635044</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [5,]         NA</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [6,]  2.0956358</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="co"># we assume a single factor structure</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>lavaanSyntax <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="st">      f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + l6*y6 + l7*y7 </span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="st">      f ~~ 1*f</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="st">      &quot;</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="co"># estimate the model with lavaan</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>lavaanModel <span class="ot">&lt;-</span> <span class="fu">cfa</span>(lavaanSyntax, </span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> data,</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>                   <span class="at">missing =</span> <span class="st">&quot;ml&quot;</span>) <span class="co"># important: use fiml for missing data</span></span></code></pre></div>
+<p>Note that we added the argument <code>missing = &#39;ml&#39;</code> to the
+<strong>lavaan</strong> model. This tells <strong>lavaan</strong> to use
+the full information maximum likelihood function.</p>
+<p>Next, pass this model to any of the penalty functions in
+<strong>lessSEM</strong>. <strong>lessSEM</strong> will automatically
+switch to the full information maximum likelihood function as well:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fitLasso <span class="ot">&lt;-</span> <span class="fu">lasso</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">regularized =</span> regularized,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">nLambdas =</span> <span class="dv">10</span>)</span></code></pre></div>
+<p>To check if <strong>lessSEM</strong> did actually use the full
+information maximum likelihood, we can compare the 2log-likelihood of
+<strong>lavaan</strong> and <strong>lessSEM</strong> when no penalty is
+used (<span class="math inline">\(\lambda = 0\)</span>):</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fitLasso <span class="ot">&lt;-</span> <span class="fu">lasso</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">regularized =</span> regularized,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">lambdas =</span> <span class="dv">0</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fitLasso<span class="sc">@</span>fits<span class="sc">$</span>m2LL</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 2034.104</span></span></code></pre></div>
+<p>Compare this to:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">logLik</span>(lavaanModel)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &#39;log Lik.&#39; 2034.104 (df=20)</span></span></code></pre></div>
+</div>
+</div>
+<div id="more-information" class="section level2">
+<h2>More information</h2>
+<p>We provide more information in the documentation of the individual
+functions. For instance, see <code>?lessSEM::lasso</code> for more
+details on the lasso penalty. If you are interested in the general
+purpose interface, have a look at <code>?lessEM::gpLasso</code>,
+<code>?lesssEM::gpMcp</code>, etc. To get more details on implementing
+the <strong>lessSEM</strong> optimizers in your own package, have a look
+at the vignettes <code>vignette(&#39;General-Purpose-Optimization&#39;)</code>
+and <code>vignette(&#39;The-optimizer-interface&#39;)</code> and at the <a href="https://github.com/jhorzek/lessLM">lessLM</a> package.</p>
+</div>
+<div id="table-of-the-most-relevant-functions" class="section level2">
+<h2>Table of the most relevant functions</h2>
+<p>Fitting <em>regularized SEM</em>:</p>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>function name</th>
+<th>what it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ridge</td>
+<td>ridge regularization of SEM</td>
+</tr>
+<tr class="even">
+<td>cvRidge</td>
+<td>cross-validated ridge regularization of SEM</td>
+</tr>
+<tr class="odd">
+<td>lasso</td>
+<td>lasso regularization of SEM</td>
+</tr>
+<tr class="even">
+<td>cvLasso</td>
+<td>cross-validated lasso regularization of SEM</td>
+</tr>
+<tr class="odd">
+<td>adaptiveLasso</td>
+<td>adaptive lasso regularization of SEM</td>
+</tr>
+<tr class="even">
+<td>cvAdaptiveLasso</td>
+<td>cross-validated adaptive lasso regularization of SEM</td>
+</tr>
+<tr class="odd">
+<td>elasticNet</td>
+<td>elastic net regularization of SEM</td>
+</tr>
+<tr class="even">
+<td>cvElasticNet</td>
+<td>cross-validated elastic net regularization of SEM</td>
+</tr>
+<tr class="odd">
+<td>cappedL1</td>
+<td>cappedL1 regularization of SEM</td>
+</tr>
+<tr class="even">
+<td>cvCappedL1</td>
+<td>cross-validated cappedL1 regularization of SEM</td>
+</tr>
+<tr class="odd">
+<td>lsp</td>
+<td>lsp regularization of SEM</td>
+</tr>
+<tr class="even">
+<td>cvLsp</td>
+<td>cross-validated lsp regularization of SEM</td>
+</tr>
+<tr class="odd">
+<td>mcp</td>
+<td>mcp regularization of SEM</td>
+</tr>
+<tr class="even">
+<td>cvMcp</td>
+<td>cross-validated mcp regularization of SEM</td>
+</tr>
+<tr class="odd">
+<td>scad</td>
+<td>scad regularization of SEM</td>
+</tr>
+<tr class="even">
+<td>cvScad</td>
+<td>cross-validated scad regularization of SEM</td>
+</tr>
+</tbody>
+</table>
+<p>Using the optimizers in <strong>lessSEM</strong> for <em>general
+purpose optimization</em>:</p>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>function name</th>
+<th>what it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>gpRidge</td>
+<td>ridge regularization for general purpose optimization</td>
+</tr>
+<tr class="even">
+<td>gpLasso</td>
+<td>lasso regularization for general purpose optimization</td>
+</tr>
+<tr class="odd">
+<td>gpAdaptiveLasso</td>
+<td>adaptive lasso regularization for general purpose optimization</td>
+</tr>
+<tr class="even">
+<td>gpElasticNet</td>
+<td>elastic net regularization for general purpose optimization</td>
+</tr>
+<tr class="odd">
+<td>gpCappedL1</td>
+<td>cappedL1 regularization for general purpose optimization</td>
+</tr>
+<tr class="even">
+<td>gpLsp</td>
+<td>lsp regularization for general purpose optimization</td>
+</tr>
+<tr class="odd">
+<td>gpMcp</td>
+<td>mcp regularization for general purpose optimization</td>
+</tr>
+<tr class="even">
+<td>gpScad</td>
+<td>scad regularization for general purpose optimization</td>
+</tr>
+</tbody>
+</table>
+<p>Using the optimizers in <strong>lessSEM</strong> for <em>general
+purpose optimization with C++ functions</em>:</p>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>function name</th>
+<th>what it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>gpRidgeCpp</td>
+<td>ridge regularization for general purpose optimization</td>
+</tr>
+<tr class="even">
+<td>gpLassoCpp</td>
+<td>lasso regularization for general purpose optimization</td>
+</tr>
+<tr class="odd">
+<td>gpAdaptiveLassoCpp</td>
+<td>adaptive lasso regularization for general purpose optimization</td>
+</tr>
+<tr class="even">
+<td>gpElasticNetCpp</td>
+<td>elastic net regularization for general purpose optimization</td>
+</tr>
+<tr class="odd">
+<td>gpCappedL1Cpp</td>
+<td>cappedL1 regularization for general purpose optimization</td>
+</tr>
+<tr class="even">
+<td>gpLspCpp</td>
+<td>lsp regularization for general purpose optimization</td>
+</tr>
+<tr class="odd">
+<td>gpMcpCpp</td>
+<td>mcp regularization for general purpose optimization</td>
+</tr>
+<tr class="even">
+<td>gpScadCpp</td>
+<td>scad regularization for general purpose optimization</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<div id="r---packages-software" class="section level2">
+<h2>R - Packages / Software</h2>
+<ul>
+<li><a href="https://github.com/yrosseel/lavaan">lavaan</a> Rosseel, Y.
+(2012). lavaan: An R Package for Structural Equation Modeling. Journal
+of Statistical Software, 48(2), 1–36. <a href="https://doi.org/10.18637/jss.v048.i02" class="uri">https://doi.org/10.18637/jss.v048.i02</a></li>
+<li><a href="https://github.com/Rjacobucci/regsem">regsem</a>:
+Jacobucci, R. (2017). regsem: Regularized Structural Equation Modeling.
+ArXiv:1703.08489 [Stat]. <a href="http://arxiv.org/abs/1703.08489" class="uri">http://arxiv.org/abs/1703.08489</a></li>
+<li><a href="https://github.com/psyphh/lslx">lslx</a>: Huang, P.-H.
+(2020). lslx: Semi-confirmatory structural equation modeling via
+penalized likelihood. Journal of Statistical Software, 93(7). <a href="https://doi.org/10.18637/jss.v093.i07" class="uri">https://doi.org/10.18637/jss.v093.i07</a></li>
+<li><a href="https://cran.r-project.org/web/packages/fasta/index.html">fasta</a>:
+Another implementation of the fista algorithm (Beck &amp; Teboulle,
+2009)</li>
+<li><a href="https://ensmallen.org/">ensmallen</a>: Curtin, R. R., Edel,
+M., Prabhu, R. G., Basak, S., Lou, Z., &amp; Sanderson, C. (2021). The
+ensmallen library for ﬂexible numerical optimization. Journal of Machine
+Learning Research, 22, 1–6.</li>
+</ul>
+</div>
+<div id="regularized-structural-equation-modeling-1" class="section level2">
+<h2>Regularized Structural Equation Modeling</h2>
+<ul>
+<li>Huang, P.-H., Chen, H., &amp; Weng, L.-J. (2017). A Penalized
+Likelihood Method for Structural Equation Modeling. Psychometrika,
+82(2), 329–354. <a href="https://doi.org/10.1007/s11336-017-9566-9" class="uri">https://doi.org/10.1007/s11336-017-9566-9</a></li>
+<li>Jacobucci, R., Grimm, K. J., &amp; McArdle, J. J. (2016).
+Regularized Structural Equation Modeling. Structural Equation Modeling:
+A Multidisciplinary Journal, 23(4), 555–566. <a href="https://doi.org/10.1080/10705511.2016.1154793" class="uri">https://doi.org/10.1080/10705511.2016.1154793</a></li>
+</ul>
+</div>
+<div id="penalty-functions" class="section level2">
+<h2>Penalty Functions</h2>
+<ul>
+<li>Candès, E. J., Wakin, M. B., &amp; Boyd, S. P. (2008). Enhancing
+Sparsity by Reweighted l1 Minimization. Journal of Fourier Analysis and
+Applications, 14(5–6), 877–905. <a href="https://doi.org/10.1007/s00041-008-9045-x" class="uri">https://doi.org/10.1007/s00041-008-9045-x</a></li>
+<li>Fan, J., &amp; Li, R. (2001). Variable selection via nonconcave
+penalized likelihood and its oracle properties. Journal of the American
+Statistical Association, 96(456), 1348–1360. <a href="https://doi.org/10.1198/016214501753382273" class="uri">https://doi.org/10.1198/016214501753382273</a></li>
+<li>Hoerl, A. E., &amp; Kennard, R. W. (1970). Ridge Regression: Biased
+Estimation for Nonorthogonal Problems. Technometrics, 12(1), 55–67. <a href="https://doi.org/10.1080/00401706.1970.10488634" class="uri">https://doi.org/10.1080/00401706.1970.10488634</a></li>
+<li>Tibshirani, R. (1996). Regression shrinkage and selection via the
+lasso. Journal of the Royal Statistical Society. Series B
+(Methodological), 58(1), 267–288.</li>
+<li>Zhang, C.-H. (2010). Nearly unbiased variable selection under
+minimax concave penalty. The Annals of Statistics, 38(2), 894–942. <a href="https://doi.org/10.1214/09-AOS729" class="uri">https://doi.org/10.1214/09-AOS729</a></li>
+<li>Zhang, T. (2010). Analysis of Multi-stage Convex Relaxation for
+Sparse Regularization. Journal of Machine Learning Research, 11,
+1081–1107.</li>
+<li>Zou, H. (2006). The adaptive lasso and its oracle properties.
+Journal of the American Statistical Association, 101(476), 1418–1429. <a href="https://doi.org/10.1198/016214506000000735" class="uri">https://doi.org/10.1198/016214506000000735</a></li>
+<li>Zou, H., &amp; Hastie, T. (2005). Regularization and variable
+selection via the elastic net. Journal of the Royal Statistical Society:
+Series B, 67(2), 301–320. <a href="https://doi.org/10.1111/j.1467-9868.2005.00503.x" class="uri">https://doi.org/10.1111/j.1467-9868.2005.00503.x</a></li>
+</ul>
+</div>
+<div id="optimizer" class="section level2">
+<h2>Optimizer</h2>
+<div id="glmnet" class="section level3">
+<h3>GLMNET</h3>
+<ul>
+<li>Friedman, J., Hastie, T., &amp; Tibshirani, R. (2010).
+Regularization paths for generalized linear models via coordinate
+descent. Journal of Statistical Software, 33(1), 1–20. <a href="https://doi.org/10.18637/jss.v033.i01" class="uri">https://doi.org/10.18637/jss.v033.i01</a></li>
+<li>Yuan, G.-X., Ho, C.-H., &amp; Lin, C.-J. (2012). An improved GLMNET
+for l1-regularized logistic regression. The Journal of Machine Learning
+Research, 13, 1999–2030. <a href="https://doi.org/10.1145/2020408.2020421" class="uri">https://doi.org/10.1145/2020408.2020421</a></li>
+</ul>
+</div>
+<div id="variants-of-ista" class="section level3">
+<h3>Variants of ISTA</h3>
+<ul>
+<li>Beck, A., &amp; Teboulle, M. (2009). A Fast Iterative
+Shrinkage-Thresholding Algorithm for Linear Inverse Problems. SIAM
+Journal on Imaging Sciences, 2(1), 183–202. <a href="https://doi.org/10.1137/080716542" class="uri">https://doi.org/10.1137/080716542</a></li>
+<li>Gong, P., Zhang, C., Lu, Z., Huang, J., &amp; Ye, J. (2013). A
+general iterative shrinkage and thresholding algorithm for non-convex
+regularized optimization problems. Proceedings of the 30th International
+Conference on Machine Learning, 28(2)(2), 37–45.</li>
+<li>Parikh, N., &amp; Boyd, S. (2013). Proximal Algorithms. Foundations
+and Trends in Optimization, 1(3), 123–231.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="important-notes" class="section level1">
+<h1>Important Notes</h1>
+<p>THE SOFTWARE IS PROVIDED ‘AS IS’, WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
