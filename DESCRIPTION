@@ -23,6 +23,7 @@ Suggests:
     ncvreg,
     regsem,
     lslx,
-    mvtnorm
+    mvtnorm,
+    Matrix
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr

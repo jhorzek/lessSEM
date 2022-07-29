@@ -10,6 +10,7 @@ adaptiveLasso(
   weights = NULL,
   lambdas = NULL,
   nLambdas = NULL,
+  reverse = TRUE,
   method = "ista",
   modifyModel = lessSEM::modifyModel(),
   control = lessSEM::controlIsta()
@@ -33,6 +34,10 @@ the unregularized parameter estimates}
 \item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
 compute the first lambda value which sets all regularized parameters to zero.
 It will then generate nLambda values between 0 and the computed lambda.}
+
+\item{reverse}{if set to TRUE and nLambdas is used, lessSEM will start with the
+largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
+the smallest lambda and gradually increase it.}
 
 \item{method}{which optimizer should be used? Currently implemented are ista
 and glmnet. With ista, the control argument can be used to switch to related procedures

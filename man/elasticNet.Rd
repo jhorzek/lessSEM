@@ -17,6 +17,10 @@ elasticNet(
 \arguments{
 \item{lavaanModel}{model of class lavaan}
 
+\item{regularized}{vector with names of parameters which are to be regularized.
+If you are unsure what these parameters are called, use
+getLavaanParameters(model) with your lavaan model object}
+
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
 
 \item{alphas}{numeric vector with values of the tuning parameter alpha. Must be
@@ -30,14 +34,6 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}
-
-\item{weights}{labeled vector with weights for each of the parameters in the
-model. If you are unsure what these parameters are called, use
-getLavaanParameters(model) with your lavaan model object}
-
-\item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
-compute the first lambda value which sets all regularized parameters to zero.
-It will then generate nLambda values between 0 and the computed lambda.}
 }
 \description{
 Implements elastic net regularization for structural equation models.

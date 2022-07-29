@@ -12,6 +12,7 @@ gpAdaptiveLasso(
   gr = NULL,
   lambdas = NULL,
   nLambdas = NULL,
+  reverse = TRUE,
   ...,
   method = "ista",
   control = controlIsta()
@@ -36,6 +37,10 @@ to approximate the gradients}
 \item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
 compute the first lambda value which sets all regularized parameters to zero.
 It will then generate nLambda values between 0 and the computed lambda.}
+
+\item{reverse}{if set to TRUE and nLambdas is used, lessSEM will start with the
+largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
+the smallest lambda and gradually increase it.}
 
 \item{...}{additional arguments passed to fn and gr}
 
@@ -146,7 +151,7 @@ weights <- 1/abs(b)
 weights <- length(b)*weights/sum(weights)
 
 # optimize
-adpativeLassoPen <- gpAdaptiveLasso(
+adaptiveLassoPen <- gpAdaptiveLasso(
   par = b, 
   regularized = regularized, 
   weights = weights,
@@ -156,16 +161,16 @@ adpativeLassoPen <- gpAdaptiveLasso(
   y = y,
   N = N
 )
-plot(adpativeLassoPen)
-AIC(adpativeLassoPen)
+plot(adaptiveLassoPen)
+AIC(adaptiveLassoPen)
 
 # for comparison:
 # library(glmnet)
 # coef(glmnet(x = X,
 #            y = y,
 #            penalty.factor = weights,
-#            lambda = adpativeLassoPen@fits$lambda[20],
+#            lambda = adaptiveLassoPen@fits$lambda[20],
 #            intercept = FALSE,
 #            standardize = FALSE))[,1]
-# adpativeLassoPen@parameters[20,]
+# adaptiveLassoPen@parameters[20,]
 }

@@ -56,4 +56,11 @@ test_that("testing adaptive lasso", {
                                   nLambdas = 10)
   testthat::expect_equal(all(apply(rsem2@parameters[,regularizedLavaan] == 0,2,sum) > 0), TRUE)
   
+  rsem2 <- lessSEM::adaptiveLasso(lavaanModel = modelFit, 
+                                  regularized = regularizedLavaan,
+                                  reverse = FALSE,
+                                  nLambdas = 10)
+  testthat::expect_equal(all(apply(rsem2@parameters[,regularizedLavaan] == 0,2,sum) > 0), TRUE)
+  
+  
 })

@@ -25,9 +25,15 @@ getLavaanParameters(model) with your lavaan model object}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
 
-\item{method}{which optimizer should be used? Currently implemented are ista
-and glmnet. With ista, the control argument can be used to switch to related procedures
-(currently gist).}
+\item{k}{the number of cross-validation folds. Alternatively, you can pass
+a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.}
+
+\item{standardize}{Standardizing your data prior to the analysis can undermine the cross-
+validation. Set standardize=TRUE to automatically standardize the data.}
+
+\item{method}{which optimizer should be used? Currently implemented are ista and glmnet.
+With ista, the control argument can be used to switch to related procedures (currently gist).}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
@@ -35,9 +41,7 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 for more details.}
 
-\item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
-compute the first lambda value which sets all regularized parameters to zero.
-It will then generate nLambda values between 0 and the computed lambda.}
+\item{returnSubsets}{set to TRUE to return the parameters for each training set}
 }
 \description{
 Implements cross-validated lasso regularization for structural equation models.

@@ -55,12 +55,10 @@ gpOptimizationInternal <- function(par,
   if(is.null(gr)){
     
     # The following is necessary to ensure that the arguments are called 
-    # correclty even if the user does not use the naming of our examples:
-    additionalArguments$fn <- function(par, parameterLabels, additionalArguments
-    ){
-      return(fn(par, parameterLabels, additionalArguments))
-    }
-    # gradient funciton using numDeriv:
+    # correctly even if the user does not use the naming of our examples:
+    additionalArguments$fn <- fn
+    
+    # gradient function using numDeriv:
     gr <- function(par, parameterLabels, additionalArguments){
       grad <- numDeriv::grad(func = additionalArguments$fn, 
                              x = par, 
@@ -312,11 +310,6 @@ gpOptimizationInternal <- function(par,
       "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
     )
     
-    message(paste0(
-      "Automatically selecting the maximal lambda value.\n",
-      "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
-    )
-    
     maxLambda <- gpGetMaxLambda(regularizedModel,
                                 par,
                                 fn,
@@ -324,12 +317,21 @@ gpOptimizationInternal <- function(par,
                                 additionalArguments,
                                 weights)
     
-    tuningParameters <- data.frame(
-      lambda = seq(0,
-                   maxLambda,
-                   length.out = tuningParameters$nLambdas),
-      alpha = 1
-    )
+    if(tuningParameters$reverse){
+      tuningParameters <- data.frame(
+        lambda = rev(seq(0,
+                         maxLambda,
+                         length.out = tuningParameters$nLambdas)),
+        alpha = 1
+      )
+    }else{
+      tuningParameters <- data.frame(
+        lambda = seq(0,
+                     maxLambda,
+                     length.out = tuningParameters$nLambdas),
+        alpha = 1
+      )
+    }
     
     inputArguments$tuningParameters = tuningParameters
     

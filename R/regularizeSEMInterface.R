@@ -55,6 +55,9 @@
 #' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
+#' @param reverse if set to TRUE and nLambdas is used, lessSEM will start with the
+#' largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
+#' the smallest lambda and gradually increase it.
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
@@ -133,6 +136,7 @@ lasso <- function(lavaanModel,
                   regularized,
                   lambdas = NULL,
                   nLambdas = NULL,
+                  reverse = TRUE,
                   method = "ista", 
                   modifyModel = lessSEM::modifyModel(),
                   control = controlIsta()){
@@ -142,7 +146,8 @@ lasso <- function(lavaanModel,
   }
   
   if(!is.null(nLambdas)){
-    tuningParameters <- data.frame(nLambdas = nLambdas)
+    tuningParameters <- data.frame(nLambdas = nLambdas,
+                                   reverse = reverse)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
@@ -224,6 +229,9 @@ lasso <- function(lavaanModel,
 #' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
+#' @param reverse if set to TRUE and nLambdas is used, lessSEM will start with the
+#' largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
+#' the smallest lambda and gradually increase it.
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
@@ -303,6 +311,7 @@ adaptiveLasso <- function(lavaanModel,
                           weights = NULL,
                           lambdas = NULL,
                           nLambdas = NULL,
+                          reverse = TRUE,
                           method = "ista", 
                           modifyModel = lessSEM::modifyModel(),
                           control = lessSEM::controlIsta()){
@@ -310,7 +319,8 @@ adaptiveLasso <- function(lavaanModel,
     stop("Specify either lambdas or nLambdas")
   }
   if(!is.null(nLambdas)){
-    tuningParameters <- data.frame(nLambdas = nLambdas)
+    tuningParameters <- data.frame(nLambdas = nLambdas,
+                                   reverse = reverse)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
@@ -525,13 +535,10 @@ ridge <- function(lavaanModel,
 #' Trends in Optimization, 1(3), 123–231.
 #' 
 #' @param lavaanModel model of class lavaan 
-#' @param weights labeled vector with weights for each of the parameters in the 
-#' model. If you are unsure what these parameters are called, use 
+#' @param regularized vector with names of parameters which are to be regularized.
+#' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
-#' compute the first lambda value which sets all regularized parameters to zero.
-#' It will then generate nLambda values between 0 and the computed lambda.
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
 #' in [0,1]. 0 = ridge, 1 = lasso.
 #' @param method which optimizer should be used? Currently implemented are ista

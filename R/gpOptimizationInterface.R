@@ -55,6 +55,9 @@
 #' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
+#' @param reverse if set to TRUE and nLambdas is used, lessSEM will start with the
+#' largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
+#' the smallest lambda and gradually increase it.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -134,6 +137,7 @@ gpLasso <- function(par,
                     gr = NULL,
                     lambdas = NULL,
                     nLambdas = NULL,
+                    reverse = TRUE,
                     ...,
                     method = "ista", 
                     control = controlIsta()
@@ -159,7 +163,8 @@ gpLasso <- function(par,
   }
   
   if(!is.null(nLambdas)){
-    tuningParameters <- data.frame(nLambdas = nLambdas)
+    tuningParameters <- data.frame(nLambdas = nLambdas,
+                                   reverse = reverse)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
@@ -228,6 +233,7 @@ gpLasso <- function(par,
 #'  
 #' @param par labeled vector with starting values
 #' @param regularized vector with names of parameters which are to be regularized.
+#' @param weights labeled vector with adaptive lasso weights. NULL will use 1/abs(par)
 #' @param fn R function which takes the parameters as input and returns the 
 #' fit value (a single value)
 #' @param gr R function which takes the parameters as input and returns the 
@@ -237,7 +243,9 @@ gpLasso <- function(par,
 #' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
-#' @param weights labeled vector with adaptive lasso weights. NULL will use 1/abs(par)
+#' @param reverse if set to TRUE and nLambdas is used, lessSEM will start with the
+#' largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
+#' the smallest lambda and gradually increase it.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -296,7 +304,7 @@ gpLasso <- function(par,
 #' weights <- length(b)*weights/sum(weights)
 #' 
 #' # optimize
-#' adpativeLassoPen <- gpAdaptiveLasso(
+#' adaptiveLassoPen <- gpAdaptiveLasso(
 #'   par = b, 
 #'   regularized = regularized, 
 #'   weights = weights,
@@ -306,18 +314,18 @@ gpLasso <- function(par,
 #'   y = y,
 #'   N = N
 #' )
-#' plot(adpativeLassoPen)
-#' AIC(adpativeLassoPen)
+#' plot(adaptiveLassoPen)
+#' AIC(adaptiveLassoPen)
 #' 
 #' # for comparison:
 #' # library(glmnet)
 #' # coef(glmnet(x = X,
 #' #            y = y,
 #' #            penalty.factor = weights,
-#' #            lambda = adpativeLassoPen@fits$lambda[20],
+#' #            lambda = adaptiveLassoPen@fits$lambda[20],
 #' #            intercept = FALSE,
 #' #            standardize = FALSE))[,1]
-#' # adpativeLassoPen@parameters[20,]
+#' # adaptiveLassoPen@parameters[20,]
 #' @export
 gpAdaptiveLasso <- function(par,
                             regularized,
@@ -326,6 +334,7 @@ gpAdaptiveLasso <- function(par,
                             gr = NULL,
                             lambdas = NULL,
                             nLambdas = NULL,
+                            reverse = TRUE,
                             ...,
                             method = "ista", 
                             control = controlIsta()){
@@ -364,7 +373,8 @@ gpAdaptiveLasso <- function(par,
   }
   
   if(!is.null(nLambdas)){
-    tuningParameters <- data.frame(nLambdas = nLambdas)
+    tuningParameters <- data.frame(nLambdas = nLambdas,
+                                   reverse = reverse)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
