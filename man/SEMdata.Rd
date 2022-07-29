@@ -9,6 +9,9 @@ SEMdata(rawData)
 \arguments{
 \item{rawData}{matrix with raw data set}
 }
+\value{
+list with internal representation of data
+}
 \description{
 internal function. Creates internal data representation
 }

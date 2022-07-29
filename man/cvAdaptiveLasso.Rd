@@ -50,6 +50,9 @@ for more details.}
 
 \item{returnSubsets}{set to TRUE to return the parameters for each training set}
 }
+\value{
+model of class cvRegularizedSEM
+}
 \description{
 Implements cross-validated adaptive lasso regularization for structural equation models.
 The penalty function is given by:

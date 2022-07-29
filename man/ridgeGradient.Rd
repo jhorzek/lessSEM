@@ -13,6 +13,9 @@ ridgeGradient(parameters, tuningParameters, penaltyFunctionArguments)
 
 \item{penaltyFunctionArguments}{list with field regularizedParameterLabels (labels of regularized parameters)}
 }
+\value{
+gradient values
+}
 \description{
 ridge gradient function
 }

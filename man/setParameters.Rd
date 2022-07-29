@@ -15,6 +15,9 @@ setParameters(SEM, labels, values, raw)
 
 \item{raw}{are the parameters given in raw format or transformed?}
 }
+\value{
+SEM with changed parameter values
+}
 \description{
 change the parameters of the internal model representation.
 }

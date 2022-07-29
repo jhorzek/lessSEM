@@ -27,12 +27,12 @@ test_that("testing ista-lasso", {
   scores <- -2*lavScores(model)
   gradients <- apply(scores,2,sum)
   
-  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = model, whichPars = "start")
-  SEM <- lessSEM:::fit(SEM)
+  SEM <- lessSEM::SEMFromLavaan(lavaanModel = model, whichPars = "start")
+  SEM <- lessSEM::fit(SEM)
   SEM$getGradients(T)
   eigen(SEM$impliedCovariance)$values
   
-  startingValues <- lessSEM:::getParameters(SEM, TRUE)
+  startingValues <- lessSEM::getParameters(SEM, TRUE)
   labels <- SEM$getParameterLabels()
   
   weights <- startingValues
@@ -64,8 +64,8 @@ test_that("testing ista-lasso", {
   
   lassoResult$rawParameters
   
-  testthat::expect_equal(all(round(lessSEM:::getParameters(SEM, raw = FALSE) - 
-                                     lessSEM::getLavaanParameters(model)[names(lessSEM:::getParameters(SEM, raw = FALSE))],
+  testthat::expect_equal(all(round(lessSEM::getParameters(SEM, raw = FALSE) - 
+                                     lessSEM::getLavaanParameters(model)[names(lessSEM::getParameters(SEM, raw = FALSE))],
                                    1) == 0),
                          TRUE)
   

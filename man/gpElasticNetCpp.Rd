@@ -47,6 +47,9 @@ model.}
 compute the first lambda value which sets all regularized parameters to zero.
 It will then generate nLambda values between 0 and the computed lambda.}
 }
+\value{
+Object of class gpRegularized
+}
 \description{
 Implements elastic net regularization for general purpose optimization problems with C++ functions.
 The penalty function is given by:

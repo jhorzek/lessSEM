@@ -20,6 +20,7 @@
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
+#' @returns model of class cvRegularizedSEM
 #' @md
 cvRegularizeSmoothSEMInternal <- function(lavaanModel,
                                     k,
@@ -73,7 +74,7 @@ cvRegularizeSmoothSEMInternal <- function(lavaanModel,
     if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
     k <- ncol(subsets)
   }else{
-    subsets <- lessSEM:::createSubsets(N = N, k = k)
+    subsets <- lessSEM::createSubsets(N = N, k = k)
   }
   
   if(penalty == "adaptiveLasso") 

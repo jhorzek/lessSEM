@@ -4,6 +4,7 @@
 #' @param N number of persons in the data set
 #' @param loadings loadings of the latent variable on the manifest observations
 #' @param percentMissing percentage of missing data
+#' @returns data set for a single-factor CFA.
 #' @examples 
 #' y <- lessSEM::simulateExampleData()
 #' @export
@@ -125,10 +126,13 @@ noDotDotDot <- function(fn, fnName, ...){
 #' 
 #' This function helps you create the pointers necessary to use the Cpp interface
 #' 
-#' @param fitFunName name of your C++ fit function (IMPORTANT: This must be the name
+#' @param fitFunName name of your C++ fit function 
+#' (IMPORTANT: This must be the name
 #' used in C++)
-#' @param gradFunName name of your C++ gradient function (IMPORTANT: This must be the name
+#' @param gradFunName name of your C++ gradient function 
+#' (IMPORTANT: This must be the name
 #' used in C++)
+#' @returns a string which can be copied in the C++ function to create the pointers.
 #' @export
 makePtrs <- function(fitFunName, gradFunName){
   

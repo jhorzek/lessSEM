@@ -4,6 +4,12 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+//' scadPenalty_C
+//' 
+//' @param par single parameter value
+//' @param lambda_p lambda value for this parameter
+//' @param theta theta value for this parameter
+//' @returns penalty value
 // [[Rcpp::export]]
 double scadPenalty_C(const double par,
                      const double lambda_p,

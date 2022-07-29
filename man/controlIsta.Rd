@@ -56,6 +56,9 @@ If set to -99 you will get the debug output which is horribly convoluted}
 3 = Barzilai-Borwein procedure 
 4 = Barzilai-Borwein procedure, but sometimes resets the step size; this can help when the optimizer is caught in a bad spot.}
 }
+\value{
+object of class controlIsta
+}
 \description{
 controlIsta
 }

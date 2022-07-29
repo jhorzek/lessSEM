@@ -65,6 +65,7 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -239,6 +240,7 @@ lasso <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -405,6 +407,7 @@ adaptiveLasso <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -547,6 +550,7 @@ ridge <- function(lavaanModel,
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -691,6 +695,7 @@ elasticNet <- function(lavaanModel,
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -815,6 +820,7 @@ cappedL1 <- function(lavaanModel,
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -941,6 +947,7 @@ lsp <- function(lavaanModel,
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -1069,6 +1076,7 @@ mcp <- function(lavaanModel,
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)

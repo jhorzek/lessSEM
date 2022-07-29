@@ -4,6 +4,7 @@
 #'
 #' @param lavaanModel model of class lavaan
 #' @param removeDuplicates should duplicated parameters be removed?
+#' @returns returns a labeled vector with parameters from lavaan
 #' @export
 getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
@@ -18,6 +19,7 @@ getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
 #' can be used to get both sets of labels.
 #'
 #' @param lavaanModel model of class lavaan
+#' @returns a list with lavaan and regsem labels
 #' @export
 lavaan2regsemLabels <- function(lavaanModel){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
@@ -48,6 +50,7 @@ lavaan2regsemLabels <- function(lavaanModel){
 #' 
 #' @param cvregsemModel model of class cvregsem
 #' @param lavaanModel model of class lavaan
+#' @returns regsem parameters with lavaan labels
 #' @export
 cvregsem2LavaanParameters <- function(cvregsemModel, lavaanModel){
   if(!is(cvregsemModel, "cvregsem")) stop("cvregsemModel must be of class cvregsem.")
@@ -71,6 +74,7 @@ cvregsem2LavaanParameters <- function(cvregsemModel, lavaanModel){
 #' 
 #' @param regsemModel model of class regsem
 #' @param lavaanModel model of class lavaan
+#' @returns regsem parameters with lavaan labels
 #' @export
 regsem2LavaanParameters <- function(regsemModel, lavaanModel){
   if(!is(regsemModel, "regsem")) stop("regsemModel must be of class cvregsem.")
@@ -94,6 +98,7 @@ regsem2LavaanParameters <- function(regsemModel, lavaanModel){
 #' can be used to get both sets of labels.
 #'
 #' @param lavaanModel model of class lavaan
+#' @returns list with lavaan labels and lslx labels
 #' @export
 lavaan2lslxLabels <- function(lavaanModel){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")

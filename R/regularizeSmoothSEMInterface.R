@@ -24,6 +24,7 @@
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -132,6 +133,7 @@ smoothLasso <- function(lavaanModel,
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -244,6 +246,7 @@ smoothAdaptiveLasso <- function(lavaanModel,
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -340,6 +343,7 @@ ridgeBfgs <- function(lavaanModel,
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
+#' @returns Model of class regularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)

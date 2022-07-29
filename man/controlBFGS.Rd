@@ -34,25 +34,28 @@ If set to "compute", the initial hessian will be computed. If set to a single va
 
 \item{stepSize}{Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)}
 
+\item{sigma}{only relevant when lineSearch = 'GLMNET'. Controls the sigma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.}
+
+\item{gamma}{Controls the gamma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421. Defaults to 0.}
+
 \item{maxIterOut}{Maximal number of outer iterations}
 
 \item{maxIterIn}{Maximal number of inner iterations}
 
 \item{maxIterLine}{Maximal number of iterations for the line search procedure}
 
+\item{breakOuter}{Stopping criterion for outer iterations}
+
+\item{breakInner}{Stopping criterion for inner iterations}
+
 \item{convergenceCriterion}{which convergence criterion should be used for the outer iterations? possible are 0 = GLMNET, 1 = gradients, 2 = fitChange
 Note that in case of gradients and GLMNET, we divide the gradients (and the Hessian) of the log-Likelihood by N as it would otherwise be
 considerably more difficult for larger sample sizes to reach the convergence criteria.}
 
 \item{verbose}{0 prints no additional information, > 0 prints GLMNET iterations}
-
-\item{sig}{only relevant when lineSearch = 'GLMNET'. Controls the sigma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.}
-
-\item{gam}{Controls the gamma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421. Defaults to 0.}
-
-\item{epsOut}{Stopping criterion for outer iterations}
-
-\item{epsIn}{Stopping criterion for inner iterations}
+}
+\value{
+object of class controlBFGS
 }
 \description{
 Control the BFGS optimizer.

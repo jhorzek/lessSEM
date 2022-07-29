@@ -32,6 +32,9 @@ getLavaanParameters(model) with your lavaan model object}
 \item{control}{used to control the optimizer. This element is generated with
 the controlBFGS function. See ?controlBFGS for more details.}
 }
+\value{
+Model of class regularizedSEM
+}
 \description{
 This function allows for regularization of models built in lavaan with the
 smoothed lasso penalty. The returned object is an S4 class; its elements can be accessed

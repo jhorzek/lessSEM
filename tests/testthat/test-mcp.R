@@ -29,7 +29,7 @@ test_that("testing mcp", {
                             paste0(yNames, collapse = " + "), " <= 1"
   )
   fitLslx <- lslx$new(model = lslxModelSyntax,
-                      sample_cov = cov(y),
+                      sample_cov = stats::cov(y),
                       sample_size = nrow(y)
   )
   

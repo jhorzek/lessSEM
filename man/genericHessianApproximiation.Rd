@@ -19,6 +19,9 @@ genericHessianApproximiation(
 
 \item{penaltyFunction}{}
 }
+\value{
+matrix with Hessian values
+}
 \description{
 This function can be used to approximate the Hessian of a generic penalty function with numDeriv
 }

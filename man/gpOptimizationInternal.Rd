@@ -45,6 +45,9 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}
 }
+\value{
+Object of class gpRegularized
+}
 \description{
 Internal function: This function computes the regularized models
 for all penaltiy functions which are implemented for glmnet and gist.

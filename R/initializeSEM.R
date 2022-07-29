@@ -11,6 +11,7 @@
 #' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param addMeans If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average
 #' @param dataSet optional: Pass an alternative data set to SEMFromLavaan which will replace the original data set in lavaanModel.
+#' @returns Object of class Rcpp_SEMCpp
 SEMFromLavaan <- function(lavaanModel, 
                           whichPars = "est",
                           transformVariances = TRUE, 
@@ -74,12 +75,12 @@ SEMFromLavaan <- function(lavaanModel,
     
   }
   
-  internalData <- lessSEM:::SEMdata(rawData)
+  internalData <- lessSEM::SEMdata(rawData)
   
   # translate to RAM notation
   
   ## directed paths
-  AmatrixElements <- lessSEM:::setAMatrix(model = lavaanModel, 
+  AmatrixElements <- lessSEM::setAMatrix(model = lavaanModel, 
                                           lavaanParameterTable = lavaanParameterTable, 
                                           nLatent = nLatent, 
                                           nManifest = nManifest, 
@@ -87,7 +88,7 @@ SEMFromLavaan <- function(lavaanModel,
                                           manifestNames = manifestNames)
   
   ## undirected paths
-  SmatrixElements <- lessSEM:::setSMatrix(model = lavaanModel, 
+  SmatrixElements <- lessSEM::setSMatrix(model = lavaanModel, 
                                           lavaanParameterTable = lavaanParameterTable, 
                                           nLatent = nLatent, 
                                           nManifest = nManifest, 
@@ -96,7 +97,7 @@ SEMFromLavaan <- function(lavaanModel,
   
   
   ## Mean structure
-  MvectorElements <- lessSEM:::setMVector(model = lavaanModel, 
+  MvectorElements <- lessSEM::setMVector(model = lavaanModel, 
                                           lavaanParameterTable = lavaanParameterTable, 
                                           nLatent = nLatent, 
                                           nManifest = nManifest, 
@@ -138,7 +139,7 @@ SEMFromLavaan <- function(lavaanModel,
   }else if(whichPars == "start"){
     parameterValues <- lavaanModel@ParTable$start[lavaanModel@ParTable$free != 0]
   }else{
-    stop(paste0("Could not set the parameters of the model. Set whichPars to one of: 'est', 'start'. See ?lessSEM:::SEMFromLavaan for more details."))
+    stop(paste0("Could not set the parameters of the model. Set whichPars to one of: 'est', 'start'. See ?lessSEM::SEMFromLavaan for more details."))
   }
   
   # construct internal representation of parameters
@@ -271,11 +272,11 @@ SEMFromLavaan <- function(lavaanModel,
   # the following step is necessary if the parameters of the lavaanModel do not correspond to those in
   # the matrices of the lavaan object. This is, for instance, the case if the starting values
   # instead of the estimates are used.
-  parameters <- lessSEM:::getParameters(SEM = SEMCpp, raw = TRUE)
-  SEMCpp <- lessSEM:::setParameters(SEM = SEMCpp, labels = names(parameters), values = parameters, raw = TRUE)
+  parameters <- lessSEM::getParameters(SEM = SEMCpp, raw = TRUE)
+  SEMCpp <- lessSEM::setParameters(SEM = SEMCpp, labels = names(parameters), values = parameters, raw = TRUE)
   
   if(fit){
-    SEMCpp <- lessSEM:::fit(SEM = SEMCpp)
+    SEMCpp <- lessSEM::fit(SEM = SEMCpp)
     if(whichPars == "est" && checkFit){
       # check model fit
       if(round(SEMCpp$m2LL - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")

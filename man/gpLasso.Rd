@@ -49,6 +49,9 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 for more details.}
 }
+\value{
+Object of class gpRegularized
+}
 \description{
 Implements lasso regularization for general purpose optimization problems.
 The penalty function is given by:

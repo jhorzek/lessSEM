@@ -22,6 +22,7 @@
 #' (currently gist).
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
+#' @returns Object of class gpRegularized
 #' @md
 #' @export
 gpOptimizationInternal <- function(par,

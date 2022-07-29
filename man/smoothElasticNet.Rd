@@ -41,6 +41,9 @@ in \link{0,1}. 0 = ridge, 1 = lasso.}
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.}
 }
+\value{
+Model of class regularizedSEM
+}
 \description{
 This function allows for regularization of models built in lavaan with the
 smooth elastic net penalty. Its elements can be accessed

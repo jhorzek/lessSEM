@@ -41,6 +41,9 @@ model.}
 \item{control}{used to control the optimizer. This element is generated with
 the controlBFGS function. See ?controlBFGS for more details.}
 }
+\value{
+model of class cvRegularizedSEM
+}
 \description{
 Combination of smoothly regularized structural equation model and cross-validation
 }

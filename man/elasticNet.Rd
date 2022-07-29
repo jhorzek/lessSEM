@@ -35,6 +35,9 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}
 }
+\value{
+Model of class regularizedSEM
+}
 \description{
 Implements elastic net regularization for structural equation models.
 The penalty function is given by:

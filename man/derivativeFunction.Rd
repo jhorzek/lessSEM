@@ -13,6 +13,9 @@ derivativeFunction(par, SEM, raw)
 
 \item{raw}{controls if the internal transformations of lessSEM is used.}
 }
+\value{
+gradients of the model
+}
 \description{
 internal function which returns the gradients of an object of class Rcpp_SEMCpp. This function can be used in optimizers
 }

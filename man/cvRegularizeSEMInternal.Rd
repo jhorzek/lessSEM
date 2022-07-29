@@ -43,6 +43,9 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}
 }
+\value{
+model of class cvRegularizedSEM
+}
 \description{
 Combination of regularized structural equation model and cross-validation
 }

@@ -30,6 +30,9 @@ a constant (theta)}
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta (see ?controlIsta)}
 }
+\value{
+Model of class regularizedSEM
+}
 \description{
 Implements scad regularization for structural equation models.
 The penalty function is given by:

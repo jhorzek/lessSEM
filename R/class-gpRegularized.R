@@ -1,3 +1,15 @@
+#' gpRegularized
+#' 
+#' Class for regularized model using general purpose optimization interface
+#' @slot penalty penalty used (e.g., "lasso")
+#' @slot parameters data.frame with all parameter estimates
+#' @slot fits data.frame with all fit results
+#' @slot parameterLabels character vector with names of all parameters
+#' @slot weights vector with weights given to each of the parameters in the penalty
+#' @slot regularized character vector with names of regularized parameters
+#' @slot internalOptimization list of elements used internally
+#' @slot inputArguments list with elements passed by the user to the general
+#' purpose optimizer
 setClass(Class = "gpRegularized",
          representation = representation(
            penalty = "character",
@@ -52,6 +64,7 @@ setMethod("summary", "gpRegularized", function (object) {
 #' 
 #' @param object object of class gpRegularized
 #' @param criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
+#' @returns parameter estimates
 #' @export
 setMethod("coef", "gpRegularized", function (object, criterion = NULL) {
   if(!is.null(criterion) && criterion %in% c("AIC", "BIC")){
@@ -80,6 +93,7 @@ setMethod("coef", "gpRegularized", function (object, criterion = NULL) {
 #' returns the AIC
 #' 
 #' @param object object of class gpRegularized
+#' @returns data frame with fit values, appended with AIC
 #' @export
 setMethod("AIC", "gpRegularized", function (object) {
   if(!object@penalty %in% c("lasso", "adaptiveLasso", "cappedL1", "mcp", "scad"))
@@ -96,6 +110,7 @@ setMethod("AIC", "gpRegularized", function (object) {
 #' returns the BIC
 #' 
 #' @param object object of class gpRegularized
+#' @returns data frame with fit values, appended with BIC
 #' @export
 setMethod("BIC", "gpRegularized", function (object) {
   N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
@@ -127,7 +142,7 @@ setMethod("plot", "gpRegularized", function (x, regularizedOnly = TRUE) {
   
   if(nTuning > 2) 
     stop("Plotting currently only supported for up to 2 tuning parameters")
-  if(nTuning == 2 & !("plotly" %in% rownames(installed.packages())))
+  if(nTuning == 2 & !("plotly" %in% rownames(utils::installed.packages())))
     stop("Plotting more than one tuning parameter requires the package plotly")
   
   

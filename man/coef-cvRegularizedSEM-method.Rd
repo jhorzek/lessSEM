@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{object of class regularizedSEM}
 }
+\value{
+the parameter estimates of an cvRegularizedSEM
+}
 \description{
 Returns the parameter estimates of an cvRegularizedSEM
 }

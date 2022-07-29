@@ -17,6 +17,9 @@ simulateExampleData(
 
 \item{percentMissing}{percentage of missing data}
 }
+\value{
+data set for a single-factor CFA.
+}
 \description{
 simulate data for a simple CFA model
 }

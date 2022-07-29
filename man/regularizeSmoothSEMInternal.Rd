@@ -35,6 +35,9 @@ model.}
 \item{control}{used to control the optimizer. This element is generated with
 the controlBFGS function. See ?controlBFGS for more details.}
 }
+\value{
+regularizedSEM
+}
 \description{
 Internal function: This function computes the regularized models
 for all smooth penalty functions which are implemented for bfgs.

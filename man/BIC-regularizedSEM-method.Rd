@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{object of class regularizedSEM}
 }
+\value{
+BIC values
+}
 \description{
 returns the BIC
 }

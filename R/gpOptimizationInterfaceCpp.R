@@ -56,6 +56,7 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers
@@ -275,6 +276,7 @@ gpLassoCpp <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers
@@ -496,6 +498,7 @@ gpAdaptiveLassoCpp <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers
@@ -700,6 +703,7 @@ gpRidgeCpp <- function(par,
 #' (currently gist).
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples
 #' # This example shows how to use the optimizers
@@ -901,6 +905,7 @@ gpElasticNetCpp <- function(par,
 #' a constant (theta)
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers
@@ -1286,6 +1291,7 @@ gpLspCpp <- function(par,
 #' @param thetas numeric vector: values for the tuning parameter theta
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers
@@ -1487,6 +1493,7 @@ gpMcpCpp <- function(par,
 #' @param thetas numeric vector: values for the tuning parameter theta
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers

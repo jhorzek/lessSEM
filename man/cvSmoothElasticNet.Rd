@@ -36,6 +36,9 @@ the controlBFGS function. See ?controlBFGS for more details.}
 model. If you are unsure what these parameters are called, use
 getLavaanParameters(model) with your lavaan model object}
 }
+\value{
+model of class cvRegularizedSEM
+}
 \description{
 Implements cross-validated  smooth elastic net regularization for structural equation models.
 The penalty function is given by:

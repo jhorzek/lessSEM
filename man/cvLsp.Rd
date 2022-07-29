@@ -46,6 +46,9 @@ for more details.}
 \item{method}{which optimizer should be used? Currently implemented are ista and glmnet.
 With ista, the control argument can be used to switch to related procedures (currently gist).}
 }
+\value{
+model of class cvRegularizedSEM
+}
 \description{
 Implements lsp regularization for structural equation models.
 The penalty function is given by:

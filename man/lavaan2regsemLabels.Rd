@@ -9,6 +9,9 @@ lavaan2regsemLabels(lavaanModel)
 \arguments{
 \item{lavaanModel}{model of class lavaan}
 }
+\value{
+a list with lavaan and regsem labels
+}
 \description{
 helper function: regsem and lavaan use slightly different parameter labels. This function
 can be used to get both sets of labels.

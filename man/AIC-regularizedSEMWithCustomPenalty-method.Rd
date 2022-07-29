@@ -13,6 +13,9 @@
 
 \item{zeroThreshold}{penalized parameters below this threshold will be counted as zeroed}
 }
+\value{
+AIC values
+}
 \description{
 returns the AIC
 }

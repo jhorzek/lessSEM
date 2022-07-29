@@ -134,6 +134,7 @@ inline lessSEM::fitResults ista(
   arma::rowvec parameterChange(startingValues.n_elem);
   arma::rowvec gradientChange(startingValues.n_elem); // necessary for Barzilai Borwein
   arma::mat quadr, parchTimeGrad;
+  Rcpp::NumericVector randomNumber; // for stochastic Barzilai Borwein
   
   // prepare fit elements
   double fit_k = (1.0/control_.sampleSize)*model_.fit(startingValues, parameterLabels) +
@@ -381,8 +382,10 @@ inline lessSEM::fitResults ista(
       if(control_.verbose == -99) Rcpp::Rcout << "L_kMinus1 after BB: " << L_kMinus1 << std::endl;
       if(L_kMinus1 < 1e-10 || L_kMinus1 > 1e10) L_kMinus1 = control_.L0;
       
-      if(control_.stepSizeIn == stochasticBarzilaiBorwein && 
-         rand() % 100 < 25) {
+      
+      randomNumber = Rcpp::runif(1,0.0,1.0);
+      if((control_.stepSizeIn == stochasticBarzilaiBorwein) && 
+         (randomNumber(0,0) < 0.25)) {
         if(control_.verbose == -99) Rcpp::Rcout << "Resetting L_kMinus1 randomly " << std::endl;
         L_kMinus1 = control_.L0;// reset with 25% probability
       }

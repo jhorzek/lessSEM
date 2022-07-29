@@ -26,6 +26,9 @@ gpGetMaxLambda(
 
 \item{weights}{weights given to each parameter in the penalty function}
 }
+\value{
+first lambda value which sets all regularized parameters to zero (plus some tolerance)
+}
 \description{
 generates a the first lambda which sets all regularized parameters to zero
 }

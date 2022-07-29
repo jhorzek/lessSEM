@@ -32,6 +32,9 @@ getLavaanParameters(model) with your lavaan model object}
 \item{control}{used to control the optimizer. This element is generated with
 the controlBFGS function. See ?controlBFGS for more details.}
 }
+\value{
+model of class cvRegularizedSEM
+}
 \description{
 Implements cross-validated smooth lasso regularization for structural equation models.
 The penalty function is given by:

@@ -11,6 +11,9 @@
 
 \item{criterion}{can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned}
 }
+\value{
+parameter estimates
+}
 \description{
 Returns the parameter estimates of a gpRegularized
 }

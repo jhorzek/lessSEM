@@ -38,6 +38,9 @@ getLavaanParameters(model) with your lavaan model object}
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta (see ?controlIsta)}
 }
+\value{
+Object of class gpRegularized
+}
 \description{
 Implements scad regularization for general purpose optimization problems.
 The penalty function is given by:

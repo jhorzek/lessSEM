@@ -65,6 +65,7 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers
@@ -253,6 +254,7 @@ gpLasso <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers
@@ -458,6 +460,7 @@ gpAdaptiveLasso <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers
@@ -642,6 +645,7 @@ gpRidge <- function(par,
 #' (currently gist).
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples
 #' # This example shows how to use the optimizers
@@ -828,6 +832,7 @@ gpElasticNet <- function(par,
 #' a constant (theta)
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers
@@ -1188,6 +1193,7 @@ gpLsp <- function(par,
 #' @param thetas numeric vector: values for the tuning parameter theta
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers
@@ -1367,6 +1373,7 @@ gpMcp <- function(par,
 #' @param thetas numeric vector: values for the tuning parameter theta
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
+#' @returns Object of class gpRegularized
 #' @md
 #' @examples 
 #' # This example shows how to use the optimizers

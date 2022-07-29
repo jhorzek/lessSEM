@@ -7,11 +7,16 @@
 makePtrs(fitFunName, gradFunName)
 }
 \arguments{
-\item{fitFunName}{name of your C++ fit function (IMPORTANT: This must be the name
+\item{fitFunName}{name of your C++ fit function 
+(IMPORTANT: This must be the name
 used in C++)}
 
-\item{gradFunName}{name of your C++ gradient function (IMPORTANT: This must be the name
+\item{gradFunName}{name of your C++ gradient function 
+(IMPORTANT: This must be the name
 used in C++)}
+}
+\value{
+a string which can be copied in the C++ function to create the pointers.
 }
 \description{
 This function helps you create the pointers necessary to use the Cpp interface

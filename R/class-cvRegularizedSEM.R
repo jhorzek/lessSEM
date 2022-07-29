@@ -1,3 +1,17 @@
+#' cvRegularizedSEM
+#' 
+#' Class for cross-validated regularized SEM
+#' @slot parameters data.frame with parameter estimates for the best combination of the
+#' tuning parameters
+#' @slot cvfits data.frame with all combinations of the
+#' tuning parameters and the sum of the cross-validation fits
+#' @slot parameterLabels character vector with names of all parameters
+#' @slot regularized character vector with names of regularized parameters
+#' @slot cvfitsDetails data.frame with cross-validation fits for each subset
+#' @slot subsets matrix indicating which person is in which subset
+#' @slot subsetParameters optional: data.frame with parameter estimates for all
+#' combinations of the tuning parameters in all subsets
+#' @slot misc list with additional return elements
 setClass(Class = "cvRegularizedSEM",
          representation = representation(
            parameters="data.frame",
@@ -12,7 +26,6 @@ setClass(Class = "cvRegularizedSEM",
 )
 
 #' show
-#' 
 #' @export
 setMethod("show", "cvRegularizedSEM", function (object) {
   bestFit <- unlist(object@parameters)
@@ -49,7 +62,7 @@ setMethod("summary", "cvRegularizedSEM", function (object) {
 #' Returns the parameter estimates of an cvRegularizedSEM
 #'  
 #' @param object object of class regularizedSEM
-#' 
+#' @returns the parameter estimates of an cvRegularizedSEM
 #' @export
 setMethod("coef", "cvRegularizedSEM", function (object) {
   return(unlist(object@parameters[,object@parameterLabels]))
@@ -71,7 +84,7 @@ setMethod("plot", "cvRegularizedSEM", function (x) {
   
   if(nTuning > 2) 
     stop("Plotting currently only supported for up to 2 tuning parameters")
-  if(nTuning == 2 & !("plotly" %in% rownames(installed.packages())))
+  if(nTuning == 2 & !("plotly" %in% rownames(utils::installed.packages())))
     stop("Plotting more than one tuning parameter requires the package plotly")
   
   if(nTuning == 1){

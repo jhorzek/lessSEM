@@ -64,6 +64,7 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns model of class cvRegularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -210,6 +211,7 @@ cvLasso <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns model of class cvRegularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -354,6 +356,7 @@ cvAdaptiveLasso <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns model of class cvRegularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -497,6 +500,7 @@ cvRidge <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns model of class cvRegularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -643,6 +647,7 @@ cvElasticNet <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns model of class cvRegularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -784,6 +789,7 @@ cvCappedL1 <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns model of class cvRegularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -927,6 +933,7 @@ cvLsp <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns model of class cvRegularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)
@@ -1072,6 +1079,7 @@ cvMcp <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
+#' @returns model of class cvRegularizedSEM
 #' @md
 #' @examples 
 #' library(lessSEM)

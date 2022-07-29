@@ -34,6 +34,9 @@ the next iteration?}
 
 \item{control}{option to set parameters of the optimizer; see ?Rsolnp::solnp}
 }
+\value{
+Model of class regularizedSEMWithCustomPenalty
+}
 \description{
 Optimize a SEM with custom penalty function using the Rsolnp optimizer (see ?Rsolnp::solnp). This optimizer is the default in regsem (see ?regsem::cv_regsem).
 }

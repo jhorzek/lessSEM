@@ -39,6 +39,9 @@ a constant (theta)}
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta (see ?controlIsta)}
 }
+\value{
+Object of class gpRegularized
+}
 \description{
 Implements cappedL1 regularization for general purpose optimization problems.
 The penalty function is given by:

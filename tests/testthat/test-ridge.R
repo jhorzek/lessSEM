@@ -26,7 +26,7 @@ test_that("testing elasticNet-ridge-c", {
   # fit model using lslx
   lslxModelSyntax <- paste0('fix(1)*', yNames[1], ' + ', paste0(yNames[2:length(yNames)], collapse = " + "), " <=: f") 
   fitLslx <- lslx$new(model = lslxModelSyntax,
-                      sample_cov = cov(y),
+                      sample_cov = stats::cov(y),
                       sample_size = nrow(y)
   )
   

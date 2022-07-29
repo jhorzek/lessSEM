@@ -51,6 +51,9 @@ It will then generate nLambda values between 0 and the computed lambda.}
 
 \item{returnSubsets}{set to TRUE to return the parameters for each training set}
 }
+\value{
+model of class cvRegularizedSEM
+}
 \description{
 Implements elastic net regularization for structural equation models.
 The penalty function is given by:

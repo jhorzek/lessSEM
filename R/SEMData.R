@@ -2,6 +2,7 @@
 #' 
 #' internal function. Creates internal data representation
 #' @param rawData matrix with raw data set
+#' @returns list with internal representation of data
 SEMdata <- function(rawData){
   
   # extract unique missingness patterns
@@ -21,7 +22,7 @@ SEMdata <- function(rawData){
       missingSubsets[[mrow]]$N <- length(individuals)
       missingSubsets[[mrow]]$observed <- sum(!uniqueMissingPatterns[mrow,])
       missingSubsets[[mrow]]$notMissing <- which(!uniqueMissingPatterns[mrow,])-1
-      missingSubsets[[mrow]]$covariance <- ((length(individuals)-1)/length(individuals))*cov(rawData[individuals,!uniqueMissingPatterns[mrow,]])
+      missingSubsets[[mrow]]$covariance <- ((length(individuals)-1)/length(individuals))*stats::cov(rawData[individuals,!uniqueMissingPatterns[mrow,]])
       missingSubsets[[mrow]]$means <- apply(rawData[individuals,!uniqueMissingPatterns[mrow,]], 2, mean)
       missingSubsets[[mrow]]$rawData <- rawData[individuals,,drop=FALSE]
       missingSubsets[[mrow]]$m2LL <- NA

@@ -49,6 +49,9 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 for more details.}
 }
+\value{
+Model of class regularizedSEM
+}
 \description{
 Implements adaptive lasso regularization for structural equation models.
 The penalty function is given by:
