@@ -402,7 +402,6 @@ genericGradientApproximiation <- function(parameters,
 #' 
 #' This function can be used to approximate the Hessian of a generic penalty function with numDeriv
 #' @param parameters vector with labeled parameter values
-#' @param penaltyFunction 
 #' @param tuningParameters data.frame with tuning parameters
 #' @param penaltyFunctionArguments list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see lessSEM::smoothLASSO for an example 
 #' @returns matrix with Hessian values
