@@ -17,6 +17,15 @@ double mcpPenalty_C(const double par,
   return(lessSEM::mcpPenalty(par, lambda_p, theta));
 }
 
+//'@name istaMcp
+//'@title mcp optimization with ista
+//'@description Object for mcp optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta and a lambda value.
+//'@returns a list with fit results
 class istaMcp{
   public:
     

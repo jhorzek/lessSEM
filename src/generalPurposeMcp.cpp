@@ -4,6 +4,17 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+//'@name istaMcpGeneralPurpose
+//'@title mcp optimization with ista
+//'@description Object for mcp optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'an R function to compute the fit, an R function to compute the gradients, a
+//'list with elements the fit and gradient function require, a theta and a lambda value (alpha must be 1).
+//'@returns a list with fit results
+//'
 class istaMcpGeneralPurpose{
   public:
     
@@ -108,6 +119,16 @@ class istaMcpGeneralPurpose{
   }
 };
 
+//'@name istaMcpGeneralPurposeCpp
+//'@title mcp optimization with ista
+//'@description Object for mcp optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEXP function pointer to compute the fit, a SEXP function pointer to compute the gradients, a
+//'list with elements the fit and gradient function require, a theta and a lambda value (alpha must be 1).
+//'@returns a list with fit results
 class istaMcpGeneralPurposeCpp{
 public:
   

@@ -4,11 +4,21 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+//'@name istaCappedL1GeneralPurpose
+//'@title cappedL1 optimization with ista
+//'@description Object for cappedL1 optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'an R function to compute the fit, an R function to compute the gradients, a
+//'list with elements the fit and gradient function require, a theta, lambda and an alpha value (alpha must be 1).
+//'@returns a list with fit results
 class istaCappedL1GeneralPurpose{
-  public:
-    
-    
-    // settings
+public:
+  
+  
+  // settings
   const Rcpp::NumericVector weights;
   
   // control optimizer
@@ -29,25 +39,27 @@ class istaCappedL1GeneralPurpose{
     Rcpp::List control
   ):
     weights(weights_),
-  L0(Rcpp::as<double> (control["L0"])),
-  eta(Rcpp::as<double> (control["eta"])),
-  accelerate(Rcpp::as<bool> (control["accelerate"])),
-  maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
-  maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
-  breakOuter(Rcpp::as<double> (control["breakOuter"])),
-  convCritInner(static_cast<lessSEM::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
-  sigma(Rcpp::as<double> (control["sigma"])),
-  stepSizeInh(static_cast<lessSEM::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
-  verbose(Rcpp::as<int> (control["verbose"])){}
+    L0(Rcpp::as<double> (control["L0"])),
+    eta(Rcpp::as<double> (control["eta"])),
+    accelerate(Rcpp::as<bool> (control["accelerate"])),
+    maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
+    maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
+    breakOuter(Rcpp::as<double> (control["breakOuter"])),
+    convCritInner(static_cast<lessSEM::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
+    sigma(Rcpp::as<double> (control["sigma"])),
+    stepSizeInh(static_cast<lessSEM::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
+    verbose(Rcpp::as<int> (control["verbose"])){}
   
   Rcpp::List optimize(
-    Rcpp::NumericVector startingValues_, 
-    Rcpp::Function fitFunction,
-    Rcpp::Function gradientFunction,
-    Rcpp::List userSuppliedElements,
-    double theta_,
-    double lambda_, 
-    double alpha_){
+      Rcpp::NumericVector startingValues_, 
+      Rcpp::Function fitFunction,
+      Rcpp::Function gradientFunction,
+      Rcpp::List userSuppliedElements,
+      double theta_,
+      double lambda_, 
+      double alpha_){
+    
+    if(alpha_ != 1.0) Rcpp::stop("alpha must be 1.");
     
     generalPurposeFitFramework gpFF(fitFunction, gradientFunction, userSuppliedElements);
     
@@ -110,6 +122,16 @@ class istaCappedL1GeneralPurpose{
   }
 };
 
+//'@name istaCappedL1GeneralPurposeCpp
+//'@title cappedL1 optimization with ista
+//'@description Object for cappedL1 optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEXP function pointer to compute the fit, a SEXP function pointer to compute the gradients, a
+//'list with elements the fit and gradient function require, a theta, lambda and an alpha value (alpha must be 1).
+//'@returns a list with fit results
 class istaCappedL1GeneralPurposeCpp{
 public:
   
