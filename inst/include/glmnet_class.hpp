@@ -103,9 +103,11 @@ inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
   zChange(1,1, arma::fill::zeros);
   
   HessDiag.diag() = Hessian.diag();
-  
-  std::vector<int> randOrder(stepDirection.n_elem);
-  for(int i = 0; i < stepDirection.n_elem; i++) randOrder.at(i) = i;
+
+  // the order in which parameters are updated should be random
+  Rcpp::NumericVector randOrder(stepDirection.n_elem);
+  Rcpp::NumericVector sampleFrom(stepDirection.n_elem);
+  for(int i = 0; i < stepDirection.n_elem; i++) sampleFrom.at(i) = i;
   
   if(verbose == -99 ) Rcpp::Rcout << "parameters_kMinus1" << parameters_kMinus1 << std::endl;
   
@@ -114,8 +116,9 @@ inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
     // reset direction z
     z.fill(arma::fill::zeros); 
     //z_old.fill(arma::fill::zeros);
+    
     // iterate over parameters in random order
-    std::random_shuffle(randOrder.begin(), randOrder.end());
+    randOrder = Rcpp::sample(sampleFrom, stepDirection.n_elem,false);
     
     for(int p = 0; p < stepDirection.n_elem; p++){
       
