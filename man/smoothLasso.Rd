@@ -18,7 +18,7 @@ smoothLasso(
 \item{lavaanModel}{model of class lavaan}
 
 \item{regularized}{vector with names of parameters which are to be regularized.
-If you are unsure what these parameters are called, use 
+If you are unsure what these parameters are called, use
 getLavaanParameters(model) with your lavaan model object}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
@@ -29,7 +29,7 @@ getLavaanParameters(model) with your lavaan model object}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{control}{used to control the optimizer. This element is generated with 
+\item{control}{used to control the optimizer. This element is generated with
 the controlBFGS function. See ?controlBFGS for more details.}
 }
 \value{
@@ -43,13 +43,14 @@ Use lasso() instead.
 }
 \details{
 For more details, see:
-
-1. Lee, S.-I., Lee, H., Abbeel, P., & Ng, A. Y. (2006). 
-Efficient L1 Regularized Logistic Regression. Proceedings of the 
+\enumerate{
+\item Lee, S.-I., Lee, H., Abbeel, P., & Ng, A. Y. (2006).
+Efficient L1 Regularized Logistic Regression. Proceedings of the
 Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408.
-2. Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). 
-   Regularized Structural Equation Modeling. Structural Equation Modeling: 
-   A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+\item Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016).
+Regularized Structural Equation Modeling. Structural Equation Modeling:
+A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+}
 }
 \examples{
 library(lessSEM)

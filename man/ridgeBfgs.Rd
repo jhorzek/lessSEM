@@ -16,14 +16,14 @@ ridgeBfgs(
 \item{lavaanModel}{model of class lavaan}
 
 \item{regularized}{vector with names of parameters which are to be regularized.
-If you are unsure what these parameters are called, use 
+If you are unsure what these parameters are called, use
 getLavaanParameters(model) with your lavaan model object}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{control}{used to control the optimizer. This element is generated with 
+\item{control}{used to control the optimizer. This element is generated with
 the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.}
 }
 \value{
@@ -36,13 +36,14 @@ with the "@" operator (see examples).
 }
 \details{
 For more details, see:
-
-1. Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). 
-   Regularized Structural Equation Modeling. Structural Equation Modeling: 
-   A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
-2. Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood 
-   Method for Structural Equation Modeling. Psychometrika, 82(2),
-   329–354. https://doi.org/10.1007/s11336-017-9566-9
+\enumerate{
+\item Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016).
+Regularized Structural Equation Modeling. Structural Equation Modeling:
+A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+\item Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood
+Method for Structural Equation Modeling. Psychometrika, 82(2),
+329–354. https://doi.org/10.1007/s11336-017-9566-9
+}
 }
 \examples{
 library(lessSEM)

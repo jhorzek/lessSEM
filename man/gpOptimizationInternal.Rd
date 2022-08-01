@@ -20,14 +20,14 @@ gpOptimizationInternal(
 \arguments{
 \item{par}{labeled vector with starting values}
 
-\item{weights}{labeled vector with weights for each of the parameters in the 
+\item{weights}{labeled vector with weights for each of the parameters in the
 model.}
 
-\item{fn}{R function which takes the parameters AND their labels 
+\item{fn}{R function which takes the parameters AND their labels
 as input and returns the fit value (a single value)}
 
 \item{gr}{R function which takes the parameters AND their labels
-as input and returns the gradients of the objective function. 
+as input and returns the gradients of the objective function.
 If set to NULL, numDeriv will be used to approximate the gradients}
 
 \item{additionalArguments}{additional argument passed to fn and gr}
@@ -42,7 +42,7 @@ If set to NULL, numDeriv will be used to approximate the gradients}
 and glmnet. With ista, the control argument can be used to switch to related procedures
 (currently gist).}
 
-\item{control}{used to control the optimizer. This element is generated with 
+\item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}
 }
 \value{

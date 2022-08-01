@@ -9,21 +9,21 @@ getHessian(SEM, raw = FALSE, eps = 1e-07)
 \arguments{
 \item{SEM}{model of class Rcpp_SEMCpp}
 
-\item{raw}{controls if the internal transformations of lessSEM should be used. 
-lessSEM will use an exponential function for all variances to 
-avoid negative variances. When set to TRUE, the gradients will be given for 
-the internal parameter representation. Set to FALSE to get the usual 
+\item{raw}{controls if the internal transformations of lessSEM should be used.
+lessSEM will use an exponential function for all variances to
+avoid negative variances. When set to TRUE, the gradients will be given for
+the internal parameter representation. Set to FALSE to get the usual
 gradients}
 
 \item{eps}{eps controls the step size of the numerical approximation.}
 }
 \value{
-matrix with second derivatives of the -2log-Likelihood with respect 
+matrix with second derivatives of the -2log-Likelihood with respect
 to each parameter
 }
 \description{
-returns the Hessian of a model of class Rcpp_SEMCpp. This is the internal 
+returns the Hessian of a model of class Rcpp_SEMCpp. This is the internal
 model representation. Models of this class
-can be generated with the SEMFromLavaan-function. The function is adapted 
+can be generated with the SEMFromLavaan-function. The function is adapted
 from lavaan::lav_model_hessian.
 }

@@ -18,11 +18,11 @@ gpMcp(
 \arguments{
 \item{par}{labeled vector with starting values}
 
-\item{fn}{R function which takes the parameters AND their labels 
+\item{fn}{R function which takes the parameters AND their labels
 as input and returns the fit value (a single value)}
 
 \item{gr}{R function which takes the parameters AND their labels
-as input and returns the gradients of the objective function. 
+as input and returns the gradients of the objective function.
 If set to NULL, numDeriv will be used to approximate the gradients}
 
 \item{...}{additional arguments passed to fn and gr}
@@ -33,7 +33,7 @@ If set to NULL, numDeriv will be used to approximate the gradients}
 
 \item{thetas}{numeric vector: values for the tuning parameter theta}
 
-\item{control}{used to control the optimizer. This element is generated with 
+\item{control}{used to control the optimizer. This element is generated with
 the controlIsta (see ?controlIsta)}
 }
 \value{
@@ -42,51 +42,54 @@ Object of class gpRegularized
 \description{
 Implements mcp regularization for general purpose optimization problems.
 The penalty function is given by:
-\deqn{p( x_j) = \begin{cases}
+\ifelse{html}{\deqn{p( x_j) = \begin{cases}
 \lambda |x_j| - x_j^2/(2\theta) & \text{if } |x_j| \leq \theta\lambda\\
 \theta\lambda^2/2 & \text{if } |x_j| > \lambda\theta
-\end{cases}}
-where \eqn{\theta > 0}.
+\end{cases}} where \eqn{\theta > 0}.}{
+Equation Omitted in Pdf Documentation.}
 }
 \details{
-The interface is similar to that of optim. Users have to supply a vector 
-with starting values (important: This vector _must_ have labels) and a fitting
-function. This fitting functions _must_ take a labeled vector with parameter
+The interface is similar to that of optim. Users have to supply a vector
+with starting values (important: This vector \emph{must} have labels) and a fitting
+function. This fitting functions \emph{must} take a labeled vector with parameter
 values as first argument. The remaining arguments are passed with the ... argument.
 This is similar to optim.
 
 The gradient function gr is optional. If set to NULL, the \pkg{numDeriv} package
 will be used to approximate the gradients. Supplying a gradient function
-can result in considerable speed improvements.  
+can result in considerable speed improvements.
 
 mcp regularization:
-
-* Zhang, C.-H. (2010). Nearly unbiased variable selection under minimax concave penalty. 
+\itemize{
+\item Zhang, C.-H. (2010). Nearly unbiased variable selection under minimax concave penalty.
 The Annals of Statistics, 38(2), 894–942. https://doi.org/10.1214/09-AOS729
- 
-For more details on GLMNET, see:
+}
 
-* Friedman, J., Hastie, T., & Tibshirani, R. (2010). 
-Regularization Paths for Generalized Linear Models via Coordinate Descent. 
+For more details on GLMNET, see:
+\itemize{
+\item Friedman, J., Hastie, T., & Tibshirani, R. (2010).
+Regularization Paths for Generalized Linear Models via Coordinate Descent.
 Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
-* Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
-A Comparison of Optimization Methods and Software for Large-scale 
+\item Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
+A Comparison of Optimization Methods and Software for Large-scale
 L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
-* Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
-An improved GLMNET for l1-regularized logistic regression. 
+\item Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012).
+An improved GLMNET for l1-regularized logistic regression.
 The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
+}
 
 For more details on ISTA, see:
-
-* Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding 
+\itemize{
+\item Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding
 Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
 183–202. https://doi.org/10.1137/080716542
-* Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 
-A General Iterative Shrinkage and Thresholding Algorithm for Non-convex 
-Regularized Optimization Problems. Proceedings of the 30th International 
+\item Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013).
+A General Iterative Shrinkage and Thresholding Algorithm for Non-convex
+Regularized Optimization Problems. Proceedings of the 30th International
 Conference on Machine Learning, 28(2)(2), 37–45.
-* Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
+\item Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and
 Trends in Optimization, 1(3), 123–231.
+}
 }
 \examples{
 # This example shows how to use the optimizers

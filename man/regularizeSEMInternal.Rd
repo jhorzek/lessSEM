@@ -19,7 +19,7 @@ regularizeSEMInternal(
 
 \item{penalty}{string: name of the penalty used in the model}
 
-\item{weights}{labeled vector with weights for each of the parameters in the 
+\item{weights}{labeled vector with weights for each of the parameters in the
 model.}
 
 \item{tuningParameters}{data.frame with tuning parameter values}
@@ -30,7 +30,7 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{control}{used to control the optimizer. This element is generated with 
+\item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}
 }
 \description{

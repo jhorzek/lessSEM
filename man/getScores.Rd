@@ -9,18 +9,18 @@ getScores(SEM, raw)
 \arguments{
 \item{SEM}{model of class Rcpp_SEMCpp}
 
-\item{raw}{controls if the internal transformations of lessSEM should be used. 
-lessSEM will use an exponential function for all variances to 
-avoid negative variances. When set to TRUE, the scores will be given for the 
-internal parameter representation. Set to FALSE to get the usual 
+\item{raw}{controls if the internal transformations of lessSEM should be used.
+lessSEM will use an exponential function for all variances to
+avoid negative variances. When set to TRUE, the scores will be given for the
+internal parameter representation. Set to FALSE to get the usual
 scores}
 }
 \value{
-matrix with derivatives of the -2log-Likelihood for each person and parameter 
+matrix with derivatives of the -2log-Likelihood for each person and parameter
 (rows are persons, columns are parameters)
 }
 \description{
-returns the scores of a model of class Rcpp_SEMCpp. This is the internal model 
+returns the scores of a model of class Rcpp_SEMCpp. This is the internal model
 representation. Models of this class
 can be generated with the SEMFromLavaan-function.
 }
