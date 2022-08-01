@@ -8,7 +8,7 @@ tmp <-   try({
 // [[Rcpp::depends(RcppArmadillo,lessSEM)]]
 
 #include <RcppArmadillo.h>
-#include "lessSEM.hpp"
+#include "lessSEM.h"
 
 double sumSquaredError(
     arma::colvec b, // the parameter vector

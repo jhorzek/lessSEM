@@ -1,9 +1,9 @@
 #ifndef LASSO_H
 #define LASSO_H
 #include <RcppArmadillo.h>
-#include "proximalOperator.hpp"
-#include "penalty.hpp"
-#include "enet.hpp" // for definition of tuning parameters
+#include "proximalOperator.h"
+#include "penalty.h"
+#include "enet.h" // for definition of tuning parameters
 
 namespace lessSEM{
 

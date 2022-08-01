@@ -1,11 +1,11 @@
 #ifndef ISTACLASS_H
 #define ISTACLASS_H
 #include <RcppArmadillo.h>
-#include "model.hpp"
-#include "fitResults.hpp"
-#include "proximalOperator.hpp"
-#include "penalty.hpp"
-#include "smoothPenalty.hpp"
+#include "model.h"
+#include "fitResults.h"
+#include "proximalOperator.h"
+#include "penalty.h"
+#include "smoothPenalty.h"
 
 // The design follows ensmallen (https://github.com/mlpack/ensmallen) in that the 
 // user supplies a C++ class with methods fit and gradients which is used

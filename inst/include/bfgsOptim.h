@@ -1,11 +1,11 @@
 #ifndef BFGSOPTIMCLASS_H
 #define BFGSOPTIMCLASS_H
 #include <RcppArmadillo.h>
-#include "model.hpp"
-#include "fitResults.hpp"
-#include "proximalOperator.hpp"
-#include "ridge.hpp"
-#include "bfgs.hpp"
+#include "model.h"
+#include "fitResults.h"
+#include "proximalOperator.h"
+#include "ridge.h"
+#include "bfgs.h"
 
 // The design follows ensmallen (https://github.com/mlpack/ensmallen) in that the 
 // user supplies a C++ class with methods fit and gradients which is used

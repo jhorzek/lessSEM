@@ -2,7 +2,7 @@
 #define HESSIAN_H
 
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
+#include "SEM.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

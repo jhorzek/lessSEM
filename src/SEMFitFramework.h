@@ -1,7 +1,7 @@
 #ifndef SEMISTA_h
 #define SEMISTA_h
-#include "SEM.hpp"
-#include "lessSEM.hpp"
+#include "SEM.h"
+#include "lessSEM.h"
 
 class SEMFitFramework: public lessSEM::model{
 public:

@@ -1,5 +1,5 @@
 #include <RcppArmadillo.h>
-#include "implied.hpp"
+#include "implied.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

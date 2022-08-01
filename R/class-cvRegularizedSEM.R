@@ -24,11 +24,6 @@ setClass(Class = "cvRegularizedSEM",
 )
 
 #' Show method for objects of class \code{cvRegularizedSEM}.
-#'
-#' @docType methods
-#' @name show-cvRegularizedSEM
-#' @rdname show-cvRegularizedSEM
-#' @aliases show-cvRegularizedSEM show,cvRegularizedSEM-method
 #' 
 #' @param object object of class cvRegularizedSEM
 setMethod("show", "cvRegularizedSEM", function (object) {
@@ -41,14 +36,8 @@ setMethod("show", "cvRegularizedSEM", function (object) {
 })
 
 #' summary method for objects of class \code{cvRegularizedSEM}.
-#'
-#' @docType methods
-#' @name summary-cvRegularizedSEM
-#' @rdname summary-cvRegularizedSEM
-#' @aliases summary-cvRegularizedSEM summary,cvRegularizedSEM-method
 #' 
 #' @param object object of class cvRegularizedSEM
-#' @export
 setMethod("summary", "cvRegularizedSEM", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Exact Cross Validation Results ####\n\n"))
@@ -81,8 +70,8 @@ setMethod("coef", "cvRegularizedSEM", function (object) {
 #' plots the regularized and unregularized parameters as well as the cross-validation fits for all levels of lambda
 #'
 #' @docType methods
-#' @name plot-cvRegularizedSEM
-#' @rdname plot-cvRegularizedSEM
+#' @name plot-cvRegularizedSEM-method
+#' @rdname plot-cvRegularizedSEM-method
 #' @aliases plot-cvRegularizedSEM plot,cvRegularizedSEM-method
 #' 
 #' 

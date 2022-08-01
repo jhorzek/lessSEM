@@ -1,9 +1,9 @@
 #ifndef CAPPEDL1_H
 #define CAPPEDL1_H
 #include <RcppArmadillo.h>
-#include "proximalOperator.hpp"
-#include "penalty.hpp"
-#include "enet.hpp" // for definition of tuning parameters
+#include "proximalOperator.h"
+#include "penalty.h"
+#include "enet.h" // for definition of tuning parameters
 
 // The proximal operator for this penalty function has been developed by
 // Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 

@@ -1,9 +1,9 @@
 #ifndef RIDGE_H
 #define RIDGE_H
 #include <RcppArmadillo.h>
-#include "proximalOperator.hpp"
-#include "smoothPenalty.hpp"
-#include "enet.hpp" // for definition of tuning parameters
+#include "proximalOperator.h"
+#include "smoothPenalty.h"
+#include "enet.h" // for definition of tuning parameters
 
 namespace lessSEM{
 

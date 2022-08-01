@@ -1,7 +1,7 @@
 #ifndef GPFITFRAMEWORK_h
 #define GPFITFRAMEWORK_h
-#include "SEM.hpp"
-#include "lessSEM.hpp"
+#include "SEM.h"
+#include "lessSEM.h"
 
 class generalPurposeFitFramework: public lessSEM::model{
 public:

@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
-#include "gpFitFramework.hpp"
+#include "SEM.h"
+#include "gpFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

@@ -126,8 +126,8 @@ setMethod("BIC", "regularizedSEM", function (object) {
 #' plots the regularized and unregularized parameters for all levels of lambda
 #'
 #' @docType methods
-#' @name plot-regularizedSEM
-#' @rdname plot-regularizedSEM
+#' @name plot-regularizedSEM-method
+#' @rdname plot-regularizedSEM-method
 #' @aliases plot-regularizedSEM plot,regularizedSEM-method
 #' 
 #' @param x object of class regularizedSEM

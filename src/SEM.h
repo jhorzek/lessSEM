@@ -2,9 +2,9 @@
 #define SEMMODULE_H
 
 #include <RcppArmadillo.h>
-#include "dataset.hpp"
-#include "parameters.hpp"
-#include "derivativeStructure.hpp"
+#include "dataset.h"
+#include "parameters.h"
+#include "derivativeStructure.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

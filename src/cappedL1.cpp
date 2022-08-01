@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
-#include "SEMFitFramework.hpp"
+#include "SEM.h"
+#include "SEMFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

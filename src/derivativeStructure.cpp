@@ -1,4 +1,4 @@
-#include "derivativeStructure.hpp"
+#include "derivativeStructure.h"
 #include <RcppArmadillo.h>
 
 // [[Rcpp :: depends ( RcppArmadillo )]]

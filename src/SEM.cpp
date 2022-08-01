@@ -1,10 +1,10 @@
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
-#include "implied.hpp"
-#include "fit.hpp"
-#include "scores.hpp"
-#include "gradients.hpp"
-#include "hessian.hpp"
+#include "SEM.h"
+#include "implied.h"
+#include "fit.h"
+#include "scores.h"
+#include "gradients.h"
+#include "hessian.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

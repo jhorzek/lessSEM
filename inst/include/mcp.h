@@ -1,8 +1,8 @@
 #ifndef MCP_H
 #define MCP_H
 #include <RcppArmadillo.h>
-#include "proximalOperator.hpp"
-#include "penalty.hpp"
+#include "proximalOperator.h"
+#include "penalty.h"
 
 // The proximal operator for this penalty function has been developed by
 // Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 

@@ -2,7 +2,7 @@
 #define SCORES_H
 
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
+#include "SEM.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

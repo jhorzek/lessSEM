@@ -1,12 +1,12 @@
 #ifndef GLMNETCLASS_H
 #define GLMNETCLASS_H
 #include <RcppArmadillo.h>
-#include "model.hpp"
-#include "fitResults.hpp"
-#include "lasso.hpp"
-#include "ridge.hpp"
-#include "enet.hpp"
-#include "bfgs.hpp"
+#include "model.h"
+#include "fitResults.h"
+#include "lasso.h"
+#include "ridge.h"
+#include "enet.h"
+#include "bfgs.h"
 
 // The design follows ensmallen (https://github.com/mlpack/ensmallen) in that the 
 // user supplies a C++ class with methods fit and gradients which is used

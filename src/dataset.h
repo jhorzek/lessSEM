@@ -2,7 +2,7 @@
 #define DATAMODULE_H
 
 #include <RcppArmadillo.h>
-#include "subset.hpp"
+#include "subset.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

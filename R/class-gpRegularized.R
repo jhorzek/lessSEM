@@ -129,8 +129,8 @@ setMethod("BIC", "gpRegularized", function (object) {
 #' plots the regularized and unregularized parameters for all levels of lambda
 #'
 #' @docType methods
-#' @name plot-gpRegularized
-#' @rdname plot-gpRegularized
+#' @name plot-gpRegularized-method
+#' @rdname plot-gpRegularized-method
 #' @aliases plot-gpRegularized plot,gpRegularized-method
 #' 
 #' @param x object of class gpRegularized
