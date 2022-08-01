@@ -1,3 +1,12 @@
+#' Class for regularized SEM
+#' @slot penalty penalty used (e.g., "lasso")
+#' @slot parameters data.frame with parameter estimates
+#' @slot fits data.frame with all fit results
+#' @slot parameterLabels character vector with names of all parameters
+#' @slot weights vector with weights given to each of the parameters in the penalty
+#' @slot regularized character vector with names of regularized parameters
+#' @slot internalOptimization list of elements used internally
+#' @slot inputArguments list with elements passed by the user to the general
 setClass(Class = "regularizedSEM",
          representation = representation(
            penalty = "character",
@@ -52,6 +61,7 @@ setMethod("summary", "regularizedSEM", function (object) {
 #' 
 #' @param object object of class regularizedSEM
 #' @param criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
+#' @returns parameters of the model as data.frame
 #' @export
 setMethod("coef", "regularizedSEM", function (object, criterion = NULL) {
   if(!is.null(criterion) && criterion %in% c("AIC", "BIC")){
@@ -80,6 +90,7 @@ setMethod("coef", "regularizedSEM", function (object, criterion = NULL) {
 #' returns the AIC
 #' 
 #' @param object object of class regularizedSEM
+#' @returns AIC values
 #' @export
 setMethod("AIC", "regularizedSEM", function (object) {
   if(!object@penalty %in% c("lasso", "adaptiveLasso", "cappedL1", "mcp", "scad"))
@@ -96,6 +107,7 @@ setMethod("AIC", "regularizedSEM", function (object) {
 #' returns the BIC
 #' 
 #' @param object object of class regularizedSEM
+#' @returns BIC values
 #' @export
 setMethod("BIC", "regularizedSEM", function (object) {
   N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
@@ -111,14 +123,20 @@ setMethod("BIC", "regularizedSEM", function (object) {
   
 })
 
-#' plot
-#' 
 #' plots the regularized and unregularized parameters for all levels of lambda
 #' 
-#' @param x object of class regularizedSEM
-#' @param regularizedOnly boolean: should only regularized parameters be plotted?``
+#' @param x object of class gpRegularized
+#' @param y not used
+#' @param ... use regularizedOnly=FALSE to plot all parameters
 #' @export
-setMethod("plot", "regularizedSEM", function (x, regularizedOnly = TRUE) {
+setMethod("plot", 
+          c(x = "regularizedSEM", y = "missing"), 
+          function (x, y, ...) {
+  if("regularizedOnly" %in% names(list(...))){
+    regularizedOnly <- list(...)$regularizedOnly
+  }else{
+    regularizedOnly <- TRUE
+  }
   parameters <- x@parameters
   tuningParameters <- x@parameters[,!colnames(x@parameters)%in%x@parameterLabels,drop=FALSE]
   tuningParameters <- tuningParameters[,apply(tuningParameters,2,function(x) length(unique(x)) > 1),drop=FALSE]
@@ -127,7 +145,7 @@ setMethod("plot", "regularizedSEM", function (x, regularizedOnly = TRUE) {
   
   if(nTuning > 2) 
     stop("Plotting currently only supported for up to 2 tuning parameters")
-  if(nTuning == 2 & !("plotly" %in% rownames(installed.packages())))
+  if(nTuning == 2 & !("plotly" %in% rownames(utils::installed.packages())))
     stop("Plotting more than one tuning parameter requires the package plotly")
   
   

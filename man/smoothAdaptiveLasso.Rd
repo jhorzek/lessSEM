@@ -19,11 +19,11 @@ smoothAdaptiveLasso(
 \item{lavaanModel}{model of class lavaan}
 
 \item{regularized}{vector with names of parameters which are to be regularized.
-If you are unsure what these parameters are called, use
+If you are unsure what these parameters are called, use 
 getLavaanParameters(model) with your lavaan model object}
 
-\item{weights}{labeled vector with weights for each of the parameters in the
-model. If you are unsure what these parameters are called, use
+\item{weights}{labeled vector with weights for each of the parameters in the 
+model. If you are unsure what these parameters are called, use 
 getLavaanParameters(model) with your lavaan model object. If set to NULL,
 the default weights will be used: the inverse of the absolute values of
 the unregularized parameter estimates}
@@ -36,8 +36,11 @@ the unregularized parameter estimates}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{control}{used to control the optimizer. This element is generated with
+\item{control}{used to control the optimizer. This element is generated with 
 the controlBFGS function. See ?controlBFGS for more details.}
+}
+\value{
+Model of class regularizedSEM
 }
 \description{
 This function allows for regularization of models built in lavaan with the
@@ -46,17 +49,16 @@ with the "@" operator (see examples).
 }
 \details{
 For more details, see:
-\enumerate{
-\item Zou, H. (2006). The Adaptive Lasso and Its Oracle Properties.
-Journal of the American Statistical Association, 101(476), 1418–1429.
-https://doi.org/10.1198/016214506000000735
-\item Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016).
-Regularized Structural Equation Modeling. Structural Equation Modeling:
-A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
-\item Lee, S.-I., Lee, H., Abbeel, P., & Ng, A. Y. (2006).
-Efficient L1 Regularized Logistic Regression. Proceedings of the
+
+1. Zou, H. (2006). The Adaptive Lasso and Its Oracle Properties.
+   Journal of the American Statistical Association, 101(476), 1418–1429.
+   https://doi.org/10.1198/016214506000000735
+2. Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). 
+   Regularized Structural Equation Modeling. Structural Equation Modeling: 
+   A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+3. Lee, S.-I., Lee, H., Abbeel, P., & Ng, A. Y. (2006). 
+Efficient L1 Regularized Logistic Regression. Proceedings of the 
 Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408.
-}
 }
 \examples{
 library(lessSEM)

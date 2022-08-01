@@ -1,9 +1,19 @@
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
-#include "gpFitFramework.hpp"
+#include "SEM.h"
+#include "gpFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+//'@name istaScadGeneralPurpose
+//'@title scad optimization with ista
+//'@description Object for scad optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'an R function to compute the fit, an R function to compute the gradients, a
+//'list with elements the fit and gradient function require, a theta and a lambda value (alpha must be 1).
+//'@returns a list with fit results
 class istaScadGeneralPurpose{
   public:
     
@@ -108,6 +118,16 @@ class istaScadGeneralPurpose{
   }
 };
 
+//'@name istaScadGeneralPurposeCpp
+//'@title scad optimization with ista
+//'@description Object for scad optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEXP function pointer to compute the fit, a SEXP function pointer to compute the gradients, a
+//'list with elements the fit and gradient function require, a theta and a lambda value (alpha must be 1).
+//'@returns a list with fit results
 class istaScadGeneralPurposeCpp{
 public:
   

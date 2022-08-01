@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
-#include "subset.hpp"
-#include "dataset.hpp"
+#include "subset.h"
+#include "dataset.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

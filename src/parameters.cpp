@@ -1,4 +1,4 @@
-#include "parameters.hpp"
+#include "parameters.h"
 #include <RcppArmadillo.h>
 
 // [[Rcpp :: depends ( RcppArmadillo )]]

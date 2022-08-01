@@ -1,9 +1,15 @@
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
-#include "SEMFitFramework.hpp"
+#include "SEM.h"
+#include "SEMFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+//' scadPenalty_C
+//' 
+//' @param par single parameter value
+//' @param lambda_p lambda value for this parameter
+//' @param theta theta value for this parameter
+//' @returns penalty value
 // [[Rcpp::export]]
 double scadPenalty_C(const double par,
                      const double lambda_p,
@@ -11,7 +17,15 @@ double scadPenalty_C(const double par,
   return(lessSEM::scadPenalty(par, lambda_p, theta));
 }
 
-
+//'@name istaScad
+//'@title scad optimization with ista
+//'@description Object for scad optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta and a lambda value.
+//'@returns a list with fit results
 class istaScad{
   public:
     

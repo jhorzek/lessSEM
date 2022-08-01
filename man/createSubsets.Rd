@@ -17,3 +17,6 @@ matrix with subsets
 \description{
 create subsets for cross-validation
 }
+\examples{
+createSubsets(N=100, k = 5)
+}

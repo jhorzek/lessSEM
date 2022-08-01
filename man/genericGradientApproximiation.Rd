@@ -17,6 +17,9 @@ genericGradientApproximiation(
 
 \item{penaltyFunctionArguments}{list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see lessSEM::smoothLASSO for an example}
 }
+\value{
+vector with gradient values
+}
 \description{
 This function can be used to approximate the gradients of a generic penalty function with numDeriv
 }

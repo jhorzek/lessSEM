@@ -11,6 +11,9 @@ cvregsem2LavaanParameters(cvregsemModel, lavaanModel)
 
 \item{lavaanModel}{model of class lavaan}
 }
+\value{
+regsem parameters with lavaan labels
+}
 \description{
 helper function: regsem and lavaan use slightly different parameter labels. This function
 can be used to translate the parameter labels of a cv_regsem object to lavaan labels

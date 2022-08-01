@@ -9,6 +9,9 @@ fit(SEM)
 \arguments{
 \item{SEM}{model of class Rcpp_SEMCpp.}
 }
+\value{
+fitted SEM
+}
 \description{
 fits an object of class Rcpp_SEMCpp.
 }

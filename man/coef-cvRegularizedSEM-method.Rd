@@ -7,7 +7,10 @@
 \S4method{coef}{cvRegularizedSEM}(object)
 }
 \arguments{
-\item{object}{object of class regularizedSEM}
+\item{object}{object of class cvRegularizedSEM}
+}
+\value{
+the parameter estimates of an cvRegularizedSEM
 }
 \description{
 Returns the parameter estimates of an cvRegularizedSEM

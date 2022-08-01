@@ -24,10 +24,10 @@ test_that("testing scores", {
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE)
   lavaanScores <- -2*lavaan::lavScores(model)
   
-  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = model)
-  SEM <- lessSEM:::fit(SEM)
+  SEM <- lessSEM::SEMFromLavaan(lavaanModel = model)
+  SEM <- lessSEM::fit(SEM)
   
-  scoresAnalytic <- lessSEM:::getScores(SEM, raw = FALSE)
+  scoresAnalytic <- lessSEM::getScores(SEM, raw = FALSE)
 
   testthat::expect_equal(round(sum(abs(scoresAnalytic - lavaanScores)),4),0)
   
@@ -45,9 +45,9 @@ test_that("testing scores", {
   model <- sem(model1, data = PoliticalDemocracyWithNA, meanstructure = TRUE, missing = "ML")
   lavaanScores <- -2*lavaan::lavScores(model)
   
-  SEM <- lessSEM:::SEMFromLavaan(lavaanModel = model)
-  SEM <- lessSEM:::fit(SEM)
+  SEM <- lessSEM::SEMFromLavaan(lavaanModel = model)
+  SEM <- lessSEM::fit(SEM)
   
-  scoresAnalytic <- lessSEM:::getScores(SEM, raw = FALSE)
+  scoresAnalytic <- lessSEM::getScores(SEM, raw = FALSE)
   testthat::expect_equal(round(sum(abs(scoresAnalytic - lavaanScores)),4),0)
 })

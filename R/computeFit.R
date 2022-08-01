@@ -3,6 +3,7 @@
 #' fits an object of class Rcpp_SEMCpp.
 #' 
 #' @param SEM model of class Rcpp_SEMCpp. 
+#' @returns fitted SEM
 fit <- function(SEM){
   SEM$fit()
   return(SEM)
@@ -16,6 +17,7 @@ fit <- function(SEM){
 #' @param par labeled vector with parameter values
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param raw controls if the internal transformations of lessSEM is used.
+#' @returns -2log-Likelihood
 fitFunction <- function(par, SEM, raw){
   SEM <- setParameters(SEM = SEM, names(par), values = par, raw = raw)
   tryFit <- try(SEM$fit(), silent = TRUE)
@@ -30,6 +32,7 @@ fitFunction <- function(par, SEM, raw){
 #' @param par labeled vector with parameter values
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param raw controls if the internal transformations of lessSEM is used.
+#' @returns gradients of the model
 derivativeFunction <- function(par, SEM, raw){
   failureReturns <- rep(999999999, length(par))
   names(failureReturns) <- names(par)
@@ -50,6 +53,7 @@ derivativeFunction <- function(par, SEM, raw){
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param data vector with data points for this single individual
 #' @param raw controls if the internal transformations of lessSEM is used.
+#' @returns -2 log Likelihood for each subject in the data set
 individualMinus2LogLikelihood <- function(par, SEM, data, raw){
   if(any(names(data) != SEM$manifestNames)) stop("SEM$manifestNames and colnames of data do not match!")
   if(any(getParameters(SEM, raw = raw)[names(par)] != par)) SEM <- setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
@@ -71,6 +75,7 @@ individualMinus2LogLikelihood <- function(par, SEM, data, raw){
 #' @param par labeled vector with parameter values
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param raw controls if the internal transformations of lessSEM is used.
+#' @returns likelihood ratio fit statistic
 likelihoodRatioFit <- function(par, SEM, raw){
   if(anyNA(SEM$rawData)) stop("likelihoodRatioFit currently only implemented for data without missings")
   if(any(getParameters(SEM)[names(par)] != par)) SEM <- setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
@@ -78,7 +83,7 @@ likelihoodRatioFit <- function(par, SEM, raw){
   
   # compute fit
   N <- nrow(SEM$rawData)
-  obsCov <- ((N-1)/N)*cov(SEM$rawData)
+  obsCov <- ((N-1)/N)*stats::cov(SEM$rawData)
   obsMeans <- apply(SEM$rawData,2,mean)
   expectedCovInverse <- solve(SEM$impliedCovariance)
   lrValue <- N*(log(det(SEM$impliedCovariance)) + 

@@ -31,6 +31,9 @@ be optimized afterwards as setting the parameters to "est" may result in the mod
 
 \item{dataSet}{optional: Pass an alternative data set to SEMFromLavaan which will replace the original data set in lavaanModel.}
 }
+\value{
+Object of class Rcpp_SEMCpp
+}
 \description{
 internal function. Translates an object of class lavaan to the internal model representation.
 }

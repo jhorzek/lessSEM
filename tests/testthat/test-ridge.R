@@ -7,7 +7,7 @@ test_that("testing elasticNet-ridge-c", {
   l1 <- 1; l2 <- .2; l3 <- 0;
   v1 <- .2; v2 <- .8; v3 <- 1
   
-  f <- matrix(rnorm(N, 0, 1), ncol = 1)
+  f <- matrix(stats::rnorm(N, 0, 1), ncol = 1)
   L <- matrix(c(rep(l1,5), rep(l2,5), rep(l3,15)), nrow = 1)
   y <- matrix(NA, nrow = N, ncol = ncol(L))
   
@@ -26,7 +26,7 @@ test_that("testing elasticNet-ridge-c", {
   # fit model using lslx
   lslxModelSyntax <- paste0('fix(1)*', yNames[1], ' + ', paste0(yNames[2:length(yNames)], collapse = " + "), " <=: f") 
   fitLslx <- lslx$new(model = lslxModelSyntax,
-                      sample_cov = cov(y),
+                      sample_cov = stats::cov(y),
                       sample_size = nrow(y)
   )
   

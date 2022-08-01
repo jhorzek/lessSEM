@@ -4,6 +4,7 @@
 #' @param N number of persons in the data set
 #' @param loadings loadings of the latent variable on the manifest observations
 #' @param percentMissing percentage of missing data
+#' @returns data set for a single-factor CFA.
 #' @examples 
 #' y <- lessSEM::simulateExampleData()
 #' @export
@@ -12,7 +13,7 @@ simulateExampleData <- function(N = 100, # sample size
                                 percentMissing = 0
 ){
   
-  f <- matrix(rnorm(N, 0, 1), ncol = 1) # latent factor
+  f <- matrix(stats::rnorm(N, 0, 1), ncol = 1) # latent factor
   L <- matrix(loadings, 
               nrow = 1) # loadings
   # covariances
@@ -47,6 +48,7 @@ simulateExampleData <- function(N = 100, # sample size
 #' remplaces the dot dot dot part of the fitting and gradient fuction
 #' @param fn fit or gradient function. IMPORTANT: THE FIRST ARGUMENT TO
 #' THE FUNCTION MUST BE THE PARAMETER VECTOR
+#' @param fnName name of the function fn
 #' @param ... additional arguments
 #' @return list with (1) new function which wraps fn and (2) list with arguments passed to fn
 noDotDotDot <- function(fn, fnName, ...){
@@ -125,10 +127,13 @@ noDotDotDot <- function(fn, fnName, ...){
 #' 
 #' This function helps you create the pointers necessary to use the Cpp interface
 #' 
-#' @param fitFunName name of your C++ fit function (IMPORTANT: This must be the name
+#' @param fitFunName name of your C++ fit function 
+#' (IMPORTANT: This must be the name
 #' used in C++)
-#' @param gradFunName name of your C++ gradient function (IMPORTANT: This must be the name
+#' @param gradFunName name of your C++ gradient function 
+#' (IMPORTANT: This must be the name
 #' used in C++)
+#' @returns a string which can be copied in the C++ function to create the pointers.
 #' @export
 makePtrs <- function(fitFunName, gradFunName){
   

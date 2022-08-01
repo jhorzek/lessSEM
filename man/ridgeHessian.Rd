@@ -2,7 +2,7 @@
 % Please edit documentation in R/penaltyFunctions.R
 \name{ridgeHessian}
 \alias{ridgeHessian}
-\title{ridgeGradient}
+\title{ridgeHessian}
 \usage{
 ridgeHessian(parameters, tuningParameters, penaltyFunctionArguments)
 }
@@ -12,6 +12,9 @@ ridgeHessian(parameters, tuningParameters, penaltyFunctionArguments)
 \item{tuningParameters}{list with field lambda (tuning parameter value)}
 
 \item{penaltyFunctionArguments}{list with field regularizedParameterLabels (labels of regularized parameters)}
+}
+\value{
+Hessian matrix
 }
 \description{
 ridge Hessian function

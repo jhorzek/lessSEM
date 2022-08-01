@@ -11,6 +11,10 @@ newTau(regularizedSEM, tau)
 
 \item{tau}{new tau value}
 }
+\value{
+regularizedSEM, but with new regularizedSEM@fits$nonZeroParameters
+}
 \description{
-assign new value to parameter tau used by approximate optimization
+assign new value to parameter tau used by approximate optimization. Any regularized
+value below tau will be evaluated as zeroed which directly impacts the AIC, BIC, etc.
 }

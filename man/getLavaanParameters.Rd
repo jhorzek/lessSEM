@@ -11,6 +11,9 @@ getLavaanParameters(lavaanModel, removeDuplicates = TRUE)
 
 \item{removeDuplicates}{should duplicated parameters be removed?}
 }
+\value{
+returns a labeled vector with parameters from lavaan
+}
 \description{
 helper function: returns a labeled vector with parameters from lavaan
 }

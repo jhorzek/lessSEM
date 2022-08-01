@@ -8,7 +8,7 @@ tmp <-   try({
 // [[Rcpp::depends(RcppArmadillo,lessSEM)]]
 
 #include <RcppArmadillo.h>
-#include "lessSEM.hpp"
+#include "lessSEM.h"
 
 double sumSquaredError(
     arma::colvec b, // the parameter vector
@@ -301,10 +301,10 @@ printCoefficients <- function(model){
 # linear regression.
 N <- 100 # number of persons
 p <- 10 # number of predictors
-X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+X <- matrix(stats::rnorm(N*p),	nrow = N, ncol = p) # design matrix
 b <- c(rep(1,4), 
        rep(0,6)) # true regression weights
-y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
+y <- X%*%matrix(b,ncol = 1) + stats::rnorm(N,0,.2)
 
 # define the tuning parameters
 lambda = seq(1,0,length.out = 5)

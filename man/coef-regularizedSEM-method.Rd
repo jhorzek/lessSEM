@@ -11,6 +11,9 @@
 
 \item{criterion}{can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned}
 }
+\value{
+parameters of the model as data.frame
+}
 \description{
 Returns the parameter estimates of a regularizedSEM
 }

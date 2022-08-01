@@ -3,7 +3,9 @@
 #' create subsets for cross-validation
 #' @param N number of samples in the data set
 #' @param k number of subsets to create
-#' @return matrix with subsets
+#' @returns matrix with subsets
+#' @examples 
+#' createSubsets(N=100, k = 5)
 createSubsets <- function(N,k){
   # build subgroups
   if(k < N){

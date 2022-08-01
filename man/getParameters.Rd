@@ -11,6 +11,9 @@ getParameters(SEM, raw = FALSE)
 
 \item{raw}{controls if the parameter are returned in raw format or transformed}
 }
+\value{
+labeled vector with parameter values
+}
 \description{
 returns the parameters of the internal model representation.
 }

@@ -20,7 +20,7 @@ smoothElasticNet(
 \item{lavaanModel}{model of class lavaan}
 
 \item{regularized}{vector with names of parameters which are to be regularized.
-If you are unsure what these parameters are called, use
+If you are unsure what these parameters are called, use 
 getLavaanParameters(model) with your lavaan model object}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
@@ -30,7 +30,7 @@ compute the first lambda value which sets all regularized parameters to zero.
 It will then generate nLambda values between 0 and the computed lambda.}
 
 \item{alphas}{numeric vector with values of the tuning parameter alpha. Must be
-in \link{0,1}. 0 = ridge, 1 = lasso.}
+between 0 and 1. 0 = ridge, 1 = lasso.}
 
 \item{epsilon}{epsilon > 0; controls the smoothness of the approximation. Larger values = smoother}
 
@@ -38,8 +38,11 @@ in \link{0,1}. 0 = ridge, 1 = lasso.}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{control}{used to control the optimizer. This element is generated with
+\item{control}{used to control the optimizer. This element is generated with 
 the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.}
+}
+\value{
+Model of class regularizedSEM
 }
 \description{
 This function allows for regularization of models built in lavaan with the
@@ -48,18 +51,17 @@ with the "@" operator (see examples).
 }
 \details{
 For more details, see:
-\enumerate{
-\item Zou, H., & Hastie, T. (2005). Regularization and variable selection via
-the elastic net. Journal of the Royal Statistical Society:
+
+1. Zou, H., & Hastie, T. (2005). Regularization and variable selection via 
+the elastic net. Journal of the Royal Statistical Society: 
 Series B, 67(2), 301–320. https://doi.org/10.1111/j.1467-9868.2005.00503.x
 for the details of this regularization technique.
-\item Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016).
-Regularized Structural Equation Modeling. Structural Equation Modeling:
+2. Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). 
+Regularized Structural Equation Modeling. Structural Equation Modeling: 
 A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
-\item Lee, S.-I., Lee, H., Abbeel, P., & Ng, A. Y. (2006).
-Efficient L1 Regularized Logistic Regression. Proceedings of the
+3. Lee, S.-I., Lee, H., Abbeel, P., & Ng, A. Y. (2006). 
+Efficient L1 Regularized Logistic Regression. Proceedings of the 
 Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408.
-}
 }
 \examples{
 library(lessSEM)

@@ -2,10 +2,13 @@
 % Please edit documentation in R/class-cvRegularizedSEM.R
 \name{show,cvRegularizedSEM-method}
 \alias{show,cvRegularizedSEM-method}
-\title{show}
+\title{Show method for objects of class \code{cvRegularizedSEM}.}
 \usage{
 \S4method{show}{cvRegularizedSEM}(object)
 }
+\arguments{
+\item{object}{object of class cvRegularizedSEM}
+}
 \description{
-show
+Show method for objects of class \code{cvRegularizedSEM}.
 }

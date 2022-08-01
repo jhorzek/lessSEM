@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{object of class regularizedSEM}
 }
+\value{
+AIC values
+}
 \description{
 returns the AIC
 }

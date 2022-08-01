@@ -13,9 +13,11 @@
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param tau parameters below threshold tau will be seen as zeroed
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method optimizer used. Currently only "bfgs" is supported.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
-#' @md
+#' @returns regularizedSEM
+
 #' @export
 regularizeSmoothSEMInternal <- function(lavaanModel,
                                          penalty,
@@ -60,14 +62,14 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
   }
   
   if(any(startingValues == "est")){
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "est",
                                    addMeans = modifyModel$addMeans, 
                                    activeSet = modifyModel$activeSet,
                                    dataSet = modifyModel$dataSet)
   }else if(any(startingValues == "start")){
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start",
                                    addMeans = modifyModel$addMeans, 
@@ -77,15 +79,15 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
     
     if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel))))
       stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
-    SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start", 
                                    fit = FALSE,
                                    addMeans = modifyModel$addMeans, 
                                    activeSet = modifyModel$activeSet,
                                    dataSet = modifyModel$dataSet)
-    SEM <- lessSEM:::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(lessSEM:::fit(SEM))
+    SEM <- lessSEM::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
+    SEM <- try(lessSEM::fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
       stop("Infeasible starting values.")
     
@@ -94,8 +96,8 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
   }
   
   # get parameters in raw form
-  startingValues <- lessSEM:::getParameters(SEM, raw = TRUE)
-  rawParameters <- lessSEM:::getParameters(SEM, raw = TRUE)
+  startingValues <- lessSEM::getParameters(SEM, raw = TRUE)
+  rawParameters <- lessSEM::getParameters(SEM, raw = TRUE)
   
   # set weights
   if(!is.numeric(weights)){
@@ -151,11 +153,11 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
     
   }else if(any(initialHessian == "compute")){
     
-    initialHessian <- lessSEM:::getHessian(SEM = SEM, raw = TRUE)
+    initialHessian <- lessSEM::getHessian(SEM = SEM, raw = TRUE)
     
   }else if(any(initialHessian == "scoreBased")){
     
-    scores <- lessSEM:::getScores(SEM = SEM, raw = TRUE)
+    scores <- lessSEM::getScores(SEM = SEM, raw = TRUE)
     FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
     rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
     for(score in 1:nrow(scores)){
@@ -276,7 +278,7 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
                                   raw = TRUE)
     fits$m2LL[it] <- SEM$fit()
     # transform internal parameter representation to "natural" form
-    transformedParameters <- lessSEM:::getParameters(SEM,
+    transformedParameters <- lessSEM::getParameters(SEM,
                                                      raw = FALSE)
     parameterEstimates[it, 
                        names(rawParameters)] <- transformedParameters[names(rawParameters)]
@@ -293,7 +295,7 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
                             sep = " = "),
                      " resulted in Error!"))
       
-      SEM <- lessSEM:::SEMFromLavaan(lavaanModel = lavaanModel, 
+      SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
                                      transformVariances = TRUE,
                                      whichPars = startingValues,
                                      addMeans = control$addMeans)
@@ -336,10 +338,12 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
 
 #' newTau
 #' 
-#' assign new value to parameter tau used by approximate optimization
+#' assign new value to parameter tau used by approximate optimization. Any regularized
+#' value below tau will be evaluated as zeroed which directly impacts the AIC, BIC, etc.
 #' 
 #' @param regularizedSEM object fitted with approximate optimization
 #' @param tau new tau value
+#' @returns regularizedSEM, but with new regularizedSEM@fits$nonZeroParameters
 newTau <- function(regularizedSEM, tau){
   if(!is(regularizedSEM,"regularizedSEM")) stop("regularizedSEM must be of class regularizedSEM")
   if(is.null(regularizedSEM@inputArguments$tau)) stop("Could not find tau in regularizedSEM. Did you use a smoothed penalty?")

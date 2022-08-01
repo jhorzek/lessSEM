@@ -17,6 +17,9 @@ smoothAdaptiveLASSOGradient(
 
 \item{penaltyFunctionArguments}{list with fields regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)}
 }
+\value{
+gradient values
+}
 \description{
 smoothed version of non-differentiable adaptive LASSO gradient
 }

@@ -2,10 +2,13 @@
 % Please edit documentation in R/class-cvRegularizedSEM.R
 \name{summary,cvRegularizedSEM-method}
 \alias{summary,cvRegularizedSEM-method}
-\title{summary}
+\title{summary method for objects of class \code{cvRegularizedSEM}.}
 \usage{
 \S4method{summary}{cvRegularizedSEM}(object)
 }
+\arguments{
+\item{object}{object of class cvRegularizedSEM}
+}
 \description{
-summary
+summary method for objects of class \code{cvRegularizedSEM}.
 }

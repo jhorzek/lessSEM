@@ -8,10 +8,10 @@ test_that("testing general purpose optimization with gr", {
   # linear regression.
   N <- 100 # number of persons
   p <- 10 # number of predictors
-  X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+  X <- matrix(stats::rnorm(N*p),	nrow = N, ncol = p) # design matrix
   b <- c(rep(1,4),
          rep(0,6)) # true regression weights
-  y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
+  y <- X%*%matrix(b,ncol = 1) + stats::rnorm(N,0,.2)
   
   # First, we must construct a fiting function
   # which returns a single value. We will use

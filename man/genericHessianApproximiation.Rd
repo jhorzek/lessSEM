@@ -16,8 +16,9 @@ genericHessianApproximiation(
 \item{tuningParameters}{data.frame with tuning parameters}
 
 \item{penaltyFunctionArguments}{list with additional arguments passed to the penalty function. NOTE: The penalty function itself must also be an object of this list! penalty function. Must accept three parameters: vector with parameter values, data.frame with tuning parameters, and list with penaltyFunctionArguments. see lessSEM::smoothLASSO for an example}
-
-\item{penaltyFunction}{}
+}
+\value{
+matrix with Hessian values
 }
 \description{
 This function can be used to approximate the Hessian of a generic penalty function with numDeriv

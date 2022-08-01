@@ -1,3 +1,15 @@
+#' Class for cross-validated regularized SEM
+#' @slot parameters data.frame with parameter estimates for the best combination of the
+#' tuning parameters
+#' @slot cvfits data.frame with all combinations of the
+#' tuning parameters and the sum of the cross-validation fits
+#' @slot parameterLabels character vector with names of all parameters
+#' @slot regularized character vector with names of regularized parameters
+#' @slot cvfitsDetails data.frame with cross-validation fits for each subset
+#' @slot subsets matrix indicating which person is in which subset
+#' @slot subsetParameters optional: data.frame with parameter estimates for all
+#' combinations of the tuning parameters in all subsets
+#' @slot misc list with additional return elements
 setClass(Class = "cvRegularizedSEM",
          representation = representation(
            parameters="data.frame",
@@ -11,9 +23,9 @@ setClass(Class = "cvRegularizedSEM",
          )
 )
 
-#' show
+#' Show method for objects of class \code{cvRegularizedSEM}.
 #' 
-#' @export
+#' @param object object of class cvRegularizedSEM
 setMethod("show", "cvRegularizedSEM", function (object) {
   bestFit <- unlist(object@parameters)
   tuningParameters <- bestFit[!names(bestFit) %in% object@parameterLabels]
@@ -23,9 +35,9 @@ setMethod("show", "cvRegularizedSEM", function (object) {
   print(bestFit[object@parameterLabels])
 })
 
-#' summary
+#' summary method for objects of class \code{cvRegularizedSEM}.
 #' 
-#' @export
+#' @param object object of class cvRegularizedSEM
 setMethod("summary", "cvRegularizedSEM", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Exact Cross Validation Results ####\n\n"))
@@ -48,20 +60,23 @@ setMethod("summary", "cvRegularizedSEM", function (object) {
 #' 
 #' Returns the parameter estimates of an cvRegularizedSEM
 #'  
-#' @param object object of class regularizedSEM
-#' 
+#' @param object object of class cvRegularizedSEM
+#' @returns the parameter estimates of an cvRegularizedSEM
 #' @export
 setMethod("coef", "cvRegularizedSEM", function (object) {
   return(unlist(object@parameters[,object@parameterLabels]))
 })
 
-#' plot
+#' plots the cross-validation fits
 #' 
-#' plots the regularized and unregularized parameters as well as the cross-validation fits for all levels of lambda
-#' 
-#' @param x object of class regularizedSEM
+#' @param x object of class cvRegularizedSEM
+#' @param y not used
+#' @param ... not used
 #' @export
-setMethod("plot", "cvRegularizedSEM", function (x) {
+setMethod("plot", 
+          signature = c(x = "cvRegularizedSEM",
+                        y = "missing"), 
+          definition = function (x, y, ...) {
   
   fits <- x@cvfits
   tuningParameters <- fits[,colnames(fits)!= "cvfit",drop=FALSE]
@@ -71,7 +86,7 @@ setMethod("plot", "cvRegularizedSEM", function (x) {
   
   if(nTuning > 2) 
     stop("Plotting currently only supported for up to 2 tuning parameters")
-  if(nTuning == 2 & !("plotly" %in% rownames(installed.packages())))
+  if(nTuning == 2 & !("plotly" %in% rownames(utils::installed.packages())))
     stop("Plotting more than one tuning parameter requires the package plotly")
   
   if(nTuning == 1){

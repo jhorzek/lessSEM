@@ -6,6 +6,8 @@
 #' @param rawParameters labeled vector with starting values
 #' @param weights weights given to each parameter in the penalty function
 #' @param N sample size
+#' @param approx When set to TRUE, .Machine$double.xmax^(.01) is used instead of .Machine$double.xmax^(.05)
+#' @returns first lambda value which sets all regularized parameters to zero (plus some tolerance)
 #' @export
 getMaxLambda_C <- function(regularizedModel, 
                          SEM,
@@ -26,23 +28,23 @@ getMaxLambda_C <- function(regularizedModel,
   )
   
   sparseParameters <- result$rawParameters
-  SEM <- lessSEM:::setParameters(SEM = SEM, 
+  SEM <- lessSEM::setParameters(SEM = SEM, 
                               labels = names(sparseParameters), 
                               values = sparseParameters, 
                               raw = TRUE)
-  SEM <- lessSEM:::fit(SEM = SEM)
-  gradients <- lessSEM:::getGradients(SEM = SEM, 
+  SEM <- lessSEM::fit(SEM = SEM)
+  gradients <- lessSEM::getGradients(SEM = SEM, 
                                    raw = TRUE)
   
   # define maxLambda as the maximal gradient of the regularized parameters
   maxLambda <- max(abs(gradients[weights != 0]) * 
                      weights[weights != 0]^(-1))
   # reset SEM
-  SEM <- lessSEM:::setParameters(SEM = SEM, 
+  SEM <- lessSEM::setParameters(SEM = SEM, 
                               labels = names(rawParameters), 
                               values = rawParameters, 
                               raw = TRUE)
-  SEM <- lessSEM:::fit(SEM = SEM)
+  SEM <- lessSEM::fit(SEM = SEM)
   
   return((1/N)*(maxLambda+.1*maxLambda)) # adding some wiggle room as well
 }
@@ -56,6 +58,7 @@ getMaxLambda_C <- function(regularizedModel,
 #' @param gradientFunction R gradient functions
 #' @param userSuppliedArguments list with arguments for fitFunction and gradientFunction
 #' @param weights weights given to each parameter in the penalty function
+#' @returns first lambda value which sets all regularized parameters to zero (plus some tolerance)
 #' @export
 gpGetMaxLambda <- function(regularizedModel,
                            par,

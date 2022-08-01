@@ -1,9 +1,19 @@
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
-#include "gpFitFramework.hpp"
+#include "SEM.h"
+#include "gpFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+//'@name istaEnetGeneralPurpose
+//'@title elastic net optimization with ista
+//'@description Object for elastic net optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'an R function to compute the fit, an R function to compute the gradients, a
+//'list with elements the fit and gradient function require, a lambda and an alpha value.
+//'@returns a list with fit results
 class istaEnetGeneralPurpose{
 public:
   
@@ -102,6 +112,18 @@ public:
   }
 };
 
+//'@name glmnetEnetGeneralPurpose
+//'@title elastic net optimization with glmnet optimizer
+//'@description Object for elastic net optimization with
+//'glmnet optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field setHessian changes the Hessian of the model. Expects a matrix
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'an R function to compute the fit, an R function to compute the gradients, a
+//'list with elements the fit and gradient function require, a lambda and an alpha value.
+//'@returns a list with fit results
+//'
 class glmnetEnetGeneralPurpose{
 public:
   
@@ -212,6 +234,16 @@ public:
   }
 };
 
+//'@name istaEnetGeneralPurposeCpp
+//'@title elastic net optimization with ista
+//'@description Object for elastic net optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEXP function pointer to compute the fit, a SEXP function pointer to compute the gradients, a
+//'list with elements the fit and gradient function require, a lambda and an alpha value.
+//'@returns a list with fit results
 class istaEnetGeneralPurposeCpp{
 public:
   
@@ -310,7 +342,17 @@ public:
   }
 };
 
-
+//'@name glmnetEnetGeneralPurposeCpp
+//'@title elastic net optimization with glmnet optimizer
+//'@description Object for elastic net optimization with
+//'glmnet optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field setHessian changes the Hessian of the model. Expects a matrix
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEXP function pointer to compute the fit, a SEXP function pointer to compute the gradients, a
+//'list with elements the fit and gradient function require, a lambda and an alpha value.
+//'@returns a list with fit results
 class glmnetEnetGeneralPurposeCpp{
 public:
   

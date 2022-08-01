@@ -21,7 +21,7 @@ regularizeSmoothSEMInternal(
 
 \item{penalty}{string: name of the penalty used in the model}
 
-\item{weights}{labeled vector with weights for each of the parameters in the
+\item{weights}{labeled vector with weights for each of the parameters in the 
 model.}
 
 \item{tuningParameters}{data.frame with tuning parameter values}
@@ -30,10 +30,15 @@ model.}
 
 \item{tau}{parameters below threshold tau will be seen as zeroed}
 
+\item{method}{optimizer used. Currently only "bfgs" is supported.}
+
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{control}{used to control the optimizer. This element is generated with
+\item{control}{used to control the optimizer. This element is generated with 
 the controlBFGS function. See ?controlBFGS for more details.}
+}
+\value{
+regularizedSEM
 }
 \description{
 Internal function: This function computes the regularized models

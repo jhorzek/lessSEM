@@ -47,14 +47,17 @@ depends directly on the sample size}
 \item{sigma}{sigma in (0,1) is used by the gist convergence criterion. larger
 simga enforce larger improvement in fit}
 
-\item{verbose}{if set to a value > 0, the fit every "verbose" iterations is printed. 
-If set to -99 you will get the debug output which is horribly convoluted}
-
-\item{stepSizeIn}{how should step sizes be carried forward from iteration to iteration? 
+\item{stepSizeInheritance}{how should step sizes be carried forward from iteration to iteration? 
 0 = resets the step size to L0 in each iteration
 1 = takes the previous step size as initial value for the next iteration
 3 = Barzilai-Borwein procedure 
 4 = Barzilai-Borwein procedure, but sometimes resets the step size; this can help when the optimizer is caught in a bad spot.}
+
+\item{verbose}{if set to a value > 0, the fit every "verbose" iterations is printed. 
+If set to -99 you will get the debug output which is horribly convoluted}
+}
+\value{
+object of class controlIsta
 }
 \description{
 controlIsta

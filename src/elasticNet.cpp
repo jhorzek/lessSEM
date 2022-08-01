@@ -1,9 +1,18 @@
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
-#include "SEMFitFramework.hpp"
+#include "SEM.h"
+#include "SEMFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+//'@name istaEnet
+//'@title elastic net optimization with ista
+//'@description Object for elastic net optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a lambda and an alpha value.
+//'@returns a list with fit results
 class istaEnet{
 public:
   
@@ -103,6 +112,17 @@ public:
   }
 };
 
+//'@name glmnetEnet
+//'@title elastic net optimization with glmnet optimizer
+//'@description Object for elastic net optimization with
+//'glmnet optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field setHessian changes the Hessian of the model. Expects a matrix
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a lambda and an alpha value.
+//'@returns a list with fit results
+//'
 class glmnetEnet{
 public:
   
@@ -210,6 +230,17 @@ public:
   }
 };
 
+//'@name bfgsEnet
+//'@title smoothly approximated elastic net
+//'@description Object for smoothly approximated elastic net optimization with
+//'bfgs optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field setHessian changes the Hessian of the model. Expects a matrix
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a lambda and an alpha value.
+//'@returns a list with fit results
+//'
 class bfgsEnet{
 public:
   

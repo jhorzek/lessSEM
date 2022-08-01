@@ -13,6 +13,9 @@ modifyModel(addMeans = TRUE, activeSet = NULL, dataSet = NULL)
 
 \item{dataSet}{option to replace the data set in the lavaan model with a different data set. Can be useful for cross-validation}
 }
+\value{
+Object of class modifyModel
+}
 \description{
 Modify the model from lavaan to fit your needs
 }

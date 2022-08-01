@@ -13,6 +13,9 @@ ridgeValue(parameters, tuningParameters, penaltyFunctionArguments)
 
 \item{penaltyFunctionArguments}{list with field regularizedParameterLabels (labels of regularized parameters)}
 }
+\value{
+penalty function value
+}
 \description{
 ridge penalty function
 }

@@ -17,7 +17,7 @@ mcp(
 \item{lavaanModel}{model of class lavaan}
 
 \item{regularized}{vector with names of parameters which are to be regularized.
-If you are unsure what these parameters are called, use
+If you are unsure what these parameters are called, use 
 getLavaanParameters(model) with your lavaan model object}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
@@ -27,8 +27,11 @@ a constant (theta)}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{control}{used to control the optimizer. This element is generated with
+\item{control}{used to control the optimizer. This element is generated with 
 the controlIsta (see ?controlIsta)}
+}
+\value{
+Model of class regularizedSEM
 }
 \description{
 Implements mcp regularization for structural equation models.
@@ -43,48 +46,44 @@ where \eqn{\theta > 0}.
 Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 most standard SEM are supported. \pkg{lessSEM} also provides full information
 maximum likelihood for missing data. To use this functionality,
-fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.
+fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
 \pkg{lessSEM} will then automatically switch to full information maximum likelihood
 as well.
 
 mcp regularization:
-\itemize{
-\item Zhang, C.-H. (2010). Nearly unbiased variable selection under minimax concave penalty.
+
+* Zhang, C.-H. (2010). Nearly unbiased variable selection under minimax concave penalty. 
 The Annals of Statistics, 38(2), 894–942. https://doi.org/10.1214/09-AOS729
-}
 
 Regularized SEM
-\itemize{
-\item Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
-\item Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural
+
+* Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
+* Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural 
 Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
-}
 
 For more details on GLMNET, see:
-\itemize{
-\item Friedman, J., Hastie, T., & Tibshirani, R. (2010).
-Regularization Paths for Generalized Linear Models via Coordinate Descent.
+
+* Friedman, J., Hastie, T., & Tibshirani, R. (2010). 
+Regularization Paths for Generalized Linear Models via Coordinate Descent. 
 Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
-\item Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
-A Comparison of Optimization Methods and Software for Large-scale
+* Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
+A Comparison of Optimization Methods and Software for Large-scale 
 L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
-\item Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012).
-An improved GLMNET for l1-regularized logistic regression.
+* Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
+An improved GLMNET for l1-regularized logistic regression. 
 The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
-}
 
 For more details on ISTA, see:
-\itemize{
-\item Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding
+
+* Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding 
 Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
 183–202. https://doi.org/10.1137/080716542
-\item Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013).
-A General Iterative Shrinkage and Thresholding Algorithm for Non-convex
-Regularized Optimization Problems. Proceedings of the 30th International
+* Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 
+A General Iterative Shrinkage and Thresholding Algorithm for Non-convex 
+Regularized Optimization Problems. Proceedings of the 30th International 
 Conference on Machine Learning, 28(2)(2), 37–45.
-\item Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and
+* Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
 Trends in Optimization, 1(3), 123–231.
-}
 }
 \examples{
 library(lessSEM)

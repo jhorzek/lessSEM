@@ -1,7 +1,7 @@
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
-#include "scores.hpp"
-#include "gradients.hpp"
+#include "SEM.h"
+#include "scores.h"
+#include "gradients.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

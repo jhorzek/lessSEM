@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
-#include "SEM.hpp"
-#include "hessian.hpp"
+#include "SEM.h"
+#include "hessian.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 

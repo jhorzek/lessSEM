@@ -13,6 +13,9 @@ fitFunction(par, SEM, raw)
 
 \item{raw}{controls if the internal transformations of lessSEM is used.}
 }
+\value{
+-2log-Likelihood
+}
 \description{
 internal function which returns the -2 log Likelihood of an object of class Rcpp_SEMCpp. This function can be used in optimizers
 }

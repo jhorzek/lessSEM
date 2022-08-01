@@ -15,6 +15,9 @@ individualMinus2LogLikelihood(par, SEM, data, raw)
 
 \item{raw}{controls if the internal transformations of lessSEM is used.}
 }
+\value{
+-2 log Likelihood for each subject in the data set
+}
 \description{
 internal function which returns the -2 log Likelihood for a single subject
 }

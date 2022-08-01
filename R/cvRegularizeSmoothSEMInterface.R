@@ -28,10 +28,17 @@
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
-#' @md
+#' @returns model of class cvRegularizedSEM
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -142,10 +149,17 @@ cvSmoothLasso <- function(lavaanModel,
 #' the unregularized parameter estimates
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
-#' @md
+#' @returns model of class cvRegularizedSEM 
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -255,10 +269,18 @@ cvSmoothAdaptiveLasso <- function(lavaanModel,
 #' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlBFGS function. See ?controlBFGS for more details.
-#' @md
+#' the controlBFGS function. See ?controlBFGS
+#' for more details.
+#' @returns model of class cvRegularizedSEM
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -356,17 +378,24 @@ cvRidgeBfgs <- function(lavaanModel,
 #' Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
 #' 
 #' @param lavaanModel model of class lavaan 
-#' @param weights labeled vector with weights for each of the parameters in the 
-#' model. If you are unsure what these parameters are called, use 
+#' @param regularized vector with names of parameters which are to be regularized.
+#' If you are unsure what these parameters are called, use 
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param alphas numeric vector with values of the tuning parameter alpha. Must be
-#' in [0,1]. 0 = ridge, 1 = lasso.
+#' between 0 and 1. 0 = ridge, 1 = lasso.
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
+#' @param k the number of cross-validation folds. Alternatively, you can pass
+#' a matrix with booleans (TRUE, FALSE) which indicates for each person which subset
+#' it belongs to. See ?lessSEM::createSubsets for an example of how this matrix should look like.
+#' @param standardize Standardizing your data prior to the analysis can undermine the cross-
+#' validation. Set standardize=TRUE to automatically standardize the data.
+#' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlBFGS function. See ?controlBFGS for more details.
-#' @md
+#' the controlBFGS function. See ?controlBFGS
+#' for more details.
+
 #' @examples 
 #' library(lessSEM)
 #' 

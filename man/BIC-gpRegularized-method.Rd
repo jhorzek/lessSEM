@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{object of class gpRegularized}
 }
+\value{
+data frame with fit values, appended with BIC
+}
 \description{
 returns the BIC
 }
