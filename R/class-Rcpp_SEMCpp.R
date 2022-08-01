@@ -1,7 +1,5 @@
 # https://gallery.rcpp.org/articles/custom-printer-exposed-modules/
-#' @name Rcpp_SEMCpp
-#' 
-#' @title internal representation of SEM in C++
+#' internal representation of SEM in C++
 #' 
 setClass("Rcpp_SEMCpp")
 

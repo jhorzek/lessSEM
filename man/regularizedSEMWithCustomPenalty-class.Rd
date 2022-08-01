@@ -3,7 +3,7 @@
 \docType{class}
 \name{regularizedSEMWithCustomPenalty-class}
 \alias{regularizedSEMWithCustomPenalty-class}
-\title{regularizedSEMWithCustomPenalty}
+\title{Class for regularized SEM using Rsolnp}
 \description{
 Class for regularized SEM using Rsolnp
 }

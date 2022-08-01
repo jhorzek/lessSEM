@@ -1,5 +1,3 @@
-#' gpRegularized
-#' 
 #' Class for regularized model using general purpose optimization interface
 #' @slot penalty penalty used (e.g., "lasso")
 #' @slot parameters data.frame with all parameter estimates
@@ -128,9 +126,12 @@ setMethod("BIC", "gpRegularized", function (object) {
   
 })
 
-#' plot
-#' 
 #' plots the regularized and unregularized parameters for all levels of lambda
+#'
+#' @docType methods
+#' @name plot-gpRegularized
+#' @rdname plot-gpRegularized
+#' @aliases plot-gpRegularized plot,gpRegularized-method
 #' 
 #' @param x object of class gpRegularized
 #' @param regularizedOnly boolean: should only regularized parameters be plotted?``

@@ -3,7 +3,7 @@
 \docType{class}
 \name{regularizedSEM-class}
 \alias{regularizedSEM-class}
-\title{regularizedSEM}
+\title{Class for regularized SEM}
 \description{
 Class for regularized SEM
 }

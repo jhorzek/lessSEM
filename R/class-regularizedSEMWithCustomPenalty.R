@@ -1,5 +1,3 @@
-#' regularizedSEMWithCustomPenalty
-#' 
 #' Class for regularized SEM using Rsolnp
 #' @slot parameters data.frame with parameter estimates
 #' @slot fits data.frame with all fit results

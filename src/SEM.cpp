@@ -8,6 +8,50 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+//' @name SEMCpp
+//' 
+//' @title SEMCpp class
+//' 
+//' @description internal SEM representation
+//' 
+//' @field new Creates a new SEMCpp.
+//' @field A Matrix with directed effects
+//' @field S Matrix with undirected paths
+//' @field F Filter matrix to separate latent and observed variables
+//' @field m Vector with means of observed and latent variables
+//' @field impliedCovariance implied covariance matrix
+//' @field impliedMeans implied means vector
+//' @field m2LL -2 log-likelihood
+//' @field rawData raw data set
+//' @field manifestNames names of manifest variables
+//' @field wasFit names of manifest variables
+//' @field setMatrix Fills the elements of a model matrix. Expects a char 
+//' (A, S, or F), and a matrix with values
+//' @field setVector Fills the elements of a model vector. 
+//' Expects a char (m), and a vector with values
+//' @field initializeParameters Initializes the parameters of the model. 
+//' Expects StringVector with labels, StringVector with location, 
+//' uvec with rows, uvec with columns, vec with values, and vec with rawValues
+//' @field setParameters Changes the parameters of a model. Expects StringVector 
+//' with labels, vec with values, and boolean indicating if the values are raw (TRUE) 
+//' or transformed (FALSE).
+//' @field addDerivativeElement Add an element to the internal derivative structure. 
+//' string label, string with location, and boolean indicating if it is a variance, matrix with positions.
+//' @field addRawData Adds a raw data set. Expects matrix and vector with labels of manifest variables.
+//' @field addSubset Adds a subset to the data. Expects the sample size N of the subset, 
+//' the number of observed variables without missings, uvec with indices of notMissing values, 
+//' matrix with covariance, colvec with means, raw data without missings.
+//' @field implied Computes implied means and covariance matrix
+//' @field fit Fits the model. Returns -2 log likelihood
+//' @field getParameters Returns a data frame with model parameters.
+//' @field getParameterLabels Returns a vector with unique parameter labels as used internally.
+//' @field getGradients Returns a matrix with scores.
+//' @field getScores Returns a matrix with scores.
+//' @field getHessian Returns the hessian of the model. Expects the labels of the 
+//' parameters and the values of the parameters as well as a boolean indicating if 
+//' these are raw. Finally, a double (eps) controls the precision of the approximation.
+
+
 bool SEMCpp::checkModel(){
 
   int N_ = 0;

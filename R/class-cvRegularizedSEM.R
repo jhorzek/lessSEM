@@ -1,5 +1,3 @@
-#' cvRegularizedSEM
-#' 
 #' Class for cross-validated regularized SEM
 #' @slot parameters data.frame with parameter estimates for the best combination of the
 #' tuning parameters
@@ -25,10 +23,14 @@ setClass(Class = "cvRegularizedSEM",
          )
 )
 
-#' show
+#' Show method for objects of class \code{cvRegularizedSEM}.
+#'
+#' @docType methods
+#' @name show-cvRegularizedSEM
+#' @rdname show-cvRegularizedSEM
+#' @aliases show-cvRegularizedSEM show,cvRegularizedSEM-method
 #' 
 #' @param object object of class cvRegularizedSEM
-#' @export
 setMethod("show", "cvRegularizedSEM", function (object) {
   bestFit <- unlist(object@parameters)
   tuningParameters <- bestFit[!names(bestFit) %in% object@parameterLabels]
@@ -38,7 +40,12 @@ setMethod("show", "cvRegularizedSEM", function (object) {
   print(bestFit[object@parameterLabels])
 })
 
-#' summary
+#' summary method for objects of class \code{cvRegularizedSEM}.
+#'
+#' @docType methods
+#' @name summary-cvRegularizedSEM
+#' @rdname summary-cvRegularizedSEM
+#' @aliases summary-cvRegularizedSEM summary,cvRegularizedSEM-method
 #' 
 #' @param object object of class cvRegularizedSEM
 #' @export
@@ -71,12 +78,15 @@ setMethod("coef", "cvRegularizedSEM", function (object) {
   return(unlist(object@parameters[,object@parameterLabels]))
 })
 
-#' plot
-#' 
 #' plots the regularized and unregularized parameters as well as the cross-validation fits for all levels of lambda
+#'
+#' @docType methods
+#' @name plot-cvRegularizedSEM
+#' @rdname plot-cvRegularizedSEM
+#' @aliases plot-cvRegularizedSEM plot,cvRegularizedSEM-method
+#' 
 #' 
 #' @param x object of class cvRegularizedSEM
-#' @export
 setMethod("plot", "cvRegularizedSEM", function (x) {
   
   fits <- x@cvfits

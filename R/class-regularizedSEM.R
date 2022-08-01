@@ -1,5 +1,3 @@
-#' regularizedSEM
-#' 
 #' Class for regularized SEM
 #' @slot penalty penalty used (e.g., "lasso")
 #' @slot parameters data.frame with parameter estimates
@@ -125,9 +123,12 @@ setMethod("BIC", "regularizedSEM", function (object) {
   
 })
 
-#' plot
-#' 
 #' plots the regularized and unregularized parameters for all levels of lambda
+#'
+#' @docType methods
+#' @name plot-regularizedSEM
+#' @rdname plot-regularizedSEM
+#' @aliases plot-regularizedSEM plot,regularizedSEM-method
 #' 
 #' @param x object of class regularizedSEM
 #' @param regularizedOnly boolean: should only regularized parameters be plotted?``

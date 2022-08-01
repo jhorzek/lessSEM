@@ -3,7 +3,7 @@
 \docType{class}
 \name{gpRegularized-class}
 \alias{gpRegularized-class}
-\title{gpRegularized}
+\title{Class for regularized model using general purpose optimization interface}
 \description{
 Class for regularized model using general purpose optimization interface
 }

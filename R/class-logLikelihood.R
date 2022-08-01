@@ -1,5 +1,3 @@
-#' logLikelihood
-#' 
 #' Class for log-likelihood of regularized SEM. Note: we define a custom logLik - 
 #' Function because the generic one is using df = number of parameters which might be confusing.
 #' @slot logLik log-Likelihood

@@ -3,7 +3,7 @@
 \docType{class}
 \name{cvRegularizedSEM-class}
 \alias{cvRegularizedSEM-class}
-\title{cvRegularizedSEM}
+\title{Class for cross-validated regularized SEM}
 \description{
 Class for cross-validated regularized SEM
 }
