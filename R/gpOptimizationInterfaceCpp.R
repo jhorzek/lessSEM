@@ -842,8 +842,6 @@ gpElasticNetCpp <- function(par,
 }
 
 
-#' gpCappedL1Cpp
-#' 
 #' Implements cappedL1 regularization for general purpose optimization problems with C++ functions.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \lambda \min(| x_j|, \theta)}
@@ -1006,6 +1004,7 @@ gpElasticNetCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' cL1@parameters
+#' 
 #' @export
 gpCappedL1Cpp <- function(par,
                        fn,
@@ -1043,16 +1042,14 @@ gpCappedL1Cpp <- function(par,
   
 }
 
-#' gpLspCpp
-#' 
 #' Implements lsp regularization for general purpose optimization problems with C++ functions.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \lambda \log(1 + |x_j|\theta)}
 #' where \eqn{\theta > 0}. 
 #' 
 #' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
-#' with starting values (important: This vector _must_ have labels), a fitting
-#' function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
+#' with starting values (important: This vector must have labels), a fitting
+#' function, and a gradient function. These fitting functions must take an const Rcpp::NumericVector& with parameter
 #' values as first argument and an Rcpp::List& as second argument 
 #' 
 #' lsp regularization:
@@ -1084,12 +1081,6 @@ gpCappedL1Cpp <- function(par,
 #' Conference on Machine Learning, 28(2)(2), 37–45.
 #' * Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
 #' Trends in Optimization, 1(3), 123–231.
-#' # This example shows how to use the optimizers
-#' # for other objective functions. We will use
-#' # a linear regression as an example. Note that
-#' # this is not a useful application of the optimizers
-#' # as there are specialized packages for linear regression
-#' # (e.g., glmnet)
 #' 
 #' @param par labeled vector with starting values
 #' @param fn R function which takes the parameters AND their labels 
@@ -1209,6 +1200,7 @@ gpCappedL1Cpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' l@parameters
+#' 
 #' @export
 gpLspCpp <- function(par,
                   fn,
@@ -1248,11 +1240,11 @@ gpLspCpp <- function(par,
 #' 
 #' Implements mcp regularization for general purpose optimization problems with C++ functions.
 #' The penalty function is given by:
-#' \deqn{p( x_j) = \begin{cases}
+#' \ifelse{html}{\deqn{p( x_j) = \begin{cases}
 #' \lambda |x_j| - x_j^2/(2\theta) & \text{if } |x_j| \leq \theta\lambda\\
 #' \theta\lambda^2/2 & \text{if } |x_j| > \lambda\theta
-#' \end{cases}}
-#' where \eqn{\theta > 0}. 
+#' \end{cases}} where \eqn{\theta > 0}.}{
+#' Equation Omitted in Pdf Documentation.}
 #' 
 #' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels), a fitting
@@ -1447,13 +1439,16 @@ gpMcpCpp <- function(par,
 #' 
 #' Implements scad regularization for general purpose optimization problems with C++ functions.
 #' The penalty function is given by:
+#' \ifelse{html}{
 #' \deqn{p( x_j) = \begin{cases}
 #' \lambda |x_j| & \text{if } |x_j| \leq \theta\\
 #' \frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)} & 
 #' \text{if } \lambda < |x_j| \leq \lambda\theta \\
 #' (\theta + 1) \lambda^2/2 & \text{if } |x_j| \geq \theta\lambda\\
 #' \end{cases}}
-#' where \eqn{\theta > 2}.  
+#' where \eqn{\theta > 2}.}{
+#' Equation Omitted in Pdf Documentation.
+#' } 
 #' 
 #' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels), a fitting

@@ -87,7 +87,7 @@ test_that("testing cross-validation for smooth adaptive lasso", {
     
   }
   
-  testthat::expect_equal(all(abs(cv@cvfits$cvfit)< 1e-6), TRUE)
+  testthat::expect_equal(all(abs(cv@cvfits$cvfit)< 1e-4), TRUE)
   
   # test subset parameters
   subset <- sample(1:5, 1)
@@ -101,7 +101,7 @@ test_that("testing cross-validation for smooth adaptive lasso", {
                                control = controlBFGS(startingValues = "start"),
                                modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
   
-  testthat::expect_equal(all(abs(subsetLasso@parameters - subsetPars[,colnames(subsetLasso@parameters)])< 1e-3), TRUE)
+  testthat::expect_equal(all(abs(subsetLasso@parameters - subsetPars[,colnames(subsetLasso@parameters)])< 1e-2), TRUE)
   
   # test standardization
   cv <- cvSmoothAdaptiveLasso(lavaanModel = modelFit, 
@@ -147,7 +147,7 @@ test_that("testing cross-validation for smooth adaptive lasso", {
     
   }
   
-  testthat::expect_equal(all(abs(cvfits$cvfit)< 1e-6), TRUE)
+  testthat::expect_equal(all(abs(cvfits$cvfit)< 1e-4), TRUE)
   
   # test reweighing
   
@@ -169,7 +169,7 @@ test_that("testing cross-validation for smooth adaptive lasso", {
     par <- getLavaanParameters(modelFit_i)
     # Note: weights can be very large and differences are to be expected even
     # for fairly similar parameter estimates
-    testthat::expect_equal(all((abs(par) - weights[i,names(par)]^(-1))[cv@regularized] < 1e-3), TRUE)
+    testthat::expect_equal(all((abs(par) - weights[i,names(par)]^(-1))[cv@regularized] < 1e-2), TRUE)
     
   }
   
@@ -227,7 +227,7 @@ test_that("testing cross-validation for smooth adaptive lasso", {
     
   }
   
-  testthat::expect_equal(all(abs(cvfits$cvfit)< 1e-6), TRUE)
+  testthat::expect_equal(all(abs(cvfits$cvfit)< 1e-4), TRUE)
   
   
   

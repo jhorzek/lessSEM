@@ -7,11 +7,11 @@
 makePtrs(fitFunName, gradFunName)
 }
 \arguments{
-\item{fitFunName}{name of your C++ fit function 
+\item{fitFunName}{name of your C++ fit function
 (IMPORTANT: This must be the name
 used in C++)}
 
-\item{gradFunName}{name of your C++ gradient function 
+\item{gradFunName}{name of your C++ gradient function
 (IMPORTANT: This must be the name
 used in C++)}
 }

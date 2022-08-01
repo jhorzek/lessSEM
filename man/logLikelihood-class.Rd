@@ -3,10 +3,10 @@
 \docType{class}
 \name{logLikelihood-class}
 \alias{logLikelihood-class}
-\title{Class for log-likelihood of regularized SEM. Note: we define a custom logLik - 
+\title{Class for log-likelihood of regularized SEM. Note: we define a custom logLik -
 Function because the generic one is using df = number of parameters which might be confusing.}
 \description{
-Class for log-likelihood of regularized SEM. Note: we define a custom logLik - 
+Class for log-likelihood of regularized SEM. Note: we define a custom logLik -
 Function because the generic one is using df = number of parameters which might be confusing.
 }
 \section{Slots}{

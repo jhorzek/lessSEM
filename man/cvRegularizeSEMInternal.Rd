@@ -20,14 +20,14 @@ cvRegularizeSEMInternal(
 \arguments{
 \item{lavaanModel}{model of class lavaan}
 
-\item{k}{the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function. 
+\item{k}{the number of cross-validation folds. Alternatively, a matrix with pre-defined subsets can be passed to the function.
 See ?lessSEM::cvLasso for an example}
 
 \item{standardize}{should training and test sets be standardized?}
 
 \item{penalty}{string: name of the penalty used in the model}
 
-\item{weights}{labeled vector with weights for each of the parameters in the 
+\item{weights}{labeled vector with weights for each of the parameters in the
 model.}
 
 \item{returnSubsetParameters}{if set to TRUE, the parameter estimates of the individual cross-validation training sets will be returned}
@@ -40,7 +40,7 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{control}{used to control the optimizer. This element is generated with 
+\item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}
 }
 \value{

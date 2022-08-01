@@ -31,27 +31,27 @@ internal SEM representation
 
 \item{\code{wasFit}}{names of manifest variables}
 
-\item{\code{setMatrix}}{Fills the elements of a model matrix. Expects a char 
+\item{\code{setMatrix}}{Fills the elements of a model matrix. Expects a char
 (A, S, or F), and a matrix with values}
 
-\item{\code{setVector}}{Fills the elements of a model vector. 
+\item{\code{setVector}}{Fills the elements of a model vector.
 Expects a char (m), and a vector with values}
 
-\item{\code{initializeParameters}}{Initializes the parameters of the model. 
-Expects StringVector with labels, StringVector with location, 
+\item{\code{initializeParameters}}{Initializes the parameters of the model.
+Expects StringVector with labels, StringVector with location,
 uvec with rows, uvec with columns, vec with values, and vec with rawValues}
 
-\item{\code{setParameters}}{Changes the parameters of a model. Expects StringVector 
-with labels, vec with values, and boolean indicating if the values are raw (TRUE) 
+\item{\code{setParameters}}{Changes the parameters of a model. Expects StringVector
+with labels, vec with values, and boolean indicating if the values are raw (TRUE)
 or transformed (FALSE).}
 
-\item{\code{addDerivativeElement}}{Add an element to the internal derivative structure. 
+\item{\code{addDerivativeElement}}{Add an element to the internal derivative structure.
 string label, string with location, and boolean indicating if it is a variance, matrix with positions.}
 
 \item{\code{addRawData}}{Adds a raw data set. Expects matrix and vector with labels of manifest variables.}
 
-\item{\code{addSubset}}{Adds a subset to the data. Expects the sample size N of the subset, 
-the number of observed variables without missings, uvec with indices of notMissing values, 
+\item{\code{addSubset}}{Adds a subset to the data. Expects the sample size N of the subset,
+the number of observed variables without missings, uvec with indices of notMissing values,
 matrix with covariance, colvec with means, raw data without missings.}
 
 \item{\code{implied}}{Computes implied means and covariance matrix}
@@ -66,8 +66,8 @@ matrix with covariance, colvec with means, raw data without missings.}
 
 \item{\code{getScores}}{Returns a matrix with scores.}
 
-\item{\code{getHessian}}{Returns the hessian of the model. Expects the labels of the 
-parameters and the values of the parameters as well as a boolean indicating if 
+\item{\code{getHessian}}{Returns the hessian of the model. Expects the labels of the
+parameters and the values of the parameters as well as a boolean indicating if
 these are raw. Finally, a double (eps) controls the precision of the approximation.}
 }}
 

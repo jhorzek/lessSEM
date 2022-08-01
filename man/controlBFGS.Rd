@@ -25,8 +25,8 @@ controlBFGS(
 from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
 values can be passed to the function which will then be used as starting values.}
 
-\item{initialHessian}{option to provide an initial Hessian to the optimizer. Must have row and column names corresponding to the parameter labels. use getLavaanParameters(lavaanModel) to 
-see those labels. If set to "scoreBased", the outer product of the scores will be used as an approximation (see https://en.wikipedia.org/wiki/Berndt%E2%80%93Hall%E2%80%93Hall%E2%80%93Hausman_algorithm).
+\item{initialHessian}{option to provide an initial Hessian to the optimizer. Must have row and column names corresponding to the parameter labels. use getLavaanParameters(lavaanModel) to
+see those labels. If set to "scoreBased", the outer product of the scores will be used as an approximation (see https://en.wikipedia.org/wiki/Berndt\%E2\%80\%93Hall\%E2\%80\%93Hall\%E2\%80\%93Hausman_algorithm).
 If set to "compute", the initial hessian will be computed. If set to a single value, a diagonal matrix with the single value along the diagonal will be used.}
 
 \item{saveHessian}{should the Hessian be saved for later use? Note: This may take a lot of memory!}

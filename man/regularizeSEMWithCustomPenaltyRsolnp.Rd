@@ -17,7 +17,7 @@ regularizeSEMWithCustomPenaltyRsolnp(
 \arguments{
 \item{lavaanModel}{model of class lavaan}
 
-\item{individualPenaltyFunction}{penalty function which takes the current parameter values as first argument, the tuning parameters as second, and the penaltyFunctionArguments as third argument and 
+\item{individualPenaltyFunction}{penalty function which takes the current parameter values as first argument, the tuning parameters as second, and the penaltyFunctionArguments as third argument and
 returns a single value - the value of the penalty function for a single person. If the true penalty function is non-differentiable (e.g., lasso) a smooth
 approximation of this function should be provided.}
 

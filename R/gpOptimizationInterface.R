@@ -965,8 +965,8 @@ gpCappedL1 <- function(par,
 #' The penalty function is given by:
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
-#' with starting values (important: This vector _must_ have labels) and a fitting
-#' function. This fitting functions _must_ take a labeled vector with parameter
+#' with starting values (important: This vector must have labels) and a fitting
+#' function. This fitting functions must take a labeled vector with parameter
 #' values as first argument. The remaining arguments are passed with the ... argument.
 #' This is similar to optim.
 #' 
@@ -1003,12 +1003,6 @@ gpCappedL1 <- function(par,
 #' Conference on Machine Learning, 28(2)(2), 37–45.
 #' * Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
 #' Trends in Optimization, 1(3), 123–231.
-#' # This example shows how to use the optimizers
-#' # for other objective functions. We will use
-#' # a linear regression as an example. Note that
-#' # this is not a useful application of the optimizers
-#' # as there are specialized packages for linear regression
-#' # (e.g., glmnet)
 #' 
 #' @param par labeled vector with starting values
 #' @param fn R function which takes the parameters AND their labels 
@@ -1141,11 +1135,11 @@ gpLsp <- function(par,
 #' 
 #' Implements mcp regularization for general purpose optimization problems.
 #' The penalty function is given by:
-#' \deqn{p( x_j) = \begin{cases}
+#' \ifelse{html}{\deqn{p( x_j) = \begin{cases}
 #' \lambda |x_j| - x_j^2/(2\theta) & \text{if } |x_j| \leq \theta\lambda\\
 #' \theta\lambda^2/2 & \text{if } |x_j| > \lambda\theta
-#' \end{cases}}
-#' where \eqn{\theta > 0}. 
+#' \end{cases}} where \eqn{\theta > 0}.}{
+#' Equation Omitted in Pdf Documentation.}
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting
@@ -1316,13 +1310,16 @@ gpMcp <- function(par,
 #' 
 #' Implements scad regularization for general purpose optimization problems.
 #' The penalty function is given by:
+#' \ifelse{html}{
 #' \deqn{p( x_j) = \begin{cases}
 #' \lambda |x_j| & \text{if } |x_j| \leq \theta\\
 #' \frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)} & 
 #' \text{if } \lambda < |x_j| \leq \lambda\theta \\
 #' (\theta + 1) \lambda^2/2 & \text{if } |x_j| \geq \theta\lambda\\
 #' \end{cases}}
-#' where \eqn{\theta > 2}.  
+#' where \eqn{\theta > 2}.}{
+#' Equation Omitted in Pdf Documentation.
+#' }  
 #' 
 #' The interface is similar to that of optim. Users have to supply a vector 
 #' with starting values (important: This vector _must_ have labels) and a fitting

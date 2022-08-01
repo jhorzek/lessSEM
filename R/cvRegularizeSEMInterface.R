@@ -858,11 +858,12 @@ cvLsp <- function(lavaanModel,
 #' 
 #' Implements mcp regularization for structural equation models.
 #' The penalty function is given by:
-#' \deqn{p( x_j) = \begin{cases}
+#' \ifelse{html}{\deqn{p( x_j) = \begin{cases}
 #' \lambda |x_j| - x_j^2/(2\theta) & \text{if } |x_j| \leq \theta\lambda\\
 #' \theta\lambda^2/2 & \text{if } |x_j| > \lambda\theta
-#' \end{cases}}
-#' where \eqn{\theta > 0}. 
+#' \end{cases}} where \eqn{\theta > 0}.}{
+#' Equation Omitted in Pdf Documentation.}
+#' 
 #' 
 #' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
@@ -998,13 +999,16 @@ cvMcp <- function(lavaanModel,
 #' 
 #' Implements scad regularization for structural equation models.
 #' The penalty function is given by:
+#' \ifelse{html}{
 #' \deqn{p( x_j) = \begin{cases}
 #' \lambda |x_j| & \text{if } |x_j| \leq \theta\\
 #' \frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)} & 
 #' \text{if } \lambda < |x_j| \leq \lambda\theta \\
 #' (\theta + 1) \lambda^2/2 & \text{if } |x_j| \geq \theta\lambda\\
 #' \end{cases}}
-#' where \eqn{\theta > 2}. 
+#' where \eqn{\theta > 2}.}{
+#' Equation Omitted in Pdf Documentation.
+#' }
 #' 
 #' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currenlty,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information

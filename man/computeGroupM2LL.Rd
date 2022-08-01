@@ -3,9 +3,9 @@
 \name{computeGroupM2LL}
 \alias{computeGroupM2LL}
 \title{computeGroupM2LL
-Computes the -2log likelihood in a RAM model for a  group of people with identical 
-missing structure. The idea is based on OpenMx (Boker, S. M., Neale, M. C., Maes, H. H., 
-Wilde, M. J., Spiegel, M., Brick, T. R., Estabrook, R., Bates, T. C., & Mehta, P. (2022). 
+Computes the -2log likelihood in a RAM model for a  group of people with identical
+missing structure. The idea is based on OpenMx (Boker, S. M., Neale, M. C., Maes, H. H.,
+Wilde, M. J., Spiegel, M., Brick, T. R., Estabrook, R., Bates, T. C., & Mehta, P. (2022).
 OpenMx: Extended structural equation modelling (2.20.0). https://cran.r-project.org/web/packages/OpenMx/OpenMx.pdf)}
 \usage{
 computeGroupM2LL(
@@ -35,8 +35,8 @@ computeGroupM2LL(
 }
 \description{
 computeGroupM2LL
-Computes the -2log likelihood in a RAM model for a  group of people with identical 
-missing structure. The idea is based on OpenMx (Boker, S. M., Neale, M. C., Maes, H. H., 
-Wilde, M. J., Spiegel, M., Brick, T. R., Estabrook, R., Bates, T. C., & Mehta, P. (2022). 
+Computes the -2log likelihood in a RAM model for a  group of people with identical
+missing structure. The idea is based on OpenMx (Boker, S. M., Neale, M. C., Maes, H. H.,
+Wilde, M. J., Spiegel, M., Brick, T. R., Estabrook, R., Bates, T. C., & Mehta, P. (2022).
 OpenMx: Extended structural equation modelling (2.20.0). https://cran.r-project.org/web/packages/OpenMx/OpenMx.pdf)
 }

@@ -21,33 +21,33 @@ controlGlmnet(
 )
 }
 \arguments{
-\item{startingValues}{option to provide initial starting values. Only used 
+\item{startingValues}{option to provide initial starting values. Only used
 for the first lambda. Three options are supported. Setting to "est" will use the estimates
-from the lavaan model object. Setting to "start" will use the starting values 
+from the lavaan model object. Setting to "start" will use the starting values
 of the lavaan model. Finally, a labeled vector with parameter
 values can be passed to the function which will then be used as starting values.}
 
-\item{initialHessian}{option to provide an initial Hessian to the optimizer. 
-Must have row and column names corresponding to the parameter labels. use 
-getLavaanParameters(lavaanModel) to 
-see those labels. If set to "scoreBased", the outer product of the scores 
-will be used as an approximation 
-(see https://en.wikipedia.org/wiki/Berndt%E2%80%93Hall%E2%80%93Hall%E2%80%93Hausman_algorithm).
-If set to "compute", the initial hessian will be computed. If set to a single 
+\item{initialHessian}{option to provide an initial Hessian to the optimizer.
+Must have row and column names corresponding to the parameter labels. use
+getLavaanParameters(lavaanModel) to
+see those labels. If set to "scoreBased", the outer product of the scores
+will be used as an approximation
+(see https://en.wikipedia.org/wiki/Berndt\%E2\%80\%93Hall\%E2\%80\%93Hall\%E2\%80\%93Hausman_algorithm).
+If set to "compute", the initial hessian will be computed. If set to a single
 value, a diagonal matrix with the single value along the diagonal will be used.}
 
 \item{saveHessian}{should the Hessian be saved for later use? Note: This may take a lot of memory!}
 
-\item{stepSize}{Initial stepSize of the outer iteration 
+\item{stepSize}{Initial stepSize of the outer iteration
 (theta_{k+1} = theta_k + stepSize * Stepdirection)}
 
-\item{sigma}{only relevant when lineSearch = 'GLMNET'. Controls the sigma 
-parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET 
-for l1-regularized logistic regression. The Journal of Machine Learning Research, 
+\item{sigma}{only relevant when lineSearch = 'GLMNET'. Controls the sigma
+parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET
+for l1-regularized logistic regression. The Journal of Machine Learning Research,
 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.}
 
-\item{gamma}{Controls the gamma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
-An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning 
+\item{gamma}{Controls the gamma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012).
+An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning
 Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421. Defaults to 0.}
 
 \item{maxIterOut}{Maximal number of outer iterations}
