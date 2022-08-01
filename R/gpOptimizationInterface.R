@@ -66,7 +66,7 @@
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for other objective functions. We will use
@@ -255,7 +255,7 @@ gpLasso <- function(par,
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for other objective functions. We will use
@@ -461,7 +461,7 @@ gpAdaptiveLasso <- function(par,
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for other objective functions. We will use
@@ -643,7 +643,7 @@ gpRidge <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples
 #' # This example shows how to use the optimizers
 #' # for other objective functions. We will use
@@ -828,7 +828,7 @@ gpElasticNet <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for other objective functions. We will use
@@ -1199,7 +1199,7 @@ gpLsp <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for other objective functions. We will use
@@ -1377,7 +1377,7 @@ gpMcp <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for other objective functions. We will use

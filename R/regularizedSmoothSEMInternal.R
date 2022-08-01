@@ -17,7 +17,7 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @returns regularizedSEM
-#' @md
+
 #' @export
 regularizeSmoothSEMInternal <- function(lavaanModel,
                                          penalty,

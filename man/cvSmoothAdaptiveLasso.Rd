@@ -21,11 +21,11 @@ cvSmoothAdaptiveLasso(
 \item{lavaanModel}{model of class lavaan}
 
 \item{regularized}{vector with names of parameters which are to be regularized.
-If you are unsure what these parameters are called, use
+If you are unsure what these parameters are called, use 
 getLavaanParameters(model) with your lavaan model object}
 
-\item{weights}{labeled vector with weights for each of the parameters in the
-model. If you are unsure what these parameters are called, use
+\item{weights}{labeled vector with weights for each of the parameters in the 
+model. If you are unsure what these parameters are called, use 
 getLavaanParameters(model) with your lavaan model object. If set to NULL,
 the default weights will be used: the inverse of the absolute values of
 the unregularized parameter estimates}
@@ -45,7 +45,7 @@ validation. Set standardize=TRUE to automatically standardize the data.}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{control}{used to control the optimizer. This element is generated with
+\item{control}{used to control the optimizer. This element is generated with 
 the controlBFGS function. See ?controlBFGS for more details.}
 }
 \value{
@@ -60,22 +60,20 @@ The penalty function is given by:
 Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 most standard SEM are supported. \pkg{lessSEM} also provides full information
 maximum likelihood for missing data. To use this functionality,
-fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.
+fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
 \pkg{lessSEM} will then automatically switch to full information maximum likelihood
 as well.
 
 Adaptive lasso regularization:
-\itemize{
-\item Zou, H. (2006). The adaptive lasso and its oracle properties. Journal of the American Statistical Association,
+
+* Zou, H. (2006). The adaptive lasso and its oracle properties. Journal of the American Statistical Association, 
 101(476), 1418–1429. https://doi.org/10.1198/016214506000000735
-}
 
 Regularized SEM
-\itemize{
-\item Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
-\item Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural
+
+* Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
+* Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural 
 Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
-}
 }
 \examples{
 library(lessSEM)

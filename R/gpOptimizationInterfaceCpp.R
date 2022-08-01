@@ -57,7 +57,7 @@
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
@@ -277,7 +277,7 @@ gpLassoCpp <- function(par,
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
@@ -499,7 +499,7 @@ gpAdaptiveLassoCpp <- function(par,
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
@@ -700,7 +700,7 @@ gpRidgeCpp <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
@@ -902,7 +902,7 @@ gpElasticNetCpp <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
@@ -1303,7 +1303,7 @@ gpLspCpp <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
@@ -1505,7 +1505,7 @@ gpMcpCpp <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Object of class gpRegularized
-#' @md
+
 #' @examples 
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use

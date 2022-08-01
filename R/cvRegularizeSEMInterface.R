@@ -65,7 +65,7 @@
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns model of class cvRegularizedSEM
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -212,7 +212,7 @@ cvLasso <- function(lavaanModel,
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns model of class cvRegularizedSEM
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -357,7 +357,7 @@ cvAdaptiveLasso <- function(lavaanModel,
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns model of class cvRegularizedSEM
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -498,7 +498,7 @@ cvRidge <- function(lavaanModel,
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns model of class cvRegularizedSEM
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -643,7 +643,7 @@ cvElasticNet <- function(lavaanModel,
 #' the controlIsta function. See ?controlIsta
 #' for more details.
 #' @returns model of class cvRegularizedSEM
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -782,7 +782,7 @@ cvCappedL1 <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' @returns model of class cvRegularizedSEM
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -923,7 +923,7 @@ cvLsp <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' @returns model of class cvRegularizedSEM
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -1066,7 +1066,7 @@ cvMcp <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' @returns model of class cvRegularizedSEM
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 

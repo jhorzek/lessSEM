@@ -24,10 +24,10 @@ gpAdaptiveLassoCpp(
 
 \item{weights}{labeled vector with adaptive lasso weights. NULL will use 1/abs(par)}
 
-\item{fn}{R function which takes the parameters as input and returns the
+\item{fn}{R function which takes the parameters as input and returns the 
 fit value (a single value)}
 
-\item{gr}{R function which takes the parameters as input and returns the
+\item{gr}{R function which takes the parameters as input and returns the 
 gradients of the objective function. If set to NULL, numDeriv will be used
 to approximate the gradients}
 
@@ -43,7 +43,7 @@ It will then generate nLambda values between 0 and the computed lambda.}
 and glmnet. With ista, the control argument can be used to switch to related procedures
 (currently gist).}
 
-\item{control}{used to control the optimizer. This element is generated with
+\item{control}{used to control the optimizer. This element is generated with 
 the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 for more details.}
 }
@@ -57,42 +57,39 @@ The penalty function is given by:
 Adaptive lasso regularization will set parameters to zero if \eqn{\lambda} is large enough.
 }
 \details{
-The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector
-with starting values (important: This vector \emph{must} have labels), a fitting
-function, and a gradient function. These fitting functions \emph{must} take an const Rcpp::NumericVector& with parameter
+The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
+with starting values (important: This vector _must_ have labels), a fitting
+function, and a gradient function. These fitting functions _must_ take an const Rcpp::NumericVector& with parameter
 values as first argument and an Rcpp::List& as second argument
 
 Adaptive lasso regularization:
-\itemize{
-\item Zou, H. (2006). The adaptive lasso and its oracle properties. Journal of the American Statistical Association,
-101(476), 1418–1429. https://doi.org/10.1198/016214506000000735
-}
 
+* Zou, H. (2006). The adaptive lasso and its oracle properties. Journal of the American Statistical Association, 
+101(476), 1418–1429. https://doi.org/10.1198/016214506000000735
+ 
 For more details on GLMNET, see:
-\itemize{
-\item Friedman, J., Hastie, T., & Tibshirani, R. (2010).
-Regularization Paths for Generalized Linear Models via Coordinate Descent.
+
+* Friedman, J., Hastie, T., & Tibshirani, R. (2010). 
+Regularization Paths for Generalized Linear Models via Coordinate Descent. 
 Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
-\item Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
-A Comparison of Optimization Methods and Software for Large-scale
+* Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
+A Comparison of Optimization Methods and Software for Large-scale 
 L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
-\item Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012).
-An improved GLMNET for l1-regularized logistic regression.
+* Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
+An improved GLMNET for l1-regularized logistic regression. 
 The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
-}
 
 For more details on ISTA, see:
-\itemize{
-\item Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding
+
+* Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding 
 Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
 183–202. https://doi.org/10.1137/080716542
-\item Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013).
-A General Iterative Shrinkage and Thresholding Algorithm for Non-convex
-Regularized Optimization Problems. Proceedings of the 30th International
+* Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 
+A General Iterative Shrinkage and Thresholding Algorithm for Non-convex 
+Regularized Optimization Problems. Proceedings of the 30th International 
 Conference on Machine Learning, 28(2)(2), 37–45.
-\item Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and
+* Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
 Trends in Optimization, 1(3), 123–231.
-}
 }
 \examples{
 # This example shows how to use the optimizers

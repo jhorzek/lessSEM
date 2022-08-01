@@ -16,7 +16,7 @@
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
-#' @md
+
 #' @export
 regularizeSEMInternal <- function(lavaanModel,
                                   penalty,

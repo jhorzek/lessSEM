@@ -38,7 +38,7 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @returns model of class cvRegularizedSEM
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -159,7 +159,7 @@ cvSmoothLasso <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @returns model of class cvRegularizedSEM 
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -280,7 +280,7 @@ cvSmoothAdaptiveLasso <- function(lavaanModel,
 #' the controlBFGS function. See ?controlBFGS
 #' for more details.
 #' @returns model of class cvRegularizedSEM
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -395,7 +395,7 @@ cvRidgeBfgs <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS
 #' for more details.
-#' @md
+
 #' @examples 
 #' library(lessSEM)
 #' 

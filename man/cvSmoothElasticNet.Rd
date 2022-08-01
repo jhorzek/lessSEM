@@ -21,7 +21,7 @@ cvSmoothElasticNet(
 \item{lavaanModel}{model of class lavaan}
 
 \item{regularized}{vector with names of parameters which are to be regularized.
-If you are unsure what these parameters are called, use
+If you are unsure what these parameters are called, use 
 getLavaanParameters(model) with your lavaan model object}
 
 \item{lambdas}{numeric vector: values for the tuning parameter lambda}
@@ -42,7 +42,7 @@ validation. Set standardize=TRUE to automatically standardize the data.}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{control}{used to control the optimizer. This element is generated with
+\item{control}{used to control the optimizer. This element is generated with 
 the controlBFGS function. See ?controlBFGS
 for more details.}
 }
@@ -50,7 +50,7 @@ for more details.}
 Implements cross-validated  smooth elastic net regularization for structural equation models.
 The penalty function is given by:
 \deqn{p( x_j) = \alpha\lambda\sqrt{(x_j + \epsilon)^2} + (1-\alpha)\lambda x_j^2}
-Note that the smooth elastic net combines ridge and smooth lasso regularization. If \eqn{\alpha = 0},
+Note that the smooth elastic net combines ridge and smooth lasso regularization. If \eqn{\alpha = 0}, 
 the elastic net reduces to ridge regularization. If \eqn{\alpha = 1} it reduces
 to smooth lasso regularization. In between, elastic net is a compromise between the shrinkage of
 the lasso and the ridge penalty.
@@ -59,22 +59,20 @@ the lasso and the ridge penalty.
 Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 most standard SEM are supported. \pkg{lessSEM} also provides full information
 maximum likelihood for missing data. To use this functionality,
-fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.
+fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
 \pkg{lessSEM} will then automatically switch to full information maximum likelihood
 as well.
 
 Elastic net regularization:
-\itemize{
-\item Zou, H., & Hastie, T. (2005). Regularization and variable selection via the elastic net.
+
+* Zou, H., & Hastie, T. (2005). Regularization and variable selection via the elastic net. 
 Journal of the Royal Statistical Society: Series B, 67(2), 301–320. https://doi.org/10.1111/j.1467-9868.2005.00503.x
-}
 
 Regularized SEM
-\itemize{
-\item Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
-\item Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural
+
+* Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
+* Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural 
 Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
-}
 }
 \examples{
 library(lessSEM)
