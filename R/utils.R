@@ -13,7 +13,7 @@ simulateExampleData <- function(N = 100, # sample size
                                 percentMissing = 0
 ){
   
-  f <- matrix(rnorm(N, 0, 1), ncol = 1) # latent factor
+  f <- matrix(stats::rnorm(N, 0, 1), ncol = 1) # latent factor
   L <- matrix(loadings, 
               nrow = 1) # loadings
   # covariances

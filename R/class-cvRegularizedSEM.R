@@ -67,16 +67,16 @@ setMethod("coef", "cvRegularizedSEM", function (object) {
   return(unlist(object@parameters[,object@parameterLabels]))
 })
 
-#' plots the regularized and unregularized parameters as well as the cross-validation fits for all levels of lambda
-#'
-#' @docType methods
-#' @name plot-cvRegularizedSEM-method
-#' @rdname plot-cvRegularizedSEM-method
-#' @aliases plot-cvRegularizedSEM plot,cvRegularizedSEM-method
-#' 
+#' plots the cross-validation fits
 #' 
 #' @param x object of class cvRegularizedSEM
-setMethod("plot", "cvRegularizedSEM", function (x) {
+#' @param y not used
+#' @param ... not used
+#' @export
+setMethod("plot", 
+          signature = c(x = "cvRegularizedSEM",
+                        y = "missing"), 
+          definition = function (x, y, ...) {
   
   fits <- x@cvfits
   tuningParameters <- fits[,colnames(fits)!= "cvfit",drop=FALSE]

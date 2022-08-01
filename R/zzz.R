@@ -54,7 +54,7 @@ Rcpp::loadModule("istaScadGeneralPurpose_cpp", TRUE)
 Rcpp::loadModule("istaCappedL1GeneralPurpose_cpp", TRUE)
 
 # general Purpose with Cpp
-Rcpp::loadModule("istaScadGeneralPurposeCpp_cpp", TRUE)
+Rcpp::loadModule("glmnetEnetGeneralPurposeCpp_cpp", TRUE)
 Rcpp::loadModule("istaEnetGeneralPurposeCpp_cpp", TRUE)
 Rcpp::loadModule("istaLspGeneralPurposeCpp_cpp", TRUE)
 Rcpp::loadModule("istaMcpGeneralPurposeCpp_cpp", TRUE)

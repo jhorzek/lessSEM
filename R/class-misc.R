@@ -51,3 +51,7 @@ setClass("Rcpp_istaCappedL1")
 
 #' Wrapper for C++ module. See ?lessSEM::glmnetEnetGeneralPurpose
 setClass("Rcpp_glmnetEnetGeneralPurpose")
+
+#' Wrapper for C++ module. See ?lessSEM::glmnetEnetGeneralPurposeCpp
+setClass("Rcpp_glmnetEnetGeneralPurposeCpp")
+

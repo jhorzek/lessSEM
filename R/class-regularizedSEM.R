@@ -124,16 +124,19 @@ setMethod("BIC", "regularizedSEM", function (object) {
 })
 
 #' plots the regularized and unregularized parameters for all levels of lambda
-#'
-#' @docType methods
-#' @name plot-regularizedSEM-method
-#' @rdname plot-regularizedSEM-method
-#' @aliases plot-regularizedSEM plot,regularizedSEM-method
 #' 
-#' @param x object of class regularizedSEM
-#' @param regularizedOnly boolean: should only regularized parameters be plotted?``
+#' @param x object of class gpRegularized
+#' @param y not used
+#' @param ... use regularizedOnly=FALSE to plot all parameters
 #' @export
-setMethod("plot", "regularizedSEM", function (x, regularizedOnly = TRUE) {
+setMethod("plot", 
+          c(x = "regularizedSEM", y = "missing"), 
+          function (x, y, ...) {
+  if("regularizedOnly" %in% names(list(...))){
+    regularizedOnly <- list(...)$regularizedOnly
+  }else{
+    regularizedOnly <- TRUE
+  }
   parameters <- x@parameters
   tuningParameters <- x@parameters[,!colnames(x@parameters)%in%x@parameterLabels,drop=FALSE]
   tuningParameters <- tuningParameters[,apply(tuningParameters,2,function(x) length(unique(x)) > 1),drop=FALSE]

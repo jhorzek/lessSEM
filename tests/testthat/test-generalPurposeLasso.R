@@ -3,13 +3,13 @@ test_that("testing general purpose ista lasso", {
   set.seed(123)
   n <- 100
   df <- data.frame(
-    x1 = rnorm(n),
-    x2 = rnorm(n),
-    x3 = rnorm(n),
-    x4 = rnorm(n),
-    x5 = rnorm(n)
+    x1 = stats::rnorm(n),
+    x2 = stats::rnorm(n),
+    x3 = stats::rnorm(n),
+    x4 = stats::rnorm(n),
+    x5 = stats::rnorm(n)
   )
-  df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + rnorm(n,0,.3) 
+  df$y <- 0*df$x1 + .2*df$x2 + .3*df$x3 + .4*df$x4 + .5*df$x5 + stats::rnorm(n,0,.3) 
   lmFit <- lm(y ~ 0+., df)
   
   # manual

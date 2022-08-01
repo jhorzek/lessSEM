@@ -3,11 +3,11 @@ test_that("testing mediation model", {
   library(lessSEM)
   N <- 100
   
-  x_0 <- rnorm(n = N, mean = 0, sd = 1)
-  x_1 <- rnorm(N, mean = 0, sd = 1)
+  x_0 <- stats::rnorm(n = N, mean = 0, sd = 1)
+  x_1 <- stats::rnorm(N, mean = 0, sd = 1)
   
-  mediator <- .4*x_0 + .3*x_1 + rnorm(n = N, mean = 0, sd = sqrt(.3))
-  y <- .45*mediator + rnorm(n = N, mean = 0, sd = sqrt(.3))
+  mediator <- .4*x_0 + .3*x_1 + stats::rnorm(n = N, mean = 0, sd = sqrt(.3))
+  y <- .45*mediator + stats::rnorm(n = N, mean = 0, sd = sqrt(.3))
   
   datensatz <- data.frame(x_0 = x_0,
                           x_1 = x_1,
