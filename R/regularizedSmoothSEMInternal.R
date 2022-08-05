@@ -346,14 +346,19 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
 #' @returns regularizedSEM, but with new regularizedSEM@fits$nonZeroParameters
 newTau <- function(regularizedSEM, tau){
   if(!is(regularizedSEM,"regularizedSEM")) stop("regularizedSEM must be of class regularizedSEM")
+  if(! regularizedSEM@penalty %in% c("lasso", "adaptiveLasso", "elasticNet")) stop("penalty must be of type lasso, adaptiveLasso, or elasticNet")
   if(is.null(regularizedSEM@inputArguments$tau)) stop("Could not find tau in regularizedSEM. Did you use a smoothed penalty?")
   
+  nParameters <- length(regularizedSEM@parameterLabels)
+  
+  regularized <- names(regularizedSEM@weights)[regularizedSEM@weights != 0]
+  
   regularizedSEM@fits$nonZeroParameters <- 
-    length(regularizedSEM@parameterLabels) - 
-    apply(regularizedSEM@parameters[,
-                                    names(regularizedSEM@weights[regularizedSEM@parameterLabels] != 0)],
+    nParameters - 
+    apply(regularizedSEM@parameters[,regularized],
           1,
           function(x) sum(abs(x) <= tau)
     )
+  regularizedSEM@fits$nonZeroParameters[regularizedSEM@fits$lambda == 0] <- nParameters
   return(regularizedSEM)
 }

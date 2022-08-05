@@ -46,6 +46,6 @@ test_that("testing new tau", {
   apprRegsem <- newTau(apprRegsem, 1e-4)
   nZero <- apply(apprRegsem@parameters[,apprRegsem@regularized], 1, function(x) sum(abs(x) <= 1e-4))
   
-  testthat::expect_equal(all(apprRegsem@fits$nonZeroParameters == length(apprRegsem@parameterLabels) - nZero) , TRUE)
+  testthat::expect_equal(all(apprRegsem@fits$nonZeroParameters == (length(apprRegsem@parameterLabels) - nZero)) , TRUE)
   
 })
