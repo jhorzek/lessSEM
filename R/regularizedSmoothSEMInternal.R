@@ -353,6 +353,8 @@ newTau <- function(regularizedSEM, tau){
   
   regularized <- names(regularizedSEM@weights)[regularizedSEM@weights != 0]
   
+  if(any(!regularized %in% regularizedSEM@regularized)) stop("Error while identifying regularized parameters.")
+  
   regularizedSEM@fits$nonZeroParameters <- 
     nParameters - 
     apply(regularizedSEM@parameters[,regularized],
