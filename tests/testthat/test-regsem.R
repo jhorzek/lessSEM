@@ -9,13 +9,13 @@ test_that("testing regsem", {
   cv.out = cv_regsem(outt,type="lasso", pars_pen=c(1:2,6:8),
                      n.lambda=10,jump=0.01, round = 10)
   
-  parameters <- cvregsem2LavaanParameters(cvregsemModel = cv.out, lavaanModel = outt)
+  parameters <- lessSEM:::.cvregsem2LavaanParameters(cvregsemModel = cv.out, lavaanModel = outt)
   
-  CFA <- SEMFromLavaan(lavaanModel = outt)
+  CFA <- lessSEM:::.SEMFromLavaan(lavaanModel = outt)
 
   chisquares <- rep(NA, nrow(parameters))
   for(p in 1:nrow(parameters)){
-    chisquares[p] <- likelihoodRatioFit(par = parameters[p,], SEM = CFA, raw = FALSE)
+    chisquares[p] <- lessSEM:::.likelihoodRatioFit(par = parameters[p,], SEM = CFA, raw = FALSE)
   }
   
   testthat::expect_equal(sum(round(chisquares - cv.out$fits[,"chisq"],4)), 0)

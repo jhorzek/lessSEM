@@ -1,10 +1,10 @@
-#' getParameters
+#' .getParameters
 #' 
 #' returns the parameters of the internal model representation.
 #' @param SEM model of class Rcpp_SEMCpp. Models of this class
 #' @param raw controls if the parameter are returned in raw format or transformed
 #' @returns labeled vector with parameter values
-getParameters <- function(SEM, raw = FALSE){
+.getParameters <- function(SEM, raw = FALSE){
   parameterTable <- SEM$getParameters()
   
   if(raw){
@@ -19,7 +19,7 @@ getParameters <- function(SEM, raw = FALSE){
   return(values)
 }
 
-#' setParameters
+#' .setParameters
 #' 
 #' change the parameters of the internal model representation.
 #' @param SEM model of class Rcpp_SEMCpp. Models of this class
@@ -27,7 +27,7 @@ getParameters <- function(SEM, raw = FALSE){
 #' @param values vector with parameter values
 #' @param raw are the parameters given in raw format or transformed?
 #' @returns SEM with changed parameter values
-setParameters <- function(SEM, labels, values, raw){
+.setParameters <- function(SEM, labels, values, raw){
   if(length(labels) != length(values)){stop("labels and values of different length!")}
   SEM$setParameters(labels, values, raw)
   return(SEM)

@@ -30,7 +30,7 @@ test_that("testing adaptive lasso", {
                             n.lambda = 5,
                             gradFun = "ram")
   
-  regsemPars <- lessSEM::cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, lavaanModel = modelFit)
+  regsemPars <- lessSEM:::.cvregsem2LavaanParameters(cvregsemModel = regsem_cvFit, lavaanModel = modelFit)
   
   # replicate with regularizedSEM
   regularizedLavaan <- paste0("f=~y",6:ncol(y))

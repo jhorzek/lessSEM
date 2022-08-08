@@ -1,4 +1,4 @@
-#' regularizeSEMInternal
+#' .regularizeSEMInternal
 #' 
 #' Internal function: This function computes the regularized models
 #' for all penaltiy functions which are implemented for glmnet and gist.
@@ -18,7 +18,7 @@
 #' the controlIsta() and controlGlmnet() functions.
 
 #' @export
-regularizeSEMInternal <- function(lavaanModel,
+.regularizeSEMInternal <- function(lavaanModel,
                                   penalty,
                                   weights,
                                   tuningParameters,
@@ -63,14 +63,14 @@ regularizeSEMInternal <- function(lavaanModel,
   }
   
   if(any(startingValues == "est")){
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "est",
                                    addMeans = modifyModel$addMeans, 
                                    activeSet = modifyModel$activeSet,
                                    dataSet = modifyModel$dataSet)
   }else if(any(startingValues == "start")){
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start",
                                    addMeans = modifyModel$addMeans, 
@@ -80,15 +80,15 @@ regularizeSEMInternal <- function(lavaanModel,
     
     if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel))))
       stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start", 
                                    fit = FALSE,
                                    addMeans = modifyModel$addMeans, 
                                    activeSet = modifyModel$activeSet,
                                    dataSet = modifyModel$dataSet)
-    SEM <- lessSEM::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(lessSEM::fit(SEM))
+    SEM <- lessSEM:::.setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
+    SEM <- try(lessSEM:::.fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
       stop("Infeasible starting values.")
     
@@ -97,8 +97,8 @@ regularizeSEMInternal <- function(lavaanModel,
   }
   
   # get parameters in raw form
-  startingValues <- lessSEM::getParameters(SEM, raw = TRUE)
-  rawParameters <- lessSEM::getParameters(SEM, raw = TRUE)
+  startingValues <- lessSEM:::.getParameters(SEM, raw = TRUE)
+  rawParameters <- lessSEM:::.getParameters(SEM, raw = TRUE)
   
   # set weights
   if(!is.numeric(weights)){
@@ -156,11 +156,11 @@ regularizeSEMInternal <- function(lavaanModel,
       
     }else if(any(initialHessian == "compute")){
       
-      initialHessian <- lessSEM::getHessian(SEM = SEM, raw = TRUE)
+      initialHessian <- lessSEM:::.getHessian(SEM = SEM, raw = TRUE)
       
     }else if(any(initialHessian == "scoreBased")){
       
-      scores <- lessSEM::getScores(SEM = SEM, raw = TRUE)
+      scores <- lessSEM:::.getScores(SEM = SEM, raw = TRUE)
       FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
       rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
       for(score in 1:nrow(scores)){
@@ -274,7 +274,7 @@ regularizeSEMInternal <- function(lavaanModel,
       "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
     )
     
-    maxLambda <- getMaxLambda_C(regularizedModel = regularizedModel,
+    maxLambda <- lessSEM:::.getMaxLambda_C(regularizedModel = regularizedModel,
                                 SEM = SEM,
                                 rawParameters = rawParameters,
                                 weights = weights,
@@ -384,13 +384,13 @@ regularizeSEMInternal <- function(lavaanModel,
     fits$convergence[it] <- result$convergence
     
     # get unregularized fit:
-    SEM <- lessSEM::setParameters(SEM, 
+    SEM <- lessSEM:::.setParameters(SEM, 
                                   names(rawParameters), 
                                   values = rawParameters, 
                                   raw = TRUE)
     fits$m2LL[it] <- SEM$fit()
     # transform internal parameter representation to "natural" form
-    transformedParameters <- lessSEM::getParameters(SEM,
+    transformedParameters <- lessSEM:::.getParameters(SEM,
                                                      raw = FALSE)
     parameterEstimates[it, 
                        names(rawParameters)] <- transformedParameters[names(rawParameters)]
@@ -407,7 +407,7 @@ regularizeSEMInternal <- function(lavaanModel,
                             sep = " = "),
                      " resulted in Error!"))
       
-      SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
+      SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = lavaanModel, 
                                      transformVariances = TRUE,
                                      whichPars = startingValues,
                                      addMeans = control$addMeans)

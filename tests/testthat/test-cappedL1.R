@@ -65,7 +65,7 @@ test_that("testing cappedL1", {
   )
   
   #### Now we are ready to optimize! ####
-  regsemApprox <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
+  regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
                                                        individualPenaltyFunction = smoothCappedL1Value,
                                                        tuningParameters = tuningParameters,
                                                        penaltyFunctionArguments = penaltyFunctionArguments)

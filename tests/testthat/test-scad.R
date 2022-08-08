@@ -61,7 +61,7 @@ test_that("testing scad", {
   )
   
   #### Now we are ready to optimize! ####
-  regsemApprox <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
+  regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
                                                        individualPenaltyFunction = smoothScadValue,
                                                        tuningParameters = tuningParameters,
                                                        penaltyFunctionArguments = penaltyFunctionArguments)

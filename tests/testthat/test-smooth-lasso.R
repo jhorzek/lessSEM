@@ -49,7 +49,7 @@ test_that("testing smooth lasso", {
     eps = 1e-8
   )
   tuningParameters <- data.frame("lambda" = lambdas)
-  apprRegsem4 <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit, 
+  apprRegsem4 <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit, 
                                                       individualPenaltyFunction = smoothLASSOValue, 
                                                       tuningParameters = tuningParameters, 
                                                       penaltyFunctionArguments = penaltyFunctionArguments)

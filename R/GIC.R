@@ -34,7 +34,7 @@ GIC <- function(regularizedSEM, scaler = 2){
   gic <- rep(NA, nrow(parameters))
   
   # we need a model to compute the Hessians
-  SEM <- lessSEM::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
+  SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
                                 whichPars = "start", 
                                 transformVariances = TRUE, 
                                 fit = FALSE,
@@ -51,15 +51,15 @@ GIC <- function(regularizedSEM, scaler = 2){
     
     utils::setTxtProgressBar(pb = pbar, value = p)
     
-    SEM <- setParameters(SEM = SEM, 
+    SEM <- lessSEM:::.setParameters(SEM = SEM, 
                          labels = regularizedSEM@parameterLabels, 
                          values = unlist(parameters[p,]), 
                          raw = FALSE)
     
-    m2LL <- fit(SEM = SEM)$m2LL
+    m2LL <- lessSEM:::.fit(SEM = SEM)$m2LL
     
     # We need the Hessian of the -2log-likelihood and the penalty function
-    m2LLHessian <- getHessian(SEM, raw = FALSE)
+    m2LLHessian <- lessSEM:::.getHessian(SEM, raw = FALSE)
     
     if(penalty == "lasso"){
       

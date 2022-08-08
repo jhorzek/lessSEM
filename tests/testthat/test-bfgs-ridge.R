@@ -46,7 +46,7 @@ test_that("testing bfgs ridge", {
     regularizedParameterLabels = regularizedLavaan
   )
   tuningParameters <- data.frame("lambda" = lambdas)
-  apprRegsem4 <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit, 
+  apprRegsem4 <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit, 
                                                       individualPenaltyFunction = ridgeValue, 
                                                       tuningParameters = tuningParameters, 
                                                       penaltyFunctionArguments = penaltyFunctionArguments)

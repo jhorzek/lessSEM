@@ -1,4 +1,4 @@
-#' getMaxLambda_C
+#' .getMaxLambda_C
 #' 
 #' generates a the first lambda which sets all regularized parameters to zero
 #' @param regularizedModel Model combining likelihood and lasso type penalty
@@ -9,7 +9,7 @@
 #' @param approx When set to TRUE, .Machine$double.xmax^(.01) is used instead of .Machine$double.xmax^(.05)
 #' @returns first lambda value which sets all regularized parameters to zero (plus some tolerance)
 #' @export
-getMaxLambda_C <- function(regularizedModel, 
+.getMaxLambda_C <- function(regularizedModel, 
                          SEM,
                          rawParameters,
                          weights,
@@ -28,28 +28,28 @@ getMaxLambda_C <- function(regularizedModel,
   )
   
   sparseParameters <- result$rawParameters
-  SEM <- lessSEM::setParameters(SEM = SEM, 
+  SEM <- lessSEM:::.setParameters(SEM = SEM, 
                               labels = names(sparseParameters), 
                               values = sparseParameters, 
                               raw = TRUE)
-  SEM <- lessSEM::fit(SEM = SEM)
-  gradients <- lessSEM::getGradients(SEM = SEM, 
+  SEM <- lessSEM:::.fit(SEM = SEM)
+  gradients <- lessSEM:::.getGradients(SEM = SEM, 
                                    raw = TRUE)
   
   # define maxLambda as the maximal gradient of the regularized parameters
   maxLambda <- max(abs(gradients[weights != 0]) * 
                      weights[weights != 0]^(-1))
   # reset SEM
-  SEM <- lessSEM::setParameters(SEM = SEM, 
+  SEM <- lessSEM:::.setParameters(SEM = SEM, 
                               labels = names(rawParameters), 
                               values = rawParameters, 
                               raw = TRUE)
-  SEM <- lessSEM::fit(SEM = SEM)
+  SEM <- lessSEM:::.fit(SEM = SEM)
   
   return((1/N)*(maxLambda+.1*maxLambda)) # adding some wiggle room as well
 }
 
-#' gpGetMaxLambda
+#' .gpGetMaxLambda
 #' 
 #' generates a the first lambda which sets all regularized parameters to zero
 #' @param regularizedModel Model combining likelihood and lasso type penalty
@@ -60,7 +60,7 @@ getMaxLambda_C <- function(regularizedModel,
 #' @param weights weights given to each parameter in the penalty function
 #' @returns first lambda value which sets all regularized parameters to zero (plus some tolerance)
 #' @export
-gpGetMaxLambda <- function(regularizedModel,
+.gpGetMaxLambda <- function(regularizedModel,
                            par,
                            fitFunction,
                            gradientFunction,

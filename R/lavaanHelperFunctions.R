@@ -13,7 +13,7 @@ getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
   return(parameters[unique(names(parameters))])
 }
 
-#' lavaan2regsemLabels
+#' .lavaan2regsemLabels
 #' 
 #' helper function: regsem and lavaan use slightly different parameter labels. This function
 #' can be used to get both sets of labels.
@@ -21,7 +21,7 @@ getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
 #' @param lavaanModel model of class lavaan
 #' @returns a list with lavaan and regsem labels
 #' @export
-lavaan2regsemLabels <- function(lavaanModel){
+.lavaan2regsemLabels <- function(lavaanModel){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   # extract parameters
   parameterIDs <- lavaanModel@ParTable$id[lavaanModel@ParTable$free != 0]
@@ -43,7 +43,7 @@ lavaan2regsemLabels <- function(lavaanModel){
   )
 }
 
-#' cvregsem2LavaanParameters
+#' .cvregsem2LavaanParameters
 #' 
 #' helper function: regsem and lavaan use slightly different parameter labels. This function
 #' can be used to translate the parameter labels of a cv_regsem object to lavaan labels
@@ -52,12 +52,12 @@ lavaan2regsemLabels <- function(lavaanModel){
 #' @param lavaanModel model of class lavaan
 #' @returns regsem parameters with lavaan labels
 #' @export
-cvregsem2LavaanParameters <- function(cvregsemModel, lavaanModel){
+.cvregsem2LavaanParameters <- function(cvregsemModel, lavaanModel){
   if(!is(cvregsemModel, "cvregsem")) stop("cvregsemModel must be of class cvregsem.")
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   parameters <- cvregsemModel$parameters
   
-  parLabels <- lavaan2regsemLabels(lavaanModel = lavaanModel)
+  parLabels <- lessSEM:::.lavaan2regsemLabels(lavaanModel = lavaanModel)
   
   # resort parameters
   parameters <- parameters[,parLabels$regsemLabels]
@@ -82,7 +82,7 @@ regsem2LavaanParameters <- function(regsemModel, lavaanModel){
   
   parameters <- unlist(regsemModel$out$pars)
   
-  parLabels <- lavaan2regsemLabels(lavaanModel = lavaanModel)
+  parLabels <- lessSEM:::.lavaan2regsemLabels(lavaanModel = lavaanModel)
   
   # resort parameters
   parameters <- parameters[parLabels$regsemLabels]

@@ -97,7 +97,7 @@ cvSmoothLasso <- function(lavaanModel,
   tuningParameters <- data.frame(lambda = lambdas,
                                  alpha = 1)
   
-  result <- cvRegularizeSmoothSEMInternal(
+  result <- lessSEM:::.cvRegularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "lasso",
     k = k,
@@ -219,7 +219,7 @@ cvSmoothAdaptiveLasso <- function(lavaanModel,
   
   if(is.null(weights)) weights <- regularized
   
-  result <- cvRegularizeSmoothSEMInternal(
+  result <- lessSEM:::.cvRegularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "adaptiveLasso",
     weights = weights,
@@ -331,7 +331,7 @@ cvRidgeBfgs <- function(lavaanModel,
                     control = controlBFGS()){
   
   
-  result <- cvRegularizeSmoothSEMInternal(
+  result <- lessSEM:::.cvRegularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "ridge",
     weights = regularized,
@@ -454,7 +454,7 @@ cvSmoothElasticNet <- function(lavaanModel,
   if(any(alphas < 0) || any(alphas > 1)) 
     stop("alpha must be between 0 and 1.")
   
-  result <- cvRegularizeSmoothSEMInternal(
+  result <- lessSEM:::.cvRegularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "elasticNet",
     weights = regularized,

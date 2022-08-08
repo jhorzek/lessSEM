@@ -1,4 +1,4 @@
-#' regularizeSEMWithCustomPenaltyRsolnp
+#' .regularizeSEMWithCustomPenaltyRsolnp
 #' 
 #' Optimize a SEM with custom penalty function using the Rsolnp optimizer (see ?Rsolnp::solnp). This optimizer is the default in regsem (see ?regsem::cv_regsem).
 #' 
@@ -120,7 +120,7 @@
 #'        regsemApprox@parameters[,regsemExact@parameterLabels])
 #' # Note that the parameter estimates are basically identical.
 #' @export
-regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel, 
+.regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel, 
                                                  individualPenaltyFunction,
                                                  tuningParameters,
                                                  penaltyFunctionArguments,
@@ -145,13 +145,13 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   
   ### initialize model ####
   if(any(startingValues == "est")){
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "est",
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
   }else if(any(startingValues == "start")){
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start",
                                    addMeans = control$addMeans, 
@@ -159,14 +159,14 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   }else if(is.numeric(startingValues)){
     
     if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
+    SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = lavaanModel, 
                                    transformVariances = TRUE,
                                    whichPars = "start", 
                                    fit = FALSE,
                                    addMeans = control$addMeans, 
                                    activeSet = control$activeSet)
-    SEM <- lessSEM::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(lessSEM::fit(SEM))
+    SEM <- lessSEM:::.setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
+    SEM <- try(lessSEM:::.fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) stop("Infeasible starting values.")
     
   }else{
@@ -174,7 +174,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   }
   
   # get parameters
-  parameters <- lessSEM::getParameters(SEM, raw = TRUE)
+  parameters <- lessSEM:::.getParameters(SEM, raw = TRUE)
   
   # define fitting function
   fitfun <- function(parameters, 
@@ -183,7 +183,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
                      individualPenaltyFunction, 
                      tuningParameters,
                      penaltyFunctionArguments){
-    SEM <- try(lessSEM::setParameters(SEM = SEM, 
+    SEM <- try(lessSEM:::.setParameters(SEM = SEM, 
                                        labels = names(parameters), 
                                        values = parameters, 
                                        raw = TRUE), 
@@ -191,7 +191,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
     if(is(SEM, "try-error")){
       return(99999999999999999)
     }
-    SEM <- try(lessSEM::fit(SEM), silent = TRUE)
+    SEM <- try(lessSEM:::.fit(SEM), silent = TRUE)
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)){
       return(99999999999999999)
     }
@@ -257,12 +257,12 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
     # will be better if more iterations have to be done until convergence
     if(carryOverParameters) parametersInit <- result$pars
     
-    SEM <- try(lessSEM::setParameters(SEM = SEM, labels = names(result$pars), 
+    SEM <- try(lessSEM:::.setParameters(SEM = SEM, labels = names(result$pars), 
                                        values = result$pars, raw = TRUE), 
                silent = TRUE)
-    SEM <- try(lessSEM::fit(SEM), silent = TRUE)
+    SEM <- try(lessSEM:::.fit(SEM), silent = TRUE)
     
-    parameterEstimates[i, names(parameters)] <- lessSEM::getParameters(SEM, raw = FALSE)[names(parameters)]
+    parameterEstimates[i, names(parameters)] <- lessSEM:::.getParameters(SEM, raw = FALSE)[names(parameters)]
     fits$m2LL[i] <- SEM$m2LL
     fits$regM2LL[i] <- SEM$m2LL + sampleSize*individualPenaltyFunction(result$pars, 
                                                                        currentTuningParameters, 

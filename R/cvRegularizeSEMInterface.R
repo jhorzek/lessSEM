@@ -123,7 +123,7 @@ cvLasso <- function(lavaanModel,
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
   
-  result <- cvRegularizeSEMInternal(
+  result <- lessSEM:::.cvRegularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "lasso",
     k = k,
@@ -271,7 +271,7 @@ cvAdaptiveLasso <- function(lavaanModel,
   
   if(is.null(weights)) weights <- regularized
   
-  result <- cvRegularizeSEMInternal(
+  result <- lessSEM:::.cvRegularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "adaptiveLasso",
     weights = weights,
@@ -409,7 +409,7 @@ cvRidge <- function(lavaanModel,
                   control = controlIsta()){
   
   
-  result <- cvRegularizeSEMInternal(
+  result <- lessSEM:::.cvRegularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "ridge",
     weights = regularized,
@@ -555,7 +555,7 @@ cvElasticNet <- function(lavaanModel,
   if(any(alphas < 0) || any(alphas > 1)) 
     stop("alpha must be between 0 and 1.")
   
-  result <- cvRegularizeSEMInternal(
+  result <- lessSEM:::.cvRegularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "elasticNet",
     weights = regularized,
@@ -697,7 +697,7 @@ cvCappedL1 <- function(lavaanModel,
                      control = controlIsta()){
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM::cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- lessSEM:::.cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "cappedL1", 
                                            weights = regularized,
                                            k = k,
@@ -837,7 +837,7 @@ cvLsp <- function(lavaanModel,
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM::cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- lessSEM:::.cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "lsp", 
                                            weights = regularized,
                                            k = k,
@@ -978,7 +978,7 @@ cvMcp <- function(lavaanModel,
                 control = controlIsta()){
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
-  result <- lessSEM::cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- lessSEM:::.cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "mcp", 
                                            weights = regularized,
                                            k = k,
@@ -1125,7 +1125,7 @@ cvScad <- function(lavaanModel,
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
-  result <- lessSEM::cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- lessSEM:::.cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "scad", 
                                            weights = regularized,
                                            k = k,

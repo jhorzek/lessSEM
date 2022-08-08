@@ -7,7 +7,7 @@ test_that("testing noDotDotDot", {
   }
   
   out <- try(
-    lessSEM::noDotDotDot(fn = fn, fnName = "fn")
+    lessSEM:::.noDotDotDot(fn = fn, fnName = "fn")
   )
   
   testthat::expect_equal(is(out, "list"), TRUE)
@@ -23,7 +23,7 @@ test_that("testing noDotDotDot", {
   }
   
   out <- try(
-    lessSEM::noDotDotDot(fn = fn, fnName = "fn", x = 1, y = "a", z = 1)
+    lessSEM:::.noDotDotDot(fn = fn, fnName = "fn", x = 1, y = "a", z = 1)
   )
   
   testthat::expect_equal(is(out, "list"), TRUE)

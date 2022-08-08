@@ -200,7 +200,7 @@ gpLassoCpp <- function(par,
                                    alpha = 1)
   }
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- lessSEM:::.gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -424,7 +424,7 @@ gpAdaptiveLassoCpp <- function(par,
                                    alpha = 1)
   }
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- lessSEM:::.gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -623,7 +623,7 @@ gpRidgeCpp <- function(par,
   tuningParameters <- data.frame(lambda = lambdas,
                                  alpha = 0)
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- lessSEM:::.gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -826,7 +826,7 @@ gpElasticNetCpp <- function(par,
                                   alpha = alphas)
   
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- lessSEM:::.gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1024,7 +1024,7 @@ gpCappedL1Cpp <- function(par,
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- lessSEM:::.gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1219,7 +1219,7 @@ gpLspCpp <- function(par,
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- lessSEM:::.gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1418,7 +1418,7 @@ gpMcpCpp <- function(par,
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- lessSEM:::.gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1623,7 +1623,7 @@ gpScadCpp <- function(par,
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- lessSEM:::.gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
