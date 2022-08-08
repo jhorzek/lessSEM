@@ -27,7 +27,7 @@ very interesting penalty functions.
 
 The following penalty functions are currently implemented in lessSEM:
 
-![](inst/penalty_functions.png)
+![](man/figures/penalty_functions.png)
 
 “penalty” refers to the name of the function call in the lessSEM package
 (e.g., lasso is called with the `lasso()` function). Smooth functions
@@ -47,7 +47,7 @@ Currently, lessSEM has the following optimizers:
     al. (2013)
 -   glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
 
-**These are also available for other packages.** There are trhee ways to
+**These are also available for other packages.** There are three ways to
 implement them which are documented in the
 `General-Purpose-Optimization` vignette. In short, these are:
 

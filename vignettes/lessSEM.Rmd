@@ -1,5 +1,5 @@
 ---
-title: "A short introduction to regularized SEM with lessSEM"
+title: "lessSEM"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{lessSEM}
