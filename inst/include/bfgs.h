@@ -22,7 +22,8 @@ namespace lessSEM{
     const arma::rowvec& parameters_k, 
     const arma::rowvec& gradients_k, 
     const bool cautious, 
-    const double hessianEps){
+    const double hessianEps,
+    bool verbose){
     
     arma::rowvec y = gradients_k - gradients_kMinus1;
     arma::rowvec d = parameters_k - parameters_kMinus1;
@@ -37,12 +38,12 @@ namespace lessSEM{
       
     }catch(...){
       // skip in case of error: return Hessian_kMinus1
-      Rcpp::warning("Hessian update skipped.");
+      if(verbose) Rcpp::warning("Hessian update skipped.");
       return(Hessian_k);
     }
     
     if(yTimesD(0,0) < 0){
-      Rcpp::warning("Hessian update possibly non-positive definite.");
+      if(verbose) Rcpp::warning("Hessian update possibly non-positive definite.");
       if(skipUpdate) return(Hessian_k);
     }
     
@@ -57,7 +58,7 @@ namespace lessSEM{
       ySquared/yTimesD(0,0);
     
     if(!arma::is_finite(Hessian_k)){
-      Rcpp::warning("Non-finite Hessian. Returning previous Hessian");
+      if(verbose) Rcpp::warning("Non-finite Hessian. Returning previous Hessian");
       return(Hessian_kMinus1);
     }
     
@@ -65,7 +66,7 @@ namespace lessSEM{
     if(!Hessian_k.is_symmetric()){
       // make symmetric
       double sumElem = arma::accu(arma::pow(Hessian_k - .5*(Hessian_k + arma::trans(Hessian_k)),2));
-      if(sumElem > 1) Rcpp::warning("Hessian not symmetric");
+      if((sumElem > 1) & verbose) Rcpp::warning("Hessian not symmetric");
       Hessian_k = .5*(Hessian_k + arma::trans(Hessian_k));
     }else{
       return(Hessian_k);
@@ -76,7 +77,7 @@ namespace lessSEM{
     if(!Hessian_k.is_sympd()){
       // make positive definite
       // see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
-        Rcpp::warning("Hessian not pd");
+      if(verbose) Rcpp::warning("Hessian not pd");
       arma::vec eigenValues = arma::eig_sym(Hessian_k);
       arma::mat diagMat = arma::eye(Hessian_k.n_rows, 
                                     Hessian_k.n_cols);
@@ -87,7 +88,7 @@ namespace lessSEM{
       // check again...
       if(!Hessian_k.is_sympd()){
         // return non-updated hessian
-        Rcpp::warning("Invalid Hessian. Returning previous Hessian");
+        if(verbose) Rcpp::warning("Invalid Hessian. Returning previous Hessian");
         return(Hessian_kMinus1);
       }
     }
