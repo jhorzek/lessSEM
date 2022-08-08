@@ -14,7 +14,7 @@ gpLasso(
   reverse = TRUE,
   ...,
   method = "ista",
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{

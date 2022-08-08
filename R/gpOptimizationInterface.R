@@ -141,16 +141,16 @@ gpLasso <- function(par,
                     reverse = TRUE,
                     ...,
                     method = "ista", 
-                    control = controlIsta()
+                    control = lessSEM::controlIsta()
 ){
   
-  removeDotDotDot <- lessSEM:::.noDotDotDot(fn, fnName = "fn", ... = ...)
+  removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM:::.noDotDotDot(gr, fnName = "gr", ...)
+    removeDotDotDot <- .noDotDotDot(gr, fnName = "gr", ...)
     gr <- removeDotDotDot[[1]]
     additionalArguments <- c(additionalArguments, 
                              removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
@@ -171,7 +171,7 @@ gpLasso <- function(par,
                                    alpha = 1)
   }
   
-  result <- lessSEM:::.gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -339,15 +339,15 @@ gpAdaptiveLasso <- function(par,
                             reverse = TRUE,
                             ...,
                             method = "ista", 
-                            control = controlIsta()){
+                            control = lessSEM::controlIsta()){
   
-  removeDotDotDot <- lessSEM:::.noDotDotDot(fn, fnName = "fn", ... = ...)
+  removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM:::.noDotDotDot(gr, fnName = "gr", ...)
+    removeDotDotDot <- .noDotDotDot(gr, fnName = "gr", ...)
     gr <- removeDotDotDot[[1]]
     additionalArguments <- c(additionalArguments, 
                              removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
@@ -382,7 +382,7 @@ gpAdaptiveLasso <- function(par,
                                    alpha = 1)
   }
   
-  result <- lessSEM:::.gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -540,15 +540,15 @@ gpRidge <- function(par,
                     lambdas,
                     ...,
                     method = "ista", 
-                    control = controlIsta()){
+                    control = lessSEM::controlIsta()){
   
-  removeDotDotDot <- lessSEM:::.noDotDotDot(fn, fnName = "fn", ... = ...)
+  removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM:::.noDotDotDot(gr, fnName = "gr", ...)
+    removeDotDotDot <- .noDotDotDot(gr, fnName = "gr", ...)
     gr <- removeDotDotDot[[1]]
     additionalArguments <- c(additionalArguments, 
                              removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
@@ -561,7 +561,7 @@ gpRidge <- function(par,
   tuningParameters <- data.frame(lambda = lambdas,
                                  alpha = 0)
   
-  result <- lessSEM:::.gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -641,7 +641,7 @@ gpRidge <- function(par,
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta() and controlGlmnet() functions.
+#' the lessSEM::controlIsta() and controlGlmnet() functions.
 #' @returns Object of class gpRegularized
 
 #' @examples
@@ -729,15 +729,15 @@ gpElasticNet <- function(par,
                          alphas,
                          ...,
                          method = "ista", 
-                         control = controlIsta()){
+                         control = lessSEM::controlIsta()){
   
-  removeDotDotDot <- lessSEM:::.noDotDotDot(fn, fnName = "fn", ... = ...)
+  removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM:::.noDotDotDot(gr, fnName = "gr", ...)
+    removeDotDotDot <- .noDotDotDot(gr, fnName = "gr", ...)
     gr <- removeDotDotDot[[1]]
     additionalArguments <- c(additionalArguments, 
                              removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
@@ -750,7 +750,7 @@ gpElasticNet <- function(par,
                                   alpha = alphas)
   
   
-  result <- lessSEM:::.gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -923,15 +923,15 @@ gpCappedL1 <- function(par,
                        regularized,
                        lambdas,
                        thetas,
-                       control = controlIsta()){
+                       control = lessSEM::controlIsta()){
   
-  removeDotDotDot <- lessSEM:::.noDotDotDot(fn, fnName = "fn", ... = ...)
+  removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM:::.noDotDotDot(gr, fnName = "gr", ...)
+    removeDotDotDot <- .noDotDotDot(gr, fnName = "gr", ...)
     gr <- removeDotDotDot[[1]]
     additionalArguments <- c(additionalArguments, 
                              removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
@@ -942,7 +942,7 @@ gpCappedL1 <- function(par,
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM:::.gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1097,14 +1097,14 @@ gpLsp <- function(par,
                   regularized,
                   lambdas,
                   thetas,
-                  control = controlIsta()){
-  removeDotDotDot <- lessSEM:::.noDotDotDot(fn, fnName = "fn", ... = ...)
+                  control = lessSEM::controlIsta()){
+  removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM:::.noDotDotDot(gr, fnName = "gr", ...)
+    removeDotDotDot <- .noDotDotDot(gr, fnName = "gr", ...)
     gr <- removeDotDotDot[[1]]
     additionalArguments <- c(additionalArguments, 
                              removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
@@ -1115,7 +1115,7 @@ gpLsp <- function(par,
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM:::.gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1271,15 +1271,15 @@ gpMcp <- function(par,
                   regularized,
                   lambdas,
                   thetas,
-                  control = controlIsta()){
+                  control = lessSEM::controlIsta()){
   
-  removeDotDotDot <- lessSEM:::.noDotDotDot(fn, fnName = "fn", ... = ...)
+  removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM:::.noDotDotDot(gr, fnName = "gr", ...)
+    removeDotDotDot <- .noDotDotDot(gr, fnName = "gr", ...)
     gr <- removeDotDotDot[[1]]
     additionalArguments <- c(additionalArguments, 
                              removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
@@ -1290,7 +1290,7 @@ gpMcp <- function(par,
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM:::.gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1453,15 +1453,15 @@ gpScad <- function(par,
                    regularized,
                    lambdas,
                    thetas,
-                   control = controlIsta()){
+                   control = lessSEM::controlIsta()){
   
-  removeDotDotDot <- lessSEM:::.noDotDotDot(fn, fnName = "fn", ... = ...)
+  removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
   
   if(!is.null(gr)){
     
-    removeDotDotDot <- lessSEM:::.noDotDotDot(gr, fnName = "gr", ...)
+    removeDotDotDot <- .noDotDotDot(gr, fnName = "gr", ...)
     gr <- removeDotDotDot[[1]]
     additionalArguments <- c(additionalArguments, 
                              removeDotDotDot$additionalArguments[!names(removeDotDotDot$additionalArguments) %in% names(additionalArguments)])
@@ -1472,7 +1472,7 @@ gpScad <- function(par,
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
-  result <- lessSEM:::.gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,

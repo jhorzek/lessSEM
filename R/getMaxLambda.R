@@ -28,23 +28,23 @@
   )
   
   sparseParameters <- result$rawParameters
-  SEM <- lessSEM:::.setParameters(SEM = SEM, 
+  SEM <- .setParameters(SEM = SEM, 
                               labels = names(sparseParameters), 
                               values = sparseParameters, 
                               raw = TRUE)
-  SEM <- lessSEM:::.fit(SEM = SEM)
-  gradients <- lessSEM:::.getGradients(SEM = SEM, 
+  SEM <- .fit(SEM = SEM)
+  gradients <- .getGradients(SEM = SEM, 
                                    raw = TRUE)
   
   # define maxLambda as the maximal gradient of the regularized parameters
   maxLambda <- max(abs(gradients[weights != 0]) * 
                      weights[weights != 0]^(-1))
   # reset SEM
-  SEM <- lessSEM:::.setParameters(SEM = SEM, 
+  SEM <- .setParameters(SEM = SEM, 
                               labels = names(rawParameters), 
                               values = rawParameters, 
                               raw = TRUE)
-  SEM <- lessSEM:::.fit(SEM = SEM)
+  SEM <- .fit(SEM = SEM)
   
   return((1/N)*(maxLambda+.1*maxLambda)) # adding some wiggle room as well
 }

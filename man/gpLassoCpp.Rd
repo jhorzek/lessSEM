@@ -13,7 +13,7 @@ gpLassoCpp(
   nLambdas = NULL,
   additionalArguments,
   method = "ista",
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{

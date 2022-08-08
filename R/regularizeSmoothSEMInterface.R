@@ -81,12 +81,12 @@ smoothLasso <- function(lavaanModel,
                         epsilon,
                         tau,
                         modifyModel = lessSEM::modifyModel(),
-                        control = controlBFGS()){
+                        control = lessSEM::controlBFGS()){
   
   tuningParameters <- data.frame(lambda = lambdas,
                                  alpha = 1)
   
-  result <- lessSEM:::.regularizeSmoothSEMInternal(
+  result <- .regularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "lasso",
     weights = regularized,
@@ -201,7 +201,7 @@ smoothAdaptiveLasso <- function(lavaanModel,
                                 epsilon,
                                 tau,
                                 modifyModel = lessSEM::modifyModel(),
-                                control = controlBFGS()){
+                                control = lessSEM::controlBFGS()){
   
   
   tuningParameters <- data.frame(lambda = lambdas,
@@ -209,7 +209,7 @@ smoothAdaptiveLasso <- function(lavaanModel,
   
   if(is.null(weights)) weights <- regularized
   
-  result <- lessSEM:::.regularizeSmoothSEMInternal(
+  result <- .regularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "adaptiveLasso",
     weights = weights,
@@ -292,9 +292,9 @@ ridgeBfgs <- function(lavaanModel,
                       regularized,
                       lambdas = NULL,
                       modifyModel = lessSEM::modifyModel(),
-                      control = controlBFGS()){
+                      control = lessSEM::controlBFGS()){
   
-  result <- lessSEM:::.regularizeSmoothSEMInternal(
+  result <- .regularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "ridge",
     weights = regularized,
@@ -394,12 +394,12 @@ smoothElasticNet <- function(lavaanModel,
                              epsilon, 
                              tau,
                              modifyModel = lessSEM::modifyModel(),
-                             control = controlBFGS()){
+                             control = lessSEM::controlBFGS()){
   
   if(any(alphas < 0) || any(alphas > 1)) 
     stop("alpha must be between 0 and 1.")
   
-  result <- lessSEM:::.regularizeSmoothSEMInternal(
+  result <- .regularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "elasticNet",
     weights = regularized,

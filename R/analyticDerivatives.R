@@ -61,8 +61,8 @@
   # SEE lavaan:::lav_model_hessian FOR THE IMPLEMENTATION
   # BY Yves Rosseel
   
-  SEM <- lessSEM:::.fit(SEM = SEM)
-  parameters <- lessSEM:::.getParameters(SEM = SEM, raw = raw)
+  SEM <- .fit(SEM = SEM)
+  parameters <- .getParameters(SEM = SEM, raw = raw)
   hessian <- SEM$getHessian(names(parameters), parameters, raw, eps)
   rownames(hessian) <- names(parameters)
   colnames(hessian) <- names(parameters)

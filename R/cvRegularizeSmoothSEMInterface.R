@@ -92,12 +92,12 @@ cvSmoothLasso <- function(lavaanModel,
                           standardize = FALSE,
                           returnSubsetParameters = FALSE,
                           modifyModel = lessSEM::modifyModel(),
-                          control = controlBFGS()){
+                          control = lessSEM::controlBFGS()){
   
   tuningParameters <- data.frame(lambda = lambdas,
                                  alpha = 1)
   
-  result <- lessSEM:::.cvRegularizeSmoothSEMInternal(
+  result <- .cvRegularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "lasso",
     k = k,
@@ -212,14 +212,14 @@ cvSmoothAdaptiveLasso <- function(lavaanModel,
                             standardize = FALSE,
                             returnSubsetParameters = FALSE,
                             modifyModel = lessSEM::modifyModel(),
-                            control = controlBFGS()){
+                            control = lessSEM::controlBFGS()){
   
   tuningParameters <- data.frame(lambda = lambdas,
                                  alpha = 1)
   
   if(is.null(weights)) weights <- regularized
   
-  result <- lessSEM:::.cvRegularizeSmoothSEMInternal(
+  result <- .cvRegularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "adaptiveLasso",
     weights = weights,
@@ -328,10 +328,10 @@ cvRidgeBfgs <- function(lavaanModel,
                     standardize = FALSE,
                     returnSubsetParameters = FALSE,
                     modifyModel = lessSEM::modifyModel(),
-                    control = controlBFGS()){
+                    control = lessSEM::controlBFGS()){
   
   
-  result <- lessSEM:::.cvRegularizeSmoothSEMInternal(
+  result <- .cvRegularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "ridge",
     weights = regularized,
@@ -449,12 +449,12 @@ cvSmoothElasticNet <- function(lavaanModel,
                          returnSubsetParameters = FALSE,
                          
                          modifyModel = lessSEM::modifyModel(),
-                         control = controlBFGS()){
+                         control = lessSEM::controlBFGS()){
   
   if(any(alphas < 0) || any(alphas > 1)) 
     stop("alpha must be between 0 and 1.")
   
-  result <- lessSEM:::.cvRegularizeSmoothSEMInternal(
+  result <- .cvRegularizeSmoothSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "elasticNet",
     weights = regularized,

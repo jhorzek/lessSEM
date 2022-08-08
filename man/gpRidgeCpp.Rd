@@ -12,7 +12,7 @@ gpRidgeCpp(
   lambdas,
   additionalArguments,
   method = "ista",
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{

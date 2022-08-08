@@ -12,7 +12,7 @@ gpCappedL1(
   regularized,
   lambdas,
   thetas,
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{

@@ -10,7 +10,7 @@ ridge(
   lambdas,
   method = "ista",
   modifyModel = lessSEM::modifyModel(),
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{

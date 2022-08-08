@@ -140,7 +140,7 @@ lasso <- function(lavaanModel,
                   reverse = TRUE,
                   method = "ista", 
                   modifyModel = lessSEM::modifyModel(),
-                  control = controlIsta()){
+                  control = lessSEM::controlIsta()){
   
   if(is.null(lambdas) && is.null(nLambdas)){
     stop("Specify either lambdas or nLambdas")
@@ -154,7 +154,7 @@ lasso <- function(lavaanModel,
                                    alpha = 1)
   }
   
-  result <- lessSEM:::.regularizeSEMInternal(
+  result <- .regularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "lasso",
     weights = regularized,
@@ -330,7 +330,7 @@ adaptiveLasso <- function(lavaanModel,
   
   if(is.null(weights)) weights <- regularized
   
-  result <- lessSEM:::.regularizeSEMInternal(
+  result <- .regularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "adaptiveLasso",
     weights = weights,
@@ -468,10 +468,10 @@ ridge <- function(lavaanModel,
                   lambdas,
                   method = "ista", 
                   modifyModel = lessSEM::modifyModel(),
-                  control = controlIsta()){
+                  control = lessSEM::controlIsta()){
   
   
-  result <- lessSEM:::.regularizeSEMInternal(
+  result <- .regularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "ridge",
     weights = regularized,
@@ -549,7 +549,7 @@ ridge <- function(lavaanModel,
 #' (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta() and controlGlmnet() functions.
+#' the lessSEM::controlIsta() and controlGlmnet() functions.
 #' @returns Model of class regularizedSEM
 
 #' @examples 
@@ -613,12 +613,12 @@ elasticNet <- function(lavaanModel,
                        alphas,
                        method = "ista", 
                        modifyModel = lessSEM::modifyModel(),
-                       control = controlIsta()){
+                       control = lessSEM::controlIsta()){
   
   if(any(alphas < 0) || any(alphas > 1)) 
     stop("alpha must be between 0 and 1.")
   
-  result <- lessSEM:::.regularizeSEMInternal(
+  result <- .regularizeSEMInternal(
     lavaanModel = lavaanModel,
     penalty = "elasticNet",
     weights = regularized,
@@ -742,10 +742,10 @@ cappedL1 <- function(lavaanModel,
                      lambdas,
                      thetas,
                      modifyModel = lessSEM::modifyModel(),
-                     control = controlIsta()){
+                     control = lessSEM::controlIsta()){
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM:::.regularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "cappedL1", 
                                            weights = regularized,
                                            tuningParameters = expand.grid(lambda = lambdas, 
@@ -867,11 +867,11 @@ lsp <- function(lavaanModel,
                 lambdas,
                 thetas,
                 modifyModel = lessSEM::modifyModel(),
-                control = controlIsta()){
+                control = lessSEM::controlIsta()){
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM:::.regularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "lsp", 
                                            weights = regularized,
                                            tuningParameters = expand.grid(lambda = lambdas, 
@@ -994,10 +994,10 @@ mcp <- function(lavaanModel,
                 lambdas,
                 thetas,
                 modifyModel = lessSEM::modifyModel(),
-                control = controlIsta()){
+                control = lessSEM::controlIsta()){
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
-  result <- lessSEM:::.regularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "mcp", 
                                            weights = regularized,
                                            tuningParameters = expand.grid(lambda = lambdas, 
@@ -1126,11 +1126,11 @@ scad <- function(lavaanModel,
                  lambdas,
                  thetas,
                  modifyModel = lessSEM::modifyModel(),
-                 control = controlIsta()){
+                 control = lessSEM::controlIsta()){
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
-  result <- lessSEM:::.regularizeSEMInternal(lavaanModel = lavaanModel, 
+  result <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "scad", 
                                            weights = regularized,
                                            tuningParameters = expand.grid(lambda = lambdas, 

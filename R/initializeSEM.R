@@ -75,12 +75,12 @@
     
   }
   
-  internalData <- lessSEM:::.SEMdata(rawData)
+  internalData <- .SEMdata(rawData)
   
   # translate to RAM notation
   
   ## directed paths
-  AmatrixElements <- lessSEM:::.setAMatrix(model = lavaanModel, 
+  AmatrixElements <- .setAMatrix(model = lavaanModel, 
                                           lavaanParameterTable = lavaanParameterTable, 
                                           nLatent = nLatent, 
                                           nManifest = nManifest, 
@@ -88,7 +88,7 @@
                                           manifestNames = manifestNames)
   
   ## undirected paths
-  SmatrixElements <- lessSEM:::.setSMatrix(model = lavaanModel, 
+  SmatrixElements <- .setSMatrix(model = lavaanModel, 
                                           lavaanParameterTable = lavaanParameterTable, 
                                           nLatent = nLatent, 
                                           nManifest = nManifest, 
@@ -97,7 +97,7 @@
   
   
   ## Mean structure
-  MvectorElements <- lessSEM:::.setMVector(model = lavaanModel, 
+  MvectorElements <- .setMVector(model = lavaanModel, 
                                           lavaanParameterTable = lavaanParameterTable, 
                                           nLatent = nLatent, 
                                           nManifest = nManifest, 
@@ -139,7 +139,7 @@
   }else if(whichPars == "start"){
     parameterValues <- lavaanModel@ParTable$start[lavaanModel@ParTable$free != 0]
   }else{
-    stop(paste0("Could not set the parameters of the model. Set whichPars to one of: 'est', 'start'. See ?lessSEM:::.SEMFromLavaan for more details."))
+    stop(paste0("Could not set the parameters of the model. Set whichPars to one of: 'est', 'start'. See ?.SEMFromLavaan for more details."))
   }
   
   # construct internal representation of parameters
@@ -272,11 +272,11 @@
   # the following step is necessary if the parameters of the lavaanModel do not correspond to those in
   # the matrices of the lavaan object. This is, for instance, the case if the starting values
   # instead of the estimates are used.
-  parameters <- lessSEM:::.getParameters(SEM = SEMCpp, raw = TRUE)
-  SEMCpp <- lessSEM:::.setParameters(SEM = SEMCpp, labels = names(parameters), values = parameters, raw = TRUE)
+  parameters <- .getParameters(SEM = SEMCpp, raw = TRUE)
+  SEMCpp <- .setParameters(SEM = SEMCpp, labels = names(parameters), values = parameters, raw = TRUE)
   
   if(fit){
-    SEMCpp <- lessSEM:::.fit(SEM = SEMCpp)
+    SEMCpp <- .fit(SEM = SEMCpp)
     if(whichPars == "est" && checkFit){
       # check model fit
       if(round(SEMCpp$m2LL - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")

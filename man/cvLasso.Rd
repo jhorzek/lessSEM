@@ -13,7 +13,7 @@ cvLasso(
   returnSubsetParameters = FALSE,
   method = "glmnet",
   modifyModel = lessSEM::modifyModel(),
-  control = controlGlmnet()
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{

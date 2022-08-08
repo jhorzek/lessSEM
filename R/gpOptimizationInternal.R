@@ -311,7 +311,7 @@
       "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
     )
     
-    maxLambda <- lessSEM:::.gpGetMaxLambda(regularizedModel,
+    maxLambda <- .gpGetMaxLambda(regularizedModel,
                                 par,
                                 fn,
                                 gr,

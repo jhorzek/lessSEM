@@ -19,7 +19,7 @@
 #' @param raw controls if the internal transformations of lessSEM is used.
 #' @returns -2log-Likelihood
 .fitFunction <- function(par, SEM, raw){
-  SEM <- lessSEM:::.setParameters(SEM = SEM, names(par), values = par, raw = raw)
+  SEM <- .setParameters(SEM = SEM, names(par), values = par, raw = raw)
   tryFit <- try(SEM$fit(), silent = TRUE)
   if(is(tryFit, "try-error") || is.na(SEM$m2LL) || any(eigen(SEM$S, only.values = TRUE)$values < 0)) {return(9999999999999)}
   return(SEM$m2LL)
@@ -37,7 +37,7 @@
   failureReturns <- rep(999999999, length(par))
   names(failureReturns) <- names(par)
   
-  SEM <- lessSEM:::.setParameters(SEM = SEM, names(par), values = par, raw = raw)
+  SEM <- .setParameters(SEM = SEM, names(par), values = par, raw = raw)
   tryFit <- try(SEM$fit(), silent = TRUE)
   if(any(class(tryFit) == "try-error") || is.na(SEM$m2LL)) {return(failureReturns)}
   tryGradients <- try(.getGradients(SEM = SEM, raw = raw), silent = TRUE)
@@ -56,7 +56,7 @@
 #' @returns -2 log Likelihood for each subject in the data set
 .individualMinus2LogLikelihood <- function(par, SEM, data, raw){
   if(any(names(data) != SEM$manifestNames)) stop("SEM$manifestNames and colnames of data do not match!")
-  if(any(lessSEM:::.getParameters(SEM, raw = raw)[names(par)] != par)) SEM <- lessSEM:::.setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
+  if(any(.getParameters(SEM, raw = raw)[names(par)] != par)) SEM <- .setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
   if(anyNA(SEM$impliedCovariance) || anyNA(SEM$impliedMeans)) SEM$implied()
   isMissing <- is.na(data)
   return(
@@ -78,7 +78,7 @@
 #' @returns likelihood ratio fit statistic
 .likelihoodRatioFit <- function(par, SEM, raw){
   if(anyNA(SEM$rawData)) stop("likelihoodRatioFit currently only implemented for data without missings")
-  if(any(lessSEM:::.getParameters(SEM)[names(par)] != par)) SEM <- lessSEM:::.setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
+  if(any(.getParameters(SEM)[names(par)] != par)) SEM <- .setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
   SEM$fit()
   
   # compute fit

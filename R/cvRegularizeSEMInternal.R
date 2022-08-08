@@ -64,7 +64,7 @@
   
   misc <- list()
   
-  parameterLabels <- names(lessSEM::getLavaanParameters(lavaanModel))
+  parameterLabels <- names(getLavaanParameters(lavaanModel))
   
   if(all(apply(rawData, 2, function(x) abs(mean(x)) <= 1e-5))) 
     warning(paste0("It seems that you standardized your data before fitting your lavaan model. ",
@@ -80,7 +80,7 @@
     if(nrow(subsets) != N) stop(paste0("k must have as many rows as there are subjects in your data set (", N, ")."))
     k <- ncol(subsets)
   }else{
-    subsets <- lessSEM::createSubsets(N = N, k = k)
+    subsets <- createSubsets(N = N, k = k)
   }
   
   if(penalty == "adaptiveLasso") 
@@ -193,7 +193,7 @@
       weights_s <- weights
     }
     
-    regularizedSEM_s <- lessSEM:::.regularizeSEMInternal(lavaanModel = lavaanModel, 
+    regularizedSEM_s <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
                                               penalty = penalty, 
                                               weights = weights_s, 
                                               tuningParameters = tuningParameters, 
@@ -222,7 +222,7 @@
     
     # to compute the out of sample fit, we also need a SEM with all individuals 
     # if the test set
-    SEM_s <- lessSEM:::.SEMFromLavaan(
+    SEM_s <- .SEMFromLavaan(
       lavaanModel = lavaanModel,
       whichPars = "start",
       fit = FALSE, 
@@ -233,7 +233,7 @@
     )
     
     for(p in 1:nrow(regularizedSEM_s@parameters)){
-      SEM_s <- lessSEM:::.setParameters(
+      SEM_s <- .setParameters(
         SEM = SEM_s, 
         labels =  
           names(unlist(regularizedSEM_s@parameters[p,regularizedSEM_s@parameterLabels])),
@@ -252,7 +252,7 @@
   tp <- tuningParameters[which.min(cvfits$cvfit)[1],]
   if(standardize) rawData <- scale(rawData)
   modifyModel$dataSet <- rawData
-  regularizedSEM_full <- lessSEM:::.regularizeSEMInternal(lavaanModel = lavaanModel, 
+  regularizedSEM_full <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
                                                penalty = penalty, 
                                                weights = weights_s, 
                                                tuningParameters = tp, 

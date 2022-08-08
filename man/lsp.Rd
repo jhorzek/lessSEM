@@ -10,7 +10,7 @@ lsp(
   lambdas,
   thetas,
   modifyModel = lessSEM::modifyModel(),
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{

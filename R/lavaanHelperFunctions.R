@@ -57,7 +57,7 @@ getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   parameters <- cvregsemModel$parameters
   
-  parLabels <- lessSEM:::.lavaan2regsemLabels(lavaanModel = lavaanModel)
+  parLabels <- .lavaan2regsemLabels(lavaanModel = lavaanModel)
   
   # resort parameters
   parameters <- parameters[,parLabels$regsemLabels]
@@ -82,7 +82,7 @@ regsem2LavaanParameters <- function(regsemModel, lavaanModel){
   
   parameters <- unlist(regsemModel$out$pars)
   
-  parLabels <- lessSEM:::.lavaan2regsemLabels(lavaanModel = lavaanModel)
+  parLabels <- .lavaan2regsemLabels(lavaanModel = lavaanModel)
   
   # resort parameters
   parameters <- parameters[parLabels$regsemLabels]

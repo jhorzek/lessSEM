@@ -12,7 +12,7 @@ smoothAdaptiveLasso(
   epsilon,
   tau,
   modifyModel = lessSEM::modifyModel(),
-  control = controlBFGS()
+  control = lessSEM::controlBFGS()
 )
 }
 \arguments{

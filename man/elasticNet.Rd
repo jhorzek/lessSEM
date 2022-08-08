@@ -11,7 +11,7 @@ elasticNet(
   alphas,
   method = "ista",
   modifyModel = lessSEM::modifyModel(),
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with
-the controlIsta() and controlGlmnet() functions.}
+the lessSEM::controlIsta() and controlGlmnet() functions.}
 }
 \value{
 Model of class regularizedSEM
