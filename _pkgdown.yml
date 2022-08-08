@@ -1,4 +1,6 @@
+title: lessSEM
 url: ~
 template:
   bootstrap: 5
-
+  params:
+    bootswatch: pulse

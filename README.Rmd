@@ -188,7 +188,7 @@ Regularized Structural Equation Modeling. ArXiv:1703.08489 [Stat]. http://arxiv.
 Semi-confirmatory structural equation modeling via penalized likelihood. Journal 
 of Statistical Software, 93(7). https://doi.org/10.18637/jss.v093.i07
 * [fasta](https://cran.r-project.org/web/packages/fasta/index.html): 
-Another implementation of the fista algorithm (Beck & Teboulle, 2009)
+Another implementation of the fista algorithm (Beck & Teboulle, 2009).
 * [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M., Prabhu, R. G., 
 Basak, S., Lou, Z., & Sanderson, C. (2021). The ensmallen library for ﬂexible 
 numerical optimization. Journal of Machine Learning Research, 22, 1–6.

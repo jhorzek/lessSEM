@@ -1,3 +1,20 @@
+#' GIC
+#' 
+#' THIS FUNCTION IS UNDER DEVELOPMENT AND SHOULD _NOT_ BE USED.
+#' computes the generalized information criterion as 
+#' \eqn{-2\log \mathcal L + \text{scaler}*\text{df}}
+#' where scaler is a numeric value with which the 
+#' degrees of freedom (df) are multiplied.
+#' 
+#' See Zhang et al. (2010) for more details.
+#' 
+#' * Zhang, Y., Li, R., & Tsai, C.-L. (2010). Regularization Parameter 
+#' Selections via Generalized Information Criterion. 
+#' Journal of the American Statistical Association, 105(489), 
+#' 312–323. https://doi.org/10.1198/jasa.2009.tm08013
+#' @param regularizedSEM model of class regularizedSEM
+#' @param scaler numeric value to scale the degrees of freedom
+#' @return vector with GIC values.
 GIC <- function(regularizedSEM, scaler = 2){
   warning("GIC IS EXPERIMENTAL AND SHOULD NOT BE USED!")
   penalty <- regularizedSEM@penalty
