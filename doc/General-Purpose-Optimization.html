@@ -356,12 +356,12 @@ the most complicated approach.</li>
 <p>In general, the approaches get faster as you transition from 1 to 3.
 You will see the largest performance gains when implementing a gradient
 function and not just a fitting function, however. As a rule of thumb:
-Use approach 1 if you intend to run you model a few times, don’t want to
-create a new package and your model runs fairly fast. Use approach 2 if
-you want to increase the speed a bit, while keeping the changes
+Use approach 1 if you intend to run your model a few times, don’t want
+to create a new package and your model runs fairly fast. Use approach 2
+if you want to increase the speed a bit, while keeping the changes
 necessary to your files manageable. Use approach 3 if you create a new
-package, have some experience with RcppArmadillo and want to get the
-best performance.</p>
+package, have some experience with <strong>RcppArmadillo</strong> and
+want to get the best performance.</p>
 <p>In the following, we will demonstrate all three approaches using a
 linear regression model as an example.</p>
 <div id="the-example" class="section level2">
@@ -491,9 +491,9 @@ gradients, this can result in faster estimation:</p>
 #&gt; 6 0.000000000  0.000000000 0.000000000 0.000000000  0.000000000 0.003365918</code></pre>
 <p>Here is a short comparison of running both models 5 times each:</p>
 <p>Runtime in seconds without gradients:</p>
-<pre><code>#&gt; [1] 1.417184 1.395870 1.361810 1.370608 1.384273</code></pre>
+<pre><code>#&gt; [1] 1.330495 1.300491 1.245776 1.250139 1.278634</code></pre>
 <p>Runtime in seconds with gradients:</p>
-<pre><code>#&gt; [1] 0.05127621 0.04662013 0.04632163 0.04888868 0.04619360</code></pre>
+<pre><code>#&gt; [1] 0.04893064 0.04770327 0.04499030 0.04780340 0.04754496</code></pre>
 <p>Now, that’s quite a difference!</p>
 <p>Note that you can also pass a C++ function to gpLasso similar to the
 approach above:</p>
@@ -562,7 +562,7 @@ approach above:</p>
 #&gt; 5 0.000000000  0.000000000 0.000217458 0.001971241  0.000000000 0.007906064
 #&gt; 6 0.000000000  0.000000000 0.000000000 0.000000000  0.000000000 0.003365918</code></pre>
 <p>The runtime in seconds with C++ is:</p>
-<pre><code>#&gt; [1] 0.03727603 0.03612709 0.03251362 0.03272724 0.03264117</code></pre>
+<pre><code>#&gt; [1] 0.03563714 0.03443170 0.03272772 0.03284526 0.03276324</code></pre>
 <p>Which is even lower than what we had before!</p>
 </div>
 <div id="using-c-function-pointers" class="section level2">
@@ -577,14 +577,14 @@ approach is more constrained than the one presented above:</p>
 <ol style="list-style-type: decimal">
 <li>We must define both, a fitting function and a gradient function in
 Rcpp. We cannot rely on numDeriv any more!</li>
-<li>The fitting function and the gradient function are only allowed tow
+<li>The fitting function and the gradient function are only allowed two
 parameters each: a <code>const Rcpp::NumericVector&amp;</code> (the
 parameters) and an <code>Rcpp::List&amp;</code> (everything else). While
 this seems restrictive, note that we can virtually pass anything we want
 in a list.</li>
-<li>We must (create pointers)[<a href="https://gallery.rcpp.org/articles/passing-cpp-function-pointers/" class="uri">https://gallery.rcpp.org/articles/passing-cpp-function-pointers/</a>]
-to the fit and gradient function. This is difficult, however we will
-provide some guidance below.</li>
+<li>We must <a href="https://gallery.rcpp.org/articles/passing-cpp-function-pointers/">create
+pointers</a> to the fit and gradient function. This is difficult,
+however we will provide some guidance below.</li>
 </ol>
 <p>This may be a bit overwhelming at first, so we will go through it
 step by step.</p>
@@ -594,7 +594,7 @@ step by step.</p>
 linear regression model in the example above. However, we often do not
 know the gradients in closed form. If you don’t have a gradient
 function, you can try a numerical approximation. More details can be
-found (here)[<a href="https://en.wikipedia.org/wiki/Finite_difference" class="uri">https://en.wikipedia.org/wiki/Finite_difference</a>].</p>
+found <a href="https://en.wikipedia.org/wiki/Finite_difference">here</a>.</p>
 </div>
 <div id="adapting-the-functions-to-the-constraints" class="section level3">
 <h3>2. Adapting the functions to the constraints</h3>
@@ -673,10 +673,10 @@ we will call data:</p>
 <div id="step-3-creating-pointers-to-our-functions" class="section level3">
 <h3>Step 3: Creating pointers to our functions</h3>
 <p>This is where it get’s really tricky! We can’t just pass our
-functions to C++. However, we can (create pointers)[<a href="https://gallery.rcpp.org/articles/passing-cpp-function-pointers/" class="uri">https://gallery.rcpp.org/articles/passing-cpp-function-pointers/</a>].
-These have to be generated in C++ and this can be tricky to get right.
-To simplify the process, we have created a function which helps setting
-things up:</p>
+functions to C++. However, we can <a href="https://gallery.rcpp.org/articles/passing-cpp-function-pointers/">create
+pointers</a>. These have to be generated in C++ and this can be tricky
+to get right. To simplify the process, we have created a function which
+helps setting things up:</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(lessSEM<span class="sc">::</span><span class="fu">makePtrs</span>(<span class="at">fitFunName =</span> <span class="st">&quot;fitfunction&quot;</span>, <span class="co"># name of the function in C++</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">gradFunName =</span> <span class="st">&quot;gradientfunction&quot;</span> <span class="co"># name of the function in C++</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -836,7 +836,7 @@ end, use the <code>gpLassoCpp</code> function:</p>
 #&gt; 5 0.000000000  0.000000000 0.0001374354 0.002100692  0.000000000 0.008033475
 #&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003352431</code></pre>
 <p>Benchmarking this approach results in:</p>
-<pre><code>#&gt; [1] 0.006386518 0.006216288 0.006041765 0.008893013 0.006044388</code></pre>
+<pre><code>#&gt; [1] 0.005780697 0.005470276 0.005553007 0.005724669 0.006649256</code></pre>
 <p>So, we have reduced our run time even more!</p>
 </div>
 </div>
@@ -846,7 +846,7 @@ end, use the <code>gpLassoCpp</code> function:</p>
 created a whole package to demonstrate it. You will find more
 information in the vignette <code>The-optimizer-interface</code> and in
 the <a href="https://github.com/jhorzek/lessLM">lessLM</a> package.</p>
-<p>It will come to the same parameter estiamtes:</p>
+<p>It will come to the same parameter estimates:</p>
 <pre><code>#&gt;              b0        b1        b2        b3       b4          b5           b6
 #&gt; [1,] 0.02734701 1.0129361 0.9991629 0.9705501 1.027728 0.013993181 -0.007491533
 #&gt; [2,] 0.02939675 1.0043635 0.9908681 0.9626493 1.025035 0.003400965  0.000000000
@@ -862,7 +862,7 @@ the <a href="https://github.com/jhorzek/lessLM">lessLM</a> package.</p>
 #&gt; [5,] 0.0001374354 0.002100692  0.000000000 0.008033475
 #&gt; [6,] 0.0000000000 0.000000000  0.000000000 0.003352431</code></pre>
 <p>And the run times are even lower:</p>
-<pre><code>#&gt; [1] 0.0014834404 0.0008492470 0.0009114742 0.0008594990 0.0008404255</code></pre>
+<pre><code>#&gt; [1] 0.0014665127 0.0008847713 0.0009009838 0.0008785725 0.0009002686</code></pre>
 </div>
 
 

@@ -14,3 +14,4 @@ src/Makevars
 /doc/*
 !/doc/*.html
 /Meta/
+/doc/

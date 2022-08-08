@@ -42,10 +42,10 @@ to the underlying C++ functions. This is the most complicated approach.
 In general, the approaches get faster as you transition from 1 to 3. You will
 see the largest performance gains when implementing a gradient function and not just
 a fitting function, however. As a rule of thumb: Use approach 1 if you intend to
-run you model a few times, don't want to create a new package and your model
+run your model a few times, don't want to create a new package and your model
 runs fairly fast. Use approach 2 if you want to increase the speed a bit, while
 keeping the changes necessary to your files manageable. Use approach 3 if you 
-create a new package, have some experience with RcppArmadillo and want to get the best performance. 
+create a new package, have some experience with **RcppArmadillo** and want to get the best performance. 
 
 In the following, we will demonstrate all three approaches using a linear regression model
 as an example. 
@@ -338,10 +338,10 @@ approach is more constrained than the one presented above:
 
 1. We must define both, a fitting function and a gradient function in Rcpp. We cannot
 rely on numDeriv any more!
-2. The fitting function and the gradient function are only allowed tow parameters each:
+2. The fitting function and the gradient function are only allowed two parameters each:
 a `const Rcpp::NumericVector&` (the parameters) and an `Rcpp::List&` (everything else). While this seems restrictive, note
 that we can virtually pass anything we want in a list.
-3. We must (create pointers)[https://gallery.rcpp.org/articles/passing-cpp-function-pointers/] 
+3. We must [create pointers](https://gallery.rcpp.org/articles/passing-cpp-function-pointers/) 
 to the fit and gradient function. This is difficult, however we will provide some guidance below.
 
 This may be a bit overwhelming at first, so we will go through it step by step. 
@@ -351,7 +351,7 @@ This may be a bit overwhelming at first, so we will go through it step by step.
 We already defined a fitting function and a gradient function for our linear regression
 model in the example above. However, we often do not know the gradients in closed form.
 If you don't have a gradient function, you can try a numerical approximation. More
-details can be found (here)[https://en.wikipedia.org/wiki/Finite_difference].
+details can be found [here](https://en.wikipedia.org/wiki/Finite_difference).
 
 ### 2. Adapting the functions to the constraints
 
@@ -433,7 +433,7 @@ That's it, our functions have been transformed!
 ### Step 3: Creating pointers to our functions
 
 This is where it get's really tricky! We can't just pass our functions to C++.
-However, we can (create pointers)[https://gallery.rcpp.org/articles/passing-cpp-function-pointers/].
+However, we can [create pointers](https://gallery.rcpp.org/articles/passing-cpp-function-pointers/).
 These have to be generated in C++ and this can be tricky to get right. To simplify 
 the process, we have created a function which helps setting things up:
 
@@ -861,7 +861,7 @@ l1 <- elasticNet(y = y,
 )
 ```
 
-It will come to the same parameter estiamtes:
+It will come to the same parameter estimates:
 ```{r, echo = FALSE}
 head(l1$B)
 ```
