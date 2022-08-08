@@ -87,7 +87,7 @@ GIC <- function(regularizedSEM, scaler = 2){
     m2LLHessian <- m2LLHessian[,!colWithNA]
     
     dfs <- try(sum(diag(solve(m2LLHessian - penaltyHessian)%*%m2LLHessian)))
-    if(is(df, "try-error")) next
+    if(is(dfs, "try-error")) next
     
     gic[p] <- m2LL + scaler*dfs
   }

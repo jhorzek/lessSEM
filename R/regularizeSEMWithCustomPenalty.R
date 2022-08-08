@@ -104,7 +104,7 @@
 #' # full sample!
 #' 
 #' #### Now we are ready to optimize! ####
-#' regsemApprox <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = lavaanModel,
+#' regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = lavaanModel,
 #'                                                individualPenaltyFunction = smoothLASSO,
 #'                                                tuningParameters = tuningParameters,
 #'                                                penaltyFunctionArguments = penaltyFunctionArguments)
