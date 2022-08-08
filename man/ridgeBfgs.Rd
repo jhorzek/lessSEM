@@ -9,7 +9,7 @@ ridgeBfgs(
   regularized,
   lambdas = NULL,
   modifyModel = lessSEM::modifyModel(),
-  control = controlBFGS()
+  control = lessSEM::controlBFGS()
 )
 }
 \arguments{

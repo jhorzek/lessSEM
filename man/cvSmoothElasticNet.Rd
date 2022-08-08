@@ -14,7 +14,7 @@ cvSmoothElasticNet(
   standardize = FALSE,
   returnSubsetParameters = FALSE,
   modifyModel = lessSEM::modifyModel(),
-  control = controlBFGS()
+  control = lessSEM::controlBFGS()
 )
 }
 \arguments{

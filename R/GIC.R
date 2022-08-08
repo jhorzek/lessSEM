@@ -2,8 +2,10 @@
 #' 
 #' THIS FUNCTION IS UNDER DEVELOPMENT AND SHOULD _NOT_ BE USED.
 #' computes the generalized information criterion as 
-#' \eqn{-2\log \mathcal L + \text{scaler}*\text{df}}
-#' where scaler is a numeric value with which the 
+#' 
+#' -2-log-Likelihood + scaler*df
+#' 
+#' where the scaler is a numeric value with which the 
 #' degrees of freedom (df) are multiplied.
 #' 
 #' See Zhang et al. (2010) for more details.
@@ -34,7 +36,7 @@ GIC <- function(regularizedSEM, scaler = 2){
   gic <- rep(NA, nrow(parameters))
   
   # we need a model to compute the Hessians
-  SEM <- lessSEM::SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
+  SEM <- .SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
                                 whichPars = "start", 
                                 transformVariances = TRUE, 
                                 fit = FALSE,
@@ -51,15 +53,15 @@ GIC <- function(regularizedSEM, scaler = 2){
     
     utils::setTxtProgressBar(pb = pbar, value = p)
     
-    SEM <- setParameters(SEM = SEM, 
+    SEM <- .setParameters(SEM = SEM, 
                          labels = regularizedSEM@parameterLabels, 
                          values = unlist(parameters[p,]), 
                          raw = FALSE)
     
-    m2LL <- fit(SEM = SEM)$m2LL
+    m2LL <- .fit(SEM = SEM)$m2LL
     
     # We need the Hessian of the -2log-likelihood and the penalty function
-    m2LLHessian <- getHessian(SEM, raw = FALSE)
+    m2LLHessian <- .getHessian(SEM, raw = FALSE)
     
     if(penalty == "lasso"){
       
@@ -87,7 +89,7 @@ GIC <- function(regularizedSEM, scaler = 2){
     m2LLHessian <- m2LLHessian[,!colWithNA]
     
     dfs <- try(sum(diag(solve(m2LLHessian - penaltyHessian)%*%m2LLHessian)))
-    if(is(df, "try-error")) next
+    if(is(dfs, "try-error")) next
     
     gic[p] <- m2LL + scaler*dfs
   }

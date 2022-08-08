@@ -13,7 +13,7 @@ cvMcp(
   standardize = FALSE,
   returnSubsetParameters = FALSE,
   modifyModel = lessSEM::modifyModel(),
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{

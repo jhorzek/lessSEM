@@ -16,3 +16,4 @@ src/Makevars
 /Meta/
 /doc/
 docs
+tests/testthat/*.pdf

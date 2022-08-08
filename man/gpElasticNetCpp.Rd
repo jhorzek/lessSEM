@@ -13,7 +13,7 @@ gpElasticNetCpp(
   alphas,
   additionalArguments,
   method = "ista",
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{
@@ -40,7 +40,7 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 (currently gist).}
 
 \item{control}{used to control the optimizer. This element is generated with
-the controlIsta() and controlGlmnet() functions.}
+the lessSEM::controlIsta() and controlGlmnet() functions.}
 }
 \value{
 Object of class gpRegularized

@@ -18,7 +18,7 @@ gpCappedL1Cpp(
   regularized,
   lambdas,
   thetas,
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{

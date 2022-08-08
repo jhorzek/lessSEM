@@ -53,7 +53,7 @@ test_that("testing cross-validation for adaptive lasso", {
   subsets <- cv@subsets
   pars <- cv@subsetParameters
   
-  SEM <- lessSEM::SEMFromLavaan(lavaanModel = modelFit)
+  SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = modelFit)
   
   parameterLabels <- cv@parameterLabels
   
@@ -66,7 +66,7 @@ test_that("testing cross-validation for adaptive lasso", {
     trainSet <- pars$trainSet[ro]
     testSet <- subsets[,trainSet]
     
-    SEM <- lessSEM::setParameters(SEM = SEM, 
+    SEM <- lessSEM:::.setParameters(SEM = SEM, 
                                   labels = parameterLabels, 
                                   values = unlist(pars[ro, parameterLabels]),
                                   raw = FALSE)
@@ -123,7 +123,7 @@ test_that("testing cross-validation for adaptive lasso", {
                                  means = means, 
                                  standardDeviations = standardDeviations)
     
-    SEM <- lessSEM::setParameters(SEM = SEM, 
+    SEM <- lessSEM:::.setParameters(SEM = SEM, 
                                   labels = parameterLabels, 
                                   values = unlist(pars[ro, parameterLabels]),
                                   raw = FALSE)
@@ -200,7 +200,7 @@ test_that("testing cross-validation for adaptive lasso", {
                                  means = means, 
                                  standardDeviations = standardDeviations)
     
-    SEM <- lessSEM::setParameters(SEM = SEM, 
+    SEM <- lessSEM:::.setParameters(SEM = SEM, 
                                   labels = parameterLabels, 
                                   values = unlist(pars[ro, parameterLabels]),
                                   raw = FALSE)

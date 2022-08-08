@@ -20,7 +20,7 @@ test_that("testing lavaan", {
 '
   
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE)
-  SEM <- lessSEM::SEMFromLavaan(lavaanModel = model)
+  SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = model)
   show(SEM)
   logLik(SEM)
   testthat::expect_equal(round(AIC(SEM) - AIC(model),5),0)
@@ -30,12 +30,12 @@ test_that("testing lavaan", {
 
   individualFit <- rep(NA, nrow(PoliticalDemocracy))
   for(i in 1:nrow(PoliticalDemocracy)){
-    individualFit[i] <- lessSEM::individualMinus2LogLikelihood(par = getParameters(SEM), SEM = SEM, data = SEM$rawData[i,], raw = FALSE)
+    individualFit[i] <- lessSEM:::.individualMinus2LogLikelihood(par = lessSEM:::.getParameters(SEM), SEM = SEM, data = SEM$rawData[i,], raw = FALSE)
   }
   
   testthat::expect_equal(round(sum(individualFit) - (-2*as.numeric(logLik(model))),4),0)
   
-  testthat::expect_equal(round(model@Fit@test$standard$stat - likelihoodRatioFit(par = getParameters(SEM), SEM),4)[1,1],0)
+  testthat::expect_equal(round(model@Fit@test$standard$stat - lessSEM:::.likelihoodRatioFit(par = lessSEM:::.getParameters(SEM), SEM),4)[1,1],0)
 
   # test missing data
   dat <- PoliticalDemocracy
@@ -46,8 +46,8 @@ test_that("testing lavaan", {
   
   model <- sem(model1, data = dat, meanstructure = TRUE, missing = "ML")
   
-  SEM <- lessSEM::SEMFromLavaan(lavaanModel = model)
-  lessSEM::fit(SEM)
+  SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = model)
+  lessSEM:::.fit(SEM)
   
   testthat::expect_equal(round(SEM$m2LL - (-2*as.numeric(logLik(model))),4),0)
 

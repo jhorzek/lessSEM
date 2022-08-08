@@ -10,7 +10,7 @@ cappedL1(
   lambdas,
   thetas,
   modifyModel = lessSEM::modifyModel(),
-  control = controlIsta()
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{

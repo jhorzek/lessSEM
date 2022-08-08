@@ -1,9 +1,9 @@
-#' SEMdata
+#' .SEMdata
 #' 
 #' internal function. Creates internal data representation
 #' @param rawData matrix with raw data set
 #' @returns list with internal representation of data
-SEMdata <- function(rawData){
+.SEMdata <- function(rawData){
   
   # extract unique missingness patterns
   

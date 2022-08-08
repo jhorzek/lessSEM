@@ -33,7 +33,7 @@ test_that("testing new tau", {
   
   apprRegsem <- smoothLasso(lavaanModel = modelFit, 
                             regularized = regularizedLavaan, 
-                            epsilon = 1e-7, 
+                            epsilon = 1e-8, 
                             tau = 0,
                             lambdas = lambdas)
   

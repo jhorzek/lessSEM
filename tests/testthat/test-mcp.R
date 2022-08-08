@@ -169,7 +169,7 @@ test_that("testing mcp", {
   )
   
   #### Now we are ready to optimize! ####
-  regsemApprox <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
+  regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
                                                        individualPenaltyFunction = smoothMcpValue,
                                                        tuningParameters = tuningParameters,
                                                        penaltyFunctionArguments = penaltyFunctionArguments)

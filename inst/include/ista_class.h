@@ -332,7 +332,7 @@ inline lessSEM::fitResults ista(
     }// end inner iteration
     
     // print fit info
-    if(control_.verbose > 0 && outer_iteration % control_.verbose == 0){
+    if((control_.verbose > 0) && (outer_iteration % control_.verbose == 0)){
       Rcpp::Rcout << "Fit in iteration outer_iteration " << 
         outer_iteration + 1 << 
           ": " << penalizedFit_k << 
@@ -340,7 +340,7 @@ inline lessSEM::fitResults ista(
       Rcpp::Rcout << parameters_k << std::endl;
     } 
     
-    if(!breakInner){
+    if((!breakInner) && (control_.verbose < 0)){
       Rcpp::warning("Inner iterations did not improve the fit --> resetting L.");
       L_kMinus1 = control_.L0;
       continue;

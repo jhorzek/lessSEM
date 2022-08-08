@@ -1,4 +1,4 @@
-#' regularizeSmoothSEMInternal
+#' .regularizeSmoothSEMInternal
 #' 
 #' Internal function: This function computes the regularized models
 #' for all smooth penalty functions which are implemented for bfgs.
@@ -19,7 +19,7 @@
 #' @returns regularizedSEM
 
 #' @export
-regularizeSmoothSEMInternal <- function(lavaanModel,
+.regularizeSmoothSEMInternal <- function(lavaanModel,
                                          penalty,
                                          weights,
                                          tuningParameters,
@@ -62,32 +62,35 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
   }
   
   if(any(startingValues == "est")){
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                   transformVariances = TRUE,
-                                   whichPars = "est",
-                                   addMeans = modifyModel$addMeans, 
-                                   activeSet = modifyModel$activeSet,
-                                   dataSet = modifyModel$dataSet)
+    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel, 
+                          transformVariances = TRUE,
+                          whichPars = "est",
+                          addMeans = modifyModel$addMeans, 
+                          activeSet = modifyModel$activeSet,
+                          dataSet = modifyModel$dataSet)
   }else if(any(startingValues == "start")){
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                   transformVariances = TRUE,
-                                   whichPars = "start",
-                                   addMeans = modifyModel$addMeans, 
-                                   activeSet = modifyModel$activeSet,
-                                   dataSet = modifyModel$dataSet)
+    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel, 
+                          transformVariances = TRUE,
+                          whichPars = "start",
+                          addMeans = modifyModel$addMeans, 
+                          activeSet = modifyModel$activeSet,
+                          dataSet = modifyModel$dataSet)
   }else if(is.numeric(startingValues)){
     
-    if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel))))
+    if(!all(names(startingValues) %in% names(getLavaanParameters(lavaanModel))))
       stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                   transformVariances = TRUE,
-                                   whichPars = "start", 
-                                   fit = FALSE,
-                                   addMeans = modifyModel$addMeans, 
-                                   activeSet = modifyModel$activeSet,
-                                   dataSet = modifyModel$dataSet)
-    SEM <- lessSEM::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(lessSEM::fit(SEM))
+    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel, 
+                          transformVariances = TRUE,
+                          whichPars = "start", 
+                          fit = FALSE,
+                          addMeans = modifyModel$addMeans, 
+                          activeSet = modifyModel$activeSet,
+                          dataSet = modifyModel$dataSet)
+    SEM <- .setParameters(SEM = SEM, 
+                          labels = names(startingValues), 
+                          values = startingValues, 
+                          raw = FALSE)
+    SEM <- try(.fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
       stop("Infeasible starting values.")
     
@@ -96,8 +99,8 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
   }
   
   # get parameters in raw form
-  startingValues <- lessSEM::getParameters(SEM, raw = TRUE)
-  rawParameters <- lessSEM::getParameters(SEM, raw = TRUE)
+  startingValues <- .getParameters(SEM, raw = TRUE)
+  rawParameters <- .getParameters(SEM, raw = TRUE)
   
   # set weights
   if(!is.numeric(weights)){
@@ -109,7 +112,7 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
         control_s$verbose <- 0
         # optimize model: We set lambda = 0, so we get the MLE
         cat("Computing MLE for adaptive lasso...\n")
-        MLE <- lessSEM::ridgeBfgs(
+        MLE <- ridgeBfgs(
           lavaanModel = lavaanModel,
           lambdas = 0, 
           regularized = regularized,
@@ -147,17 +150,17 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
   initialHessian <- control$initialHessian
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
     
-    if(!all(rownames(initialHessian) %in% names(lessSEM::getLavaanParameters(lavaanModel))) ||
-       !all(colnames(initialHessian) %in% names(lessSEM::getLavaanParameters(lavaanModel)))
+    if(!all(rownames(initialHessian) %in% names(getLavaanParameters(lavaanModel))) ||
+       !all(colnames(initialHessian) %in% names(getLavaanParameters(lavaanModel)))
     ) stop("initialHessian must have the parameter names as rownames and colnames. See lessSEM::getLavaanParameters(lavaanModel).")
     
   }else if(any(initialHessian == "compute")){
     
-    initialHessian <- lessSEM::getHessian(SEM = SEM, raw = TRUE)
+    initialHessian <- .getHessian(SEM = SEM, raw = TRUE)
     
   }else if(any(initialHessian == "scoreBased")){
     
-    scores <- lessSEM::getScores(SEM = SEM, raw = TRUE)
+    scores <- .getScores(SEM = SEM, raw = TRUE)
     FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
     rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
     for(score in 1:nrow(scores)){
@@ -243,9 +246,9 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
   #### print progress ####
   if(control$verbose == 0){
     progressbar = utils::txtProgressBar(min = 0, 
-                                 max = nrow(tuningParameters), 
-                                 initial = 0, 
-                                 style = 3)
+                                        max = nrow(tuningParameters), 
+                                        initial = 0, 
+                                        style = 3)
   }
   
   #### Iterate over all tuning parameter combinations and fit models ####
@@ -272,14 +275,14 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
     fits$convergence[it] <- result$convergence
     
     # get unregularized fit:
-    SEM <- lessSEM::setParameters(SEM, 
-                                  names(rawParameters), 
-                                  values = rawParameters, 
-                                  raw = TRUE)
+    SEM <- .setParameters(SEM, 
+                          names(rawParameters), 
+                          values = rawParameters, 
+                          raw = TRUE)
     fits$m2LL[it] <- SEM$fit()
     # transform internal parameter representation to "natural" form
-    transformedParameters <- lessSEM::getParameters(SEM,
-                                                     raw = FALSE)
+    transformedParameters <- .getParameters(SEM,
+                                            raw = FALSE)
     parameterEstimates[it, 
                        names(rawParameters)] <- transformedParameters[names(rawParameters)]
     
@@ -295,10 +298,10 @@ regularizeSmoothSEMInternal <- function(lavaanModel,
                             sep = " = "),
                      " resulted in Error!"))
       
-      SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                     transformVariances = TRUE,
-                                     whichPars = startingValues,
-                                     addMeans = control$addMeans)
+      SEM <- .SEMFromLavaan(lavaanModel = lavaanModel, 
+                            transformVariances = TRUE,
+                            whichPars = startingValues,
+                            addMeans = control$addMeans)
       
       
       regularizedModel$setHessian(controlIntern$initialHessian)

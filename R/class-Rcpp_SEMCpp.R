@@ -10,7 +10,7 @@ setClass("Rcpp_SEMCpp")
 setMethod("show", "Rcpp_SEMCpp", function (object) {
   cat("Internal C++ model representation of lessSEM\n")
   cat("Parameters:\n")
-  print(lessSEM::getParameters(object))
+  print(.getParameters(object))
   cat("\n")
   cat(paste0("-2 log-Likelihood: ", object$m2LL))
 })
@@ -25,7 +25,7 @@ setMethod("logLik", "Rcpp_SEMCpp", function (object) {
     object$fit()
   }
   N <- nrow(object$rawData)
-  numberOfParameters <- length(lessSEM::getParameters(object))
+  numberOfParameters <- length(.getParameters(object))
   
   ll <- new("logLikelihood",
             logLik = -.5*object$m2LL,
@@ -40,7 +40,7 @@ setMethod("logLik", "Rcpp_SEMCpp", function (object) {
 #' @returns all coefficients of the model in transformed form
 #' @export
 setMethod("coef", "Rcpp_SEMCpp", function (object) {
-  return(lessSEM::getParameters(object, raw = FALSE))
+  return(.getParameters(object, raw = FALSE))
 })
 
 #' AIC

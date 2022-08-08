@@ -1,4 +1,4 @@
-#' regularizeSEMWithCustomPenaltyRsolnp
+#' .regularizeSEMWithCustomPenaltyRsolnp
 #' 
 #' Optimize a SEM with custom penalty function using the Rsolnp optimizer (see ?Rsolnp::solnp). This optimizer is the default in regsem (see ?regsem::cv_regsem).
 #' 
@@ -80,7 +80,7 @@
 #' # Now, it is time to specify our custom penalty function:
 #' 
 #' smoothLASSO <- function(
-#'   # here are our three arguments:
+    #'   # here are our three arguments:
 #'   parameters,
 #'   tuningParameters,
 #'   penaltyFunctionArguments
@@ -104,7 +104,7 @@
 #' # full sample!
 #' 
 #' #### Now we are ready to optimize! ####
-#' regsemApprox <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = lavaanModel,
+#' regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = lavaanModel,
 #'                                                individualPenaltyFunction = smoothLASSO,
 #'                                                tuningParameters = tuningParameters,
 #'                                                penaltyFunctionArguments = penaltyFunctionArguments)
@@ -120,13 +120,13 @@
 #'        regsemApprox@parameters[,regsemExact@parameterLabels])
 #' # Note that the parameter estimates are basically identical.
 #' @export
-regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel, 
-                                                 individualPenaltyFunction,
-                                                 tuningParameters,
-                                                 penaltyFunctionArguments,
-                                                 startingValues = "est",
-                                                 carryOverParameters = TRUE,
-                                                 control = list("trace" = 0)){
+.regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel, 
+                                                  individualPenaltyFunction,
+                                                  tuningParameters,
+                                                  penaltyFunctionArguments,
+                                                  startingValues = "est",
+                                                  carryOverParameters = TRUE,
+                                                  control = list("trace" = 0)){
   
   inputArguments <- as.list(environment())
   
@@ -145,28 +145,31 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   
   ### initialize model ####
   if(any(startingValues == "est")){
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                   transformVariances = TRUE,
-                                   whichPars = "est",
-                                   addMeans = control$addMeans, 
-                                   activeSet = control$activeSet)
+    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel, 
+                          transformVariances = TRUE,
+                          whichPars = "est",
+                          addMeans = control$addMeans, 
+                          activeSet = control$activeSet)
   }else if(any(startingValues == "start")){
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                   transformVariances = TRUE,
-                                   whichPars = "start",
-                                   addMeans = control$addMeans, 
-                                   activeSet = control$activeSet)
+    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel, 
+                          transformVariances = TRUE,
+                          whichPars = "start",
+                          addMeans = control$addMeans, 
+                          activeSet = control$activeSet)
   }else if(is.numeric(startingValues)){
     
-    if(!all(names(startingValues) %in% names(lessSEM::getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
-    SEM <- lessSEM::SEMFromLavaan(lavaanModel = lavaanModel, 
-                                   transformVariances = TRUE,
-                                   whichPars = "start", 
-                                   fit = FALSE,
-                                   addMeans = control$addMeans, 
-                                   activeSet = control$activeSet)
-    SEM <- lessSEM::setParameters(SEM = SEM, labels = names(startingValues), value = startingValues, raw = FALSE)
-    SEM <- try(lessSEM::fit(SEM))
+    if(!all(names(startingValues) %in% names(getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
+    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel, 
+                          transformVariances = TRUE,
+                          whichPars = "start", 
+                          fit = FALSE,
+                          addMeans = control$addMeans, 
+                          activeSet = control$activeSet)
+    SEM <- .setParameters(SEM = SEM, 
+                          labels = names(startingValues), 
+                          values = startingValues, 
+                          raw = FALSE)
+    SEM <- try(.fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) stop("Infeasible starting values.")
     
   }else{
@@ -174,7 +177,7 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   }
   
   # get parameters
-  parameters <- lessSEM::getParameters(SEM, raw = TRUE)
+  parameters <- .getParameters(SEM, raw = TRUE)
   
   # define fitting function
   fitfun <- function(parameters, 
@@ -183,15 +186,15 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
                      individualPenaltyFunction, 
                      tuningParameters,
                      penaltyFunctionArguments){
-    SEM <- try(lessSEM::setParameters(SEM = SEM, 
-                                       labels = names(parameters), 
-                                       values = parameters, 
-                                       raw = TRUE), 
+    SEM <- try(.setParameters(SEM = SEM, 
+                              labels = names(parameters), 
+                              values = parameters, 
+                              raw = TRUE), 
                silent = TRUE)
     if(is(SEM, "try-error")){
       return(99999999999999999)
     }
-    SEM <- try(lessSEM::fit(SEM), silent = TRUE)
+    SEM <- try(.fit(SEM), silent = TRUE)
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)){
       return(99999999999999999)
     }
@@ -232,9 +235,9 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
   Hessians <- list(NULL)
   
   progressbar = utils::txtProgressBar(min = 0, 
-                               max = nrow(tuningParameters), 
-                               initial = 0, 
-                               style = 3)
+                                      max = nrow(tuningParameters), 
+                                      initial = 0, 
+                                      style = 3)
   
   parametersInit <- parameters
   
@@ -257,12 +260,12 @@ regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel,
     # will be better if more iterations have to be done until convergence
     if(carryOverParameters) parametersInit <- result$pars
     
-    SEM <- try(lessSEM::setParameters(SEM = SEM, labels = names(result$pars), 
-                                       values = result$pars, raw = TRUE), 
+    SEM <- try(.setParameters(SEM = SEM, labels = names(result$pars), 
+                              values = result$pars, raw = TRUE), 
                silent = TRUE)
-    SEM <- try(lessSEM::fit(SEM), silent = TRUE)
+    SEM <- try(.fit(SEM), silent = TRUE)
     
-    parameterEstimates[i, names(parameters)] <- lessSEM::getParameters(SEM, raw = FALSE)[names(parameters)]
+    parameterEstimates[i, names(parameters)] <- .getParameters(SEM, raw = FALSE)[names(parameters)]
     fits$m2LL[i] <- SEM$m2LL
     fits$regM2LL[i] <- SEM$m2LL + sampleSize*individualPenaltyFunction(result$pars, 
                                                                        currentTuningParameters, 

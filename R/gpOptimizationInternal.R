@@ -1,4 +1,4 @@
-#' gpOptimizationInternal
+#' .gpOptimizationInternal
 #' 
 #' Internal function: This function computes the regularized models
 #' for all penaltiy functions which are implemented for glmnet and gist.
@@ -25,7 +25,7 @@
 #' @returns Object of class gpRegularized
 
 #' @export
-gpOptimizationInternal <- function(par,
+.gpOptimizationInternal <- function(par,
                                    weights,
                                    fn,
                                    gr = NULL,
@@ -311,7 +311,7 @@ gpOptimizationInternal <- function(par,
       "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
     )
     
-    maxLambda <- gpGetMaxLambda(regularizedModel,
+    maxLambda <- .gpGetMaxLambda(regularizedModel,
                                 par,
                                 fn,
                                 gr,

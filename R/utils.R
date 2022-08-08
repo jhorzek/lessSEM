@@ -43,7 +43,7 @@ simulateExampleData <- function(N = 100, # sample size
   
 }
 
-#' noDotDotDot
+#' .noDotDotDot
 #' 
 #' remplaces the dot dot dot part of the fitting and gradient fuction
 #' @param fn fit or gradient function. IMPORTANT: THE FIRST ARGUMENT TO
@@ -51,7 +51,7 @@ simulateExampleData <- function(N = 100, # sample size
 #' @param fnName name of the function fn
 #' @param ... additional arguments
 #' @return list with (1) new function which wraps fn and (2) list with arguments passed to fn
-noDotDotDot <- function(fn, fnName, ...){
+.noDotDotDot <- function(fn, fnName, ...){
   
   # see Barranka, https://stackoverflow.com/questions/26164078/r-define-a-function-from-character-string
   

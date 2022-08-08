@@ -17,11 +17,13 @@ vector with GIC values.
 \description{
 THIS FUNCTION IS UNDER DEVELOPMENT AND SHOULD \emph{NOT} BE USED.
 computes the generalized information criterion as
-\eqn{-2\log \mathcal L + \text{scaler}*\text{df}}
-where scaler is a numeric value with which the
-degrees of freedom (df) are multiplied.
 }
 \details{
+-2-log-Likelihood + scaler*df
+
+where the scaler is a numeric value with which the
+degrees of freedom (df) are multiplied.
+
 See Zhang et al. (2010) for more details.
 \itemize{
 \item Zhang, Y., Li, R., & Tsai, C.-L. (2010). Regularization Parameter

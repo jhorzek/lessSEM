@@ -332,7 +332,7 @@ inline arma::rowvec glmnetLineSearch(
     
   }// end line search
   
-  if(!converged) Rcpp::warning("Line search did not converge.");
+  if(!converged && (verbose == -99)) Rcpp::warning("Line search did not converge.");
   
   return(parameters_k);
 }
@@ -503,7 +503,8 @@ inline lessSEM::fitResults glmnet(model& model_,
       parameters_k,
       gradients_k,
       true,
-      .001
+      .001,
+      control_.verbose == -99
     );
     
     if(control_.verbose == -99) Rcpp::Rcout << "New Hessian_k\n: " << Hessian_k << std::endl;

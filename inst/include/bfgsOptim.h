@@ -332,7 +332,8 @@ inline lessSEM::fitResults bfgsOptim(model& model_,
       parameters_k,
       gradients_k,
       true,
-      .001
+      .001,
+      control_.verbose == -99
     );
     
     if(control_.verbose == -99) Rcpp::Rcout << "New Hessian_k\n: " << Hessian_k << std::endl;

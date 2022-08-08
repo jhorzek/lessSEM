@@ -51,7 +51,7 @@ test_that("testing lsp", {
   )
   
   #### Now we are ready to optimize! ####
-  regsemApprox <- regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
+  regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
                                                        individualPenaltyFunction = smoothLspValue,
                                                        tuningParameters = tuningParameters,
                                                        penaltyFunctionArguments = penaltyFunctionArguments)

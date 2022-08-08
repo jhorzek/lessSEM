@@ -178,7 +178,7 @@ gpLassoCpp <- function(par,
                     nLambdas = NULL,
                     additionalArguments,
                     method = "ista", 
-                    control = controlIsta()
+                    control = lessSEM::controlIsta()
 ){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
@@ -200,7 +200,7 @@ gpLassoCpp <- function(par,
                                    alpha = 1)
   }
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -390,7 +390,7 @@ gpAdaptiveLassoCpp <- function(par,
                             nLambdas = NULL,
                             additionalArguments,
                             method = "ista", 
-                            control = controlIsta()){
+                            control = lessSEM::controlIsta()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -424,7 +424,7 @@ gpAdaptiveLassoCpp <- function(par,
                                    alpha = 1)
   }
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -610,7 +610,7 @@ gpRidgeCpp <- function(par,
                     lambdas,
                     additionalArguments,
                     method = "ista", 
-                    control = controlIsta()){
+                    control = lessSEM::controlIsta()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -623,7 +623,7 @@ gpRidgeCpp <- function(par,
   tuningParameters <- data.frame(lambda = lambdas,
                                  alpha = 0)
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -698,7 +698,7 @@ gpRidgeCpp <- function(par,
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta() and controlGlmnet() functions.
+#' the lessSEM::controlIsta() and controlGlmnet() functions.
 #' @returns Object of class gpRegularized
 
 #' @examples
@@ -813,7 +813,7 @@ gpElasticNetCpp <- function(par,
                          alphas,
                          additionalArguments,
                          method = "ista", 
-                         control = controlIsta()){
+                         control = lessSEM::controlIsta()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -826,7 +826,7 @@ gpElasticNetCpp <- function(par,
                                   alpha = alphas)
   
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1013,7 +1013,7 @@ gpCappedL1Cpp <- function(par,
                        regularized,
                        lambdas,
                        thetas,
-                       control = controlIsta()){
+                       control = lessSEM::controlIsta()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -1024,7 +1024,7 @@ gpCappedL1Cpp <- function(par,
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1209,7 +1209,7 @@ gpLspCpp <- function(par,
                   regularized,
                   lambdas,
                   thetas,
-                  control = controlIsta()){
+                  control = lessSEM::controlIsta()){
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
   }
@@ -1219,7 +1219,7 @@ gpLspCpp <- function(par,
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1407,7 +1407,7 @@ gpMcpCpp <- function(par,
                   regularized,
                   lambdas,
                   thetas,
-                  control = controlIsta()){
+                  control = lessSEM::controlIsta()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -1418,7 +1418,7 @@ gpMcpCpp <- function(par,
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
@@ -1612,7 +1612,7 @@ gpScadCpp <- function(par,
                    regularized,
                    lambdas,
                    thetas,
-                   control = controlIsta()){
+                   control = lessSEM::controlIsta()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -1623,7 +1623,7 @@ gpScadCpp <- function(par,
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
-  result <- lessSEM::gpOptimizationInternal(par = par,
+  result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
                                             gr = gr,
                                             additionalArguments = additionalArguments,
