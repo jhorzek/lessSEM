@@ -2,8 +2,10 @@
 #' 
 #' THIS FUNCTION IS UNDER DEVELOPMENT AND SHOULD _NOT_ BE USED.
 #' computes the generalized information criterion as 
-#' \eqn{-2\log \mathcal L + \text{scaler}*\text{df}}
-#' where scaler is a numeric value with which the 
+#' 
+#' -2-log-Likelihood + scaler*df
+#' 
+#' where the scaler is a numeric value with which the 
 #' degrees of freedom (df) are multiplied.
 #' 
 #' See Zhang et al. (2010) for more details.
