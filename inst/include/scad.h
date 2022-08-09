@@ -169,7 +169,7 @@ public:
   override {
     
     double penalty = 0.0;
-    double absPar;
+    
     for(int p = 0; p < parameterValues.n_elem; p ++){
       // unregularized values:
       if(tuningParameters.weights.at(p) == 0.0) continue;
