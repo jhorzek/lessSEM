@@ -37,15 +37,13 @@ test_that("testing new tau", {
                             tau = 0,
                             lambdas = lambdas)
   
-  parameterDifference <- apprRegsem@parameters[,rsem@parameterLabels] - rsem@parameters[,rsem@parameterLabels]
-  matplot(abs(parameterDifference[,regularizedLavaan]), type  ="l")
-  testthat::expect_equal(max(abs(parameterDifference[,regularizedLavaan])) < .03, TRUE)
-  
   testthat::expect_equal(length(unique(apprRegsem@fits$nonZeroParameters)) , 1)
   
-  apprRegsem <- newTau(apprRegsem, 1e-4)
-  nZero <- apply(apprRegsem@parameters[,apprRegsem@regularized], 1, function(x) sum(abs(x) <= 1e-4))
-  
-  testthat::expect_equal(all(apprRegsem@fits$nonZeroParameters == (length(apprRegsem@parameterLabels) - nZero)) , TRUE)
-  
+  newTaus <- seq(1e-10,1e-1,length.out = 10)
+  for(nt in newTaus){
+    apprRegsem <- newTau(apprRegsem, nt)
+    nZero <- apply(apprRegsem@parameters[,apprRegsem@regularized], 1, function(x) sum(abs(x) <= nt))
+    nZero[which(apprRegsem@fits$lambda == 0)] <- 0
+    testthat::expect_equal(all(apprRegsem@fits$nonZeroParameters == (length(apprRegsem@parameterLabels) - nZero)) , TRUE)
+  }
 })
