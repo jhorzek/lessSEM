@@ -143,17 +143,24 @@ If we use the lasso or adaptive lasso, **lessSEM** can automatically compute
 which $\lambda$ is necessary to set all parameters to zero. This is currently
 not supported for any of the other penalties. 
 
-You can access all parameters with the `coef()` function:
+The plots returned by **lessSEM** are either **ggplot2** elements (in case of a single 
+tuning parameter), or created with plotly (in case of 2 tuning parameters). You 
+can change a plot post-hoc:
+
+```{r}
+plot(fitLasso) + ggplot2::theme_bw()
+```
+
+
+The `coef` function gives access to all parameter estimates:
 
 ```{r}
 head(coef(fitLasso))
 ```
 
 
-
-Now, let's assume you also want 
-to try out the scad penalty. In this case, all you have to do is to replace
-the `lasso()` function with the `scad()` function:
+Now, let's assume you also want to try out the scad penalty. In this case, 
+all you have to do is to replace the `lasso()` function with the `scad()` function:
 
 ```{r, eval = FALSE}
 fitScad <- scad(lavaanModel = lavaanModel, 
