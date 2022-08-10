@@ -17,3 +17,4 @@ src/Makevars
 /doc/
 docs
 tests/testthat/*.pdf
+seafile-ignore.txt
