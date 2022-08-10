@@ -91,22 +91,26 @@ setMethod("plot",
   
   if(nTuning == 1){
     
-    ggplot2::ggplot(data = fits,
+    return(
+      ggplot2::ggplot(data = fits,
                     mapping = ggplot2::aes_string(x = colnames(tuningParameters), 
                                                   y = "cvfit")) +
       ggplot2::geom_line(colour = "#008080")+
       ggplot2::ggtitle("Regularized Parameters")
+      )
     
   }else{
     fits$tp1 <- unlist(fits[,colnames(tuningParameters)[1]])
     fits$tp2 <- unlist(fits[,colnames(tuningParameters)[2]])
-    plotly::plot_ly(fits, 
+    return(
+      plotly::plot_ly(fits, 
                     x = ~tp1, y = ~tp2, z = ~cvfit, 
                     type = 'scatter3d', mode = 'lines',
                     opacity = 1,
                     split = ~tp2,
                     line = list(width = 6, 
                                 reverscale = FALSE))
+    )
     
   }
 })

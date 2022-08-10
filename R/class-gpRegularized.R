@@ -173,12 +173,14 @@ setMethod("plot",
             
             if(nTuning == 1){
               
-              ggplot2::ggplot(data = parametersLong,
+              return(
+                ggplot2::ggplot(data = parametersLong,
                               mapping = ggplot2::aes_string(x = colnames(tuningParameters), 
                                                             y = "value", 
                                                             group = "name")) +
                 ggplot2::geom_line(colour = "#008080")+
                 ggplot2::ggtitle("Regularized Parameters")
+              )
               
             }else{
               parametersLong$name <- paste0(parametersLong$name, 
@@ -196,7 +198,7 @@ setMethod("plot",
                                      line = list(width = 6, 
                                                  reverscale = FALSE)
               )
-              print(plt)
+              return(plt)
               
             }
             

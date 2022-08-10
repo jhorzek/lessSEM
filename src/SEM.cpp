@@ -84,7 +84,7 @@ bool SEMCpp::checkModel(){
 }
 
 void SEMCpp::addRawData(arma::mat rawData_, Rcpp::StringVector manifestNames_, arma::uvec personInSubset_){
-  if(currentStatus != addedDerivatives & currentStatus != addedRawData){
+  if((currentStatus != addedDerivatives) & (currentStatus != addedRawData)){
     Rcpp::stop("Please define the model matrices and add parameters as well as add derivative elements before calling addRawData.");
   }
   currentStatus = addedRawData;
@@ -106,7 +106,7 @@ void SEMCpp::addSubset(int N_,
                        // raw data is required for N == 1
                        arma::mat rawData_){
   
-  if(currentStatus != addedRawData & currentStatus != addedSubsets){
+  if((currentStatus != addedRawData) & (currentStatus != addedSubsets)){
     Rcpp::stop("Please define the model matrices and add parameters as well as add derivative elements before calling addRawData.");
   }
   currentStatus = addedSubsets;
@@ -343,7 +343,7 @@ arma::mat SEMCpp::getScores(bool raw){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(currentStatus != computedImplied & currentStatus != fitted){
+  if((currentStatus != computedImplied) & (currentStatus != fitted)){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
   arma::mat scoresMat = scores(*this, raw);
@@ -355,7 +355,7 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(currentStatus != computedImplied & currentStatus != fitted){
+  if((currentStatus != computedImplied) & (currentStatus != fitted)){
     Rcpp::stop("The model implied matrices have not been computed yet. Call Model$implied() first.");
   }
   arma::rowvec gradients = gradientsByGroup(*this, raw);
@@ -370,7 +370,7 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if(currentStatus != computedImplied & currentStatus != fitted){
+  if((currentStatus != computedImplied) & (currentStatus != fitted)){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
   arma::mat hessian = approximateHessian(*this, 

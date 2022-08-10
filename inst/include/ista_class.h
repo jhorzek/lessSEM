@@ -145,8 +145,6 @@ inline lessSEM::fitResults ista(
   double penalizedFit_k, penalizedFit_kMinus1;
   arma::rowvec gradients_k, gradients_kMinus1, gradient_y_k;
   
-  double ridgePenalty = 0.0;
-  
   if(control_.verbose == -99) Rcpp::Rcout << "initial fit: " << 
     (1.0/control_.sampleSize)*model_.fit(startingValues, parameterLabels) << std::endl;
   
