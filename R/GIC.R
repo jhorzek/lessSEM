@@ -37,8 +37,7 @@ GIC <- function(regularizedSEM, scaler = 2){
   
   # we need a model to compute the Hessians
   SEM <- .SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
-                                whichPars = "start", 
-                                transformVariances = TRUE, 
+                                whichPars = "start",
                                 fit = FALSE,
                                 addMeans = regularizedSEM@inputArguments$modifyModel$addMeans,
                                 activeSet = regularizedSEM@inputArguments$modifyModel$activeSet, 

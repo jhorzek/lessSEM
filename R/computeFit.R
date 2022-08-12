@@ -25,7 +25,7 @@
   return(SEM$m2LL)
 }
 
-#' .derivativeFunction
+#' .gradientFunction
 #' 
 #' internal function which returns the gradients of an object of class Rcpp_SEMCpp. This function can be used in optimizers
 #' 
@@ -33,7 +33,7 @@
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param raw controls if the internal transformations of lessSEM is used.
 #' @returns gradients of the model
-.derivativeFunction <- function(par, SEM, raw){
+.gradientFunction <- function(par, SEM, raw){
   failureReturns <- rep(999999999, length(par))
   names(failureReturns) <- names(par)
   

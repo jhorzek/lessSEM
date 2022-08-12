@@ -228,8 +228,7 @@
       fit = FALSE, 
       addMeans = modifyModel$addMeans,
       activeSet = modifyModel$activeSet, 
-      dataSet = testSet, 
-      transformVariances = TRUE
+      dataSet = testSet
     )
     
     for(p in 1:nrow(regularizedSEM_s@parameters)){

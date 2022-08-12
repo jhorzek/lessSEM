@@ -1,0 +1,308 @@
+---
+title: "The-Structural-Equation-Model"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{The-Structural-Equation-Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(lessSEM)
+```
+
+The lessSEM package comes with a custom implementation of structural equation models (SEM).
+This implementation supports full-information-maximum-likelihood computation in 
+case of missing data and could also be used by other packages. Identical to [regsem](https://github.com/Rjacobucci/regsem)
+lessSEM also builds on [lavaan](https://github.com/yrosseel/lavaan) to set up the model.
+That is, if you are already familiar with lavaan, setting up models with lessSEM should
+be relatively easy.
+
+We will use the political democracy example from the sem documentation of lavaan  in the following:
+
+```{r}
+library(lavaan)
+# see ?lavaan::sem
+model <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a*y2 + b*y3 + c*y4
+     dem65 =~ y5 + a*y6 + b*y7 + c*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 + y6
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+lavaanModel <- sem(model, data = PoliticalDemocracy)
+```
+
+## From lavaan to lessSEM
+
+To translate the model from lavaan to lessSEM, we have to use the `lessSEM:::.SEMFromLavaan` function.
+Importantly, this function is not exported by lessSEM. That is, you _must_ use the 
+three colons as shown above to access this function!
+
+```{r, error=TRUE}
+library(lessSEM)
+
+# won't work:
+mySEM <- .SEMFromLavaan(lavaanModel = lavaanModel)
+
+# will work:
+mySEM <- lessSEM:::.SEMFromLavaan(lavaanModel = lavaanModel)
+```
+
+```{r}
+show(mySEM)
+```
+
+
+The `lessSEM:::.SEMFromLavaan` function comes with some additional arguments to
+fine tune the initialization of the model.
+
+1. `whichPars`: with the `whichPars` arguments, we can change which parameters 
+are used in the mySEM created above. By default, we will use the estimates (`whichPars = "est"`)
+of the lavaan model, but we could also use the starting values (`whichPars = "start"`)
+or supply custom parameter values
+2. `fit`: When `fit = TRUE`, lessSEM will fit the model once and compare the fitting function
+value to that of the lavaanModel. If you supplied parameters other than "est", this 
+should be set to `fit = FALSE`
+3. `addMeans`: Should a mean structure be added? It is currenlty recomended to set this to `TRUE`
+4. `activeSet`: This allows for only using part of the data set. This can be useful for 
+cross-validation.
+5. `dataSet`: This allows for passing a different data set to mySEM. This can be useful for 
+cross-validation.
+
+
+In most cases, we recommend setting up the model as shown above, with none of the
+additional arguments being used.
+
+## Working with the Rcpp_SEMCpp class
+
+The mySEM object is implemented in C++ to make everything run faster. 
+The underlying class is `Rcpp_SEMCpp` and was created using the wonderful
+[Rcpp](https://github.com/RcppCore/Rcpp) and 
+[RcppArmadillo](https://github.com/RcppCore/RcppArmadillo) packages.
+```{r}
+class(mySEM)
+```
+
+You can access its elements using the dollar-operator:
+```{r}
+mySEM$A
+```
+
+Note that, identical to regsem, the model is implemented with the RAM notation (McArdle & McDonald, 1984). 
+If you are not familiar with this notation, Fox (2006) provides a short introduction.
+However, you won't need to know the details for the time being. Instead,
+we will focus on how to get and set the parameters, fit the model, get its gradients, etc.
+
+### Accessing the Parameters
+
+The parameters of the model can be accessed with the `lessSEM:::.getParameters` function:
+
+```{r}
+(myParameters <- lessSEM:::.getParameters(mySEM))
+```
+
+The naming is identical to that of the lavaanModel. By default, the parameters are
+returned in the transformed format. This requires some more explanation: In lessSEM
+we assume that negative variances are outside of the parameter space. That is,
+negative variances are **not** allowed (this is different from lavaan!). To ensure
+that all variances are positive, we use a transformation: Say we are interested in
+the variance `ind60~~ind60`. Internally, there is a parameter called `x1~~x1` and this
+parameter has a `rawValue` and a transformed value (called just `value`). 
+We can access these values with:
+```{r}
+mySEM$getParameters()
+```
+
+For all parameters which are _not_ variances, the `rawValue` will be identical to
+the `value`. For variances, the `rawValue` can be any real value. The `value` itself
+is then computed as $e^{\text{rawValue}}$; this ensures that the `value` is always
+positive. You can access the raw values as follows:
+
+```{r}
+lessSEM:::.getParameters(mySEM, raw = TRUE)
+```
+
+Note that the raw value for `ind60~~ind60` is negative while the transformed value is positive.
+
+### Changing the Parameters
+
+Being able to change the parameters is essential for fitting a model. In lessSEM,
+this is facilitated by the `lessSEM:::.setParameters` function:
+
+```{r}
+# first, let's change one of the parameters:
+myParameters["a"] <- 1
+
+# now, let's change the parameters of the model
+mySEM <- lessSEM:::.setParameters(SEM = mySEM, # the model
+                                  labels = names(myParameters), # names of the parameters
+                                  values = myParameters, # values of the parameters 
+                                  raw = FALSE)
+```
+
+Note that we had to specify if the parameters in `myParameters` are given in raw format.
+Here, we already used the transformed parameters, so we set `raw = FALSE`. Using
+the raw parameters instead would look as follows:
+
+```{r}
+myParameters <- lessSEM:::.getParameters(mySEM, raw = TRUE)
+# first, let's change one of the parameters:
+myParameters["a"] <- 1
+
+# now, let's change the parameters of the model
+mySEM <- lessSEM:::.setParameters(SEM = mySEM, # the model
+                                  labels = names(myParameters), # names of the parameters
+                                  values = myParameters, # values of the parameters
+                                  raw = TRUE)
+```
+
+Let's check the parameters:
+
+```{r}
+lessSEM:::.getParameters(mySEM)
+```
+
+Note that `a` now has the value `1`. 
+
+
+## Fitting the model
+
+To compute the -2-log-likelihood of the model, we use the `lessSEM:::.fit` function:
+
+```{r}
+mySEM <- lessSEM:::.fit(SEM = mySEM)
+```
+
+The -2-log-likelihood can be accessed with:
+
+```{r}
+mySEM$m2LL
+```
+
+## Computing the gradients
+
+To compute the gradients, use the `lessSEM:::.getGradients` function. Gradients
+can be computed for the transformed parameters
+
+```{r}
+lessSEM:::.getGradients(mySEM, raw = FALSE)
+```
+or for the raw parameters
+
+```{r}
+lessSEM:::.getGradients(mySEM, raw = TRUE)
+```
+
+## Computing the Hessian
+
+To compute the Hessian, use the `lessSEM:::.getHessian` function. The Hessian
+can be computed for the transformed parameters
+
+```{r, eval = FALSE}
+lessSEM:::.getHessian(mySEM, raw = FALSE)
+```
+or for the raw parameters
+
+```{r, eval = FALSE}
+lessSEM:::.getHessian(mySEM, raw = TRUE)
+```
+
+## Computing the Scores
+
+To compute the scores (derivative of the -2-log-likelihood for each person), 
+use the `lessSEM:::.getScores` function. The scores
+can be computed for the transformed parameters
+
+```{r, eval = FALSE}
+lessSEM:::.getScores(mySEM, raw = FALSE)
+```
+or for the raw parameters
+
+```{r, eval = FALSE}
+lessSEM:::.getScores(mySEM, raw = TRUE)
+```
+
+## Using lessSEM with general purpose optimizers
+
+The most important part about the whole SEM implementation mentioned above is that
+we can use it flexibly with different optimizers. For instance, we may want to
+try out the BFGS optimizer from optim.
+
+**Important**: We highly recommend that you use the raw parameters for any
+optimization. Using the non-raw parameters can cause errors and unnecessary headaches!
+
+Let's have a look at the `optim` function:
+
+```{r}
+args(optim)
+```
+
+Note that the function requires a `par` argument - the parameter estimates - 
+a `fn` argument - the fitting function - and also allows for the gradients to 
+be passed to the function using the `gr` argument. We could build such functions based
+on the `lessSEM:::.fit` and `lessSEM:::.getGradients` functions shown above, however
+for convenience such wrappers are already implemented in lessSEM. 
+The fitting function is called with `lessSEM:::.fitFunction` and the gradient
+function is called `lessSEM:::.gradientFunction`. Both expect a vector with 
+parameters, a SEM, and an argument specifying if the parameters are in raw format.
+
+We can use this in optim as follows:
+
+```{r}
+# let's get the starting values:
+par <- lessSEM:::.getParameters(mySEM, raw = TRUE) # important: Use raw = TRUE!
+
+print(par)
+
+opt <- optim(par = par, 
+             fn = lessSEM:::.fitFunction, # use the fitting function wrapper
+             gr = lessSEM:::.gradientFunction, # use the gradient function wrapper
+             SEM = mySEM, # use the SEM we created above
+             raw = TRUE, # make sure to tell the functions that we are using raw parameters
+             method = "BFGS" # use the BFGS optimizer
+)
+print(opt$par)
+```
+
+Note that the parameter `a` is now back at the maximum likelihood estimate from before.
+However, all parameters are still in raw format. To get the transformed parameters,
+let's take one more step:
+
+```{r}
+mySEM <- lessSEM:::.setParameters(SEM = mySEM, # the model
+                                  labels = names(opt$par), # names of the parameters
+                                  values = opt$par, # values of the parameters
+                                  raw = TRUE)
+print(lessSEM:::.getParameters(mySEM, raw = FALSE))
+```
+
+Compare those to the parameter estimates from lavaan:
+
+```{r}
+coef(lavaanModel)
+```
+
+
+## References
+
+* Fox, J. (2006). Teacher’s corner: Structural equation modeling with the sem package in R. Structural Equation Modeling: A Multidisciplinary Journal, 13(3), 465–486. https://doi.org/10.1207/s15328007sem1303_7
+* McArdle, J. J., & McDonald, R. P. (1984). Some algebraic properties of the Reticular Action Model for moment structures. British Journal of Mathematical and Statistical Psychology, 37(2), 234–251. https://doi.org/10.1111/j.2044-8317.1984.tb00802.x

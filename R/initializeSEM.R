@@ -6,7 +6,6 @@
 #' @param whichPars which parameters should be used to initialize the model. If set to "est", the parameters will be set to the
 #' estimated parameters of the lavaan model. If set to "start", the starting values of lavaan will be used. The latter can be useful if parameters are to
 #' be optimized afterwards as setting the parameters to "est" may result in the model getting stuck in a local minimum.
-#' @param transformVariances set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative
 #' @param fit should the model be fitted and compared to the lavaanModel?
 #' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param addMeans If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average
@@ -14,7 +13,6 @@
 #' @returns Object of class Rcpp_SEMCpp
 .SEMFromLavaan <- function(lavaanModel, 
                           whichPars = "est",
-                          transformVariances = TRUE, 
                           fit = TRUE,
                           addMeans = TRUE,
                           activeSet = NULL,
@@ -165,7 +163,7 @@
             if(modelParameters[[matrixName]][ro,co] != parameterIDs[parameter]) next
             rawParameterValue <- parameterValues[parameter]
             # keep variances positive:
-            if(transformVariances && ro==co && matrixName=="Smatrix") {
+            if(ro==co && matrixName=="Smatrix") {
               if(rawParameterValue < 0){
                 rawParameterValue <- log(.01)
                 warning("lavaanModel has negative variances. Cannot compare fit to lavaanModel")
