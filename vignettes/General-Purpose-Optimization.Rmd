@@ -327,7 +327,7 @@ print(runtimes$RC)
 ```
 Which is even lower than what we had before!
 
-## Using C++ function pointers
+## The second approach: Using C++ function pointers
 
 While using the Rcpp functions defined above was quite fast for our linear regression,
 it can still be fairly slow for more involved models (e.g., SEM). This is due to
@@ -613,7 +613,7 @@ print(runtimes$Cpt)
 ```
 So, we have reduced our run time even more!
 
-## Approach 3: Including the header files
+## The third approach: Including the header files
 
 This is, by far, the most difficult approach which is why we have created a 
 whole package to demonstrate it. You will find more information in the vignette
