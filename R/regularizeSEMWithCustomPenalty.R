@@ -145,22 +145,19 @@
   
   ### initialize model ####
   if(any(startingValues == "est")){
-    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel, 
-                          transformVariances = TRUE,
+    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
                           whichPars = "est",
                           addMeans = control$addMeans, 
                           activeSet = control$activeSet)
   }else if(any(startingValues == "start")){
-    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel, 
-                          transformVariances = TRUE,
+    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
                           whichPars = "start",
                           addMeans = control$addMeans, 
                           activeSet = control$activeSet)
   }else if(is.numeric(startingValues)){
     
     if(!all(names(startingValues) %in% names(getLavaanParameters(lavaanModel)))) stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
-    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel, 
-                          transformVariances = TRUE,
+    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
                           whichPars = "start", 
                           fit = FALSE,
                           addMeans = control$addMeans, 

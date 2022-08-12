@@ -7,7 +7,6 @@
 .SEMFromLavaan(
   lavaanModel,
   whichPars = "est",
-  transformVariances = TRUE,
   fit = TRUE,
   addMeans = TRUE,
   activeSet = NULL,
@@ -20,8 +19,6 @@
 \item{whichPars}{which parameters should be used to initialize the model. If set to "est", the parameters will be set to the
 estimated parameters of the lavaan model. If set to "start", the starting values of lavaan will be used. The latter can be useful if parameters are to
 be optimized afterwards as setting the parameters to "est" may result in the model getting stuck in a local minimum.}
-
-\item{transformVariances}{set to TRUE to use the internal transformation of variances. This will make sure that estimates for variances can never be negative}
 
 \item{fit}{should the model be fitted and compared to the lavaanModel?}
 
