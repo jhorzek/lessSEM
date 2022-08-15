@@ -24,7 +24,7 @@ computes the generalized information criterion as
 where the scaler is a numeric value with which the
 degrees of freedom (df) are multiplied.
 
-See Zhang et al. (2010) for more details.
+See Fan & Li (2001), p. 1355 and Zhang et al. (2010), p. 314 for more details.
 \itemize{
 \item Zhang, Y., Li, R., & Tsai, C.-L. (2010). Regularization Parameter
 Selections via Generalized Information Criterion.

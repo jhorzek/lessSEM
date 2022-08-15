@@ -8,7 +8,7 @@
 #' where the scaler is a numeric value with which the 
 #' degrees of freedom (df) are multiplied.
 #' 
-#' See Zhang et al. (2010) for more details.
+#' See Fan & Li (2001), p. 1355 and Zhang et al. (2010), p. 314 for more details.
 #' 
 #' * Zhang, Y., Li, R., & Tsai, C.-L. (2010). Regularization Parameter 
 #' Selections via Generalized Information Criterion. 
@@ -34,6 +34,7 @@ GIC <- function(regularizedSEM, scaler = 2){
   parameters <- regularizedSEM@parameters[,regularizedSEM@parameterLabels]
   
   gic <- rep(NA, nrow(parameters))
+  dfs <- gic
   
   # we need a model to compute the Hessians
   SEM <- .SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
@@ -60,7 +61,7 @@ GIC <- function(regularizedSEM, scaler = 2){
     m2LL <- .fit(SEM = SEM)$m2LL
     
     # We need the Hessian of the -2log-likelihood and the penalty function
-    m2LLHessian <- .getHessian(SEM, raw = FALSE)
+    m2LLHessian <- .getHessian(SEM, raw = TRUE)
     
     if(penalty == "lasso"){
       
@@ -74,6 +75,8 @@ GIC <- function(regularizedSEM, scaler = 2){
                                              )
       )
       
+    }else{
+      stop("Currently only implemented for lasso penalty")
     }
     
     # remove all rows and columns with NAs; these are the ones, where parameters 
@@ -87,11 +90,16 @@ GIC <- function(regularizedSEM, scaler = 2){
     m2LLHessian <- m2LLHessian[!rowWithNA,]
     m2LLHessian <- m2LLHessian[,!colWithNA]
     
-    dfs <- try(sum(diag(solve(m2LLHessian - penaltyHessian)%*%m2LLHessian)))
-    if(is(dfs, "try-error")) next
-    
-    gic[p] <- m2LL + scaler*dfs
+    # Note: the fomula in Zhang et al. (2010), p. 314 is based on the log-
+    # likelihood, note the -2-log-likelihood -> multiplication with -.5
+    df <- try(sum(diag(solve(-.5*m2LLHessian - .5*penaltyHessian)%*%(-.5*m2LLHessian))))
+    if(is(df, "try-error")) next
+    dfs[p] <- df
+    gic[p] <- m2LL + scaler*df
   }
   
-  return(gic)
+  return(
+    list("gic" = gic,
+              "df" = dfs)
+  )
 }
