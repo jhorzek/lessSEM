@@ -3,10 +3,11 @@
 #' THIS FUNCTION IS UNDER DEVELOPMENT AND SHOULD _NOT_ BE USED.
 #' computes the generalized information criterion as 
 #' 
-#' -2-log-Likelihood + scaler*df
+#' -2-log-Likelihood + k*df
 #' 
-#' where the scaler is a numeric value with which the 
-#' degrees of freedom (df) are multiplied.
+#' where the k is a numeric value with which the 
+#' degrees of freedom (df) are multiplied. To get the equivalent
+#' of the AIC, use k = 2. For an equivalent to the BIC, set k = log(N)
 #' 
 #' See Fan & Li (2001), p. 1355 and Zhang et al. (2010), p. 314 for more details.
 #' 
@@ -15,9 +16,9 @@
 #' Journal of the American Statistical Association, 105(489), 
 #' 312–323. https://doi.org/10.1198/jasa.2009.tm08013
 #' @param regularizedSEM model of class regularizedSEM
-#' @param scaler numeric value to scale the degrees of freedom
+#' @param k numeric value to scale the degrees of freedom
 #' @return vector with GIC values.
-GIC <- function(regularizedSEM, scaler = 2){
+GIC <- function(regularizedSEM, k = 2){
   warning("GIC IS EXPERIMENTAL AND SHOULD NOT BE USED!")
   penalty <- regularizedSEM@penalty
   
@@ -95,7 +96,7 @@ GIC <- function(regularizedSEM, scaler = 2){
     df <- try(sum(diag(solve(-.5*m2LLHessian - .5*penaltyHessian)%*%(-.5*m2LLHessian))))
     if(is(df, "try-error")) next
     dfs[p] <- df
-    gic[p] <- m2LL + scaler*df
+    gic[p] <- m2LL + k*df
   }
   
   return(
