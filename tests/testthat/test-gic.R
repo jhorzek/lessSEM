@@ -1,4 +1,5 @@
 test_that("testing gic", {
+  set.seed(1234)
   library(lessSEM)
 
   dataset <- simulateExampleData()
@@ -30,7 +31,7 @@ f ~~ 1*f
     epsilon = 1e-8,
     tau = 0)
   
-  GAIC <- GIC(regularizedSEM = regsemSmooth, scaler = 2)
+  GAIC <- GIC(regularizedSEM = regsemSmooth, k = 2)
   
-  testthat::expect_equal(all(abs(nPar - GAIC$df) < 1), TRUE)
+  testthat::expect_equal(all(abs(nPar - GAIC$df) < 2), TRUE)
 })
