@@ -4,12 +4,12 @@
 \alias{GIC}
 \title{GIC}
 \usage{
-GIC(regularizedSEM, scaler = 2)
+GIC(regularizedSEM, k = 2)
 }
 \arguments{
 \item{regularizedSEM}{model of class regularizedSEM}
 
-\item{scaler}{numeric value to scale the degrees of freedom}
+\item{k}{numeric value to scale the degrees of freedom}
 }
 \value{
 vector with GIC values.
@@ -19,10 +19,11 @@ THIS FUNCTION IS UNDER DEVELOPMENT AND SHOULD \emph{NOT} BE USED.
 computes the generalized information criterion as
 }
 \details{
--2-log-Likelihood + scaler*df
+-2-log-Likelihood + k*df
 
-where the scaler is a numeric value with which the
-degrees of freedom (df) are multiplied.
+where the k is a numeric value with which the
+degrees of freedom (df) are multiplied. To get the equivalent
+of the AIC, use k = 2. For an equivalent to the BIC, set k = log(N)
 
 See Fan & Li (2001), p. 1355 and Zhang et al. (2010), p. 314 for more details.
 \itemize{
