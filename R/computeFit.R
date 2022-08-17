@@ -45,6 +45,31 @@
   return(tryGradients)
 }
 
+
+#' .standardErrors
+#' 
+#' compute the standard errors of a fitted SEM. IMPORTANT: Assumes that the 
+#' SEM has been fitted and the parameter estimates are at the ordinary maximum
+#' likelihood estimates
+#' @param SEM model of class Rcpp_SEMCpp. 
+#' @param raw controls if the internal transformations of lessSEM is used. If 
+#' set to TRUE, the standard errors will be returned for the internally used 
+#' parameter specification
+#' @return a vector with standard errors
+.standardErrors <- function(SEM, raw){
+  
+  Hessian <- .getHessian(SEM = SEM, raw = raw)
+  
+  # Note: We are minimizing the 2 times negative log likelihood.
+  # The Fisher Information is the negative expected Hessian of the log likelihood
+  # The Hessian of the 2 times negative log likelihood is therefore 2*"observed Fisher Information"
+  # and 2 times it's inverse is the covariance matrix of the parameters
+  nFisherInformation <- .5*(Hessian)
+  standardErrors <- sqrt(diag(solve(nFisherInformation)))
+  
+  return(standardErrors)
+}
+
 #' .individualMinus2LogLikelihood
 #' 
 #' internal function which returns the -2 log Likelihood for a single subject

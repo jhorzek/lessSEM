@@ -295,12 +295,24 @@ mySEM <- lessSEM:::.setParameters(SEM = mySEM, # the model
 print(lessSEM:::.getParameters(mySEM, raw = FALSE))
 ```
 
-Compare those to the parameter estimates from lavaan:
+Compare those to the parameter estimates from **lavaan**:
 
 ```{r}
 coef(lavaanModel)
 ```
 
+
+Finally, we can compute the standard errors:
+
+```{r}
+lessSEM:::.standardErrors(SEM = mySEM, raw = FALSE)
+```
+
+Let's compare this to **lavaan** again:
+
+```{r}
+parameterEstimates(lavaanModel)[,1:6]
+```
 
 ## References
 
