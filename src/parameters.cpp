@@ -104,3 +104,33 @@ void parameters::setParameters(Rcpp::StringVector label_,
   
   return;
 }
+
+void parameters::asTransformation(SEXP transformationFunctionSEXP)
+{
+  // create pointer to the transformation function 
+  Rcpp::XPtr<transformationFunctionPtr> xpTransformationFunction(transformationFunctionSEXP);
+  transformationFunction = *xpTransformationFunction; 
+}
+
+void parameters::transform()
+{
+  for(int i = 0; i < uniqueParameterLabels.length(); i++){
+    uniqueRawParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].rawValue;
+  }
+  uniqueRawParameterValues.names() = uniqueParameterLabels;
+  
+  uniqueRawParameterValues = transformationFunction(uniqueRawParameterValues);
+  
+  // also change the parameter values in the parameter map; these are the ones that
+  // are actually used internally
+  std::string parameterLabel;
+  for(int p = 0; p < uniqueParameterLabels.length(); p++){
+    parameterLabel = Rcpp::as< std::string >(uniqueParameterLabels.at(p));
+    parameterMap.at(parameterLabel).rawValue = uniqueRawParameterValues.at(p);
+    if(parameterMap.at(parameterLabel).isVariance){
+      parameterMap.at(parameterLabel).value = std::log(uniqueRawParameterValues.at(p));
+    }else{
+      parameterMap.at(parameterLabel).value = uniqueRawParameterValues.at(p);
+    }
+  }
+}

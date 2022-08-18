@@ -1,46 +1,16 @@
 #include "SEMWithTransformations.h"
 
-void parametersWithTransformations::asTransformation(SEXP transformationFunctionSEXP)
-{
-  // create pointer to the transformation function 
-  Rcpp::XPtr<transformationFunctionPtr> xpTransformationFunction(transformationFunctionSEXP);
-  transformationFunction = *xpTransformationFunction; 
-}
+// void SEMWithTransformationsCpp::addTransformation(SEXP transformationFunctionSEXP)
+// {
+//   parameterTable.asTransformation(transformationFunctionSEXP);
+// }
+// 
+// void SEMWithTransformationsCpp::computeTransformations()
+// {
+//   parameterTable.transform();
+// }
 
-void parametersWithTransformations::transform()
-{
-  for(int i = 0; i < uniqueParameterLabels.length(); i++){
-    uniqueRawParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].rawValue;
-  }
-  uniqueRawParameterValues.names() = uniqueParameterLabels;
-  
-  uniqueRawParameterValues = transformationFunction(uniqueRawParameterValues);
-  
-  // also change the parameter values in the parameter map; these are the ones that
-  // are actually used internally
-  std::string parameterLabel;
-  for(int p = 0; p < uniqueParameterLabels.length(); p++){
-    parameterLabel = Rcpp::as< std::string >(uniqueParameterLabels.at(p));
-    parameterMap.at(parameterLabel).rawValue = uniqueRawParameterValues.at(p);
-    if(parameterMap.at(parameterLabel).isVariance){
-      parameterMap.at(parameterLabel).value = std::log(uniqueRawParameterValues.at(p));
-    }else{
-      parameterMap.at(parameterLabel).value = uniqueRawParameterValues.at(p);
-    }
-  }
-}
-
-void SEMWithTransformationsCpp::addTransformation(SEXP transformationFunctionSEXP)
-{
-  parameterTable.asTransformation(transformationFunctionSEXP);
-}
-
-void SEMWithTransformationsCpp::computeTransformations()
-{
-  parameterTable.transform();
-}
-
-RCPP_MODULE(SEM_cpp){
+RCPP_MODULE(SEMWithTransformations_Cpp){
   using namespace Rcpp;
   Rcpp::class_<SEMCpp>( "SEMCpp" )
     .constructor("Creates a new SEMCpp.")
@@ -74,9 +44,10 @@ RCPP_MODULE(SEM_cpp){
 
   Rcpp::class_<SEMWithTransformationsCpp>( "SEMWithTransformationsCpp" )
     .derives<SEMCpp>("SEMCpp")
+    .constructor("Creates a new SEMWithTransformationsCpp.")
 
   // additional methods
-  .method( "addTransformation", &SEMWithTransformationsCpp::addTransformation, "Add a transformation function. Expects parameterLabels and pointer to function.")
-  .method( "computeTransformations", &SEMWithTransformationsCpp::computeTransformations, "Compute all transformations")
+  // .method( "addTransformation", &SEMWithTransformationsCpp::addTransformation, "Add a transformation function. Expects parameterLabels and pointer to function.")
+  // .method( "computeTransformations", &SEMWithTransformationsCpp::computeTransformations, "Compute all transformations")
   ;
 }

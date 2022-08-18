@@ -1,49 +1,22 @@
 #ifndef SEMWITHTRANSFORMATIONS_H
 #define SEMWITHTRANSFORMATIONS_H
+// [[Rcpp :: depends ( RcppArmadillo )]]
 
 #include "SEM.h"
 
-// first, we have to define some types to allow for passing compiled
-// functions to our SEM. These functions will be used to transform the parameters
-// See: https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
-typedef Rcpp::NumericVector (*transformationFunctionPtr)(
-    Rcpp::NumericVector& //labeled parameter values
-); // function takes our raw parameters and returns the transformed ones!
-typedef Rcpp::XPtr<transformationFunctionPtr> transformationFunctionPtr_t;
-
-class parametersWithTransformations: public parameters{
-  // parametersWithTransformations is like parameters, but
-  // some of its elements may be transformations from other 
-  // elements -> not every parameter is a real parameter
-  
-public: 
-  transformationFunctionPtr transformationFunction;
-  
-  // we use the same initialize function as that of parameters.
-  // Here, we initialize all raw and transformed parameters
-  
-  // Now, we have to tell our SEM, which parameters are transformations
-  // and how to compute those
-  void asTransformation(SEXP transformationFunctionSEXP);
-  
-  void transform();
-  
-};
-
 class SEMWithTransformationsCpp: public SEMCpp{
 public:
-  parametersWithTransformations parameterTable;
+double mynewvariable = 1.0;
+  // void addTransformation(SEXP transformationFunctionSEXP);
+  // 
+  // void computeTransformations();
   
-  void addTransformation(SEXP transformationFunctionSEXP);
-  
-  void computeTransformations();
-  
-  arma::rowvec getGradientsWithTransformation(bool raw);
-  arma::mat getScoresWithTransformation(bool raw);
-  arma::mat getHessianWithTransformation(Rcpp::StringVector label_,
-                       arma::vec value_,
-                       bool raw,
-                       double eps);
+  // arma::rowvec getGradientsWithTransformation(bool raw);
+  // arma::mat getScoresWithTransformation(bool raw);
+  // arma::mat getHessianWithTransformation(Rcpp::StringVector label_,
+  //                      arma::vec value_,
+  //                      bool raw,
+  //                      double eps);
   
 };
 

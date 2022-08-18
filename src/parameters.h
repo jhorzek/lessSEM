@@ -22,6 +22,16 @@ struct parameterElements{
 };
 };
 
+// In some SEMs, we also allow for parameters to be transformations of one another.
+// To this end, we define some types to allow for passing compiled
+// functions to our SEM. These functions will be used to transform the parameters
+// See: https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+typedef Rcpp::NumericVector (*transformationFunctionPtr)(
+    Rcpp::NumericVector& //labeled parameter values
+); // function takes our raw parameters and returns the transformed ones!
+typedef Rcpp::XPtr<transformationFunctionPtr> transformationFunctionPtr_t;
+
+
 class parameters{
 public: 
   
@@ -56,6 +66,18 @@ public:
                      arma::vec value_,
                      bool raw
   );
+  
+  // in case of transformations
+  transformationFunctionPtr transformationFunction;
+  
+  // we use the same initialize function as that of parameters.
+  // Here, we initialize all raw and transformed parameters
+  
+  // Now, we have to tell our SEM, which parameters are transformations
+  // and how to compute those
+  void asTransformation(SEXP transformationFunctionSEXP);
+  
+  void transform();
   
 };
 

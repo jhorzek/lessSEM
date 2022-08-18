@@ -240,19 +240,19 @@
   # build model
   
   if(hasTransformations){
-    SEMCpp <- new(SEMWithTransformationsCpp)
+    mySEM <- new(SEMWithTransformationsCpp)
   }else{
-    SEMCpp <- new(SEMCpp)
+    mySEM <- new(SEMCpp)
   }
   
   # set matrices and vector
-  SEMCpp$setMatrix("A", modelMatrices$Amatrix)
-  SEMCpp$setMatrix("S", modelMatrices$Smatrix)
-  SEMCpp$setMatrix("F", modelMatrices$Fmatrix)
-  SEMCpp$setVector('m', modelMatrices$Mvector)
+  mySEM$setMatrix("A", modelMatrices$Amatrix)
+  mySEM$setMatrix("S", modelMatrices$Smatrix)
+  mySEM$setMatrix("F", modelMatrices$Fmatrix)
+  mySEM$setVector('m', modelMatrices$Mvector)
   
   # set parameters
-  SEMCpp$initializeParameters(parameterTable$label,
+  mySEM$initializeParameters(parameterTable$label,
                               parameterTable$location,
                               parameterTable$row-1, # c++ starts at 0 
                               parameterTable$col-1, # c++ starts at 0 
@@ -284,7 +284,7 @@
       positionMatrix[cbind(rows,cols)] <- 1
       isVariance <- FALSE
     }
-    SEMCpp$addDerivativeElement(p, 
+    mySEM$addDerivativeElement(p, 
                                 uniqueLocation, 
                                 isVariance, 
                                 positionMatrix)
@@ -292,9 +292,9 @@
   }
   
   # set data
-  SEMCpp$addRawData(rawData, manifestNames, internalData$individualMissingPatternID-1)
+  mySEM$addRawData(rawData, manifestNames, internalData$individualMissingPatternID-1)
   for(s in 1:length(internalData$missingSubsets)){
-    SEMCpp$addSubset(internalData$missingSubsets[[s]]$N,
+    mySEM$addSubset(internalData$missingSubsets[[s]]$N,
                      which(internalData$individualMissingPatternID == s)-1,
                      internalData$missingSubsets[[s]]$observed,
                      internalData$missingSubsets[[s]]$notMissing,
@@ -304,24 +304,24 @@
   }
   
   if(hasTransformations){
-    SEMCpp$addTransformation(transformationFunctionPointer)
+    mySEM$addTransformation(transformationFunctionPointer)
   }
   
   # the following step is necessary if the parameters of the lavaanModel do not correspond to those in
   # the matrices of the lavaan object. This is, for instance, the case if the starting values
   # instead of the estimates are used.
-  parameters <- .getParameters(SEM = SEMCpp, raw = TRUE)
-  SEMCpp <- .setParameters(SEM = SEMCpp, labels = names(parameters), values = parameters, raw = TRUE)
+  parameters <- .getParameters(SEM = mySEM, raw = TRUE)
+  mySEM <- .setParameters(SEM = mySEM, labels = names(parameters), values = parameters, raw = TRUE)
   
   if(fit){
-    SEMCpp <- .fit(SEM = SEMCpp)
+    mySEM <- .fit(SEM = mySEM)
     if(whichPars == "est" && checkFit){
       # check model fit
-      if(round(SEMCpp$m2LL - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+      if(round(mySEM$m2LL - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
     }
   }
   
-  return(SEMCpp)
+  return(mySEM)
 }
 
 #' .setAMatrix
