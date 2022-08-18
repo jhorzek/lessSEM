@@ -34,6 +34,7 @@ NULL
 
 # SEM Module
 Rcpp::loadModule("SEM_cpp", TRUE)
+Rcpp::loadModule("SEMWithTransformations_cpp", TRUE)
 
 # SEM optimization
 Rcpp::loadModule("istaEnet_cpp", TRUE)
