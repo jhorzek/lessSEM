@@ -17,7 +17,6 @@ class parametersWithTransformations: public parameters{
   // elements -> not every parameter is a real parameter
   
 public: 
-  std::vector<bool> isTransformation;
   transformationFunctionPtr transformationFunction;
   
   // we use the same initialize function as that of parameters.
@@ -25,10 +24,7 @@ public:
   
   // Now, we have to tell our SEM, which parameters are transformations
   // and how to compute those
-  void asTransformation(Rcpp::StringVector parameterLabels, // labels of parameters which are
-                        // transformations of other parameters
-                        SEXP transformationFunctionSEXP
-  );
+  void asTransformation(SEXP transformationFunctionSEXP);
   
   void transform();
   
@@ -38,10 +34,7 @@ class SEMWithTransformationsCpp: public SEMCpp{
 public:
   parametersWithTransformations parameterTable;
   
-  void addTransformation(Rcpp::StringVector parameterLabels, // labels of parameters which are
-                         // transformations of other parameters
-                         SEXP transformationFunctionSEXP
-  );
+  void addTransformation(SEXP transformationFunctionSEXP);
   
   void computeTransformations();
   

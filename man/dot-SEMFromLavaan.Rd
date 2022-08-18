@@ -10,7 +10,8 @@
   fit = TRUE,
   addMeans = TRUE,
   activeSet = NULL,
-  dataSet = NULL
+  dataSet = NULL,
+  transformations = NULL
 )
 }
 \arguments{

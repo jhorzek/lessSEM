@@ -3,7 +3,7 @@
 #' compile user defined parameter transformations to a 
 #' pass to a SEM
 #' @param syntax string with user defined transformations
-#' @returns list with two Rcpp functions: (1) the transformation function and 
+#' @returns list with parameter names and two Rcpp functions: (1) the transformation function and 
 #' (2) a function to create a pointer to the transformation function
 #' @examples 
 #' syntax <- "
@@ -30,7 +30,8 @@
   cat("done.\n")
   
   return(
-    list("getPtr" = getPtr,
+    list("parameters" = parameters,
+         "getPtr" = getPtr,
          "transformationFunction" = transformationFunction     
               )
   )
