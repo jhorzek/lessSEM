@@ -21,6 +21,7 @@ void parameters::initialize(Rcpp::StringVector label_,
       uniqueParameterLabels.push_back(label_.at(i));
       uniqueParameterValues.push_back(value_.at(i));
       uniqueRawParameterValues.push_back(rawValue_.at(i));
+      uniqueParameterLocations.push_back(location_.at(i));
       
       parameterMap[currentLabel].value = value_.at(i);
       parameterMap[currentLabel].rawValue = rawValue_.at(i);
@@ -49,7 +50,8 @@ Rcpp::DataFrame parameters::getParameters(){
   Rcpp::DataFrame parameterFrame =
     Rcpp::DataFrame::create( Rcpp::Named("label") = uniqueParameterLabels, 
                              Rcpp::Named("value") = uniqueParameterValues,
-                             Rcpp::Named("rawValue") = uniqueRawParameterValues
+                             Rcpp::Named("rawValue") = uniqueRawParameterValues,
+                             Rcpp::Named("location") = uniqueParameterLocations
     );
   return(parameterFrame);
 }
@@ -105,8 +107,9 @@ void parameters::setParameters(Rcpp::StringVector label_,
   return;
 }
 
-void parameters::asTransformation(SEXP transformationFunctionSEXP)
+void parameters::addTransformation(SEXP transformationFunctionSEXP)
 {
+  hasTransformations = true;
   // create pointer to the transformation function 
   Rcpp::XPtr<transformationFunctionPtr> xpTransformationFunction(transformationFunctionSEXP);
   transformationFunction = *xpTransformationFunction; 
@@ -114,23 +117,65 @@ void parameters::asTransformation(SEXP transformationFunctionSEXP)
 
 void parameters::transform()
 {
+  Rcpp::NumericVector params(uniqueParameterLabels.length());
+  Rcpp::CharacterVector paramLabels(uniqueParameterLabels.length());
   for(int i = 0; i < uniqueParameterLabels.length(); i++){
-    uniqueRawParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].rawValue;
+    params.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].rawValue;
+    paramLabels.at(i) = uniqueParameterLabels.at(i);
   }
-  uniqueRawParameterValues.names() = uniqueParameterLabels;
+  params.names() = paramLabels;
+  Rcpp::Rcout << params << std::endl;
   
-  uniqueRawParameterValues = transformationFunction(uniqueRawParameterValues);
+  params = transformationFunction(params);
   
   // also change the parameter values in the parameter map; these are the ones that
   // are actually used internally
   std::string parameterLabel;
-  for(int p = 0; p < uniqueParameterLabels.length(); p++){
-    parameterLabel = Rcpp::as< std::string >(uniqueParameterLabels.at(p));
-    parameterMap.at(parameterLabel).rawValue = uniqueRawParameterValues.at(p);
+  for(int p = 0; p < paramLabels.length(); p++){
+    parameterLabel = Rcpp::as< std::string >(paramLabels.at(p));
+    parameterMap.at(parameterLabel).rawValue = params.at(p);
     if(parameterMap.at(parameterLabel).isVariance){
-      parameterMap.at(parameterLabel).value = std::log(uniqueRawParameterValues.at(p));
+      parameterMap.at(parameterLabel).value = std::exp(params.at(p));
     }else{
-      parameterMap.at(parameterLabel).value = uniqueRawParameterValues.at(p);
+      parameterMap.at(parameterLabel).value = params.at(p);
     }
   }
+}
+
+arma::mat parameters::getTransformationGradients(std::vector<std::string> parameterLabels){
+  if(!hasTransformations) Rcpp::stop("Does not have transformations.");
+  arma::mat currentGradients(parameterLabels.size(), 
+                             parameterLabels.size(), 
+                             arma::fill::zeros);
+  Rcpp::NumericVector parameterValues(parameterLabels.size());
+  Rcpp::CharacterVector parameterLabelsRcpp(parameterLabels.size());
+  
+  arma::colvec stepForward, stepBackward;
+ 
+  for(int i = 0; i < parameterLabels.size(); i++){
+    
+    parameterValues.at(i) = parameterMap.at(parameterLabels.at(i)).rawValue;
+    parameterLabelsRcpp.at(i) = parameterLabels.at(i);
+  }
+  
+  parameterValues.names() = parameterLabelsRcpp;
+  
+  double eps = 1e-6;
+  
+  for(int i = 0; i < parameterLabels.size(); i++){
+    
+    parameterValues.at(i) += eps;
+    
+    stepForward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues));
+    
+    parameterValues.at(i) -= 2.0*eps;
+    
+    stepBackward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues));
+    
+    parameterValues.at(i) += eps;
+    
+    currentGradients.col(i) = (stepForward - stepBackward)/2.0;
+  }
+  
+  return(currentGradients);
 }

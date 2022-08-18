@@ -196,14 +196,30 @@ void SEMCpp::addDerivativeElement(std::string label_,
   return;
 }
 
+void SEMCpp::addTransformation(SEXP transformationFunctionSEXP)
+{
+  hasTransformations = true;
+  parameterTable.addTransformation(transformationFunctionSEXP);
+}
+
+void SEMCpp::computeTransformations()
+{
+  parameterTable.transform();
+}
+
 void SEMCpp::setParameters(Rcpp::StringVector label_,
                            arma::vec value_,
                            bool raw){
   currentStatus = changedParameters;
   
+  if(parameterTable.hasTransformations & (!raw)) 
+    Rcpp::stop("SEMs with transformation currently only support setParameters with raw = true.");
+  
   wasFit = false; // reset fit 
   // step one: change parameters in parameterTable
   parameterTable.setParameters(label_, value_, raw);
+  if(parameterTable.hasTransformations)
+   parameterTable.transform();
   // step two: change parameters in model matrices
   
   for (auto const& param : parameterTable.parameterMap)
@@ -241,6 +257,10 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
                 param.second.col.at(elem)) = param.second.value;
         
       }
+      continue;
+    }
+    
+    if(param.second.location.compare("transformation") == 0){
       continue;
     }
     
@@ -361,6 +381,14 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   }
   arma::rowvec gradients = gradientsByGroup(*this, raw);
   
+  if(hasTransformations){
+    // in case of transformations, we can make use of the chain rule to get the derivative
+    // with respect to the true underlying parameters. gradientsByGroup will only return
+    // the gradients of the trasnformed parameters in the SEM 
+    arma::mat transformationGradients = parameterTable.getTransformationGradients(derivElements.uniqueLabels);
+    Rcpp::stop("Gradients for transformed parameters are not yet implemented");
+  }
+  
   return(gradients);
 }
 
@@ -374,6 +402,11 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   if((currentStatus != computedImplied) & (currentStatus != fitted)){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
+  
+  if(hasTransformations){
+    Rcpp::stop("Hessian for transformed parameters is not yet implemented");
+  }
+  
   arma::mat hessian = approximateHessian(*this, 
                                          label_,
                                          value_,
@@ -413,5 +446,7 @@ RCPP_MODULE(SEM_cpp){
   .method( "getGradients", &SEMCpp::getGradients, "Returns a matrix with scores.")
   .method( "getScores", &SEMCpp::getScores, "Returns a matrix with scores.")
   .method( "getHessian", &SEMCpp::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
+  .method( "addTransformation", &SEMCpp::addTransformation, "Add a transformation function. Expects parameterLabels and pointer to function.")
+  .method( "computeTransformations", &SEMCpp::computeTransformations, "Compute all transformations")
   ;
 }

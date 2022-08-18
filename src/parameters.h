@@ -41,6 +41,9 @@ public:
   Rcpp::CharacterVector uniqueParameterLabels;
   Rcpp::NumericVector uniqueParameterValues;
   Rcpp::NumericVector uniqueRawParameterValues;
+  Rcpp::CharacterVector uniqueParameterLocations;
+  
+  bool hasTransformations = false;
   
   // to decide which elements should be recomputed
   bool AChanged = true;
@@ -75,9 +78,11 @@ public:
   
   // Now, we have to tell our SEM, which parameters are transformations
   // and how to compute those
-  void asTransformation(SEXP transformationFunctionSEXP);
+  void addTransformation(SEXP transformationFunctionSEXP);
   
   void transform();
+  
+  arma::mat getTransformationGradients(std::vector<std::string> parameterLabels);
   
 };
 

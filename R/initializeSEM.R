@@ -239,11 +239,7 @@
   
   # build model
   
-  if(hasTransformations){
-    mySEM <- new(SEMWithTransformationsCpp)
-  }else{
-    mySEM <- new(SEMCpp)
-  }
+  mySEM <- new(SEMCpp)
   
   # set matrices and vector
   mySEM$setMatrix("A", modelMatrices$Amatrix)
@@ -253,11 +249,11 @@
   
   # set parameters
   mySEM$initializeParameters(parameterTable$label,
-                              parameterTable$location,
-                              parameterTable$row-1, # c++ starts at 0 
-                              parameterTable$col-1, # c++ starts at 0 
-                              parameterTable$value,
-                              parameterTable$rawValue)
+                             parameterTable$location,
+                             parameterTable$row-1, # c++ starts at 0 
+                             parameterTable$col-1, # c++ starts at 0 
+                             parameterTable$value,
+                             parameterTable$rawValue)
   
   # set derivative elements
   for(p in unique(parameterTable$label)){
@@ -283,11 +279,14 @@
       positionMatrix[] <- 0
       positionMatrix[cbind(rows,cols)] <- 1
       isVariance <- FALSE
+    }else if(uniqueLocation == "transformation"){
+      positionMatrix <- matrix(NA,1,1)
+      isVariance <- FALSE
     }
     mySEM$addDerivativeElement(p, 
-                                uniqueLocation, 
-                                isVariance, 
-                                positionMatrix)
+                               uniqueLocation, 
+                               isVariance, 
+                               positionMatrix)
     rm(positionMatrix, isVariance) # avoid any carry over
   }
   
@@ -295,12 +294,12 @@
   mySEM$addRawData(rawData, manifestNames, internalData$individualMissingPatternID-1)
   for(s in 1:length(internalData$missingSubsets)){
     mySEM$addSubset(internalData$missingSubsets[[s]]$N,
-                     which(internalData$individualMissingPatternID == s)-1,
-                     internalData$missingSubsets[[s]]$observed,
-                     internalData$missingSubsets[[s]]$notMissing,
-                     internalData$missingSubsets[[s]]$covariance,
-                     internalData$missingSubsets[[s]]$means,
-                     internalData$missingSubsets[[s]]$rawData)
+                    which(internalData$individualMissingPatternID == s)-1,
+                    internalData$missingSubsets[[s]]$observed,
+                    internalData$missingSubsets[[s]]$notMissing,
+                    internalData$missingSubsets[[s]]$covariance,
+                    internalData$missingSubsets[[s]]$means,
+                    internalData$missingSubsets[[s]]$rawData)
   }
   
   if(hasTransformations){

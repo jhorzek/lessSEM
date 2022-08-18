@@ -96,7 +96,6 @@ END_RCPP
 }
 
 RcppExport SEXP _rcpp_module_boot_SEM_cpp();
-RcppExport SEXP _rcpp_module_boot_SEMWithTransformations_Cpp();
 RcppExport SEXP _rcpp_module_boot_istaCappedL1_cpp();
 RcppExport SEXP _rcpp_module_boot_bfgsEnet_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetEnet_cpp();
@@ -125,7 +124,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_lessSEM_mcpPenalty_C", (DL_FUNC) &_lessSEM_mcpPenalty_C, 3},
     {"_lessSEM_scadPenalty_C", (DL_FUNC) &_lessSEM_scadPenalty_C, 3},
     {"_rcpp_module_boot_SEM_cpp", (DL_FUNC) &_rcpp_module_boot_SEM_cpp, 0},
-    {"_rcpp_module_boot_SEMWithTransformations_Cpp", (DL_FUNC) &_rcpp_module_boot_SEMWithTransformations_Cpp, 0},
     {"_rcpp_module_boot_istaCappedL1_cpp", (DL_FUNC) &_rcpp_module_boot_istaCappedL1_cpp, 0},
     {"_rcpp_module_boot_bfgsEnet_cpp", (DL_FUNC) &_rcpp_module_boot_bfgsEnet_cpp, 0},
     {"_rcpp_module_boot_glmnetEnet_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnet_cpp, 0},

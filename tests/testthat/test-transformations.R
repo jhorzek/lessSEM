@@ -35,10 +35,11 @@ test_that("testing transformations", {
                                   transformations = transformations)
   show(SEM)
   logLik(SEM)
-  testthat::expect_equal(round(AIC(SEM) - AIC(model),5),0)
-  testthat::expect_equal(round(BIC(SEM) - BIC(model),5),0)
   
-  testthat::expect_equal(round(SEM$m2LL - (-2*as.numeric(logLik(model))),4),0)
+  params <- lessSEM:::.getParameters(SEM, raw = TRUE)
+  testthat::expect_equal((params["d"] - params["a"] - params["deltaA"]) == 0,c("d" = TRUE))
+  testthat::expect_equal((params["e"] - params["b"] - params["deltaB"]) == 0,c("e" = TRUE))
+  testthat::expect_equal((params["f"] - params["c"] - params["deltaC"]) == 0,c("f" = TRUE))
   
   individualFit <- rep(NA, nrow(PoliticalDemocracy))
   for(i in 1:nrow(PoliticalDemocracy)){
