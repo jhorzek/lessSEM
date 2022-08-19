@@ -8,7 +8,8 @@ void parameters::initialize(Rcpp::StringVector label_,
                             arma::uvec row_,
                             arma::uvec col_,
                             arma::vec value_,
-                            arma::vec rawValue_){
+                            arma::vec rawValue_,
+                            std::vector<bool> isTransformation_){
   
   std::string currentLabel;
   // create hash values
@@ -22,6 +23,7 @@ void parameters::initialize(Rcpp::StringVector label_,
       uniqueParameterValues.push_back(value_.at(i));
       uniqueRawParameterValues.push_back(rawValue_.at(i));
       uniqueParameterLocations.push_back(location_.at(i));
+      uniqueIsTransformation.push_back(isTransformation_.at(i));
       
       parameterMap[currentLabel].value = value_.at(i);
       parameterMap[currentLabel].rawValue = rawValue_.at(i);
@@ -35,6 +37,7 @@ void parameters::initialize(Rcpp::StringVector label_,
         parameterMap[currentLabel].isVariance = false;
       }
       
+      parameterMap[currentLabel].isTransformation = isTransformation_.at(i);
     }
     
     parameterMap.at(currentLabel).row.push_back(row_.at(i));
@@ -43,15 +46,18 @@ void parameters::initialize(Rcpp::StringVector label_,
 }
 
 Rcpp::DataFrame parameters::getParameters(){
+  Rcpp::LogicalVector isTransformation(uniqueParameterLabels.length());
   for(int i = 0; i < uniqueParameterLabels.length(); i++){
     uniqueParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].value;
     uniqueRawParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].rawValue;
+    isTransformation.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].isTransformation;
   }
   Rcpp::DataFrame parameterFrame =
     Rcpp::DataFrame::create( Rcpp::Named("label") = uniqueParameterLabels, 
                              Rcpp::Named("value") = uniqueParameterValues,
                              Rcpp::Named("rawValue") = uniqueRawParameterValues,
-                             Rcpp::Named("location") = uniqueParameterLocations
+                             Rcpp::Named("location") = uniqueParameterLocations,
+                             Rcpp::Named("isTransformation") = isTransformation
     );
   return(parameterFrame);
 }
@@ -66,6 +72,7 @@ void parameters::setParameters(Rcpp::StringVector label_,
     // all parameters are saved as a hash in parameterMap
     if(!raw){
       if(parameterMap.at(parameterLabel).value == value_.at(param)) continue;
+      if(parameterMap.at(parameterLabel).isTransformation) Rcpp::stop("Cannot change transformed parameters");
       
       parameterMap.at(parameterLabel).changed = true;
       

@@ -165,7 +165,8 @@ void SEMCpp::initializeParameters(Rcpp::StringVector label_,
                                   arma::uvec row_,
                                   arma::uvec col_,
                                   arma::vec value_,
-                                  arma::vec rawValue_){
+                                  arma::vec rawValue_,
+                                  std::vector<bool> isTransformation){
   if(currentStatus != addedMatrices){
     Rcpp::stop("Please define the model matrices before adding parameters");
   }
@@ -176,7 +177,15 @@ void SEMCpp::initializeParameters(Rcpp::StringVector label_,
                             row_,
                             col_,
                             value_,
-                            rawValue_);
+                            rawValue_,
+                            isTransformation);
+  
+  // also initialize the derivative elements
+  derivElements.initialize(
+    parameterTable.uniqueParameterLabels,
+    parameterTable.uniqueParameterLocations
+  );
+  
   return;
 }
 

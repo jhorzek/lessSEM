@@ -75,7 +75,8 @@ public:
                             arma::uvec row_,
                             arma::uvec col_,
                             arma::vec value_,
-                            arma::vec rawValue_);
+                            arma::vec rawValue_,
+                            std::vector<bool> isTransformation);
   void setParameters(Rcpp::StringVector label_,
                      arma::vec value_,
                      bool raw);

@@ -147,7 +147,8 @@
                                "location" = c(), 
                                "row" = c(), 
                                "col" = c(),
-                               "value" = c())
+                               "value" = c(),
+                               "isTransformation" = c())
   
   matrixNames <- names(modelParameters)
   
@@ -181,7 +182,8 @@
                                       "row" = ro, 
                                       "col" = co,
                                       "value" = parameterValues[parameter],
-                                      "rawValue" = rawParameterValue
+                                      "rawValue" = rawParameterValue,
+                                      "isTransformation" = FALSE
                                     )
             )
           }
@@ -200,7 +202,8 @@
                                 "row" = which(rownames(MvectorElements$Mvector) == manifestName), 
                                 "col" = 1,
                                 "value" = MvectorElements$Mvector[manifestName,1],
-                                "rawValue" = MvectorElements$Mvector[manifestName,1]
+                                "rawValue" = MvectorElements$Mvector[manifestName,1],
+                                "isTransformation" = FALSE
                               )
       )
     }
@@ -229,9 +232,12 @@
         "row" = 1, 
         "col" = 1,
         "value" = 0,
-        "rawValue" = 0
+        "rawValue" = 0,
+        "isTransformation" = FALSE
       )
     )
+    
+    parameterTable$isTransformation[parameterTable$label %in% transformationFunctions$isTransformation] <- TRUE
     
   }else{
     hasTransformations <- FALSE
@@ -253,7 +259,8 @@
                              parameterTable$row-1, # c++ starts at 0 
                              parameterTable$col-1, # c++ starts at 0 
                              parameterTable$value,
-                             parameterTable$rawValue)
+                             parameterTable$rawValue,
+                             parameterTable$isTransformation)
   
   # set derivative elements
   for(p in unique(parameterTable$label)){
@@ -310,13 +317,17 @@
   # the matrices of the lavaan object. This is, for instance, the case if the starting values
   # instead of the estimates are used.
   parameters <- .getParameters(SEM = mySEM, raw = TRUE)
-  mySEM <- .setParameters(SEM = mySEM, labels = names(parameters), values = parameters, raw = TRUE)
+  mySEM <- .setParameters(SEM = mySEM, 
+                          labels = names(parameters), 
+                          values = parameters, 
+                          raw = TRUE)
   
   if(fit){
     mySEM <- .fit(SEM = mySEM)
     if(whichPars == "est" && checkFit){
       # check model fit
-      if(round(mySEM$m2LL - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+      if(round(mySEM$m2LL - (-2*logLik(lavaanModel)), 4) !=0) 
+        stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
     }
   }
   

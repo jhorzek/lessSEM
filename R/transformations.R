@@ -22,7 +22,7 @@
   
   parameters <- .extractParametersFromSyntax(syntax = syntax)
   
-  armaFunction <- .createRcppTransformationFunction(syntax = syntax, parameters = parameters)
+  armaFunction <- .createRcppTransformationFunction(syntax = syntax, parameters = parameters$parameters)
   
   cat("Compiling the transformation function ... ")
   
@@ -30,10 +30,11 @@
   cat("done.\n")
   
   return(
-    list("parameters" = parameters,
+    list("parameters" = parameters$parameters,
+         "isTransformation" = parameters$parameters[parameters$isTransformation],
          "getPtr" = getPtr,
          "transformationFunction" = transformationFunction     
-              )
+    )
   )
 }
 
@@ -87,7 +88,8 @@
 #' 
 #' extract the names of the parameters in a syntax
 #' @param syntax syntax for parameter transformations
-#' @return vector with names of parameters used in the syntax
+#' @return vector with names of parameters used in the syntax and vector with
+#' boolean indicating if parameter is transformation result
 .extractParametersFromSyntax <- function(syntax){
   parameters <- syntax[1]
   parameters <- gsub(x = parameters, 
@@ -96,8 +98,24 @@
                      fixed = TRUE)
   parameters <- stringr::str_split(string = parameters, 
                                    pattern = ",")[[1]]
+  isTransformation <- rep(FALSE, length(parameters))
+  names(isTransformation) <- parameters
   
-  return(parameters)
+  for(i in 2:length(syntax)){
+    isEquation <- grepl(pattern = "=", syntax[i])
+    if(isEquation){
+      # check left hand side
+      lhs <- stringr::str_split(string = syntax[i], 
+                                pattern = "=")[[1]][1]
+      if(! lhs %in% parameters){
+        stop(paste0("Could not find ", lhs, " in parameter: specification of transformations."))
+      }
+      isTransformation[lhs] <- TRUE
+    }
+  }
+  
+  return(list("parameters" = parameters,
+              "isTransformation" = isTransformation))
   
 }
 
@@ -126,13 +144,13 @@
   for(p in parameters){
     functionBody <- c(functionBody,
                       paste0('double ', p ,' = parameterValues["', p, '"];') 
-                      )
+    )
   }
   functionBody <- c(functionBody, 
                     "\n\n// add user defined functions",
                     paste0(syntax, ";"), 
                     "\n\n// update parameters"
-                    )
+  )
   for(p in parameters){
     functionBody <- c(functionBody,
                       paste0('parameterValues["', p, '"] = ', p, ';') 
@@ -159,9 +177,9 @@ transformationFunctionPtr_t getPtr() {
         return(transformationFunctionPtr_t(new transformationFunctionPtr(&transformationFunction)));
 }
 "
-  
-  return(
-    paste0(c(functionHead, functionBody, functionEnd,
+
+return(
+  paste0(c(functionHead, functionBody, functionEnd,
            ptrFunction), collapse = "\n")
-  )
+)
 }

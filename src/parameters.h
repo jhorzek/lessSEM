@@ -14,6 +14,7 @@ struct parameterElements{
   bool changed; // to indicate if the parameter changed since the last fit
   bool isVariance;
   std::string location; // name of the matrix where the parameter is located
+  bool isTransformation;
   
   std::vector<int> row;
   std::vector<int> col;
@@ -42,6 +43,7 @@ public:
   Rcpp::NumericVector uniqueParameterValues;
   Rcpp::NumericVector uniqueRawParameterValues;
   Rcpp::CharacterVector uniqueParameterLocations;
+  std::vector<bool> uniqueIsTransformation;
   
   bool hasTransformations = false;
   
@@ -59,7 +61,8 @@ public:
                   arma::uvec row_,
                   arma::uvec col_,
                   arma::vec value_,
-                  arma::vec rawValue_);
+                  arma::vec rawValue_,
+                  std::vector<bool> isTransformation_);
   
   // getter
   Rcpp::DataFrame getParameters();

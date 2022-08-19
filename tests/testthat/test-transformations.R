@@ -43,7 +43,10 @@ test_that("testing transformations", {
   
   individualFit <- rep(NA, nrow(PoliticalDemocracy))
   for(i in 1:nrow(PoliticalDemocracy)){
-    individualFit[i] <- lessSEM:::.individualMinus2LogLikelihood(par = lessSEM:::.getParameters(SEM), SEM = SEM, data = SEM$rawData[i,], raw = FALSE)
+    individualFit[i] <- lessSEM:::.individualMinus2LogLikelihood(par = lessSEM:::.getParameters(SEM), 
+                                                                 SEM = SEM, 
+                                                                 data = SEM$rawData[i,], 
+                                                                 raw = FALSE)
   }
   
   testthat::expect_equal(round(sum(individualFit) - (-2*as.numeric(logLik(model))),4),0)
