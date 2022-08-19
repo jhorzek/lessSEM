@@ -17,10 +17,15 @@ scores}
 }
 \value{
 matrix with derivatives of the -2log-Likelihood for each person and parameter
-(rows are persons, columns are parameters)
 }
 \description{
 returns the scores of a model of class Rcpp_SEMCpp. This is the internal model
 representation. Models of this class
 can be generated with the lessSEM:::.SEMFromLavaan-function.
 }
+\keyword{(rows}
+\keyword{are}
+\keyword{columns}
+\keyword{internal}
+\keyword{parameters)}
+\keyword{persons,}

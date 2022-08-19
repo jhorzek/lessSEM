@@ -15,3 +15,4 @@ BIC values
 \description{
 BIC
 }
+\keyword{internal}

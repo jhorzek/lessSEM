@@ -11,6 +11,7 @@
 #' internal parameter representation. Set to FALSE to get the usual 
 #' scores
 #' @returns matrix with derivatives of the -2log-Likelihood for each person and parameter 
+#' @keywords internal
 #' (rows are persons, columns are parameters)
 .getScores <- function(SEM, raw){
   scores <- SEM$getScores(raw)
@@ -32,9 +33,10 @@
 #' internal parameter representation. Set to FALSE to get the usual 
 #' gradients
 #' @returns vector with derivatives of the -2log-Likelihood with respect to each parameter
+#' @keywords internal
 .getGradients <- function(SEM, raw){
   gradients <- as.vector(SEM$getGradients(raw))
-  names(gradients) <- SEM$getParameterLabels()
+  names(gradients) <- names(.getParameters(SEM = SEM, raw = TRUE, transformations = FALSE))
   return(gradients)
 }
 
@@ -56,6 +58,7 @@
 #' @param eps eps controls the step size of the numerical approximation.
 #' @returns matrix with second derivatives of the -2log-Likelihood with respect 
 #' to each parameter
+#' @keywords internal
 .getHessian <- function (SEM, raw = FALSE, eps = 1e-7){
   # THE FOLLOWING CODE IS ADAPTED FROM LAVAAN. 
   # SEE lavaan:::lav_model_hessian FOR THE IMPLEMENTATION

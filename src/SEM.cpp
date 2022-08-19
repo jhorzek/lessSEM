@@ -50,6 +50,8 @@
 //' @field getHessian Returns the hessian of the model. Expects the labels of the 
 //' parameters and the values of the parameters as well as a boolean indicating if 
 //' these are raw. Finally, a double (eps) controls the precision of the approximation.
+//' @field addTransformation add transformations to the model.
+//' @field computeTransformations compute the transformations.
 
 
 bool SEMCpp::checkModel(){
@@ -131,6 +133,7 @@ void SEMCpp::removeSubset(int whichSubset){
 }
 
 void SEMCpp::setMatrix(std::string whichMatrix, arma::mat values){
+  
   currentStatus = addedMatrices; 
   
   if(whichMatrix.compare("A") == 0){
@@ -164,7 +167,8 @@ void SEMCpp::initializeParameters(Rcpp::StringVector label_,
                                   arma::uvec row_,
                                   arma::uvec col_,
                                   arma::vec value_,
-                                  arma::vec rawValue_){
+                                  arma::vec rawValue_,
+                                  std::vector<bool> isTransformation){
   if(currentStatus != addedMatrices){
     Rcpp::stop("Please define the model matrices before adding parameters");
   }
@@ -175,7 +179,35 @@ void SEMCpp::initializeParameters(Rcpp::StringVector label_,
                             row_,
                             col_,
                             value_,
-                            rawValue_);
+                            rawValue_,
+                            isTransformation);
+  
+  // also initialize the derivative elements
+  parameterTable.nModelParameters = 0;
+  parameterTable.nTransformationParameters = 0;
+  std::string currentParameter;
+  for(int i = 0; i < parameterTable.uniqueParameterLabels.length(); i++){
+    currentParameter = parameterTable.uniqueParameterLabels.at(i);
+    if(parameterTable.parameterMap.at(currentParameter).location.compare("transformation") == 0){
+      // parameter is not in the model but only in the transformations
+      parameterTable.nTransformationParameters++;
+      continue;
+    }
+    if(parameterTable.parameterMap.at(currentParameter).isTransformation){
+      // parameter is in the model, but is a function of other parameters
+      parameterTable.nModelParameters++;
+      continue;
+    }
+    parameterTable.nTransformationParameters++;
+    parameterTable.nModelParameters++;
+  }
+
+  derivElements.initialize(
+    parameterTable.nModelParameters,
+    parameterTable.uniqueParameterLabels,
+    parameterTable.uniqueParameterLocations
+  );
+  
   return;
 }
 
@@ -195,14 +227,30 @@ void SEMCpp::addDerivativeElement(std::string label_,
   return;
 }
 
+void SEMCpp::addTransformation(SEXP transformationFunctionSEXP)
+{
+  hasTransformations = true;
+  parameterTable.addTransformation(transformationFunctionSEXP);
+}
+
+void SEMCpp::computeTransformations()
+{
+  parameterTable.transform();
+}
+
 void SEMCpp::setParameters(Rcpp::StringVector label_,
                            arma::vec value_,
                            bool raw){
   currentStatus = changedParameters;
   
+  // if(parameterTable.hasTransformations & (!raw)) 
+  //   Rcpp::stop("SEMs with transformation currently only support setParameters with raw = true.");
+  
   wasFit = false; // reset fit 
   // step one: change parameters in parameterTable
   parameterTable.setParameters(label_, value_, raw);
+  if(parameterTable.hasTransformations)
+   parameterTable.transform();
   // step two: change parameters in model matrices
   
   for (auto const& param : parameterTable.parameterMap)
@@ -243,6 +291,10 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
       continue;
     }
     
+    if(param.second.location.compare("transformation") == 0){
+      continue;
+    }
+    
     Rcpp::stop("NOT FOUND");
   }
   
@@ -261,11 +313,8 @@ Rcpp::DataFrame SEMCpp::getParameters(){
 }
 
 Rcpp::StringVector SEMCpp::getParameterLabels(){
-  Rcpp::StringVector uniqueParLabels(derivElements.uniqueLabels.size());
-  for(int i = 0; i < derivElements.uniqueLabels.size(); i++){
-    uniqueParLabels(i) = derivElements.uniqueLabels.at(i);
-  }
-  return(uniqueParLabels);
+  
+  return(parameterTable.uniqueParameterLabels);
   
 }
 // fit functions
@@ -346,6 +395,7 @@ arma::mat SEMCpp::getScores(bool raw){
   if((currentStatus != computedImplied) & (currentStatus != fitted)){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
+  if(hasTransformations) Rcpp::stop("Not yet implemented for models with transformations.");
   arma::mat scoresMat = scores(*this, raw);
   
   return(scoresMat);
@@ -360,6 +410,15 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   }
   arma::rowvec gradients = gradientsByGroup(*this, raw);
   
+  if(hasTransformations){
+    if(!raw) Rcpp::stop("Gradients with raw = false currently not supported when using transformations.");
+    // in case of transformations, we can make use of the chain rule to get the derivative
+    // with respect to the true underlying parameters. gradientsByGroup will only return
+    // the gradients of the transformed parameters in the SEM 
+    arma::mat transformationGradients = parameterTable.getTransformationGradients();
+    return(gradients*transformationGradients);
+  }
+  
   return(gradients);
 }
 
@@ -373,6 +432,7 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   if((currentStatus != computedImplied) & (currentStatus != fitted)){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
+  
   arma::mat hessian = approximateHessian(*this, 
                                          label_,
                                          value_,
@@ -382,38 +442,37 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   return(hessian);
 }
 
-
-
-  RCPP_MODULE(SEM_cpp){
-    using namespace Rcpp;
-    Rcpp::class_<SEMCpp>( "SEMCpp" )
-      .constructor("Creates a new SEMCpp.")
-      .field_readonly( "A", &SEMCpp::Amatrix, "Matrix with directed effects")
-      .field_readonly( "S", &SEMCpp::Smatrix, "Matrix with undirected paths")
-      .field_readonly( "F", &SEMCpp::Fmatrix, "Filter matrix to separate latent and observed variables")
-      .field_readonly( "m", &SEMCpp::Mvector, "Vector with means of observed and latent variables")
-      .field_readonly( "impliedCovariance", &SEMCpp::impliedCovariance, "implied covariance matrix")
-      .field_readonly( "impliedMeans", &SEMCpp::impliedMeans, "implied means vector")
-      .field_readonly( "m2LL", &SEMCpp::m2LL, "minus 2 log-likelihood")
-      .field_readonly( "rawData", &SEMCpp::rawData, "raw data set")
-      .field_readonly( "manifestNames", &SEMCpp::manifestNames, "names of manifest variables")
-      .field_readonly( "wasFit", &SEMCpp::wasFit, "names of manifest variables")
-    
-    // methods
-    .method( "setMatrix", &SEMCpp::setMatrix, "Fills the elements of a model matrix. Expects a char (A, S, or F), and a matrix with values")
-    .method( "setVector", &SEMCpp::setVector, "Fills the elements of a model vector. Expects a char (m), and a vector with values")
-    .method( "initializeParameters", &SEMCpp::initializeParameters, "Initializes the parameters of the model. Expects StringVector with labels, StringVector with location, uvec with rows, uvec with columns, vec with values, and vec with rawValues")
-    .method( "setParameters", &SEMCpp::setParameters, "Changes the parameters of a model. Expects StringVector with labels, vec with values, and boolean indicating if the values are raw (TRUE) or transformed (FALSE).")
-    .method( "addDerivativeElement", &SEMCpp::addDerivativeElement, "Add an element to the internal derivative structure. string label, string with location, and boolean indicating if it is a variance, matrix with positions.")
-    .method( "addRawData", &SEMCpp::addRawData, "Adds a raw data set. Expects matrix and vector with labels of manifest variables.")
-    .method( "addSubset", &SEMCpp::addSubset, "Adds a subset to the data. Expects the sample size N of the subset, the number of observed variables without missings, uvec with indices of notMissing values, matrix with covariance, colvec with means, raw data without missings.")
-    .method( "implied", &SEMCpp::implied, "Computes implied means and covariance matrix")
-    .method( "fit", &SEMCpp::fit, "Fits the model. Returns -2 log likelihood")
-    .method( "getParameters", &SEMCpp::getParameters, "Returns a data frame with model parameters.")
-    .method( "getParameterLabels", &SEMCpp::getParameterLabels, "Returns a vector with unique parameter labels as used internally.")
-    .method( "getGradients", &SEMCpp::getGradients, "Returns a matrix with scores.")
-    .method( "getScores", &SEMCpp::getScores, "Returns a matrix with scores.")
-    .method( "getHessian", &SEMCpp::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
-    ;
-  }
-
+RCPP_MODULE(SEM_cpp){
+  using namespace Rcpp;
+  Rcpp::class_<SEMCpp>( "SEMCpp" )
+    .constructor("Creates a new SEMCpp.")
+    .field_readonly( "A", &SEMCpp::Amatrix, "Matrix with directed effects")
+    .field_readonly( "S", &SEMCpp::Smatrix, "Matrix with undirected paths")
+    .field_readonly( "F", &SEMCpp::Fmatrix, "Filter matrix to separate latent and observed variables")
+    .field_readonly( "m", &SEMCpp::Mvector, "Vector with means of observed and latent variables")
+    .field_readonly( "impliedCovariance", &SEMCpp::impliedCovariance, "implied covariance matrix")
+    .field_readonly( "impliedMeans", &SEMCpp::impliedMeans, "implied means vector")
+    .field_readonly( "m2LL", &SEMCpp::m2LL, "minus 2 log-likelihood")
+    .field_readonly( "rawData", &SEMCpp::rawData, "raw data set")
+    .field_readonly( "manifestNames", &SEMCpp::manifestNames, "names of manifest variables")
+    .field_readonly( "wasFit", &SEMCpp::wasFit, "names of manifest variables")
+  
+  // methods
+  .method( "setMatrix", &SEMCpp::setMatrix, "Fills the elements of a model matrix. Expects a char (A, S, or F), and a matrix with values")
+  .method( "setVector", &SEMCpp::setVector, "Fills the elements of a model vector. Expects a char (m), and a vector with values")
+  .method( "initializeParameters", &SEMCpp::initializeParameters, "Initializes the parameters of the model. Expects StringVector with labels, StringVector with location, uvec with rows, uvec with columns, vec with values, and vec with rawValues")
+  .method( "setParameters", &SEMCpp::setParameters, "Changes the parameters of a model. Expects StringVector with labels, vec with values, and boolean indicating if the values are raw (TRUE) or transformed (FALSE).")
+  .method( "addDerivativeElement", &SEMCpp::addDerivativeElement, "Add an element to the internal derivative structure. string label, string with location, and boolean indicating if it is a variance, matrix with positions.")
+  .method( "addRawData", &SEMCpp::addRawData, "Adds a raw data set. Expects matrix and vector with labels of manifest variables.")
+  .method( "addSubset", &SEMCpp::addSubset, "Adds a subset to the data. Expects the sample size N of the subset, the number of observed variables without missings, uvec with indices of notMissing values, matrix with covariance, colvec with means, raw data without missings.")
+  .method( "implied", &SEMCpp::implied, "Computes implied means and covariance matrix")
+  .method( "fit", &SEMCpp::fit, "Fits the model. Returns -2 log likelihood")
+  .method( "getParameters", &SEMCpp::getParameters, "Returns a data frame with model parameters.")
+  .method( "getParameterLabels", &SEMCpp::getParameterLabels, "Returns a vector with unique parameter labels as used internally.")
+  .method( "getGradients", &SEMCpp::getGradients, "Returns a matrix with scores.")
+  .method( "getScores", &SEMCpp::getScores, "Returns a matrix with scores.")
+  .method( "getHessian", &SEMCpp::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
+  .method( "addTransformation", &SEMCpp::addTransformation, "Add a transformation function. Expects parameterLabels and pointer to function.")
+  .method( "computeTransformations", &SEMCpp::computeTransformations, "Compute all transformations")
+  ;
+}

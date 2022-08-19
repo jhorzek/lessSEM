@@ -32,3 +32,4 @@ first lambda value which sets all regularized parameters to zero (plus some tole
 \description{
 generates a the first lambda which sets all regularized parameters to zero
 }
+\keyword{internal}

@@ -14,6 +14,7 @@ struct parameterElements{
   bool changed; // to indicate if the parameter changed since the last fit
   bool isVariance;
   std::string location; // name of the matrix where the parameter is located
+  bool isTransformation;
   
   std::vector<int> row;
   std::vector<int> col;
@@ -21,6 +22,16 @@ struct parameterElements{
   //arma::uvec col = {0}; // col in the matrix
 };
 };
+
+// In some SEMs, we also allow for parameters to be transformations of one another.
+// To this end, we define some types to allow for passing compiled
+// functions to our SEM. These functions will be used to transform the parameters
+// See: https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+typedef Rcpp::NumericVector (*transformationFunctionPtr)(
+    Rcpp::NumericVector& //labeled parameter values
+); // function takes our raw parameters and returns the transformed ones!
+typedef Rcpp::XPtr<transformationFunctionPtr> transformationFunctionPtr_t;
+
 
 class parameters{
 public: 
@@ -31,11 +42,21 @@ public:
   Rcpp::CharacterVector uniqueParameterLabels;
   Rcpp::NumericVector uniqueParameterValues;
   Rcpp::NumericVector uniqueRawParameterValues;
+  Rcpp::CharacterVector uniqueParameterLocations;
+  std::vector<bool> uniqueIsTransformation;
+  
+  bool hasTransformations = false;
   
   // to decide which elements should be recomputed
   bool AChanged = true;
   bool SChanged = true;
   bool mChanged = true;
+  
+  int nModelParameters, nTransformationParameters;
+  // nModelParameters: number of parameters in the SEM, some of which
+  // can be functions of other parameters defined in the transformation
+  // nTransformationParameters: number of actual parameters, excluding 
+  // those that are transformations
   
   // constructor
   parameters(){};
@@ -46,7 +67,8 @@ public:
                   arma::uvec row_,
                   arma::uvec col_,
                   arma::vec value_,
-                  arma::vec rawValue_);
+                  arma::vec rawValue_,
+                  std::vector<bool> isTransformation_);
   
   // getter
   Rcpp::DataFrame getParameters();
@@ -56,6 +78,20 @@ public:
                      arma::vec value_,
                      bool raw
   );
+  
+  // in case of transformations
+  transformationFunctionPtr transformationFunction;
+  
+  // we use the same initialize function as that of parameters.
+  // Here, we initialize all raw and transformed parameters
+  
+  // Now, we have to tell our SEM, which parameters are transformations
+  // and how to compute those
+  void addTransformation(SEXP transformationFunctionSEXP);
+  
+  void transform();
+  
+  arma::mat getTransformationGradients();
   
 };
 

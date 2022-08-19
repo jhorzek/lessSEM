@@ -19,3 +19,4 @@ likelihood ratio fit statistic
 \description{
 internal function which returns the likelihood ratio fit statistic
 }
+\keyword{internal}

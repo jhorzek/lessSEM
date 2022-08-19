@@ -46,3 +46,4 @@ for all smooth penalty functions which are implemented for bfgs.
 Use the dedicated penalty functions (e.g., lessSEM::smoothLasso) to penalize
 the model.
 }
+\keyword{internal}

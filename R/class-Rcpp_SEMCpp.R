@@ -1,12 +1,12 @@
 # https://gallery.rcpp.org/articles/custom-printer-exposed-modules/
 #' internal representation of SEM in C++
-#' 
+#' @keywords internal
 setClass("Rcpp_SEMCpp")
 
 #' show
 #' 
 #' @param object object of class Rcpp_SEMCpp
-#' @export
+#' @keywords internal
 setMethod("show", "Rcpp_SEMCpp", function (object) {
   cat("Internal C++ model representation of lessSEM\n")
   cat("Parameters:\n")
@@ -19,7 +19,7 @@ setMethod("show", "Rcpp_SEMCpp", function (object) {
 #' 
 #' @param object object of class Rcpp_SEMCpp
 #' @returns log-likelihood of the model
-#' @export
+#' @keywords internal
 setMethod("logLik", "Rcpp_SEMCpp", function (object) {
   if(!object$wasFit){
     object$fit()
@@ -38,7 +38,7 @@ setMethod("logLik", "Rcpp_SEMCpp", function (object) {
 #' 
 #' @param object object of class Rcpp_SEMCpp
 #' @returns all coefficients of the model in transformed form
-#' @export
+#' @keywords internal
 setMethod("coef", "Rcpp_SEMCpp", function (object) {
   return(.getParameters(object, raw = FALSE))
 })
@@ -47,7 +47,7 @@ setMethod("coef", "Rcpp_SEMCpp", function (object) {
 #' 
 #' @param object object of class Rcpp_SEMCpp
 #' @returns AIC values
-#' @export
+#' @keywords internal
 setMethod("AIC", "Rcpp_SEMCpp", function (object) {
   if(!object$wasFit){
     object$fit()
@@ -61,7 +61,7 @@ setMethod("AIC", "Rcpp_SEMCpp", function (object) {
 #' 
 #' @param object object of class Rcpp_SEMCpp
 #' @returns BIC values
-#' @export
+#' @keywords internal
 setMethod("BIC", "Rcpp_SEMCpp", function (object) {
   if(!object$wasFit){
     object$fit()

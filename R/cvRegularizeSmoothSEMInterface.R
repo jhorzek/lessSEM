@@ -106,7 +106,6 @@ cvSmoothLasso <- function(lavaanModel,
     returnSubsetParameters = returnSubsetParameters,
     weights = regularized,
     tuningParameters = tuningParameters,
-     
     modifyModel = modifyModel,
     control = control
   )
@@ -228,7 +227,6 @@ cvSmoothAdaptiveLasso <- function(lavaanModel,
     standardize = standardize,
     returnSubsetParameters = returnSubsetParameters,
     tuningParameters = tuningParameters,
-     
     modifyModel = modifyModel,
     control = control
   )
@@ -341,7 +339,6 @@ cvRidgeBfgs <- function(lavaanModel,
     returnSubsetParameters = returnSubsetParameters,
     tuningParameters = data.frame(lambda = lambdas,
                                   alpha = 0),
-     
     modifyModel = modifyModel,
     control = control
   )
@@ -447,7 +444,6 @@ cvSmoothElasticNet <- function(lavaanModel,
                          k = 5,
                          standardize = FALSE,
                          returnSubsetParameters = FALSE,
-                         
                          modifyModel = lessSEM::modifyModel(),
                          control = lessSEM::controlBFGS()){
   

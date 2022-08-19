@@ -20,7 +20,7 @@ getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
 #'
 #' @param lavaanModel model of class lavaan
 #' @returns a list with lavaan and regsem labels
-#' @export
+#' @keywords internal
 .lavaan2regsemLabels <- function(lavaanModel){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   # extract parameters
@@ -51,7 +51,7 @@ getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
 #' @param cvregsemModel model of class cvregsem
 #' @param lavaanModel model of class lavaan
 #' @returns regsem parameters with lavaan labels
-#' @export
+#' @keywords internal
 .cvregsem2LavaanParameters <- function(cvregsemModel, lavaanModel){
   if(!is(cvregsemModel, "cvregsem")) stop("cvregsemModel must be of class cvregsem.")
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")

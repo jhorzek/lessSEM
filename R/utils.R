@@ -51,6 +51,7 @@ simulateExampleData <- function(N = 100, # sample size
 #' @param fnName name of the function fn
 #' @param ... additional arguments
 #' @return list with (1) new function which wraps fn and (2) list with arguments passed to fn
+#' @keywords internal
 .noDotDotDot <- function(fn, fnName, ...){
   
   # see Barranka, https://stackoverflow.com/questions/26164078/r-define-a-function-from-character-string

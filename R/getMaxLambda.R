@@ -8,7 +8,7 @@
 #' @param N sample size
 #' @param approx When set to TRUE, .Machine$double.xmax^(.01) is used instead of .Machine$double.xmax^(.05)
 #' @returns first lambda value which sets all regularized parameters to zero (plus some tolerance)
-#' @export
+#' @keywords internal
 .getMaxLambda_C <- function(regularizedModel, 
                          SEM,
                          rawParameters,
@@ -59,7 +59,7 @@
 #' @param userSuppliedArguments list with arguments for fitFunction and gradientFunction
 #' @param weights weights given to each parameter in the penalty function
 #' @returns first lambda value which sets all regularized parameters to zero (plus some tolerance)
-#' @export
+#' @keywords internal
 .gpGetMaxLambda <- function(regularizedModel,
                            par,
                            fitFunction,

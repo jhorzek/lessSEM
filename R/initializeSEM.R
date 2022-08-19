@@ -11,12 +11,14 @@
 #' @param addMeans If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average
 #' @param dataSet optional: Pass an alternative data set to lessSEM:::.SEMFromLavaan which will replace the original data set in lavaanModel.
 #' @returns Object of class Rcpp_SEMCpp
+#' @keywords internal
 .SEMFromLavaan <- function(lavaanModel, 
-                          whichPars = "est",
-                          fit = TRUE,
-                          addMeans = TRUE,
-                          activeSet = NULL,
-                          dataSet = NULL){
+                           whichPars = "est",
+                           fit = TRUE,
+                           addMeans = TRUE,
+                           activeSet = NULL,
+                           dataSet = NULL,
+                           transformations = NULL){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   
   if(is.null(dataSet)){
@@ -79,29 +81,29 @@
   
   ## directed paths
   AmatrixElements <- .setAMatrix(model = lavaanModel, 
-                                          lavaanParameterTable = lavaanParameterTable, 
-                                          nLatent = nLatent, 
-                                          nManifest = nManifest, 
-                                          latentNames = latentNames, 
-                                          manifestNames = manifestNames)
+                                 lavaanParameterTable = lavaanParameterTable, 
+                                 nLatent = nLatent, 
+                                 nManifest = nManifest, 
+                                 latentNames = latentNames, 
+                                 manifestNames = manifestNames)
   
   ## undirected paths
   SmatrixElements <- .setSMatrix(model = lavaanModel, 
-                                          lavaanParameterTable = lavaanParameterTable, 
-                                          nLatent = nLatent, 
-                                          nManifest = nManifest, 
-                                          latentNames = latentNames, 
-                                          manifestNames = manifestNames)
+                                 lavaanParameterTable = lavaanParameterTable, 
+                                 nLatent = nLatent, 
+                                 nManifest = nManifest, 
+                                 latentNames = latentNames, 
+                                 manifestNames = manifestNames)
   
   
   ## Mean structure
   MvectorElements <- .setMVector(model = lavaanModel, 
-                                          lavaanParameterTable = lavaanParameterTable, 
-                                          nLatent = nLatent, 
-                                          nManifest = nManifest, 
-                                          latentNames = latentNames, 
-                                          manifestNames = manifestNames,
-                                          rawData = rawData)
+                                 lavaanParameterTable = lavaanParameterTable, 
+                                 nLatent = nLatent, 
+                                 nManifest = nManifest, 
+                                 latentNames = latentNames, 
+                                 manifestNames = manifestNames,
+                                 rawData = rawData)
   
   ## Filter matrix
   Fmatrix <- diag(nManifest)
@@ -146,7 +148,8 @@
                                "location" = c(), 
                                "row" = c(), 
                                "col" = c(),
-                               "value" = c())
+                               "value" = c(),
+                               "isTransformation" = c())
   
   matrixNames <- names(modelParameters)
   
@@ -180,7 +183,8 @@
                                       "row" = ro, 
                                       "col" = co,
                                       "value" = parameterValues[parameter],
-                                      "rawValue" = rawParameterValue
+                                      "rawValue" = rawParameterValue,
+                                      "isTransformation" = FALSE
                                     )
             )
           }
@@ -199,29 +203,66 @@
                                 "row" = which(rownames(MvectorElements$Mvector) == manifestName), 
                                 "col" = 1,
                                 "value" = MvectorElements$Mvector[manifestName,1],
-                                "rawValue" = MvectorElements$Mvector[manifestName,1]
+                                "rawValue" = MvectorElements$Mvector[manifestName,1],
+                                "isTransformation" = FALSE
                               )
       )
     }
   }
   
+  # check for transformations
+  if(!is.null(transformations)){
+    
+    hasTransformations <- TRUE
+    fit <- FALSE
+    
+    if(!is(transformations, "character")) stop("transformations must be a string.")
+    
+    transformationFunctions <- .compileTransformations(syntax = transformations,
+                                                       parameterLabels = parameterLabels)
+    
+    transformationFunctionPointer <- transformationFunctions$getPtr()
+    
+    # let's check for new parameters which have to be added to the model:
+    addParameters <- transformationFunctions$parameters[!transformationFunctions$parameters %in% parameterTable$label]
+    if(length(addParameters) != 0)
+      parameterTable <- rbind(
+        parameterTable,
+        data.frame(
+          "label" = addParameters,
+          "location" = "transformation", 
+          "row" = 1, 
+          "col" = 1,
+          "value" = 0,
+          "rawValue" = 0,
+          "isTransformation" = FALSE
+        )
+      )
+    
+    parameterTable$isTransformation[parameterTable$label %in% transformationFunctions$isTransformation] <- TRUE
+    
+  }else{
+    hasTransformations <- FALSE
+  }
+  
   # build model
   
-  SEMCpp <- new(SEMCpp)
+  mySEM <- new(SEMCpp)
   
   # set matrices and vector
-  SEMCpp$setMatrix("A", modelMatrices$Amatrix)
-  SEMCpp$setMatrix("S", modelMatrices$Smatrix)
-  SEMCpp$setMatrix("F", modelMatrices$Fmatrix)
-  SEMCpp$setVector('m', modelMatrices$Mvector)
+  mySEM$setMatrix("A", modelMatrices$Amatrix)
+  mySEM$setMatrix("S", modelMatrices$Smatrix)
+  mySEM$setMatrix("F", modelMatrices$Fmatrix)
+  mySEM$setVector('m', modelMatrices$Mvector)
   
   # set parameters
-  SEMCpp$initializeParameters(parameterTable$label,
-                              parameterTable$location,
-                              parameterTable$row-1, # c++ starts at 0 
-                              parameterTable$col-1, # c++ starts at 0 
-                              parameterTable$value,
-                              parameterTable$rawValue)
+  mySEM$initializeParameters(parameterTable$label,
+                             parameterTable$location,
+                             parameterTable$row-1, # c++ starts at 0 
+                             parameterTable$col-1, # c++ starts at 0 
+                             parameterTable$value,
+                             parameterTable$rawValue,
+                             parameterTable$isTransformation)
   
   # set derivative elements
   for(p in unique(parameterTable$label)){
@@ -247,41 +288,53 @@
       positionMatrix[] <- 0
       positionMatrix[cbind(rows,cols)] <- 1
       isVariance <- FALSE
+    }else if(uniqueLocation == "transformation"){
+      next
+    }else{
+      stop("unknown location")
     }
-    SEMCpp$addDerivativeElement(p, 
-                                uniqueLocation, 
-                                isVariance, 
-                                positionMatrix)
+    mySEM$addDerivativeElement(p, 
+                               uniqueLocation, 
+                               isVariance, 
+                               positionMatrix)
     rm(positionMatrix, isVariance) # avoid any carry over
   }
   
   # set data
-  SEMCpp$addRawData(rawData, manifestNames, internalData$individualMissingPatternID-1)
+  mySEM$addRawData(rawData, manifestNames, internalData$individualMissingPatternID-1)
   for(s in 1:length(internalData$missingSubsets)){
-    SEMCpp$addSubset(internalData$missingSubsets[[s]]$N,
-                     which(internalData$individualMissingPatternID == s)-1,
-                     internalData$missingSubsets[[s]]$observed,
-                     internalData$missingSubsets[[s]]$notMissing,
-                     internalData$missingSubsets[[s]]$covariance,
-                     internalData$missingSubsets[[s]]$means,
-                     internalData$missingSubsets[[s]]$rawData)
+    mySEM$addSubset(internalData$missingSubsets[[s]]$N,
+                    which(internalData$individualMissingPatternID == s)-1,
+                    internalData$missingSubsets[[s]]$observed,
+                    internalData$missingSubsets[[s]]$notMissing,
+                    internalData$missingSubsets[[s]]$covariance,
+                    internalData$missingSubsets[[s]]$means,
+                    internalData$missingSubsets[[s]]$rawData)
+  }
+  
+  if(hasTransformations){
+    mySEM$addTransformation(transformationFunctionPointer)
   }
   
   # the following step is necessary if the parameters of the lavaanModel do not correspond to those in
   # the matrices of the lavaan object. This is, for instance, the case if the starting values
   # instead of the estimates are used.
-  parameters <- .getParameters(SEM = SEMCpp, raw = TRUE)
-  SEMCpp <- .setParameters(SEM = SEMCpp, labels = names(parameters), values = parameters, raw = TRUE)
+  parameters <- .getParameters(SEM = mySEM, raw = TRUE)
+  mySEM <- .setParameters(SEM = mySEM, 
+                          labels = names(parameters), 
+                          values = parameters, 
+                          raw = TRUE)
   
   if(fit){
-    SEMCpp <- .fit(SEM = SEMCpp)
+    mySEM <- .fit(SEM = mySEM)
     if(whichPars == "est" && checkFit){
       # check model fit
-      if(round(SEMCpp$m2LL - (-2*logLik(lavaanModel)), 4) !=0) stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+      if(round(mySEM$m2LL - (-2*logLik(lavaanModel)), 4) !=0) 
+        stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
     }
   }
   
-  return(SEMCpp)
+  return(mySEM)
 }
 
 #' .setAMatrix
@@ -294,6 +347,7 @@
 #' @param nManifest number of manifest variables 
 #' @param latentNames names of latent variables
 #' @param manifestNames names of manifest variables
+#' @keywords internal
 .setAMatrix <- function(model, lavaanParameterTable, nLatent, nManifest, latentNames, manifestNames){
   
   Amatrix <- matrix(0, 
@@ -328,7 +382,7 @@
 #' @param nManifest number of manifest variables 
 #' @param latentNames names of latent variables
 #' @param manifestNames names of manifest variables
-#' @export
+#' @keywords internal
 .setSMatrix <- function(model, lavaanParameterTable, nLatent, nManifest, latentNames, manifestNames){
   
   Smatrix <- matrix(0, 
@@ -363,7 +417,7 @@
 #' @param latentNames names of latent variables
 #' @param manifestNames names of manifest variables
 #' @param rawData matrix with raw data
-#' @export
+#' @keywords internal
 .setMVector <- function(model, lavaanParameterTable, nLatent, nManifest, latentNames, manifestNames, rawData){
   
   Mvector <- matrix(0, 

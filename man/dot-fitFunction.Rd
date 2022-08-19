@@ -19,3 +19,4 @@
 \description{
 internal function which returns the -2 log Likelihood of an object of class Rcpp_SEMCpp. This function can be used in optimizers
 }
+\keyword{internal}

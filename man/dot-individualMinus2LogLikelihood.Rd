@@ -21,3 +21,4 @@
 \description{
 internal function which returns the -2 log Likelihood for a single subject
 }
+\keyword{internal}

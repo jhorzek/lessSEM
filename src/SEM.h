@@ -25,6 +25,7 @@ public:
   //flags
   bool wasChecked = false; // true if the model was checked
   bool wasFit = false; // true if fit was called
+  bool hasTransformations = false; // true if the user defined transformations of parameters
   
   status currentStatus;
   
@@ -74,7 +75,8 @@ public:
                             arma::uvec row_,
                             arma::uvec col_,
                             arma::vec value_,
-                            arma::vec rawValue_);
+                            arma::vec rawValue_,
+                            std::vector<bool> isTransformation);
   void setParameters(Rcpp::StringVector label_,
                      arma::vec value_,
                      bool raw);
@@ -83,6 +85,10 @@ public:
                             std::string location_, 
                             bool isVariance_, 
                             arma::mat positionMatrix_);
+  
+  void addTransformation(SEXP transformationFunctionSEXP);
+  
+  void computeTransformations();
   
   // getter
   Rcpp::DataFrame getParameters();

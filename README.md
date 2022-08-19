@@ -173,8 +173,15 @@ provided in the documentation of the individual functions (e.g., see
 # Miscellaneous
 
 You will find a short introduction to the optimizer interfaces in the
-vignette `The-optimizer-interface` and a derivation of the scad and mcp
-used by the package in the vignette `SCAD-and-MCP`.
+vignette  
+`vignette('The-optimizer-interface', package = 'lessSEM')` and a
+derivation of the scad and mcp used by the package in the vignette
+`vignette('SCAD-and-MCP', package = 'lessSEM')`.
+
+Finally, you can also transform parameters of your model. This is
+explained in detail in the vignette
+`vignette('Model-transformations', package = 'lessSEM')` and is a
+powerful tool to, for instance, detect measurement invariance.
 
 # References
 
@@ -193,7 +200,7 @@ used by the package in the vignette `SCAD-and-MCP`.
     <https://doi.org/10.18637/jss.v093.i07>
 -   [fasta](https://cran.r-project.org/web/packages/fasta/index.html):
     Another implementation of the fista algorithm (Beck & Teboulle,
-    2009)
+    2009).
 -   [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M.,
     Prabhu, R. G., Basak, S., Lou, Z., & Sanderson, C. (2021). The
     ensmallen library for ﬂexible numerical optimization. Journal of

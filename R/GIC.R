@@ -39,11 +39,12 @@ GIC <- function(regularizedSEM, k = 2){
   
   # we need a model to compute the Hessians
   SEM <- .SEMFromLavaan(lavaanModel = regularizedSEM@inputArguments$lavaanModel, 
-                                whichPars = "start",
-                                fit = FALSE,
-                                addMeans = regularizedSEM@inputArguments$modifyModel$addMeans,
-                                activeSet = regularizedSEM@inputArguments$modifyModel$activeSet, 
-                                dataSet = regularizedSEM@inputArguments$modifyModel$dataSet
+                        whichPars = "start",
+                        fit = FALSE,
+                        addMeans = regularizedSEM@inputArguments$modifyModel$addMeans,
+                        activeSet = regularizedSEM@inputArguments$modifyModel$activeSet, 
+                        dataSet = regularizedSEM@inputArguments$modifyModel$dataSet,
+                        transformations = regularizedSEM@inputArguments$modifyModel$transformations
   )
   
   N <- nrow(SEM$rawData)
@@ -55,9 +56,9 @@ GIC <- function(regularizedSEM, k = 2){
     utils::setTxtProgressBar(pb = pbar, value = p)
     
     SEM <- .setParameters(SEM = SEM, 
-                         labels = regularizedSEM@parameterLabels, 
-                         values = unlist(parameters[p,]), 
-                         raw = FALSE)
+                          labels = regularizedSEM@parameterLabels, 
+                          values = unlist(parameters[p,]), 
+                          raw = FALSE)
     
     m2LL <- .fit(SEM = SEM)$m2LL
     
@@ -101,6 +102,6 @@ GIC <- function(regularizedSEM, k = 2){
   
   return(
     list("gic" = gic,
-              "df" = dfs)
+         "df" = dfs)
   )
 }

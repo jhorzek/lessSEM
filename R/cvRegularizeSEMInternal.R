@@ -23,7 +23,7 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
 #' @returns model of class cvRegularizedSEM
-
+#' @keywords internal
 .cvRegularizeSEMInternal <- function(lavaanModel,
                                     k,
                                     standardize,
@@ -228,7 +228,8 @@
       fit = FALSE, 
       addMeans = modifyModel$addMeans,
       activeSet = modifyModel$activeSet, 
-      dataSet = testSet
+      dataSet = testSet,
+      transformations = modifyModel$transformations
     )
     
     for(p in 1:nrow(regularizedSEM_s@parameters)){

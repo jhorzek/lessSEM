@@ -27,3 +27,4 @@ model representation. Models of this class
 can be generated with the lessSEM:::.SEMFromLavaan-function. The function is adapted
 from lavaan::lav_model_hessian.
 }
+\keyword{internal}

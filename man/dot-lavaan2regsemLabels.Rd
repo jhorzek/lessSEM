@@ -16,3 +16,4 @@ a list with lavaan and regsem labels
 helper function: regsem and lavaan use slightly different parameter labels. This function
 can be used to get both sets of labels.
 }
+\keyword{internal}

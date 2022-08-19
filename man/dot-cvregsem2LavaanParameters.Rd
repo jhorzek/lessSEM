@@ -18,3 +18,4 @@ regsem parameters with lavaan labels
 helper function: regsem and lavaan use slightly different parameter labels. This function
 can be used to translate the parameter labels of a cv_regsem object to lavaan labels
 }
+\keyword{internal}

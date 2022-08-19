@@ -24,17 +24,17 @@ test_that("testing cross-validation for adaptive lasso", {
   
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   rsem <- lessSEM::adaptiveLasso(lavaanModel = modelFit, 
-                         regularized = regularizedLavaan,
-                         nLambdas = 30)
+                                 regularized = regularizedLavaan,
+                                 nLambdas = 30)
   
   lambdas <- rsem@fits$lambda
   
   ## Test cross-validation
   
   cv <- cvAdaptiveLasso(lavaanModel = modelFit, 
-                regularized = regularizedLavaan,
-                lambdas = lambdas, 
-                returnSubsetParameters = TRUE)
+                        regularized = regularizedLavaan,
+                        lambdas = lambdas, 
+                        returnSubsetParameters = TRUE)
   
   testthat::expect_equal(all(cv@regularized == rsem@regularized), TRUE)
   selected <- which.min(cv@cvfits$cvfit)
@@ -42,9 +42,9 @@ test_that("testing cross-validation for adaptive lasso", {
   testthat::expect_equal(ncol(cv@subsets), 5)
   
   cv3 <- cvAdaptiveLasso(lavaanModel = modelFit, 
-                 regularized = regularizedLavaan,
-                 lambdas = lambdas,
-                 k = 3)
+                         regularized = regularizedLavaan,
+                         lambdas = lambdas,
+                         k = 3)
   testthat::expect_equal(ncol(cv3@subsets), 3)
   
   coef(cv)
@@ -67,9 +67,9 @@ test_that("testing cross-validation for adaptive lasso", {
     testSet <- subsets[,trainSet]
     
     SEM <- lessSEM:::.setParameters(SEM = SEM, 
-                                  labels = parameterLabels, 
-                                  values = unlist(pars[ro, parameterLabels]),
-                                  raw = FALSE)
+                                    labels = parameterLabels, 
+                                    values = unlist(pars[ro, parameterLabels]),
+                                    raw = FALSE)
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
@@ -91,19 +91,19 @@ test_that("testing cross-validation for adaptive lasso", {
   subsetPars <- pars[pars$trainSet == subset,]
   
   subsetLasso <- adaptiveLasso(lavaanModel = modelFit, 
-                       regularized = regularizedLavaan,
-                       lambdas = lambdas,
-                       control = controlIsta(startingValues = "start"),
-                       modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
+                               regularized = regularizedLavaan,
+                               lambdas = lambdas,
+                               control = controlIsta(startingValues = "start"),
+                               modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
   
   testthat::expect_equal(all(abs(subsetLasso@parameters - subsetPars[,colnames(subsetLasso@parameters)])< 1e-3), TRUE)
   
   # test standardization
   cv <- cvAdaptiveLasso(lavaanModel = modelFit, 
-                regularized = regularizedLavaan,
-                lambdas = lambdas, 
-                returnSubsetParameters = TRUE,
-                standardize = TRUE)
+                        regularized = regularizedLavaan,
+                        lambdas = lambdas, 
+                        returnSubsetParameters = TRUE,
+                        standardize = TRUE)
   
   subsets <- cv@subsets
   pars <- cv@subsetParameters
@@ -124,9 +124,9 @@ test_that("testing cross-validation for adaptive lasso", {
                                  standardDeviations = standardDeviations)
     
     SEM <- lessSEM:::.setParameters(SEM = SEM, 
-                                  labels = parameterLabels, 
-                                  values = unlist(pars[ro, parameterLabels]),
-                                  raw = FALSE)
+                                    labels = parameterLabels, 
+                                    values = unlist(pars[ro, parameterLabels]),
+                                    raw = FALSE)
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
@@ -201,9 +201,9 @@ test_that("testing cross-validation for adaptive lasso", {
                                  standardDeviations = standardDeviations)
     
     SEM <- lessSEM:::.setParameters(SEM = SEM, 
-                                  labels = parameterLabels, 
-                                  values = unlist(pars[ro, parameterLabels]),
-                                  raw = FALSE)
+                                    labels = parameterLabels, 
+                                    values = unlist(pars[ro, parameterLabels]),
+                                    raw = FALSE)
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(

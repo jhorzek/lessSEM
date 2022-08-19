@@ -7,3 +7,4 @@
 \description{
 Wrapper for C++ module. See ?lessSEM::istaCappedL1GeneralPurposeCpp
 }
+\keyword{internal}

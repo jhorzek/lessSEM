@@ -29,3 +29,4 @@
 \description{
 internal function. Populates the matrix with directed effects in RAM notation
 }
+\keyword{internal}

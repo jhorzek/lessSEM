@@ -4,6 +4,7 @@
 #' 
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @returns fitted SEM
+#' @keywords internal
 .fit <- function(SEM){
   SEM$fit()
   return(SEM)
@@ -18,6 +19,7 @@
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param raw controls if the internal transformations of lessSEM is used.
 #' @returns -2log-Likelihood
+#' @keywords internal
 .fitFunction <- function(par, SEM, raw){
   SEM <- .setParameters(SEM = SEM, names(par), values = par, raw = raw)
   tryFit <- try(SEM$fit(), silent = TRUE)
@@ -33,6 +35,7 @@
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param raw controls if the internal transformations of lessSEM is used.
 #' @returns gradients of the model
+#' @keywords internal
 .gradientFunction <- function(par, SEM, raw){
   failureReturns <- rep(999999999, length(par))
   names(failureReturns) <- names(par)
@@ -56,6 +59,7 @@
 #' set to TRUE, the standard errors will be returned for the internally used 
 #' parameter specification
 #' @return a vector with standard errors
+#' @keywords internal
 .standardErrors <- function(SEM, raw){
   
   Hessian <- .getHessian(SEM = SEM, raw = raw)
@@ -79,6 +83,7 @@
 #' @param data vector with data points for this single individual
 #' @param raw controls if the internal transformations of lessSEM is used.
 #' @returns -2 log Likelihood for each subject in the data set
+#' @keywords internal
 .individualMinus2LogLikelihood <- function(par, SEM, data, raw){
   if(any(names(data) != SEM$manifestNames)) stop("SEM$manifestNames and colnames of data do not match!")
   if(any(.getParameters(SEM, raw = raw)[names(par)] != par)) SEM <- .setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
@@ -101,6 +106,7 @@
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param raw controls if the internal transformations of lessSEM is used.
 #' @returns likelihood ratio fit statistic
+#' @keywords internal
 .likelihoodRatioFit <- function(par, SEM, raw){
   if(anyNA(SEM$rawData)) stop("likelihoodRatioFit currently only implemented for data without missings")
   if(any(.getParameters(SEM)[names(par)] != par)) SEM <- .setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
