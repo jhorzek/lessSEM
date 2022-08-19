@@ -131,7 +131,6 @@ void parameters::transform()
     paramLabels.at(i) = uniqueParameterLabels.at(i);
   }
   params.names() = paramLabels;
-  Rcpp::Rcout << params << std::endl;
   
   params = transformationFunction(params);
   
@@ -149,39 +148,50 @@ void parameters::transform()
   }
 }
 
-arma::mat parameters::getTransformationGradients(std::vector<std::string> parameterLabels){
+arma::mat parameters::getTransformationGradients(){
   if(!hasTransformations) Rcpp::stop("Does not have transformations.");
-  arma::mat currentGradients(parameterLabels.size(), 
-                             parameterLabels.size(), 
+  arma::mat currentGradients(nModelParameters, 
+                             nTransformationParameters,
                              arma::fill::zeros);
-  Rcpp::NumericVector parameterValues(parameterLabels.size());
-  Rcpp::CharacterVector parameterLabelsRcpp(parameterLabels.size());
-  
+  Rcpp::NumericVector parameterValues(uniqueParameterLabels.size());
+  Rcpp::CharacterVector parameterLabelsRcpp(uniqueParameterLabels.size());
+  arma::uvec selectRows(nModelParameters);
   arma::colvec stepForward, stepBackward;
- 
-  for(int i = 0; i < parameterLabels.size(); i++){
+  std::string currentParameter;
+  int j = 0;
+  for(int i = 0; i < uniqueParameterLabels.size(); i++){
+    currentParameter = uniqueParameterLabels.at(i);
     
-    parameterValues.at(i) = parameterMap.at(parameterLabels.at(i)).rawValue;
-    parameterLabelsRcpp.at(i) = parameterLabels.at(i);
+    parameterValues.at(i) = parameterMap.at(currentParameter).rawValue;
+    parameterLabelsRcpp.at(i) = currentParameter;
+    if(parameterMap.at(currentParameter).location.compare("transformation") == 0){
+      // we want to remove all parameters which are only in transformations and not in the model
+      continue;
+    }
+    selectRows.at(j) = i;
+    j++;
   }
   
   parameterValues.names() = parameterLabelsRcpp;
   
   double eps = 1e-6;
   
-  for(int i = 0; i < parameterLabels.size(); i++){
-    
+  j = 0;
+  for(int i = 0; i < parameterValues.size(); i++){
+    currentParameter = parameterLabelsRcpp.at(i);
+    if(parameterMap.at(currentParameter).isTransformation) continue;
     parameterValues.at(i) += eps;
     
-    stepForward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues));
+    stepForward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues)).rows(selectRows);
     
     parameterValues.at(i) -= 2.0*eps;
     
-    stepBackward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues));
+    stepBackward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues)).rows(selectRows);
     
     parameterValues.at(i) += eps;
     
-    currentGradients.col(i) = (stepForward - stepBackward)/2.0;
+    currentGradients.col(j) = (stepForward - stepBackward)/(2.0*eps);
+    j++;
   }
   
   return(currentGradients);

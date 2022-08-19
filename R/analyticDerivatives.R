@@ -34,7 +34,7 @@
 #' @returns vector with derivatives of the -2log-Likelihood with respect to each parameter
 .getGradients <- function(SEM, raw){
   gradients <- as.vector(SEM$getGradients(raw))
-  names(gradients) <- SEM$getParameterLabels()
+  names(gradients) <- names(.getParameters(SEM = SEM, raw = TRUE, transformations = FALSE))
   return(gradients)
 }
 

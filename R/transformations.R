@@ -3,24 +3,18 @@
 #' compile user defined parameter transformations to a 
 #' pass to a SEM
 #' @param syntax string with user defined transformations
+#' @param parameterLabels names of parameters in the model
 #' @returns list with parameter names and two Rcpp functions: (1) the transformation function and 
 #' (2) a function to create a pointer to the transformation function
-#' @examples 
-#' syntax <- "
-#' parameters: a, b, c, d, f, g, h # important: state all parameters which you want to use!
-#' # This must be the first line in your statement!
-#' a = b + c
-#' d = a*f
-#' g = log(h)
-#' "
-#' fns <- .compileTransformations(syntax)
-.compileTransformations <- function(syntax){
+.compileTransformations <- function(syntax,
+                                    parameterLabels){
   
   syntax <- .reduceSyntax(syntax = syntax)
   
   .checkSyntax(syntax = syntax)
   
-  parameters <- .extractParametersFromSyntax(syntax = syntax)
+  parameters <- .extractParametersFromSyntax(syntax = syntax,
+                                             parameterLabels = parameterLabels)
   
   armaFunction <- .createRcppTransformationFunction(syntax = syntax, parameters = parameters$parameters)
   
@@ -88,9 +82,11 @@
 #' 
 #' extract the names of the parameters in a syntax
 #' @param syntax syntax for parameter transformations
+#' @param parameterLabels names of parameters in the model
 #' @return vector with names of parameters used in the syntax and vector with
 #' boolean indicating if parameter is transformation result
-.extractParametersFromSyntax <- function(syntax){
+.extractParametersFromSyntax <- function(syntax,
+                                         parameterLabels){
   parameters <- syntax[1]
   parameters <- gsub(x = parameters, 
                      pattern = "parameters:",
@@ -109,6 +105,9 @@
                                 pattern = "=")[[1]][1]
       if(! lhs %in% parameters){
         stop(paste0("Could not find ", lhs, " in parameter: specification of transformations."))
+      }
+      if(! lhs %in% parameterLabels){
+        stop(paste0("Could not find ", lhs, " in model parameters. Every left hand side of your equations must be a model parameter."))
       }
       isTransformation[lhs] <- TRUE
     }

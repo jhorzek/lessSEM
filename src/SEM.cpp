@@ -181,7 +181,27 @@ void SEMCpp::initializeParameters(Rcpp::StringVector label_,
                             isTransformation);
   
   // also initialize the derivative elements
+  parameterTable.nModelParameters = 0;
+  parameterTable.nTransformationParameters = 0;
+  std::string currentParameter;
+  for(int i = 0; i < parameterTable.uniqueParameterLabels.length(); i++){
+    currentParameter = parameterTable.uniqueParameterLabels.at(i);
+    if(parameterTable.parameterMap.at(currentParameter).location.compare("transformation") == 0){
+      // parameter is not in the model but only in the transformations
+      parameterTable.nTransformationParameters++;
+      continue;
+    }
+    if(parameterTable.parameterMap.at(currentParameter).isTransformation){
+      // parameter is in the model, but is a function of other parameters
+      parameterTable.nModelParameters++;
+      continue;
+    }
+    parameterTable.nTransformationParameters++;
+    parameterTable.nModelParameters++;
+  }
+
   derivElements.initialize(
+    parameterTable.nModelParameters,
     parameterTable.uniqueParameterLabels,
     parameterTable.uniqueParameterLocations
   );
@@ -291,11 +311,8 @@ Rcpp::DataFrame SEMCpp::getParameters(){
 }
 
 Rcpp::StringVector SEMCpp::getParameterLabels(){
-  Rcpp::StringVector uniqueParLabels(derivElements.uniqueLabels.size());
-  for(int i = 0; i < derivElements.uniqueLabels.size(); i++){
-    uniqueParLabels(i) = derivElements.uniqueLabels.at(i);
-  }
-  return(uniqueParLabels);
+  
+  return(parameterTable.uniqueParameterLabels);
   
 }
 // fit functions
@@ -376,6 +393,7 @@ arma::mat SEMCpp::getScores(bool raw){
   if((currentStatus != computedImplied) & (currentStatus != fitted)){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
+  if(hasTransformations) Rcpp::stop("Not yet implemented for models with transformations.");
   arma::mat scoresMat = scores(*this, raw);
   
   return(scoresMat);
@@ -391,11 +409,12 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   arma::rowvec gradients = gradientsByGroup(*this, raw);
   
   if(hasTransformations){
+    if(!raw) Rcpp::stop("Gradients with raw = false currently not supported when using transformations.");
     // in case of transformations, we can make use of the chain rule to get the derivative
     // with respect to the true underlying parameters. gradientsByGroup will only return
-    // the gradients of the trasnformed parameters in the SEM 
-    arma::mat transformationGradients = parameterTable.getTransformationGradients(derivElements.uniqueLabels);
-    Rcpp::stop("Gradients for transformed parameters are not yet implemented");
+    // the gradients of the transformed parameters in the SEM 
+    arma::mat transformationGradients = parameterTable.getTransformationGradients();
+    return(gradients*transformationGradients);
   }
   
   return(gradients);

@@ -52,6 +52,12 @@ public:
   bool SChanged = true;
   bool mChanged = true;
   
+  int nModelParameters, nTransformationParameters;
+  // nModelParameters: number of parameters in the SEM, some of which
+  // can be functions of other parameters defined in the transformation
+  // nTransformationParameters: number of actual parameters, excluding 
+  // those that are transformations
+  
   // constructor
   parameters(){};
   
@@ -85,7 +91,7 @@ public:
   
   void transform();
   
-  arma::mat getTransformationGradients(std::vector<std::string> parameterLabels);
+  arma::mat getTransformationGradients();
   
 };
 

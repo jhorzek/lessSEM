@@ -217,25 +217,26 @@
     
     if(!is(transformations, "character")) stop("transformations must be a string.")
     
-    transformationFunctions <- .compileTransformations(syntax = transformations)
+    transformationFunctions <- .compileTransformations(syntax = transformations,
+                                                       parameterLabels = parameterLabels)
     
     transformationFunctionPointer <- transformationFunctions$getPtr()
     
     # let's check for new parameters which have to be added to the model:
     addParameters <- transformationFunctions$parameters[!transformationFunctions$parameters %in% parameterTable$label]
-    
-    parameterTable <- rbind(
-      parameterTable,
-      data.frame(
-        "label" = addParameters,
-        "location" = "transformation", 
-        "row" = 1, 
-        "col" = 1,
-        "value" = 0,
-        "rawValue" = 0,
-        "isTransformation" = FALSE
+    if(length(addParameters) != 0)
+      parameterTable <- rbind(
+        parameterTable,
+        data.frame(
+          "label" = addParameters,
+          "location" = "transformation", 
+          "row" = 1, 
+          "col" = 1,
+          "value" = 0,
+          "rawValue" = 0,
+          "isTransformation" = FALSE
+        )
       )
-    )
     
     parameterTable$isTransformation[parameterTable$label %in% transformationFunctions$isTransformation] <- TRUE
     
@@ -287,8 +288,9 @@
       positionMatrix[cbind(rows,cols)] <- 1
       isVariance <- FALSE
     }else if(uniqueLocation == "transformation"){
-      positionMatrix <- matrix(NA,1,1)
-      isVariance <- FALSE
+      next
+    }else{
+      stop("unknown location")
     }
     mySEM$addDerivativeElement(p, 
                                uniqueLocation, 

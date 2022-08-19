@@ -3,20 +3,26 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-void derivativeElements::initialize(Rcpp::StringVector uniqueParameterLabels,
+void derivativeElements::initialize(int nParam,
+                                    Rcpp::StringVector uniqueParameterLabels,
                                     Rcpp::StringVector uniqueParameterLocations)
   {
   
-  uniqueLabels.resize(uniqueParameterLabels.length());
-  uniqueLocations.resize(uniqueParameterLabels.length());
-  wasInitialized.resize(uniqueParameterLabels.length());
-  isVariance.resize(uniqueParameterLabels.length());
-  positionInLocation.resize(uniqueParameterLabels.length());
+  uniqueLabels.resize(nParam);
+  uniqueLocations.resize(nParam);
+  wasInitialized.resize(nParam);
+  isVariance.resize(nParam);
+  positionInLocation.resize(nParam);
   
+  int j = 0;
   for(int i = 0; i < uniqueParameterLabels.length(); i++){
-    uniqueLabels.at(i) = uniqueParameterLabels.at(i);
-    uniqueLocations.at(i) = uniqueParameterLocations.at(i);
-    wasInitialized.at(i) = false;
+    if(uniqueParameterLocations.at(i) == "transformation")
+      continue;
+      // the derivative structure only takes care of model parameters!
+    uniqueLabels.at(j) = uniqueParameterLabels.at(i);
+    uniqueLocations.at(j) = uniqueParameterLocations.at(i);
+    wasInitialized.at(j) = false;
+    j++;
   }
   
   return;
