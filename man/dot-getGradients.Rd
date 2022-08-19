@@ -23,3 +23,4 @@ returns the gradients of a model of class Rcpp_SEMCpp. This is the internal mode
 representation. Models of this class
 can be generated with the lessSEM:::.SEMFromLavaan-function.
 }
+\keyword{internal}

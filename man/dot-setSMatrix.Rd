@@ -29,3 +29,4 @@
 \description{
 internal function. Populates the matrix with undirected paths in RAM notation
 }
+\keyword{internal}

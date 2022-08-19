@@ -19,3 +19,4 @@ gradients of the model
 \description{
 internal function which returns the gradients of an object of class Rcpp_SEMCpp. This function can be used in optimizers
 }
+\keyword{internal}

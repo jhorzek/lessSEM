@@ -15,3 +15,4 @@ log-likelihood of the model
 \description{
 logLik
 }
+\keyword{internal}

@@ -4,7 +4,12 @@
 \alias{modifyModel}
 \title{modifyModel}
 \usage{
-modifyModel(addMeans = TRUE, activeSet = NULL, dataSet = NULL)
+modifyModel(
+  addMeans = TRUE,
+  activeSet = NULL,
+  dataSet = NULL,
+  transformations = NULL
+)
 }
 \arguments{
 \item{addMeans}{If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average}
@@ -12,6 +17,8 @@ modifyModel(addMeans = TRUE, activeSet = NULL, dataSet = NULL)
 \item{activeSet}{Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.}
 
 \item{dataSet}{option to replace the data set in the lavaan model with a different data set. Can be useful for cross-validation}
+
+\item{transformations}{allows for transformations of parameters - useful for measurement invariance tests etc.}
 }
 \value{
 Object of class modifyModel

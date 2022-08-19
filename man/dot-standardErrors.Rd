@@ -21,3 +21,4 @@ compute the standard errors of a fitted SEM. IMPORTANT: Assumes that the
 SEM has been fitted and the parameter estimates are at the ordinary maximum
 likelihood estimates
 }
+\keyword{internal}

@@ -4,10 +4,12 @@
 \alias{.compileTransformations}
 \title{.compileTransformations}
 \usage{
-.compileTransformations(syntax)
+.compileTransformations(syntax, parameterLabels)
 }
 \arguments{
 \item{syntax}{string with user defined transformations}
+
+\item{parameterLabels}{names of parameters in the model}
 }
 \value{
 list with parameter names and two Rcpp functions: (1) the transformation function and
@@ -17,13 +19,4 @@ list with parameter names and two Rcpp functions: (1) the transformation functio
 compile user defined parameter transformations to a
 pass to a SEM
 }
-\examples{
-syntax <- "
-parameters: a, b, c, d, f, g, h # important: state all parameters which you want to use!
-# This must be the first line in your statement!
-a = b + c
-d = a*f
-g = log(h)
-"
-fns <- .compileTransformations(syntax)
-}
+\keyword{internal}

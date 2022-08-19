@@ -69,5 +69,9 @@ matrix with covariance, colvec with means, raw data without missings.}
 \item{\code{getHessian}}{Returns the hessian of the model. Expects the labels of the
 parameters and the values of the parameters as well as a boolean indicating if
 these are raw. Finally, a double (eps) controls the precision of the approximation.}
+
+\item{\code{addTransformation}}{add transformations to the model.}
+
+\item{\code{computeTransformations}}{compute the transformations.}
 }}
 

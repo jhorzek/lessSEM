@@ -3,6 +3,7 @@
 #' internal function. Creates internal data representation
 #' @param rawData matrix with raw data set
 #' @returns list with internal representation of data
+#' @keywords internal
 .SEMdata <- function(rawData){
   
   # extract unique missingness patterns

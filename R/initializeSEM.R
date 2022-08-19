@@ -11,6 +11,7 @@
 #' @param addMeans If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average
 #' @param dataSet optional: Pass an alternative data set to lessSEM:::.SEMFromLavaan which will replace the original data set in lavaanModel.
 #' @returns Object of class Rcpp_SEMCpp
+#' @keywords internal
 .SEMFromLavaan <- function(lavaanModel, 
                            whichPars = "est",
                            fit = TRUE,
@@ -346,6 +347,7 @@
 #' @param nManifest number of manifest variables 
 #' @param latentNames names of latent variables
 #' @param manifestNames names of manifest variables
+#' @keywords internal
 .setAMatrix <- function(model, lavaanParameterTable, nLatent, nManifest, latentNames, manifestNames){
   
   Amatrix <- matrix(0, 
@@ -380,7 +382,7 @@
 #' @param nManifest number of manifest variables 
 #' @param latentNames names of latent variables
 #' @param manifestNames names of manifest variables
-#' @export
+#' @keywords internal
 .setSMatrix <- function(model, lavaanParameterTable, nLatent, nManifest, latentNames, manifestNames){
   
   Smatrix <- matrix(0, 
@@ -415,7 +417,7 @@
 #' @param latentNames names of latent variables
 #' @param manifestNames names of manifest variables
 #' @param rawData matrix with raw data
-#' @export
+#' @keywords internal
 .setMVector <- function(model, lavaanParameterTable, nLatent, nManifest, latentNames, manifestNames, rawData){
   
   Mvector <- matrix(0, 

@@ -20,3 +20,4 @@ list with (1) new function which wraps fn and (2) list with arguments passed to 
 \description{
 remplaces the dot dot dot part of the fitting and gradient fuction
 }
+\keyword{internal}

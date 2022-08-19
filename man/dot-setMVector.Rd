@@ -32,3 +32,4 @@
 \description{
 internal function. Populates the vector with means in RAM notation
 }
+\keyword{internal}

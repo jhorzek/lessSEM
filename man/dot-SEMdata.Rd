@@ -15,3 +15,4 @@ list with internal representation of data
 \description{
 internal function. Creates internal data representation
 }
+\keyword{internal}

@@ -21,3 +21,4 @@ SEM with changed parameter values
 \description{
 change the parameters of the internal model representation.
 }
+\keyword{internal}

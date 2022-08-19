@@ -55,3 +55,4 @@ for all penalty functions which are implemented for glmnet and gist.
 Use the dedicated penalty functions (e.g., lessSEM::cvLasso) to penalize
 the model.
 }
+\keyword{internal}

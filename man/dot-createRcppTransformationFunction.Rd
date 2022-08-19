@@ -17,3 +17,4 @@ string with functions for compilations with Rcpp
 \description{
 create an Rcpp function which uses the user-defined parameter transformation
 }
+\keyword{internal}

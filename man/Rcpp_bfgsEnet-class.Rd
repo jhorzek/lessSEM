@@ -7,3 +7,4 @@
 \description{
 Wrapper for C++ module. See ?lessSEM::bfgsEnet
 }
+\keyword{internal}

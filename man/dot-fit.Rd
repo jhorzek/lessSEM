@@ -15,3 +15,4 @@ fitted SEM
 \description{
 fits an object of class Rcpp_SEMCpp.
 }
+\keyword{internal}

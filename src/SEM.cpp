@@ -50,6 +50,8 @@
 //' @field getHessian Returns the hessian of the model. Expects the labels of the 
 //' parameters and the values of the parameters as well as a boolean indicating if 
 //' these are raw. Finally, a double (eps) controls the precision of the approximation.
+//' @field addTransformation add transformations to the model.
+//' @field computeTransformations compute the transformations.
 
 
 bool SEMCpp::checkModel(){
@@ -241,8 +243,8 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
                            bool raw){
   currentStatus = changedParameters;
   
-  if(parameterTable.hasTransformations & (!raw)) 
-    Rcpp::stop("SEMs with transformation currently only support setParameters with raw = true.");
+  // if(parameterTable.hasTransformations & (!raw)) 
+  //   Rcpp::stop("SEMs with transformation currently only support setParameters with raw = true.");
   
   wasFit = false; // reset fit 
   // step one: change parameters in parameterTable
@@ -429,10 +431,6 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   }
   if((currentStatus != computedImplied) & (currentStatus != fitted)){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
-  }
-  
-  if(hasTransformations){
-    Rcpp::stop("Hessian for transformed parameters is not yet implemented");
   }
   
   arma::mat hessian = approximateHessian(*this, 

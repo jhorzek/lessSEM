@@ -41,6 +41,7 @@ test_that("testing transformations", {
   
   parameters <- lessSEM:::.getParameters(SEM, raw = TRUE)
   gradients <- lessSEM:::.getGradients(SEM, raw = TRUE)
+  Hessian <- lessSEM:::.getHessian(SEM, raw = TRUE)
   
   # these gradients should be identical to those of a model where the
   # equality constraint was present from the get-go
@@ -79,12 +80,15 @@ test_that("testing transformations", {
   testthat::expect_equal(abs(SEM$fit()- SEMNoTransformations$fit()) < 1e-8,TRUE)
   
   gradientsNoTransformations <- lessSEM:::.getGradients(SEMNoTransformations, raw = TRUE)
-    
+  HessianNoTransformations <- lessSEM:::.getHessian(SEM, raw = TRUE)
+  
   testthat::expect_equal(all(abs(gradients - gradientsNoTransformations[names(gradients)]) < 1e-6), TRUE)
   
+  testthat::expect_equal(all(abs(Hessian[names(gradients), names(gradients)] - HessianNoTransformations[names(gradients), names(gradients)]) < 1e-6), TRUE)
+  
   # Now, let's test a more complicated transformation:
-    
-    transformations <- "
+  
+  transformations <- "
   parameters: a,b,c,d,e,f,deltaA, deltaB, deltaC
   d = a + deltaA
   e = b + deltaB

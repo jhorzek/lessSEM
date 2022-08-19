@@ -35,3 +35,4 @@ Object of class Rcpp_SEMCpp
 \description{
 internal function. Translates an object of class lavaan to the internal model representation.
 }
+\keyword{internal}

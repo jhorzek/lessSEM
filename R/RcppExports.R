@@ -43,6 +43,8 @@
 #' @field getHessian Returns the hessian of the model. Expects the labels of the 
 #' parameters and the values of the parameters as well as a boolean indicating if 
 #' these are raw. Finally, a double (eps) controls the precision of the approximation.
+#' @field addTransformation add transformations to the model.
+#' @field computeTransformations compute the transformations.
 NULL
 
 #'@name istaCappedL1

@@ -1,0 +1,424 @@
+---
+title: "Model-transformations"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Model-transformations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(lessSEM)
+```
+
+To allow for more flexible model estimation, **lessSEM** offers parameter 
+transformations. This is still an experimental feature, so beware. But if it 
+can be used, it is relatively powerful.
+
+## Motivation
+
+In longitudinal SEM, an important question is if parameters stay the same over
+time (e.g., measurement invariance). This question can be difficult to answer and
+may require setting up many different models manually. Here, regularization techniques
+can be very handy. For instance, in the seminal political democracy example, the 
+model is typically set up as follows (see `?lavaan::sem`):
+
+```{r}
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a*y2 + b*y3 + c*y4
+     dem65 =~ y5 + a*y6 + b*y7 + c*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+```
+
+Note that the loadings a, b, and c are assumed to stay the same over time!
+That is, measurement invariance is assumed. Relaxing this assumption, we could
+define the model as follows:
+
+```{r}
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+```
+
+Here, each loading is estimated separately. This results in a more complex model. 
+However do we know which model to use? There are many procedures to answer this 
+question (e.g., using modification indexes, setting up separate models by hand, etc.).
+
+## Using Regularization
+
+First, note that measurement invariance can be rephrased as $a_1-a_2 = 0$, $b_1-b_2 = 0$, 
+and $c_1-c_2 = 0$. Thus, regularizing the differences between these parameters may
+allow for testing measurement invariance (Belzak & Bauer, 2020, for using regularization
+techniques to test measurement invariance). In **regsem**, there is a "diff_lasso"
+implementation which regularizes differences between parameters, however this is
+not available in **lessSEM**. However, **lessSEM** provides a flexible workaround:
+parameter transformations. 
+To make this work, we have to re-define our parameters. To this end, we make use
+of a decomposition similar to that proposed by Fisher et al. (2022)[^1]. 
+
+[^1]: Note that Fisher et al. (2022) used the decomposition to regularize differences
+between individuals in vector autoregressive models. Person-specific parameters
+are not yet supported in **lessSEM**, but we will make use of the same decomposition-idea.
+
+Redefine:
+
+$$
+\begin{align}
+a_2 &= a_1 + \Delta a_2\\
+b_2 &= b_1 + \Delta b_2\\
+c_2 &= c_1 + \Delta c_2
+\end{align}
+$$
+By regularizing $\Delta a_2$, $\Delta b_2$, and $\Delta c_2$ towards zero,
+we can enforce measurement invariance over time.
+
+## Setting up the Model
+
+We first start with the most flexible model which we want to test:
+
+```{r}
+library(lavaan)
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+lavaanFit <- sem(model = modelSyntax,
+                 data = PoliticalDemocracy)
+```
+
+Note that the model defined above estimates all parameters time-point specific. 
+That is, no measurement invariance is assumed. 
+
+Now, we want to redefine the parameters as outlined above: 
+
+$$
+\begin{align}
+a_2 &= a_1 + \Delta a_2\\
+b_2 &= b_1 + \Delta b_2\\
+c_2 &= c_1 + \Delta c_2
+\end{align}
+$$
+
+In **lessSEM** such redefinitions are called transformations and can be
+passed to the penalty functions (e.g., to `lasso`) using the `modifyModel` command.
+
+First, we have to create a definition of our transformations:
+
+```{r}
+transformations <- "
+# IMPORTANT: Our transformations always have to start with the follwing line:
+parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
+
+# In the line above, we defined the names of the parameters which we
+# want to use in our transformations. EACH AND EVERY PARAMETER USED IN
+# THE FOLLOWING MUST BE STATED ABOVE. The line must always start with
+# the keyword 'parameters' followed by a colon. The parameters must be
+# separated by commata.
+
+# Now we can state our transformations:
+
+a2 = a1 + delta_a2
+b2 = b1 + delta_b2
+c2 = c1 + delta_c2
+"
+```
+
+Next, we have to pass the `transformations` variable to the penalty function:
+
+```{r, echo=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = c("delta_a2", "delta_b2", "delta_c2"),# we want to regularize 
+                  # the differences between the parameters
+                  nLambdas = 100,
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r, include = FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = c("delta_a2", "delta_b2", "delta_c2"),# we want to regularize 
+                  # the differences between the parameters
+                  nLambdas = 100,
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+Let's have a look at the parameter estimates:
+
+```{r}
+coef(lassoFit)[seq(1,100,10),c("lambda", "a1", "b1", "c1", "delta_a2", "delta_b2", "delta_c2")]
+```
+Note that the differences between the parameters gets smaller with larger $\lambda$ values. 
+We can also plot the differences:
+
+```{r}
+plot(lassoFit)
+```
+
+To check if measurement invariance can be assumed, we can select the best model 
+using information criteria:
+
+```{r}
+coef(lassoFit, criterion = "BIC")
+```
+
+Note that all differences have been zeroed -- that is, a model with measurement invariance
+did fit best.
+
+Limitation: Above, we did not take into account that the variables may have 
+different scales; a thorough use of the method should scale the data first.
+
+## Further Examples
+
+Another example where the transformations could be useful is when detecting
+non-stationarity in autoregressive and cross-lagged parameters. In the following,
+we will demonstrate this with an autoregressive model. The model is defined as 
+follows:
+
+$$
+\begin{align}
+\eta_t &= a_t\eta_{t-1} + \zeta_t\\
+\begin{bmatrix}
+y_{1,t}\\
+y_{2,t}\\
+y_{3,t}\\
+\end{bmatrix} &= \begin{bmatrix}
+l_1\\
+l_2\\
+l_3\\
+\end{bmatrix} \eta_t + \pmb\varepsilon
+\end{align}
+$$
+
+It is often assumed that the autoregressive effect $a_t$ is constant over time; 
+that is, the same autoregressive effect is used for all time points. This is 
+a strong assumption and we may want to test it. One way to do so is by using the
+same procedure outlined above, where we define
+$a_t = a_1 + \Delta a_t$
+In this case, each autoregressive effect is composed of the first
+autoregressive effect ($a_1$) and the difference between the parameters ($\Delta a_t$). 
+By regularizing $\Delta a_t$, we can enforce stationarity. 
+
+A drawback of the approach outlined above is that the first autoregressive effect
+is treated as different from the rest: After all, why should $a_1$ serve as baseline and not 
+$a_2$ or $a_5$? We will take a slightly different approach, again building on the
+idea of Fisher et al. (2022). Let's define the autoregressive effect as
+
+$a_t = a_{t-1} + \Delta a_t$
+
+Note that $\Delta a_t$ is no longer the difference with respect to the initial
+autoregressive effect $a_1$ but the difference with respect to the directly 
+preceding time point. When regularizing $\Delta a_t$, we can now detect sudden 
+changes in the parameter -- e.g., due to an intervention. This can also 
+be thought of as a regime change model, where there may be multiple regimes (i.e., 
+different true parameters for different time points; see also Ou et al., 2019
+for regime switching models) and we want to detect if/when the process changes. 
+
+We won't go into the details of how to set up the model here, but you can 
+find them in the source of this file 
+([e.g., in GitHub](https://github.com/jhorzek/lessSEM/tree/main/vignettes/Model-transformations.Rmd)).
+We simulated a data set with 200 individuals measured at 10 time points. The
+autoregressive effect $a_t$ changes at $t=5$ from $.6$ to $.2$.
+
+```{r, include = FALSE}
+set.seed(123)
+# autoregressive model
+
+persons <- 200
+tps <- 10
+a <- c(rep(.6,4), rep(.2,tps-4))
+
+data <- matrix(NA, 
+               nrow = persons, 
+               ncol = 3*tps)
+
+colnames(data) <- paste0("y", rep(1:3, tps), 
+                         "_t", 
+                         rep(1:tps, each = 3))
+
+loadings <- matrix(c(1,.6,.7), ncol = 1)
+
+for(id in 1:persons){
+  eta <- rep(NA, tps)
+  
+  eta[1] <- rnorm(1)
+  for(tp in 1:tps){
+    if(tp == 1) {
+      eta[1] <- rnorm(1)
+    }else{
+      eta[tp] <- a[tp]*eta[tp-1] + rnorm(1,0,1-a[tp]^2)
+    }
+    data[id, paste0("y", 1:3, "_t",tp)] <- loadings*eta[tp] + 
+     t( mvtnorm::rmvnorm(n = 1, mean = rep(0,3), sigma = diag(c(.1,1.1-.6^2,1.1-.7^2))))
+  }
+}
+
+lavaanSyntax <- paste0(
+  c(paste0("eta", 2:tps, " ~ a", 1:(tps-1), "*eta", 1:(tps-1)),
+    "\n",
+    "eta1 ~~ eta1",
+    paste0("eta", 2:tps, " ~~ v*eta", 2:tps),
+    "\n"
+  ),
+  collapse = "\n"
+)
+# add loadings
+for(tp in 1:tps){
+  lavaanSyntax <- paste0(
+    lavaanSyntax,
+    paste0("eta",tp, " =~ ", paste0(c("1*y1_t", "l2*y2_t", "l3*y3_t"), tp, collapse = " + ")),
+    sep = "\n"
+  )
+  lavaanSyntax <- paste0(
+    lavaanSyntax,
+    paste0(
+      paste0(c("y1_t", "y2_t", "y3_t"), tp , " ~~ ", paste0("mvar", 1:3),  c("*y1_t", "*y2_t", "*y3_t"), tp),
+      collapse = "\n"
+    ),
+    sep = "\n"
+  )
+}
+```
+
+The data looks as follows:
+```{r}
+head(data)
+```
+
+
+The lavaan model is defined as follows:
+
+```{r, echo=FALSE}
+cat(lavaanSyntax)
+```
+
+We fit the model using lavaan:
+
+```{r}
+lavaanFit <- sem(model = lavaanSyntax, 
+                 data = data,
+                 orthogonal.y = TRUE, 
+                 orthogonal.x = TRUE,
+                 missing = "ml")
+```
+
+
+```{r, include=FALSE}
+transformations <- 
+  paste0(
+    paste0("parameters: ", 
+                          paste0(c(
+                            paste0("a",1:(tps-1)),
+                            paste0(paste0("delta",2:(tps-1)))), 
+                            collapse = ", "),
+                          collapse = ""),
+    "\n\n",
+  paste0(
+    paste0("a",2:(tps-1), " = ", paste0("a", 1:(tps-2)), " + ", paste0("delta", 2:(tps-1))),
+    collapse = "\n"),
+  collapse = "\n"
+)
+```
+
+And define our transformations as follows:
+
+```{r, echo=FALSE}
+cat(transformations)
+```
+
+Finally, we can fit our model:
+
+```{r,include=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = paste0("delta", 2:9),# we want to regularize 
+                  # the differences between the parameters
+                  nLambdas = 20,
+                  # glmnet is considerably faster here:
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+
+```
+
+```{r,eval=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = paste0("delta", 2:9),# we want to regularize 
+                  # the differences between the parameters
+                  nLambdas = 20,
+                  # glmnet is considerably faster here:
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+Extracting the best fitting model:
+
+```{r}
+coef(lassoFit, criterion = "BIC")
+```
+
+While the result is not perfect, **lessSEM** correctly identfied a change in the
+autoregressive parameter.
+
+
+## Bibliography
+
+* Belzak, W. C. M., & Bauer, D. J. (2020). Improving the assessment of measurement invariance: Using regularization to select anchor items and identify differential item functioning. Psychological Methods, 25(6), 673–690. https://doi.org/10.1037/met0000253
+* Fisher, Z. F., Kim, Y., Fredrickson, B. L., & Pipiras, V. (2022). Penalized Estimation and Forecasting of Multiple Subject Intensive Longitudinal Data. Psychometrika, 87(2), 1–29. https://doi.org/10.1007/s11336-021-09825-7
+* Ou, L., Hunter, M., D., & Chow, S.-M. (2019). Whats for dynr: A package for linear and nonlinear dynamic modeling in r. The R Journal, 11(1), 91–111. https://doi.org/10.32614/RJ-2019-012
+
+
