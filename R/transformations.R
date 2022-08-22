@@ -5,7 +5,8 @@
 #' @param syntax string with user defined transformations
 #' @param parameterLabels names of parameters in the model
 #' @returns list with parameter names and two Rcpp functions: (1) the transformation function and 
-#' (2) a function to create a pointer to the transformation function
+#' (2) a function to create a pointer to the transformation function. 
+#' If starting values were defined, these are returned as well.
 #' @keywords internal
 .compileTransformations <- function(syntax,
                                     parameterLabels){
@@ -17,7 +18,8 @@
   parameters <- .extractParametersFromSyntax(syntax = syntax,
                                              parameterLabels = parameterLabels)
   
-  armaFunction <- .createRcppTransformationFunction(syntax = syntax, parameters = parameters$parameters)
+  armaFunction <- .createRcppTransformationFunction(syntax = syntax, 
+                                                    parameters = parameters$parameters)
   
   cat("Compiling the transformation function ... ")
   
@@ -27,6 +29,7 @@
   return(
     list("parameters" = parameters$parameters,
          "isTransformation" = parameters$parameters[parameters$isTransformation],
+         "startingValues" = parameters$startingValues,
          "getPtr" = getPtr,
          "transformationFunction" = transformationFunction     
     )
@@ -91,7 +94,21 @@
 #' @keywords internal
 .extractParametersFromSyntax <- function(syntax,
                                          parameterLabels){
-  parameters <- syntax[1]
+  # check which line starts with "parameters:" or "start:"
+  parametersAt <- NA
+  startingValuesAt <- NA
+  for(i in 1:length(syntax)){
+    if(grepl("parameters:", syntax[i])){
+      parametersAt <- i
+    }
+    if(grepl("start:", syntax[i])){
+      startingValuesAt <- i
+    }
+  }
+  
+  if(is.na(parametersAt)) stop("Could not find a statement with 'parameters:' in your transformations")
+  
+  parameters <- syntax[parametersAt]
   parameters <- gsub(x = parameters, 
                      pattern = "parameters:",
                      replacement = "", 
@@ -101,7 +118,32 @@
   isTransformation <- rep(FALSE, length(parameters))
   names(isTransformation) <- parameters
   
-  for(i in 2:length(syntax)){
+  if(!is.na(startingValuesAt)){
+    startingValues <- syntax[startingValuesAt]
+    startingValues <- gsub(x = startingValues, 
+                           pattern = "start:",
+                           replacement = "", 
+                           fixed = TRUE)
+    startingValues <- stringr::str_split(string = startingValues, 
+                                         pattern = ",")[[1]]
+    startingValuesNames <- rep(NA, length(startingValues))
+    startingValuesVector <- rep(NA, length(startingValues))
+    for(i in 1:length(startingValues)){
+      startingValuesNames[i] <- stringr::str_split(string = startingValues[i], 
+                                                   pattern = "=")[[1]][1]
+      startingValuesVector[i] <- as.numeric(stringr::str_split(string = startingValues[i], 
+                                                               pattern = "=")[[1]][2])
+    }
+    names(startingValuesVector) <- startingValuesNames
+  }else{
+    startingValuesVector <- NA
+  }
+  
+  for(i in 1:length(syntax)){
+    
+    if(i == parametersAt) next
+    if((!is.na(startingValuesAt)) && i == startingValuesAt) next
+    
     isEquation <- grepl(pattern = "=", syntax[i])
     if(isEquation){
       # check left hand side
@@ -118,7 +160,8 @@
   }
   
   return(list("parameters" = parameters,
-              "isTransformation" = isTransformation))
+              "isTransformation" = isTransformation,
+              "startingValuesVector" = startingValuesVector))
   
 }
 
@@ -131,7 +174,26 @@
 #' @keywords internal
 .createRcppTransformationFunction <- function(syntax, parameters){
   
-  syntax <- syntax[-1] # remove parameter statement from syntax
+  # check which line starts with "parameters:" or "start:"
+  parametersAt <- NA
+  startingValuesAt <- NA
+  for(i in 1:length(syntax)){
+    if(grepl("parameters:", syntax[i])){
+      parametersAt <- i
+    }
+    if(grepl("start:", syntax[i])){
+      startingValuesAt <- i
+    }
+  }
+  
+  # remove parameter and starting values statement from syntax
+  
+  if(!is.na(startingValuesAt)) 
+  {
+    syntax <- syntax[-c(parametersAt, startingValuesAt)]
+  }else{
+    syntax <- syntax[-c(parametersAt)] 
+  }
   
   functionHead <- "
   // [[Rcpp::depends(RcppArmadillo)]]
