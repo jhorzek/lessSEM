@@ -17,7 +17,7 @@
 #'  (`vignette("lessSEM", package = "lessSEM")`).
 #'  - Some advanced regularization procedures can be achieved by using model transformations 
 #'  (e.g., regularizing differences between parameters). See 
-#'  `vignette("Model-transformations", package = "lessSEM")` for more details.
+#'  `vignette("Parameter-transformations", package = "lessSEM")` for more details.
 #'  - `vignette("General-Purpose-Optimization", package = "lessSEM")`  explains 
 #'  the use of the optimizers implemented in **lessSEM** for models other than SEMs
 #'  - `vignette("The-Structural-Equation-Model", package = "lessSEM")`  explains 

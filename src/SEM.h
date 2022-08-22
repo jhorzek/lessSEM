@@ -26,6 +26,8 @@ public:
   bool wasChecked = false; // true if the model was checked
   bool wasFit = false; // true if fit was called
   bool hasTransformations = false; // true if the user defined transformations of parameters
+  int functionCalls = 0;
+  int gradientCalls = 0;
   
   status currentStatus;
   

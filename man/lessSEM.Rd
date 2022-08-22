@@ -22,7 +22,7 @@ There are multiple vignettes for specific topics that may be interesting to you:
 (\code{vignette("lessSEM", package = "lessSEM")}).
 \item Some advanced regularization procedures can be achieved by using model transformations
 (e.g., regularizing differences between parameters). See
-\code{vignette("Model-transformations", package = "lessSEM")} for more details.
+\code{vignette("Parameter-transformations", package = "lessSEM")} for more details.
 \item \code{vignette("General-Purpose-Optimization", package = "lessSEM")}  explains
 the use of the optimizers implemented in \strong{lessSEM} for models other than SEMs
 \item \code{vignette("The-Structural-Equation-Model", package = "lessSEM")}  explains
