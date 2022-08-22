@@ -439,13 +439,13 @@ autoregressive parameter.
 
 The transformations used above are implemented using [RcppArmadillo](https://github.com/RcppCore/RcppArmadillo).
 You can use any of the functions implemented in **Rcpp** or **RcppArmadillo** which
-can be applied to variable of type `double` within your transformations. To provide
+can be applied to variables of type `double` within your transformations. To provide
 another example, we could also use these transformations to set up a simple version of
 a continuous time SEM (e.g., Voelkle & Oud, 2015; far superior versions of this model
 are implemented in [ctsem](https://github.com/cdriveraus/ctsem) and [dynr](https://github.com/mhunter1/dynr)).
 We will use the same model from above, but remove the change in the autoregressive 
 effect. The code to simulate the data set can be found in the source of this 
-file [e.g., on GitHub](https://github.com/jhorzek/lessSEM/blob/main/vignettes/Parameter-transformations.Rmd).
+file ([e.g., on GitHub](https://github.com/jhorzek/lessSEM/blob/main/vignettes/Parameter-transformations.Rmd)).
 
 ```{r, include=FALSE}
 persons <- 200
