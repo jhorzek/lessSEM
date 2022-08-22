@@ -27,6 +27,7 @@ Suggests:
     lslx,
     mvtnorm,
     Matrix,
-    OpenMx
+    OpenMx,
+    ctsemOMX
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr

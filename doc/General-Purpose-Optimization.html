@@ -491,9 +491,9 @@ gradients, this can result in faster estimation:</p>
 #&gt; 6 0.000000000  0.000000000 0.000000000 0.000000000  0.000000000 0.003365918</code></pre>
 <p>Here is a short comparison of running both models 5 times each:</p>
 <p>Runtime in seconds without gradients:</p>
-<pre><code>#&gt; [1] 1.442595 1.386091 1.355790 1.348670 1.381623</code></pre>
+<pre><code>#&gt; [1] 1.406129 1.364129 1.328224 1.324434 1.351225</code></pre>
 <p>Runtime in seconds with gradients:</p>
-<pre><code>#&gt; [1] 0.04835677 0.05188394 0.05013657 0.04860616 0.05118537</code></pre>
+<pre><code>#&gt; [1] 0.04891396 0.05096173 0.05036545 0.04983449 0.05140996</code></pre>
 <p>Now, that’s quite a difference!</p>
 <p>Note that you can also pass a C++ function to gpLasso similar to the
 approach above:</p>
@@ -562,7 +562,7 @@ approach above:</p>
 #&gt; 5 0.000000000  0.000000000 0.000217458 0.001971241  0.000000000 0.007906064
 #&gt; 6 0.000000000  0.000000000 0.000000000 0.000000000  0.000000000 0.003365918</code></pre>
 <p>The runtime in seconds with C++ is:</p>
-<pre><code>#&gt; [1] 0.04277420 0.03685260 0.03413367 0.03410530 0.03410721</code></pre>
+<pre><code>#&gt; [1] 0.03627133 0.03788137 0.03488636 0.03457785 0.03444600</code></pre>
 <p>Which is even lower than what we had before!</p>
 </div>
 <div id="the-second-approach-using-c-function-pointers" class="section level2">
@@ -836,7 +836,7 @@ end, use the <code>gpLassoCpp</code> function:</p>
 #&gt; 5 0.000000000  0.000000000 0.0001374354 0.002100692  0.000000000 0.008033475
 #&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003352431</code></pre>
 <p>Benchmarking this approach results in:</p>
-<pre><code>#&gt; [1] 0.005755186 0.005556107 0.006187439 0.006460190 0.006469250</code></pre>
+<pre><code>#&gt; [1] 0.005872965 0.005683661 0.005662680 0.006442070 0.006541729</code></pre>
 <p>So, we have reduced our run time even more!</p>
 </div>
 </div>
@@ -862,7 +862,7 @@ the <a href="https://github.com/jhorzek/lessLM">lessLM</a> package.</p>
 #&gt; [5,] 0.0001374354 0.002100692  0.000000000 0.008033475
 #&gt; [6,] 0.0000000000 0.000000000  0.000000000 0.003352431</code></pre>
 <p>And the run times are even lower:</p>
-<pre><code>#&gt; [1] 0.001620054 0.001327991 0.001418591 0.001441240 0.001411676</code></pre>
+<pre><code>#&gt; [1] 0.0015168190 0.0008740425 0.0008568764 0.0008738041 0.0008821487</code></pre>
 </div>
 
 

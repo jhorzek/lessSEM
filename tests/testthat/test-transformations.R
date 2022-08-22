@@ -131,8 +131,8 @@ test_that("testing transformations", {
 '
   
   fitLavaan <- sem(modelLavaan, 
-                data = PoliticalDemocracy, 
-                meanstructure = TRUE
+                   data = PoliticalDemocracy, 
+                   meanstructure = TRUE
   )
   
   transformations <- "
@@ -141,7 +141,7 @@ test_that("testing transformations", {
   e = b + deltaB
   f = c + deltaC
   "
-  rsemGlmnet <- lasso(lavaanModel = model2, 
+  rsemGlmnet <- lasso(lavaanModel = fitLavaan, 
                       regularized = c("deltaA", "deltaB", "deltaC"),
                       lambdas = 0,
                       method = "glmnet",
@@ -151,7 +151,8 @@ test_that("testing transformations", {
   
   
   library(OpenMx)
-  
+  manifests <- c(paste0("x",1:3), paste0("y", 1:8))
+  latents <- c("ind60", "dem60", "dem65")
   modelMx <- mxModel(
     mxPath(from = "ind60", 
            to = "dem60",
@@ -203,10 +204,10 @@ test_that("testing transformations", {
   fitMx <- mxRun(modelMx)
   testthat::expect_equal(
     all(
-    abs(
-    omxGetParameters(fitMx)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")] -
-    unlist(coef(rsemGlmnet)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")])
-    ) < .01), 
+      abs(
+        omxGetParameters(fitMx)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")] -
+          unlist(coef(rsemGlmnet)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")])
+      ) < .01), 
     TRUE)
   
   ## Let's test another transformation
@@ -269,7 +270,7 @@ test_that("testing transformations", {
   e = b + deltaB
   f = c + deltaC
   "
-  rsemGlmnet <- lasso(lavaanModel = model2, 
+  rsemGlmnet <- lasso(lavaanModel = fitLavaan, 
                       regularized = c("dlog", "deltaB", "deltaC"),
                       lambdas = 0,
                       method = "glmnet",

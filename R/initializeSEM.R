@@ -241,6 +241,14 @@
     
     parameterTable$isTransformation[parameterTable$label %in% transformationFunctions$isTransformation] <- TRUE
     
+    if(all(!is.na(transformationFunctions$startingValues))){
+      for(i in 1:length(transformationFunctions$startingValues)){
+        whichPar <- parameterTable$label == names(transformationFunctions$startingValues)[i]
+        parameterTable$rawValue[whichPar] <- transformationFunctions$startingValues[i]
+        parameterTable$value[whichPar] <- transformationFunctions$startingValues[i]
+      }
+    }
+    
   }else{
     hasTransformations <- FALSE
   }

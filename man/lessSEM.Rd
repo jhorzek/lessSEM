@@ -3,16 +3,17 @@
 \docType{package}
 \name{lessSEM}
 \alias{lessSEM}
+\alias{lessSEM-package}
 \title{lessSEM}
 \description{
 lessSEM (\strong{l}essSEM \strong{e}stimates \strong{s}parse \strong{SEMr})
 is an R package which provides regularized
 structural equation modeling (regularized SEM)
 building on lavaan.
+}
+\details{
 lessSEM is heavily inspired by the \href{https://github.com/Rjacobucci/regsem}{regsem}
-and \href{https://github.com/psyphh/lslx}{lslx} packages.
-
-The objectives of lessSEM are (1) to compare exact and approximate optimization of regularized SEM
+and \href{https://github.com/psyphh/lslx}{lslx} packages. The objectives of lessSEM are (1) to compare exact and approximate optimization of regularized SEM
 and (2) to provide optimizers for other SEM packages which can be used with an
 interface similar to optim.
 
@@ -36,9 +37,8 @@ find more stable implementations of regularized SEM in the
 R packages \href{https://github.com/Rjacobucci/regsem}{regsem}
 and \href{https://github.com/psyphh/lslx}{lslx}.
 \subsection{References}{
-}
-}
-\details{
+
+More details can be found in the following publications:
 \subsection{R - Packages / Software}{
 \itemize{
 \item \href{https://github.com/yrosseel/lavaan}{lavaan} Rosseel, Y. (2012). lavaan: An R Package for Structural Equation Modeling. Journal of Statistical Software, 48(2), 1–36. https://doi.org/10.18637/jss.v048.i02
@@ -112,6 +112,8 @@ Proceedings of the 30th International Conference on Machine Learning, 28(2)(2), 
 \item Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and
 Trends in Optimization, 1(3), 123–231.
 }
+}
+
 }
 
 }
@@ -204,3 +206,4 @@ regsemGlmnet@parameters - regsem@parameters
 \author{
 Jannik Orzek \href{mailto:orzek@mpib-berlin.mpg.de}{orzek@mpib-berlin.mpg.de}
 }
+\keyword{internal}
