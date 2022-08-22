@@ -4,34 +4,35 @@
 #' is an R package which provides regularized 
 #' structural equation modeling (regularized SEM) 
 #' building on lavaan.
+#' 
+#' 
 #' lessSEM is heavily inspired by the [regsem](https://github.com/Rjacobucci/regsem) 
-#' and [lslx](https://github.com/psyphh/lslx) packages.
+#' and [lslx](https://github.com/psyphh/lslx) packages. The objectives of lessSEM are (1) to compare exact and approximate optimization of regularized SEM
+#' and (2) to provide optimizers for other SEM packages which can be used with an 
+#' interface similar to optim.
 #'  
-#'  The objectives of lessSEM are (1) to compare exact and approximate optimization of regularized SEM
-#'  and (2) to provide optimizers for other SEM packages which can be used with an 
-#'  interface similar to optim.
+#' There are multiple vignettes for specific topics that may be interesting to you:
 #'  
-#'  There are multiple vignettes for specific topics that may be interesting to you:
-#'  
-#'  - If you are new to **lessSEM**, check out the vignette 'lessSEM' 
-#'  (`vignette("lessSEM", package = "lessSEM")`).
-#'  - Some advanced regularization procedures can be achieved by using model transformations 
-#'  (e.g., regularizing differences between parameters). See 
-#'  `vignette("Parameter-transformations", package = "lessSEM")` for more details.
-#'  - `vignette("General-Purpose-Optimization", package = "lessSEM")`  explains 
-#'  the use of the optimizers implemented in **lessSEM** for models other than SEMs
-#'  - `vignette("The-Structural-Equation-Model", package = "lessSEM")`  explains 
-#'  the how SEMs are implemented in **lessSEM**
-#'  - `vignette("The-optimizer-interface", package = "lessSEM")`  explains 
-#'  the details of the underlying optimizer framework
-#'    
-#'  
-#'  **Warning**: The package is relatively new and you may 
-#'  find more stable implementations of regularized SEM in the 
-#'  R packages [regsem](https://github.com/Rjacobucci/regsem) 
-#'  and [lslx](https://github.com/psyphh/lslx). 
+#' - If you are new to **lessSEM**, check out the vignette 'lessSEM' 
+#' (`vignette("lessSEM", package = "lessSEM")`).
+#' - Some advanced regularization procedures can be achieved by using model transformations 
+#' (e.g., regularizing differences between parameters). See 
+#' `vignette("Parameter-transformations", package = "lessSEM")` for more details.
+#' - `vignette("General-Purpose-Optimization", package = "lessSEM")`  explains 
+#' the use of the optimizers implemented in **lessSEM** for models other than SEMs
+#' - `vignette("The-Structural-Equation-Model", package = "lessSEM")`  explains 
+#' the how SEMs are implemented in **lessSEM**
+#' - `vignette("The-optimizer-interface", package = "lessSEM")`  explains 
+#' the details of the underlying optimizer framework
+#'   
+#' **Warning**: The package is relatively new and you may 
+#' find more stable implementations of regularized SEM in the 
+#' R packages [regsem](https://github.com/Rjacobucci/regsem) 
+#' and [lslx](https://github.com/psyphh/lslx). 
 #'  
 #' ## References
+#' 
+#' More details can be found in the following publications:
 #' 
 #' ### R - Packages / Software
 #' 
@@ -189,7 +190,8 @@
 #' @useDynLib lessSEM
 #' @exportPattern("^[[:alpha:]]+")
 #' @name lessSEM
-NULL
+#' @keywords internal
+"_PACKAGE"
 
 # SEM Module
 Rcpp::loadModule("SEM_cpp", TRUE)
