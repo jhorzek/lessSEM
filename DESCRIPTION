@@ -5,10 +5,11 @@ Version: 1.0
 Date: 2022-04-03
 Author: Jannik H. Orzek
 Maintainer: Jannik H. Orzek <orzek@mpib-berlin.mpg.de>
-Description: lessSEM provides regularized structural equation modeling 
+Description: Provides regularized structural equation modeling 
   (regularized SEM) with non-smooth penalty functions (e.g., lasso) building 
   on lavaan. The package is heavily inspired by the 
-  [regsem](https://github.com/Rjacobucci/regsem) package.
+  [regsem](https://github.com/Rjacobucci/regsem) and 
+  [lslx](https://github.com/psyphh/lslx) packages. See ?lessSEM::lessSEM for an introduction.
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.2.1
@@ -25,6 +26,7 @@ Suggests:
     regsem,
     lslx,
     mvtnorm,
-    Matrix
+    Matrix,
+    OpenMx
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr

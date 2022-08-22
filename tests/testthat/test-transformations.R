@@ -117,4 +117,172 @@ test_that("testing transformations", {
   testthat::expect_equal(abs(params2["e"] - params2["b"] - params2["deltaB"])< 1e-10,c("e" = TRUE))
   testthat::expect_equal(abs(params2["f"] - params2["c"] - params2["deltaC"])< 1e-10,c("f" = TRUE))
   
+  
+  ## Testing transformations against OpenMx
+  modelLavaan <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a*y2 + b*y3 + c*y4
+     dem65 =~ y5 + d*y6 + e*y7 + f*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+'
+  
+  fitLavaan <- sem(modelLavaan, 
+                data = PoliticalDemocracy, 
+                meanstructure = TRUE
+  )
+  
+  transformations <- "
+  parameters: a,b,c,d,e,f,deltaA, deltaB, deltaC
+  d = a + deltaA
+  e = b + deltaB
+  f = c + deltaC
+  "
+  rsemGlmnet <- lasso(lavaanModel = model2, 
+                      regularized = c("deltaA", "deltaB", "deltaC"),
+                      lambdas = 0,
+                      method = "glmnet",
+                      control = controlGlmnet(),
+                      modifyModel = modifyModel(transformations = transformations)
+  )
+  
+  
+  library(OpenMx)
+  
+  modelMx <- mxModel(
+    mxPath(from = "ind60", 
+           to = "dem60",
+           labels = "dem60_ind60",
+           free = c(TRUE)),
+    mxPath(from = c("ind60",
+                    "dem60"), 
+           to = "dem65", 
+           labels = c("dem65_ind60", "dem65_dem60"),
+           free = TRUE),
+    mxPath(from = "ind60", 
+           to = paste0("x",1:3), 
+           labels = paste0("l",1:3),
+           free = c(FALSE, TRUE, TRUE), 
+           values = c(1,1,1)),
+    mxPath(from = "dem60", 
+           to = paste0("y",1:4), 
+           labels = c(NA, "a", "b", "c"),
+           free = c(FALSE, TRUE, TRUE, TRUE), 
+           values = c(1,1,1,1)),
+    mxPath(from = "dem65", 
+           to = paste0("y",5:8), 
+           labels = c(NA, "d[1,1]", "e[1,1]", "f[1,1]"),
+           free = c(FALSE, FALSE, FALSE, FALSE), 
+           values = c(1,1,1,1)),
+    mxAlgebra(expression = a+deltaA, name = "d"),
+    mxAlgebra(expression = b+deltaB, name = "e"),
+    mxAlgebra(expression = c+deltaC, name = "f"),
+    mxMatrix(type = "Full", nrow = 1, ncol = 1, free = TRUE, values = 0, labels = "deltaA"),
+    mxMatrix(type = "Full", nrow = 1, ncol = 1, free = TRUE, values = 0, labels = "deltaB"),
+    mxMatrix(type = "Full", nrow = 1, ncol = 1, free = TRUE, values = 0, labels = "deltaC"),
+    mxPath(from = latents, 
+           to = latents, 
+           labels = paste0(latents, "__", latents),
+           arrows = 2, 
+           free = TRUE),
+    mxPath(from = manifests, 
+           to = manifests, 
+           labels = paste0(manifests, "__", manifests),
+           arrows = 2,
+           free = TRUE),
+    mxData(observed = PoliticalDemocracy, type = "raw"),
+    mxFitFunctionML(),
+    latentVars = latents,
+    manifestVars = manifests,
+    mxPath(from = 'one', to = manifests),
+    type = "RAM"
+  )
+  fitMx <- mxRun(modelMx)
+  testthat::expect_equal(
+    all(
+    abs(
+    omxGetParameters(fitMx)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")] -
+    unlist(coef(rsemGlmnet)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")])
+    ) < .01), 
+    TRUE)
+  
+  ## Let's test another transformation
+  
+  modelMx <- mxModel(
+    mxPath(from = "ind60", 
+           to = "dem60",
+           labels = "dem60_ind60",
+           free = c(TRUE)),
+    mxPath(from = c("ind60",
+                    "dem60"), 
+           to = "dem65", 
+           labels = c("dem65_ind60", "dem65_dem60"),
+           free = TRUE),
+    mxPath(from = "ind60", 
+           to = paste0("x",1:3), 
+           labels = paste0("l",1:3),
+           free = c(FALSE, TRUE, TRUE), 
+           values = c(1,1,1)),
+    mxPath(from = "dem60", 
+           to = paste0("y",1:4), 
+           labels = c(NA, "a", "b", "c"),
+           free = c(FALSE, TRUE, TRUE, TRUE), 
+           values = c(1,1,1,1)),
+    mxPath(from = "dem65", 
+           to = paste0("y",5:8), 
+           labels = c(NA, "d[1,1]", "e[1,1]", "f[1,1]"),
+           free = c(FALSE, FALSE, FALSE, FALSE), 
+           values = c(1,1,1,1)),
+    mxAlgebra(expression = exp(dlog), name = "d"),
+    mxAlgebra(expression = b+deltaB, name = "e"),
+    mxAlgebra(expression = c+deltaC, name = "f"),
+    mxMatrix(type = "Full", nrow = 1, ncol = 1, free = TRUE, values = 0, labels = "dlog"),
+    mxMatrix(type = "Full", nrow = 1, ncol = 1, free = TRUE, values = 0, labels = "deltaB"),
+    mxMatrix(type = "Full", nrow = 1, ncol = 1, free = TRUE, values = 0, labels = "deltaC"),
+    mxPath(from = latents, 
+           to = latents, 
+           labels = paste0(latents, "__", latents),
+           arrows = 2, 
+           free = TRUE),
+    mxPath(from = manifests, 
+           to = manifests, 
+           labels = paste0(manifests, "__", manifests),
+           arrows = 2,
+           free = TRUE),
+    mxData(observed = PoliticalDemocracy, type = "raw"),
+    mxFitFunctionML(),
+    latentVars = latents,
+    manifestVars = manifests,
+    mxPath(from = 'one', to = manifests),
+    type = "RAM"
+  )
+  fitMx <- mxRun(modelMx)
+  omxGetParameters(fitMx)
+  
+  
+  transformations <- "
+  parameters: a,b,c,d,e,f,dlog, deltaB, deltaC
+  d = exp(dlog)
+  e = b + deltaB
+  f = c + deltaC
+  "
+  rsemGlmnet <- lasso(lavaanModel = model2, 
+                      regularized = c("dlog", "deltaB", "deltaC"),
+                      lambdas = 0,
+                      method = "glmnet",
+                      control = controlGlmnet(),
+                      modifyModel = modifyModel(transformations = transformations)
+  )
+  coef(rsemGlmnet)
+  
+  testthat::expect_equal(
+    all(
+      abs(
+        omxGetParameters(fitMx)[c("a", "b", "c", "dlog", "deltaB", "deltaC")] -
+          unlist(coef(rsemGlmnet)[c("a", "b", "c", "dlog", "deltaB", "deltaC")])
+      ) < .01), 
+    TRUE)
 })
