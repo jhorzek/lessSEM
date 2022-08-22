@@ -348,6 +348,7 @@ double SEMCpp::fit(){
   
   m2LL = 0.0;
   wasFit = true;
+  functionCalls++;
   
   // step one: compute implied mean and covariance
   implied();
@@ -408,6 +409,8 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   if((currentStatus != computedImplied) & (currentStatus != fitted)){
     Rcpp::stop("The model implied matrices have not been computed yet. Call Model$implied() first.");
   }
+  gradientCalls++;
+  
   arma::rowvec gradients = gradientsByGroup(*this, raw);
   
   if(hasTransformations){
@@ -456,6 +459,8 @@ RCPP_MODULE(SEM_cpp){
     .field_readonly( "rawData", &SEMCpp::rawData, "raw data set")
     .field_readonly( "manifestNames", &SEMCpp::manifestNames, "names of manifest variables")
     .field_readonly( "wasFit", &SEMCpp::wasFit, "names of manifest variables")
+    .field_readonly( "functionCalls", &SEMCpp::functionCalls, "Counts how often the fit function was called")
+    .field_readonly( "gradientCalls", &SEMCpp::gradientCalls, "Counts how often the gradient function was called")
   
   // methods
   .method( "setMatrix", &SEMCpp::setMatrix, "Fills the elements of a model matrix. Expects a char (A, S, or F), and a matrix with values")

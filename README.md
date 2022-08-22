@@ -8,7 +8,8 @@ which provides regularized structural equation modeling (regularized
 SEM) with non-smooth penalty functions (e.g., lasso) building on
 [lavaan](https://github.com/yrosseel/lavaan). lessSEM is heavily
 inspired by the [regsem](https://github.com/Rjacobucci/regsem) package
-which provides similar functionality.
+and the [lslx](https://github.com/psyphh/lslx) package which provide
+similar functionality.
 
 The objectives of lessSEM are:
 
@@ -180,7 +181,7 @@ derivation of the scad and mcp used by the package in the vignette
 
 Finally, you can also transform parameters of your model. This is
 explained in detail in the vignette
-`vignette('Model-transformations', package = 'lessSEM')` and is a
+`vignette('Parameter-transformations', package = 'lessSEM')` and is a
 powerful tool to, for instance, detect measurement invariance.
 
 # References

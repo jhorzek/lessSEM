@@ -16,8 +16,7 @@
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
-
-#' @export
+#' @keywords internal
 .regularizeSEMInternal <- function(lavaanModel,
                                    penalty,
                                    weights,
@@ -432,7 +431,9 @@
   }
   
   internalOptimization <- list(
-    "HessiansOfDifferentiablePart" = Hessians
+    "HessiansOfDifferentiablePart" = Hessians,
+    "functionCalls" = SEM$functionCalls,
+    "gradientCalls" = SEM$gradientCalls
   )
   
   results <- new("regularizedSEM",

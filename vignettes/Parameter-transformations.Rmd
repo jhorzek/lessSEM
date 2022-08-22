@@ -1,8 +1,8 @@
 ---
-title: "Model-transformations"
+title: "Parameter-transformations"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Model-transformations}
+  %\VignetteIndexEntry{Parameter-transformations}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -19,13 +19,14 @@ library(lessSEM)
 ```
 
 To allow for more flexible model estimation, **lessSEM** offers parameter 
-transformations. This is still an experimental feature, so beware. But if it 
-can be used, it is relatively powerful.
+transformations. This is an experimental feature, so be careful when using it. 
+However, parameter transformations can be very powerful and simplify implementing
+some specific forms of regularization. 
 
 ## Motivation
 
-In longitudinal SEM, an important question is if parameters stay the same over
-time (e.g., measurement invariance). This question can be difficult to answer and
+In longitudinal SEM, it is important to investigate if parameters stay the same over
+time (e.g., measurement invariance). This can be difficult to decide and
 may require setting up many different models manually. Here, regularization techniques
 can be very handy. For instance, in the seminal political democracy example, the 
 model is typically set up as follows (see `?lavaan::sem`):
@@ -50,8 +51,8 @@ modelSyntax <- '
 '
 ```
 
-Note that the loadings a, b, and c are assumed to stay the same over time!
-That is, measurement invariance is assumed. Relaxing this assumption, we could
+Note that the loadings a, b, and c are assumed to stay the same over time.
+That is, measurement invariance is assumed! Relaxing this assumption, we could
 define the model as follows:
 
 ```{r}
@@ -75,18 +76,18 @@ modelSyntax <- '
 ```
 
 Here, each loading is estimated separately. This results in a more complex model. 
-However do we know which model to use? There are many procedures to answer this 
+How do we know which model to use? There are many procedures to answer this 
 question (e.g., using modification indexes, setting up separate models by hand, etc.).
+In the following, we will show how regularization could be used (see e.g., Belzak & Bauer, 2020).
 
 ## Using Regularization
 
 First, note that measurement invariance can be rephrased as $a_1-a_2 = 0$, $b_1-b_2 = 0$, 
 and $c_1-c_2 = 0$. Thus, regularizing the differences between these parameters may
-allow for testing measurement invariance (Belzak & Bauer, 2020, for using regularization
-techniques to test measurement invariance). In **regsem**, there is a "diff_lasso"
-implementation which regularizes differences between parameters, however this is
-not available in **lessSEM**. However, **lessSEM** provides a flexible workaround:
-parameter transformations. 
+allow for testing measurement invariance (e.g., Belzak & Bauer, 2020). 
+In **regsem**, there is a "diff_lasso" implementation which regularizes differences 
+between parameters, however this is not available in **lessSEM**. 
+Instead, **lessSEM** provides a flexible workaround: parameter transformations. 
 To make this work, we have to re-define our parameters. To this end, we make use
 of a decomposition similar to that proposed by Fisher et al. (2022)[^1]. 
 
@@ -173,7 +174,7 @@ c2 = c1 + delta_c2
 
 Next, we have to pass the `transformations` variable to the penalty function:
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 lassoFit <- lasso(lavaanModel = lavaanFit, 
                   regularized = c("delta_a2", "delta_b2", "delta_c2"),# we want to regularize 
                   # the differences between the parameters
@@ -183,7 +184,7 @@ lassoFit <- lasso(lavaanModel = lavaanFit,
 )
 ```
 
-```{r, include = FALSE}
+```{r, eval = FALSE}
 lassoFit <- lasso(lavaanModel = lavaanFit, 
                   regularized = c("delta_a2", "delta_b2", "delta_c2"),# we want to regularize 
                   # the differences between the parameters
@@ -198,7 +199,7 @@ Let's have a look at the parameter estimates:
 ```{r}
 coef(lassoFit)[seq(1,100,10),c("lambda", "a1", "b1", "c1", "delta_a2", "delta_b2", "delta_c2")]
 ```
-Note that the differences between the parameters gets smaller with larger $\lambda$ values. 
+Note that the differences between the parameters get smaller with larger $\lambda$ values. 
 We can also plot the differences:
 
 ```{r}
@@ -212,8 +213,8 @@ using information criteria:
 coef(lassoFit, criterion = "BIC")
 ```
 
-Note that all differences have been zeroed -- that is, a model with measurement invariance
-did fit best.
+Note that all differences have been zeroed -- that is, a model with full measurement 
+invariance did fit best.
 
 Limitation: Above, we did not take into account that the variables may have 
 different scales; a thorough use of the method should scale the data first.
@@ -250,7 +251,7 @@ autoregressive effect ($a_1$) and the difference between the parameters ($\Delta
 By regularizing $\Delta a_t$, we can enforce stationarity. 
 
 A drawback of the approach outlined above is that the first autoregressive effect
-is treated as different from the rest: After all, why should $a_1$ serve as baseline and not 
+is treated differently from the rest: After all, why should $a_1$ serve as baseline and not 
 $a_2$ or $a_5$? We will take a slightly different approach, again building on the
 idea of Fisher et al. (2022). Let's define the autoregressive effect as
 
@@ -266,9 +267,9 @@ for regime switching models) and we want to detect if/when the process changes.
 
 We won't go into the details of how to set up the model here, but you can 
 find them in the source of this file 
-([e.g., in GitHub](https://github.com/jhorzek/lessSEM/tree/main/vignettes/Model-transformations.Rmd)).
+([e.g., in GitHub](https://github.com/jhorzek/lessSEM/tree/main/vignettes/Parameter-transformations.Rmd)).
 We simulated a data set with 200 individuals measured at 10 time points. The
-autoregressive effect $a_t$ changes at $t=5$ from $.6$ to $.2$.
+autoregressive effect $a_t$ changes at $t=4$ from $.6$ to $.2$.
 
 ```{r, include = FALSE}
 set.seed(123)
@@ -276,7 +277,8 @@ set.seed(123)
 
 persons <- 200
 tps <- 10
-a <- c(rep(.6,4), rep(.2,tps-4))
+a <- c(rep(.6,4), # first element will be ignored
+       rep(.2,tps-4))
 
 data <- matrix(NA, 
                nrow = persons, 
@@ -350,9 +352,11 @@ lavaanFit <- sem(model = lavaanSyntax,
                  orthogonal.y = TRUE, 
                  orthogonal.x = TRUE,
                  missing = "ml")
+coef(lavaanFit)
 ```
 
-
+Note that no constraints on autoregressive effects are implemented -- each
+effect (a1-a9) is estimated separately.
 ```{r, include=FALSE}
 transformations <- 
   paste0(
@@ -370,7 +374,7 @@ transformations <-
 )
 ```
 
-And define our transformations as follows:
+We now define transformations as follows:
 
 ```{r, echo=FALSE}
 cat(transformations)
@@ -382,7 +386,7 @@ Finally, we can fit our model:
 lassoFit <- lasso(lavaanModel = lavaanFit, 
                   regularized = paste0("delta", 2:9),# we want to regularize 
                   # the differences between the parameters
-                  nLambdas = 20,
+                  nLambdas = 100,
                   # glmnet is considerably faster here:
                   method = "glmnet",
                   control = controlGlmnet(),
@@ -396,7 +400,7 @@ lassoFit <- lasso(lavaanModel = lavaanFit,
 lassoFit <- lasso(lavaanModel = lavaanFit, 
                   regularized = paste0("delta", 2:9),# we want to regularize 
                   # the differences between the parameters
-                  nLambdas = 20,
+                  nLambdas = 100,
                   # glmnet is considerably faster here:
                   method = "glmnet",
                   control = controlGlmnet(),
@@ -411,7 +415,23 @@ Extracting the best fitting model:
 coef(lassoFit, criterion = "BIC")
 ```
 
-While the result is not perfect, **lessSEM** correctly identfied a change in the
+The true autoregressive effects are given by
+```{r,echo=FALSE}
+a[2:10]
+```
+
+while the estimates are
+```{r}
+aEst <- rep(NA, 9)
+aEst[1] <- unlist(coef(lassoFit, criterion = "BIC")["a1"])
+for(i in 2:9){
+  aEst[i] <- aEst[i-1] + unlist(coef(lassoFit, criterion = "BIC")[paste0("delta",i)])
+}
+
+print(aEst)
+```
+
+The result is not perfect, but **lessSEM** correctly identfied a change in the
 autoregressive parameter.
 
 

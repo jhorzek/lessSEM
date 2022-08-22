@@ -321,6 +321,138 @@ Compare this to:
 -2*logLik(lavaanModel)
 ```
 
+## Changing the optimizer
+
+**lessSEM** comes with two specialized optimization procedures for elastic-net-type
+penalties: ista and glmnet. Currently, the default is ista, which does not require the 
+computation of a Hessian matrix. However, this comes at a price: ista optimization
+tends to call the fit and gradient function a lot more than glment. If you are using an elastic-net-type 
+penalty (ridge, lasso, adaptive lasso, or elastic net), we recommend that you 
+first test the glmnet optimizer and then switch to ista if glmnet results in errors
+due to the Hessian matrix. Switching to glmnet is done as follows:
+
+```{r, eval = FALSE}
+fitLasso <- lasso(lavaanModel = lavaanModel, 
+                  regularized = regularized,
+                  nLambdas = 10,
+                  method = "glmnet", # change the method
+                  control = controlGlmnet() # change the control argument
+                  )
+```
+
+## Parameter transformations
+
+**lessSEM** allows for parameter transformations. This is explained in detail in the
+vignette Parameter-transformations (see `vignette("Parameter-transformations", package = "lessSEM")`).
+To provide a short example, let's have a look at the political democracy data set:
+
+```{r}
+# example from ?lavaan::sem
+library(lavaan)
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a*y2 + b*y3 + c*y4
+     dem65 =~ y5 + a*y6 + b*y7 + c*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+lavaanFit <- sem(model = modelSyntax,
+                 data = PoliticalDemocracy)
+```
+
+Note that in the model estimated above, loadings on the latent variables are 
+constrained to equality over time. We could also relax this assumption by
+allowing for time point specific loadings:
+
+```{r}
+library(lavaan)
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+lavaanFit <- sem(model = modelSyntax,
+                 data = PoliticalDemocracy)
+```
+
+Deciding between both approaches can be difficult as there may be some parameters
+for which equality over time holds, while others violate the assumption. 
+Here, transformations can be used to regularize differences between parameters.
+To this end, we define the transformations:
+
+```{r}
+transformations <- "
+# IMPORTANT: Our transformations always have to start with the follwing line:
+parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
+
+# In the line above, we defined the names of the parameters which we
+# want to use in our transformations. EACH AND EVERY PARAMETER USED IN
+# THE FOLLOWING MUST BE STATED ABOVE. The line must always start with
+# the keyword 'parameters' followed by a colon. The parameters must be
+# separated by commata.
+
+# Now we can state our transformations:
+
+a2 = a1 + delta_a2
+b2 = b1 + delta_b2
+c2 = c1 + delta_c2
+"
+```
+
+Next, we have to pass the `transformations` variable to the penalty function:
+
+```{r, echo=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = c("delta_a2", "delta_b2", "delta_c2"),# we want to regularize 
+                  # the differences between the parameters
+                  nLambdas = 100,
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r, include = FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = c("delta_a2", "delta_b2", "delta_c2"),# we want to regularize 
+                  # the differences between the parameters
+                  nLambdas = 100,
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+To check if measurement invariance can be assumed, we can select the best model 
+using information criteria:
+
+```{r}
+coef(lassoFit, criterion = "BIC")
+```
+
+More details are provided in `vignette("Parameter-transformations", package = "lessSEM")`.
 
 ## More information
 
