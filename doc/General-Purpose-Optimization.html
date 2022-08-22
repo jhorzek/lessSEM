@@ -491,9 +491,9 @@ gradients, this can result in faster estimation:</p>
 #&gt; 6 0.000000000  0.000000000 0.000000000 0.000000000  0.000000000 0.003365918</code></pre>
 <p>Here is a short comparison of running both models 5 times each:</p>
 <p>Runtime in seconds without gradients:</p>
-<pre><code>#&gt; [1] 1.330495 1.300491 1.245776 1.250139 1.278634</code></pre>
+<pre><code>#&gt; [1] 1.442595 1.386091 1.355790 1.348670 1.381623</code></pre>
 <p>Runtime in seconds with gradients:</p>
-<pre><code>#&gt; [1] 0.04893064 0.04770327 0.04499030 0.04780340 0.04754496</code></pre>
+<pre><code>#&gt; [1] 0.04835677 0.05188394 0.05013657 0.04860616 0.05118537</code></pre>
 <p>Now, that’s quite a difference!</p>
 <p>Note that you can also pass a C++ function to gpLasso similar to the
 approach above:</p>
@@ -562,11 +562,11 @@ approach above:</p>
 #&gt; 5 0.000000000  0.000000000 0.000217458 0.001971241  0.000000000 0.007906064
 #&gt; 6 0.000000000  0.000000000 0.000000000 0.000000000  0.000000000 0.003365918</code></pre>
 <p>The runtime in seconds with C++ is:</p>
-<pre><code>#&gt; [1] 0.03563714 0.03443170 0.03272772 0.03284526 0.03276324</code></pre>
+<pre><code>#&gt; [1] 0.04277420 0.03685260 0.03413367 0.03410530 0.03410721</code></pre>
 <p>Which is even lower than what we had before!</p>
 </div>
-<div id="using-c-function-pointers" class="section level2">
-<h2>Using C++ function pointers</h2>
+<div id="the-second-approach-using-c-function-pointers" class="section level2">
+<h2>The second approach: Using C++ function pointers</h2>
 <p>While using the Rcpp functions defined above was quite fast for our
 linear regression, it can still be fairly slow for more involved models
 (e.g., SEM). This is due to our optimizer having to go back and forth
@@ -836,12 +836,12 @@ end, use the <code>gpLassoCpp</code> function:</p>
 #&gt; 5 0.000000000  0.000000000 0.0001374354 0.002100692  0.000000000 0.008033475
 #&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003352431</code></pre>
 <p>Benchmarking this approach results in:</p>
-<pre><code>#&gt; [1] 0.005780697 0.005470276 0.005553007 0.005724669 0.006649256</code></pre>
+<pre><code>#&gt; [1] 0.005755186 0.005556107 0.006187439 0.006460190 0.006469250</code></pre>
 <p>So, we have reduced our run time even more!</p>
 </div>
 </div>
-<div id="approach-3-including-the-header-files" class="section level2">
-<h2>Approach 3: Including the header files</h2>
+<div id="the-third-approach-including-the-header-files" class="section level2">
+<h2>The third approach: Including the header files</h2>
 <p>This is, by far, the most difficult approach which is why we have
 created a whole package to demonstrate it. You will find more
 information in the vignette <code>The-optimizer-interface</code> and in
@@ -862,7 +862,7 @@ the <a href="https://github.com/jhorzek/lessLM">lessLM</a> package.</p>
 #&gt; [5,] 0.0001374354 0.002100692  0.000000000 0.008033475
 #&gt; [6,] 0.0000000000 0.000000000  0.000000000 0.003352431</code></pre>
 <p>And the run times are even lower:</p>
-<pre><code>#&gt; [1] 0.0014665127 0.0008847713 0.0009009838 0.0008785725 0.0009002686</code></pre>
+<pre><code>#&gt; [1] 0.001620054 0.001327991 0.001418591 0.001441240 0.001411676</code></pre>
 </div>
 
 
