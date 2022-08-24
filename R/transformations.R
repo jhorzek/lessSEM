@@ -13,8 +13,6 @@
   
   syntax <- .reduceSyntax(syntax = syntax)
   
-  .checkSyntax(syntax = syntax)
-  
   parameters <- .extractParametersFromSyntax(syntax = syntax,
                                              parameterLabels = parameterLabels)
   
@@ -48,10 +46,7 @@
   # split rows
   syntax <- stringr::str_split(string = syntax, 
                                pattern = "\\n")[[1]]
-  # remove white space
-  syntax <- stringr::str_replace_all(string = syntax, 
-                                     pattern = "\\s",
-                                     replacement = "")
+  
   # remove comments
   hasComment <- stringr::str_locate(syntax,
                                     "#|!")
@@ -67,21 +62,17 @@
     }
   }
   
-  # remove empty
-  syntax <- syntax[syntax != ""]
+  # remove empty elements
+  syntax <- syntax[!grepl(pattern = "^\\s*$", x = syntax)]
+  
+  # # check if left hand side of an equation has white space -> will be 
+  # # a data type and a variable name
+  # isDefinition <- grepl(pattern = "[a-zA-Z:]+\\s+[a-zA-Z:]+\\s*=",
+  #                          x = syntax) &
+  #   !grepl(pattern = "start\\s*:\\s*",
+  #         x = syntax)
   
   return(syntax)
-}
-
-#' .checkSyntax
-#' 
-#' check the syntax for parameter transformations
-#' @param syntax syntax for parameter transformations
-#' @return nothing
-#' @keywords internal
-.checkSyntax <- function(syntax){
-  if(!grepl(pattern = "parameters:", syntax[1])) 
-    stop("The syntax for parameter transformations must start with a statement similar to paramters: a, b, c, ...")
 }
 
 #' .extractParametersFromSyntax
@@ -98,10 +89,10 @@
   parametersAt <- NA
   startingValuesAt <- NA
   for(i in 1:length(syntax)){
-    if(grepl("parameters:", syntax[i])){
+    if(grepl("parameters\\s*:", syntax[i])){
       parametersAt <- i
     }
-    if(grepl("start:", syntax[i])){
+    if(grepl("start\\s*:", syntax[i])){
       startingValuesAt <- i
     }
   }
@@ -109,10 +100,13 @@
   if(is.na(parametersAt)) stop("Could not find a statement with 'parameters:' in your transformations")
   
   parameters <- syntax[parametersAt]
+  #remove white space
+  parameters <- gsub(pattern = "\\s",
+                     x = parameters,
+                     replacement = "")
   parameters <- gsub(x = parameters, 
                      pattern = "parameters:",
-                     replacement = "", 
-                     fixed = TRUE)
+                     replacement = "")
   parameters <- stringr::str_split(string = parameters, 
                                    pattern = ",")[[1]]
   isTransformation <- rep(FALSE, length(parameters))
@@ -120,10 +114,12 @@
   
   if(!is.na(startingValuesAt)){
     startingValues <- syntax[startingValuesAt]
+    startingValues <- gsub(pattern = "\\s",
+                           x = startingValues,
+                           replacement = "")
     startingValues <- gsub(x = startingValues, 
                            pattern = "start:",
-                           replacement = "", 
-                           fixed = TRUE)
+                           replacement = "")
     startingValues <- stringr::str_split(string = startingValues, 
                                          pattern = ",")[[1]]
     startingValuesNames <- rep(NA, length(startingValues))
@@ -148,14 +144,10 @@
     if(isEquation){
       # check left hand side
       lhs <- stringr::str_split(string = syntax[i], 
-                                pattern = "=")[[1]][1]
-      if(! lhs %in% parameters){
-        stop(paste0("Could not find ", lhs, " in parameter: specification of transformations."))
+                                pattern = "\\s*=")[[1]][1]
+      if(lhs %in% parameterLabels){
+        isTransformation[lhs] <- TRUE
       }
-      if(! lhs %in% parameterLabels){
-        stop(paste0("Could not find ", lhs, " in model parameters. Every left hand side of your equations must be a model parameter."))
-      }
-      isTransformation[lhs] <- TRUE
     }
   }
   
