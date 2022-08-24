@@ -72,9 +72,10 @@ test_that("testing transformations", {
                                                    whichPars = "start",
                                                    fit = TRUE, 
                                                    addMeans = TRUE)
+  parameters_ <- parameters[!names(parameters) %in% c("d", "e", "f")] 
   SEMNoTransformations <- lessSEM:::.setParameters(SEMNoTransformations, 
-                                                   names(parameters),
-                                                   parameters, 
+                                                   names(parameters_),
+                                                   parameters_, 
                                                    TRUE)
   
   testthat::expect_equal(abs(SEM$fit()- SEMNoTransformations$fit()) < 1e-8,TRUE)
@@ -82,9 +83,11 @@ test_that("testing transformations", {
   gradientsNoTransformations <- lessSEM:::.getGradients(SEMNoTransformations, raw = TRUE)
   HessianNoTransformations <- lessSEM:::.getHessian(SEM, raw = TRUE)
   
-  testthat::expect_equal(all(abs(gradients - gradientsNoTransformations[names(gradients)]) < 1e-6), TRUE)
+  testthat::expect_equal(all(abs(gradients[names(gradientsNoTransformations)] -
+                                   gradientsNoTransformations[names(gradientsNoTransformations)]) < 1e-6), TRUE)
   
-  testthat::expect_equal(all(abs(Hessian[names(gradients), names(gradients)] - HessianNoTransformations[names(gradients), names(gradients)]) < 1e-6), TRUE)
+  testthat::expect_equal(all(abs(Hessian[names(gradientsNoTransformations), names(gradientsNoTransformations)] - 
+                                   HessianNoTransformations[names(gradientsNoTransformations), names(gradientsNoTransformations)]) < 1e-6), TRUE)
   
   # Now, let's test a more complicated transformation:
   
