@@ -441,7 +441,7 @@ The transformations used above are implemented using [RcppArmadillo](https://git
 You can use any of the functions implemented in **Rcpp** or **RcppArmadillo** which
 can be applied to variables of type `double` within your transformations. To provide
 another example, we could also use these transformations to set up a simple version of
-a continuous time SEM (e.g., Voelkle & Oud, 2015; far superior versions of this model
+a continuous time SEM (e.g., Voelkle & Oud, 2012; far superior versions of this model
 are implemented in [ctsem](https://github.com/cdriveraus/ctsem) and [dynr](https://github.com/mhunter1/dynr)).
 We will use the same model from above, but remove the change in the autoregressive 
 effect. The code to simulate the data set can be found in the source of this 
@@ -654,13 +654,230 @@ ctSummary$DRIFT
 sqrt(ctSummary$DIFFUSION)
 ```
 
+
+### Extended Example
+
+In the example above, we used a univariate ctsem. In the following, we will extend this 
+to a multivariate example. We will use the AnomAuth data set from ctsem.
+The data is included in the ctsemOMX package:
+```{r}
+data("AnomAuth")
+head(AnomAuth)
+```
+
+The five measurement occasions are unequally spaced. In a discrete time model,
+we could take care of this by implementing a model with different autoregressive
+and cross-lagged effects for the different time intervals:
+
+```{r}
+# initial time point
+lavaanSyntax <- 
+  "eta1_T0 =~ 1 * Y1_T0
+eta2_T0 =~ 1 * Y2_T0
+Y1_T0 ~~ 0*Y1_T0
+Y2_T0 ~~ 0*Y2_T0\n"
+
+# variances
+lavaanSyntax <- c(lavaanSyntax,
+  "eta1_T0 ~~ v0_11 * eta1_T0 + v0_12 * eta2_T0\neta2_T0 ~~ v0_22 * eta2_T0\n"
+)
+
+# means
+lavaanSyntax <- c(lavaanSyntax,
+  "eta1_T0 ~ 1\neta2_T0 ~ 1\nY1_T0~mMean1*1\nY2_T0~mMean2*1\n" 
+)
+
+for(tp in c(0,1,2,3)){
+  if(tp < 2) {
+    a <- "a1"
+    v <- "v1"
+  }else{
+    a <-"a2"
+    v <- "v2"
+  }
+  
+  # autoregressive and cross-lagged
+  lavaanSyntax <- c(lavaanSyntax,
+  paste0(
+    "eta1_T", tp+1, " ~ ", a, "_11 * eta1_T", tp, " + ", a, "_12 * eta2_T", tp,"\n",
+    "eta2_T", tp+1, " ~ ", a, "_21 * eta1_T", tp, " + ", a, "_22 * eta2_T", tp, "\n"
+  )
+  )
+  
+  # variances
+  lavaanSyntax <- c(lavaanSyntax,
+  paste0(
+    "eta1_T", tp+1, " ~~ ", v, "_11 * eta1_T", tp+1, " + ", v, "_12 * eta2_T", tp+1,"\n",
+    "eta2_T", tp+1, " ~~ ", v, "_22 * eta2_T", tp+1, "\n"
+  )
+  )
+  
+  # loadings
+  lavaanSyntax <- c(lavaanSyntax,
+  paste0(
+    "eta1_T", tp+1, " =~ 1 * Y1_T", tp+1,"\n",
+    "eta2_T", tp+1, " =~ 1 * Y2_T", tp+1,"\n"
+  )
+  )
+  
+  # manifest variances
+  lavaanSyntax <- c(lavaanSyntax,
+  paste0(
+    "Y1_T", tp+1, " ~~ 0* Y1_T", tp+1, "\n",
+    "Y2_T", tp+1, " ~~ 0* Y2_T", tp+1, "\n"
+  )
+  )
+  
+  # manifest means
+  lavaanSyntax <- c(lavaanSyntax,
+  paste0(
+    "Y1_T", tp+1, " ~ mMean1 * 1\n",
+    "Y2_T", tp+1, " ~ mMean2 * 1\n"
+  )
+  )
+}
+lavaanSyntax <- paste0(lavaanSyntax, collapse = "")
+cat(lavaanSyntax)
+```
+
+Setting up the model in lavaan:
+```{r}
+lavaanFit <- sem(model = lavaanSyntax, data = AnomAuth,
+                 orthogonal.y = TRUE, 
+                 orthogonal.x = TRUE,
+                 missing = "ml",
+                 do.fit = FALSE)
+```
+
+
+To transform the parameters to those of a continuous time model, 
+we have to define the transformations again. We will not go into the details 
+here. See Voelkle et al. (2012) for the underlying transformations.
+
+```{r}
+transformations <- "
+parameters: a1_11, a1_12, a1_21, a1_22, a2_11, a2_12, a2_21, a2_22, ctA_11, ctA_12, ctA_21, ctA_22, v1_11, v1_12, v1_22, v2_11, v2_12, v2_22, ctV_11, ctV_12, ctV_22
+start: ctA_11 = -1, ctA_12 = 0, ctA_21 = 0, ctA_22 = -1, ctV_11 = .1, ctV_12 = 0, ctV_22 = .1
+
+# transformations:
+arma::mat drift(2,2)
+arma::mat ARCL1(2,2)
+arma::mat ARCL2(2,2)
+arma::mat driftHash(4,4)
+drift(0,0) = ctA_11
+drift(1,0) = ctA_21
+drift(0,1) = ctA_12
+drift(1,1) = ctA_22
+ARCL1 = expmat(drift)
+ARCL2 = expmat(drift*2.0)
+
+driftHash = kron(drift, arma::eye(2,2)) + kron(arma::eye(2,2), drift)
+
+arma::mat diffusion(2,2)
+arma::mat discreteDiff1(2,2)
+arma::mat discreteDiff2(2,2)
+diffusion(0,0) = ctV_11
+diffusion(1,0) = ctV_12
+diffusion(0,1) = ctV_12
+diffusion(1,1) = ctV_22
+discreteDiff1 = arma::reshape(arma::inv(driftHash) * (expmat(driftHash) - arma::eye(arma::size(expmat(driftHash))))*arma::vectorise(diffusion),2,2)
+discreteDiff2 = arma::reshape(arma::inv(driftHash) * (expmat(driftHash*2.0) - arma::eye(arma::size(expmat(driftHash*2.0))))*arma::vectorise(diffusion),2,2)
+
+# extract parameters
+
+a1_11 = ARCL1(0,0)
+a1_12 = ARCL1(0,1)
+a1_21 = ARCL1(1,0)
+a1_22 = ARCL1(1,1)
+
+a2_11 = ARCL2(0,0)
+a2_12 = ARCL2(0,1)
+a2_21 = ARCL2(1,0)
+a2_22 = ARCL2(1,1)
+
+v1_11 = log(discreteDiff1(0,0)) # we take the log because of the internal 
+# transformation in lessSEM
+v1_12 = discreteDiff1(0,1)
+v1_22 = log(discreteDiff1(1,1)) # we take the log because of the internal 
+# transformation in lessSEM
+
+v2_11 = log(discreteDiff2(0,0)) # we take the log because of the internal 
+# transformation in lessSEM
+v2_12 = discreteDiff2(0,1)
+v2_22 = log(discreteDiff2(1,1)) # we take the log because of the internal 
+# transformation in lessSEM
+"
+```
+
+As before, we can now fit the model with **lessSEM**
+
+```{r,include=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = "ctA_21",
+                  lambdas = 0,
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r,eval=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = "ctA_21",
+                  lambdas = 0,
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+For comparison, we will also fit the model with **ctsemOMX**:
+```{r,include=FALSE}
+AnomAuthmodel <- ctModel(LAMBDA = matrix(c(1, 0, 0, 1), nrow = 2, ncol = 2), 
+                         Tpoints = 5, n.latent = 2, n.manifest = 2, MANIFESTVAR=diag(0, 2), TRAITVAR = NULL) 
+AnomAuthfit <- ctFit(AnomAuth, AnomAuthmodel)
+```
+
+```{r,eval=FALSE}
+AnomAuthmodel <- ctModel(LAMBDA = matrix(c(1, 0, 0, 1), nrow = 2, ncol = 2), 
+                         Tpoints = 5, n.latent = 2, n.manifest = 2, MANIFESTVAR=diag(0, 2), TRAITVAR = NULL) 
+AnomAuthfit <- ctFit(AnomAuth, AnomAuthmodel)
+```
+
+The following matrices are the drifts of the **lessSEM** model and the **ctsemOMX**
+model:
+
+lessSEM:
+```{r}
+matrix(unlist(coef(lassoFit)[,c("ctA_11", "ctA_21", "ctA_12", "ctA_22")]),2,2)
+```
+ctsemOMX:
+```{r}
+AnomAuthfit$mxobj$DRIFT$values
+```
+
+The diffusions are given by:
+
+lessSEM:
+```{r}
+matrix(unlist(coef(lassoFit)[,c("ctV_11", "ctV_12", "ctV_12", "ctV_22")]),2,2)
+```
+
+ctsemOMX:
+```{r}
+AnomAuthfit$mxobj$DIFFUSIONchol$result%*%t(AnomAuthfit$mxobj$DIFFUSIONchol$result)
+```
+
 ## Bibliography
 
 * Belzak, W. C. M., & Bauer, D. J. (2020). Improving the assessment of measurement invariance: Using regularization to select anchor items and identify differential item functioning. Psychological Methods, 25(6), 673–690. https://doi.org/10.1037/met0000253
 * Driver, C. C., Oud, J. H. L., & Voelkle, M. C. (2017). Continuous time structural equation modelling with R package ctsem. Journal of Statistical Software, 77(5), 1–36. https://doi.org/10.18637/jss.v077.i05
 * Fisher, Z. F., Kim, Y., Fredrickson, B. L., & Pipiras, V. (2022). Penalized Estimation and Forecasting of Multiple Subject Intensive Longitudinal Data. Psychometrika, 87(2), 1–29. https://doi.org/10.1007/s11336-021-09825-7
 * Ou, L., Hunter, M., D., & Chow, S.-M. (2019). Whats for dynr: A package for linear and nonlinear dynamic modeling in r. The R Journal, 11(1), 91–111. https://doi.org/10.32614/RJ-2019-012
-* Voelkle, M. C., & Oud, J. H. L. (2015). Relating latent change score and continuous time models. Structural Equation Modeling: A Multidisciplinary Journal, 22(3), 366–381. https://doi.org/10.1080/10705511.2014.935918
+* Voelkle, M. C., Oud, J. H. L., Davidov, E., & Schmidt, P. (2012). An sem approach to continuous time modeling of panel data: Relating authoritarianism and anomia. Psychological Methods, 17(2), 176–192. https://doi.org/10.1037/a0027543
+
 
 
 
