@@ -756,8 +756,15 @@ here. See Voelkle et al. (2012) for the underlying transformations.
 
 ```{r}
 transformations <- "
-parameters: a1_11, a1_12, a1_21, a1_22, a2_11, a2_12, a2_21, a2_22, ctA_11, ctA_12, ctA_21, ctA_22, v1_11, v1_12, v1_22, v2_11, v2_12, v2_22, ctV_11, ctV_12, ctV_22
-start: ctA_11 = -1, ctA_12 = 0, ctA_21 = 0, ctA_22 = -1, ctV_11 = .1, ctV_12 = 0, ctV_22 = .1
+# Define all parameters which we want to use:
+parameters: a1_11, a1_12, a1_21, a1_22, a2_11, a2_12, a2_21, a2_22, 
+ctA_11, ctA_12, ctA_21, ctA_22, 
+v1_11, v1_12, v1_22, v2_11, v2_12, v2_22, 
+ctV_11, ctV_12, ctV_22
+
+# Define the starting values for the continuous time parameters:
+start: ctA_11 = -1, ctA_12 = 0, ctA_21 = 0, ctA_22 = -1, 
+ctV_11 = .1, ctV_12 = 0, ctV_22 = .1
 
 # transformations:
 arma::mat drift(2,2)
@@ -780,8 +787,12 @@ diffusion(0,0) = ctV_11
 diffusion(1,0) = ctV_12
 diffusion(0,1) = ctV_12
 diffusion(1,1) = ctV_22
-discreteDiff1 = arma::reshape(arma::inv(driftHash) * (expmat(driftHash) - arma::eye(arma::size(expmat(driftHash))))*arma::vectorise(diffusion),2,2)
-discreteDiff2 = arma::reshape(arma::inv(driftHash) * (expmat(driftHash*2.0) - arma::eye(arma::size(expmat(driftHash*2.0))))*arma::vectorise(diffusion),2,2)
+discreteDiff1 = arma::reshape(arma::inv(driftHash) * 
+  (expmat(driftHash) - arma::eye(arma::size(expmat(driftHash))))*
+  arma::vectorise(diffusion),2,2)
+discreteDiff2 = arma::reshape(arma::inv(driftHash) * 
+  (expmat(driftHash*2.0) - arma::eye(arma::size(expmat(driftHash*2.0))))*
+  arma::vectorise(diffusion),2,2)
 
 # extract parameters
 
