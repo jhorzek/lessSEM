@@ -60,7 +60,57 @@ test_that("testing elasticNet-lasso-with-transformation", {
   
   testthat::expect_equal(all(abs(coef(rsemGlmnet) - coef(rsemIsta)) < 1e-2), TRUE)
   
+  # test multi-line transformations
+  transformations <- "
+  parameters: a,b,c,d,e,f,
+  deltaA, deltaB, 
+  deltaC
+  d = a + 
+  deltaA
+  e = b + deltaB
+  f = c + ((
+  deltaC
+  )
+  )
+  "
+  rsemGlmnet2 <- lasso(lavaanModel = modelFit, 
+                      regularized = c("deltaA", "deltaB", "deltaC"),
+                      lambdas = lambdas,
+                      method = "glmnet",
+                      control = controlGlmnet(),
+                      modifyModel = modifyModel(transformations = transformations)
+  )
+  testthat::expect_equal(all(abs(coef(rsemGlmnet) - coef(rsemGlmnet2)) < 1e-4), TRUE)
+  
+  # test multi-line transformations and starting values
+  transformations <- "
+  parameters: a,b,c,d,e,f,
+  deltaA, deltaB, 
+  deltaC
+  start: a = 1, b = 2, 
+  c=3, 
+  deltaB = 1.1, 
+    deltaC = .2
+  d = a + deltaA
+  e = b + deltaB
+  f = c + deltaC
+  "
+  rsemGlmnet3 <- lasso(lavaanModel = modelFit, 
+                       regularized = c("deltaA", "deltaB", "deltaC"),
+                       lambdas = lambdas,
+                       method = "glmnet",
+                       control = controlGlmnet(),
+                       modifyModel = modifyModel(transformations = transformations)
+  )
+  testthat::expect_equal(all(abs(coef(rsemGlmnet) - coef(rsemGlmnet3)) < 1e-2), TRUE)
+  
   # set automatic lambda:
+  transformations <- "
+  parameters: a,b,c,d,e,f,deltaA, deltaB, deltaC
+  d = a + deltaA
+  e = b + deltaB
+  f = c + deltaC
+  "
   rsem2 <- lessSEM::lasso(lavaanModel = modelFit, 
                           regularized = c("deltaA", "deltaB", "deltaC"),
                           nLambdas = 10,
@@ -84,4 +134,5 @@ test_that("testing elasticNet-lasso-with-transformation", {
                       k = 5
   )
   rsemGlmnet@parameters
+  
 })

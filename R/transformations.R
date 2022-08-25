@@ -13,6 +13,12 @@
   
   syntax <- .reduceSyntax(syntax = syntax)
   
+  syntax <- .makeSingleLine(syntax = syntax, what = "parameters")
+  if(all(is.na(syntax))) stop("Could not find a parameter: statement in your transformations")
+  if(!any(is.na(.makeSingleLine(syntax = syntax, what = "start")))){
+    syntax <- .makeSingleLine(syntax = syntax, what = "start")
+  }
+  
   parameters <- .extractParametersFromSyntax(syntax = syntax,
                                              parameterLabels = parameterLabels)
   
@@ -73,6 +79,42 @@
   #         x = syntax)
   
   return(syntax)
+}
+
+#' .makeSingleLine
+#' 
+#' checks if a parameter: or a start: statement spans multiple lines 
+#' and reduces it to one line.
+#' 
+#' @param syntax reduced syntax
+#' @param what which statement to look for (parameters or start)
+#' @return a syntax where multi-line statements are condensed to one line
+.makeSingleLine <- function(syntax, what){
+  
+  parameterStatement <- which(grepl(pattern = paste0(what,"\\s*:"), x = syntax))
+  if(length(parameterStatement) != 1) return(NA)
+  if(grepl(pattern = ",\\s*$", x = syntax[parameterStatement])){
+    # is multi-line
+    endsAt <- NA
+    for(i in parameterStatement:length(syntax)){
+      if(!grepl(pattern = ",\\s*$", x = syntax[i])){
+        endsAt <- i
+        break
+      }
+    }
+    if(is.na(endsAt)) stop(paste0(what, " statement starts but does not end (you may have a trailing ',')."))
+  }else{
+    endsAt <- parameterStatement
+  }
+  
+  # combine lines
+  syntaxNew <- syntax[-c(parameterStatement:(endsAt))]
+  syntaxNew <- c(
+    paste0(syntax[c(parameterStatement:(endsAt))], collapse = ""),
+    syntaxNew
+  )
+  
+  return(syntaxNew)
 }
 
 #' .extractParametersFromSyntax
@@ -145,6 +187,8 @@
       # check left hand side
       lhs <- stringr::str_split(string = syntax[i], 
                                 pattern = "\\s*=")[[1]][1]
+      # remove leading spaces
+      lhs <- gsub(pattern = "^\\s*", replacement = "", x = lhs)
       if(lhs %in% parameterLabels){
         isTransformation[lhs] <- TRUE
       }
@@ -187,6 +231,18 @@
     syntax <- syntax[-c(parametersAt)] 
   }
   
+  # check for dangling braces
+  isDanglingBrace <- grepl(pattern = "^\\s*)\\s*$", x = syntax)
+  
+  if(any(isDanglingBrace)){
+    for(i in rev(which(isDanglingBrace))){
+      # going in reverse because there may be layers of braces
+      if(i == 0) stop("Your transformations seems to start with a closing brace.")
+      syntax[i-1] <- paste0(syntax[i-1], syntax[i])
+    }
+    syntax <- syntax[!isDanglingBrace]
+  }
+  
   functionHead <- "
   // [[Rcpp::depends(RcppArmadillo)]]
   #include <RcppArmadillo.h>
@@ -204,9 +260,11 @@
                       paste0('double ', p ,' = parameterValues["', p, '"];') 
     )
   }
+  endsWithOperator <- grepl(pattern = "[+-//*,(=]\\s*$", x = syntax)
+  lineEndings <- ifelse(endsWithOperator, "", ";")
   functionBody <- c(functionBody, 
                     "\n\n// add user defined functions",
-                    paste0(syntax, ";"), 
+                    paste0(syntax, lineEndings), 
                     "\n\n// update parameters"
   )
   for(p in parameters){
