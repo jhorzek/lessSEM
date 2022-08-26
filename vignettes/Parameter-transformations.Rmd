@@ -438,10 +438,95 @@ autoregressive parameter.
 ## Looking under the hood
 
 The transformations used above are implemented using [RcppArmadillo](https://github.com/RcppCore/RcppArmadillo).
-You can use any of the functions implemented in **Rcpp** or **RcppArmadillo** which
-can be applied to variables of type `double` within your transformations. To provide
-another example, we could also use these transformations to set up a simple version of
-a continuous time SEM (e.g., Voelkle & Oud, 2012; far superior versions of this model
+This allows for a lot more complicated transformations than those outlined before.
+In general, **lessSEM** will take your transformations and try to translate them
+to C++. Let's assume that the model is given by our first example:
+
+```{r}
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+lavaanFit <- sem(model = modelSyntax, 
+                 data = PoliticalDemocracy)
+```
+
+We defined the transformations to be:
+
+```{r}
+transformations <- "
+parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
+
+a2 = a1 + delta_a2
+b2 = b1 + delta_b2
+c2 = c1 + delta_c2
+"
+```
+
+When this transformation is passed to **lessSEM**, **lessSEM** will first try
+to figure out which parameters are already in the model and which ones are new.
+In our case a1, a2, b1, b2, c1, and c2 are already known, while delta_a2, 
+delta_b2, and delta_c2 are new. **lessSEM** will now add the new parameters to the
+internal parameter vector. Next, **lessSEM** will scan the names of the parameters
+which appear on the left hand side of an equation (a2, b2, and c2) in our case. 
+This will tell **lessSEM** which of your parameters are functions of other parameters
+(i.e., transformations). Knowing that a2 is a function of other parameters will
+tell **lessSEM**, that a2 should no longer be estimated. Instead, the parameters
+which make up a2 are estimated: a1 and delta_a2.
+
+To see this in action, we can create the C++ function without compilation:
+
+```{r}
+transformationFunction <- lessSEM:::.compileTransformations(syntax = transformations, 
+                                                            parameterLabels = names(getLavaanParameters(lavaanFit)),
+                                                            compile = FALSE)
+```
+
+First, let's have a look at the extended parameter vector:
+```{r}
+transformationFunction$parameters
+```
+Note that delta_a2, delta_b2, and delta_c2 have been added. Some of these are 
+transformations of other parameters:
+```{r}
+transformationFunction$isTransformation
+```
+These will not be estimated but computed based on the other model parameters.
+
+Finally, the C++ function has been returned:
+```{r}
+cat(transformationFunction$armaFunction)
+```
+
+Most importantly, note that the first step here is to extract the required
+parameters from the parameter vector (e.g., `double a1 = parameterValues["a1"];`).
+Next, all of these parameters are directly available for use in your transformations.
+This is why we can simply write `a2 = a1 + delta_a2;`. **lessSEM** also added
+the semicolons required by C++.  Finally, the transformed parameters are returned.
+To pass our function to **lessSEM**, we also create a pointer to our function, 
+but this is beyond the scope here.
+
+At this point you may be wondering where all the more complicated transformations
+are that we promised above. Importantly, you can use any of the functions implemented 
+in **Rcpp** or **RcppArmadillo** which can be applied to variables of type `double` 
+within your transformations without any in-depth knowledge of C++. For instance,
+**RcppArmadillo** comes with an exponential-function (`exp`), a `pow` and a 
+`log` function. Making use of this, we can implement a univariate continuous time
+SEM (e.g., Voelkle & Oud, 2012; far superior versions of this model
 are implemented in [ctsem](https://github.com/cdriveraus/ctsem) and [dynr](https://github.com/mhunter1/dynr)).
 We will use the same model from above, but remove the change in the autoregressive 
 effect. The code to simulate the data set can be found in the source of this 
@@ -503,7 +588,7 @@ for(tp in 1:tps){
     ),
     sep = "\n"
   )
-   lavaanSyntax <- paste0(
+  lavaanSyntax <- paste0(
     lavaanSyntax,
     paste0(
       paste0(c("y1_T", "y2_T", "y3_T"), tp-1 , " ~ ", paste0("mMean", 1:3, "*1")),
@@ -654,11 +739,14 @@ ctSummary$DRIFT
 sqrt(ctSummary$DIFFUSION)
 ```
 
+### Making use of C++
 
-### Extended Example
-
-In the example above, we used a univariate ctsem. In the following, we will extend this 
-to a multivariate example. We will use the AnomAuth data set from ctsem.
+In the example above, we used a univariate ctsem. Because of this, all our 
+functions were fairly simple in that we only needed the `log`, `exp`, and `pow` functions
+for single variables. However, because **lessSEM** creates a C++ function, we can
+build much more powerful transformations if we are familiar with **RcppArmadillo**.
+In the following, we will therefore extend the example 
+to a multivariate continuous time SEM. We will use the AnomAuth data set from ctsem.
 The data is included in the ctsemOMX package:
 ```{r}
 data("AnomAuth")
@@ -679,12 +767,12 @@ Y2_T0 ~~ 0*Y2_T0\n"
 
 # variances
 lavaanSyntax <- c(lavaanSyntax,
-  "eta1_T0 ~~ v0_11 * eta1_T0 + v0_12 * eta2_T0\neta2_T0 ~~ v0_22 * eta2_T0\n"
+                  "eta1_T0 ~~ v0_11 * eta1_T0 + v0_12 * eta2_T0\neta2_T0 ~~ v0_22 * eta2_T0\n"
 )
 
 # means
 lavaanSyntax <- c(lavaanSyntax,
-  "eta1_T0 ~ 1\neta2_T0 ~ 1\nY1_T0~mMean1*1\nY2_T0~mMean2*1\n" 
+                  "eta1_T0 ~ 1\neta2_T0 ~ 1\nY1_T0~mMean1*1\nY2_T0~mMean2*1\n" 
 )
 
 for(tp in c(0,1,2,3)){
@@ -698,42 +786,42 @@ for(tp in c(0,1,2,3)){
   
   # autoregressive and cross-lagged
   lavaanSyntax <- c(lavaanSyntax,
-  paste0(
-    "eta1_T", tp+1, " ~ ", a, "_11 * eta1_T", tp, " + ", a, "_12 * eta2_T", tp,"\n",
-    "eta2_T", tp+1, " ~ ", a, "_21 * eta1_T", tp, " + ", a, "_22 * eta2_T", tp, "\n"
-  )
+                    paste0(
+                      "eta1_T", tp+1, " ~ ", a, "_11 * eta1_T", tp, " + ", a, "_12 * eta2_T", tp,"\n",
+                      "eta2_T", tp+1, " ~ ", a, "_21 * eta1_T", tp, " + ", a, "_22 * eta2_T", tp, "\n"
+                    )
   )
   
   # variances
   lavaanSyntax <- c(lavaanSyntax,
-  paste0(
-    "eta1_T", tp+1, " ~~ ", v, "_11 * eta1_T", tp+1, " + ", v, "_12 * eta2_T", tp+1,"\n",
-    "eta2_T", tp+1, " ~~ ", v, "_22 * eta2_T", tp+1, "\n"
-  )
+                    paste0(
+                      "eta1_T", tp+1, " ~~ ", v, "_11 * eta1_T", tp+1, " + ", v, "_12 * eta2_T", tp+1,"\n",
+                      "eta2_T", tp+1, " ~~ ", v, "_22 * eta2_T", tp+1, "\n"
+                    )
   )
   
   # loadings
   lavaanSyntax <- c(lavaanSyntax,
-  paste0(
-    "eta1_T", tp+1, " =~ 1 * Y1_T", tp+1,"\n",
-    "eta2_T", tp+1, " =~ 1 * Y2_T", tp+1,"\n"
-  )
+                    paste0(
+                      "eta1_T", tp+1, " =~ 1 * Y1_T", tp+1,"\n",
+                      "eta2_T", tp+1, " =~ 1 * Y2_T", tp+1,"\n"
+                    )
   )
   
   # manifest variances
   lavaanSyntax <- c(lavaanSyntax,
-  paste0(
-    "Y1_T", tp+1, " ~~ 0* Y1_T", tp+1, "\n",
-    "Y2_T", tp+1, " ~~ 0* Y2_T", tp+1, "\n"
-  )
+                    paste0(
+                      "Y1_T", tp+1, " ~~ 0* Y1_T", tp+1, "\n",
+                      "Y2_T", tp+1, " ~~ 0* Y2_T", tp+1, "\n"
+                    )
   )
   
   # manifest means
   lavaanSyntax <- c(lavaanSyntax,
-  paste0(
-    "Y1_T", tp+1, " ~ mMean1 * 1\n",
-    "Y2_T", tp+1, " ~ mMean2 * 1\n"
-  )
+                    paste0(
+                      "Y1_T", tp+1, " ~ mMean1 * 1\n",
+                      "Y2_T", tp+1, " ~ mMean2 * 1\n"
+                    )
   )
 }
 lavaanSyntax <- paste0(lavaanSyntax, collapse = "")
@@ -820,6 +908,11 @@ v2_22 = log(discreteDiff2(1,1)) # we take the log because of the internal
 "
 ```
 
+
+Most importantly, we used matrices in our transformations. This is possible,
+because **lessSEM** uses **RcppArmadillo** in the background and therefore also
+provides users with all of the functions implemented therein.
+
 As before, we can now fit the model with **lessSEM**
 
 ```{r,include=FALSE}
@@ -880,6 +973,24 @@ ctsemOMX:
 ```{r}
 AnomAuthfit$mxobj$DIFFUSIONchol$result%*%t(AnomAuthfit$mxobj$DIFFUSIONchol$result)
 ```
+
+## How it is implemented
+
+
+The basic idea behind the transformations is as follows: Assume that the 
+SEM parameters are given by $\pmb\theta$. The 2-log-likelihood of the model
+is given by $f(\pmb\theta)$. When using transformations, we redefine $\pmb\theta$
+to be a function of other parameters, say $\pmb\gamma$. That is, $\pmb\theta =\pmb g(\pmb\gamma)$,
+where $\pmb g$ is a function returning a vector. As a result, we can re-write
+the fitting function as $f(\pmb\theta) = f(\pmb g(\pmb\gamma))$.
+Instead of optimizing $\pmb\theta$, we now optimize $\pmb\gamma$. Within
+**lessSEM**, the gradients of $f(\pmb\theta)$ with respect to $\pmb\theta$
+are implemented in closed form as this results in a considerably faster run time.
+To get the gradients of $f(\pmb\theta) = f(\pmb g(\pmb\gamma))$ with respect to
+$\pmb\gamma$, **lessSEM** makes use of the [chain rule](https://en.wikipedia.org/wiki/Chain_rule). 
+The gradients of the transformation $\pmb g(\pmb\gamma)$ are approximated
+numerically.
+
 
 ## Bibliography
 

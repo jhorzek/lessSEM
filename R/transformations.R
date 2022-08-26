@@ -4,12 +4,14 @@
 #' pass to a SEM
 #' @param syntax string with user defined transformations
 #' @param parameterLabels names of parameters in the model
+#' @param compile if set to FALSE, the function will not be compiled -> for visual inspection
 #' @returns list with parameter names and two Rcpp functions: (1) the transformation function and 
 #' (2) a function to create a pointer to the transformation function. 
 #' If starting values were defined, these are returned as well.
 #' @keywords internal
 .compileTransformations <- function(syntax,
-                                    parameterLabels){
+                                    parameterLabels,
+                                    compile = TRUE){
   
   syntax <- .reduceSyntax(syntax = syntax)
   
@@ -24,6 +26,16 @@
   
   armaFunction <- .createRcppTransformationFunction(syntax = syntax, 
                                                     parameters = parameters$parameters)
+  
+  if(!compile){
+    return(
+      list("parameters" = parameters$parameters,
+           "isTransformation" = parameters$parameters[parameters$isTransformation],
+           "startingValues" = parameters$startingValues,
+           "armaFunction" = armaFunction
+      )
+    )
+  }
   
   cat("Compiling the transformation function ... ")
   
