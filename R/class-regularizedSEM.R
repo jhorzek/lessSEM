@@ -5,6 +5,8 @@
 #' @slot parameterLabels character vector with names of all parameters
 #' @slot weights vector with weights given to each of the parameters in the penalty
 #' @slot regularized character vector with names of regularized parameters
+#' @slot transformations if the model has transformations, the transformed parameters 
+#' are returned
 #' @slot internalOptimization list of elements used internally
 #' @slot inputArguments list with elements passed by the user to the general
 setClass(Class = "regularizedSEM",
@@ -15,6 +17,7 @@ setClass(Class = "regularizedSEM",
            parameterLabels = "character",
            weights = "numeric",
            regularized = "character",
+           transformations = "data.frame",
            internalOptimization="list", 
            inputArguments="list"
          )

@@ -216,6 +216,13 @@ coef(lassoFit, criterion = "BIC")
 Note that all differences have been zeroed -- that is, a model with full measurement 
 invariance did fit best.
 
+We can also access the transformed parameters:
+
+```{r}
+head(lassoFit@transformations)
+```
+
+
 Limitation: Above, we did not take into account that the variables may have 
 different scales; a thorough use of the method should scale the data first.
 
