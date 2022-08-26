@@ -173,7 +173,7 @@ measurement invariance in longitudinal models. A thorough introduction
 is provided in
 `vignette('Parameter-transformations', package = 'lessSEM')`. As an
 example, we will test measurement invariance in the `PoliticalDemocracy`
-data set.
+data set (see also Bauer et al., 2020).
 
 ``` r
 library(lessSEM)
@@ -264,7 +264,8 @@ derivation of the scad and mcp used by the package in the vignette
 Finally, you can also transform parameters of your model. This is
 explained in detail in the vignette
 `vignette('Parameter-transformations', package = 'lessSEM')` and is a
-powerful tool to, for instance, detect measurement invariance.
+powerful tool to, for instance, detect measurement invariance (see also
+Bauer et al., 2020).
 
 # References
 
@@ -353,6 +354,15 @@ powerful tool to, for instance, detect measurement invariance.
     International Conference on Machine Learning, 28(2)(2), 37–45.
 -   Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and
     Trends in Optimization, 1(3), 123–231.
+
+## Miscellaneous
+
+-   Bauer, D. J., Belzak, W. C. M., & Cole, V. T. (2020). Simplifying
+    the Assessment of Measurement Invariance over Multiple Background
+    Variables: Using Regularized Moderated Nonlinear Factor Analysis to
+    Detect Differential Item Functioning. Structural Equation Modeling:
+    A Multidisciplinary Journal, 27(1), 43–55.
+    <https://doi.org/10.1080/10705511.2019.1642754>
 
 # Important Notes
 
