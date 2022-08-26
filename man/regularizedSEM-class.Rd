@@ -22,6 +22,9 @@ Class for regularized SEM
 
 \item{\code{regularized}}{character vector with names of regularized parameters}
 
+\item{\code{transformations}}{if the model has transformations, the transformed parameters
+are returned}
+
 \item{\code{internalOptimization}}{list of elements used internally}
 
 \item{\code{inputArguments}}{list with elements passed by the user to the general}

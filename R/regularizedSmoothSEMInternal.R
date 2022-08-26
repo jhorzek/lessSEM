@@ -228,6 +228,24 @@
     parameterEstimates
   )
   
+  if(!is.null(modifyModel$transformations)){
+    transformationsAre <- .getParameters(SEM,
+                                         raw = FALSE,
+                                         transformations = TRUE)
+    transformationsAre <- transformationsAre[!names(transformationsAre)%in%names(rawParameters)]
+    
+    transformations <- as.data.frame(matrix(NA,
+                                            nrow = nrow(tuningParameters), 
+                                            ncol = length(transformationsAre)))
+    colnames(transformations) <- names(transformationsAre)
+    transformations <- cbind(
+      tuningParameters,
+      transformations
+    )
+  }else{
+    transformations <- data.frame()
+  }
+  
   if(control$saveHessian){
     Hessians <- list(
       "lambda" = tuningParameters$lambda,
@@ -285,6 +303,15 @@
     parameterEstimates[it, 
                        names(rawParameters)] <- transformedParameters[names(rawParameters)]
     
+    if(!is.null(modifyModel$transformations)){
+      transformationsAre <- .getParameters(SEM,
+                                           raw = FALSE,
+                                           transformations = TRUE)
+      transformationsAre <- transformationsAre[!names(transformationsAre)%in%names(rawParameters)]
+      transformations[it,
+                      names(transformationsAre)] <- transformationsAre
+    }
+    
     if(control$saveHessian) 
       Hessians$Hessian[[it]] <- result$Hessian
     
@@ -329,6 +356,7 @@
                  parameterLabels = names(rawParameters),
                  weights = weights,
                  regularized = names(weights)[weights!=0],
+                 transformations = transformations,
                  internalOptimization = internalOptimization,
                  inputArguments = inputArguments)
   

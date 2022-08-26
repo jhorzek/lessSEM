@@ -83,87 +83,205 @@ offer even more features, such as multi-group penalties.
 
 If you want to install lessSEM from GitHub, use the following commands in R:
 
-    if(!require(devtools))install.packages("devtools")
-  
-    devtools::install_github("jhorzek/lessSEM")
-    
+if(!require(devtools))install.packages("devtools")
+
+devtools::install_github("jhorzek/lessSEM")
+
 
 # Example
 
-    library(lessSEM)
-    
-    # Identical to regsem, lessSEM builds on the lavaan
-    # package for model specification. The first step
-    # therefore is to implement the model in lavaan.
-    
-    dataset <- simulateExampleData()
-    
-    lavaanSyntax <- "
+```{r, eval = FALSE}
+library(lessSEM)
+library(lavaan)
+
+# Identical to regsem, lessSEM builds on the lavaan
+# package for model specification. The first step
+# therefore is to implement the model in lavaan.
+
+dataset <- simulateExampleData()
+
+lavaanSyntax <- "
       f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
            l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
            l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
       f ~~ 1*f
       "
-    
-    lavaanModel <- lavaan::sem(lavaanSyntax,
-                               data = dataset,
-                               meanstructure = TRUE,
-                               std.lv = TRUE)
-    
-    # Optional: Plot the model
-    # semPlot::semPaths(lavaanModel, 
-    #                   what = "est",
-    #                   fade = FALSE)
-    
-    regsem <- lasso(
-      # pass the fitted lavaan model
-      lavaanModel = lavaanModel,
-      # names of the regularized parameters:
-      regularized = paste0("l", 6:15),
-      # in case of lasso and adaptive lasso, we can specify the number of lambda
-      # values to use. lessSEM will automatically find lambda_max and fit
-      # models for nLambda values between 0 and lambda_max. For the other
-      # penalty functions, lambdas must be specified explicitly
-      nLambdas = 50)
-    
-    # use the plot-function to plot the regularized parameters:
-    plot(regsem)
-    
-    # elements of regsem can be accessed with the @ operator:
-    regsem@parameters[1,]
-    
-    # AIC and BIC:
-    AIC(regsem)
-    BIC(regsem)
-    
-    # The best parameters can also be extracted with:
-    coef(regsem, criterion = "AIC")
-    coef(regsem, criterion = "BIC")
-    
-    # cross-validation
-    cv <- cvLasso(lavaanModel = lavaanModel,
-                  regularized = paste0("l", 6:15),
-                  lambdas = seq(0,1,.1),
-                  standardize = TRUE)
-    
-    # get best model according to cross-validation:
-    coef(cv)
-    
-    #### Advanced ###
-    # Switching the optimizer # 
-    # Use the "method" argument to switch the optimizer. The control argument
-    # must also be changed to the corresponding function:
-    regsemGlmnet <- lasso(
-      lavaanModel = lavaanModel,
-      regularized = paste0("l", 6:15),
-      nLambdas = 50,
-      method = "glmnet",
-      control = controlGlmnet())
-    
-    # Note: The results are basically identical:
-    regsemGlmnet@parameters - regsem@parameters
-    
-    
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           meanstructure = TRUE,
+                           std.lv = TRUE)
+
+# Optional: Plot the model
+# semPlot::semPaths(lavaanModel, 
+#                   what = "est",
+#                   fade = FALSE)
+
+regsem <- lasso(
+  # pass the fitted lavaan model
+  lavaanModel = lavaanModel,
+  # names of the regularized parameters:
+  regularized = paste0("l", 6:15),
+  # in case of lasso and adaptive lasso, we can specify the number of lambda
+  # values to use. lessSEM will automatically find lambda_max and fit
+  # models for nLambda values between 0 and lambda_max. For the other
+  # penalty functions, lambdas must be specified explicitly
+  nLambdas = 50)
+
+# use the plot-function to plot the regularized parameters:
+plot(regsem)
+
+# elements of regsem can be accessed with the @ operator:
+regsem@parameters[1,]
+
+# AIC and BIC:
+AIC(regsem)
+BIC(regsem)
+
+# The best parameters can also be extracted with:
+coef(regsem, criterion = "AIC")
+coef(regsem, criterion = "BIC")
+
+# cross-validation
+cv <- cvLasso(lavaanModel = lavaanModel,
+              regularized = paste0("l", 6:15),
+              lambdas = seq(0,1,.1),
+              standardize = TRUE)
+
+# get best model according to cross-validation:
+coef(cv)
+
+#### Advanced ###
+# Switching the optimizer # 
+# Use the "method" argument to switch the optimizer. The control argument
+# must also be changed to the corresponding function:
+regsemGlmnet <- lasso(
+  lavaanModel = lavaanModel,
+  regularized = paste0("l", 6:15),
+  nLambdas = 50,
+  method = "glmnet",
+  control = controlGlmnet())
+
+# Note: The results are basically identical:
+regsemGlmnet@parameters - regsem@parameters
+```
+
+
+# Transformations
+
+lessSEM allows for parameter transformations which can be used to test
+measurement invariance in longitudinal models. A thorough introduction is 
+provided in ``vignette('Parameter-transformations', package = 'lessSEM')``. 
+As an example, we will test measurement invariance in the `PoliticalDemocracy`
+data set (see also Bauer et al., 2020).
+
+```{r, eval = FALSE}
+library(lessSEM)
+library(lavaan)
+# we will use the PoliticalDemocracy from lavaan (see ?lavaan::sem)
+model <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     # assuming different loadings for different time points:
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 + y6
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+fit <- sem(model, data = PoliticalDemocracy)
+
+# We will define a transformation which regularizes differences
+# between loadings over time:
+
+transformations <- "
+# which parameters do we want to use?
+parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
+
+# transformations:
+a2 = a1 + delta_a2
+b2 = b1 + delta_b2
+c2 = c1 + delta_c2
+"
+
+# setting delta_a2, delta_b2, or delta_c2 to zero implies measurement invariance
+# for the respective parameters (a1, b1, c1)
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  # we want to regularize the differences between the parameters
+                  regularized = c("delta_a2", "delta_b2", "delta_c2"),
+                  nLambdas = 100,
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r, include = FALSE}
+library(lessSEM)
+library(lavaan)
+# we will use the PoliticalDemocracy from lavaan (see ?lavaan::sem)
+model <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     # assuming different loadings for different time points:
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 + y6
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+fit <- sem(model, data = PoliticalDemocracy)
+
+# We will define a transformation which regularizes differences
+# between loadings over time:
+
+transformations <- "
+# which parameters do we want to use?
+parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
+
+# transformations:
+a2 = a1 + delta_a2
+b2 = b1 + delta_b2
+c2 = c1 + delta_c2
+"
+
+# setting delta_a2, delta_b2, or delta_c2 to zero implies measurement invariance
+# for the respective parameters (a1, b1, c1)
+lassoFit <- lasso(lavaanModel = fit, 
+                  # we want to regularize the differences between the parameters
+                  regularized = c("delta_a2", "delta_b2", "delta_c2"),
+                  nLambdas = 100,
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+Finally, we can extract the best parameters:
+
+```{r}
+coef(lassoFit, criterion = "BIC")
+```
+
+As all differences (delta_a2, delta_b2, or delta_c2) have been zeroed, we can 
+assume measurement invariance.
+
 # A more thorough introduction
 
 You will find a short introduction to regularized SEM with the lessSEM
@@ -180,7 +298,8 @@ the scad and mcp used by the package in the vignette
 
 Finally, you can also transform parameters of your model. This is explained
 in detail in the vignette ``vignette('Parameter-transformations', package = 'lessSEM')``
-and is a powerful tool to, for instance, detect measurement invariance.
+and is a powerful tool to, for instance, detect measurement invariance 
+(see also Bauer et al., 2020).
 
 # References
 
@@ -249,6 +368,10 @@ shrinkage and thresholding algorithm for non-convex regularized optimization pro
 Proceedings of the 30th International Conference on Machine Learning, 28(2)(2), 37–45.
 * Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
 Trends in Optimization, 1(3), 123–231.
+
+## Miscellaneous
+
+* Bauer, D. J., Belzak, W. C. M., & Cole, V. T. (2020). Simplifying the Assessment of Measurement Invariance over Multiple Background Variables: Using Regularized Moderated Nonlinear Factor Analysis to Detect Differential Item Functioning. Structural Equation Modeling: A Multidisciplinary Journal, 27(1), 43–55. https://doi.org/10.1080/10705511.2019.1642754
 
 
 # Important Notes
