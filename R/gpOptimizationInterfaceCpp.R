@@ -177,8 +177,8 @@ gpLassoCpp <- function(par,
                     lambdas = NULL,
                     nLambdas = NULL,
                     additionalArguments,
-                    method = "ista", 
-                    control = lessSEM::controlIsta()
+                    method = "glmnet", 
+                    control = lessSEM::controlGlmnet()
 ){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
@@ -389,8 +389,8 @@ gpAdaptiveLassoCpp <- function(par,
                             lambdas = NULL,
                             nLambdas = NULL,
                             additionalArguments,
-                            method = "ista", 
-                            control = lessSEM::controlIsta()){
+                            method = "glmnet", 
+                            control = lessSEM::controlGlmnet()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -609,8 +609,8 @@ gpRidgeCpp <- function(par,
                     gr,
                     lambdas,
                     additionalArguments,
-                    method = "ista", 
-                    control = lessSEM::controlIsta()){
+                    method = "glmnet", 
+                    control = lessSEM::controlGlmnet()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -812,8 +812,8 @@ gpElasticNetCpp <- function(par,
                          lambdas,
                          alphas,
                          additionalArguments,
-                         method = "ista", 
-                         control = lessSEM::controlIsta()){
+                         method = "glmnet", 
+                         control = lessSEM::controlGlmnet()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")

@@ -83,9 +83,10 @@ offer even more features, such as multi-group penalties.
 
 If you want to install lessSEM from GitHub, use the following commands in R:
 
+```{r, eval = FALSE}
 if(!require(devtools))install.packages("devtools")
-
 devtools::install_github("jhorzek/lessSEM")
+```
 
 
 # Example
@@ -155,21 +156,21 @@ coef(cv)
 # Switching the optimizer # 
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-regsemGlmnet <- lasso(
+regsemIsta <- lasso(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   nLambdas = 50,
-  method = "glmnet",
-  control = controlGlmnet())
+  method = "ista",
+  control = controlIsta())
 
 # Note: The results are basically identical:
-regsemGlmnet@parameters - regsem@parameters
+regsemIsta@parameters - regsem@parameters
 ```
 
 
 # Transformations
 
-lessSEM allows for parameter transformations which can be used to test
+lessSEM allows for parameter transformations which could, for instance, be used to test
 measurement invariance in longitudinal models. A thorough introduction is 
 provided in ``vignette('Parameter-transformations', package = 'lessSEM')``. 
 As an example, we will test measurement invariance in the `PoliticalDemocracy`
@@ -279,7 +280,7 @@ Finally, we can extract the best parameters:
 coef(lassoFit, criterion = "BIC")
 ```
 
-As all differences (delta_a2, delta_b2, or delta_c2) have been zeroed, we can 
+As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been zeroed, we can 
 assume measurement invariance.
 
 # A more thorough introduction

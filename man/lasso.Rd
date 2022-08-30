@@ -10,9 +10,9 @@ lasso(
   lambdas = NULL,
   nLambdas = NULL,
   reverse = TRUE,
-  method = "ista",
+  method = "glmnet",
   modifyModel = lessSEM::modifyModel(),
-  control = lessSEM::controlIsta()
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{
@@ -154,13 +154,13 @@ coef(regsem, criterion = "BIC")
 # Switching the optimizer # 
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-regsemGlmnet <- lasso(
+regsemIsta <- lasso(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   nLambdas = 50,
-  method = "glmnet",
-  control = controlGlmnet())
+  method = "ista",
+  control = controlIsta())
 
 # Note: The results are basically identical:
-regsemGlmnet@parameters - regsem@parameters
+regsemIsta@parameters - regsem@parameters
 }

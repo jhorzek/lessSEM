@@ -123,24 +123,24 @@
 #' # Switching the optimizer # 
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
-#' regsemGlmnet <- lasso(
+#' regsemIsta <- lasso(
 #'   lavaanModel = lavaanModel,
 #'   regularized = paste0("l", 6:15),
 #'   nLambdas = 50,
-#'   method = "glmnet",
-#'   control = controlGlmnet())
+#'   method = "ista",
+#'   control = controlIsta())
 #' 
 #' # Note: The results are basically identical:
-#' regsemGlmnet@parameters - regsem@parameters
+#' regsemIsta@parameters - regsem@parameters
 #' @export
 lasso <- function(lavaanModel,
                   regularized,
                   lambdas = NULL,
                   nLambdas = NULL,
                   reverse = TRUE,
-                  method = "ista", 
+                  method = "glmnet", 
                   modifyModel = lessSEM::modifyModel(),
-                  control = lessSEM::controlIsta()){
+                  control = lessSEM::controlGlmnet()){
   
   if(is.null(lambdas) && is.null(nLambdas)){
     stop("Specify either lambdas or nLambdas")
@@ -298,15 +298,15 @@ lasso <- function(lavaanModel,
 #' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
-#' regsemGlmnet <- adaptiveLasso(
+#' regsemIsta <- adaptiveLasso(
 #'   lavaanModel = lavaanModel,
 #'   regularized = paste0("l", 6:15),
 #'   nLambdas = 50,
-#'   method = "glmnet",
-#'   control = controlGlmnet())
+#'   method = "ista",
+#'   control = controlIsta())
 #' 
 #' # Note: The results are basically identical:
-#' regsemGlmnet@parameters - regsem@parameters
+#' regsemIsta@parameters - regsem@parameters
 #' @export
 adaptiveLasso <- function(lavaanModel,
                           regularized,
@@ -314,9 +314,9 @@ adaptiveLasso <- function(lavaanModel,
                           lambdas = NULL,
                           nLambdas = NULL,
                           reverse = TRUE,
-                          method = "ista", 
+                          method = "glmnet", 
                           modifyModel = lessSEM::modifyModel(),
-                          control = lessSEM::controlIsta()){
+                          control = lessSEM::controlGlmnet()){
   if(is.null(lambdas) && is.null(nLambdas)){
     stop("Specify either lambdas or nLambdas")
   }
@@ -453,22 +453,22 @@ adaptiveLasso <- function(lavaanModel,
 #' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
-#' regsemGlmnet <- ridge(
+#' regsemIsta <- ridge(
 #'   lavaanModel = lavaanModel,
 #'   regularized = paste0("l", 6:15),
 #'   lambdas = seq(0,1,length.out = 20),
-#'   method = "glmnet",
-#'   control = controlGlmnet())
+#'   method = "ista",
+#'   control = controlIsta())
 #' 
 #' # Note: The results are basically identical:
-#' regsemGlmnet@parameters - regsem@parameters
+#' regsemIsta@parameters - regsem@parameters
 #' @export
 ridge <- function(lavaanModel,
                   regularized,
                   lambdas,
-                  method = "ista", 
+                  method = "glmnet", 
                   modifyModel = lessSEM::modifyModel(),
-                  control = lessSEM::controlIsta()){
+                  control = lessSEM::controlGlmnet()){
   
   
   result <- .regularizeSEMInternal(
@@ -596,24 +596,24 @@ ridge <- function(lavaanModel,
 #' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
-#' regsemGlmnet <- elasticNet(
+#' regsemIsta <- elasticNet(
 #'   lavaanModel = lavaanModel,
 #'   regularized = paste0("l", 6:15),
 #'   lambdas = seq(0,1,length.out = 20),
 #'   alphas = seq(0,1,.1),
-#'   method = "glmnet",
-#'   control = controlGlmnet())
+#'   method = "ista",
+#'   control = controlIsta())
 #' 
 #' # Note: The results are basically identical:
-#' regsemGlmnet@parameters - regsem@parameters
+#' regsemIsta@parameters - regsem@parameters
 #' @export
 elasticNet <- function(lavaanModel,
                        regularized,
                        lambdas,
                        alphas,
-                       method = "ista", 
+                       method = "glmnet", 
                        modifyModel = lessSEM::modifyModel(),
-                       control = lessSEM::controlIsta()){
+                       control = lessSEM::controlGlmnet()){
   
   if(any(alphas < 0) || any(alphas > 1)) 
     stop("alpha must be between 0 and 1.")

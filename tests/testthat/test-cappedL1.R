@@ -45,6 +45,7 @@ test_that("testing cappedL1", {
   rsemIstaLasso <- lasso(lavaanModel = modelFit, 
                          regularized = paste0("f=~y",6:ncol(y)), 
                          lambdas = lambdas,
+                         method = "ista",
                          control = controlIsta(convCritInner = 0)
   )
   

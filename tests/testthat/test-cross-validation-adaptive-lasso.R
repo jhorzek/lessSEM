@@ -93,6 +93,7 @@ test_that("testing cross-validation for adaptive lasso", {
   subsetLasso <- adaptiveLasso(lavaanModel = modelFit, 
                                regularized = regularizedLavaan,
                                lambdas = lambdas,
+                               method = "ista",
                                control = controlIsta(startingValues = "start"),
                                modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
   

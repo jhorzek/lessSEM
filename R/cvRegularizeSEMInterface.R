@@ -262,9 +262,9 @@ cvAdaptiveLasso <- function(lavaanModel,
                           k = 5,
                           standardize = FALSE,
                           returnSubsetParameters = FALSE,
-                          method = "ista", 
+                          method = "glmnet", 
                           modifyModel = lessSEM::modifyModel(),
-                          control = lessSEM::controlIsta()){
+                          control = lessSEM::controlGlmnet()){
 
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
@@ -404,9 +404,9 @@ cvRidge <- function(lavaanModel,
                   k = 5,
                   standardize = FALSE,
                   returnSubsetParameters = FALSE,
-                  method = "ista", 
+                  method = "glmnet", 
                   modifyModel = lessSEM::modifyModel(),
-                  control = lessSEM::controlIsta()){
+                  control = lessSEM::controlGlmnet()){
   
   
   result <- .cvRegularizeSEMInternal(
@@ -548,9 +548,9 @@ cvElasticNet <- function(lavaanModel,
                        k = 5,
                        standardize = FALSE,
                        returnSubsetParameters = FALSE,
-                       method = "ista", 
+                       method = "glmnet", 
                        modifyModel = lessSEM::modifyModel(),
-                       control = lessSEM::controlIsta()){
+                       control = lessSEM::controlGlmnet()){
   
   if(any(alphas < 0) || any(alphas > 1)) 
     stop("alpha must be between 0 and 1.")

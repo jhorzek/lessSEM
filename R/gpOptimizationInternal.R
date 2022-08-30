@@ -25,15 +25,15 @@
 #' @returns Object of class gpRegularized
 #' @keywords internal
 .gpOptimizationInternal <- function(par,
-                                   weights,
-                                   fn,
-                                   gr = NULL,
-                                   additionalArguments,
-                                   isCpp = FALSE,
-                                   penalty,
-                                   tuningParameters,
-                                   method,
-                                   control){
+                                    weights,
+                                    fn,
+                                    gr = NULL,
+                                    additionalArguments,
+                                    isCpp = FALSE,
+                                    penalty,
+                                    tuningParameters,
+                                    method,
+                                    control){
   
   inputArguments <- as.list(environment())
   
@@ -154,14 +154,28 @@
       
     }else if(any(initialHessian == "compute")){
       
-      initialHessian <- numDeriv::hessian(func = 
-                                            function(par, parameterLabels, additionalArguments
-                                            ){
-                                              return(fn(par, parameterLabels, additionalArguments))
-                                            }, 
-                                          x = par,
-                                          parameterLabels = parameterLabels,
-                                          additionalArguments = additionalArguments)
+      if(isCpp){
+        initialHessian <- numDeriv::hessian(func = 
+                                              function(par, parameterLabels, additionalArguments
+                                              ){
+                                                names(par) <- parameterLabels
+                                                return(callFitFunction(fitFunctionSEXP = fn, 
+                                                                       parameters = par, 
+                                                                       userSuppliedElements = additionalArguments))
+                                              }, 
+                                            x = par,
+                                            parameterLabels = parameterLabels,
+                                            additionalArguments = additionalArguments)
+      }else{
+        initialHessian <- numDeriv::hessian(func = 
+                                              function(par, parameterLabels, additionalArguments
+                                              ){
+                                                return(fn(par, parameterLabels, additionalArguments))
+                                              }, 
+                                            x = par,
+                                            parameterLabels = parameterLabels,
+                                            additionalArguments = additionalArguments)
+      }
       
     }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
       initialHessian <- diag(initialHessian,length(par))
@@ -311,11 +325,11 @@
     )
     
     maxLambda <- .gpGetMaxLambda(regularizedModel,
-                                par,
-                                fn,
-                                gr,
-                                additionalArguments,
-                                weights)
+                                 par,
+                                 fn,
+                                 gr,
+                                 additionalArguments,
+                                 weights)
     
     if(tuningParameters$reverse){
       tuningParameters <- data.frame(
@@ -371,9 +385,9 @@
   #### print progress ####
   if(control$verbose == 0){
     progressbar = utils::txtProgressBar(min = 0, 
-                                 max = nrow(tuningParameters), 
-                                 initial = 0, 
-                                 style = 3)
+                                        max = nrow(tuningParameters), 
+                                        initial = 0, 
+                                        style = 3)
   }
   
   #### Iterate over all tuning parameter combinations and fit models ####

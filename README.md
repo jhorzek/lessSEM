@@ -84,9 +84,10 @@ multi-group penalties.
 If you want to install lessSEM from GitHub, use the following commands
 in R:
 
-if(!require(devtools))install.packages(“devtools”)
-
-devtools::install_github(“jhorzek/lessSEM”)
+``` r
+if(!require(devtools))install.packages("devtools")
+devtools::install_github("jhorzek/lessSEM")
+```
 
 # Example
 
@@ -155,22 +156,22 @@ coef(cv)
 # Switching the optimizer # 
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-regsemGlmnet <- lasso(
+regsemIsta <- lasso(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   nLambdas = 50,
-  method = "glmnet",
-  control = controlGlmnet())
+  method = "ista",
+  control = controlIsta())
 
 # Note: The results are basically identical:
-regsemGlmnet@parameters - regsem@parameters
+regsemIsta@parameters - regsem@parameters
 ```
 
 # Transformations
 
-lessSEM allows for parameter transformations which can be used to test
-measurement invariance in longitudinal models. A thorough introduction
-is provided in
+lessSEM allows for parameter transformations which could, for instance,
+be used to test measurement invariance in longitudinal models. A
+thorough introduction is provided in
 `vignette('Parameter-transformations', package = 'lessSEM')`. As an
 example, we will test measurement invariance in the `PoliticalDemocracy`
 data set (see also Bauer et al., 2020).
@@ -228,22 +229,22 @@ Finally, we can extract the best parameters:
 
 ``` r
 coef(lassoFit, criterion = "BIC")
-#>       lambda alpha ind60=~x2 ind60=~x3      a1      b1       c1 dem60~ind60
-#> 10 0.2108082     1  2.179663  1.818209 1.19067 1.17455 1.250943    1.471334
-#>    dem65~ind60 dem65~dem60    y1~~y5   y2~~y4   y2~~y6    y3~~y7    y4~~y8
-#> 10   0.6007926   0.8648237 0.5830864 1.439462 2.182783 0.7131161 0.3633389
-#>      y6~~y8     x1~~x1    x2~~x2    x3~~x3   y1~~y1   y2~~y2   y3~~y3   y4~~y4
-#> 10 1.370266 0.08138862 0.1204197 0.4666628 1.854152 7.581019 4.954939 3.223892
-#>      y5~~y5   y6~~y6   y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
-#> 10 2.312859 4.966919 3.558855 3.306101    0.4485981     3.875898    0.1666146
-#>       x1~1   x2~1    x3~1     y1~1     y2~1    y3~1     y4~1     y5~1     y6~1
-#> 10 5.05437 4.7922 3.55769 5.464667 4.256443 6.56311 4.452533 5.136252 2.978074
-#>        y7~1    y8~1 delta_a2 delta_b2 delta_c2
-#> 10 6.196264 4.04339        0        0        0
+#>      lambda alpha ind60=~x2 ind60=~x3       a1       b1       c1 dem60~ind60
+#> 9 0.2128335     1  2.179657   1.81821 1.190778 1.174537 1.250975    1.471333
+#>   dem65~ind60 dem65~dem60    y1~~y5   y2~~y4   y2~~y6    y3~~y7    y4~~y8
+#> 9   0.6004788   0.8650411 0.5825327 1.440146 2.183018 0.7115774 0.3628155
+#>     y6~~y8     x1~~x1    x2~~x2    x3~~x3   y1~~y1   y2~~y2   y3~~y3   y4~~y4
+#> 9 1.371799 0.08138774 0.1204276 0.4666599 1.854633 7.581369 4.955664 3.224511
+#>     y5~~y5   y6~~y6  y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
+#> 9 2.313031 4.968202 3.56004 3.307712    0.4485989     3.875342    0.1644624
+#>       x1~1     x2~1    x3~1     y1~1     y2~1    y3~1     y4~1     y5~1
+#> 9 5.054384 4.792195 3.55769 5.464667 4.256443 6.56311 4.452533 5.136252
+#>       y6~1     y7~1    y8~1 delta_a2 delta_b2 delta_c2
+#> 9 2.978074 6.196264 4.04339        0        0        0
 ```
 
-As all differences (delta_a2, delta_b2, or delta_c2) have been zeroed,
-we can assume measurement invariance.
+As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been
+zeroed, we can assume measurement invariance.
 
 # A more thorough introduction
 
