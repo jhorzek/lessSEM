@@ -12,8 +12,8 @@ gpElasticNet(
   lambdas,
   alphas,
   ...,
-  method = "ista",
-  control = lessSEM::controlIsta()
+  method = "glmnet",
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{

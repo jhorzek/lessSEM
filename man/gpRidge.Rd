@@ -11,8 +11,8 @@ gpRidge(
   gr = NULL,
   lambdas,
   ...,
-  method = "ista",
-  control = lessSEM::controlIsta()
+  method = "glmnet",
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{

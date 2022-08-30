@@ -47,6 +47,18 @@
 #' @field computeTransformations compute the transformations.
 NULL
 
+#' callFitFunction
+#' 
+#' wrapper to call user defined fit function
+#' @param fitFunctionSEXP pointer to fit function
+#' @param parameters vector with parameter values
+#' @param userSuppliedElements list with additional elements
+#' @returns fit value (double)
+#' 
+callFitFunction <- function(fitFunctionSEXP, parameters, userSuppliedElements) {
+    .Call(`_lessSEM_callFitFunction`, fitFunctionSEXP, parameters, userSuppliedElements)
+}
+
 #'@name istaCappedL1
 #'@title cappedL1 optimization with ista
 #'@description Object for elastic net optimization with

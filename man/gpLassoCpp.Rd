@@ -12,8 +12,8 @@ gpLassoCpp(
   lambdas = NULL,
   nLambdas = NULL,
   additionalArguments,
-  method = "ista",
-  control = lessSEM::controlIsta()
+  method = "glmnet",
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{

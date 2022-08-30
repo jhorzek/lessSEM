@@ -13,8 +13,8 @@ gpLasso(
   nLambdas = NULL,
   reverse = TRUE,
   ...,
-  method = "ista",
-  control = lessSEM::controlIsta()
+  method = "glmnet",
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{

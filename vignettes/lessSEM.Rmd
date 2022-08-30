@@ -324,19 +324,21 @@ Compare this to:
 ## Changing the optimizer
 
 **lessSEM** comes with two specialized optimization procedures for elastic-net-type
-penalties: ista and glmnet. Currently, the default is ista, which does not require the 
-computation of a Hessian matrix. However, this comes at a price: ista optimization
+penalties: ista and glmnet. Currently, the default is glmnet for all elastic net
+variants (ridge, lasso, adaptive lasso, elastic net) and ista for all other penalties.
+Ista does not require the computation of a Hessian matrix. 
+However, this comes at a price: ista optimization
 tends to call the fit and gradient function a lot more than glment. If you are using an elastic-net-type 
 penalty (ridge, lasso, adaptive lasso, or elastic net), we recommend that you 
 first test the glmnet optimizer and then switch to ista if glmnet results in errors
-due to the Hessian matrix. Switching to glmnet is done as follows:
+due to the Hessian matrix. Switching to ista is done as follows:
 
 ```{r, eval = FALSE}
 fitLasso <- lasso(lavaanModel = lavaanModel, 
                   regularized = regularized,
                   nLambdas = 10,
-                  method = "glmnet", # change the method
-                  control = controlGlmnet() # change the control argument
+                  method = "ista", # change the method
+                  control = controlIsta() # change the control argument
                   )
 ```
 
@@ -425,7 +427,7 @@ c2 = c1 + delta_c2
 
 Next, we have to pass the `transformations` variable to the penalty function:
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 lassoFit <- lasso(lavaanModel = lavaanFit, 
                   regularized = c("delta_a2", "delta_b2", "delta_c2"),# we want to regularize 
                   # the differences between the parameters

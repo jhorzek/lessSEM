@@ -12,6 +12,19 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// callFitFunction
+double callFitFunction(SEXP fitFunctionSEXP, Rcpp::NumericVector parameters, Rcpp::List userSuppliedElements);
+RcppExport SEXP _lessSEM_callFitFunction(SEXP fitFunctionSEXPSEXP, SEXP parametersSEXP, SEXP userSuppliedElementsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type fitFunctionSEXP(fitFunctionSEXPSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type parameters(parametersSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type userSuppliedElements(userSuppliedElementsSEXP);
+    rcpp_result_gen = Rcpp::wrap(callFitFunction(fitFunctionSEXP, parameters, userSuppliedElements));
+    return rcpp_result_gen;
+END_RCPP
+}
 // computeIndividualM2LL
 double computeIndividualM2LL(const int nObservedVariables, const arma::colvec& rawData, const arma::colvec& impliedMeans, const arma::mat& impliedCovariance);
 RcppExport SEXP _lessSEM_computeIndividualM2LL(SEXP nObservedVariablesSEXP, SEXP rawDataSEXP, SEXP impliedMeansSEXP, SEXP impliedCovarianceSEXP) {
@@ -117,6 +130,7 @@ RcppExport SEXP _rcpp_module_boot_istaMcp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaScad_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_lessSEM_callFitFunction", (DL_FUNC) &_lessSEM_callFitFunction, 3},
     {"_lessSEM_computeIndividualM2LL", (DL_FUNC) &_lessSEM_computeIndividualM2LL, 4},
     {"_lessSEM_computeGroupM2LL", (DL_FUNC) &_lessSEM_computeGroupM2LL, 6},
     {"_lessSEM_computeImpliedCovariance", (DL_FUNC) &_lessSEM_computeImpliedCovariance, 3},

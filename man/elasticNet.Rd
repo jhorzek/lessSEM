@@ -9,9 +9,9 @@ elasticNet(
   regularized,
   lambdas,
   alphas,
-  method = "ista",
+  method = "glmnet",
   modifyModel = lessSEM::modifyModel(),
-  control = lessSEM::controlIsta()
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{
@@ -138,14 +138,14 @@ regsem@parameters[1,]
 # Switching the optimizer #
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-regsemGlmnet <- elasticNet(
+regsemIsta <- elasticNet(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   lambdas = seq(0,1,length.out = 20),
   alphas = seq(0,1,.1),
-  method = "glmnet",
-  control = controlGlmnet())
+  method = "ista",
+  control = controlIsta())
 
 # Note: The results are basically identical:
-regsemGlmnet@parameters - regsem@parameters
+regsemIsta@parameters - regsem@parameters
 }

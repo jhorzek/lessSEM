@@ -27,6 +27,7 @@ f ~~ 1*f
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
     lambdas = seq(0,1,.1),
+    method = "ista",
     control = controlIsta())
   )
   
@@ -38,6 +39,7 @@ f ~~ 1*f
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
     lambdas = seq(0,1,.1),
+    method = "ista",
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
@@ -72,6 +74,7 @@ f ~~ 1*f
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
     lambdas = seq(0,1,.1),
+    method = "ista",
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
@@ -93,6 +96,7 @@ f ~~ 1*f
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
     lambdas = seq(0,1,.1),
+    method = "ista",
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
@@ -104,6 +108,7 @@ f ~~ 1*f
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
     nLambdas = 50,
+    method = "ista",
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
@@ -139,6 +144,7 @@ f ~~ 1*f
     regularized = paste0("l", 6:15),
     lambdas = seq(0,1,.1),
     alphas = seq(0,1,.1),
+    method = "ista",
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)

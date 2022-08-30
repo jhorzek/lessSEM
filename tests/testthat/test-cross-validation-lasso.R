@@ -25,8 +25,7 @@ test_that("testing cross-validation for lasso", {
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   rsem <- lessSEM::lasso(lavaanModel = modelFit, 
                          regularized = regularizedLavaan,
-                         nLambdas = 30, 
-                         control = controlIsta(breakOuter = 1e-5))
+                         nLambdas = 30)
   
   lambdas <- rsem@fits$lambda
   

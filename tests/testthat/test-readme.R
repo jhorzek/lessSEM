@@ -63,14 +63,14 @@ test_that("testing readme", {
   # Switching the optimizer # 
   # Use the "method" argument to switch the optimizer. The control argument
   # must also be changed to the corresponding function:
-  regsemGlmnet <- lasso(
+  regsemIsta <- lasso(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
     nLambdas = 50,
-    method = "glmnet",
-    control = controlGlmnet())
+    method = "ista",
+    control = controlIsta())
   
   # Note: The results are basically identical:
-  regsemGlmnet@parameters - regsem@parameters
+  regsemIsta@parameters - regsem@parameters
   
 })

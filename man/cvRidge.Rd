@@ -11,9 +11,9 @@ cvRidge(
   k = 5,
   standardize = FALSE,
   returnSubsetParameters = FALSE,
-  method = "ista",
+  method = "glmnet",
   modifyModel = lessSEM::modifyModel(),
-  control = lessSEM::controlIsta()
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{

@@ -140,8 +140,8 @@ gpLasso <- function(par,
                     nLambdas = NULL,
                     reverse = TRUE,
                     ...,
-                    method = "ista", 
-                    control = lessSEM::controlIsta()
+                    method = "glmnet", 
+                    control = lessSEM::controlGlmnet()
 ){
   
   removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
@@ -338,8 +338,8 @@ gpAdaptiveLasso <- function(par,
                             nLambdas = NULL,
                             reverse = TRUE,
                             ...,
-                            method = "ista", 
-                            control = lessSEM::controlIsta()){
+                            method = "glmnet", 
+                            control = lessSEM::controlGlmnet()){
   
   removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
@@ -539,8 +539,8 @@ gpRidge <- function(par,
                     gr = NULL,
                     lambdas,
                     ...,
-                    method = "ista", 
-                    control = lessSEM::controlIsta()){
+                    method = "glmnet", 
+                    control = lessSEM::controlGlmnet()){
   
   removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
@@ -728,8 +728,8 @@ gpElasticNet <- function(par,
                          lambdas,
                          alphas,
                          ...,
-                         method = "ista", 
-                         control = lessSEM::controlIsta()){
+                         method = "glmnet", 
+                         control = lessSEM::controlGlmnet()){
   
   removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
