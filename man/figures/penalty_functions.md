@@ -7,7 +7,7 @@ $$
 \text{adaptiveLasso} & p( x_j) = \frac{1}{w_j}\lambda| x_j| & \frac{1}{w_j}\lambda\sqrt{ x_j^2 + \varepsilon}; \varepsilon > 0 & \text{bfgs, glmnet, ista} & \text{(Zou, 2006)}\\
 \text{elasticNet} & p( x_j) = \alpha\lambda| x_j| + (1-\alpha)\lambda x_j^2 & \alpha\lambda\sqrt{ x_j^2 + \varepsilon} + (1-\alpha)\lambda x_j^2; \varepsilon > 0 & \text{bfgs, glmnet, ista} & \text{(Zou \& Hastie, 2005)}\\
 \text{cappedL1} & p( x_j) = \lambda \min(| x_j|, \theta); \theta > 0 & -- & \text{ista} & \text{(Zhang, 2010)}\\
-\text{lsp} & p( x_j) = \lambda \log(1 + |x_j|\theta); \theta > 0 & -- & \text{ista} & \text{(Candès et al., 2008)} \\
+\text{lsp} & p( x_j) = \lambda \log(1 + |x_j|/\theta); \theta > 0 & -- & \text{ista} & \text{(Candès et al., 2008)} \\
 \text{scad} & p( x_j) = \begin{cases}
 \lambda |x_j| & \text{if } |x_j| \leq \lambda\\
 \frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)} & \text{if } \lambda < |x_j| \leq \lambda\theta \\

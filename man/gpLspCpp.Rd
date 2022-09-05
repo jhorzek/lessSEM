@@ -4,7 +4,7 @@
 \alias{gpLspCpp}
 \title{Implements lsp regularization for general purpose optimization problems with C++ functions.
 The penalty function is given by:
-\deqn{p( x_j) = \lambda \log(1 + |x_j|\theta)}
+\deqn{p( x_j) = \lambda \log(1 + |x_j|/\theta)}
 where \eqn{\theta > 0}.}
 \usage{
 gpLspCpp(

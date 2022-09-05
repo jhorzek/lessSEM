@@ -1044,7 +1044,7 @@ gpCappedL1Cpp <- function(par,
 
 #' Implements lsp regularization for general purpose optimization problems with C++ functions.
 #' The penalty function is given by:
-#' \deqn{p( x_j) = \lambda \log(1 + |x_j|\theta)}
+#' \deqn{p( x_j) = \lambda \log(1 + |x_j|/\theta)}
 #' where \eqn{\theta > 0}. 
 #' 
 #' The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector 
