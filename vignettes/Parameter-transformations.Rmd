@@ -226,6 +226,63 @@ head(lassoFit@transformations)
 Limitation: Above, we did not take into account that the variables may have 
 different scales; a thorough use of the method should scale the data first.
 
+## Some Guidelines
+
+When using transformations, please make sure to give your parameters names which
+are compatible with standard naming conventions in R. The default names of
+lavaan (e.g., `f=~y1` for loadings) are not supported. That is, all parameters
+used in the transformations should be given names in the lavaan syntax.
+
+In the example above, we used the following syntax:
+
+```{r,eval=FALSE}
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+```
+
+Importantly, all parameters used in the transformation (`a1, b1, c1, a2, b2, c2`)
+were labeled in the lavaan syntax. As a counter example:
+
+```{r,eval=FALSE}
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + y2 + y3 + y4
+     dem65 =~ y5 + y6 + y7 + y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+```
+
+The syntax above specifies the same model, but will use the lavaan-specific naming
+convention for the parameters. `a1`, for example, will be named `dem60=~y2`.
+These names are not compatible with the current implementation
+of transformations used in **lessSEM**.
+
 ## Further Examples
 
 Another example where the transformations could be useful is when detecting
