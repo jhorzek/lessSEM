@@ -764,7 +764,7 @@ cappedL1 <- function(lavaanModel,
 #' 
 #' Implements lsp regularization for structural equation models.
 #' The penalty function is given by:
-#' \deqn{p( x_j) = \lambda \log(1 + |x_j|\theta)}
+#' \deqn{p( x_j) = \lambda \log(1 + |x_j|/\theta)}
 #' where \eqn{\theta > 0}. 
 #' 
 #' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
