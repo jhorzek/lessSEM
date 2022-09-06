@@ -112,4 +112,13 @@ test_that("testing elasticNet-lasso-c", {
                                   reverse = FALSE,
                                   nLambdas = 10)
   testthat::expect_equal(all(apply(rsem2@parameters[,paste0("f=~y",6:ncol(y))] == 0,2,sum) > 0), TRUE)
+  
+  lassoError <- try(lasso(lavaanModel = modelFit, 
+                    regularized = paste0("f=~y",6:(ncol(y)+1)), 
+                    lambdas = lambdas,
+                    method = "ista",
+                    control = controlIsta(verbose = 0, 
+                                          startingValues = "est")
+  ), silent = TRUE)
+  testthat::expect_equal(is(lassoError, "try-error"), TRUE)
 })

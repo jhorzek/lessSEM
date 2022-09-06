@@ -137,6 +137,16 @@
     }
   }
   
+  # make sure that all regularized parameters are actually in the model
+  if(any(! regularized %in% names(startingValues))){
+    stop(
+      paste0("The following parameter was specified as regularized, but could not be found in the model:\n",
+                paste0(regularized[! regularized %in% names(startingValues)], collapse = ", ")),
+         "\nThe model parameters are:\n",
+         paste0(names(startingValues), collapse = ", ")
+    )
+  }
+  
   if(any(grepl("~~", names(weights)) & weights != 0)) 
     warning("Be careful when regularizing variances. These are implemented with a log-transform in lessSEM and you may not get the results you expected.")
   

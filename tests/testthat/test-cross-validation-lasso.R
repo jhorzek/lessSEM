@@ -67,9 +67,9 @@ test_that("testing cross-validation for lasso", {
     testSet <- subsets[,trainSet]
     
     SEM <- lessSEM:::.setParameters(SEM = SEM, 
-                                  labels = parameterLabels, 
-                                  values = unlist(pars[ro, parameterLabels]),
-                                  raw = FALSE)
+                                    labels = parameterLabels, 
+                                    values = unlist(pars[ro, parameterLabels]),
+                                    raw = FALSE)
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
@@ -91,8 +91,8 @@ test_that("testing cross-validation for lasso", {
   subsetPars <- pars[pars$trainSet == subset,]
   
   subsetLasso <- lasso(lavaanModel = modelFit, 
-                         regularized = regularizedLavaan,
-                         lambdas = lambdas,
+                       regularized = regularizedLavaan,
+                       lambdas = lambdas,
                        modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
   
   testthat::expect_equal(all(abs(subsetLasso@parameters - subsetPars[,colnames(subsetLasso@parameters)])< 1e-3), TRUE)
@@ -123,9 +123,9 @@ test_that("testing cross-validation for lasso", {
                                  standardDeviations = standardDeviations)
     
     SEM <- lessSEM:::.setParameters(SEM = SEM, 
-                                  labels = parameterLabels, 
-                                  values = unlist(pars[ro, parameterLabels]),
-                                  raw = FALSE)
+                                    labels = parameterLabels, 
+                                    values = unlist(pars[ro, parameterLabels]),
+                                    raw = FALSE)
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
@@ -142,5 +142,10 @@ test_that("testing cross-validation for lasso", {
   
   testthat::expect_equal(all(abs(cvfits$cvfit)< 1e-6), TRUE)
   
+  lassoError <- try(cvLasso(lavaanModel = modelFit, 
+                            regularized = paste0("f=~y",6:(ncol(y)+1)), 
+                            lambdas = lambdas, 
+                            k = 3), silent = TRUE)
+  testthat::expect_equal(is(lassoError, "try-error"), TRUE)
   
 })
