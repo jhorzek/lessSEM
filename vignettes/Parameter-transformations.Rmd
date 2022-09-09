@@ -1037,6 +1037,35 @@ ctsemOMX:
 AnomAuthfit$mxobj$DIFFUSIONchol$result%*%t(AnomAuthfit$mxobj$DIFFUSIONchol$result)
 ```
 
+Regularization could be used to enforce sparsity:
+
+```{r,include=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = "ctA_21",
+                  nLambdas = 30,
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r,eval=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = "ctA_21",
+                  nLambdas = 30,
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r}
+plot(lassoFit)
+```
+
+
 ## How it is implemented
 
 
