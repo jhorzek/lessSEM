@@ -39,7 +39,7 @@ between 0 and 1. 0 = ridge, 1 = lasso.}
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with
-the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.}
+the controlBFGS function. See ?controlBFGS for more details.}
 }
 \value{
 Model of class regularizedSEM

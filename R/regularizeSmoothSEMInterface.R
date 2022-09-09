@@ -245,9 +245,8 @@ smoothAdaptiveLasso <- function(lavaanModel,
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
+#' the controlBFGS function. See ?controlBFGS for more details.
 #' @returns Model of class regularizedSEM
-
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -342,7 +341,7 @@ ridgeBfgs <- function(lavaanModel,
 #' @param tau parameters below threshold tau will be seen as zeroed
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.
+#' the controlBFGS function. See ?controlBFGS for more details.
 #' @returns Model of class regularizedSEM
 
 #' @examples 

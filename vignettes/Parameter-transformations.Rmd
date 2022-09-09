@@ -701,34 +701,22 @@ v = log((1.0/(2.0*ctA))*(exp(2.0*ctA)-1)*pow(ctV,2.0)) # we take
 ```
 
 ```{r,include=FALSE}
-lassoFit <- lasso(lavaanModel = lavaanFit, 
-                  regularized = "ctA",
-                  lambdas = 0,# note: setting ctA to zero does not make much sense
-                  # as this would imply perfect stability. We will therefore just
-                  # estimate the maximum likelihood estimates
-                  method = "glmnet",
-                  control = controlGlmnet(),
-                  # Our model modification must make use of the modifyModel - function:
-                  modifyModel = modifyModel(transformations = transformations)
+lessSEMFit <- bfgs(lavaanModel = lavaanFit, 
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
 )
 ```
 
 ```{r,eval=FALSE}
-lassoFit <- lasso(lavaanModel = lavaanFit, 
-                  regularized = "ctA",
-                  lambdas = 0,# note: setting ctA to zero does not make much sense
-                  # as this would imply perfect stability. We will therefore just
-                  # estimate the maximum likelihood estimates
-                  method = "glmnet",
-                  control = controlGlmnet(),
-                  # Our model modification must make use of the modifyModel - function:
-                  modifyModel = modifyModel(transformations = transformations)
+lessSEMFit <- bfgs(lavaanModel = lavaanFit, 
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
 )
 ```
 
 Let's have a look at the parameter estimates:
 ```{r}
-coef(lassoFit)
+coef(lessSEMFit)
 ```
 
 For comparison, we will run the same model with **ctsem**:
@@ -794,7 +782,7 @@ ctsem summary and the parameter `ctV` corresponds to the root of the
 `DIFFUSION` parameter in the ctsem summary:
 
 ```{r}
-coef(lassoFit)[,c("ctA", "ctV")]
+coef(lessSEMFit)[,c("ctA", "ctV")]
 
 # drift value from ctsem:
 ctSummary$DRIFT
@@ -979,24 +967,16 @@ provides users with all of the functions implemented therein.
 As before, we can now fit the model with **lessSEM**
 
 ```{r,include=FALSE}
-lassoFit <- lasso(lavaanModel = lavaanFit, 
-                  regularized = "ctA_21",
-                  lambdas = 0,
-                  method = "glmnet",
-                  control = controlGlmnet(),
-                  # Our model modification must make use of the modifyModel - function:
-                  modifyModel = modifyModel(transformations = transformations)
+lessSEMFit <- bfgs(lavaanModel = lavaanFit,
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
 )
 ```
 
 ```{r,eval=FALSE}
-lassoFit <- lasso(lavaanModel = lavaanFit, 
-                  regularized = "ctA_21",
-                  lambdas = 0,
-                  method = "glmnet",
-                  control = controlGlmnet(),
-                  # Our model modification must make use of the modifyModel - function:
-                  modifyModel = modifyModel(transformations = transformations)
+lessSEMFit <- bfgs(lavaanModel = lavaanFit,
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
 )
 ```
 
@@ -1018,7 +998,7 @@ model:
 
 lessSEM:
 ```{r}
-matrix(unlist(coef(lassoFit)[,c("ctA_11", "ctA_21", "ctA_12", "ctA_22")]),2,2)
+matrix(unlist(coef(lessSEMFit)[,c("ctA_11", "ctA_21", "ctA_12", "ctA_22")]),2,2)
 ```
 ctsemOMX:
 ```{r}
@@ -1029,7 +1009,7 @@ The diffusions are given by:
 
 lessSEM:
 ```{r}
-matrix(unlist(coef(lassoFit)[,c("ctV_11", "ctV_12", "ctV_12", "ctV_22")]),2,2)
+matrix(unlist(coef(lessSEMFit)[,c("ctV_11", "ctV_12", "ctV_12", "ctV_22")]),2,2)
 ```
 
 ctsemOMX:
