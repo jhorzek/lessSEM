@@ -494,7 +494,7 @@ for(i in 2:9){
 print(aEst)
 ```
 
-The result is not perfect, but **lessSEM** correctly identfied a change in the
+The result is not perfect, but **lessSEM** correctly identified a change in the
 autoregressive parameter.
 
 
