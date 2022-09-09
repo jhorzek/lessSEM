@@ -6,8 +6,6 @@
 \usage{
 bfgs(
   lavaanModel,
-  regularized,
-  lambdas = NULL,
   modifyModel = lessSEM::modifyModel(),
   control = lessSEM::controlBFGS()
 )
@@ -17,7 +15,7 @@ bfgs(
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
-\item{controlBFGS}{used to control the optimizer. See ?controlBFGS for more details.}
+\item{control}{used to control the optimizer. See ?controlBFGS for more details.}
 }
 \value{
 Model of class regularizedSEM

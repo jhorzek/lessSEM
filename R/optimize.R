@@ -7,7 +7,7 @@
 #' 
 #' @param lavaanModel model of class lavaan 
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
-#' @param controlBFGS used to control the optimizer. See ?controlBFGS for more details.
+#' @param control used to control the optimizer. See ?controlBFGS for more details.
 #' @returns Model of class regularizedSEM
 #' @examples 
 #' library(lessSEM)
@@ -39,10 +39,8 @@
 #' regsem@parameters
 #' @export
 bfgs <- function(lavaanModel,
-                      regularized,
-                      lambdas = NULL,
-                      modifyModel = lessSEM::modifyModel(),
-                      control = lessSEM::controlBFGS()){
+                 modifyModel = lessSEM::modifyModel(),
+                 control = lessSEM::controlBFGS()){
   
   regularized <- NULL
   
