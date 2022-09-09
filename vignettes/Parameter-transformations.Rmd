@@ -84,16 +84,15 @@ In the following, we will show how regularization could be used (see e.g., Belza
 
 First, note that measurement invariance can be rephrased as $a_1-a_2 = 0$, $b_1-b_2 = 0$, 
 and $c_1-c_2 = 0$. Thus, regularizing the differences between these parameters may
-allow for testing measurement invariance (e.g., Belzak & Bauer, 2020). 
-In **regsem**, there is a "diff_lasso" implementation which regularizes differences 
-between parameters, however this is not available in **lessSEM**. 
+allow for testing measurement invariance (e.g., Belzak & Bauer, 2020; Liang et al., 2018; 
+Muthen & Asparouhov, 2013). In fact, this is used in Bayesian SEM to test 
+approximate measurement invariance (Liang et al., 2018; Muthen & Asparouhov, 2013).
+Similar procedures have also been developed by Huang (2018) for multi-group differences
+in parameter estimates and by Fisher et al. (2022) in vector autoregressive models.
+In **regsem**, there is a "diff_lasso" implementation which regularizes 
+differences between parameters, however this is not available in **lessSEM**. 
 Instead, **lessSEM** provides a flexible workaround: parameter transformations. 
-To make this work, we have to re-define our parameters. To this end, we make use
-of a decomposition similar to that proposed by Fisher et al. (2022)[^1]. 
-
-[^1]: Note that Fisher et al. (2022) used the decomposition to regularize differences
-between individuals in vector autoregressive models. Person-specific parameters
-are not yet supported in **lessSEM**, but we will make use of the same decomposition-idea.
+To make this work, we have to re-define our parameters.
 
 Redefine:
 
@@ -286,9 +285,9 @@ of transformations used in **lessSEM**.
 ## Further Examples
 
 Another example where the transformations could be useful is when detecting
-non-stationarity in autoregressive and cross-lagged parameters. In the following,
-we will demonstrate this with an autoregressive model. The model is defined as 
-follows:
+non-stationarity in autoregressive and cross-lagged parameters (e.g., Liang et al., 2018). 
+In the following, we will demonstrate this with an autoregressive model. 
+The model is defined as:
 
 $$
 \begin{align}
@@ -495,7 +494,7 @@ for(i in 2:9){
 print(aEst)
 ```
 
-The result is not perfect, but **lessSEM** correctly identfied a change in the
+The result is not perfect, but **lessSEM** correctly identified a change in the
 autoregressive parameter.
 
 
@@ -702,34 +701,22 @@ v = log((1.0/(2.0*ctA))*(exp(2.0*ctA)-1)*pow(ctV,2.0)) # we take
 ```
 
 ```{r,include=FALSE}
-lassoFit <- lasso(lavaanModel = lavaanFit, 
-                  regularized = "ctA",
-                  lambdas = 0,# note: setting ctA to zero does not make much sense
-                  # as this would imply perfect stability. We will therefore just
-                  # estimate the maximum likelihood estimates
-                  method = "glmnet",
-                  control = controlGlmnet(),
-                  # Our model modification must make use of the modifyModel - function:
-                  modifyModel = modifyModel(transformations = transformations)
+lessSEMFit <- bfgs(lavaanModel = lavaanFit, 
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
 )
 ```
 
 ```{r,eval=FALSE}
-lassoFit <- lasso(lavaanModel = lavaanFit, 
-                  regularized = "ctA",
-                  lambdas = 0,# note: setting ctA to zero does not make much sense
-                  # as this would imply perfect stability. We will therefore just
-                  # estimate the maximum likelihood estimates
-                  method = "glmnet",
-                  control = controlGlmnet(),
-                  # Our model modification must make use of the modifyModel - function:
-                  modifyModel = modifyModel(transformations = transformations)
+lessSEMFit <- bfgs(lavaanModel = lavaanFit, 
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
 )
 ```
 
 Let's have a look at the parameter estimates:
 ```{r}
-coef(lassoFit)
+coef(lessSEMFit)
 ```
 
 For comparison, we will run the same model with **ctsem**:
@@ -795,7 +782,7 @@ ctsem summary and the parameter `ctV` corresponds to the root of the
 `DIFFUSION` parameter in the ctsem summary:
 
 ```{r}
-coef(lassoFit)[,c("ctA", "ctV")]
+coef(lessSEMFit)[,c("ctA", "ctV")]
 
 # drift value from ctsem:
 ctSummary$DRIFT
@@ -980,24 +967,16 @@ provides users with all of the functions implemented therein.
 As before, we can now fit the model with **lessSEM**
 
 ```{r,include=FALSE}
-lassoFit <- lasso(lavaanModel = lavaanFit, 
-                  regularized = "ctA_21",
-                  lambdas = 0,
-                  method = "glmnet",
-                  control = controlGlmnet(),
-                  # Our model modification must make use of the modifyModel - function:
-                  modifyModel = modifyModel(transformations = transformations)
+lessSEMFit <- bfgs(lavaanModel = lavaanFit,
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
 )
 ```
 
 ```{r,eval=FALSE}
-lassoFit <- lasso(lavaanModel = lavaanFit, 
-                  regularized = "ctA_21",
-                  lambdas = 0,
-                  method = "glmnet",
-                  control = controlGlmnet(),
-                  # Our model modification must make use of the modifyModel - function:
-                  modifyModel = modifyModel(transformations = transformations)
+lessSEMFit <- bfgs(lavaanModel = lavaanFit,
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
 )
 ```
 
@@ -1019,7 +998,7 @@ model:
 
 lessSEM:
 ```{r}
-matrix(unlist(coef(lassoFit)[,c("ctA_11", "ctA_21", "ctA_12", "ctA_22")]),2,2)
+matrix(unlist(coef(lessSEMFit)[,c("ctA_11", "ctA_21", "ctA_12", "ctA_22")]),2,2)
 ```
 ctsemOMX:
 ```{r}
@@ -1030,13 +1009,42 @@ The diffusions are given by:
 
 lessSEM:
 ```{r}
-matrix(unlist(coef(lassoFit)[,c("ctV_11", "ctV_12", "ctV_12", "ctV_22")]),2,2)
+matrix(unlist(coef(lessSEMFit)[,c("ctV_11", "ctV_12", "ctV_12", "ctV_22")]),2,2)
 ```
 
 ctsemOMX:
 ```{r}
 AnomAuthfit$mxobj$DIFFUSIONchol$result%*%t(AnomAuthfit$mxobj$DIFFUSIONchol$result)
 ```
+
+Regularization could be used to enforce sparsity:
+
+```{r,include=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = "ctA_21",
+                  nLambdas = 30,
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r,eval=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = "ctA_21",
+                  nLambdas = 30,
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r}
+plot(lassoFit)
+```
+
 
 ## How it is implemented
 
@@ -1061,6 +1069,9 @@ numerically.
 * Belzak, W. C. M., & Bauer, D. J. (2020). Improving the assessment of measurement invariance: Using regularization to select anchor items and identify differential item functioning. Psychological Methods, 25(6), 673–690. https://doi.org/10.1037/met0000253
 * Driver, C. C., Oud, J. H. L., & Voelkle, M. C. (2017). Continuous time structural equation modelling with R package ctsem. Journal of Statistical Software, 77(5), 1–36. https://doi.org/10.18637/jss.v077.i05
 * Fisher, Z. F., Kim, Y., Fredrickson, B. L., & Pipiras, V. (2022). Penalized Estimation and Forecasting of Multiple Subject Intensive Longitudinal Data. Psychometrika, 87(2), 1–29. https://doi.org/10.1007/s11336-021-09825-7
+* Huang, P.-H. (2018). A penalized likelihood method for multi-group structural equation modelling. British Journal of Mathematical and Statistical Psychology, 71(3), 499–522. https://doi.org/10.1111/bmsp.12130
+* Liang, X., Yang, Y., & Huang, J. (2018). Evaluation of Structural Relationships in Autoregressive Cross-Lagged Models Under Longitudinal Approximate Invariance:A Bayesian Analysis. Structural Equation Modeling: A Multidisciplinary Journal, 25(4), 558–572. https://doi.org/10.1080/10705511.2017.1410706
+* Muthen, B., & Asparouhov, T. (2013). BSEM Measurement Invariance Analysis. Mplus Web Notes: No. 17.
 * Ou, L., Hunter, M., D., & Chow, S.-M. (2019). Whats for dynr: A package for linear and nonlinear dynamic modeling in r. The R Journal, 11(1), 91–111. https://doi.org/10.32614/RJ-2019-012
 * Voelkle, M. C., Oud, J. H. L., Davidov, E., & Schmidt, P. (2012). An sem approach to continuous time modeling of panel data: Relating authoritarianism and anomia. Psychological Methods, 17(2), 176–192. https://doi.org/10.1037/a0027543
 

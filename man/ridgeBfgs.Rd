@@ -24,7 +24,7 @@ getLavaanParameters(model) with your lavaan model object}
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
 \item{control}{used to control the optimizer. This element is generated with
-the controlIsta and controlGlmnet functions. See ?controlBFGS for more details.}
+the controlBFGS function. See ?controlBFGS for more details.}
 }
 \value{
 Model of class regularizedSEM

@@ -102,7 +102,12 @@
   rawParameters <- .getParameters(SEM, raw = TRUE)
   
   # set weights
-  if(!is.numeric(weights)){
+  if(is.null(weights)){
+    # using bfgs without regularization -> no weights necessary
+    weights <- startingValues
+    weights[] <- 0
+    regularized <- ""
+  }else if(!is.numeric(weights)){
     regularized <- weights
     if(penalty == "adaptiveLasso"){
       
