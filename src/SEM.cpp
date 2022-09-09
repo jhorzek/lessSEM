@@ -215,7 +215,7 @@ void SEMCpp::addDerivativeElement(std::string label_,
                                   std::string location_, 
                                   bool isVariance_, 
                                   arma::mat positionMatrix_){
-  if(currentStatus != addedParameters & currentStatus != addedDerivatives){
+  if((currentStatus != addedParameters) & (currentStatus != addedDerivatives)){
     Rcpp::stop("Please define the model matrices and add parameters before calling addDerivativeElement.");
   }
   currentStatus = addedDerivatives;
