@@ -18,3 +18,4 @@ a syntax where multi-line statements are condensed to one line
 checks if a parameter: or a start: statement spans multiple lines
 and reduces it to one line.
 }
+\keyword{internal}
