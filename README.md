@@ -174,7 +174,7 @@ be used to test measurement invariance in longitudinal models. A
 thorough introduction is provided in
 `vignette('Parameter-transformations', package = 'lessSEM')`. As an
 example, we will test measurement invariance in the `PoliticalDemocracy`
-data set (see also Bauer et al., 2020).
+data set (see also Liang, 2018; Bauer et al., 2020).
 
 ``` r
 library(lessSEM)
@@ -229,18 +229,18 @@ Finally, we can extract the best parameters:
 
 ``` r
 coef(lassoFit, criterion = "BIC")
-#>      lambda alpha ind60=~x2 ind60=~x3       a1       b1       c1 dem60~ind60
-#> 10 0.210519     1  2.179657   1.81821 1.190781 1.174538 1.250977    1.471333
-#>    dem65~ind60 dem65~dem60   y1~~y5   y2~~y4   y2~~y6    y3~~y7    y4~~y8
-#> 10   0.6004776   0.8650408 0.582538 1.440134 2.183012 0.7115808 0.3628105
-#>      y6~~y8     x1~~x1    x2~~x2    x3~~x3  y1~~y1   y2~~y2   y3~~y3   y4~~y4
-#> 10 1.371791 0.08138772 0.1204276 0.4666599 1.85464 7.581351 4.955668 3.224502
-#>      y5~~y5   y6~~y6  y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
-#> 10 2.313037 4.968193 3.56004 3.307703    0.4485989     3.875338    0.1644645
-#>        x1~1     x2~1    x3~1     y1~1     y2~1    y3~1     y4~1     y5~1
-#> 10 5.054384 4.792195 3.55769 5.464667 4.256443 6.56311 4.452533 5.136252
-#>        y6~1     y7~1    y8~1 delta_a2 delta_b2 delta_c2
-#> 10 2.978074 6.196264 4.04339        0        0        0
+#>      lambda alpha ind60=~x2 ind60=~x3       a1      b1       c1 dem60~ind60
+#> 9 0.2128335     1  2.179657   1.81821 1.190784 1.17454 1.250981    1.471331
+#>   dem65~ind60 dem65~dem60    y1~~y5   y2~~y4   y2~~y6    y3~~y7    y4~~y8
+#> 9   0.6004758   0.8650411 0.5825484 1.440122 2.183011 0.7115863 0.3628024
+#>     y6~~y8     x1~~x1    x2~~x2    x3~~x3   y1~~y1   y2~~y2   y3~~y3   y4~~y4
+#> 9 1.371781 0.08138773 0.1204276 0.4666599 1.854652 7.581341 4.955675 3.224484
+#>     y5~~y5   y6~~y6   y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
+#> 9 2.313046 4.968186 3.560037 3.307688    0.4485988     3.875323    0.1644656
+#>       x1~1     x2~1    x3~1     y1~1     y2~1    y3~1     y4~1     y5~1
+#> 9 5.054384 4.792195 3.55769 5.464667 4.256443 6.56311 4.452533 5.136252
+#>       y6~1     y7~1    y8~1 delta_a2 delta_b2 delta_c2
+#> 9 2.978074 6.196264 4.04339        0        0        0
 ```
 
 As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been
@@ -358,6 +358,11 @@ Bauer et al., 2020).
 
 ## Miscellaneous
 
+-   Liang, X., Yang, Y., & Huang, J. (2018). Evaluation of structural
+    relationships in autoregressive cross-lagged models under
+    longitudinal approximate invariance: A Bayesian analysis. Structural
+    Equation Modeling: A Multidisciplinary Journal, 25(4), 558–572.
+    <https://doi.org/10.1080/10705511.2017.1410706>
 -   Bauer, D. J., Belzak, W. C. M., & Cole, V. T. (2020). Simplifying
     the Assessment of Measurement Invariance over Multiple Background
     Variables: Using Regularized Moderated Nonlinear Factor Analysis to
