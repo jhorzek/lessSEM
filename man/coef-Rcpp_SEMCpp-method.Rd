@@ -15,4 +15,3 @@ all coefficients of the model in transformed form
 \description{
 coef
 }
-\keyword{internal}
