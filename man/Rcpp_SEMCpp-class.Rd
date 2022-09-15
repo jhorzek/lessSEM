@@ -7,4 +7,3 @@
 \description{
 internal representation of SEM in C++
 }
-\keyword{internal}

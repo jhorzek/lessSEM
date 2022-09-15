@@ -14,7 +14,8 @@ License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.2.1
 Roxygen: list(markdown = TRUE)
-Imports: Rcpp (>= 1.0.8), RcppArmadillo(>= 0.11.2.0.0), ggplot2, tidyr, lavaan, stringr, methods, numDeriv, utils, stats, graphics
+Depends: lavaan
+Imports: Rcpp (>= 1.0.8), RcppArmadillo(>= 0.11.2.0.0), ggplot2, tidyr, stringr, methods, numDeriv, utils, stats, graphics
 Suggests: 
     knitr,
     plotly,
@@ -27,7 +28,6 @@ Suggests:
     lslx,
     mvtnorm,
     Matrix,
-    OpenMx,
-    ctsemOMX
+    OpenMx
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr

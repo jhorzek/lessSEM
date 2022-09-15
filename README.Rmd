@@ -174,7 +174,7 @@ lessSEM allows for parameter transformations which could, for instance, be used 
 measurement invariance in longitudinal models. A thorough introduction is 
 provided in ``vignette('Parameter-transformations', package = 'lessSEM')``. 
 As an example, we will test measurement invariance in the `PoliticalDemocracy`
-data set (see also Bauer et al., 2020).
+data set (see also Liang, 2018; Bauer et al., 2020).
 
 ```{r, eval = FALSE}
 library(lessSEM)
@@ -372,6 +372,7 @@ Trends in Optimization, 1(3), 123–231.
 
 ## Miscellaneous
 
+* Liang, X., Yang, Y., & Huang, J. (2018). Evaluation of structural relationships in autoregressive cross-lagged models under longitudinal approximate invariance: A Bayesian analysis. Structural Equation Modeling: A Multidisciplinary Journal, 25(4), 558–572. https://doi.org/10.1080/10705511.2017.1410706
 * Bauer, D. J., Belzak, W. C. M., & Cole, V. T. (2020). Simplifying the Assessment of Measurement Invariance over Multiple Background Variables: Using Regularized Moderated Nonlinear Factor Analysis to Detect Differential Item Functioning. Structural Equation Modeling: A Multidisciplinary Journal, 27(1), 43–55. https://doi.org/10.1080/10705511.2019.1642754
 
 

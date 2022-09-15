@@ -101,6 +101,7 @@
 #' @param syntax reduced syntax
 #' @param what which statement to look for (parameters or start)
 #' @return a syntax where multi-line statements are condensed to one line
+#' @keywords internal
 .makeSingleLine <- function(syntax, what){
   
   parameterStatement <- which(grepl(pattern = paste0(what,"\\s*:"), x = syntax))
