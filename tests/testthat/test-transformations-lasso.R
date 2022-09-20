@@ -135,4 +135,21 @@ test_that("testing elasticNet-lasso-with-transformation", {
   )
   rsemGlmnet@parameters
   
+  # adaptive lasso
+  rsemGlmnet <- adaptiveLasso(lavaanModel = modelFit, 
+                        regularized = c("deltaA", "deltaB", "deltaC"),
+                        lambdas = lambdas,
+                        method = "glmnet",
+                        control = controlGlmnet(),
+                        modifyModel = modifyModel(transformations = transformations)
+  )
+  
+  # compare weights to mles:
+  MLEs <- bfgs(lavaanModel = modelFit, 
+                              modifyModel = modifyModel(transformations = transformations)
+  )
+  testthat::expect_equal(all(abs(rsemGlmnet@weights[c("deltaA", "deltaB", "deltaC")]^(-1) - 
+                               abs(MLEs@parameters[,c("deltaA", "deltaB", "deltaC")])) < 1e-3),TRUE)
+  
+  
 })
