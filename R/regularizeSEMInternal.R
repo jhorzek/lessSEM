@@ -55,7 +55,7 @@
   ### initialize model ####
   startingValues <- control$startingValues
   
-  if(!any(startingValues == "est") & penalty == "adaptiveLasso" & !is.numeric(weights)){
+  if(((!any(startingValues == "est") & !is.numeric(weights)) | !is.null(modifyModel$transformations)) & penalty == "adaptiveLasso"){
     createAdaptiveLassoWeights <- TRUE
   }else{
     createAdaptiveLassoWeights <- FALSE
