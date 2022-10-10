@@ -44,7 +44,7 @@ The following penalty functions are currently implemented in lessSEM:
 with `smoothLasso`, `smoothAdaptiveLasso`, and `smoothElasticNet`. 
 These are only implemented for the comparison of exact and approximate optimization 
 and should not be used in most cases. The best model can be selected with the 
-AIC, or BIC. If you want to use cross-validation instead, use `cvLasso`, `cvAdaptiveLasso`,
+AIC, or BIC. If you want to use cross-validation, use `cvLasso`, `cvAdaptiveLasso`,
 etc. instead (see, e.g.,  `?lessSEM::cvLasso`). The smooth versions are called
 `cvSmoothLasso`, etc.
 
@@ -55,8 +55,12 @@ Gong et al., 2013; Parikh & Boyd, 2013); optimization of cappedL1, lsp, scad,
 and mcp is based on Gong et al. (2013)
 - glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
 
-**These are also available for other packages.** There are three ways to implement them
-which are documented in the `General-Purpose-Optimization` vignette. In short, these are:
+These optimizers are implemented based on the 
+[regCtsem](https://github.com/jhorzek/regCtsem) package. Most importantly, 
+**all optimizers in lessSEM are available for other packages.** 
+There are three ways to implement them which are documented in 
+`vignette("General-Purpose-Optimization", package = "lessSEM")`.
+In short, these are:
 
 1. using the R interface: All general purpose implementations of the functions 
 are called with prefix "gp" (`gpLasso`, `gpScad`, ...). More information and 
@@ -78,7 +82,8 @@ using a model built in [lavaan](https://github.com/yrosseel/lavaan). lessSEM
 can handle missing data by means of full information maximum likelihood estimation 
 and allows for equality constraints on parameters. However, 
 [regsem](https://github.com/Rjacobucci/regsem) and [lslx](https://github.com/psyphh/lslx) 
-offer even more features, such as multi-group penalties.
+offer even more features, such as multi-group penalties. A distinct feature of
+lessSEM are parameter transformations (see below for an example).
 
 # Installation
 
@@ -89,6 +94,11 @@ if(!require(devtools))install.packages("devtools")
 devtools::install_github("jhorzek/lessSEM")
 ```
 
+# Introduction
+
+You will find a short introduction to regularized SEM with the lessSEM
+package in `vignette('lessSEM', package = 'lessSEM')`. More information is also
+provided in the documentation of the individual functions (e.g., see `?lessSEM::scad`)
 
 # Example
 
@@ -172,10 +182,10 @@ regsemIsta@parameters - regsem@parameters
 # Transformations
 
 lessSEM allows for parameter transformations which could, for instance, be used to test
-measurement invariance in longitudinal models. A thorough introduction is 
-provided in ``vignette('Parameter-transformations', package = 'lessSEM')``. 
+measurement invariance in longitudinal models (e.g., Liang, 2018; Bauer et al., 2020).
+A thorough introduction is provided in ``vignette('Parameter-transformations', package = 'lessSEM')``. 
 As an example, we will test measurement invariance in the `PoliticalDemocracy`
-data set (see also Liang, 2018; Bauer et al., 2020).
+data set.
 
 ```{r, eval = FALSE}
 library(lessSEM)
@@ -284,25 +294,6 @@ coef(lassoFit, criterion = "BIC")
 As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been zeroed, we can 
 assume measurement invariance.
 
-# A more thorough introduction
-
-You will find a short introduction to regularized SEM with the lessSEM
-package in the vignette "lessSEM" (see 
-``vignette('lessSEM', package = 'lessSEM')``). More information is also
-provided in the documentation of the individual functions (e.g., see `?lessSEM::scad`)
-
-# Miscellaneous
-
-You will find a short introduction to the optimizer interfaces in the vignette  
-``vignette('The-optimizer-interface', package = 'lessSEM')`` and a derivation of 
-the scad and mcp used by the package in the vignette 
-``vignette('SCAD-and-MCP', package = 'lessSEM')``.
-
-Finally, you can also transform parameters of your model. This is explained
-in detail in the vignette ``vignette('Parameter-transformations', package = 'lessSEM')``
-and is a powerful tool to, for instance, detect measurement invariance 
-(see also Bauer et al., 2020).
-
 # References
 
 ## R - Packages / Software
@@ -318,6 +309,9 @@ Another implementation of the fista algorithm (Beck & Teboulle, 2009).
 * [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M., Prabhu, R. G., 
 Basak, S., Lou, Z., & Sanderson, C. (2021). The ensmallen library for ﬂexible 
 numerical optimization. Journal of Machine Learning Research, 22, 1–6.
+* [regCtsem](https://github.com/jhorzek/regCtsem): Orzek, J. H., & Voelkle, M. C. (in press). 
+Regularized continuous time structural equation models: A network perspective. Psychological Methods.
+
 
 ## Regularized Structural Equation Modeling
 
