@@ -44,20 +44,23 @@ The following penalty functions are currently implemented in lessSEM:
 with `smoothLasso`, `smoothAdaptiveLasso`, and `smoothElasticNet`. 
 These are only implemented for the comparison of exact and approximate optimization 
 and should not be used in most cases. The best model can be selected with the 
-AIC, or BIC. If you want to use cross-validation instead, use `cvLasso`, `cvAdaptiveLasso`,
+AIC, or BIC. If you want to use cross-validation, use `cvLasso`, `cvAdaptiveLasso`,
 etc. instead (see, e.g.,  `?lessSEM::cvLasso`). The smooth versions are called
 `cvSmoothLasso`, etc.
 
-Currently, lessSEM has the following optimizers that are implemented based on 
-[regCtsem](https://github.com/jhorzek/regCtsem):
+Currently, lessSEM has the following optimizers:
 
 - (variants of) iterative shrinkage and thresholding (e.g., Beck & Teboulle, 2009; 
 Gong et al., 2013; Parikh & Boyd, 2013); optimization of cappedL1, lsp, scad, 
 and mcp is based on Gong et al. (2013)
 - glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
 
-**These are also available for other packages.** There are three ways to implement them
-which are documented in the `General-Purpose-Optimization` vignette. In short, these are:
+These optimizers are implemented based on the 
+[regCtsem](https://github.com/jhorzek/regCtsem) package. Most importantly, 
+**all optimizers in lessSEM are available for other packages.** 
+There are three ways to implement them which are documented in 
+`vignette("General-Purpose-Optimization", package = "lessSEM")`.
+In short, these are:
 
 1. using the R interface: All general purpose implementations of the functions 
 are called with prefix "gp" (`gpLasso`, `gpScad`, ...). More information and 
