@@ -40,7 +40,8 @@ cross-validation instead, use `cvLasso`, `cvAdaptiveLasso`, etc. instead
 (see, e.g., `?lessSEM::cvLasso`). The smooth versions are called
 `cvSmoothLasso`, etc.
 
-Currently, lessSEM has the following optimizers:
+Currently, lessSEM has the following optimizers that are implemented
+based on [regCtsem](https://github.com/jhorzek/regCtsem):
 
 -   (variants of) iterative shrinkage and thresholding (e.g., Beck &
     Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013);
@@ -88,6 +89,14 @@ in R:
 if(!require(devtools))install.packages("devtools")
 devtools::install_github("jhorzek/lessSEM")
 ```
+
+# Introduction
+
+You will find a short introduction to regularized SEM with the lessSEM
+package in the vignette “lessSEM” (see
+`vignette('lessSEM', package = 'lessSEM')`). More information is also
+provided in the documentation of the individual functions (e.g., see
+`?lessSEM::scad`)
 
 # Example
 
@@ -229,14 +238,14 @@ Finally, we can extract the best parameters:
 
 ``` r
 coef(lassoFit, criterion = "BIC")
-#>      lambda alpha ind60=~x2 ind60=~x3       a1      b1       c1 dem60~ind60
-#> 9 0.2128335     1  2.179657   1.81821 1.190784 1.17454 1.250981    1.471331
+#>      lambda alpha ind60=~x2 ind60=~x3       a1       b1       c1 dem60~ind60
+#> 9 0.2128191     1  2.179657   1.81821 1.190779 1.174537 1.250974    1.471332
 #>   dem65~ind60 dem65~dem60    y1~~y5   y2~~y4   y2~~y6    y3~~y7    y4~~y8
-#> 9   0.6004758   0.8650411 0.5825484 1.440122 2.183011 0.7115863 0.3628024
+#> 9   0.6004813   0.8650407 0.5825286 1.440141 2.183011 0.7115793 0.3628185
 #>     y6~~y8     x1~~x1    x2~~x2    x3~~x3   y1~~y1   y2~~y2   y3~~y3   y4~~y4
-#> 9 1.371781 0.08138773 0.1204276 0.4666599 1.854652 7.581341 4.955675 3.224484
-#>     y5~~y5   y6~~y6   y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
-#> 9 2.313046 4.968186 3.560037 3.307688    0.4485988     3.875323    0.1644656
+#> 9 1.371797 0.08138773 0.1204276 0.4666599 1.854632 7.581361 4.955663 3.224511
+#>    y5~~y5   y6~~y6   y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
+#> 9 2.31303 4.968197 3.560042 3.307714    0.4485989     3.875357    0.1644641
 #>       x1~1     x2~1    x3~1     y1~1     y2~1    y3~1     y4~1     y5~1
 #> 9 5.054384 4.792195 3.55769 5.464667 4.256443 6.56311 4.452533 5.136252
 #>       y6~1     y7~1    y8~1 delta_a2 delta_b2 delta_c2
@@ -245,28 +254,6 @@ coef(lassoFit, criterion = "BIC")
 
 As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been
 zeroed, we can assume measurement invariance.
-
-# A more thorough introduction
-
-You will find a short introduction to regularized SEM with the lessSEM
-package in the vignette “lessSEM” (see
-`vignette('lessSEM', package = 'lessSEM')`). More information is also
-provided in the documentation of the individual functions (e.g., see
-`?lessSEM::scad`)
-
-# Miscellaneous
-
-You will find a short introduction to the optimizer interfaces in the
-vignette  
-`vignette('The-optimizer-interface', package = 'lessSEM')` and a
-derivation of the scad and mcp used by the package in the vignette
-`vignette('SCAD-and-MCP', package = 'lessSEM')`.
-
-Finally, you can also transform parameters of your model. This is
-explained in detail in the vignette
-`vignette('Parameter-transformations', package = 'lessSEM')` and is a
-powerful tool to, for instance, detect measurement invariance (see also
-Bauer et al., 2020).
 
 # References
 
@@ -290,6 +277,9 @@ Bauer et al., 2020).
     Prabhu, R. G., Basak, S., Lou, Z., & Sanderson, C. (2021). The
     ensmallen library for ﬂexible numerical optimization. Journal of
     Machine Learning Research, 22, 1–6.
+-   [regCtsem](https://github.com/jhorzek/regCtsem): Orzek, J. H., &
+    Voelkle, M. C. (in press). Regularized continuous time structural
+    equation models: A network perspective. Psychological Methods.
 
 ## Regularized Structural Equation Modeling
 
