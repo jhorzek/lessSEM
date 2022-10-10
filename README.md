@@ -80,7 +80,8 @@ data by means of full information maximum likelihood estimation and
 allows for equality constraints on parameters. However,
 [regsem](https://github.com/Rjacobucci/regsem) and
 [lslx](https://github.com/psyphh/lslx) offer even more features, such as
-multi-group penalties.
+multi-group penalties. A distinct feature of lessSEM are parameter
+transformations (see below for an example).
 
 # Installation
 
@@ -95,10 +96,9 @@ devtools::install_github("jhorzek/lessSEM")
 # Introduction
 
 You will find a short introduction to regularized SEM with the lessSEM
-package in the vignette “lessSEM” (see
-`vignette('lessSEM', package = 'lessSEM')`). More information is also
-provided in the documentation of the individual functions (e.g., see
-`?lessSEM::scad`)
+package in `vignette('lessSEM', package = 'lessSEM')`. More information
+is also provided in the documentation of the individual functions (e.g.,
+see `?lessSEM::scad`)
 
 # Example
 
@@ -181,11 +181,11 @@ regsemIsta@parameters - regsem@parameters
 # Transformations
 
 lessSEM allows for parameter transformations which could, for instance,
-be used to test measurement invariance in longitudinal models. A
-thorough introduction is provided in
+be used to test measurement invariance in longitudinal models (e.g.,
+Liang, 2018; Bauer et al., 2020). A thorough introduction is provided in
 `vignette('Parameter-transformations', package = 'lessSEM')`. As an
 example, we will test measurement invariance in the `PoliticalDemocracy`
-data set (see also Liang, 2018; Bauer et al., 2020).
+data set.
 
 ``` r
 library(lessSEM)
