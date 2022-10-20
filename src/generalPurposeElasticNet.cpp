@@ -58,7 +58,9 @@ public:
       double lambda_,
       double alpha_){
     
-    generalPurposeFitFramework gpFF(fitFunction, gradientFunction, userSuppliedElements);
+    generalPurposeFitFramework gpFF(fitFunction, 
+                                    gradientFunction, 
+                                    userSuppliedElements);
     
     lessSEM::tuningParametersEnet tp;
     tp.lambda = lambda_;
@@ -288,7 +290,10 @@ public:
       double lambda_,
       double alpha_){
     
-    generalPurposeFitFrameworkCpp gpFF(startingValues_, fitFunction, gradientFunction, userSuppliedElements);
+    generalPurposeFitFrameworkCpp gpFF(startingValues_, 
+                                       fitFunction,
+                                       gradientFunction,
+                                       userSuppliedElements);
     
     lessSEM::tuningParametersEnet tp;
     tp.lambda = lambda_;
@@ -408,7 +413,10 @@ public:
       double lambda_,
       double alpha_){
     
-    generalPurposeFitFrameworkCpp gpFF(startingValues_, fitFunction, gradientFunction, userSuppliedElements);
+    generalPurposeFitFrameworkCpp gpFF(startingValues_, 
+                                       fitFunction, 
+                                       gradientFunction, 
+                                       userSuppliedElements);
     
     lessSEM::tuningParametersEnet tp;
     tp.lambda = lambda_;
