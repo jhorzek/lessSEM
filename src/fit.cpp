@@ -1,4 +1,5 @@
 #include <RcppArmadillo.h>
+#include "fit.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
@@ -48,10 +49,11 @@ double computeGroupM2LL(const int sampleSize,
                         const arma::colvec& impliedMeans,
                         const arma::mat& impliedCovariance){
   double m2LL;
+  arma::mat inv = arma::inv(impliedCovariance);
   double Nklog2pi = sampleSize*nObservedVariables*std::log(2*M_PI);
   double NlogDetExpCov = sampleSize*std::log(arma::det(impliedCovariance));
-  double NtrSSigma = sampleSize*arma::trace(observedCov * arma::inv(impliedCovariance));
-  arma::mat Ndist = sampleSize*arma::trans(observedMeans - impliedMeans)*arma::inv(impliedCovariance)*(observedMeans - impliedMeans);
+  double NtrSSigma = sampleSize*arma::trace(observedCov * inv);
+  arma::mat Ndist = sampleSize*arma::trans(observedMeans - impliedMeans)*inv*(observedMeans - impliedMeans);
 
   m2LL = Nklog2pi +
     NlogDetExpCov +
