@@ -1,5 +1,9 @@
 FROM rocker/tidyverse
 
-RUN R -e "install.packages(c('Rcpp', 'RcppArmadillo', 'numDeriv', 'knitr', 'plotly', 'rmarkdown', 'Rsolnp', 'testthat', 'glmnet', 'ncvreg', 'regsem', 'lslx', 'mvtnorm', 'Matrix', 'OpenMx', 'ctsemOMX'), dependencies=TRUE, repos='http://cran.rstudio.com/')"
+# install dependencies of dependencies ...
+RUN apt-get update && apt-get install -y librsvg2-dev cargo libxt-dev libudunits2-dev qpdf cmake
 
-RUN apt-get update && apt-get install -y qpdf
+# install dependencies
+COPY install_dependencies.R .
+
+RUN Rscript install_dependencies.R
