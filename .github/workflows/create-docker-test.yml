@@ -1,0 +1,21 @@
+name: Docker Image For Dependencies
+
+on:
+  workflow_dispatch
+  
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Docker with Dependencies
+      run: ls && docker build . --file .github/workflows/Dockerfile-test --tag ghcr.io/jhorzek/lesssem_test:latest
+      
+    - name: Login to GitHub Packages
+      run: echo ${{secrets.DOCKER}} | docker login ghcr.io -u jhorzek --password-stdin
+      
+    - name: Push Package
+      run: docker push ghcr.io/jhorzek/lesssem_test:latest
