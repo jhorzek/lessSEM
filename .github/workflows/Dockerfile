@@ -4,6 +4,6 @@ FROM rocker/tidyverse
 RUN apt-get update && apt-get install -y librsvg2-dev cargo libxt-dev libudunits2-dev qpdf cmake
 
 # install dependencies
-COPY install_dependencies.R .
+COPY .github/workflows/install_dependencies.R .
 
 RUN Rscript install_dependencies.R
