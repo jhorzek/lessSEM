@@ -61,7 +61,9 @@ public:
     
     if(alpha_ != 1.0) Rcpp::stop("alpha must be 1.");
     
-    generalPurposeFitFramework gpFF(fitFunction, gradientFunction, userSuppliedElements);
+    generalPurposeFitFramework gpFF(fitFunction, 
+                                    gradientFunction, 
+                                    userSuppliedElements);
     
     lessSEM::tuningParametersCappedL1 tp;
     tp.theta = theta_;
@@ -177,7 +179,10 @@ public:
       double lambda_, 
       double alpha_){
     
-    generalPurposeFitFrameworkCpp gpFF(startingValues_, fitFunction, gradientFunction, userSuppliedElements);
+    generalPurposeFitFrameworkCpp gpFF(startingValues_, 
+                                       fitFunction, 
+                                       gradientFunction, 
+                                       userSuppliedElements);
     
     lessSEM::tuningParametersCappedL1 tp;
     tp.theta = theta_;
