@@ -227,10 +227,11 @@ void SEMCpp::addDerivativeElement(std::string label_,
   return;
 }
 
-void SEMCpp::addTransformation(SEXP transformationFunctionSEXP)
+void SEMCpp::addTransformation(SEXP transformationFunctionSEXP, 
+                               Rcpp::List transformationList)
 {
   hasTransformations = true;
-  parameterTable.addTransformation(transformationFunctionSEXP);
+  parameterTable.addTransformation(transformationFunctionSEXP, transformationList);
 }
 
 void SEMCpp::computeTransformations()

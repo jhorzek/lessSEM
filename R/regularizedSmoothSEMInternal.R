@@ -66,14 +66,16 @@
                           addMeans = modifyModel$addMeans, 
                           activeSet = modifyModel$activeSet,
                           dataSet = modifyModel$dataSet,
-                          transformations = modifyModel$transformations)
+                          transformations = modifyModel$transformations,
+                          transformationList = modifyModel$transformationList)
   }else if(any(startingValues == "start")){
     SEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
                           whichPars = "start",
                           addMeans = modifyModel$addMeans, 
                           activeSet = modifyModel$activeSet,
                           dataSet = modifyModel$dataSet,
-                          transformations = modifyModel$transformations)
+                          transformations = modifyModel$transformations,
+                          transformationList = modifyModel$transformationList)
   }else if(is.numeric(startingValues)){
     
     if(!all(names(startingValues) %in% names(getLavaanParameters(lavaanModel))))
@@ -84,7 +86,8 @@
                           addMeans = modifyModel$addMeans, 
                           activeSet = modifyModel$activeSet,
                           dataSet = modifyModel$dataSet,
-                          transformations = modifyModel$transformations)
+                          transformations = modifyModel$transformations,
+                          transformationList = modifyModel$transformationList)
     SEM <- .setParameters(SEM = SEM, 
                           labels = names(startingValues), 
                           values = startingValues, 

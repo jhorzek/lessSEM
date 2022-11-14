@@ -67,7 +67,7 @@
   
   # remove comments
   hasComment <- stringr::str_locate(syntax,
-                                    "#|!")
+                                    "#")
   for(i in 1:length(syntax)){
     if(!is.na(hasComment[i,1])){
       if(hasComment[i,1] == 1){
@@ -245,7 +245,7 @@
   }
   
   # check for dangling braces
-  isDanglingBrace <- grepl(pattern = "^\\s*)\\s*$", x = syntax)
+  isDanglingBrace <- grepl(pattern = "^\\s*[){]\\s*$", x = syntax)
   
   if(any(isDanglingBrace)){
     for(i in rev(which(isDanglingBrace))){
@@ -260,7 +260,7 @@
   // [[Rcpp::depends(RcppArmadillo)]]
   #include <RcppArmadillo.h>
   // [[Rcpp::export]]
-  Rcpp::NumericVector transformationFunction(Rcpp::NumericVector& parameterValues)
+  Rcpp::NumericVector transformationFunction(Rcpp::NumericVector& parameterValues, Rcpp::List transformationList)
   {
   using namespace Rcpp;
   using namespace arma;
@@ -273,7 +273,7 @@
                       paste0('double ', p ,' = parameterValues["', p, '"];') 
     )
   }
-  endsWithOperator <- grepl(pattern = "[+-//*,(=]\\s*$", x = syntax)
+  endsWithOperator <- grepl(pattern = "[+-//*,(={}]\\s*$", x = syntax)
   lineEndings <- ifelse(endsWithOperator, "", ";")
   functionBody <- c(functionBody, 
                     "\n\n// add user defined functions",
@@ -297,7 +297,9 @@
   
   
   // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
-typedef Rcpp::NumericVector (*transformationFunctionPtr)(Rcpp::NumericVector&); //parameters
+typedef Rcpp::NumericVector (*transformationFunctionPtr)(Rcpp::NumericVector&, //parameters
+Rcpp::List // transformationList
+);
 
 typedef Rcpp::XPtr<transformationFunctionPtr> transformationFunctionPtr_t;
 

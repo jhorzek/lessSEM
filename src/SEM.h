@@ -88,7 +88,8 @@ public:
                             bool isVariance_, 
                             arma::mat positionMatrix_);
   
-  void addTransformation(SEXP transformationFunctionSEXP);
+  void addTransformation(SEXP transformationFunctionSEXP,
+                         Rcpp::List transformationList);
   
   void computeTransformations();
   
