@@ -96,7 +96,7 @@ setMethod("coef", "regularizedSEM", function (object, criterion = NULL) {
 #' @returns AIC values
 #' @export
 setMethod("AIC", "regularizedSEM", function (object) {
-  if(object@penalty == "ridge")
+  if(object@penalty == "ridge" & !all(object@inputArguments$tuningParameters == 0))
     stop("AIC not supported for this penalty.")
   
   fits <- object@fits
@@ -116,7 +116,7 @@ setMethod("BIC", "regularizedSEM", function (object) {
   N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
   fits <- object@fits
   
-  if(object@penalty == "ridge")
+  if(object@penalty == "ridge" & !all(object@inputArguments$tuningParameters == 0))
     stop("BIC not supported for this penalty.")
   
   fits <- object@fits
