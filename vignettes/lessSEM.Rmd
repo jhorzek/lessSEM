@@ -408,20 +408,21 @@ To this end, we define the transformations:
 
 ```{r}
 transformations <- "
-# IMPORTANT: Our transformations always have to start with the follwing line:
+// IMPORTANT: Our transformations always have to start with the follwing line:
 parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
 
-# In the line above, we defined the names of the parameters which we
-# want to use in our transformations. EACH AND EVERY PARAMETER USED IN
-# THE FOLLOWING MUST BE STATED ABOVE. The line must always start with
-# the keyword 'parameters' followed by a colon. The parameters must be
-# separated by commata.
+// In the line above, we defined the names of the parameters which we
+// want to use in our transformations. EACH AND EVERY PARAMETER USED IN
+// THE FOLLOWING MUST BE STATED ABOVE. The line must always start with
+// the keyword 'parameters' followed by a colon. The parameters must be
+// separated by commata.
+// Comments are added with double-backslash
 
-# Now we can state our transformations:
+// Now we can state our transformations:
 
-a2 = a1 + delta_a2
-b2 = b1 + delta_b2
-c2 = c1 + delta_c2
+a2 = a1 + delta_a2; // statements must end with semicolon
+b2 = b1 + delta_b2;
+c2 = c1 + delta_c2;
 "
 ```
 

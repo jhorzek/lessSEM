@@ -28,9 +28,9 @@ test_that("testing elasticNet-lasso-with-transformation", {
   # let's define some transformations to test for measurement invariance:
   transformations <- "
   parameters: a,b,c,d,e,f,deltaA, deltaB, deltaC
-  d = a + deltaA
-  e = b + deltaB
-  f = c + deltaC
+  d = a + deltaA;
+  e = b + deltaB;
+  f = c + deltaC;
   "
   
   lambdas <- seq(0,.4,length.out = 10)
@@ -66,12 +66,12 @@ test_that("testing elasticNet-lasso-with-transformation", {
   deltaA, deltaB, 
   deltaC
   d = a + 
-  deltaA
-  e = b + deltaB
+  deltaA;
+  e = b + deltaB;
   f = c + ((
   deltaC
   )
-  )
+  );
   "
   rsemGlmnet2 <- lasso(lavaanModel = modelFit, 
                       regularized = c("deltaA", "deltaB", "deltaC"),
@@ -91,9 +91,9 @@ test_that("testing elasticNet-lasso-with-transformation", {
   c=3, 
   deltaB = 1.1, 
     deltaC = .2
-  d = a + deltaA
-  e = b + deltaB
-  f = c + deltaC
+  d = a + deltaA;
+  e = b + deltaB;
+  f = c + deltaC;
   "
   rsemGlmnet3 <- lasso(lavaanModel = modelFit, 
                        regularized = c("deltaA", "deltaB", "deltaC"),
@@ -107,9 +107,9 @@ test_that("testing elasticNet-lasso-with-transformation", {
   # set automatic lambda:
   transformations <- "
   parameters: a,b,c,d,e,f,deltaA, deltaB, deltaC
-  d = a + deltaA
-  e = b + deltaB
-  f = c + deltaC
+  d = a + deltaA;
+  e = b + deltaB;
+  f = c + deltaC;
   "
   rsem2 <- lessSEM::lasso(lavaanModel = modelFit, 
                           regularized = c("deltaA", "deltaB", "deltaC"),

@@ -66,29 +66,11 @@
                                pattern = "\\n")[[1]]
   
   # remove comments
-  hasComment <- stringr::str_locate(syntax,
-                                    "#")
-  for(i in 1:length(syntax)){
-    if(!is.na(hasComment[i,1])){
-      if(hasComment[i,1] == 1){
-        syntax[i] <- ""
-        next
-      }
-      syntax[i] <- stringr::str_trunc(
-        syntax[i], width = hasComment[i,1]-1, ellipsis = ""
-      )
-    }
+  hasComment <- grepl(pattern = "#",
+                      x = syntax)
+  if(any(hasComment)){
+    message("Note: Found a # in your transformations. Did you want to write a comment? Please use the C++ comment syntax (e.g., \\\\ my comment)")
   }
-  
-  # remove empty elements
-  syntax <- syntax[!grepl(pattern = "^\\s*$", x = syntax)]
-  
-  # # check if left hand side of an equation has white space -> will be 
-  # # a data type and a variable name
-  # isDefinition <- grepl(pattern = "[a-zA-Z:]+\\s+[a-zA-Z:]+\\s*=",
-  #                          x = syntax) &
-  #   !grepl(pattern = "start\\s*:\\s*",
-  #         x = syntax)
   
   return(syntax)
 }
@@ -104,7 +86,7 @@
 #' @keywords internal
 .makeSingleLine <- function(syntax, what){
   
-  parameterStatement <- which(grepl(pattern = paste0(what,"\\s*:"), x = syntax))
+  parameterStatement <- which(grepl(pattern = paste0("^\\s*",what,"\\s*:"), x = syntax))
   if(length(parameterStatement) != 1) return(NA)
   if(grepl(pattern = ",\\s*$", x = syntax[parameterStatement])){
     # is multi-line
@@ -144,10 +126,10 @@
   parametersAt <- NA
   startingValuesAt <- NA
   for(i in 1:length(syntax)){
-    if(grepl("parameters\\s*:", syntax[i])){
+    if(grepl("^\\s*parameters\\s*:", syntax[i])){
       parametersAt <- i
     }
-    if(grepl("start\\s*:", syntax[i])){
+    if(grepl("^\\s*start\\s*:", syntax[i])){
       startingValuesAt <- i
     }
   }
@@ -227,10 +209,10 @@
   parametersAt <- NA
   startingValuesAt <- NA
   for(i in 1:length(syntax)){
-    if(grepl("parameters:", syntax[i])){
+    if(grepl("^\\s*parameters:", syntax[i])){
       parametersAt <- i
     }
-    if(grepl("start:", syntax[i])){
+    if(grepl("^\\s*start:", syntax[i])){
       startingValuesAt <- i
     }
   }
@@ -244,16 +226,11 @@
     syntax <- syntax[-c(parametersAt)] 
   }
   
-  # check for dangling braces
-  isDanglingBrace <- grepl(pattern = "^\\s*[){]\\s*$", x = syntax)
-  
-  if(any(isDanglingBrace)){
-    for(i in rev(which(isDanglingBrace))){
-      # going in reverse because there may be layers of braces
-      if(i == 0) stop("Your transformations seems to start with a closing brace.")
-      syntax[i-1] <- paste0(syntax[i-1], syntax[i])
-    }
-    syntax <- syntax[!isDanglingBrace]
+  # check for missing semicolons
+  missingSemicolon <- grepl(pattern = "[\\)a-zA-Z0-9_]$", x = syntax) &
+    !grepl(pattern = "^\\s*\\/\\/", x = syntax)
+  for(ms in which(missingSemicolon)){
+    message("Note: found the following statement:\n  > ", syntax[ms], "\nDid you forget a semicolon?")
   }
   
   functionHead <- "
@@ -273,11 +250,9 @@
                       paste0('double ', p ,' = parameterValues["', p, '"];') 
     )
   }
-  endsWithOperator <- grepl(pattern = "[+-//*,(={}]\\s*$", x = syntax)
-  lineEndings <- ifelse(endsWithOperator, "", ";")
   functionBody <- c(functionBody, 
                     "\n\n// add user defined functions",
-                    paste0(syntax, lineEndings), 
+                    syntax, 
                     "\n\n// update parameters"
   )
   for(p in parameters){
