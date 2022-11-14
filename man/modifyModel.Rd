@@ -8,7 +8,8 @@ modifyModel(
   addMeans = TRUE,
   activeSet = NULL,
   dataSet = NULL,
-  transformations = NULL
+  transformations = NULL,
+  transformationList = list()
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ modifyModel(
 \item{dataSet}{option to replace the data set in the lavaan model with a different data set. Can be useful for cross-validation}
 
 \item{transformations}{allows for transformations of parameters - useful for measurement invariance tests etc.}
+
+\item{transformationList}{optional list used within the transformations. NOTE: This must be used as an Rcpp::List.}
 }
 \value{
 Object of class modifyModel

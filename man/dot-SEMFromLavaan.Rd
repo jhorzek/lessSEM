@@ -11,7 +11,8 @@
   addMeans = TRUE,
   activeSet = NULL,
   dataSet = NULL,
-  transformations = NULL
+  transformations = NULL,
+  transformationList = list()
 )
 }
 \arguments{
