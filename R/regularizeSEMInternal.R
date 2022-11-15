@@ -30,10 +30,12 @@
   if(! method %in% c("ista", "glmnet")) 
     stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
   if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) 
-    stop(paste0(
-      "glmnet only supports the following penalty functions: ",
-      paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet"), collapse = ", ")
-    )
+    stop(
+      paste0(
+        "glmnet only supports the following penalty functions: ",
+        paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet"), 
+               collapse = ", ")
+      )
     )
   
   if(method == "ista" && !is(control, "controlIsta")) 
@@ -362,6 +364,10 @@
     Hessians <- list(NULL)
   }
   
+  # save model implied matrices
+  implied <- list(means = vector("list", nrow(tuningParameters)),
+                  covariances = vector("list", nrow(tuningParameters)))
+  
   #### print progress ####
   if(control$verbose == 0){
     progressbar = utils::txtProgressBar(min = 0, 
@@ -439,6 +445,14 @@
     if(method == "glmnet" && control$saveHessian) 
       Hessians$Hessian[[it]] <- result$Hessian
     
+    # save implied
+    implied$means[[it]] <- SEM$impliedMeans
+    implied$covariances[[it]] <- SEM$impliedCovariance
+    
+    rownames(implied$means[[it]]) <- SEM$manifestNames
+    dimnames(implied$covariances[[it]]) <- list(SEM$manifestNames,
+                                                SEM$manifestNames)
+    
     # set initial values for next iteration
     if(is(SEM, "try-Error")){
       # reset
@@ -471,6 +485,7 @@
   }
   
   internalOptimization <- list(
+    "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = SEM$functionCalls,
     "gradientCalls" = SEM$gradientCalls

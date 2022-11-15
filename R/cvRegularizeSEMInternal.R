@@ -64,8 +64,21 @@
   
   misc <- list()
   
-  parameterLabels <- names(getLavaanParameters(lavaanModel))
+  # we have to set up the model once to find the parameters
+  tmpSEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
+                           whichPars = "est",
+                           addMeans = modifyModel$addMeans, 
+                           activeSet = modifyModel$activeSet,
+                           dataSet = modifyModel$dataSet,
+                           transformations = modifyModel$transformations,
+                           transformationList = modifyModel$transformationList)
   
+  
+  parameterLabels <- names(lessSEM:::.getParameters(SEM = tmpSEM, 
+                                                    raw = TRUE, 
+                                                    transformations = FALSE))
+  
+  # check if the data was standardized:
   if(all(apply(rawData, 2, function(x) abs(mean(x)) <= 1e-5))) 
     warning(paste0("It seems that you standardized your data before fitting your lavaan model. ",
                    "Note that this can undermine the results of the cross-validation due to dependencies between ",
@@ -265,6 +278,7 @@
   return(
     new("cvRegularizedSEM",
         parameters=regularizedSEM_full@parameters,
+        transformations = regularizedSEM_full@transformations,
         cvfits = cvfits,
         parameterLabels = regularizedSEM_full@parameterLabels,
         regularized = regularizedSEM_full@regularized,

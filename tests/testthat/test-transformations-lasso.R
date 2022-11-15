@@ -131,9 +131,52 @@ test_that("testing elasticNet-lasso-with-transformation", {
                       method = "glmnet",
                       control = controlGlmnet(),
                       modifyModel = modifyModel(transformations = transformations),
-                      k = 5
+                      k = 5, 
+                      returnSubsetParameters = TRUE
   )
-  rsemGlmnet@parameters
+  param <- rsemGlmnet@subsetParameters
+  
+  data <- try(lavaan::lavInspect(modelFit, "data"))
+  
+  modifications <- modifyModel(transformations = transformations)
+  model <- lessSEM:::.SEMFromLavaan(lavaanModel = modelFit, 
+                                    whichPars = "est", 
+                                    fit = FALSE, 
+                                    addMeans = modifications$addMeans, 
+                                    activeSet = modifications$activeSet, 
+                                    dataSet = modifications$dataSet, 
+                                    transformations = modifications$transformations, 
+                                    transformationList = modifications$transformationList)
+  
+  cvfits <- data.frame(
+    lambda = rsemGlmnet@cvfitsDetails$lambda,
+    alpha = rsemGlmnet@cvfitsDetails$alpha,
+    matrix(NA, nrow = length(rsemGlmnet@cvfitsDetails$lambda), ncol = 5,
+           dimnames = list(NULL, paste0("testSet",1:5))))
+  
+  for(i in 1:nrow(param)){
+    
+    param_i <- unlist(param[i, rsemGlmnet@parameterLabels])
+    model <- lessSEM:::.setParameters(SEM = model, 
+                                      labels = names(param_i),
+                                      values = param_i,
+                                      raw = FALSE)
+    
+    testset <- data[rsemGlmnet@subsets[,param$trainSet[i]],]
+    
+    model$implied()
+    
+    cvfit <- -2*sum(mvtnorm::dmvnorm(x = testset, 
+                                     mean = model$impliedMeans, 
+                                     sigma = model$impliedCovariance, 
+                                     log = TRUE))
+    
+    cvfits[cvfits$lambda == param$lambda[i] & cvfits$alpha == param$alpha[i],
+           paste0("testSet", param$trainSet[i])] <- cvfit
+    
+  }
+  
+  testthat::expect_equal(all(abs(cvfits - rsemGlmnet@cvfitsDetails) < 1e-8), TRUE)
   
   # adaptive lasso
   rsemGlmnet <- adaptiveLasso(lavaanModel = modelFit, 
