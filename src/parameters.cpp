@@ -114,12 +114,14 @@ void parameters::setParameters(Rcpp::StringVector label_,
   return;
 }
 
-void parameters::addTransformation(SEXP transformationFunctionSEXP)
+void parameters::addTransformation(SEXP transformationFunctionSEXP, 
+                                   Rcpp::List transformationList_)
 {
   hasTransformations = true;
   // create pointer to the transformation function 
   Rcpp::XPtr<transformationFunctionPtr> xpTransformationFunction(transformationFunctionSEXP);
   transformationFunction = *xpTransformationFunction; 
+  transformationList = transformationList_;
 }
 
 void parameters::transform()
@@ -132,7 +134,7 @@ void parameters::transform()
   }
   params.names() = paramLabels;
   
-  params = transformationFunction(params);
+  params = transformationFunction(params, transformationList);
   
   // also change the parameter values in the parameter map; these are the ones that
   // are actually used internally
@@ -182,11 +184,11 @@ arma::mat parameters::getTransformationGradients(){
     if(parameterMap.at(currentParameter).isTransformation) continue;
     parameterValues.at(i) += eps;
     
-    stepForward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues)).rows(selectRows);
+    stepForward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues, transformationList)).rows(selectRows);
     
     parameterValues.at(i) -= 2.0*eps;
     
-    stepBackward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues)).rows(selectRows);
+    stepBackward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues, transformationList)).rows(selectRows);
     
     parameterValues.at(i) += eps;
     

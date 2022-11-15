@@ -6,12 +6,14 @@
 #' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param dataSet option to replace the data set in the lavaan model with a different data set. Can be useful for cross-validation
 #' @param transformations allows for transformations of parameters - useful for measurement invariance tests etc.
+#' @param transformationList optional list used within the transformations. NOTE: This must be used as an Rcpp::List.
 #' @returns Object of class modifyModel
 modifyModel <- function(
     addMeans = TRUE,
     activeSet = NULL,
     dataSet = NULL,
-    transformations = NULL
+    transformations = NULL,
+    transformationList = list()
   ){
   mod <- as.list(environment())
   class(mod) <- "modifyModel"

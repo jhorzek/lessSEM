@@ -27,9 +27,9 @@ test_that("testing transformations", {
   # let's test a simple equality constraint:
   transformations <- "
   parameters: a,b,c,d,e,f
-  d = a
-  e = b
-  f = c
+  d = a;
+  e = b;
+  f = c;
   "
   
   SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = model, 
@@ -93,9 +93,9 @@ test_that("testing transformations", {
   
   transformations <- "
   parameters: a,b,c,d,e,f,deltaA, deltaB, deltaC
-  d = a + deltaA
-  e = b + deltaB
-  f = c + deltaC
+  d = a + deltaA;
+  e = b + deltaB;
+  f = c + deltaC;
   "
   
   SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = model, 
@@ -140,9 +140,9 @@ test_that("testing transformations", {
   
   transformations <- "
   parameters: a,b,c,d,e,f,deltaA, deltaB, deltaC
-  d = a + deltaA
-  e = b + deltaB
-  f = c + deltaC
+  d = a + deltaA;
+  e = b + deltaB;
+  f = c + deltaC;
   "
   rsemGlmnet <- lasso(lavaanModel = fitLavaan, 
                       regularized = c("deltaA", "deltaB", "deltaC"),
@@ -269,9 +269,9 @@ test_that("testing transformations", {
   
   transformations <- "
   parameters: a,b,c,d,e,f,dlog, deltaB, deltaC
-  d = exp(dlog)
-  e = b + deltaB
-  f = c + deltaC
+  d = exp(dlog);
+  e = b + deltaB;
+  f = c + deltaC;
   "
   rsemGlmnet <- lasso(lavaanModel = fitLavaan, 
                       regularized = c("dlog", "deltaB", "deltaC"),

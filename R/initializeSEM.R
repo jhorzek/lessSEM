@@ -18,7 +18,8 @@
                            addMeans = TRUE,
                            activeSet = NULL,
                            dataSet = NULL,
-                           transformations = NULL){
+                           transformations = NULL,
+                           transformationList = list()){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   
   if(is.null(dataSet)){
@@ -321,7 +322,7 @@
   }
   
   if(hasTransformations){
-    mySEM$addTransformation(transformationFunctionPointer)
+    mySEM$addTransformation(transformationFunctionPointer, transformationList)
   }
   
   # the following step is necessary if the parameters of the lavaanModel do not correspond to those in

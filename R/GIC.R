@@ -44,7 +44,8 @@ GIC <- function(regularizedSEM, k = 2){
                         addMeans = regularizedSEM@inputArguments$modifyModel$addMeans,
                         activeSet = regularizedSEM@inputArguments$modifyModel$activeSet, 
                         dataSet = regularizedSEM@inputArguments$modifyModel$dataSet,
-                        transformations = regularizedSEM@inputArguments$modifyModel$transformations
+                        transformations = regularizedSEM@inputArguments$modifyModel$transformations,
+                        transformationList = regularizedSEM@inputArguments$modifyModel$transformationList
   )
   
   N <- nrow(SEM$rawData)
