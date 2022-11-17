@@ -13,6 +13,8 @@ Class for cross-validated regularized SEM
 \item{\code{parameters}}{data.frame with parameter estimates for the best combination of the
 tuning parameters}
 
+\item{\code{transformations}}{transformed parameters}
+
 \item{\code{cvfits}}{data.frame with all combinations of the
 tuning parameters and the sum of the cross-validation fits}
 

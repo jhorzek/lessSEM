@@ -154,20 +154,21 @@ First, we have to create a definition of our transformations:
 
 ```{r}
 transformations <- "
-# IMPORTANT: Our transformations always have to start with the follwing line:
+// IMPORTANT: Our transformations always have to start with the follwing line:
 parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
 
-# In the line above, we defined the names of the parameters which we
-# want to use in our transformations. EACH AND EVERY PARAMETER USED IN
-# THE FOLLOWING MUST BE STATED ABOVE. The line must always start with
-# the keyword 'parameters' followed by a colon. The parameters must be
-# separated by commata.
+// In the line above, we defined the names of the parameters which we
+// want to use in our transformations. EACH AND EVERY PARAMETER USED IN
+// THE FOLLOWING MUST BE STATED ABOVE. The line must always start with
+// the keyword 'parameters' followed by a colon. The parameters must be
+// separated by commata.
+// Comments can be added by using double backslash as shown here.
 
-# Now we can state our transformations:
+// Now we can state our transformations:
 
-a2 = a1 + delta_a2
-b2 = b1 + delta_b2
-c2 = c1 + delta_c2
+a2 = a1 + delta_a2; // Note: Each declaration must end with a semi-colon!
+b2 = b1 + delta_b2;
+c2 = c1 + delta_c2;
 "
 ```
 
@@ -432,7 +433,7 @@ transformations <-
            collapse = ""),
     "\n\n",
     paste0(
-      paste0("a",2:(tps-1), " = ", paste0("a", 1:(tps-2)), " + ", paste0("delta", 2:(tps-1))),
+      paste0("a",2:(tps-1), " = ", paste0("a", 1:(tps-2)), " + ", paste0("delta", 2:(tps-1)), ";"),
       collapse = "\n"),
     collapse = "\n"
   )
@@ -535,9 +536,9 @@ We defined the transformations to be:
 transformations <- "
 parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
 
-a2 = a1 + delta_a2
-b2 = b1 + delta_b2
-c2 = c1 + delta_c2
+a2 = a1 + delta_a2;
+b2 = b1 + delta_b2;
+c2 = c1 + delta_c2;
 "
 ```
 
@@ -691,17 +692,17 @@ in a continuous time SEM:
 ```{r}
 transformations <- "
 parameters: a, ctA, v, ctV
-# NOTE: We can define starting values for our parameters. This
-# is implemented with the 'start:' keyword:
+// NOTE: We can define starting values for our parameters. This
+// is implemented with the 'start:' keyword:
 start: ctA = -.1, ctV = .1
 
-# We changed the starting values for the ct parameters
-# because the auto-effect ctA should be negative.
+// We changed the starting values for the ct parameters
+// because the auto-effect ctA should be negative.
 
-a = exp(ctA)
-v = log((1.0/(2.0*ctA))*(exp(2.0*ctA)-1)*pow(ctV,2.0)) # we take
-# the log because lessSEM internally takes the exponential of
-# any variance parameter (v in our case) to avoid negative variances.
+a = exp(ctA);
+v = log((1.0/(2.0*ctA))*(exp(2.0*ctA)-1)*pow(ctV,2.0)); // we take
+// the log because lessSEM internally takes the exponential of
+// any variance parameter (v in our case) to avoid negative variances.
 "
 ```
 
@@ -899,67 +900,67 @@ here. See Voelkle et al. (2012) for the underlying transformations.
 
 ```{r}
 transformations <- "
-# Define all parameters which we want to use:
+// Define all parameters which we want to use:
 parameters: a1_11, a1_12, a1_21, a1_22, a2_11, a2_12, a2_21, a2_22, 
 ctA_11, ctA_12, ctA_21, ctA_22, 
 v1_11, v1_12, v1_22, v2_11, v2_12, v2_22, 
 ctV_11, ctV_12, ctV_22
 
-# Define the starting values for the continuous time parameters:
+// Define the starting values for the continuous time parameters:
 start: ctA_11 = -1, ctA_12 = 0, ctA_21 = 0, ctA_22 = -1, 
 ctV_11 = .1, ctV_12 = 0, ctV_22 = .1
 
-# transformations:
-arma::mat drift(2,2)
-arma::mat ARCL1(2,2)
-arma::mat ARCL2(2,2)
-arma::mat driftHash(4,4)
-drift(0,0) = ctA_11
-drift(1,0) = ctA_21
-drift(0,1) = ctA_12
-drift(1,1) = ctA_22
-ARCL1 = expmat(drift)
-ARCL2 = expmat(drift*2.0)
+// transformations:
+arma::mat drift(2,2);
+arma::mat ARCL1(2,2);
+arma::mat ARCL2(2,2);
+arma::mat driftHash(4,4);
+drift(0,0) = ctA_11;
+drift(1,0) = ctA_21;
+drift(0,1) = ctA_12;
+drift(1,1) = ctA_22;
+ARCL1 = expmat(drift);
+ARCL2 = expmat(drift*2.0);
 
-driftHash = kron(drift, arma::eye(2,2)) + kron(arma::eye(2,2), drift)
+driftHash = kron(drift, arma::eye(2,2)) + kron(arma::eye(2,2), drift);
 
-arma::mat diffusion(2,2)
-arma::mat discreteDiff1(2,2)
-arma::mat discreteDiff2(2,2)
-diffusion(0,0) = ctV_11
-diffusion(1,0) = ctV_12
-diffusion(0,1) = ctV_12
-diffusion(1,1) = ctV_22
+arma::mat diffusion(2,2);
+arma::mat discreteDiff1(2,2);
+arma::mat discreteDiff2(2,2);
+diffusion(0,0) = ctV_11;
+diffusion(1,0) = ctV_12;
+diffusion(0,1) = ctV_12;
+diffusion(1,1) = ctV_22;
 discreteDiff1 = arma::reshape(arma::inv(driftHash) * 
   (expmat(driftHash) - arma::eye(arma::size(expmat(driftHash))))*
-  arma::vectorise(diffusion),2,2)
+  arma::vectorise(diffusion),2,2);
 discreteDiff2 = arma::reshape(arma::inv(driftHash) * 
   (expmat(driftHash*2.0) - arma::eye(arma::size(expmat(driftHash*2.0))))*
-  arma::vectorise(diffusion),2,2)
+  arma::vectorise(diffusion),2,2);
 
-# extract parameters
+// extract parameters
 
-a1_11 = ARCL1(0,0)
-a1_12 = ARCL1(0,1)
-a1_21 = ARCL1(1,0)
-a1_22 = ARCL1(1,1)
+a1_11 = ARCL1(0,0);
+a1_12 = ARCL1(0,1);
+a1_21 = ARCL1(1,0);
+a1_22 = ARCL1(1,1);
 
-a2_11 = ARCL2(0,0)
-a2_12 = ARCL2(0,1)
-a2_21 = ARCL2(1,0)
-a2_22 = ARCL2(1,1)
+a2_11 = ARCL2(0,0);
+a2_12 = ARCL2(0,1);
+a2_21 = ARCL2(1,0);
+a2_22 = ARCL2(1,1);
 
-v1_11 = log(discreteDiff1(0,0)) # we take the log because of the internal 
-# transformation in lessSEM
-v1_12 = discreteDiff1(0,1)
-v1_22 = log(discreteDiff1(1,1)) # we take the log because of the internal 
-# transformation in lessSEM
+v1_11 = log(discreteDiff1(0,0)); // we take the log because of the internal 
+// transformation in lessSEM
+v1_12 = discreteDiff1(0,1);
+v1_22 = log(discreteDiff1(1,1)); // we take the log because of the internal 
+// transformation in lessSEM
 
-v2_11 = log(discreteDiff2(0,0)) # we take the log because of the internal 
-# transformation in lessSEM
-v2_12 = discreteDiff2(0,1)
-v2_22 = log(discreteDiff2(1,1)) # we take the log because of the internal 
-# transformation in lessSEM
+v2_11 = log(discreteDiff2(0,0)); // we take the log because of the internal 
+// transformation in lessSEM
+v2_12 = discreteDiff2(0,1);
+v2_22 = log(discreteDiff2(1,1)); // we take the log because of the internal 
+// transformation in lessSEM
 "
 ```
 

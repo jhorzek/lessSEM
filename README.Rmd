@@ -216,13 +216,13 @@ fit <- sem(model, data = PoliticalDemocracy)
 # between loadings over time:
 
 transformations <- "
-# which parameters do we want to use?
+// which parameters do we want to use?
 parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
 
-# transformations:
-a2 = a1 + delta_a2
-b2 = b1 + delta_b2
-c2 = c1 + delta_c2
+// transformations:
+a2 = a1 + delta_a2;
+b2 = b1 + delta_b2;
+c2 = c1 + delta_c2;
 "
 
 # setting delta_a2, delta_b2, or delta_c2 to zero implies measurement invariance
@@ -265,13 +265,13 @@ fit <- sem(model, data = PoliticalDemocracy)
 # between loadings over time:
 
 transformations <- "
-# which parameters do we want to use?
+// which parameters do we want to use?
 parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
 
-# transformations:
-a2 = a1 + delta_a2
-b2 = b1 + delta_b2
-c2 = c1 + delta_c2
+// transformations:
+a2 = a1 + delta_a2;
+b2 = b1 + delta_b2;
+c2 = c1 + delta_c2;
 "
 
 # setting delta_a2, delta_b2, or delta_c2 to zero implies measurement invariance

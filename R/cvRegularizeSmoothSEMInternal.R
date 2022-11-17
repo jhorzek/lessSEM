@@ -224,7 +224,8 @@
       addMeans = modifyModel$addMeans,
       activeSet = modifyModel$activeSet, 
       dataSet = testSet,
-      transformations = modifyModel$transformations
+      transformations = modifyModel$transformations,
+      transformationList = modifyModel$transformationList
     )
     
     for(p in 1:nrow(regularizedSEM_s@parameters)){

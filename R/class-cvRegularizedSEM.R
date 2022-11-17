@@ -1,6 +1,7 @@
 #' Class for cross-validated regularized SEM
 #' @slot parameters data.frame with parameter estimates for the best combination of the
 #' tuning parameters
+#' @slot transformations transformed parameters
 #' @slot cvfits data.frame with all combinations of the
 #' tuning parameters and the sum of the cross-validation fits
 #' @slot parameterLabels character vector with names of all parameters
@@ -13,6 +14,7 @@
 setClass(Class = "cvRegularizedSEM",
          representation = representation(
            parameters="data.frame",
+           transformations="data.frame",
            cvfits = "data.frame",
            parameterLabels = "character",
            regularized = "character",
