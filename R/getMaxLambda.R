@@ -89,7 +89,7 @@
   return(maxLambda+.1*maxLambda) # adding some wiggle room as well
 }
 
-#' .curveLambda
+#' curveLambda
 #'
 #' generates lambda values between 0 and lambdaMax using the function described here: 
 #' https://math.stackexchange.com/questions/384613/exponential-function-with-values-between-0-and-1-for-x-values-between-0-and-1.
@@ -98,11 +98,11 @@
 #' @param lambdasAutoCurve controls the curve. A value close to 1 will result in a linear increase, larger values in lambdas more concentrated around 0
 #' @param lambdasAutoLength number of lambda values to generate
 #' @examples
-#' plot(getCurvedLambda(10,1,100))
-#' plot(getCurvedLambda(10,5,100))
-#' plot(getCurvedLambda(10,100,100))
-#' @keywords internal
-.curveLambda <- function(maxLambda, 
+#' plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 1, lambdasAutoLength = 100))
+#' plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 5, lambdasAutoLength = 100))
+#' plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 100, lambdasAutoLength = 100))
+#' @keywords export
+curveLambda <- function(maxLambda, 
                          lambdasAutoCurve, 
                          lambdasAutoLength){
   if (lambdasAutoCurve < 1) 

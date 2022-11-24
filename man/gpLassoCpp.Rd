@@ -11,6 +11,7 @@ gpLassoCpp(
   gr,
   lambdas = NULL,
   nLambdas = NULL,
+  curve = 1,
   additionalArguments,
   method = "glmnet",
   control = lessSEM::controlGlmnet()
@@ -32,6 +33,10 @@ gradients of the objective function.}
 \item{nLambdas}{alternative to lambda: If alpha = 1, lessSEM can automatically
 compute the first lambda value which sets all regularized parameters to zero.
 It will then generate nLambda values between 0 and the computed lambda.}
+
+\item{curve}{Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20).
+If curve is close to 1 all lambda values will be equally spaced, if curve is large
+lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.}
 
 \item{additionalArguments}{list with additional arguments passed to fn and gr}
 
