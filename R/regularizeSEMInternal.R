@@ -297,16 +297,16 @@
                                  N = N)
     if(tuningParameters$reverse){
       tuningParameters <- data.frame(
-        lambda = rev(seq(0,
-                         maxLambda,
-                         length.out = tuningParameters$nLambdas)),
+        lambda = rev(.curveLambda(maxLambda = maxLambda, 
+                       lambdasAutoCurve = tuningParameters$curve, 
+                       tuningParameters$nLambdas)),
         alpha = 1
       )
     }else{
       tuningParameters <- data.frame(
-        lambda = seq(0,
-                     maxLambda,
-                     length.out = tuningParameters$nLambdas),
+        lambda = .curveLambda(maxLambda = maxLambda, 
+                              lambdasAutoCurve = tuningParameters$curve, 
+                              tuningParameters$nLambdas),
         alpha = 1
       )
     }

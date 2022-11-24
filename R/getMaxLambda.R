@@ -10,11 +10,11 @@
 #' @returns first lambda value which sets all regularized parameters to zero (plus some tolerance)
 #' @keywords internal
 .getMaxLambda_C <- function(regularizedModel, 
-                         SEM,
-                         rawParameters,
-                         weights,
-                         N,
-                         approx  = FALSE){
+                            SEM,
+                            rawParameters,
+                            weights,
+                            N,
+                            approx  = FALSE){
   
   lambda <- ifelse(approx,
                    .Machine$double.xmax^(.01),
@@ -29,21 +29,21 @@
   
   sparseParameters <- result$rawParameters
   SEM <- .setParameters(SEM = SEM, 
-                              labels = names(sparseParameters), 
-                              values = sparseParameters, 
-                              raw = TRUE)
+                        labels = names(sparseParameters), 
+                        values = sparseParameters, 
+                        raw = TRUE)
   SEM <- .fit(SEM = SEM)
   gradients <- .getGradients(SEM = SEM, 
-                                   raw = TRUE)
+                             raw = TRUE)
   
   # define maxLambda as the maximal gradient of the regularized parameters
   maxLambda <- max(abs(gradients[weights != 0]) * 
                      weights[weights != 0]^(-1))
   # reset SEM
   SEM <- .setParameters(SEM = SEM, 
-                              labels = names(rawParameters), 
-                              values = rawParameters, 
-                              raw = TRUE)
+                        labels = names(rawParameters), 
+                        values = rawParameters, 
+                        raw = TRUE)
   SEM <- .fit(SEM = SEM)
   
   return((1/N)*(maxLambda+.1*maxLambda)) # adding some wiggle room as well
@@ -61,11 +61,11 @@
 #' @returns first lambda value which sets all regularized parameters to zero (plus some tolerance)
 #' @keywords internal
 .gpGetMaxLambda <- function(regularizedModel,
-                           par,
-                           fitFunction,
-                           gradientFunction,
-                           userSuppliedArguments,
-                           weights){
+                            par,
+                            fitFunction,
+                            gradientFunction,
+                            userSuppliedArguments,
+                            weights){
   
   lambda <- .Machine$double.xmax^(.05)
   result <- regularizedModel$optimize(
@@ -87,4 +87,30 @@
                      weights[weights[names(par)] != 0]^(-1))
   
   return(maxLambda+.1*maxLambda) # adding some wiggle room as well
+}
+
+#' .curveLambda
+#'
+#' generates lambda values between 0 and lambdaMax using the function described here: 
+#' https://math.stackexchange.com/questions/384613/exponential-function-with-values-between-0-and-1-for-x-values-between-0-and-1.
+#' The function is identical to the one implemented in the regCtsem package.
+#' @param maxLambda maximal lambda value
+#' @param lambdasAutoCurve controls the curve. A value close to 1 will result in a linear increase, larger values in lambdas more concentrated around 0
+#' @param lambdasAutoLength number of lambda values to generate
+#' @examples
+#' plot(getCurvedLambda(10,1,100))
+#' plot(getCurvedLambda(10,5,100))
+#' plot(getCurvedLambda(10,100,100))
+#' @keywords internal
+.curveLambda <- function(maxLambda, 
+                         lambdasAutoCurve, 
+                         lambdasAutoLength){
+  if (lambdasAutoCurve < 1) 
+    stop("lambdasAutoCurve parameter must be >= 1")
+  if (lambdasAutoCurve == 1) {
+    return(seq(0, maxLambda, length.out = lambdasAutoLength))
+  }
+  lambdas <- seq(0, 1, length.out = lambdasAutoLength)
+  lambdas <- (lambdasAutoCurve^lambdas - 1)/(lambdasAutoCurve - 1)
+  return(lambdas * maxLambda)
 }

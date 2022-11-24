@@ -58,6 +58,9 @@
 #' @param reverse if set to TRUE and nLambdas is used, lessSEM will start with the
 #' largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
 #' the smallest lambda and gradually increase it.
+#' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
+#' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
+#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -139,6 +142,7 @@ gpLasso <- function(par,
                     lambdas = NULL,
                     nLambdas = NULL,
                     reverse = TRUE,
+                    curve = 1,
                     ...,
                     method = "glmnet", 
                     control = lessSEM::controlGlmnet()
@@ -165,7 +169,8 @@ gpLasso <- function(par,
   
   if(!is.null(nLambdas)){
     tuningParameters <- data.frame(nLambdas = nLambdas,
-                                   reverse = reverse)
+                                   reverse = reverse,
+                                   curve = curve)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
@@ -247,6 +252,9 @@ gpLasso <- function(par,
 #' @param reverse if set to TRUE and nLambdas is used, lessSEM will start with the
 #' largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
 #' the smallest lambda and gradually increase it.
+#' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
+#' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
+#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -337,6 +345,7 @@ gpAdaptiveLasso <- function(par,
                             lambdas = NULL,
                             nLambdas = NULL,
                             reverse = TRUE,
+                            curve = 1,
                             ...,
                             method = "glmnet", 
                             control = lessSEM::controlGlmnet()){
@@ -376,7 +385,8 @@ gpAdaptiveLasso <- function(par,
   
   if(!is.null(nLambdas)){
     tuningParameters <- data.frame(nLambdas = nLambdas,
-                                   reverse = reverse)
+                                   reverse = reverse,
+                                   curve = curve)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
