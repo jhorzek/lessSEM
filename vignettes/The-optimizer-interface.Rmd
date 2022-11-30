@@ -145,7 +145,7 @@ threshold, it is assumed that the model converged
 * breakInner: small value; if the inner convergence criterion falls below this
 threshold, it is assumed that the inner optimization
 * verbose: if set to a value > 0, the fit every verbose iterations
-is printed. If set to -99 you will get the debug output which is horribly convoluted
+is printed.
 
 If you take a closer look at how the two penalty functions are handled within glmnet,
 you will realize that we basically absorb the differentiable penalty in the 
@@ -266,4 +266,4 @@ use the Barzilai-Borwein procedure, but sometimes resets the step size;
 this can -- in our experience -- help when the optimizer is caught in a bad spot.
 * sampleSize: can be used to scale the fitting function down
 * verbose: if set to a value > 0, the fit every verbose iterations
-is printed. If set to -99 you will get the debug output which is horribly convoluted
+is printed.

@@ -76,8 +76,7 @@ struct control{
   // resets the step size; this can help when the optimizer is caught in a bad spot.
   int sampleSize; // can be used to scale the fitting function down
   int verbose; // if set to a value > 0, the fit every verbose iterations
-  // is printed. If set to -99 you will get the debug output which is horribly
-  // convoluted
+  // is printed.
 };
 
 inline control controlDefault(){
@@ -144,16 +143,7 @@ inline lessSEM::fitResults ista(
       penalty_k = 0.0;
   double penalizedFit_k, penalizedFit_kMinus1;
   arma::rowvec gradients_k, gradients_kMinus1, gradient_y_k;
-  
-  if(control_.verbose == -99) Rcpp::Rcout << "initial fit: " << 
-    (1.0/control_.sampleSize)*model_.fit(startingValues, parameterLabels) << std::endl;
-  
-  if(control_.verbose == -99) Rcpp::Rcout << "initial smooth penalty value: " << 
-    smoothPenalty_.getValue(parameters_kMinus1, parameterLabels, smoothTuningParameters) << std::endl;
-  
-  if(control_.verbose == -99) Rcpp::Rcout << "initial penalty value: " << 
-    penalty_.getValue(parameters_k, parameterLabels, tuningParameters) << std::endl;
-  
+
   penalizedFit_k = fit_k + 
     penalty_.getValue(parameters_k, parameterLabels, tuningParameters); // lasso penalty part
   
@@ -184,15 +174,11 @@ inline lessSEM::fitResults ista(
   double L_kMinus1 = control_.L0, L_k = control_.L0;
   
   // outer iteration
-  for(int outer_iteration = 0; outer_iteration < control_.maxIterOut; outer_iteration ++){    
-    if(control_.verbose == -99) Rcpp::Rcout << "Outer iteration " << outer_iteration + 1 << std::endl;
+  for(int outer_iteration = 0; outer_iteration < control_.maxIterOut; outer_iteration ++){
     
     for(int inner_iteration = 0; inner_iteration < control_.maxIterIn; inner_iteration ++){
       // inner iteration: reduce step size until the convergence criterion is met
       L_k = std::pow(control_.eta, inner_iteration)*L_kMinus1;
-      if(control_.verbose == -99) Rcpp::Rcout << "inner_iteration : " << inner_iteration << std::endl;
-      if(control_.verbose == -99) Rcpp::Rcout << "std::pow(control_.eta, inner_iteration) = " << std::pow(control_.eta, inner_iteration) << std::endl;
-      if(control_.verbose == -99) Rcpp::Rcout << "L_k : " << L_k << std::endl;
       
       if(control_.accelerate){
         // with acceleration:
@@ -232,10 +218,6 @@ inline lessSEM::fitResults ista(
       // iteration
       fit_k = (1.0/control_.sampleSize)*model_.fit(parameters_k, parameterLabels) +
         smoothPenalty_.getValue(parameters_k, parameterLabels, smoothTuningParameters); // ridge penalty part
-      if(control_.verbose == -99)
-      {
-        Rcpp::Rcout << "fit_k : " << fit_k << std::endl;
-      }
       
       if(!arma::is_finite(fit_k)) continue;
       
@@ -247,12 +229,7 @@ inline lessSEM::fitResults ista(
       
       penalizedFit_k = fit_k + 
         penalty_k;  // lasso part
-      
-      if(control_.verbose == -99){
-        Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k << std::endl;
-        Rcpp::Rcout << "penalizedFit_kMinus1 : " << penalizedFit_kMinus1 << std::endl;
-      }
-      
+
       if(!arma::is_finite(penalizedFit_k)) continue;
       
       // to test the convergence criterion, we offer different criteria
@@ -269,13 +246,6 @@ inline lessSEM::fitResults ista(
         quadr = parameterChange*arma::trans(parameterChange); // always positive
         parchTimeGrad = parameterChange*arma::trans(gradients_kMinus1); // can be 
         // positive or negative
-        
-        if(control_.verbose == -99){
-          Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k  << " vs " << fit_kMinus1 + 
-            parchTimeGrad(0,0) +
-            (L_k/2.0)*quadr(0,0) + 
-            penalty_k << std::endl;
-        }
         
         breakInner = penalizedFit_k <= (
           fit_kMinus1 + 
@@ -295,11 +265,6 @@ inline lessSEM::fitResults ista(
         parameterChange = parameters_k-parameters_kMinus1;
         quadr = parameterChange*arma::trans(parameterChange); // always positive
         
-        if(control_.verbose == -99){
-          Rcpp::Rcout << "penalizedFit_k : " << penalizedFit_k  << " vs " << penalizedFit_kMinus1 -
-            L_k*(control_.sigma/2.0)*quadr(0,0) << std::endl;
-        }
-        
         breakInner = penalizedFit_k <= (
           penalizedFit_kMinus1 -
             L_k*(control_.sigma/2.0)*quadr(0,0)
@@ -314,16 +279,11 @@ inline lessSEM::fitResults ista(
                                                      parameterLabels, 
                                                      smoothTuningParameters); // ridge part
         
-        if(control_.verbose == -99){
-          Rcpp::Rcout << "gradients_k\n: " << gradients_k << std::endl;
-        }
-        
         // if any of the gradients is non-finite, we can skip to a 
         // smaller step size
         if(!arma::is_finite(gradients_k))  continue;
         
         // if everything worked out fine, we break the inner iteration
-        if(control_.verbose == -99) Rcpp::Rcout << "Breaking inner iteration" << std::endl;
         break;
         
       }// end break inner
@@ -353,11 +313,9 @@ inline lessSEM::fitResults ista(
     fits.at(outer_iteration+1) = penalizedFit_k;
     
     // check outer breaking condition
-    if(control_.verbose == -99) Rcpp::Rcout << "Comparing " << fits.at(outer_iteration+1) << " to " << fits.at(outer_iteration) << std::endl;
     breakOuter = std::abs(fits.at(outer_iteration+1) - fits.at(outer_iteration)) < control_.breakOuter;
     
     if(breakOuter) {
-      if(control_.verbose == -99) Rcpp::Rcout << "Breaking outer iteration" << std::endl;
       break;
     }
     
@@ -374,17 +332,15 @@ inline lessSEM::fitResults ista(
       
       quadr = (parameterChange)*arma::trans(parameterChange);
       parchTimeGrad = parameterChange*arma::trans(gradientChange);
-      if(control_.verbose == -99) Rcpp::Rcout << "quadr: " << quadr << std::endl;
-      if(control_.verbose == -99) Rcpp::Rcout << "parchTimeGrad: " << parchTimeGrad << std::endl;
+      
       L_kMinus1 = parchTimeGrad(0,0)/quadr(0,0);
-      if(control_.verbose == -99) Rcpp::Rcout << "L_kMinus1 after BB: " << L_kMinus1 << std::endl;
+      
       if(L_kMinus1 < 1e-10 || L_kMinus1 > 1e10) L_kMinus1 = control_.L0;
       
       
       randomNumber = Rcpp::runif(1,0.0,1.0);
       if((control_.stepSizeIn == stochasticBarzilaiBorwein) && 
          (randomNumber.at(0) < 0.25)) {
-        if(control_.verbose == -99) Rcpp::Rcout << "Resetting L_kMinus1 randomly " << std::endl;
         L_kMinus1 = control_.L0;// reset with 25% probability
       }
       

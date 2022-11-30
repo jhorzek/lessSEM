@@ -22,6 +22,25 @@
                            transformationList = list()){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   
+  SEMList <- list(
+    matrices = list("A" = NULL,
+                    "S" = NULL,
+                    "F" = NULL,
+                    "M" = NULL),
+    parameters = list("label" = NULL,
+                      "location" = NULL,
+                      "row" = NULL,
+                      "col" = NULL,
+                      "value" = NULL,
+                      "rawValue" = NULL,
+                      "isTransformation" = NULL),
+    DerivativeElements = list(),
+    rawData = list("rawData" = NULL,
+                   "personInSubset" = NULL,
+                   "manifestNames" = NULL),
+    subsets = list()
+  )
+  
   if(is.null(dataSet)){
     rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
     if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
@@ -256,24 +275,20 @@
   
   # build model
   
-  mySEM <- new(SEMCpp)
+  SEMList$matrices$A <- modelMatrices$Amatrix
+  SEMList$matrices$S <- modelMatrices$Smatrix
+  SEMList$matrices$M <- modelMatrices$Mvector
+  SEMList$matrices$F <- modelMatrices$Fmatrix
   
-  # set matrices and vector
-  mySEM$setMatrix("A", modelMatrices$Amatrix)
-  mySEM$setMatrix("S", modelMatrices$Smatrix)
-  mySEM$setMatrix("F", modelMatrices$Fmatrix)
-  mySEM$setVector('m', modelMatrices$Mvector)
+  SEMList$parameters$label <- parameterTable$label
+  SEMList$parameters$location <- parameterTable$location
+  SEMList$parameters$row <- parameterTable$row - 1 # c++ starts at 0 
+  SEMList$parameters$col <- parameterTable$col - 1 # c++ starts at 0 
+  SEMList$parameters$value <- parameterTable$value
+  SEMList$parameters$rawValue <- parameterTable$rawValue
+  SEMList$parameters$isTransformation <- parameterTable$isTransformation
   
-  # set parameters
-  mySEM$initializeParameters(parameterTable$label,
-                             parameterTable$location,
-                             parameterTable$row-1, # c++ starts at 0 
-                             parameterTable$col-1, # c++ starts at 0 
-                             parameterTable$value,
-                             parameterTable$rawValue,
-                             parameterTable$isTransformation)
-  
-  # set derivative elements
+  ## set derivative elements
   for(p in unique(parameterTable$label)){
     
     select <- parameterTable$label == p
@@ -302,24 +317,35 @@
     }else{
       stop("unknown location")
     }
-    mySEM$addDerivativeElement(p, 
-                               uniqueLocation, 
-                               isVariance, 
-                               positionMatrix)
+    SEMList$DerivativeElements[[p]] <- list(label = p, 
+                                         location = uniqueLocation, 
+                                         isVariance = isVariance, 
+                                         positionMatrix = positionMatrix)
     rm(positionMatrix, isVariance) # avoid any carry over
   }
   
-  # set data
-  mySEM$addRawData(rawData, manifestNames, internalData$individualMissingPatternID-1)
+  ## set data
+  SEMList$rawData$rawData <- rawData
+  SEMList$rawData$manifestNames <- manifestNames
+  SEMList$rawData$personInSubset <- internalData$individualMissingPatternID - 1
+  
+  ## add subsets
   for(s in 1:length(internalData$missingSubsets)){
-    mySEM$addSubset(internalData$missingSubsets[[s]]$N,
-                    which(internalData$individualMissingPatternID == s)-1,
-                    internalData$missingSubsets[[s]]$observed,
-                    internalData$missingSubsets[[s]]$notMissing,
-                    internalData$missingSubsets[[s]]$covariance,
-                    internalData$missingSubsets[[s]]$means,
-                    internalData$missingSubsets[[s]]$rawData)
+    SEMList$subsets[[s]] <- list(
+                           N = internalData$missingSubsets[[s]]$N,
+                           persons = which(internalData$individualMissingPatternID == s)-1,
+                           observed = internalData$missingSubsets[[s]]$observed,
+                           notMissing = internalData$missingSubsets[[s]]$notMissing,
+                           covariance = internalData$missingSubsets[[s]]$covariance,
+                           means = internalData$missingSubsets[[s]]$means,
+                           rawData = internalData$missingSubsets[[s]]$rawData)
   }
+  
+  ## initialize C++ model
+  
+  mySEM <- new(SEMCpp)
+  
+  mySEM$fill(SEMList)
   
   if(hasTransformations){
     mySEM$addTransformation(transformationFunctionPointer, transformationList)
