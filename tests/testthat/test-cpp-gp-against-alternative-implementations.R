@@ -1,4 +1,5 @@
 test_that("testing C++ general purpose optimization", {
+  testthat::skip_on_cran()
   library(Rcpp)
   
   linreg <- '

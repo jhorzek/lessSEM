@@ -1,4 +1,5 @@
 test_that("testing ista-lasso", {
+  testthat::skip_on_cran()
   library(lavaan)
   library(lessSEM)
   set.seed(123)

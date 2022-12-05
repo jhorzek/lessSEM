@@ -1,4 +1,5 @@
 test_that("testing default control for glmnet", {
+  testthat::skip_on_cran()
 tmp <-   try({
   library(Rcpp)
   library(RcppArmadillo)

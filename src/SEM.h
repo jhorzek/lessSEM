@@ -48,6 +48,9 @@ public:
   arma::colvec impliedMeans;
   double m2LL; // minus 2 log-Likelihood
   
+  arma::rowvec gradients;
+  arma::mat transformationGradients;
+  
   // constructor
   SEMCpp(){};
   

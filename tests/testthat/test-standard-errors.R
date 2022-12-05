@@ -1,4 +1,5 @@
 test_that("testing standard errors", {
+  testthat::skip_on_cran()
   library(lavaan)
   library(lessSEM)
   model1 <- ' 

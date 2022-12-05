@@ -1,4 +1,5 @@
 test_that("testing elasticNet-lasso-c", {
+  testthat::skip_on_cran()
   library(lslx)
   library(lavaan)
   library(lessSEM)

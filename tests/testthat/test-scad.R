@@ -1,4 +1,5 @@
 test_that("testing scad", {
+  testthat::skip_on_cran()
   library(regsem)
   library(lessSEM)
   set.seed(123)

@@ -340,14 +340,14 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   }
   gradientCalls++;
   
-  arma::rowvec gradients = gradientsByGroup(*this, raw);
+  gradients = gradientsByGroup(*this, raw);
   
   if(hasTransformations){
     if(!raw) Rcpp::stop("Gradients with raw = false currently not supported when using transformations.");
     // in case of transformations, we can make use of the chain rule to get the derivative
     // with respect to the true underlying parameters. gradientsByGroup will only return
     // the gradients of the transformed parameters in the SEM 
-    arma::mat transformationGradients = parameterTable.getTransformationGradients();
+    transformationGradients = parameterTable.getTransformationGradients();
     return(gradients*transformationGradients);
   }
   
