@@ -309,7 +309,7 @@ arma::mat mgSEM::getHessian(Rcpp::StringVector label_,
 }
 
 
-RCPP_MODULE(mgSEM_Cpp){
+RCPP_MODULE(mgSEM_cpp){
   using namespace Rcpp;
   Rcpp::class_<mgSEM>( "mgSEM" )
     .constructor("Creates a new SEMCpp.")

@@ -127,7 +127,7 @@ RcppExport SEXP _rcpp_module_boot_istaScadGeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_istaScadGeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaLSP_cpp();
 RcppExport SEXP _rcpp_module_boot_istaMcp_cpp();
-RcppExport SEXP _rcpp_module_boot_mgSEM_Cpp();
+RcppExport SEXP _rcpp_module_boot_mgSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaScad_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
@@ -157,7 +157,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_istaScadGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaScadGeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_istaLSP_cpp", (DL_FUNC) &_rcpp_module_boot_istaLSP_cpp, 0},
     {"_rcpp_module_boot_istaMcp_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcp_cpp, 0},
-    {"_rcpp_module_boot_mgSEM_Cpp", (DL_FUNC) &_rcpp_module_boot_mgSEM_Cpp, 0},
+    {"_rcpp_module_boot_mgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_mgSEM_cpp, 0},
     {"_rcpp_module_boot_istaScad_cpp", (DL_FUNC) &_rcpp_module_boot_istaScad_cpp, 0},
     {NULL, NULL, 0}
 };
