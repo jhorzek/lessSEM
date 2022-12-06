@@ -9,7 +9,7 @@
 \arguments{
 \item{transformations}{string with transformations}
 
-\item{parameterLabels}{labels of parameters already in the model}
+\item{parameterValues}{values of parameters already in the model}
 }
 \value{
 list with extended parameter vector and transformation function pointer

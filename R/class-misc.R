@@ -92,7 +92,7 @@ setClass("Rcpp_istaCappedL1SEM")
 
 #' Wrapper for C++ module. See ?lessSEM::istaCappedL1MgSEM
 #' @keywords internal
-setClass("Rcpp_istaCappedL1MgSEM")
+setClass("Rcpp_istaCappedL1mgSEM")
 
 #' Wrapper for C++ module. See ?lessSEM::glmnetEnetGeneralPurpose
 #' @keywords internal

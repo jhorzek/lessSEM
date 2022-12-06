@@ -66,13 +66,13 @@
   startingValues <- control$startingValues
   
   if(any(startingValues == "est")){
-    SEM <- .multiGroupSEMFromLavaan(lavaanModel = lavaanModel,
+    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModel,
                                     whichPars = "est",
                                     addMeans = modifyModel$addMeans,
                                     transformations = modifyModel$transformations,
                                     transformationList = modifyModel$transformationList)
   }else if(any(startingValues == "start")){
-    SEM <- .multiGroupSEMFromLavaan(lavaanModel = lavaanModel,
+    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModel,
                                     whichPars = "start",
                                     addMeans = modifyModel$addMeans,
                                     transformations = modifyModel$transformations,
@@ -81,7 +81,7 @@
     
     if(!all(names(startingValues) %in% names(getLavaanParameters(lavaanModel))))
       stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
-    SEM <- .multiGroupSEMFromLavaan(lavaanModel = lavaanModel,
+    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModel,
                                     whichPars = "start", 
                                     fit = FALSE,
                                     addMeans = modifyModel$addMeans,
@@ -282,7 +282,7 @@
 #' 
 #' compiles the transformation function and adapts the parameter vector
 #' @param transformations string with transformations
-#' @param parameterLabels labels of parameters already in the model
+#' @param parameterValues values of parameters already in the model
 #' @return list with extended parameter vector and transformation function pointer
 .createMultiGroupTransformations <- function(transformations, parameterValues){
   if(!is(transformations, "character")) stop("transformations must be a string.")

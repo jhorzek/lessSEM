@@ -20,7 +20,13 @@
 estimated parameters of the lavaan model. If set to "start", the starting values of lavaan will be used. The latter can be useful if parameters are to
 be optimized afterwards as setting the parameters to "est" may result in the model getting stuck in a local minimum.}
 
+\item{fit}{should the model be fitted}
+
 \item{addMeans}{If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average}
+
+\item{transformations}{string with transformations}
+
+\item{transformationList}{list for transformations}
 }
 \value{
 Object of class Rcpp_mgSEMCpp

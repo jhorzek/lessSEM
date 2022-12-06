@@ -62,7 +62,7 @@
                                            startingValues = startingValues,
                                            modifyModel = modifyModel)
   }else{
-    SEM <- .initializeMultiGroupSEMForRegularization(lavaanModel = lavaanModel,
+    SEM <- .initializeMultiGroupSEMForRegularization(lavaanModels = lavaanModel,
                                                      startingValues = startingValues,
                                                      modifyModel = modifyModel)
   }
