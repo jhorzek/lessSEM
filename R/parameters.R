@@ -60,7 +60,7 @@
     
   }
   
-  if(is(SEM, "Rcpp_SEM")){
+  if(is(SEM, "Rcpp_SEMCpp")){
     parameterTable <- SEM$getParameters()
     
     if(raw){
