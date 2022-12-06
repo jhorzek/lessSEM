@@ -4,37 +4,9 @@
 #include <RcppArmadillo.h>
 #include "SEM.h"
 #include "hessian.h"
+#include "findStringInVector.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
-
-int findStringInVector(std::string what, std::vector<std::string> where, bool throwError){
-  
-  for (int i = 0; i < where.size(); i++){
-    if(where.at(i).compare(what) == 0){
-      return(i);
-    }
-  }
-  if(throwError){
-    Rcpp::stop("Could not find parameter.");
-  }else{
-    return -1;
-  }
-}
-
-int findStringInVector(std::string what, Rcpp::StringVector where, bool throwError){
-  std::string currentString;
-  for (int i = 0; i < where.size(); i++){
-    currentString = Rcpp::as<std::string>(where.at(i));
-    if(currentString.compare(what) == 0){
-      return(i);
-    }
-  }
-  if(throwError){
-    Rcpp::stop("Could not find parameter.");
-  }else{
-    return -1;
-  }
-}
 
 class mgParameters{
 public:
@@ -84,6 +56,9 @@ public:
 class mgSEM{
 public:
   std::vector<SEMCpp> models;
+  int sampleSize = 0;
+  
+  double m2LL;
   
   mgParameters parameters;
   arma::rowvec gradients;
@@ -115,7 +90,7 @@ public:
   
   // fit related functions
   void implied();
-  
+  bool impliedIsPD();
   double fit();
   
   arma::rowvec getGradients(bool raw);
@@ -129,4 +104,5 @@ public:
   
 };
 
+RCPP_EXPOSED_CLASS(mgSEM)
 # endif

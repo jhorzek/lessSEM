@@ -1,14 +1,15 @@
-#ifndef SEMISTA_h
-#define SEMISTA_h
+#ifndef SEMFF_h
+#define SEMFF_h
 #include "SEM.h"
 #include "lessSEM.h"
 
+template<typename sem>
 class SEMFitFramework: public lessSEM::model{
 public:
   
-  SEMCpp& SEM;
+  sem& SEM;
   
-  SEMFitFramework(SEMCpp& SEM_): SEM(SEM_){}
+  SEMFitFramework(sem& SEM_): SEM(SEM_){}
   
   double fit(arma::rowvec parameterValues,
              Rcpp::StringVector parameterLabels) override{
@@ -23,7 +24,7 @@ public:
                }catch(...){
                  return(arma::datum::nan);
                }
-               if(!SEM.impliedCovariance.is_sympd()){
+               if(!SEM.impliedIsPD()){
                  return(arma::datum::nan);
                }
                return(SEM.m2LL);
@@ -46,7 +47,7 @@ public:
                              gradients.fill(arma::datum::nan);
                              return(gradients);
                            }
-                           if(!SEM.impliedCovariance.is_sympd()){
+                           if(!SEM.impliedIsPD()){
                              gradients.fill(arma::datum::nan);
                              return(gradients);
                            }

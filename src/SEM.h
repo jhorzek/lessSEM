@@ -32,6 +32,7 @@ public:
   arma::mat rawData;
   arma::uvec personInSubset;
   Rcpp::StringVector manifestNames;
+  int sampleSize;
   
   // parameters
   parameters parameterTable;
@@ -75,6 +76,7 @@ public:
   
   // fit related functions
   void implied(); // compute implied means and covariance
+  bool impliedIsPD(); // check if model implied covariance matrix is positive definite
   double fit();
   arma::rowvec getGradients(bool raw);
   arma::mat getScores(bool raw);

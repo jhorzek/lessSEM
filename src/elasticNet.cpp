@@ -1,5 +1,6 @@
 #include <RcppArmadillo.h>
 #include "SEM.h"
+#include "mgSEM.h"
 #include "SEMFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
@@ -13,6 +14,7 @@
 //'@field optimize optimize the model. Expects a vector with starting values,
 //'a SEM of type SEM_Cpp, a lambda and an alpha value.
 //'@returns a list with fit results
+template<typename sem>
 class istaEnet{
 public:
   
@@ -52,13 +54,13 @@ public:
   
   Rcpp::List optimize(
       Rcpp::NumericVector startingValues_, 
-      SEMCpp& SEM_,
+      sem& SEM_,
       double lambda_, 
       double alpha_){
     
-    SEMFitFramework SEMFF(SEM_);
+    SEMFitFramework<sem> SEMFF(SEM_);
     
-    int sampleSize = SEMFF.SEM.rawData.n_rows;
+    int sampleSize = SEMFF.SEM.sampleSize;
     
     lessSEM::tuningParametersEnet tp;
     tp.alpha = alpha_;
@@ -123,6 +125,7 @@ public:
 //'a SEM of type SEM_Cpp, a lambda and an alpha value.
 //'@returns a list with fit results
 //'
+template<typename sem>
 class glmnetEnet{
 public:
   
@@ -171,13 +174,13 @@ public:
   }
   
   Rcpp::List optimize(Rcpp::NumericVector startingValues_, 
-                      SEMCpp& SEM_, 
+                      sem& SEM_, 
                       double lambda_, 
                       double alpha_){
     
-    SEMFitFramework SEMFF(SEM_);
+    SEMFitFramework<sem> SEMFF(SEM_);
     
-    int N = SEMFF.SEM.rawData.n_rows;
+    int N = SEMFF.SEM.sampleSize;
     
     lessSEM::tuningParametersEnet tp;
     tp.alpha = alpha_;
@@ -241,6 +244,7 @@ public:
 //'a SEM of type SEM_Cpp, a lambda and an alpha value.
 //'@returns a list with fit results
 //'
+template<typename sem>
 class bfgsEnet{
 public:
   
@@ -291,13 +295,13 @@ public:
   }
   
   Rcpp::List optimize(Rcpp::NumericVector startingValues_, 
-                      SEMCpp& SEM_, 
+                      sem& SEM_, 
                       double lambda_, 
                       double alpha_){
     
-    SEMFitFramework SEMFF(SEM_);
+    SEMFitFramework<sem> SEMFF(SEM_);
     
-    int N = SEMFF.SEM.rawData.n_rows;
+    int N = SEMFF.SEM.sampleSize;
     
     lessSEM::tuningParametersSmoothElasticNet tp;
     tp.epsilon = epsilon;
@@ -348,35 +352,72 @@ public:
   }
 };
 
-RCPP_EXPOSED_CLASS(bfgsEnet)
-  RCPP_MODULE(bfgsEnet_cpp){
+typedef bfgsEnet<SEMCpp> bfgsEnetSEM;
+RCPP_EXPOSED_CLASS_NODECL(bfgsEnetSEM)
+  RCPP_MODULE(bfgsEnetSEM_cpp){
     using namespace Rcpp;
-    Rcpp::class_<bfgsEnet>( "bfgsEnet" )
+    Rcpp::class_<bfgsEnetSEM>( "bfgsEnetSEM" )
       .constructor<arma::rowvec,Rcpp::List>("Creates a new istaEnet.")
     // methods
-    .method( "setHessian", &bfgsEnet::setHessian, "Changes the initial hessian. Expects a matrix")
-    .method( "optimize", &bfgsEnet::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, lambda, and alpha")
+    .method( "setHessian", &bfgsEnetSEM::setHessian, "Changes the initial hessian. Expects a matrix")
+    .method( "optimize", &bfgsEnetSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, lambda, and alpha")
     ;
   }
 
-RCPP_EXPOSED_CLASS(glmnetEnet)
-  RCPP_MODULE(glmnetEnet_cpp){
+typedef bfgsEnet<mgSEM> bfgsEnetMgSEM;
+RCPP_EXPOSED_CLASS_NODECL(bfgsEnetMgSEM)
+  RCPP_MODULE(bfgsEnetMgSEM_cpp){
     using namespace Rcpp;
-    Rcpp::class_<glmnetEnet>( "glmnetEnet" )
+    Rcpp::class_<bfgsEnetMgSEM>( "bfgsEnetMgSEM" )
       .constructor<arma::rowvec,Rcpp::List>("Creates a new istaEnet.")
     // methods
-    .method( "setHessian", &glmnetEnet::setHessian, "Changes the initial hessian. Expects a matrix")
-    .method( "optimize", &glmnetEnet::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, lambda, and alpha")
+    .method( "setHessian", &bfgsEnetMgSEM::setHessian, "Changes the initial hessian. Expects a matrix")
+    .method( "optimize", &bfgsEnetMgSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, lambda, and alpha")
     ;
   }
 
-RCPP_EXPOSED_CLASS(istaEnet)
-  RCPP_MODULE(istaEnet_cpp){
+typedef glmnetEnet<SEMCpp> glmnetEnetSEM;
+RCPP_EXPOSED_CLASS_NODECL(glmnetEnetSEM)
+  RCPP_MODULE(glmnetEnetSEM_cpp){
     using namespace Rcpp;
-    Rcpp::class_<istaEnet>( "istaEnet" )
-      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaEnet.")
+    Rcpp::class_<glmnetEnetSEM>( "glmnetEnetSEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new glmnetEnetSEM.")
     // methods
-    .method( "optimize", &istaEnet::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, lambda, and alpha")
+    .method( "setHessian", &glmnetEnetSEM::setHessian, "Changes the initial hessian. Expects a matrix")
+    .method( "optimize", &glmnetEnetSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, lambda, and alpha")
     ;
   }
 
+typedef glmnetEnet<mgSEM> glmnetEnetMgSEM;
+RCPP_EXPOSED_CLASS_NODECL(glmnetEnetMgSEM)
+  RCPP_MODULE(glmnetEnetMgSEM_cpp){
+    using namespace Rcpp;
+    Rcpp::class_<glmnetEnetMgSEM>( "glmnetEnetMgSEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new glmnetEnetMgSEM.")
+    // methods
+    .method( "setHessian", &glmnetEnetMgSEM::setHessian, "Changes the initial hessian. Expects a matrix")
+    .method( "optimize", &glmnetEnetMgSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, lambda, and alpha")
+    ;
+  }
+
+typedef istaEnet<SEMCpp> istaEnetSEM;
+RCPP_EXPOSED_CLASS_NODECL(istaEnetSEM)
+  RCPP_MODULE(istaEnetSEM_cpp){
+    using namespace Rcpp;
+    Rcpp::class_<istaEnetSEM>( "istaEnetSEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaEnetSEM.")
+    // methods
+    .method( "optimize", &istaEnetSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, lambda, and alpha")
+    ;
+  }
+
+typedef istaEnet<mgSEM> istaEnetMgSEM;
+RCPP_EXPOSED_CLASS_NODECL(istaEnetMgSEM)
+  RCPP_MODULE(istaEnetMgSEM_cpp){
+    using namespace Rcpp;
+    Rcpp::class_<istaEnetMgSEM>( "istaEnetMgSEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaEnetMgSEM.")
+    // methods
+    .method( "optimize", &istaEnetMgSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, lambda, and alpha")
+    ;
+  }

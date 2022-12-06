@@ -8,7 +8,6 @@
 .fit <- function(SEM){
   SEM$fit()
   return(SEM)
-  
 }
 
 #' .fitFunction

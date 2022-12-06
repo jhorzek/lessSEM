@@ -1,5 +1,6 @@
 #include <RcppArmadillo.h>
 #include "SEM.h"
+#include "mgSEM.h"
 #include "SEMFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
@@ -26,6 +27,8 @@ double scadPenalty_C(const double par,
 //'@field optimize optimize the model. Expects a vector with starting values,
 //'a SEM of type SEM_Cpp, a theta and a lambda value.
 //'@returns a list with fit results
+
+template<typename sem>
 class istaScad{
 public:
   
@@ -63,13 +66,13 @@ public:
   
   Rcpp::List optimize(
       Rcpp::NumericVector startingValues_, 
-      SEMCpp& SEM_,
+      sem& SEM_,
       double theta_,
       double lambda_){
     
-    SEMFitFramework SEMFF(SEM_);
+    SEMFitFramework<sem> SEMFF(SEM_);
     
-    int sampleSize = SEMFF.SEM.rawData.n_rows;
+    int sampleSize = SEMFF.SEM.sampleSize;
     
     lessSEM::tuningParametersScad tp;
     tp.theta = theta_;
@@ -127,12 +130,24 @@ public:
   }
 };
 
-RCPP_EXPOSED_CLASS(istaScad)
-  RCPP_MODULE(istaScad_cpp){
+typedef istaScad<SEMCpp> istaScadSEMCpp;
+RCPP_EXPOSED_CLASS_NODECL(istaScadSEMCpp)
+  RCPP_MODULE(istaScadSEM_cpp){
     using namespace Rcpp;
-    Rcpp::class_<istaScad>( "istaScad" )
-      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaScad.")
+    Rcpp::class_<istaScadSEMCpp>( "istaScadSEMCpp" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaScadSEMCpp.")
     // methods
-    .method( "optimize", &istaScad::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+    .method( "optimize", &istaScadSEMCpp::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+    ;
+  }
+
+typedef istaScad<mgSEM> istaScadMgSEM;
+RCPP_EXPOSED_CLASS_NODECL(istaScadMgSEM)
+  RCPP_MODULE(istaScadMgSEM_cpp){
+    using namespace Rcpp;
+    Rcpp::class_<istaScadMgSEM>( "istaScadMgSEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaScadMgSEM.")
+    // methods
+    .method( "optimize", &istaScadMgSEM::optimize, "Optimizes the model. Expects mgSEM, labeled vector with starting values, theta, lambda, and alpha")
     ;
   }

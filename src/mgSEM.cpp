@@ -119,6 +119,7 @@ void mgSEM::addModel(Rcpp::List SEMList){
     Rcpp::stop("There should be not transformations in the sub-models.");
   }
   models.push_back(newModel);
+  sampleSize += newModel.sampleSize;
   
   Rcpp::DataFrame newParameters = newModel.getParameters();
   Rcpp::StringVector newLabels = newParameters["label"];
@@ -253,9 +254,17 @@ void mgSEM::implied(){
   }
 }
 
+bool mgSEM::impliedIsPD(){
+  bool isPd = true;
+  for(int m = 0; m < models.size(); m++){
+    isPd = isPd & models.at(m).impliedIsPD();
+  }
+  return(isPd);
+}
+
 double mgSEM::fit(){
   
-  double m2LL = 0.0;
+  m2LL = 0.0;
   // compute fit for each model
   for(int m = 0; m < models.size(); m++){
     m2LL += models.at(m).fit();

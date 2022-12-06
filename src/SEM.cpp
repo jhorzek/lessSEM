@@ -107,6 +107,7 @@ void SEMCpp::fill(Rcpp::List SEMList){
   rawData = Rcpp::as<arma::mat>(dataset["rawData"]);
   personInSubset = Rcpp::as<arma::uvec>(dataset["personInSubset"]);
   manifestNames = dataset["manifestNames"];
+  sampleSize = rawData.n_rows;
   
   // add subsets
   Rcpp::List subsets = SEMList["subsets"];
@@ -248,9 +249,6 @@ Rcpp::StringVector SEMCpp::getParameterLabels(){
 }
 // fit functions
 
-
-// [[Rcpp :: depends ( RcppArmadillo )]]
-
 void SEMCpp::implied(){
   if(!wasChecked){
     wasChecked = checkModel();
@@ -268,6 +266,9 @@ void SEMCpp::implied(){
   return;
 }
 
+bool SEMCpp::impliedIsPD(){
+  return(impliedCovariance.is_sympd());
+}
 
 double SEMCpp::fit(){
   if(!wasChecked){

@@ -1,5 +1,6 @@
 #include <RcppArmadillo.h>
 #include "SEM.h"
+#include "mgSEM.h"
 #include "SEMFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
@@ -13,6 +14,8 @@
 //'@field optimize optimize the model. Expects a vector with starting values,
 //'a SEM of type SEM_Cpp, a theta and a lambda value.
 //'@returns a list with fit results
+
+template<typename sem>
 class istaLSP{
 public:
   
@@ -50,13 +53,13 @@ public:
   
   Rcpp::List optimize(
       Rcpp::NumericVector startingValues_, 
-      SEMCpp& SEM_,
+      sem& SEM_,
       double theta_,
       double lambda_){
     
-    SEMFitFramework SEMFF(SEM_);
+    SEMFitFramework<sem> SEMFF(SEM_);
     
-    int sampleSize = SEMFF.SEM.rawData.n_rows;
+    int sampleSize = SEMFF.SEM.sampleSize;
     
     lessSEM::tuningParametersLSP tp;
     tp.theta = theta_;
@@ -114,12 +117,24 @@ public:
   }
 };
 
-RCPP_EXPOSED_CLASS(istaLSP)
-  RCPP_MODULE(istaLSP_cpp){
+typedef istaLSP<SEMCpp> istaLSPSEM;
+RCPP_EXPOSED_CLASS_NODECL(istaLSPSEM)
+  RCPP_MODULE(istaLSPSEM_cpp){
     using namespace Rcpp;
-    Rcpp::class_<istaLSP>( "istaLSP" )
-      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaLSP.")
+    Rcpp::class_<istaLSPSEM>( "istaLSPSEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaLSPSEM.")
     // methods
-    .method( "optimize", &istaLSP::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+    .method( "optimize", &istaLSPSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+    ;
+  }
+
+typedef istaLSP<mgSEM> istaLSPMgSEM;
+RCPP_EXPOSED_CLASS_NODECL(istaLSPMgSEM)
+  RCPP_MODULE(istaLSPMgSEM_cpp){
+    using namespace Rcpp;
+    Rcpp::class_<istaLSPMgSEM>( "istaLSPMgSEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaLSPMgSEM.")
+    // methods
+    .method( "optimize", &istaLSPMgSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
     ;
   }
