@@ -61,7 +61,7 @@
     SEM <- .initializeSEMForRegularization(lavaanModel = lavaanModel,
                                            startingValues = startingValues,
                                            modifyModel = modifyModel)
-  }else{
+  }else if(is.vector(lavaanModel)){
     SEM <- .initializeMultiGroupSEMForRegularization(lavaanModels = lavaanModel,
                                                      startingValues = startingValues,
                                                      modifyModel = modifyModel)
@@ -113,7 +113,7 @@
       regularizedModel <- new(glmnetEnetSEM, 
                               weights, 
                               controlIntern)
-    }else if(is(SEM, "mgSEM")){
+    }else if(is(SEM, "Rcpp_mgSEM")){
       regularizedModel <- new(glmnetEnetMgSEM, 
                               weights, 
                               controlIntern)
@@ -140,7 +140,7 @@
         regularizedModel <- new(istaEnetSEM, 
                                 weights, 
                                 controlIntern)
-      }else if(is(SEM, "mgSEM")){
+      }else if(is(SEM, "Rcpp_mgSEM")){
         regularizedModel <- new(istaEnetMgSEM, 
                                 weights, 
                                 controlIntern)
@@ -152,7 +152,7 @@
         regularizedModel <- new(istaCappedL1SEM, 
                                 weights, 
                                 controlIntern)
-      }else if(is(SEM, "mgSEM")){
+      }else if(is(SEM, "Rcpp_mgSEM")){
         regularizedModel <- new(istaCappedL1mgSEM, 
                                 weights, 
                                 controlIntern)
@@ -164,7 +164,7 @@
         regularizedModel <- new(istaLSPSEM, 
                                 weights, 
                                 controlIntern)
-      }else if(is(SEM, "mgSEM")){
+      }else if(is(SEM, "Rcpp_mgSEM")){
         regularizedModel <- new(istaLSPMgSEM, 
                                 weights, 
                                 controlIntern)
@@ -176,7 +176,7 @@
         regularizedModel <- new(istaScadSEM, 
                                 weights, 
                                 controlIntern)
-      }else if(is(SEM, "mgSEM")){
+      }else if(is(SEM, "Rcpp_mgSEM")){
         regularizedModel <- new(istaScadMgSEM, 
                                 weights, 
                                 controlIntern)
@@ -188,7 +188,7 @@
         regularizedModel <- new(istaMcpSEM, 
                                 weights, 
                                 controlIntern)
-      }else if(is(SEM, "mgSEM")){
+      }else if(is(SEM, "Rcpp_mgSEM")){
         regularizedModel <- new(istaMcpMgSEM, 
                                 weights, 
                                 controlIntern)

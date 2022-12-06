@@ -87,7 +87,7 @@
   for(m in 1:length(lavaanModels)){
     
     # Note: transformation will be defined for the full model, not the submodels.
-    SEMs[[m]] <- .extractSEMFromLavaan(lavaanModel = lavaanModel,
+    SEMs[[m]] <- .extractSEMFromLavaan(lavaanModel = lavaanModels[[m]],
                                        whichPars = whichPars,
                                        fit = FALSE,
                                        addMeans = addMeans,
@@ -108,7 +108,7 @@
   # extract parameters
   parameters <- .getParameters(SEM = mySEM, raw = TRUE)
   
-  if(hasTransformations){
+  if(!is.null(transformations)){
     transforms <- .createMultiGroupTransformations(transformations = transformations, 
                                                    parameterValues = parameters)
     

@@ -63,24 +63,21 @@
 .initializeMultiGroupSEMForRegularization <- function(lavaanModels,
                                                       startingValues,
                                                       modifyModel){
-  startingValues <- control$startingValues
   
   if(any(startingValues == "est")){
-    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModel,
+    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModels,
                                     whichPars = "est",
                                     addMeans = modifyModel$addMeans,
                                     transformations = modifyModel$transformations,
                                     transformationList = modifyModel$transformationList)
   }else if(any(startingValues == "start")){
-    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModel,
+    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModels,
                                     whichPars = "start",
                                     addMeans = modifyModel$addMeans,
                                     transformations = modifyModel$transformations,
                                     transformationList = modifyModel$transformationList)
   }else if(is.numeric(startingValues)){
     
-    if(!all(names(startingValues) %in% names(getLavaanParameters(lavaanModel))))
-      stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
     SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModel,
                                     whichPars = "start", 
                                     fit = FALSE,

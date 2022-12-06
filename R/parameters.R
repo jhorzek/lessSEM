@@ -7,21 +7,77 @@
 #' @returns labeled vector with parameter values
 #' @keywords internal
 .getParameters <- function(SEM, raw = FALSE, transformations = FALSE){
-  parameterTable <- SEM$getParameters()
   
-  if(raw){
-    values  <- parameterTable$rawValue
-  }else{
-    values  <- parameterTable$value
+  if(is(SEM, "Rcpp_mgSEM")){
+    parameterTable <- SEM$getParameters()
+    if(transformations & raw){
+      return(parameterTable$parmeters)
+    }
+    
+    if(!transformations & raw){
+      if(any(parameterTable$isTransformation)){
+        return(parameterTable$parmeters[!parameterTable$isTransformation])
+      }
+      return(parameterTable$parmeters)
+    }
+    
+    submodelParameters <- SEM$getSubmodelParameters()
+    values <- c()
+    
+    if(transformations & !raw){
+      for(sm in submodelParameters){
+        addValues <- sm$value
+        names(addValues) <- sm$label
+        values  <- c(values, addValues)
+      }
+      values <- values[unique(names(values))] # remove duplicated elements
+      
+      # remove the raw elements from the parameter vector
+      param <- c(parameterTable$parmeters,
+                 values[!names(values) %in% names(parameterTable$parmeters)])
+      # now replace the raw elements:
+      param[names(values)] <- values
+      
+      return(param)
+    }
+    
+    if(!transformations & !raw){
+      for(sm in submodelParameters){
+        addValues <- sm$value
+        names(addValues) <- sm$label
+        values  <- c(values, addValues)
+      }
+      values <- values[unique(names(values))] # remove duplicated elements
+      
+      # remove the raw elements from the parameter vector
+      param <- c(parameterTable$parmeters,
+                 values[!names(values) %in% names(parameterTable$parmeters)])
+      # now replace the raw elements:
+      param[names(values)] <- values
+      
+      return(param)
+    }
+    
   }
   
-  names(values) <- parameterTable$label
-  
-  values <- values[SEM$getParameterLabels()]
-  
-  if(!transformations) values <- values[names(values) %in% parameterTable$label[!parameterTable$isTransformation]]
-  
-  return(values)
+  if(is(SEM, "Rcpp_SEM")){
+    parameterTable <- SEM$getParameters()
+    
+    if(raw){
+      values  <- parameterTable$rawValue
+    }else{
+      values  <- parameterTable$value
+    }
+    
+    names(values) <- parameterTable$label
+    
+    values <- values[SEM$getParameterLabels()]
+    
+    if(!transformations) values <- values[names(values) %in% parameterTable$label[!parameterTable$isTransformation]]
+    
+    return(values)
+  }
+  stop("Unknown model")
 }
 
 #' .setParameters

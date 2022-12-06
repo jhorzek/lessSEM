@@ -104,7 +104,7 @@
     regularizedModel <- new(bfgsEnetSEM, 
                             weights, 
                             controlIntern)
-  }else if(is(SEM, "mgSEM")){
+  }else if(is(SEM, "Rcpp_mgSEM")){
     regularizedModel <- new(bfgsEnetMgSEM, 
                             weights, 
                             controlIntern)

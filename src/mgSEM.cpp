@@ -249,22 +249,21 @@ void mgSEM::setParameters(Rcpp::StringVector label_,
 } // end set parameters
 
 // getter
-Rcpp::DataFrame mgSEM::getParameters(){
+Rcpp::List mgSEM::getParameters(){
   Rcpp::NumericVector param(parameters.uniqueValues.size());
   for(int p = 0; p < param.size(); p++){
     param.at(p) = parameters.uniqueValues.at(p);
   }
   param.names() = parameters.uniqueLabelsRcpp;
-  Rcpp::DataFrame retPar = Rcpp::DataFrame::create(Rcpp::Named("parmeters") = param,
-                                                   Rcpp::Named("isTransformation") = parameters.isTransformation);
+  Rcpp::List retPar = Rcpp::List::create(Rcpp::Named("parmeters") = param,
+                                         Rcpp::Named("isTransformation") = parameters.isTransformation);
   return(retPar);
 }
 
-Rcpp::List mgSEM::getParametersFull(){
-  Rcpp::List paramList(models.size()+1);
-  paramList.at(0) = getParameters();
-  for(int m = 1; m < models.size()+1; m++){
-    paramList.at(m) = models.at(m).getParameters();
+Rcpp::List mgSEM::getSubmodelParameters(){
+  Rcpp::List paramList;
+  for(int m = 0; m < models.size(); m++){
+    paramList.push_back(models.at(m).getParameters());
   }
   return(paramList);
 }
@@ -358,7 +357,7 @@ RCPP_MODULE(mgSEM_cpp){
   .method( "fit", &mgSEM::fit, "Fits the model. Returns -2 log likelihood")
   .method( "setParameters", &mgSEM::setParameters, "Set the parameters of a model.")
   .method( "getParameters", &mgSEM::getParameters, "Returns a vector with raw model parameters.")
-  .method( "getParametersFull", &mgSEM::getParametersFull, "Returns a list with parameters for each model.")
+  .method( "getSubmodelParameters", &mgSEM::getSubmodelParameters, "Returns a list with parameters for each model.")
   .method( "getParameterLabels", &mgSEM::getParameterLabels, "Returns a vector with unique parameter labels as used internally.")
   .method( "getGradients", &mgSEM::getGradients, "Returns a matrix with scores.")
   //.method( "getScores", &mgSEM::getScores, "Returns a matrix with scores.")

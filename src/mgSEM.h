@@ -84,8 +84,8 @@ public:
                      bool raw);
   
   // getter
-  Rcpp::DataFrame getParameters();
-  Rcpp::List getParametersFull(); // full data frame including transformations
+  Rcpp::List getParameters();
+  Rcpp::List getSubmodelParameters(); // full data frame including transformations
   
   Rcpp::StringVector getParameterLabels();
   
