@@ -122,12 +122,7 @@ void mgSEM::addModel(Rcpp::List SEMList){
   
   Rcpp::DataFrame newParameters = newModel.getParameters();
   Rcpp::StringVector newLabels = newParameters["label"];
-  Rcpp::NumericVector newValues = newParameters["value"];
-  
-  parameters.modelParameterValues.push_back(newValues);
-  parameters.modelParameterLabels.push_back(newLabels);
-  
-  parameters.modelParameterValues.at(models.size() - 1).names() = newLabels;
+  Rcpp::NumericVector newValues = newParameters["rawValue"];
   
   std::string parameterLabel;
   
@@ -193,7 +188,7 @@ void mgSEM::addTransformation(std::vector<bool> isTransformation_,
   parameters.addTransformation(isTransformation_, 
                                transformationFunctionSEXP,
                                transformationList
-                               );
+  );
 }
 
 void mgSEM::computeTransformations(){
@@ -205,6 +200,7 @@ void mgSEM::computeTransformations(){
 void mgSEM::setParameters(Rcpp::StringVector label_,
                           arma::vec value_,
                           bool raw){
+  if(!raw) Rcpp::stop("Cannot set parameters for non-raw values");
   // change the global parameters
   int loc;
   for(int i = 0; i < label_.size(); i++){
@@ -216,13 +212,9 @@ void mgSEM::setParameters(Rcpp::StringVector label_,
   }
   
   // compute the transformations
-  Rcpp::warning("Transformations missing");
-  computeTransformations();
+  if(parameters.hasTransformations) computeTransformations();
   
   // update the parameters in the models
-  
-  // from the map we can directly see which parameters should be changed in the 
-  // models. We first change each model's parameter vector:
   for(int m = 0; m < models.size(); m++){
     models.at(m).setParameters(parameters.uniqueLabelsRcpp[parameters.parameterLocationInVectorRcpp.at(m)],
               parameters.uniqueValues.elem(parameters.parameterLocationInVectorUvec.at(m)),
@@ -239,6 +231,14 @@ Rcpp::NumericVector mgSEM::getParameters(){
   }
   param.names() = parameters.uniqueLabelsRcpp;
   return(param);
+}
+
+Rcpp::List mgSEM::getParametersFull(){
+  Rcpp::List paramList(models.size());
+  for(int m = 0; m < models.size(); m++){
+    paramList.at(m) = models.at(m).getParameters();
+  }
+  return(paramList);
 }
 
 Rcpp::StringVector mgSEM::getParameterLabels(){
@@ -264,7 +264,8 @@ double mgSEM::fit(){
   return(m2LL);
 }
 
-arma::rowvec mgSEM::getGradients(bool t){
+arma::rowvec mgSEM::getGradients(bool raw){
+  if(!raw) Rcpp::stop("Cannot compute gradients for non-raw values.");
   arma::rowvec modelGradients;
   arma::mat transformationGradients;
   parameters.uniqueGradients.fill(arma::fill::zeros);
@@ -273,7 +274,6 @@ arma::rowvec mgSEM::getGradients(bool t){
   for(int m = 0; m < models.size(); m++){
     
     modelGradients = models.at(m).getGradients(true);
-    
     // add the models gradients to the existing gradients:
     parameters.uniqueGradients.elem(parameters.parameterLocationInModelUvec.at(m)) += 
       modelGradients.elem(parameters.parameterLocationInModelUvec.at(m));
@@ -297,8 +297,9 @@ arma::mat getScores(){
 
 arma::mat mgSEM::getHessian(Rcpp::StringVector label_,
                             arma::vec value_,
+                            bool raw,
                             double eps){
-  
+  if(!raw) Rcpp::stop("Cannot compute Hessian for non-raw values.");
   Hessian = approximateHessian(*this, 
                                label_,
                                value_,
@@ -318,12 +319,13 @@ RCPP_MODULE(mgSEM_cpp){
   .method( "implied", &mgSEM::implied, "Computes implied means and covariance matrix")
   .method( "fit", &mgSEM::fit, "Fits the model. Returns -2 log likelihood")
   .method( "setParameters", &mgSEM::setParameters, "Set the parameters of a model.")
-  .method( "getParameters", &mgSEM::getParameters, "Returns a data frame with model parameters.")
+  .method( "getParameters", &mgSEM::getParameters, "Returns a vector with raw model parameters.")
+  .method( "getParametersFull", &mgSEM::getParametersFull, "Returns a list with parameters for each model.")
   .method( "getParameterLabels", &mgSEM::getParameterLabels, "Returns a vector with unique parameter labels as used internally.")
   .method( "getGradients", &mgSEM::getGradients, "Returns a matrix with scores.")
   //.method( "getScores", &mgSEM::getScores, "Returns a matrix with scores.")
-  .method( "getHessian", &mgSEM::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
-  .method( "addTransformation", &mgSEM::addTransformation, "Add a transformation function. Expects parameterLabels and pointer to function.")
-  .method( "computeTransformations", &mgSEM::computeTransformations, "Compute all transformations")
+    .method( "getHessian", &mgSEM::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
+    .method( "addTransformation", &mgSEM::addTransformation, "Add a transformation function. Expects parameterLabels and pointer to function.")
+    .method( "computeTransformations", &mgSEM::computeTransformations, "Compute all transformations")
   ;
 }

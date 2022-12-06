@@ -42,7 +42,7 @@ public:
   arma::vec uniqueValues;
   std::vector<std::string> uniqueLabels;
   Rcpp::StringVector uniqueLabelsRcpp;
-  arma::colvec uniqueGradients;
+  arma::rowvec uniqueGradients;
   arma::mat uniqueHessian;
   std::vector<bool> isTransformation;
   bool hasTransformations = false;
@@ -58,10 +58,6 @@ public:
   std::vector<arma::uvec> parameterLocationInVectorUvec; // armadillo needs uvec for subsetting
   
   std::vector<std::vector<int>> model; // saves the models where the parameters are located
-  
-  // vectors with values and labels for each model
-  std::vector<Rcpp::NumericVector> modelParameterValues;
-  std::vector<Rcpp::StringVector> modelParameterLabels;
   
   // in case of transformations
   transformationFunctionPtr transformationFunction;
@@ -113,6 +109,7 @@ public:
   
   // getter
   Rcpp::NumericVector getParameters();
+  Rcpp::List getParametersFull(); // full data frame including transformations
   
   Rcpp::StringVector getParameterLabels();
   
@@ -121,12 +118,13 @@ public:
   
   double fit();
   
-  arma::rowvec getGradients(bool t);
+  arma::rowvec getGradients(bool raw);
   
   arma::mat getScores();
   
   arma::mat getHessian(Rcpp::StringVector label_,
                        arma::vec value_,
+                       bool raw,
                        double eps);
   
 };
