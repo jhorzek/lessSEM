@@ -40,10 +40,10 @@ public:
   
   // Now, we have to tell our SEM, which parameters are transformations
   // and how to compute those
-  void addTransformation(
-      std::vector<bool> isTransformation_,
-      SEXP transformationFunctionSEXP,
-      Rcpp::List transformationList_);
+  void addTransformation(Rcpp::NumericVector extendedParameters,
+                         std::vector<bool> isTransformation_,
+                         SEXP transformationFunctionSEXP,
+                         Rcpp::List transformationList_);
   
   void transform();
   
@@ -70,9 +70,10 @@ public:
   
   void addModel(Rcpp::List SEMList);
   
-  void addTransformation(std::vector<bool> isTransformation_,
+  void addTransformation(Rcpp::NumericVector extendedParameters,
+                         std::vector<bool> isTransformation_,
                          SEXP transformationFunctionSEXP,
-                         Rcpp::List transformationList);
+                         Rcpp::List transformationList_);
   
   void computeTransformations();
   
@@ -83,7 +84,7 @@ public:
                      bool raw);
   
   // getter
-  Rcpp::NumericVector getParameters();
+  Rcpp::DataFrame getParameters();
   Rcpp::List getParametersFull(); // full data frame including transformations
   
   Rcpp::StringVector getParameterLabels();

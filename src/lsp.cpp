@@ -5,16 +5,6 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-//'@name istaLSP
-//'@title lsp optimization with ista
-//'@description Object for lsp optimization with
-//'ista optimizer
-//'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
-//'@field optimize optimize the model. Expects a vector with starting values,
-//'a SEM of type SEM_Cpp, a theta and a lambda value.
-//'@returns a list with fit results
-
 template<typename sem>
 class istaLSP{
 public:
@@ -117,6 +107,16 @@ public:
   }
 };
 
+//'@name istaLSPSEM
+//'@title lsp optimization with ista
+//'@description Object for lsp optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta and a lambda value.
+//'@returns a list with fit results
+//'
 typedef istaLSP<SEMCpp> istaLSPSEM;
 RCPP_EXPOSED_CLASS_NODECL(istaLSPSEM)
   RCPP_MODULE(istaLSPSEM_cpp){
@@ -128,6 +128,16 @@ RCPP_EXPOSED_CLASS_NODECL(istaLSPSEM)
     ;
   }
 
+//'@name istaLSPMgSEM
+//'@title lsp optimization with ista
+//'@description Object for lsp optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta and a lambda value.
+//'@returns a list with fit results
+//'
 typedef istaLSP<mgSEM> istaLSPMgSEM;
 RCPP_EXPOSED_CLASS_NODECL(istaLSPMgSEM)
   RCPP_MODULE(istaLSPMgSEM_cpp){

@@ -111,17 +111,17 @@
 #' coef(regsem)
 #' @export
 cvLasso <- function(lavaanModel,
-                  regularized,
-                  lambdas,
-                  k = 5,
-                  standardize = FALSE,
-                  returnSubsetParameters = FALSE,
-                  method = "glmnet", 
-                  modifyModel = lessSEM::modifyModel(),
-                  control = lessSEM::controlGlmnet()){
+                    regularized,
+                    lambdas,
+                    k = 5,
+                    standardize = FALSE,
+                    returnSubsetParameters = FALSE,
+                    method = "glmnet", 
+                    modifyModel = lessSEM::modifyModel(),
+                    control = lessSEM::controlGlmnet()){
   
-    tuningParameters <- data.frame(lambda = lambdas,
-                                   alpha = 1)
+  tuningParameters <- data.frame(lambda = lambdas,
+                                 alpha = 1)
   
   result <- .cvRegularizeSEMInternal(
     lavaanModel = lavaanModel,
@@ -256,18 +256,18 @@ cvLasso <- function(lavaanModel,
 #' coef(regsem)
 #' @export
 cvAdaptiveLasso <- function(lavaanModel,
-                          regularized,
-                          weights = NULL,
-                          lambdas,
-                          k = 5,
-                          standardize = FALSE,
-                          returnSubsetParameters = FALSE,
-                          method = "glmnet", 
-                          modifyModel = lessSEM::modifyModel(),
-                          control = lessSEM::controlGlmnet()){
-
-    tuningParameters <- data.frame(lambda = lambdas,
-                                   alpha = 1)
+                            regularized,
+                            weights = NULL,
+                            lambdas,
+                            k = 5,
+                            standardize = FALSE,
+                            returnSubsetParameters = FALSE,
+                            method = "glmnet", 
+                            modifyModel = lessSEM::modifyModel(),
+                            control = lessSEM::controlGlmnet()){
+  
+  tuningParameters <- data.frame(lambda = lambdas,
+                                 alpha = 1)
   
   if(is.null(weights)) weights <- regularized
   
@@ -399,14 +399,14 @@ cvAdaptiveLasso <- function(lavaanModel,
 #' 
 #' @export
 cvRidge <- function(lavaanModel,
-                  regularized,
-                  lambdas,
-                  k = 5,
-                  standardize = FALSE,
-                  returnSubsetParameters = FALSE,
-                  method = "glmnet", 
-                  modifyModel = lessSEM::modifyModel(),
-                  control = lessSEM::controlGlmnet()){
+                    regularized,
+                    lambdas,
+                    k = 5,
+                    standardize = FALSE,
+                    returnSubsetParameters = FALSE,
+                    method = "glmnet", 
+                    modifyModel = lessSEM::modifyModel(),
+                    control = lessSEM::controlGlmnet()){
   
   
   result <- .cvRegularizeSEMInternal(
@@ -542,15 +542,15 @@ cvRidge <- function(lavaanModel,
 #' coef(regsem)
 #' @export
 cvElasticNet <- function(lavaanModel,
-                       regularized,
-                       lambdas,
-                       alphas,
-                       k = 5,
-                       standardize = FALSE,
-                       returnSubsetParameters = FALSE,
-                       method = "glmnet", 
-                       modifyModel = lessSEM::modifyModel(),
-                       control = lessSEM::controlGlmnet()){
+                         regularized,
+                         lambdas,
+                         alphas,
+                         k = 5,
+                         standardize = FALSE,
+                         returnSubsetParameters = FALSE,
+                         method = "glmnet", 
+                         modifyModel = lessSEM::modifyModel(),
+                         control = lessSEM::controlGlmnet()){
   
   if(any(alphas < 0) || any(alphas > 1)) 
     stop("alpha must be between 0 and 1.")
@@ -687,28 +687,28 @@ cvElasticNet <- function(lavaanModel,
 #' coef(regsem)
 #' @export
 cvCappedL1 <- function(lavaanModel,
-                     regularized,
-                     lambdas,
-                     thetas,
-                     k = 5,
-                     standardize = FALSE,
-                     returnSubsetParameters = FALSE,
-                     modifyModel = lessSEM::modifyModel(),
-                     control = lessSEM::controlIsta()){
+                       regularized,
+                       lambdas,
+                       thetas,
+                       k = 5,
+                       standardize = FALSE,
+                       returnSubsetParameters = FALSE,
+                       modifyModel = lessSEM::modifyModel(),
+                       control = lessSEM::controlIsta()){
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
-                                           penalty = "cappedL1", 
-                                           weights = regularized,
-                                           k = k,
-                                           standardize = standardize,
-                                           returnSubsetParameters = returnSubsetParameters,
-                                           tuningParameters = expand.grid(lambda = lambdas, 
-                                                                          theta = thetas,
-                                                                          alpha = 1), 
-                                           method = "ista", 
-                                           modifyModel = modifyModel, 
-                                           control = control
+                                     penalty = "cappedL1", 
+                                     weights = regularized,
+                                     k = k,
+                                     standardize = standardize,
+                                     returnSubsetParameters = returnSubsetParameters,
+                                     tuningParameters = expand.grid(lambda = lambdas, 
+                                                                    theta = thetas,
+                                                                    alpha = 1), 
+                                     method = "ista", 
+                                     modifyModel = modifyModel, 
+                                     control = control
   )
   
   return(result)
@@ -826,28 +826,28 @@ cvCappedL1 <- function(lavaanModel,
 #' coef(regsem)
 #' @export
 cvLsp <- function(lavaanModel,
-                regularized,
-                lambdas,
-                thetas,
-                k = 5,
-                standardize = FALSE,
-                returnSubsetParameters = FALSE,
-                modifyModel = lessSEM::modifyModel(),
-                control = lessSEM::controlIsta()){
+                  regularized,
+                  lambdas,
+                  thetas,
+                  k = 5,
+                  standardize = FALSE,
+                  returnSubsetParameters = FALSE,
+                  modifyModel = lessSEM::modifyModel(),
+                  control = lessSEM::controlIsta()){
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
-                                           penalty = "lsp", 
-                                           weights = regularized,
-                                           k = k,
-                                           standardize = standardize,
-                                           returnSubsetParameters = returnSubsetParameters,
-                                           tuningParameters = expand.grid(lambda = lambdas, 
-                                                                          theta = thetas), 
-                                           method = "ista", 
-                                           modifyModel = modifyModel, 
-                                           control = control
+                                     penalty = "lsp", 
+                                     weights = regularized,
+                                     k = k,
+                                     standardize = standardize,
+                                     returnSubsetParameters = returnSubsetParameters,
+                                     tuningParameters = expand.grid(lambda = lambdas, 
+                                                                    theta = thetas), 
+                                     method = "ista", 
+                                     modifyModel = modifyModel, 
+                                     control = control
   )
   
   return(result)
@@ -968,27 +968,27 @@ cvLsp <- function(lavaanModel,
 #' coef(regsem)
 #' @export
 cvMcp <- function(lavaanModel,
-                regularized,
-                lambdas,
-                thetas,
-                k = 5,
-                standardize = FALSE,
-                returnSubsetParameters = FALSE,
-                modifyModel = lessSEM::modifyModel(),
-                control = lessSEM::controlIsta()){
+                  regularized,
+                  lambdas,
+                  thetas,
+                  k = 5,
+                  standardize = FALSE,
+                  returnSubsetParameters = FALSE,
+                  modifyModel = lessSEM::modifyModel(),
+                  control = lessSEM::controlIsta()){
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   result <- .cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
-                                           penalty = "mcp", 
-                                           weights = regularized,
-                                           k = k,
-                                           standardize = standardize,
-                                           returnSubsetParameters = returnSubsetParameters,
-                                           tuningParameters = expand.grid(lambda = lambdas, 
-                                                                          theta = thetas), 
-                                           method = "ista", 
-                                           modifyModel = modifyModel, 
-                                           control = control
+                                     penalty = "mcp", 
+                                     weights = regularized,
+                                     k = k,
+                                     standardize = standardize,
+                                     returnSubsetParameters = returnSubsetParameters,
+                                     tuningParameters = expand.grid(lambda = lambdas, 
+                                                                    theta = thetas), 
+                                     method = "ista", 
+                                     modifyModel = modifyModel, 
+                                     control = control
   )
   
   return(result)
@@ -1114,28 +1114,28 @@ cvMcp <- function(lavaanModel,
 #' coef(regsem)
 #' @export
 cvScad <- function(lavaanModel,
-                 regularized,
-                 lambdas,
-                 thetas,
-                 k = 5,
-                 standardize = FALSE,
-                 returnSubsetParameters = FALSE,
-                 modifyModel = lessSEM::modifyModel(),
-                 control = lessSEM::controlIsta()){
+                   regularized,
+                   lambdas,
+                   thetas,
+                   k = 5,
+                   standardize = FALSE,
+                   returnSubsetParameters = FALSE,
+                   modifyModel = lessSEM::modifyModel(),
+                   control = lessSEM::controlIsta()){
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
   result <- .cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
-                                           penalty = "scad", 
-                                           weights = regularized,
-                                           k = k,
-                                           standardize = standardize,
-                                           returnSubsetParameters = returnSubsetParameters,
-                                           tuningParameters = expand.grid(lambda = lambdas, 
-                                                                          theta = thetas), 
-                                           method = "ista", 
-                                           modifyModel = modifyModel, 
-                                           control = control
+                                     penalty = "scad", 
+                                     weights = regularized,
+                                     k = k,
+                                     standardize = standardize,
+                                     returnSubsetParameters = returnSubsetParameters,
+                                     tuningParameters = expand.grid(lambda = lambdas, 
+                                                                    theta = thetas), 
+                                     method = "ista", 
+                                     modifyModel = modifyModel, 
+                                     control = control
   )
   
   return(result)

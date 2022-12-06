@@ -22,9 +22,9 @@ test_that("testing elasticNet-lasso-with-transformation", {
 '
   
   modelFit <- sem(model, 
-               data = PoliticalDemocracy, 
-               meanstructure = TRUE, 
-               do.fit = TRUE)
+                  data = PoliticalDemocracy, 
+                  meanstructure = TRUE, 
+                  do.fit = TRUE)
   
   # let's define some transformations to test for measurement invariance:
   transformations <- "
@@ -75,11 +75,11 @@ test_that("testing elasticNet-lasso-with-transformation", {
   );
   "
   rsemGlmnet2 <- lasso(lavaanModel = modelFit, 
-                      regularized = c("deltaA", "deltaB", "deltaC"),
-                      lambdas = lambdas,
-                      method = "glmnet",
-                      control = controlGlmnet(),
-                      modifyModel = modifyModel(transformations = transformations)
+                       regularized = c("deltaA", "deltaB", "deltaC"),
+                       lambdas = lambdas,
+                       method = "glmnet",
+                       control = controlGlmnet(),
+                       modifyModel = modifyModel(transformations = transformations)
   )
   testthat::expect_equal(all(abs(coef(rsemGlmnet) - coef(rsemGlmnet2)) < 1e-4), TRUE)
   
@@ -127,13 +127,13 @@ test_that("testing elasticNet-lasso-with-transformation", {
   
   # cross-validation
   rsemGlmnet <- cvLasso(lavaanModel = modelFit, 
-                      regularized = c("deltaA", "deltaB", "deltaC"),
-                      lambdas = lambdas,
-                      method = "glmnet",
-                      control = controlGlmnet(),
-                      modifyModel = modifyModel(transformations = transformations),
-                      k = 5, 
-                      returnSubsetParameters = TRUE
+                        regularized = c("deltaA", "deltaB", "deltaC"),
+                        lambdas = lambdas,
+                        method = "glmnet",
+                        control = controlGlmnet(),
+                        modifyModel = modifyModel(transformations = transformations),
+                        k = 5, 
+                        returnSubsetParameters = TRUE
   )
   param <- rsemGlmnet@subsetParameters
   
@@ -181,19 +181,19 @@ test_that("testing elasticNet-lasso-with-transformation", {
   
   # adaptive lasso
   rsemGlmnet <- adaptiveLasso(lavaanModel = modelFit, 
-                        regularized = c("deltaA", "deltaB", "deltaC"),
-                        lambdas = lambdas,
-                        method = "glmnet",
-                        control = controlGlmnet(),
-                        modifyModel = modifyModel(transformations = transformations)
+                              regularized = c("deltaA", "deltaB", "deltaC"),
+                              lambdas = lambdas,
+                              method = "glmnet",
+                              control = controlGlmnet(),
+                              modifyModel = modifyModel(transformations = transformations)
   )
   
   # compare weights to mles:
   MLEs <- bfgs(lavaanModel = modelFit, 
-                              modifyModel = modifyModel(transformations = transformations)
+               modifyModel = modifyModel(transformations = transformations)
   )
   testthat::expect_equal(all(abs(rsemGlmnet@weights[c("deltaA", "deltaB", "deltaC")]^(-1) - 
-                               abs(MLEs@parameters[,c("deltaA", "deltaB", "deltaC")])) < 1e-3),TRUE)
+                                   abs(MLEs@parameters[,c("deltaA", "deltaB", "deltaC")])) < 1e-3),TRUE)
   
   
 })

@@ -53,7 +53,7 @@ test_that("testing ista-lasso", {
     verbose = 0
   )
   
-  IL <- new(istaEnet, weights, control)
+  IL <- new(istaEnetSEM, weights, control)
   lassoResult <- IL$optimize(
     startingValues,
     SEM,
@@ -94,7 +94,7 @@ test_that("testing ista-lasso", {
     verbose = 0
   )
   
-  IL <- new(istaEnet, weights, control)
+  IL <- new(istaEnetSEM, weights, control)
   
   # enet
   lassoResult <- IL$optimize(

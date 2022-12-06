@@ -5,15 +5,6 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-//'@name istaCappedL1
-//'@title cappedL1 optimization with ista
-//'@description Object for elastic net optimization with
-//'ista optimizer
-//'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
-//'@field optimize optimize the model. Expects a vector with starting values,
-//'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
-//'@returns a list with fit results
 
 template<typename sem>
 class istaCappedL1{
@@ -123,6 +114,15 @@ class istaCappedL1{
   }
 };
 
+//'@name istaCappedL1SEM
+//'@title cappedL1 optimization with ista
+//'@description Object for elastic net optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
+//'@returns a list with fit results
 typedef istaCappedL1<SEMCpp> istaCappedL1SEM;
 RCPP_EXPOSED_CLASS_NODECL(istaCappedL1SEM)
   RCPP_MODULE(istaCappedL1SEM_cpp){
@@ -134,6 +134,15 @@ RCPP_EXPOSED_CLASS_NODECL(istaCappedL1SEM)
     ;
   }
 
+//'@name istaCappedL1mgSEM
+//'@title cappedL1 optimization with ista
+//'@description Object for elastic net optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
+//'@returns a list with fit results
 typedef istaCappedL1<mgSEM> istaCappedL1mgSEM;
 RCPP_EXPOSED_CLASS_NODECL(istaCappedL1mgSEM)
   RCPP_MODULE(istaCappedL1mgSEM_cpp){

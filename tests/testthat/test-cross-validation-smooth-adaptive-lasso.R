@@ -26,18 +26,18 @@ test_that("testing cross-validation for smooth adaptive lasso", {
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   lambdas <- seq(0,1,.1)
   rsem <- lessSEM::smoothAdaptiveLasso(lavaanModel = modelFit, 
-                                 regularized = regularizedLavaan,
-                                 lambdas = lambdas, 
-                                 epsilon = 1e-8,
-                                 tau = 0)
+                                       regularized = regularizedLavaan,
+                                       lambdas = lambdas, 
+                                       epsilon = 1e-8,
+                                       tau = 0)
   
   ## Test cross-validation
   
   cv <- cvSmoothAdaptiveLasso(lavaanModel = modelFit, 
-                        regularized = regularizedLavaan,
-                        lambdas = lambdas, 
-                        epsilon = 1e-8,
-                        returnSubsetParameters = TRUE)
+                              regularized = regularizedLavaan,
+                              lambdas = lambdas, 
+                              epsilon = 1e-8,
+                              returnSubsetParameters = TRUE)
   
   testthat::expect_equal(all(cv@regularized == rsem@regularized), TRUE)
   selected <- which.min(cv@cvfits$cvfit)
@@ -45,10 +45,10 @@ test_that("testing cross-validation for smooth adaptive lasso", {
   testthat::expect_equal(ncol(cv@subsets), 5)
   
   cv3 <- cvSmoothAdaptiveLasso(lavaanModel = modelFit, 
-                         regularized = regularizedLavaan,
-                         lambdas = lambdas,
-                         epsilon = 1e-8,
-                         k = 3)
+                               regularized = regularizedLavaan,
+                               lambdas = lambdas,
+                               epsilon = 1e-8,
+                               k = 3)
   testthat::expect_equal(ncol(cv3@subsets), 3)
   
   coef(cv)
@@ -71,9 +71,9 @@ test_that("testing cross-validation for smooth adaptive lasso", {
     testSet <- subsets[,trainSet]
     
     SEM <- lessSEM:::.setParameters(SEM = SEM, 
-                                  labels = parameterLabels, 
-                                  values = unlist(pars[ro, parameterLabels]),
-                                  raw = FALSE)
+                                    labels = parameterLabels, 
+                                    values = unlist(pars[ro, parameterLabels]),
+                                    raw = FALSE)
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
@@ -95,22 +95,22 @@ test_that("testing cross-validation for smooth adaptive lasso", {
   subsetPars <- pars[pars$trainSet == subset,]
   
   subsetLasso <- smoothAdaptiveLasso(lavaanModel = modelFit, 
-                               regularized = regularizedLavaan,
-                               lambdas = lambdas,
-                               epsilon = 1e-8,
-                               tau = 0,
-                               control = controlBFGS(startingValues = "start"),
-                               modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
+                                     regularized = regularizedLavaan,
+                                     lambdas = lambdas,
+                                     epsilon = 1e-8,
+                                     tau = 0,
+                                     control = controlBFGS(startingValues = "start"),
+                                     modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
   
   testthat::expect_equal(all(abs(subsetLasso@parameters - subsetPars[,colnames(subsetLasso@parameters)])< 1e-2), TRUE)
   
   # test standardization
   cv <- cvSmoothAdaptiveLasso(lavaanModel = modelFit, 
-                        regularized = regularizedLavaan,
-                        lambdas = lambdas, 
-                        returnSubsetParameters = TRUE,
-                        epsilon = 1e-8,
-                        standardize = TRUE)
+                              regularized = regularizedLavaan,
+                              lambdas = lambdas, 
+                              returnSubsetParameters = TRUE,
+                              epsilon = 1e-8,
+                              standardize = TRUE)
   
   subsets <- cv@subsets
   pars <- cv@subsetParameters
@@ -131,9 +131,9 @@ test_that("testing cross-validation for smooth adaptive lasso", {
                                  standardDeviations = standardDeviations)
     
     SEM <- lessSEM:::.setParameters(SEM = SEM, 
-                                  labels = parameterLabels, 
-                                  values = unlist(pars[ro, parameterLabels]),
-                                  raw = FALSE)
+                                    labels = parameterLabels, 
+                                    values = unlist(pars[ro, parameterLabels]),
+                                    raw = FALSE)
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
@@ -153,9 +153,9 @@ test_that("testing cross-validation for smooth adaptive lasso", {
   # test reweighing
   
   rsem2 <- lessSEM::cvSmoothAdaptiveLasso(lavaanModel = modelFit, 
-                                    regularized = regularizedLavaan,
-                                    lambdas = lambdas,
-                                    epsilon = 1e-8)
+                                          regularized = regularizedLavaan,
+                                          lambdas = lambdas,
+                                          epsilon = 1e-8)
   
   subsets <- rsem2@subsets
   weights <- rsem2@misc$newWeights
@@ -177,20 +177,20 @@ test_that("testing cross-validation for smooth adaptive lasso", {
   # test custom weights
   weights[,rsem2@regularized] <- runif(nrow(weights[,rsem2@regularized])*ncol(weights[,rsem2@regularized]), .5,10)
   rsem3 <- lessSEM::cvSmoothAdaptiveLasso(lavaanModel = modelFit, 
-                                    regularized = regularizedLavaan,
-                                    weights = as.matrix(weights[,2:ncol(weights)]),
-                                    lambdas = lambdas,
-                                    epsilon = 1e-8)
+                                          regularized = regularizedLavaan,
+                                          weights = as.matrix(weights[,2:ncol(weights)]),
+                                          lambdas = lambdas,
+                                          epsilon = 1e-8)
   
   testthat::expect_equal(all(rsem3@misc$newWeights - weights == 0), TRUE)
   
   rsem4 <- lessSEM::cvSmoothAdaptiveLasso(lavaanModel = modelFit, 
-                                    regularized = regularizedLavaan,
-                                    weights = as.matrix(weights[,2:ncol(weights)]),
-                                    lambdas = lambdas,
-                                    epsilon = 1e-8,
-                                    standardize = TRUE,
-                                    returnSubsetParameters = TRUE)
+                                          regularized = regularizedLavaan,
+                                          weights = as.matrix(weights[,2:ncol(weights)]),
+                                          lambdas = lambdas,
+                                          epsilon = 1e-8,
+                                          standardize = TRUE,
+                                          returnSubsetParameters = TRUE)
   
   subsets <- rsem4@subsets
   pars <- rsem4@subsetParameters
@@ -211,9 +211,9 @@ test_that("testing cross-validation for smooth adaptive lasso", {
                                  standardDeviations = standardDeviations)
     
     SEM <- lessSEM:::.setParameters(SEM = SEM, 
-                                  labels = parameterLabels, 
-                                  values = unlist(pars[ro, parameterLabels]),
-                                  raw = FALSE)
+                                    labels = parameterLabels, 
+                                    values = unlist(pars[ro, parameterLabels]),
+                                    raw = FALSE)
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(

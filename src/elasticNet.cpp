@@ -5,15 +5,6 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-//'@name istaEnet
-//'@title elastic net optimization with ista
-//'@description Object for elastic net optimization with
-//'ista optimizer
-//'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
-//'@field optimize optimize the model. Expects a vector with starting values,
-//'a SEM of type SEM_Cpp, a lambda and an alpha value.
-//'@returns a list with fit results
 template<typename sem>
 class istaEnet{
 public:
@@ -114,17 +105,6 @@ public:
   }
 };
 
-//'@name glmnetEnet
-//'@title elastic net optimization with glmnet optimizer
-//'@description Object for elastic net optimization with
-//'glmnet optimizer
-//'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
-//'@field setHessian changes the Hessian of the model. Expects a matrix
-//'@field optimize optimize the model. Expects a vector with starting values,
-//'a SEM of type SEM_Cpp, a lambda and an alpha value.
-//'@returns a list with fit results
-//'
 template<typename sem>
 class glmnetEnet{
 public:
@@ -352,6 +332,16 @@ public:
   }
 };
 
+//'@name bfgsEnetSEM
+//'@title smoothly approximated elastic net
+//'@description Object for smoothly approximated elastic net optimization with
+//'bfgs optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field setHessian changes the Hessian of the model. Expects a matrix
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a lambda and an alpha value.
+//'@returns a list with fit results
 typedef bfgsEnet<SEMCpp> bfgsEnetSEM;
 RCPP_EXPOSED_CLASS_NODECL(bfgsEnetSEM)
   RCPP_MODULE(bfgsEnetSEM_cpp){
@@ -364,6 +354,16 @@ RCPP_EXPOSED_CLASS_NODECL(bfgsEnetSEM)
     ;
   }
 
+//'@name bfgsEnetMgSEM
+//'@title smoothly approximated elastic net
+//'@description Object for smoothly approximated elastic net optimization with
+//'bfgs optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field setHessian changes the Hessian of the model. Expects a matrix
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a lambda and an alpha value.
+//'@returns a list with fit results
 typedef bfgsEnet<mgSEM> bfgsEnetMgSEM;
 RCPP_EXPOSED_CLASS_NODECL(bfgsEnetMgSEM)
   RCPP_MODULE(bfgsEnetMgSEM_cpp){
@@ -376,6 +376,17 @@ RCPP_EXPOSED_CLASS_NODECL(bfgsEnetMgSEM)
     ;
   }
 
+//'@name glmnetEnetSEM
+//'@title elastic net optimization with glmnet optimizer
+//'@description Object for elastic net optimization with
+//'glmnet optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field setHessian changes the Hessian of the model. Expects a matrix
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a lambda and an alpha value.
+//'@returns a list with fit results
+//'
 typedef glmnetEnet<SEMCpp> glmnetEnetSEM;
 RCPP_EXPOSED_CLASS_NODECL(glmnetEnetSEM)
   RCPP_MODULE(glmnetEnetSEM_cpp){
@@ -388,6 +399,17 @@ RCPP_EXPOSED_CLASS_NODECL(glmnetEnetSEM)
     ;
   }
 
+//'@name glmnetEnetMgSEM
+//'@title elastic net optimization with glmnet optimizer
+//'@description Object for elastic net optimization with
+//'glmnet optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field setHessian changes the Hessian of the model. Expects a matrix
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a lambda and an alpha value.
+//'@returns a list with fit results
+//'
 typedef glmnetEnet<mgSEM> glmnetEnetMgSEM;
 RCPP_EXPOSED_CLASS_NODECL(glmnetEnetMgSEM)
   RCPP_MODULE(glmnetEnetMgSEM_cpp){
@@ -400,6 +422,16 @@ RCPP_EXPOSED_CLASS_NODECL(glmnetEnetMgSEM)
     ;
   }
 
+//'@name istaEnetSEM
+//'@title elastic net optimization with ista optimizer
+//'@description Object for elastic net optimization with
+//'glmnet optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a lambda and an alpha value.
+//'@returns a list with fit results
+//'
 typedef istaEnet<SEMCpp> istaEnetSEM;
 RCPP_EXPOSED_CLASS_NODECL(istaEnetSEM)
   RCPP_MODULE(istaEnetSEM_cpp){
@@ -411,6 +443,16 @@ RCPP_EXPOSED_CLASS_NODECL(istaEnetSEM)
     ;
   }
 
+//'@name istaEnetMgSEM
+//'@title elastic net optimization with ista optimizer
+//'@description Object for elastic net optimization with
+//'glmnet optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a lambda and an alpha value.
+//'@returns a list with fit results
+//'
 typedef istaEnet<mgSEM> istaEnetMgSEM;
 RCPP_EXPOSED_CLASS_NODECL(istaEnetMgSEM)
   RCPP_MODULE(istaEnetMgSEM_cpp){

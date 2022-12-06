@@ -180,7 +180,7 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
   // step one: change parameters in parameterTable
   parameterTable.setParameters(label_, value_, raw);
   if(parameterTable.hasTransformations)
-   parameterTable.transform();
+    parameterTable.transform();
   // step two: change parameters in model matrices
   
   for (auto const& param : parameterTable.parameterMap)
@@ -254,7 +254,7 @@ void SEMCpp::implied(){
     wasChecked = checkModel();
   }
   currentStatus = computedImplied;
-
+  
   // step one: compute implied mean and covariance
   if(parameterTable.AChanged | parameterTable.SChanged) impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
   if(parameterTable.mChanged | parameterTable.AChanged) impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
@@ -379,18 +379,20 @@ RCPP_MODULE(SEM_cpp){
   using namespace Rcpp;
   Rcpp::class_<SEMCpp>( "SEMCpp" )
     .constructor("Creates a new SEMCpp.")
-    .field_readonly( "A", &SEMCpp::Amatrix, "Matrix with directed effects")
-    .field_readonly( "S", &SEMCpp::Smatrix, "Matrix with undirected paths")
-    .field_readonly( "F", &SEMCpp::Fmatrix, "Filter matrix to separate latent and observed variables")
-    .field_readonly( "m", &SEMCpp::Mvector, "Vector with means of observed and latent variables")
-    .field_readonly( "impliedCovariance", &SEMCpp::impliedCovariance, "implied covariance matrix")
-    .field_readonly( "impliedMeans", &SEMCpp::impliedMeans, "implied means vector")
-    .field_readonly( "m2LL", &SEMCpp::m2LL, "minus 2 log-likelihood")
-    .field_readonly( "rawData", &SEMCpp::rawData, "raw data set")
-    .field_readonly( "manifestNames", &SEMCpp::manifestNames, "names of manifest variables")
-    .field_readonly( "wasFit", &SEMCpp::wasFit, "names of manifest variables")
-    .field_readonly( "functionCalls", &SEMCpp::functionCalls, "Counts how often the fit function was called")
-    .field_readonly( "gradientCalls", &SEMCpp::gradientCalls, "Counts how often the gradient function was called")
+  // fields
+  .field_readonly("sampleSize", &SEMCpp::sampleSize, "N")
+  .field_readonly( "A", &SEMCpp::Amatrix, "Matrix with directed effects")
+  .field_readonly( "S", &SEMCpp::Smatrix, "Matrix with undirected paths")
+  .field_readonly( "F", &SEMCpp::Fmatrix, "Filter matrix to separate latent and observed variables")
+  .field_readonly( "m", &SEMCpp::Mvector, "Vector with means of observed and latent variables")
+  .field_readonly( "impliedCovariance", &SEMCpp::impliedCovariance, "implied covariance matrix")
+  .field_readonly( "impliedMeans", &SEMCpp::impliedMeans, "implied means vector")
+  .field_readonly( "m2LL", &SEMCpp::m2LL, "minus 2 log-likelihood")
+  .field_readonly( "rawData", &SEMCpp::rawData, "raw data set")
+  .field_readonly( "manifestNames", &SEMCpp::manifestNames, "names of manifest variables")
+  .field_readonly( "wasFit", &SEMCpp::wasFit, "names of manifest variables")
+  .field_readonly( "functionCalls", &SEMCpp::functionCalls, "Counts how often the fit function was called")
+  .field_readonly( "gradientCalls", &SEMCpp::gradientCalls, "Counts how often the gradient function was called")
   
   // methods
   .method( "fill", &SEMCpp::fill, "Fill all elements of the SEM. Expects and Rcpp::List")

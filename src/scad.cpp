@@ -18,16 +18,6 @@ double scadPenalty_C(const double par,
   return(lessSEM::scadPenalty(par, lambda_p, theta));
 }
 
-//'@name istaScad
-//'@title scad optimization with ista
-//'@description Object for scad optimization with
-//'ista optimizer
-//'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
-//'@field optimize optimize the model. Expects a vector with starting values,
-//'a SEM of type SEM_Cpp, a theta and a lambda value.
-//'@returns a list with fit results
-
 template<typename sem>
 class istaScad{
 public:
@@ -130,17 +120,35 @@ public:
   }
 };
 
-typedef istaScad<SEMCpp> istaScadSEMCpp;
-RCPP_EXPOSED_CLASS_NODECL(istaScadSEMCpp)
+//'@name istaScadSEM
+//'@title scad optimization with ista
+//'@description Object for scad optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta and a lambda value.
+//'@returns a list with fit results
+typedef istaScad<SEMCpp> istaScadSEM;
+RCPP_EXPOSED_CLASS_NODECL(istaScadSEM)
   RCPP_MODULE(istaScadSEM_cpp){
     using namespace Rcpp;
-    Rcpp::class_<istaScadSEMCpp>( "istaScadSEMCpp" )
-      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaScadSEMCpp.")
+    Rcpp::class_<istaScadSEM>( "istaScadSEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaScadSEM.")
     // methods
-    .method( "optimize", &istaScadSEMCpp::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+    .method( "optimize", &istaScadSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
     ;
   }
 
+//'@name istaScadMgSEM
+//'@title scad optimization with ista
+//'@description Object for scad optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta and a lambda value.
+//'@returns a list with fit results
 typedef istaScad<mgSEM> istaScadMgSEM;
 RCPP_EXPOSED_CLASS_NODECL(istaScadMgSEM)
   RCPP_MODULE(istaScadMgSEM_cpp){

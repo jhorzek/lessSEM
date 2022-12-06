@@ -177,14 +177,14 @@ gpLasso <- function(par,
   }
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "lasso", 
-                                            weights = regularized,
-                                            tuningParameters = tuningParameters, 
-                                            method = method,
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "lasso", 
+                                    weights = regularized,
+                                    tuningParameters = tuningParameters, 
+                                    method = method,
+                                    control = control
   )
   
   return(result)
@@ -393,14 +393,14 @@ gpAdaptiveLasso <- function(par,
   }
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "adaptiveLasso", 
-                                            weights = weights,
-                                            tuningParameters = tuningParameters, 
-                                            method = method,
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "adaptiveLasso", 
+                                    weights = weights,
+                                    tuningParameters = tuningParameters, 
+                                    method = method,
+                                    control = control
   )
   
   return(result)
@@ -572,14 +572,14 @@ gpRidge <- function(par,
                                  alpha = 0)
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "ridge", 
-                                            weights = regularized,
-                                            tuningParameters = tuningParameters, 
-                                            method = method,
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "ridge", 
+                                    weights = regularized,
+                                    tuningParameters = tuningParameters, 
+                                    method = method,
+                                    control = control
   )
   
   return(result)
@@ -761,14 +761,14 @@ gpElasticNet <- function(par,
   
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "elasticNet", 
-                                            weights = regularized,
-                                            tuningParameters = tuningParameters, 
-                                            method = method,
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "elasticNet", 
+                                    weights = regularized,
+                                    tuningParameters = tuningParameters, 
+                                    method = method,
+                                    control = control
   )
   
   return(result)
@@ -953,16 +953,16 @@ gpCappedL1 <- function(par,
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "cappedL1", 
-                                            weights = regularized,
-                                            tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas,
-                                                                           alpha = 1), 
-                                            method = "ista",
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "cappedL1", 
+                                    weights = regularized,
+                                    tuningParameters = expand.grid(lambda = lambdas, 
+                                                                   theta = thetas,
+                                                                   alpha = 1), 
+                                    method = "ista",
+                                    control = control
   )
   
   return(result)
@@ -1126,15 +1126,15 @@ gpLsp <- function(par,
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "lsp", 
-                                            weights = regularized,
-                                            tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas), 
-                                            method = "ista",
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "lsp", 
+                                    weights = regularized,
+                                    tuningParameters = expand.grid(lambda = lambdas, 
+                                                                   theta = thetas), 
+                                    method = "ista",
+                                    control = control
   )
   
   return(result)
@@ -1301,15 +1301,15 @@ gpMcp <- function(par,
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "mcp", 
-                                            weights = regularized,
-                                            tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas), 
-                                            method = "ista",
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "mcp", 
+                                    weights = regularized,
+                                    tuningParameters = expand.grid(lambda = lambdas, 
+                                                                   theta = thetas), 
+                                    method = "ista",
+                                    control = control
   )
   
   return(result)
@@ -1483,15 +1483,15 @@ gpScad <- function(par,
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "scad", 
-                                            weights = regularized,
-                                            tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas), 
-                                            method = "ista",
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "scad", 
+                                    weights = regularized,
+                                    tuningParameters = expand.grid(lambda = lambdas, 
+                                                                   theta = thetas), 
+                                    method = "ista",
+                                    control = control
   )
   
   return(result)

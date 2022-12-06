@@ -14,6 +14,7 @@
   tuningParameters,
   epsilon,
   modifyModel,
+  method = "bfgs",
   control
 )
 }
@@ -37,6 +38,8 @@ model.}
 \item{epsilon}{epsilon > 0; controls the smoothness of the approximation. Larger values = smoother}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
+
+\item{method}{optimizer used. Currently only "bfgs" is supported.}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlBFGS function. See ?controlBFGS for more details.}

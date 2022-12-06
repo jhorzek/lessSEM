@@ -1,10 +1,33 @@
 # include "mgSEM.h"
 
 void mgParameters::addTransformation(
+    Rcpp::NumericVector extendedParameters,
     std::vector<bool> isTransformation_,
     SEXP transformationFunctionSEXP,
     Rcpp::List transformationList_)
 {
+  // first, let's check that all parameters have been added to the END of the
+  // existing parameter vector
+  Rcpp::StringVector extendedLabels = extendedParameters.names();
+  
+  for(int p = 0; p < uniqueLabelsRcpp.size(); p++){
+    
+    if(uniqueLabelsRcpp.at(p) != extendedLabels.at(p)) Rcpp::stop("Mismatch in parameters");
+    
+  }
+  
+  // extend existing vectors
+  uniqueLabelsRcpp = extendedLabels;
+  for(int p = uniqueLabels.size(); p < extendedLabels.size(); p++){
+    uniqueLabels.push_back(Rcpp::as<std::string>(extendedLabels.at(p)));
+  }
+  uniqueGradients.resize(extendedLabels.size());
+  uniqueHessian.resize(extendedLabels.size(), extendedLabels.size());
+  uniqueValues.resize(extendedLabels.size());
+  for(int p = 0; p < extendedParameters.size(); p++){
+    uniqueValues.at(p) = extendedParameters.at(p);
+  }
+  
   hasTransformations = true;
   isTransformation = isTransformation_;
   // create pointer to the transformation function 
@@ -183,13 +206,14 @@ void mgSEM::addModel(Rcpp::List SEMList){
   
 }// end addModel
 
-void mgSEM::addTransformation(std::vector<bool> isTransformation_,
+void mgSEM::addTransformation(Rcpp::NumericVector extendedParameters,
+                              std::vector<bool> isTransformation_,
                               SEXP transformationFunctionSEXP,
-                              Rcpp::List transformationList){
-  parameters.addTransformation(isTransformation_, 
+                              Rcpp::List transformationList_){
+  parameters.addTransformation(extendedParameters,
+                               isTransformation_,
                                transformationFunctionSEXP,
-                               transformationList
-  );
+                               transformationList_);
 }
 
 void mgSEM::computeTransformations(){
@@ -225,18 +249,21 @@ void mgSEM::setParameters(Rcpp::StringVector label_,
 } // end set parameters
 
 // getter
-Rcpp::NumericVector mgSEM::getParameters(){
+Rcpp::DataFrame mgSEM::getParameters(){
   Rcpp::NumericVector param(parameters.uniqueValues.size());
   for(int p = 0; p < param.size(); p++){
     param.at(p) = parameters.uniqueValues.at(p);
   }
   param.names() = parameters.uniqueLabelsRcpp;
-  return(param);
+  Rcpp::DataFrame retPar = Rcpp::DataFrame::create(Rcpp::Named("parmeters") = param,
+                                                   Rcpp::Named("isTransformation") = parameters.isTransformation);
+  return(retPar);
 }
 
 Rcpp::List mgSEM::getParametersFull(){
-  Rcpp::List paramList(models.size());
-  for(int m = 0; m < models.size(); m++){
+  Rcpp::List paramList(models.size()+1);
+  paramList.at(0) = getParameters();
+  for(int m = 1; m < models.size()+1; m++){
     paramList.at(m) = models.at(m).getParameters();
   }
   return(paramList);
@@ -323,6 +350,8 @@ RCPP_MODULE(mgSEM_cpp){
   using namespace Rcpp;
   Rcpp::class_<mgSEM>( "mgSEM" )
     .constructor("Creates a new SEMCpp.")
+  // fields
+  .field_readonly("sampleSize", &mgSEM::sampleSize, "Sum of all N")
   // methods
   .method( "addModel", &mgSEM::addModel, "Adds a model. Expects and Rcpp::List")
   .method( "implied", &mgSEM::implied, "Computes implied means and covariance matrix")
