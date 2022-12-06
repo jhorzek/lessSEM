@@ -153,7 +153,7 @@ void parameters::transform()
 arma::mat parameters::getTransformationGradients(){
   if(!hasTransformations) Rcpp::stop("Does not have transformations.");
   arma::mat currentGradients(nModelParameters, 
-                             nTransformationParameters,
+                             nRealParameters,
                              arma::fill::zeros);
   Rcpp::NumericVector parameterValues(uniqueParameterLabels.size());
   Rcpp::CharacterVector parameterLabelsRcpp(uniqueParameterLabels.size());

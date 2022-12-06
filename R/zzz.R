@@ -196,6 +196,9 @@
 # SEM Module
 Rcpp::loadModule("SEM_cpp", TRUE)
 
+# mgSEM Module
+Rcpp::loadModule("mgSEM_cpp", TRUE)
+
 # SEM optimization
 Rcpp::loadModule("istaEnet_cpp", TRUE)
 Rcpp::loadModule("istaEnetGeneralPurpose_cpp", TRUE)

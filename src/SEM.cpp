@@ -60,13 +60,13 @@ void SEMCpp::fill(Rcpp::List SEMList){
   
   // also _initialize_ the derivative elements
   parameterTable.nModelParameters = 0;
-  parameterTable.nTransformationParameters = 0;
+  parameterTable.nRealParameters = 0;
   std::string currentParameter;
   for(int i = 0; i < parameterTable.uniqueParameterLabels.length(); i++){
     currentParameter = parameterTable.uniqueParameterLabels.at(i);
     if(parameterTable.parameterMap.at(currentParameter).location.compare("transformation") == 0){
       // parameter is not in the model but only in the transformations
-      parameterTable.nTransformationParameters++;
+      parameterTable.nRealParameters++;
       continue;
     }
     if(parameterTable.parameterMap.at(currentParameter).isTransformation){
@@ -74,7 +74,7 @@ void SEMCpp::fill(Rcpp::List SEMList){
       parameterTable.nModelParameters++;
       continue;
     }
-    parameterTable.nTransformationParameters++;
+    parameterTable.nRealParameters++;
     parameterTable.nModelParameters++;
   }
   

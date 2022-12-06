@@ -27,9 +27,9 @@ double scadPenalty_C(const double par,
 //'a SEM of type SEM_Cpp, a theta and a lambda value.
 //'@returns a list with fit results
 class istaScad{
-  public:
-    
-    Rcpp::NumericVector startingValues;
+public:
+  
+  Rcpp::NumericVector startingValues;
   const arma::rowvec weights;
   // control optimizer
   const double L0;
@@ -50,22 +50,22 @@ class istaScad{
     Rcpp::List control
   ): 
     weights(weights_),
-  L0(Rcpp::as<double> (control["L0"])),
-  eta(Rcpp::as<double> (control["eta"])),
-  accelerate(Rcpp::as<bool> (control["accelerate"])),
-  maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
-  maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
-  breakOuter(Rcpp::as<double> (control["breakOuter"])),
-  convCritInner(static_cast<lessSEM::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
-  sigma(Rcpp::as<double> (control["sigma"])),
-  stepSizeInh(static_cast<lessSEM::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
-  verbose(Rcpp::as<int> (control["verbose"])){}
+    L0(Rcpp::as<double> (control["L0"])),
+    eta(Rcpp::as<double> (control["eta"])),
+    accelerate(Rcpp::as<bool> (control["accelerate"])),
+    maxIterOut(Rcpp::as<int> (control["maxIterOut"])),
+    maxIterIn(Rcpp::as<int> (control["maxIterIn"])),
+    breakOuter(Rcpp::as<double> (control["breakOuter"])),
+    convCritInner(static_cast<lessSEM::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
+    sigma(Rcpp::as<double> (control["sigma"])),
+    stepSizeInh(static_cast<lessSEM::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
+    verbose(Rcpp::as<int> (control["verbose"])){}
   
   Rcpp::List optimize(
-    Rcpp::NumericVector startingValues_, 
-    SEMCpp& SEM_,
-    double theta_,
-    double lambda_){
+      Rcpp::NumericVector startingValues_, 
+      SEMCpp& SEM_,
+      double theta_,
+      double lambda_){
     
     SEMFitFramework SEMFF(SEM_);
     
@@ -128,11 +128,11 @@ class istaScad{
 };
 
 RCPP_EXPOSED_CLASS(istaScad)
-RCPP_MODULE(istaScad_cpp){
-  using namespace Rcpp;
-  Rcpp::class_<istaScad>( "istaScad" )
-  .constructor<arma::rowvec,Rcpp::List>("Creates a new istaScad.")
-  // methods
-  .method( "optimize", &istaScad::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
-  ;
-}
+  RCPP_MODULE(istaScad_cpp){
+    using namespace Rcpp;
+    Rcpp::class_<istaScad>( "istaScad" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaScad.")
+    // methods
+    .method( "optimize", &istaScad::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+    ;
+  }
