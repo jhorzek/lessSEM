@@ -457,6 +457,19 @@ coef(lassoFit, criterion = "BIC")
 
 More details are provided in `vignette("Parameter-transformations", package = "lessSEM")`.
 
+## Multi-Group Models and Definition Variables
+
+**lessSEM** supports multi-group SEM and, to some degree, definition variables.
+Regularized multi-group SEM have been proposed by Huang (2018) and are 
+implemented in **lslx** (Huang, 2020). The approach by Huang (2018) is currently
+more flexible than what **lessSEM** can do because **lslx** allows for separate
+penalties for the parameter itself and differences in the parameter value between
+groups. With **lessSEM**, this is not possible out of the box. However,
+differences between parameters can be regularized. A detailed introduction
+can be found in `vignette(topic = "Definition-Variables-and-Multi-Group-SEM", package = "lessSEM")`.
+Therein it is also explained how the multi-group SEM can be used to implement
+definition variables (e.g., for latent growth curve models).
+
 ## More information
 
 We provide more information in the documentation of the individual functions.
@@ -536,6 +549,7 @@ numerical optimization. Journal of Machine Learning Research, 22, 1–6.
 
 * Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method 
 for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
+* Huang, P.-H. (2018). A penalized likelihood method for multi-group structural equation modelling. British Journal of Mathematical and Statistical Psychology, 71(3), 499–522. https://doi.org/10.1111/bmsp.12130
 * Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural 
 Equation Modeling. Structural Equation Modeling: A Multidisciplinary Journal, 23(4), 
 555–566. https://doi.org/10.1080/10705511.2016.1154793

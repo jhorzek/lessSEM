@@ -74,15 +74,15 @@ they can be accessed from other packages using C++. The interface is similar
 to that of the [ensmallen](https://ensmallen.org/) library. We have implemented
 a simple example for elastic net regularization of linear regressions in the 
 [lessLM](https://github.com/jhorzek/lessLM) package. You can also find more 
-details on the general design of the optimizer interface in the vignette 
-`The-optimizer-interface`
+details on the general design of the optimizer interface in `vignette("The-optimizer-interface", package = "lessSEM")`.
 
 Similar to [regsem](https://github.com/Rjacobucci/regsem), lessSEM is specified 
 using a model built in [lavaan](https://github.com/yrosseel/lavaan). lessSEM 
 can handle missing data by means of full information maximum likelihood estimation 
-and allows for equality constraints on parameters. However, 
+and allows for equality constraints on parameters. You may, however, also want to
+check out 
 [regsem](https://github.com/Rjacobucci/regsem) and [lslx](https://github.com/psyphh/lslx) 
-offer even more features, such as multi-group penalties. A distinct feature of
+which offer some features that are still missing in **lessSEM**. A distinct feature of
 lessSEM are parameter transformations (see below for an example).
 
 # Installation
@@ -96,9 +96,11 @@ devtools::install_github("jhorzek/lessSEM")
 
 # Introduction
 
-You will find a short introduction to regularized SEM with the lessSEM
+You will find a short introduction to regularized SEM with the **lessSEM**
 package in `vignette('lessSEM', package = 'lessSEM')`. More information is also
-provided in the documentation of the individual functions (e.g., see `?lessSEM::scad`)
+provided in the documentation of the individual functions (e.g., see `?lessSEM::scad`).
+Finally, you will find templates for a selection of models which can be used with **lessSEM**
+(e.g., the cross-lagged panel model) in the package [**lessTemplates**](https://github.com/jhorzek/lessTemplates).
 
 # Example
 
@@ -294,6 +296,19 @@ coef(lassoFit, criterion = "BIC")
 As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been zeroed, we can 
 assume measurement invariance.
 
+# Multi-Group Models and Definition Variables
+
+**lessSEM** supports multi-group SEM and, to some degree, definition variables.
+Regularized multi-group SEM have been proposed by Huang (2018) and are 
+implemented in **lslx** (Huang, 2020). The approach by Huang (2018) is currently
+more flexible than what **lessSEM** can do because **lslx** allows for separate
+penalties for the parameter itself and differences in the parameter value between
+groups. With **lessSEM**, this is not possible out of the box. However,
+differences between parameters can be regularized. A detailed introduction
+can be found in `vignette(topic = "Definition-Variables-and-Multi-Group-SEM", package = "lessSEM")`.
+Therein it is also explained how the multi-group SEM can be used to implement
+definition variables (e.g., for latent growth curve models).
+
 # References
 
 ## R - Packages / Software
@@ -317,6 +332,7 @@ Regularized continuous time structural equation models: A network perspective. P
 
 * Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method 
 for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
+* Huang, P.-H. (2018). A penalized likelihood method for multi-group structural equation modelling. British Journal of Mathematical and Statistical Psychology, 71(3), 499–522. https://doi.org/10.1111/bmsp.12130
 * Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural 
 Equation Modeling. Structural Equation Modeling: A Multidisciplinary Journal, 23(4), 
 555–566. https://doi.org/10.1080/10705511.2016.1154793

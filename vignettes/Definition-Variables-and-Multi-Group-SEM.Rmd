@@ -1,8 +1,8 @@
 ---
-title: "Definition Variables and Multi-Group-SEM"
+title: "Definition-Variables-and-Multi-Group-SEM"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Multi-Group-SEM}
+  %\VignetteIndexEntry{Definition-Variables-and-Multi-Group-SEM}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
