@@ -60,13 +60,13 @@ void SEMCpp::fill(Rcpp::List SEMList){
   
   // also _initialize_ the derivative elements
   parameterTable.nModelParameters = 0;
-  parameterTable.nTransformationParameters = 0;
+  parameterTable.nRealParameters = 0;
   std::string currentParameter;
   for(int i = 0; i < parameterTable.uniqueParameterLabels.length(); i++){
     currentParameter = parameterTable.uniqueParameterLabels.at(i);
     if(parameterTable.parameterMap.at(currentParameter).location.compare("transformation") == 0){
       // parameter is not in the model but only in the transformations
-      parameterTable.nTransformationParameters++;
+      parameterTable.nRealParameters++;
       continue;
     }
     if(parameterTable.parameterMap.at(currentParameter).isTransformation){
@@ -74,7 +74,7 @@ void SEMCpp::fill(Rcpp::List SEMList){
       parameterTable.nModelParameters++;
       continue;
     }
-    parameterTable.nTransformationParameters++;
+    parameterTable.nRealParameters++;
     parameterTable.nModelParameters++;
   }
   
@@ -107,6 +107,7 @@ void SEMCpp::fill(Rcpp::List SEMList){
   rawData = Rcpp::as<arma::mat>(dataset["rawData"]);
   personInSubset = Rcpp::as<arma::uvec>(dataset["personInSubset"]);
   manifestNames = dataset["manifestNames"];
+  sampleSize = rawData.n_rows;
   
   // add subsets
   Rcpp::List subsets = SEMList["subsets"];
@@ -179,7 +180,7 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
   // step one: change parameters in parameterTable
   parameterTable.setParameters(label_, value_, raw);
   if(parameterTable.hasTransformations)
-   parameterTable.transform();
+    parameterTable.transform();
   // step two: change parameters in model matrices
   
   for (auto const& param : parameterTable.parameterMap)
@@ -248,15 +249,12 @@ Rcpp::StringVector SEMCpp::getParameterLabels(){
 }
 // fit functions
 
-
-// [[Rcpp :: depends ( RcppArmadillo )]]
-
 void SEMCpp::implied(){
   if(!wasChecked){
     wasChecked = checkModel();
   }
   currentStatus = computedImplied;
-
+  
   // step one: compute implied mean and covariance
   if(parameterTable.AChanged | parameterTable.SChanged) impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
   if(parameterTable.mChanged | parameterTable.AChanged) impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
@@ -268,6 +266,9 @@ void SEMCpp::implied(){
   return;
 }
 
+bool SEMCpp::impliedIsPD(){
+  return(impliedCovariance.is_sympd());
+}
 
 double SEMCpp::fit(){
   if(!wasChecked){
@@ -340,14 +341,14 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   }
   gradientCalls++;
   
-  arma::rowvec gradients = gradientsByGroup(*this, raw);
+  gradients = gradientsByGroup(*this, raw);
   
   if(hasTransformations){
     if(!raw) Rcpp::stop("Gradients with raw = false currently not supported when using transformations.");
     // in case of transformations, we can make use of the chain rule to get the derivative
     // with respect to the true underlying parameters. gradientsByGroup will only return
     // the gradients of the transformed parameters in the SEM 
-    arma::mat transformationGradients = parameterTable.getTransformationGradients();
+    transformationGradients = parameterTable.getTransformationGradients();
     return(gradients*transformationGradients);
   }
   
@@ -378,18 +379,20 @@ RCPP_MODULE(SEM_cpp){
   using namespace Rcpp;
   Rcpp::class_<SEMCpp>( "SEMCpp" )
     .constructor("Creates a new SEMCpp.")
-    .field_readonly( "A", &SEMCpp::Amatrix, "Matrix with directed effects")
-    .field_readonly( "S", &SEMCpp::Smatrix, "Matrix with undirected paths")
-    .field_readonly( "F", &SEMCpp::Fmatrix, "Filter matrix to separate latent and observed variables")
-    .field_readonly( "m", &SEMCpp::Mvector, "Vector with means of observed and latent variables")
-    .field_readonly( "impliedCovariance", &SEMCpp::impliedCovariance, "implied covariance matrix")
-    .field_readonly( "impliedMeans", &SEMCpp::impliedMeans, "implied means vector")
-    .field_readonly( "m2LL", &SEMCpp::m2LL, "minus 2 log-likelihood")
-    .field_readonly( "rawData", &SEMCpp::rawData, "raw data set")
-    .field_readonly( "manifestNames", &SEMCpp::manifestNames, "names of manifest variables")
-    .field_readonly( "wasFit", &SEMCpp::wasFit, "names of manifest variables")
-    .field_readonly( "functionCalls", &SEMCpp::functionCalls, "Counts how often the fit function was called")
-    .field_readonly( "gradientCalls", &SEMCpp::gradientCalls, "Counts how often the gradient function was called")
+  // fields
+  .field_readonly("sampleSize", &SEMCpp::sampleSize, "N")
+  .field_readonly( "A", &SEMCpp::Amatrix, "Matrix with directed effects")
+  .field_readonly( "S", &SEMCpp::Smatrix, "Matrix with undirected paths")
+  .field_readonly( "F", &SEMCpp::Fmatrix, "Filter matrix to separate latent and observed variables")
+  .field_readonly( "m", &SEMCpp::Mvector, "Vector with means of observed and latent variables")
+  .field_readonly( "impliedCovariance", &SEMCpp::impliedCovariance, "implied covariance matrix")
+  .field_readonly( "impliedMeans", &SEMCpp::impliedMeans, "implied means vector")
+  .field_readonly( "m2LL", &SEMCpp::m2LL, "minus 2 log-likelihood")
+  .field_readonly( "rawData", &SEMCpp::rawData, "raw data set")
+  .field_readonly( "manifestNames", &SEMCpp::manifestNames, "names of manifest variables")
+  .field_readonly( "wasFit", &SEMCpp::wasFit, "names of manifest variables")
+  .field_readonly( "functionCalls", &SEMCpp::functionCalls, "Counts how often the fit function was called")
+  .field_readonly( "gradientCalls", &SEMCpp::gradientCalls, "Counts how often the gradient function was called")
   
   // methods
   .method( "fill", &SEMCpp::fill, "Fill all elements of the SEM. Expects and Rcpp::List")

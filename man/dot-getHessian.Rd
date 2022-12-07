@@ -4,7 +4,7 @@
 \alias{.getHessian}
 \title{.getHessian}
 \usage{
-.getHessian(SEM, raw = FALSE, eps = 1e-07)
+.getHessian(SEM, raw, eps = 1e-07)
 }
 \arguments{
 \item{SEM}{model of class Rcpp_SEMCpp}

@@ -1,18 +1,12 @@
 #include <RcppArmadillo.h>
+#include "mgSEM.h"
 #include "SEM.h"
 #include "SEMFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-//'@name istaCappedL1
-//'@title cappedL1 optimization with ista
-//'@description Object for elastic net optimization with
-//'ista optimizer
-//'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
-//'@field optimize optimize the model. Expects a vector with starting values,
-//'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
-//'@returns a list with fit results
+
+template<typename sem>
 class istaCappedL1{
   public:
     
@@ -52,16 +46,16 @@ class istaCappedL1{
   
   Rcpp::List optimize(
     Rcpp::NumericVector startingValues_, 
-    SEMCpp& SEM_,
+    sem& SEM_,
     double theta_,
     double lambda_, 
     double alpha_){
     
     if(alpha_ != 1.0) Rcpp::stop("alpha must be set to 1.");
     
-    SEMFitFramework SEMFF(SEM_);
+    SEMFitFramework<sem> SEMFF(SEM_);
     
-    int sampleSize = SEMFF.SEM.rawData.n_rows;
+    int sampleSize = SEMFF.SEM.sampleSize;
     
     lessSEM::tuningParametersCappedL1 tp;
     tp.theta = theta_;
@@ -120,12 +114,42 @@ class istaCappedL1{
   }
 };
 
-RCPP_EXPOSED_CLASS(istaCappedL1)
-  RCPP_MODULE(istaCappedL1_cpp){
+//'@name istaCappedL1SEM
+//'@title cappedL1 optimization with ista
+//'@description Object for elastic net optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
+//'@returns a list with fit results
+typedef istaCappedL1<SEMCpp> istaCappedL1SEM;
+RCPP_EXPOSED_CLASS_NODECL(istaCappedL1SEM)
+  RCPP_MODULE(istaCappedL1SEM_cpp){
     using namespace Rcpp;
-    Rcpp::class_<istaCappedL1>( "istaCappedL1" )
-      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaCappedL1.")
+    Rcpp::class_<istaCappedL1SEM>( "istaCappedL1SEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaCappedL1SEM.")
     // methods
-    .method( "optimize", &istaCappedL1::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+    .method( "optimize", &istaCappedL1SEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+    ;
+  }
+
+//'@name istaCappedL1mgSEM
+//'@title cappedL1 optimization with ista
+//'@description Object for elastic net optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
+//'@returns a list with fit results
+typedef istaCappedL1<mgSEM> istaCappedL1mgSEM;
+RCPP_EXPOSED_CLASS_NODECL(istaCappedL1mgSEM)
+  RCPP_MODULE(istaCappedL1mgSEM_cpp){
+    using namespace Rcpp;
+    Rcpp::class_<istaCappedL1mgSEM>( "istaCappedL1mgSEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaCappedL1mgSEM.")
+    // methods
+    .method( "optimize", &istaCappedL1mgSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
     ;
   }

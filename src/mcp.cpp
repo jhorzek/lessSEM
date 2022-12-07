@@ -1,5 +1,6 @@
 #include <RcppArmadillo.h>
 #include "SEM.h"
+#include "mgSEM.h"
 #include "SEMFitFramework.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
@@ -17,15 +18,7 @@ double mcpPenalty_C(const double par,
   return(lessSEM::mcpPenalty(par, lambda_p, theta));
 }
 
-//'@name istaMcp
-//'@title mcp optimization with ista
-//'@description Object for mcp optimization with
-//'ista optimizer
-//'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
-//'@field optimize optimize the model. Expects a vector with starting values,
-//'a SEM of type SEM_Cpp, a theta and a lambda value.
-//'@returns a list with fit results
+template<typename sem>
 class istaMcp{
   public:
     
@@ -63,13 +56,13 @@ class istaMcp{
   
   Rcpp::List optimize(
     Rcpp::NumericVector startingValues_, 
-    SEMCpp& SEM_,
+    sem& SEM_,
     double theta_,
     double lambda_){
     
-    SEMFitFramework SEMFF(SEM_);
+    SEMFitFramework<sem> SEMFF(SEM_);
     
-    int sampleSize = SEMFF.SEM.rawData.n_rows;
+    int sampleSize = SEMFF.SEM.sampleSize;
     
     lessSEM::tuningParametersMcp tp;
     tp.theta = theta_;
@@ -127,12 +120,42 @@ class istaMcp{
   }
 };
 
-RCPP_EXPOSED_CLASS(istaMcp)
-RCPP_MODULE(istaMcp_cpp){
+//'@name istaMcpSEM
+//'@title mcp optimization with ista
+//'@description Object for mcp optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta and a lambda value.
+//'@returns a list with fit results
+typedef istaMcp<SEMCpp> istaMcpSEM;
+RCPP_EXPOSED_CLASS_NODECL(istaMcpSEM)
+RCPP_MODULE(istaMcpSEM_cpp){
   using namespace Rcpp;
-  Rcpp::class_<istaMcp>( "istaMcp" )
-  .constructor<arma::rowvec,Rcpp::List>("Creates a new istaMcp.")
+  Rcpp::class_<istaMcpSEM>( "istaMcpSEM" )
+  .constructor<arma::rowvec,Rcpp::List>("Creates a new istaMcpSEM.")
   // methods
-  .method( "optimize", &istaMcp::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+  .method( "optimize", &istaMcpSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
   ;
 }
+
+//'@name istaMcpMgSEM
+//'@title mcp optimization with ista
+//'@description Object for mcp optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter and (2) a list with control elements
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta and a lambda value.
+//'@returns a list with fit results
+typedef istaMcp<mgSEM> istaMcpMgSEM;
+RCPP_EXPOSED_CLASS_NODECL(istaMcpMgSEM)
+  RCPP_MODULE(istaMcpMgSEM_cpp){
+    using namespace Rcpp;
+    Rcpp::class_<istaMcpMgSEM>( "istaMcpMgSEM" )
+      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaMcpMgSEM.")
+    // methods
+    .method( "optimize", &istaMcpMgSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+    ;
+  }

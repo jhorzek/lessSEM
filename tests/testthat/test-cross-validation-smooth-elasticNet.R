@@ -1,4 +1,5 @@
 test_that("testing cross-validation for smooth elasticNet", {
+  testthat::skip_on_cran()
   library(regsem)
   library(lessSEM)
   set.seed(123)

@@ -42,11 +42,10 @@ e.g., `?lessSEM::cvLasso`). The smooth versions are called
 
 Currently, lessSEM has the following optimizers:
 
--   (variants of) iterative shrinkage and thresholding (e.g., Beck &
-    Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013);
-    optimization of cappedL1, lsp, scad, and mcp is based on Gong et
-    al. (2013)
--   glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
+- (variants of) iterative shrinkage and thresholding (e.g., Beck &
+  Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013); optimization
+  of cappedL1, lsp, scad, and mcp is based on Gong et al. (2013)
+- glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
 
 These optimizers are implemented based on the
 [regCtsem](https://github.com/jhorzek/regCtsem) package. Most
@@ -71,17 +70,18 @@ short, these are:
     simple example for elastic net regularization of linear regressions
     in the [lessLM](https://github.com/jhorzek/lessLM) package. You can
     also find more details on the general design of the optimizer
-    interface in the vignette `The-optimizer-interface`
+    interface in
+    `vignette("The-optimizer-interface", package = "lessSEM")`.
 
 Similar to [regsem](https://github.com/Rjacobucci/regsem), lessSEM is
 specified using a model built in
 [lavaan](https://github.com/yrosseel/lavaan). lessSEM can handle missing
 data by means of full information maximum likelihood estimation and
-allows for equality constraints on parameters. However,
-[regsem](https://github.com/Rjacobucci/regsem) and
-[lslx](https://github.com/psyphh/lslx) offer even more features, such as
-multi-group penalties. A distinct feature of lessSEM are parameter
-transformations (see below for an example).
+allows for equality constraints on parameters. You may, however, also
+want to check out [regsem](https://github.com/Rjacobucci/regsem) and
+[lslx](https://github.com/psyphh/lslx) which offer some features that
+are still missing in **lessSEM**. A distinct feature of lessSEM are
+parameter transformations (see below for an example).
 
 # Installation
 
@@ -95,10 +95,13 @@ devtools::install_github("jhorzek/lessSEM")
 
 # Introduction
 
-You will find a short introduction to regularized SEM with the lessSEM
-package in `vignette('lessSEM', package = 'lessSEM')`. More information
-is also provided in the documentation of the individual functions (e.g.,
-see `?lessSEM::scad`)
+You will find a short introduction to regularized SEM with the
+**lessSEM** package in `vignette('lessSEM', package = 'lessSEM')`. More
+information is also provided in the documentation of the individual
+functions (e.g., see `?lessSEM::scad`). Finally, you will find templates
+for a selection of models which can be used with **lessSEM** (e.g., the
+cross-lagged panel model) in the package
+[**lessTemplates**](https://github.com/jhorzek/lessTemplates).
 
 # Example
 
@@ -216,13 +219,13 @@ fit <- sem(model, data = PoliticalDemocracy)
 # between loadings over time:
 
 transformations <- "
-# which parameters do we want to use?
+// which parameters do we want to use?
 parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
 
-# transformations:
-a2 = a1 + delta_a2
-b2 = b1 + delta_b2
-c2 = c1 + delta_c2
+// transformations:
+a2 = a1 + delta_a2;
+b2 = b1 + delta_b2;
+c2 = c1 + delta_c2;
 "
 
 # setting delta_a2, delta_b2, or delta_c2 to zero implies measurement invariance
@@ -257,110 +260,125 @@ coef(lassoFit, criterion = "BIC")
 As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been
 zeroed, we can assume measurement invariance.
 
+# Multi-Group Models and Definition Variables
+
+**lessSEM** supports multi-group SEM and, to some degree, definition
+variables. Regularized multi-group SEM have been proposed by Huang
+(2018) and are implemented in **lslx** (Huang, 2020). The approach by
+Huang (2018) is currently more flexible than what **lessSEM** can do
+because **lslx** allows for separate penalties for the parameter itself
+and differences in the parameter value between groups. With **lessSEM**,
+this is not possible out of the box. However, differences between
+parameters can be regularized. A detailed introduction can be found in
+`vignette(topic = "Definition-Variables-and-Multi-Group-SEM", package = "lessSEM")`.
+Therein it is also explained how the multi-group SEM can be used to
+implement definition variables (e.g., for latent growth curve models).
+
 # References
 
 ## R - Packages / Software
 
--   [lavaan](https://github.com/yrosseel/lavaan) Rosseel, Y. (2012).
-    lavaan: An R Package for Structural Equation Modeling. Journal of
-    Statistical Software, 48(2), 1–36.
-    <https://doi.org/10.18637/jss.v048.i02>
--   [regsem](https://github.com/Rjacobucci/regsem): Jacobucci, R.
-    (2017). regsem: Regularized Structural Equation Modeling.
-    ArXiv:1703.08489 \[Stat\]. <http://arxiv.org/abs/1703.08489>
--   [lslx](https://github.com/psyphh/lslx): Huang, P.-H. (2020). lslx:
-    Semi-confirmatory structural equation modeling via penalized
-    likelihood. Journal of Statistical Software, 93(7).
-    <https://doi.org/10.18637/jss.v093.i07>
--   [fasta](https://cran.r-project.org/web/packages/fasta/index.html):
-    Another implementation of the fista algorithm (Beck & Teboulle,
-    2009).
--   [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M.,
-    Prabhu, R. G., Basak, S., Lou, Z., & Sanderson, C. (2021). The
-    ensmallen library for ﬂexible numerical optimization. Journal of
-    Machine Learning Research, 22, 1–6.
--   [regCtsem](https://github.com/jhorzek/regCtsem): Orzek, J. H., &
-    Voelkle, M. C. (in press). Regularized continuous time structural
-    equation models: A network perspective. Psychological Methods.
+- [lavaan](https://github.com/yrosseel/lavaan) Rosseel, Y. (2012).
+  lavaan: An R Package for Structural Equation Modeling. Journal of
+  Statistical Software, 48(2), 1–36.
+  <https://doi.org/10.18637/jss.v048.i02>
+- [regsem](https://github.com/Rjacobucci/regsem): Jacobucci, R. (2017).
+  regsem: Regularized Structural Equation Modeling. ArXiv:1703.08489
+  \[Stat\]. <http://arxiv.org/abs/1703.08489>
+- [lslx](https://github.com/psyphh/lslx): Huang, P.-H. (2020). lslx:
+  Semi-confirmatory structural equation modeling via penalized
+  likelihood. Journal of Statistical Software, 93(7).
+  <https://doi.org/10.18637/jss.v093.i07>
+- [fasta](https://cran.r-project.org/web/packages/fasta/index.html):
+  Another implementation of the fista algorithm (Beck & Teboulle, 2009).
+- [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M.,
+  Prabhu, R. G., Basak, S., Lou, Z., & Sanderson, C. (2021). The
+  ensmallen library for ﬂexible numerical optimization. Journal of
+  Machine Learning Research, 22, 1–6.
+- [regCtsem](https://github.com/jhorzek/regCtsem): Orzek, J. H., &
+  Voelkle, M. C. (in press). Regularized continuous time structural
+  equation models: A network perspective. Psychological Methods.
 
 ## Regularized Structural Equation Modeling
 
--   Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood
-    Method for Structural Equation Modeling. Psychometrika, 82(2),
-    329–354. <https://doi.org/10.1007/s11336-017-9566-9>
--   Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized
-    Structural Equation Modeling. Structural Equation Modeling: A
-    Multidisciplinary Journal, 23(4), 555–566.
-    <https://doi.org/10.1080/10705511.2016.1154793>
+- Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood
+  Method for Structural Equation Modeling. Psychometrika, 82(2),
+  329–354. <https://doi.org/10.1007/s11336-017-9566-9>
+- Huang, P.-H. (2018). A penalized likelihood method for multi-group
+  structural equation modelling. British Journal of Mathematical and
+  Statistical Psychology, 71(3), 499–522.
+  <https://doi.org/10.1111/bmsp.12130>
+- Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized
+  Structural Equation Modeling. Structural Equation Modeling: A
+  Multidisciplinary Journal, 23(4), 555–566.
+  <https://doi.org/10.1080/10705511.2016.1154793>
 
 ## Penalty Functions
 
--   Candès, E. J., Wakin, M. B., & Boyd, S. P. (2008). Enhancing
-    Sparsity by Reweighted l1 Minimization. Journal of Fourier Analysis
-    and Applications, 14(5–6), 877–905.
-    <https://doi.org/10.1007/s00041-008-9045-x>
--   Fan, J., & Li, R. (2001). Variable selection via nonconcave
-    penalized likelihood and its oracle properties. Journal of the
-    American Statistical Association, 96(456), 1348–1360.
-    <https://doi.org/10.1198/016214501753382273>
--   Hoerl, A. E., & Kennard, R. W. (1970). Ridge Regression: Biased
-    Estimation for Nonorthogonal Problems. Technometrics, 12(1), 55–67.
-    <https://doi.org/10.1080/00401706.1970.10488634>
--   Tibshirani, R. (1996). Regression shrinkage and selection via the
-    lasso. Journal of the Royal Statistical Society. Series B
-    (Methodological), 58(1), 267–288.
--   Zhang, C.-H. (2010). Nearly unbiased variable selection under
-    minimax concave penalty. The Annals of Statistics, 38(2), 894–942.
-    <https://doi.org/10.1214/09-AOS729>
--   Zhang, T. (2010). Analysis of Multi-stage Convex Relaxation for
-    Sparse Regularization. Journal of Machine Learning Research, 11,
-    1081–1107.
--   Zou, H. (2006). The adaptive lasso and its oracle properties.
-    Journal of the American Statistical Association, 101(476),
-    1418–1429. <https://doi.org/10.1198/016214506000000735>
--   Zou, H., & Hastie, T. (2005). Regularization and variable selection
-    via the elastic net. Journal of the Royal Statistical Society:
-    Series B, 67(2), 301–320.
-    <https://doi.org/10.1111/j.1467-9868.2005.00503.x>
+- Candès, E. J., Wakin, M. B., & Boyd, S. P. (2008). Enhancing Sparsity
+  by Reweighted l1 Minimization. Journal of Fourier Analysis and
+  Applications, 14(5–6), 877–905.
+  <https://doi.org/10.1007/s00041-008-9045-x>
+- Fan, J., & Li, R. (2001). Variable selection via nonconcave penalized
+  likelihood and its oracle properties. Journal of the American
+  Statistical Association, 96(456), 1348–1360.
+  <https://doi.org/10.1198/016214501753382273>
+- Hoerl, A. E., & Kennard, R. W. (1970). Ridge Regression: Biased
+  Estimation for Nonorthogonal Problems. Technometrics, 12(1), 55–67.
+  <https://doi.org/10.1080/00401706.1970.10488634>
+- Tibshirani, R. (1996). Regression shrinkage and selection via the
+  lasso. Journal of the Royal Statistical Society. Series B
+  (Methodological), 58(1), 267–288.
+- Zhang, C.-H. (2010). Nearly unbiased variable selection under minimax
+  concave penalty. The Annals of Statistics, 38(2), 894–942.
+  <https://doi.org/10.1214/09-AOS729>
+- Zhang, T. (2010). Analysis of Multi-stage Convex Relaxation for Sparse
+  Regularization. Journal of Machine Learning Research, 11, 1081–1107.
+- Zou, H. (2006). The adaptive lasso and its oracle properties. Journal
+  of the American Statistical Association, 101(476), 1418–1429.
+  <https://doi.org/10.1198/016214506000000735>
+- Zou, H., & Hastie, T. (2005). Regularization and variable selection
+  via the elastic net. Journal of the Royal Statistical Society: Series
+  B, 67(2), 301–320. <https://doi.org/10.1111/j.1467-9868.2005.00503.x>
 
 ## Optimizer
 
 ### GLMNET
 
--   Friedman, J., Hastie, T., & Tibshirani, R. (2010). Regularization
-    paths for generalized linear models via coordinate descent. Journal
-    of Statistical Software, 33(1), 1–20.
-    <https://doi.org/10.18637/jss.v033.i01>
--   Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for
-    l1-regularized logistic regression. The Journal of Machine Learning
-    Research, 13, 1999–2030. <https://doi.org/10.1145/2020408.2020421>
+- Friedman, J., Hastie, T., & Tibshirani, R. (2010). Regularization
+  paths for generalized linear models via coordinate descent. Journal of
+  Statistical Software, 33(1), 1–20.
+  <https://doi.org/10.18637/jss.v033.i01>
+- Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for
+  l1-regularized logistic regression. The Journal of Machine Learning
+  Research, 13, 1999–2030. <https://doi.org/10.1145/2020408.2020421>
 
 ### Variants of ISTA
 
--   Beck, A., & Teboulle, M. (2009). A Fast Iterative
-    Shrinkage-Thresholding Algorithm for Linear Inverse Problems. SIAM
-    Journal on Imaging Sciences, 2(1), 183–202.
-    <https://doi.org/10.1137/080716542>
--   Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). A general
-    iterative shrinkage and thresholding algorithm for non-convex
-    regularized optimization problems. Proceedings of the 30th
-    International Conference on Machine Learning, 28(2)(2), 37–45.
--   Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and
-    Trends in Optimization, 1(3), 123–231.
+- Beck, A., & Teboulle, M. (2009). A Fast Iterative
+  Shrinkage-Thresholding Algorithm for Linear Inverse Problems. SIAM
+  Journal on Imaging Sciences, 2(1), 183–202.
+  <https://doi.org/10.1137/080716542>
+- Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). A general
+  iterative shrinkage and thresholding algorithm for non-convex
+  regularized optimization problems. Proceedings of the 30th
+  International Conference on Machine Learning, 28(2)(2), 37–45.
+- Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and
+  Trends in Optimization, 1(3), 123–231.
 
 ## Miscellaneous
 
--   Liang, X., Yang, Y., & Huang, J. (2018). Evaluation of structural
-    relationships in autoregressive cross-lagged models under
-    longitudinal approximate invariance: A Bayesian analysis. Structural
-    Equation Modeling: A Multidisciplinary Journal, 25(4), 558–572.
-    <https://doi.org/10.1080/10705511.2017.1410706>
--   Bauer, D. J., Belzak, W. C. M., & Cole, V. T. (2020). Simplifying
-    the Assessment of Measurement Invariance over Multiple Background
-    Variables: Using Regularized Moderated Nonlinear Factor Analysis to
-    Detect Differential Item Functioning. Structural Equation Modeling:
-    A Multidisciplinary Journal, 27(1), 43–55.
-    <https://doi.org/10.1080/10705511.2019.1642754>
+- Liang, X., Yang, Y., & Huang, J. (2018). Evaluation of structural
+  relationships in autoregressive cross-lagged models under longitudinal
+  approximate invariance: A Bayesian analysis. Structural Equation
+  Modeling: A Multidisciplinary Journal, 25(4), 558–572.
+  <https://doi.org/10.1080/10705511.2017.1410706>
+- Bauer, D. J., Belzak, W. C. M., & Cole, V. T. (2020). Simplifying the
+  Assessment of Measurement Invariance over Multiple Background
+  Variables: Using Regularized Moderated Nonlinear Factor Analysis to
+  Detect Differential Item Functioning. Structural Equation Modeling: A
+  Multidisciplinary Journal, 27(1), 43–55.
+  <https://doi.org/10.1080/10705511.2019.1642754>
 
 # Important Notes
 

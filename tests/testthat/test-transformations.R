@@ -1,4 +1,5 @@
 test_that("testing transformations", {
+  testthat::skip_on_cran()
   library(lavaan)
   library(lessSEM)
   model1 <- ' 
@@ -144,12 +145,8 @@ test_that("testing transformations", {
   e = b + deltaB;
   f = c + deltaC;
   "
-  rsemGlmnet <- lasso(lavaanModel = fitLavaan, 
-                      regularized = c("deltaA", "deltaB", "deltaC"),
-                      lambdas = 0,
-                      method = "glmnet",
-                      control = controlGlmnet(),
-                      modifyModel = modifyModel(transformations = transformations)
+  rsemBFGS <- bfgs(lavaanModel = fitLavaan, 
+                   modifyModel = modifyModel(transformations = transformations)
   )
   
   
@@ -209,7 +206,7 @@ test_that("testing transformations", {
     all(
       abs(
         omxGetParameters(fitMx)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")] -
-          unlist(coef(rsemGlmnet)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")])
+          unlist(coef(rsemBFGS)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")])
       ) < .01), 
     TRUE)
   
@@ -273,20 +270,16 @@ test_that("testing transformations", {
   e = b + deltaB;
   f = c + deltaC;
   "
-  rsemGlmnet <- lasso(lavaanModel = fitLavaan, 
-                      regularized = c("dlog", "deltaB", "deltaC"),
-                      lambdas = 0,
-                      method = "glmnet",
-                      control = controlGlmnet(),
-                      modifyModel = modifyModel(transformations = transformations)
+  rsemBFGS <- bfgs(lavaanModel = fitLavaan, 
+                   modifyModel = modifyModel(transformations = transformations)
   )
-  coef(rsemGlmnet)
+  coef(rsemBFGS)
   
   testthat::expect_equal(
     all(
       abs(
         omxGetParameters(fitMx)[c("a", "b", "c", "dlog", "deltaB", "deltaC")] -
-          unlist(coef(rsemGlmnet)[c("a", "b", "c", "dlog", "deltaB", "deltaC")])
+          unlist(coef(rsemBFGS)[c("a", "b", "c", "dlog", "deltaB", "deltaC")])
       ) < .01), 
     TRUE)
 })

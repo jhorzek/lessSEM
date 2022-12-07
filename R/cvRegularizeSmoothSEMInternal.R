@@ -18,20 +18,22 @@
 #' @param tuningParameters data.frame with tuning parameter values
 #' @param epsilon epsilon > 0; controls the smoothness of the approximation. Larger values = smoother 
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method optimizer used. Currently only "bfgs" is supported.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @returns model of class cvRegularizedSEM
 #' @keywords internal
 .cvRegularizeSmoothSEMInternal <- function(lavaanModel,
-                                    k,
-                                    standardize,
-                                    penalty,
-                                    weights,
-                                    returnSubsetParameters,
-                                    tuningParameters,
-                                    epsilon,
-                                    modifyModel,
-                                    control){
+                                           k,
+                                           standardize,
+                                           penalty,
+                                           weights,
+                                           returnSubsetParameters,
+                                           tuningParameters,
+                                           epsilon,
+                                           modifyModel,
+                                           method = "bfgs",
+                                           control){
   
   inputArguments <- as.list(environment())
   
@@ -188,13 +190,14 @@
     }
     
     regularizedSEM_s <- .regularizeSmoothSEMInternal(lavaanModel = lavaanModel, 
-                                              penalty = penalty, 
-                                              weights = weights_s, 
-                                              tuningParameters = tuningParameters, 
-                                              epsilon = epsilon,
-                                              tau = 0,
-                                              modifyModel = modifyModel,
-                                              control = control_s
+                                                     penalty = penalty, 
+                                                     weights = weights_s, 
+                                                     tuningParameters = tuningParameters, 
+                                                     epsilon = epsilon,
+                                                     tau = 0,
+                                                     modifyModel = modifyModel,
+                                                     method = method,
+                                                     control = control_s
     )
     
     if(penalty == "adaptiveLasso"){
@@ -249,13 +252,13 @@
   if(standardize) rawData <- scale(rawData)
   modifyModel$dataSet <- rawData
   regularizedSEM_full <- .regularizeSmoothSEMInternal(lavaanModel = lavaanModel, 
-                                               penalty = penalty, 
-                                               weights = weights_s, 
-                                               tuningParameters = tp, 
-                                               epsilon = epsilon,
-                                               tau = 0,
-                                               modifyModel = modifyModel,
-                                               control = control
+                                                      penalty = penalty, 
+                                                      weights = weights_s, 
+                                                      tuningParameters = tp, 
+                                                      epsilon = epsilon,
+                                                      tau = 0,
+                                                      modifyModel = modifyModel,
+                                                      control = control
   )
   
   return(

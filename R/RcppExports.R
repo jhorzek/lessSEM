@@ -34,7 +34,7 @@ callFitFunction <- function(fitFunctionSEXP, parameters, userSuppliedElements) {
     .Call(`_lessSEM_callFitFunction`, fitFunctionSEXP, parameters, userSuppliedElements)
 }
 
-#'@name istaCappedL1
+#'@name istaCappedL1SEM
 #'@title cappedL1 optimization with ista
 #'@description Object for elastic net optimization with
 #'ista optimizer
@@ -45,18 +45,55 @@ callFitFunction <- function(fitFunctionSEXP, parameters, userSuppliedElements) {
 #'@returns a list with fit results
 NULL
 
-#'@name istaEnet
-#'@title elastic net optimization with ista
+#'@name istaCappedL1mgSEM
+#'@title cappedL1 optimization with ista
 #'@description Object for elastic net optimization with
 #'ista optimizer
 #'@field new creates a new object. Requires (1) a vector with weights for each
 #'parameter and (2) a list with control elements
 #'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
+#'@returns a list with fit results
+NULL
+
+#'@name bfgsEnet
+#'@title smoothly approximated elastic net
+#'@description Object for smoothly approximated elastic net optimization with
+#'bfgs optimizer
+#'@field new creates a new object. Requires (1) a vector with weights for each
+#'parameter and (2) a list with control elements
+#'@field setHessian changes the Hessian of the model. Expects a matrix
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a lambda and an alpha value.
+#'@returns a list with fit results
+#'
+NULL
+
+#'@name bfgsEnetSEM
+#'@title smoothly approximated elastic net
+#'@description Object for smoothly approximated elastic net optimization with
+#'bfgs optimizer
+#'@field new creates a new object. Requires (1) a vector with weights for each
+#'parameter and (2) a list with control elements
+#'@field setHessian changes the Hessian of the model. Expects a matrix
+#'@field optimize optimize the model. Expects a vector with starting values,
 #'a SEM of type SEM_Cpp, a lambda and an alpha value.
 #'@returns a list with fit results
 NULL
 
-#'@name glmnetEnet
+#'@name bfgsEnetMgSEM
+#'@title smoothly approximated elastic net
+#'@description Object for smoothly approximated elastic net optimization with
+#'bfgs optimizer
+#'@field new creates a new object. Requires (1) a vector with weights for each
+#'parameter and (2) a list with control elements
+#'@field setHessian changes the Hessian of the model. Expects a matrix
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a lambda and an alpha value.
+#'@returns a list with fit results
+NULL
+
+#'@name glmnetEnetSEM
 #'@title elastic net optimization with glmnet optimizer
 #'@description Object for elastic net optimization with
 #'glmnet optimizer
@@ -69,13 +106,37 @@ NULL
 #'
 NULL
 
-#'@name bfgsEnet
-#'@title smoothly approximated elastic net
-#'@description Object for smoothly approximated elastic net optimization with
-#'bfgs optimizer
+#'@name glmnetEnetMgSEM
+#'@title elastic net optimization with glmnet optimizer
+#'@description Object for elastic net optimization with
+#'glmnet optimizer
 #'@field new creates a new object. Requires (1) a vector with weights for each
 #'parameter and (2) a list with control elements
 #'@field setHessian changes the Hessian of the model. Expects a matrix
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a lambda and an alpha value.
+#'@returns a list with fit results
+#'
+NULL
+
+#'@name istaEnetSEM
+#'@title elastic net optimization with ista optimizer
+#'@description Object for elastic net optimization with
+#'glmnet optimizer
+#'@field new creates a new object. Requires (1) a vector with weights for each
+#'parameter and (2) a list with control elements
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a lambda and an alpha value.
+#'@returns a list with fit results
+#'
+NULL
+
+#'@name istaEnetMgSEM
+#'@title elastic net optimization with ista optimizer
+#'@description Object for elastic net optimization with
+#'glmnet optimizer
+#'@field new creates a new object. Requires (1) a vector with weights for each
+#'parameter and (2) a list with control elements
 #'@field optimize optimize the model. Expects a vector with starting values,
 #'a SEM of type SEM_Cpp, a lambda and an alpha value.
 #'@returns a list with fit results
@@ -282,7 +343,7 @@ computeImpliedMeans <- function(Fmatrix, Amatrix, Mvector) {
     .Call(`_lessSEM_computeImpliedMeans`, Fmatrix, Amatrix, Mvector)
 }
 
-#'@name istaLSP
+#'@name istaLSPSEM
 #'@title lsp optimization with ista
 #'@description Object for lsp optimization with
 #'ista optimizer
@@ -291,9 +352,33 @@ computeImpliedMeans <- function(Fmatrix, Amatrix, Mvector) {
 #'@field optimize optimize the model. Expects a vector with starting values,
 #'a SEM of type SEM_Cpp, a theta and a lambda value.
 #'@returns a list with fit results
+#'
 NULL
 
-#'@name istaMcp
+#'@name istaLSPMgSEM
+#'@title lsp optimization with ista
+#'@description Object for lsp optimization with
+#'ista optimizer
+#'@field new creates a new object. Requires (1) a vector with weights for each
+#'parameter and (2) a list with control elements
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta and a lambda value.
+#'@returns a list with fit results
+#'
+NULL
+
+#'@name istaMcpSEM
+#'@title mcp optimization with ista
+#'@description Object for mcp optimization with
+#'ista optimizer
+#'@field new creates a new object. Requires (1) a vector with weights for each
+#'parameter and (2) a list with control elements
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta and a lambda value.
+#'@returns a list with fit results
+NULL
+
+#'@name istaMcpMgSEM
 #'@title mcp optimization with ista
 #'@description Object for mcp optimization with
 #'ista optimizer
@@ -314,7 +399,40 @@ mcpPenalty_C <- function(par, lambda_p, theta) {
     .Call(`_lessSEM_mcpPenalty_C`, par, lambda_p, theta)
 }
 
-#'@name istaScad
+#' @name mgSEM
+#' 
+#' @title mgSEM class
+#' 
+#' @description internal mgSEM representation
+#' 
+#' @field new Creates a new mgSEM.
+#' @field addModel add a model. Expects Rcpp::List
+#' @field addTransformation adds transforamtions to a model
+#' @field implied Computes implied means and covariance matrix
+#' @field fit Fits the model. Returns -2 log likelihood
+#' @field getParameters Returns a data frame with model parameters.
+#' @field getParameterLabels Returns a vector with unique parameter labels as used internally.
+#' @field getGradients Returns a matrix with scores.
+#' @field getScores Returns a matrix with scores. Not yet implemented
+#' @field getHessian Returns the hessian of the model. Expects the labels of the 
+#' parameters and the values of the parameters as well as a boolean indicating if 
+#' these are raw. Finally, a double (eps) controls the precision of the approximation.
+#' @field computeTransformations compute the transformations.
+#' 
+NULL
+
+#'@name istaScadSEM
+#'@title scad optimization with ista
+#'@description Object for scad optimization with
+#'ista optimizer
+#'@field new creates a new object. Requires (1) a vector with weights for each
+#'parameter and (2) a list with control elements
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta and a lambda value.
+#'@returns a list with fit results
+NULL
+
+#'@name istaScadMgSEM
 #'@title scad optimization with ista
 #'@description Object for scad optimization with
 #'ista optimizer
