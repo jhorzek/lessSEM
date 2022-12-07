@@ -419,13 +419,15 @@
     "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = SEM$functionCalls,
-    "gradientCalls" = SEM$gradientCalls
+    "gradientCalls" = SEM$gradientCalls,
+    "N" = SEM$sampleSize
   )
   if(is(SEM, "Rcpp_mgSEM")) internalOptimization <- list(
     "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = NA,
-    "gradientCalls" = NA
+    "gradientCalls" = NA,
+    "N" = SEM$sampleSize
   )
   
   results <- new("regularizedSEM",

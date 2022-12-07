@@ -50,6 +50,9 @@ x3 ~ c(m3,m3)*1
     regularized = "l1_1",
     nLambdas = 10)
   
+  AIC(regsem)
+  BIC(regsem)
+  
   testthat::expect_equal(any(abs(unlist(regsem@parameters[nrow(regsem@parameters),names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
   
@@ -70,6 +73,9 @@ x3 ~ c(m3,m3)*1
     regularized = "l1_1",
     lambdas = seq(0,1,.1),
     alphas = seq(0,1,.25))
+  
+  AIC(regsem)
+  BIC(regsem)
   
   testthat::expect_equal(any(abs(unlist(regsem@parameters[1,names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
@@ -93,6 +99,9 @@ x3 ~ c(m3,m3)*1
     lambdas = seq(0,1,.1),
     thetas = seq(.5,1,.25))
   
+  AIC(regsem)
+  BIC(regsem)
+  
   testthat::expect_equal(any(abs(unlist(regsem@parameters[1,names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
   
@@ -114,6 +123,9 @@ x3 ~ c(m3,m3)*1
     regularized = "l1_1",
     lambdas = seq(0,1,.1),
     thetas = seq(.5,1,.25))
+  
+  AIC(regsem)
+  BIC(regsem)
   
   testthat::expect_equal(any(abs(unlist(regsem@parameters[1,names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
@@ -136,6 +148,9 @@ l3_2 = l3_1 + delta3;
     nLambdas = 10,
     modifyModel = modifyModel(transformations = transformation))
   
+  AIC(regsem)
+  BIC(regsem)
+  
   testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[nrow(regsem@parameters),names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
   
@@ -146,6 +161,9 @@ l3_2 = l3_1 + delta3;
     regularized = c("delta1", "delta2", "delta3"),
     nLambdas = 10,
     modifyModel = modifyModel(transformations = transformation))
+  
+  AIC(regsem)
+  BIC(regsem)
   
   testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[nrow(regsem@parameters),names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
@@ -159,7 +177,10 @@ l3_2 = l3_1 + delta3;
     alphas = seq(0,1,.25),
     modifyModel = modifyModel(transformations = transformation))
   
-  testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[nrow(regsem@parameters),names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
+  AIC(regsem)
+  BIC(regsem)
+  
+  testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[1,names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
   
   ### scad ####
@@ -171,7 +192,10 @@ l3_2 = l3_1 + delta3;
     thetas = seq(2.5,3,.25),
     modifyModel = modifyModel(transformations = transformation))
   
-  testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[nrow(regsem@parameters),names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
+  AIC(regsem)
+  BIC(regsem)
+  
+  testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[1,names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
   
   ### mcp ####
@@ -183,7 +207,10 @@ l3_2 = l3_1 + delta3;
     thetas = seq(.5,1,.25),
     modifyModel = modifyModel(transformations = transformation))
   
-  testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[nrow(regsem@parameters),names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
+  AIC(regsem)
+  BIC(regsem)
+  
+  testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[1,names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
   
   ### lsp ####
@@ -195,7 +222,10 @@ l3_2 = l3_1 + delta3;
     thetas = seq(.5,1,.25),
     modifyModel = modifyModel(transformations = transformation))
   
-  testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[nrow(regsem@parameters),names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
+  AIC(regsem)
+  BIC(regsem)
+  
+  testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[1,names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
   
   ### cappedL1 ####
@@ -207,6 +237,9 @@ l3_2 = l3_1 + delta3;
     thetas = seq(.5,1,.25),
     modifyModel = modifyModel(transformations = transformation))
   
-  testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[nrow(regsem@parameters),names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
+  AIC(regsem)
+  BIC(regsem)
+  
+  testthat::expect_equal(any(abs(unlist(cbind(regsem@parameters, regsem@transformations)[1,names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
 })

@@ -113,7 +113,7 @@ setMethod("AIC", "regularizedSEM", function (object) {
 #' @returns BIC values
 #' @export
 setMethod("BIC", "regularizedSEM", function (object) {
-  N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
+  N <- object@internalOptimization$N
   fits <- object@fits
   
   if(object@penalty == "ridge" & !all(object@inputArguments$tuningParameters == 0))
