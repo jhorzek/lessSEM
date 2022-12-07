@@ -53,8 +53,7 @@ simga enforce larger improvement in fit}
 3 = Barzilai-Borwein procedure
 4 = Barzilai-Borwein procedure, but sometimes resets the step size; this can help when the optimizer is caught in a bad spot.}
 
-\item{verbose}{if set to a value > 0, the fit every "verbose" iterations is printed.
-If set to -99 you will get the debug output which is horribly convoluted}
+\item{verbose}{if set to a value > 0, the fit every "verbose" iterations is printed.}
 }
 \value{
 object of class controlIsta

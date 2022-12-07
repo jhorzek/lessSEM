@@ -11,7 +11,7 @@
   tuningParameters,
   epsilon,
   tau,
-  method,
+  method = "bfgs",
   modifyModel,
   control
 )

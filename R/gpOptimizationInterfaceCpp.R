@@ -49,6 +49,9 @@
 #' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
+#' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
+#' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
+#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
 #' @param additionalArguments list with additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -176,6 +179,7 @@ gpLassoCpp <- function(par,
                     gr,
                     lambdas = NULL,
                     nLambdas = NULL,
+                    curve = 1,
                     additionalArguments,
                     method = "glmnet", 
                     control = lessSEM::controlGlmnet()
@@ -194,7 +198,8 @@ gpLassoCpp <- function(par,
   }
   
   if(!is.null(nLambdas)){
-    tuningParameters <- data.frame(nLambdas = nLambdas)
+    tuningParameters <- data.frame(nLambdas = nLambdas,
+                                   curve = curve)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
@@ -268,6 +273,9 @@ gpLassoCpp <- function(par,
 #' @param nLambdas alternative to lambda: If alpha = 1, lessSEM can automatically
 #' compute the first lambda value which sets all regularized parameters to zero.
 #' It will then generate nLambda values between 0 and the computed lambda.
+#' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
+#' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
+#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
 #' @param weights labeled vector with adaptive lasso weights. NULL will use 1/abs(par)
 #' @param additionalArguments list with additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
@@ -388,6 +396,7 @@ gpAdaptiveLassoCpp <- function(par,
                             gr,
                             lambdas = NULL,
                             nLambdas = NULL,
+                            curve = 1,
                             additionalArguments,
                             method = "glmnet", 
                             control = lessSEM::controlGlmnet()){
@@ -418,7 +427,8 @@ gpAdaptiveLassoCpp <- function(par,
   }
   
   if(!is.null(nLambdas)){
-    tuningParameters <- data.frame(nLambdas = nLambdas)
+    tuningParameters <- data.frame(nLambdas = nLambdas,
+                                   curve = curve)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)

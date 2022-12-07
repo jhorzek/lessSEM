@@ -9,11 +9,8 @@
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
 enum status {
-  addedMatrices,
-  addedParameters,
-  addedDerivatives,
-  addedRawData,
-  addedSubsets,
+  empty,
+  initialized,
   changedParameters,
   filledMatrices,
   computedImplied,
@@ -23,19 +20,19 @@ enum status {
 class SEMCpp{
 public: 
   //flags
+  status currentStatus = empty;
   bool wasChecked = false; // true if the model was checked
   bool wasFit = false; // true if fit was called
   bool hasTransformations = false; // true if the user defined transformations of parameters
   int functionCalls = 0;
   int gradientCalls = 0;
   
-  status currentStatus;
-  
   // data
   dataset data;
   arma::mat rawData;
   arma::uvec personInSubset;
   Rcpp::StringVector manifestNames;
+  int sampleSize;
   
   // parameters
   parameters parameterTable;
@@ -52,41 +49,21 @@ public:
   arma::colvec impliedMeans;
   double m2LL; // minus 2 log-Likelihood
   
+  arma::rowvec gradients;
+  arma::mat transformationGradients;
+  
   // constructor
   SEMCpp(){};
   
+  // fill model with elements
+  void fill(Rcpp::List SEMList);
+    
   bool checkModel();
   
   // setter or change elements
-  void addRawData(arma::mat rawData_, Rcpp::StringVector manifestNames_, arma::uvec personInSubset_);
-  void addSubset(int N_,
-                 arma::uvec persons_, // indices for which persons are in this subset
-                 int observed_, // number of variables without missings
-                 arma::uvec notMissing_, // vector with indices of non-missing values
-                 // the following elements are only relevant for N>1
-                 arma::mat covariance_,
-                 arma::colvec means_,
-                 // raw data is required for N == 1
-                 arma::mat rawData_);
-  void removeSubset(int whichSubset);
-  void setMatrix(std::string whichMatrix, arma::mat values);
-  void setVector(std::string whichVector, arma::colvec values);
-  
-  void initializeParameters(Rcpp::StringVector label_,
-                            Rcpp::StringVector location_,
-                            arma::uvec row_,
-                            arma::uvec col_,
-                            arma::vec value_,
-                            arma::vec rawValue_,
-                            std::vector<bool> isTransformation);
   void setParameters(Rcpp::StringVector label_,
                      arma::vec value_,
                      bool raw);
-  
-  void addDerivativeElement(std::string label_, 
-                            std::string location_, 
-                            bool isVariance_, 
-                            arma::mat positionMatrix_);
   
   void addTransformation(SEXP transformationFunctionSEXP,
                          Rcpp::List transformationList);
@@ -99,6 +76,7 @@ public:
   
   // fit related functions
   void implied(); // compute implied means and covariance
+  bool impliedIsPD(); // check if model implied covariance matrix is positive definite
   double fit();
   arma::rowvec getGradients(bool raw);
   arma::mat getScores(bool raw);

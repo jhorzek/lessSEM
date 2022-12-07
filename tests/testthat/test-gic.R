@@ -1,4 +1,5 @@
 test_that("testing gic", {
+  testthat::skip_on_cran()
   set.seed(1234)
   library(lessSEM)
 

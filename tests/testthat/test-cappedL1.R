@@ -1,4 +1,5 @@
 test_that("testing cappedL1", {
+  testthat::skip_on_cran()
   library(lslx)
   library(lavaan)
   library(lessSEM)

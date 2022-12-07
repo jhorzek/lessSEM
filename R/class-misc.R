@@ -2,17 +2,25 @@
 #' @keywords internal
 setClass("Rcpp_istaScadGeneralPurpose")
 
-#' Wrapper for C++ module. See ?lessSEM::bfgsEnet
+#' Wrapper for C++ module. See ?lessSEM::bfgsEnetSEM
 #' @keywords internal
-setClass("Rcpp_bfgsEnet")
+setClass("Rcpp_bfgsEnetSEM")
+
+#' Wrapper for C++ module. See ?lessSEM::bfgsEnetMgSEM
+#' @keywords internal
+setClass("Rcpp_bfgsEnetMgSEM")
 
 #' Wrapper for C++ module. See ?lessSEM::istaMcpGeneralPurpose
 #' @keywords internal
 setClass("Rcpp_istaMcpGeneralPurpose")
 
-#' Wrapper for C++ module. See ?lessSEM::istaEnet
+#' Wrapper for C++ module. See ?lessSEM::istaEnetSEM
 #' @keywords internal
-setClass("Rcpp_istaEnet")
+setClass("Rcpp_istaEnetSEM")
+
+#' Wrapper for C++ module. See ?lessSEM::istaEnetMgSEM
+#' @keywords internal
+setClass("Rcpp_istaEnetMgSEM")
 
 #' Wrapper for C++ module. See ?lessSEM::istaCappedL1GeneralPurposeCpp
 #' @keywords internal
@@ -34,21 +42,37 @@ setClass("Rcpp_istaLspGeneralPurpose")
 #' @keywords internal
 setClass("Rcpp_istaEnetGeneralPurpose")
 
-#' Wrapper for C++ module. See ?lessSEM::glmnetEnet
+#' Wrapper for C++ module. See ?lessSEM::glmnetEnetSEM
 #' @keywords internal
-setClass("Rcpp_glmnetEnet")
+setClass("Rcpp_glmnetEnetSEM")
 
-#' Wrapper for C++ module. See ?lessSEM::istaMcp
+#' Wrapper for C++ module. See ?lessSEM::glmnetEnetMgSEM
 #' @keywords internal
-setClass("Rcpp_istaMcp")
+setClass("Rcpp_glmnetEnetMgSEM")
 
-#' Wrapper for C++ module. See ?lessSEM::istaLSP
+#' Wrapper for C++ module. See ?lessSEM::istaMcpSEM
 #' @keywords internal
-setClass("Rcpp_istaLSP")
+setClass("Rcpp_istaMcpSEM")
 
-#' Wrapper for C++ module. See ?lessSEM::istaScad
+#' Wrapper for C++ module. See ?lessSEM::istaMcpMgSEM
 #' @keywords internal
-setClass("Rcpp_istaScad")
+setClass("Rcpp_istaMcpMgSEM")
+
+#' Wrapper for C++ module. See ?lessSEM::istaLSPSEM
+#' @keywords internal
+setClass("Rcpp_istaLSPSEM")
+
+#' Wrapper for C++ module. See ?lessSEM::istaLSPMgSEM
+#' @keywords internal
+setClass("Rcpp_istaLSPMgSEM")
+
+#' Wrapper for C++ module. See ?lessSEM::istaScadSEM
+#' @keywords internal
+setClass("Rcpp_istaScadSEM")
+
+#' Wrapper for C++ module. See ?lessSEM::istaScadMgSEM
+#' @keywords internal
+setClass("Rcpp_istaScadMgSEM")
 
 #' Wrapper for C++ module. See ?lessSEM::istaScadGeneralPurposeCpp
 #' @keywords internal
@@ -62,9 +86,13 @@ setClass("Rcpp_istaMcpGeneralPurposeCpp")
 #' @keywords internal
 setClass("Rcpp_istaLspGeneralPurposeCpp")
 
-#' Wrapper for C++ module. See ?lessSEM::istaCappedL1
+#' Wrapper for C++ module. See ?lessSEM::istaCappedL1SEM
 #' @keywords internal
-setClass("Rcpp_istaCappedL1")
+setClass("Rcpp_istaCappedL1SEM")
+
+#' Wrapper for C++ module. See ?lessSEM::istaCappedL1MgSEM
+#' @keywords internal
+setClass("Rcpp_istaCappedL1mgSEM")
 
 #' Wrapper for C++ module. See ?lessSEM::glmnetEnetGeneralPurpose
 #' @keywords internal

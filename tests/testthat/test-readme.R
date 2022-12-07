@@ -1,5 +1,5 @@
 test_that("testing readme", {
-  
+  testthat::skip_on_cran()
   library(lessSEM)
   
   # Identical to regsem, lessSEM builds on the lavaan

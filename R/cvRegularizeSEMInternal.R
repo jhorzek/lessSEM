@@ -25,15 +25,15 @@
 #' @returns model of class cvRegularizedSEM
 #' @keywords internal
 .cvRegularizeSEMInternal <- function(lavaanModel,
-                                    k,
-                                    standardize,
-                                    penalty,
-                                    weights,
-                                    returnSubsetParameters,
-                                    tuningParameters,
-                                    method, 
-                                    modifyModel,
-                                    control){
+                                     k,
+                                     standardize,
+                                     penalty,
+                                     weights,
+                                     returnSubsetParameters,
+                                     tuningParameters,
+                                     method, 
+                                     modifyModel,
+                                     control){
   
   inputArguments <- as.list(environment())
   
@@ -207,12 +207,12 @@
     }
     
     regularizedSEM_s <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
-                                              penalty = penalty, 
-                                              weights = weights_s, 
-                                              tuningParameters = tuningParameters, 
-                                              method = method,
-                                              modifyModel = modifyModel,
-                                              control = control_s
+                                               penalty = penalty, 
+                                               weights = weights_s, 
+                                               tuningParameters = tuningParameters, 
+                                               method = method,
+                                               modifyModel = modifyModel,
+                                               control = control_s
     )
     
     if(penalty == "adaptiveLasso"){
@@ -267,12 +267,12 @@
   if(standardize) rawData <- scale(rawData)
   modifyModel$dataSet <- rawData
   regularizedSEM_full <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
-                                               penalty = penalty, 
-                                               weights = weights_s, 
-                                               tuningParameters = tp, 
-                                               method = method,
-                                               modifyModel = modifyModel,
-                                               control = control
+                                                penalty = penalty, 
+                                                weights = weights_s, 
+                                                tuningParameters = tp, 
+                                                method = method,
+                                                modifyModel = modifyModel,
+                                                control = control
   )
   
   return(

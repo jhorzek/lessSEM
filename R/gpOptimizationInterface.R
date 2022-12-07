@@ -58,6 +58,9 @@
 #' @param reverse if set to TRUE and nLambdas is used, lessSEM will start with the
 #' largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
 #' the smallest lambda and gradually increase it.
+#' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
+#' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
+#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -139,6 +142,7 @@ gpLasso <- function(par,
                     lambdas = NULL,
                     nLambdas = NULL,
                     reverse = TRUE,
+                    curve = 1,
                     ...,
                     method = "glmnet", 
                     control = lessSEM::controlGlmnet()
@@ -165,21 +169,22 @@ gpLasso <- function(par,
   
   if(!is.null(nLambdas)){
     tuningParameters <- data.frame(nLambdas = nLambdas,
-                                   reverse = reverse)
+                                   reverse = reverse,
+                                   curve = curve)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
   }
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "lasso", 
-                                            weights = regularized,
-                                            tuningParameters = tuningParameters, 
-                                            method = method,
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "lasso", 
+                                    weights = regularized,
+                                    tuningParameters = tuningParameters, 
+                                    method = method,
+                                    control = control
   )
   
   return(result)
@@ -247,6 +252,9 @@ gpLasso <- function(par,
 #' @param reverse if set to TRUE and nLambdas is used, lessSEM will start with the
 #' largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
 #' the smallest lambda and gradually increase it.
+#' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
+#' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
+#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -337,6 +345,7 @@ gpAdaptiveLasso <- function(par,
                             lambdas = NULL,
                             nLambdas = NULL,
                             reverse = TRUE,
+                            curve = 1,
                             ...,
                             method = "glmnet", 
                             control = lessSEM::controlGlmnet()){
@@ -376,21 +385,22 @@ gpAdaptiveLasso <- function(par,
   
   if(!is.null(nLambdas)){
     tuningParameters <- data.frame(nLambdas = nLambdas,
-                                   reverse = reverse)
+                                   reverse = reverse,
+                                   curve = curve)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
                                    alpha = 1)
   }
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "adaptiveLasso", 
-                                            weights = weights,
-                                            tuningParameters = tuningParameters, 
-                                            method = method,
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "adaptiveLasso", 
+                                    weights = weights,
+                                    tuningParameters = tuningParameters, 
+                                    method = method,
+                                    control = control
   )
   
   return(result)
@@ -562,14 +572,14 @@ gpRidge <- function(par,
                                  alpha = 0)
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "ridge", 
-                                            weights = regularized,
-                                            tuningParameters = tuningParameters, 
-                                            method = method,
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "ridge", 
+                                    weights = regularized,
+                                    tuningParameters = tuningParameters, 
+                                    method = method,
+                                    control = control
   )
   
   return(result)
@@ -751,14 +761,14 @@ gpElasticNet <- function(par,
   
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "elasticNet", 
-                                            weights = regularized,
-                                            tuningParameters = tuningParameters, 
-                                            method = method,
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "elasticNet", 
+                                    weights = regularized,
+                                    tuningParameters = tuningParameters, 
+                                    method = method,
+                                    control = control
   )
   
   return(result)
@@ -943,16 +953,16 @@ gpCappedL1 <- function(par,
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "cappedL1", 
-                                            weights = regularized,
-                                            tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas,
-                                                                           alpha = 1), 
-                                            method = "ista",
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "cappedL1", 
+                                    weights = regularized,
+                                    tuningParameters = expand.grid(lambda = lambdas, 
+                                                                   theta = thetas,
+                                                                   alpha = 1), 
+                                    method = "ista",
+                                    control = control
   )
   
   return(result)
@@ -1116,15 +1126,15 @@ gpLsp <- function(par,
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "lsp", 
-                                            weights = regularized,
-                                            tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas), 
-                                            method = "ista",
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "lsp", 
+                                    weights = regularized,
+                                    tuningParameters = expand.grid(lambda = lambdas, 
+                                                                   theta = thetas), 
+                                    method = "ista",
+                                    control = control
   )
   
   return(result)
@@ -1291,15 +1301,15 @@ gpMcp <- function(par,
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "mcp", 
-                                            weights = regularized,
-                                            tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas), 
-                                            method = "ista",
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "mcp", 
+                                    weights = regularized,
+                                    tuningParameters = expand.grid(lambda = lambdas, 
+                                                                   theta = thetas), 
+                                    method = "ista",
+                                    control = control
   )
   
   return(result)
@@ -1473,15 +1483,15 @@ gpScad <- function(par,
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
   result <- .gpOptimizationInternal(par = par,
-                                            fn = fn,
-                                            gr = gr,
-                                            additionalArguments = additionalArguments,
-                                            penalty = "scad", 
-                                            weights = regularized,
-                                            tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas), 
-                                            method = "ista",
-                                            control = control
+                                    fn = fn,
+                                    gr = gr,
+                                    additionalArguments = additionalArguments,
+                                    penalty = "scad", 
+                                    weights = regularized,
+                                    tuningParameters = expand.grid(lambda = lambdas, 
+                                                                   theta = thetas), 
+                                    method = "ista",
+                                    control = control
   )
   
   return(result)

@@ -24,7 +24,7 @@
                                          tuningParameters,
                                          epsilon,
                                          tau,
-                                         method, 
+                                         method = "bfgs", 
                                          modifyModel,
                                          control){
   
@@ -40,161 +40,48 @@
   if(!is(control, "controlBFGS")) 
     stop("control must be of class controlBfgs See ?controlBfgs.")
   
-  if(!is(lavaanModel, "lavaan"))
-    stop("lavaanModel must be of class lavaan")
-  
-  if(lavaanModel@Options$estimator != "ML") 
-    stop("lavaanModel must be fit with ml estimator.")
-  
-  rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
-  if(is(rawData, "try-error")) 
-    stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
-  N <- nrow(rawData)
-  
-  ### initialize model ####
+  .checkLavaanModel(lavaanModel = lavaanModel)
+
   startingValues <- control$startingValues
-  
   if(!any(startingValues == "est") & penalty == "adaptiveLasso" & !is.numeric(weights)){
     createAdaptiveLassoWeights <- TRUE
   }else{
     createAdaptiveLassoWeights <- FALSE
   }
   
-  if(any(startingValues == "est")){
-    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
-                          whichPars = "est",
-                          addMeans = modifyModel$addMeans, 
-                          activeSet = modifyModel$activeSet,
-                          dataSet = modifyModel$dataSet,
-                          transformations = modifyModel$transformations,
-                          transformationList = modifyModel$transformationList)
-  }else if(any(startingValues == "start")){
-    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
-                          whichPars = "start",
-                          addMeans = modifyModel$addMeans, 
-                          activeSet = modifyModel$activeSet,
-                          dataSet = modifyModel$dataSet,
-                          transformations = modifyModel$transformations,
-                          transformationList = modifyModel$transformationList)
-  }else if(is.numeric(startingValues)){
-    
-    if(!all(names(startingValues) %in% names(getLavaanParameters(lavaanModel))))
-      stop("Parameter names of startingValues do not match those of the lavaan object. See lessSEM::getLavaanParameters(lavaanModel).")
-    SEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
-                          whichPars = "start", 
-                          fit = FALSE,
-                          addMeans = modifyModel$addMeans, 
-                          activeSet = modifyModel$activeSet,
-                          dataSet = modifyModel$dataSet,
-                          transformations = modifyModel$transformations,
-                          transformationList = modifyModel$transformationList)
-    SEM <- .setParameters(SEM = SEM, 
-                          labels = names(startingValues), 
-                          values = startingValues, 
-                          raw = FALSE)
-    SEM <- try(.fit(SEM))
-    if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
-      stop("Infeasible starting values.")
-    
+  ### initialize model ####
+  if(is(lavaanModel, "lavaan")){
+    SEM <- .initializeSEMForRegularization(lavaanModel = lavaanModel,
+                                           startingValues = startingValues,
+                                           modifyModel = modifyModel)
   }else{
-    stop("Invalid startingValues passed to elasticNet. See e.g., ?controlIsta for more information.")
+    SEM <- .initializeMultiGroupSEMForRegularization(lavaanModels = lavaanModel,
+                                                     startingValues = startingValues,
+                                                     modifyModel = modifyModel)
   }
+  
+  N <- SEM$sampleSize
   
   # get parameters in raw form
   startingValues <- .getParameters(SEM, raw = TRUE)
   rawParameters <- .getParameters(SEM, raw = TRUE)
   
   # set weights
-  if(is.null(weights)){
-    # using bfgs without regularization -> no weights necessary
-    weights <- startingValues
-    weights[] <- 0
-    regularized <- ""
-  }else if(!is.numeric(weights)){
-    regularized <- weights
-    if(penalty == "adaptiveLasso"){
-      
-      if(createAdaptiveLassoWeights){
-        control_s <- control
-        control_s$verbose <- 0
-        # optimize model: We set lambda = 0, so we get the MLE
-        cat("Computing MLE for adaptive lasso...\n")
-        MLE <- ridgeBfgs(
-          lavaanModel = lavaanModel,
-          lambdas = 0, 
-          regularized = regularized,
-          modifyModel = modifyModel,
-          control = control_s
-        )
-        
-        # MLE:
-        MLEs <- unlist(MLE@parameters[,MLE@parameterLabels])
-        weights <- 1/abs(MLEs)
-        weights[!names(weights) %in% regularized] <- 0
-      }else{
-        
-        weights <- 1/abs(startingValues)
-        weights[!names(weights) %in% regularized] <- 0
-        
-      }
-    }else{
-      weights <- startingValues
-      weights[] <- 0
-      weights[regularized] <- 1
-    }
-  }
-  
-  if(any(grepl("~~", names(weights)) & weights != 0)) 
-    warning("Be careful when regularizing variances. These are implemented with a log-transform in lessSEM and you may not get the results you expected.")
-  
-  # make sure that the weights are in the correct order
-  if(is.null(names(weights))) stop("weights must have the same names as the parameters")
-  if(length(weights) != length(rawParameters)) stop("weights must be of the same length as the parameter vector.")
-  if(any(!is.numeric(weights))) stop("weights must be numeric")
-  weights <- weights[names(rawParameters)]
+  weights <- .initializeWeights(weights = weights, 
+                                penalty = penalty, 
+                                method = method,
+                                createAdaptiveLassoWeights = createAdaptiveLassoWeights, 
+                                control = control, 
+                                lavaanModel = lavaanModel, 
+                                modifyModel = modifyModel, 
+                                startingValues = startingValues, 
+                                rawParameters = rawParameters)
   
   #### glmnet requires an initial Hessian ####
-  initialHessian <- control$initialHessian
-  if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
-    
-    if(!all(rownames(initialHessian) %in% names(getLavaanParameters(lavaanModel))) ||
-       !all(colnames(initialHessian) %in% names(getLavaanParameters(lavaanModel)))
-    ) stop("initialHessian must have the parameter names as rownames and colnames. See lessSEM::getLavaanParameters(lavaanModel).")
-    
-  }else if(any(initialHessian == "compute")){
-    
-    initialHessian <- .getHessian(SEM = SEM, raw = TRUE)
-    
-  }else if(any(initialHessian == "scoreBased")){
-    
-    scores <- .getScores(SEM = SEM, raw = TRUE)
-    FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
-    rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
-    for(score in 1:nrow(scores)){
-      FisherInformation <- FisherInformation + t(-.5*scores[score,, drop = FALSE]) %*%(-.5*scores[score,, drop = FALSE]) # we are using the -2 log-Likelihood
-    }
-    
-    initialHessian <- -2*(-FisherInformation) # negative log-likelihood
-    # make symmetric; just in case...
-    initialHessian <- .5*(initialHessian + t(initialHessian))
-    
-  }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
-    initialHessian <- diag(initialHessian,length(rawParameters))
-    rownames(initialHessian) <- names(rawParameters)
-    colnames(initialHessian) <- names(rawParameters)
-  }else{
-    stop("Invalid initialHessian passed to glmnet See ?controlGlmnet for more information.")
-  }
-  
-  if(any(eigen(initialHessian, only.values = )$values < 0)){
-    # make positive definite
-    # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
-    eigenValues = eigen(initialHessian, only.values = )$values
-    diagMat = diag(-1.1*min(eigenValues), nrow(initialHessian), ncol(initialHessian))
-    initialHessian = initialHessian +  diagMat
-  }
-  
-  control$initialHessian <- initialHessian
+  control$initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
+                                                   rawParameters = rawParameters, 
+                                                   lavaanModel = lavaanModel, 
+                                                   SEM = SEM)
   
   #### prepare regularized model object ####
   
@@ -213,9 +100,15 @@
     verbose = control$verbose
   )
   
-  regularizedModel <- new(bfgsEnet, 
-                          weights, 
-                          controlIntern)
+  if(is(SEM, "Rcpp_SEMCpp")){
+    regularizedModel <- new(bfgsEnetSEM, 
+                            weights, 
+                            controlIntern)
+  }else if(is(SEM, "Rcpp_mgSEM")){
+    regularizedModel <- new(bfgsEnetMgSEM, 
+                            weights, 
+                            controlIntern)
+  }
   
   #### define tuning parameters and prepare fit results ####
   
@@ -326,7 +219,7 @@
     # set initial values for next iteration
     if(is(SEM, "try-Error")){
       # reset
-      warning(paste0("Fit for ",
+      stop(paste0("Fit for ",
                      paste0(names(tuningParameters),
                             tuningParameters[it,], 
                             sep = " = "),
@@ -352,9 +245,9 @@
     
   }
   
-  
   internalOptimization <- list(
-    "HessiansOfDifferentiablePart" = Hessians
+    "HessiansOfDifferentiablePart" = Hessians,
+    "N" = SEM$sampleSize
   )
   
   results <- new("regularizedSEM",

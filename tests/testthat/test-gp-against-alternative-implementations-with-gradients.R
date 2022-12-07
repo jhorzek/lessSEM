@@ -1,4 +1,5 @@
 test_that("testing general purpose optimization with gr", {
+  testthat::skip_on_cran()
   library(lessSEM)
   library(glmnet)
   library(ncvreg)

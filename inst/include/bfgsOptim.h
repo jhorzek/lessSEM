@@ -52,8 +52,7 @@ struct controlBFGS{
   const convergenceCriteriaBFGS convergenceCriterion; // this is related to the inner
   // breaking condition. 
   const int verbose; // if set to a value > 0, the fit every verbose iterations
-  // is printed. If set to -99 you will get the debug output which is horribly
-  // convoluted
+  // is printed.
 };
 
 // the line search procedure is the same as used by glmnet
@@ -127,18 +126,13 @@ inline arma::rowvec bfgsLineSearch(
     currentStepSize = std::pow(stepSize, iteration); // starts with 1 and
     // then decreases with each iteration
     
-    if(verbose == -99 ) Rcpp::Rcout << "Trying Step Size " << currentStepSize << std::endl;
-    
     parameters_k = parameters_kMinus1 + currentStepSize * direction;
-    
-    if(verbose == -99 ) Rcpp::Rcout << "parameters_k \n" << parameters_k << std::endl;
     
     fit_k = model_.fit(parameters_k,
                        parameterLabels) + 
                          smoothPenalty_.getValue(parameters_k, 
                                                  parameterLabels, 
                                                  tuningParameters);
-    if(verbose == -99 ) Rcpp::Rcout << "fit_k \n" << fit_k << std::endl;
     
     if(!arma::is_finite(fit_k)){
       // skip to next iteration and try a smaller step size
@@ -168,10 +162,6 @@ inline arma::rowvec bfgsLineSearch(
     // gamma is set to zero by Yuan et al. (2012)
     // if sigma is 0, no decrease is necessary
     
-    if(verbose == -99 ) Rcpp::Rcout << "comparing " << 
-      f_k - f_0 << 
-        " and " << sigma*currentStepSize*compareTo(0,0) << 
-          std::endl;
     converged = f_k - f_0 <=  sigma*currentStepSize*compareTo(0,0);
     
     if(converged){
@@ -179,13 +169,12 @@ inline arma::rowvec bfgsLineSearch(
       // this can often cause issues
       gradients_k = model_.gradients(parameters_k,
                                      parameterLabels);
-      if(verbose == -99 ) Rcpp::Rcout << "gradients_k \n" << gradients_k << std::endl;
+      
       if(!arma::is_finite(gradients_k)) {
         // go to next iteration and test smaller step size
         continue;
       }
       // else
-      if(verbose == -99 ) Rcpp::Rcout << "break line search" << std::endl;
       break;
     }
     
@@ -260,21 +249,15 @@ inline lessSEM::fitResults bfgsOptim(model& model_,
   bool breakOuter = false; // if true, the outer iteration is exited
   
   // outer iteration
-  for(int outer_iteration = 0; outer_iteration < control_.maxIterOut; outer_iteration ++){    
-    if(control_.verbose == -99) Rcpp::Rcout << "Outer iteration " << outer_iteration + 1 << std::endl;
+  for(int outer_iteration = 0; outer_iteration < control_.maxIterOut; outer_iteration ++){
     
     // the gradients will be used by the inner iteration to compute the new 
     // parameters
     gradients_kMinus1 = model_.gradients(parameters_kMinus1, parameterLabels) +
       smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
     
-    if(control_.verbose == -99) Rcpp::Rcout << "parameters_kMinus1\n: " << parameters_kMinus1 << std::endl;
-    if(control_.verbose == -99) Rcpp::Rcout << "gradients_kMinus1\n: " << gradients_kMinus1 << std::endl;
-    
     // find step direction -> simple quasi-Newton step
     direction = -arma::trans(arma::inv_sympd(Hessian_kMinus1)*arma::trans(gradients_kMinus1));
-    
-    if(control_.verbose == -99) Rcpp::Rcout << "Found step direction\n: " << direction << std::endl;
     
     // find length of step in direction
     parameters_k = bfgsLineSearch(model_, 
@@ -294,8 +277,6 @@ inline lessSEM::fitResults bfgsOptim(model& model_,
                                   control_.maxIterLine,
                                   control_.verbose);
     
-    if(control_.verbose == -99) Rcpp::Rcout << "Proposed parameters_k\n: " << parameters_k << std::endl;
-    
     // get gradients of differentiable part
     gradients_k = model_.gradients(parameters_k,
                                    parameterLabels) +
@@ -312,8 +293,6 @@ inline lessSEM::fitResults bfgsOptim(model& model_,
     penalizedFit_k = fit_k;
     
     fits.at(outer_iteration+1) = penalizedFit_k;
-    
-    if(control_.verbose == -99) Rcpp::Rcout << "New fit\n: " << penalizedFit_k << std::endl;
     
     // print fit info
     if(control_.verbose > 0 && outer_iteration % control_.verbose == 0){
@@ -335,8 +314,6 @@ inline lessSEM::fitResults bfgsOptim(model& model_,
       .001,
       control_.verbose == -99
     );
-    
-    if(control_.verbose == -99) Rcpp::Rcout << "New Hessian_k\n: " << Hessian_k << std::endl;
     
     // check convergence 
     if(control_.convergenceCriterion == GLMNET_) {

@@ -1,4 +1,5 @@
 test_that("testing ista-lasso", {
+  testthat::skip_on_cran()
   library(lavaan)
   library(lessSEM)
   set.seed(123)
@@ -55,7 +56,7 @@ test_that("testing ista-lasso", {
     verbose = 0
   )
   
-  GNet <- new(glmnetEnet, weights, control)
+  GNet <- new(glmnetEnetSEM, weights, control)
   unregularized <- GNet$optimize(
     startingValues,
     SEM,
@@ -102,7 +103,7 @@ test_that("testing ista-lasso", {
     eta = 2,
     accelerate = TRUE,
     maxIterOut = 10000,
-    maxIterIn = 1000,
+    maxIterIn = 10000,
     breakOuter = .00000000001,
     convCritInner = 1,
     sigma = .1,
@@ -110,7 +111,7 @@ test_that("testing ista-lasso", {
     verbose = 0
   )
   
-  IN <- new(istaEnet, weights, control)
+  IN <- new(istaEnetSEM, weights, control)
   lassoResultIsta <- IN$optimize(
     startingValues,
     SEM,

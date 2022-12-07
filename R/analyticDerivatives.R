@@ -59,7 +59,7 @@
 #' @returns matrix with second derivatives of the -2log-Likelihood with respect 
 #' to each parameter
 #' @keywords internal
-.getHessian <- function (SEM, raw = FALSE, eps = 1e-7){
+.getHessian <- function (SEM, raw, eps = 1e-7){
   # THE FOLLOWING CODE IS ADAPTED FROM LAVAAN. 
   # SEE lavaan:::lav_model_hessian FOR THE IMPLEMENTATION
   # BY Yves Rosseel

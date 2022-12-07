@@ -246,9 +246,10 @@
   "
   functionBody <- c()
   for(p in parameters){
-    functionBody <- c(functionBody,
-                      paste0('double ', p ,' = parameterValues["', p, '"];') 
-    )
+    if(any(grepl(pattern = p, x = syntax)))
+      functionBody <- c(functionBody,
+                        paste0('double ', p ,' = parameterValues["', p, '"];') 
+      )
   }
   functionBody <- c(functionBody, 
                     "\n\n// add user defined functions",
@@ -256,9 +257,10 @@
                     "\n\n// update parameters"
   )
   for(p in parameters){
-    functionBody <- c(functionBody,
-                      paste0('parameterValues["', p, '"] = ', p, ';') 
-    )
+    if(any(grepl(pattern = p, x = syntax)))
+      functionBody <- c(functionBody,
+                        paste0('parameterValues["', p, '"] = ', p, ';') 
+      )
   }
   
   functionEnd <- "

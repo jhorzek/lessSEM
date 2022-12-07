@@ -10,6 +10,7 @@ lasso(
   lambdas = NULL,
   nLambdas = NULL,
   reverse = TRUE,
+  curve = 1,
   method = "glmnet",
   modifyModel = lessSEM::modifyModel(),
   control = lessSEM::controlGlmnet()
@@ -31,6 +32,10 @@ It will then generate nLambda values between 0 and the computed lambda.}
 \item{reverse}{if set to TRUE and nLambdas is used, lessSEM will start with the
 largest lambda and gradually decrease lambda. Otherwise, lessSEM will start with
 the smallest lambda and gradually increase it.}
+
+\item{curve}{Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20).
+If curve is close to 1 all lambda values will be equally spaced, if curve is large
+lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.}
 
 \item{method}{which optimizer should be used? Currently implemented are ista
 and glmnet. With ista, the control argument can be used to switch to related procedures

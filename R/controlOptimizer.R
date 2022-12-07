@@ -24,8 +24,7 @@
 #' 1 = takes the previous step size as initial value for the next iteration
 #' 3 = Barzilai-Borwein procedure 
 #' 4 = Barzilai-Borwein procedure, but sometimes resets the step size; this can help when the optimizer is caught in a bad spot.
-#' @param verbose if set to a value > 0, the fit every "verbose" iterations is printed. 
-#' If set to -99 you will get the debug output which is horribly convoluted
+#' @param verbose if set to a value > 0, the fit every "verbose" iterations is printed.
 #' @returns object of class controlIsta
 #' @export
 controlIsta <- function(

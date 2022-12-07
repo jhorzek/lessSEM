@@ -53,10 +53,10 @@ public:
   bool SChanged = true;
   bool mChanged = true;
   
-  int nModelParameters, nTransformationParameters;
+  int nModelParameters, nRealParameters;
   // nModelParameters: number of parameters in the SEM, some of which
   // can be functions of other parameters defined in the transformation
-  // nTransformationParameters: number of actual parameters, excluding 
+  // nRealParameters: number of actual parameters, excluding 
   // those that are transformations
   
   // constructor
