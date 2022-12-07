@@ -61,7 +61,7 @@ void mgParameters::transform()
 
 arma::mat mgParameters::getTransformationGradients(){
   if(!hasTransformations) Rcpp::stop("Does not have transformations.");
-  int nRealParameters; // number of parameters that are not transformations 
+  int nRealParameters = 0; // number of parameters that are not transformations 
   // of other parameters
   for (int i = 0; i < isTransformation.size(); i++){
     nRealParameters += !isTransformation.at(i);
@@ -70,44 +70,38 @@ arma::mat mgParameters::getTransformationGradients(){
                              nRealParameters,
                              arma::fill::zeros);
   Rcpp::NumericVector parameterValues(uniqueLabels.size());
-  Rcpp::CharacterVector parameterLabelsRcpp(uniqueLabels.size());
-  arma::uvec selectRows(uniqueLabels.size());
+  arma::uvec selectRows(nRealParameters);
   arma::colvec stepForward, stepBackward;
-  std::string currentParameter;
   int j = 0;
   for(int i = 0; i < isTransformation.size(); i++){
     parameterValues.at(i) = uniqueValues.at(i);
-    
     if(isTransformation.at(i)){
       // we want to remove all parameters which are only in transformations and not in the model
       continue;
     }
-    selectRows.at(j) = i;
+    //selectRows(j) = i;
     j++;
   }
-  
-  parameterValues.names() = parameterLabelsRcpp;
+  parameterValues.names() = uniqueLabels;
   
   double eps = 1e-6;
   
   j = 0;
   for(int i = 0; i < parameterValues.size(); i++){
-    currentParameter = parameterLabelsRcpp.at(i);
     if(isTransformation.at(i)) continue;
     parameterValues.at(i) += eps;
     
-    stepForward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues, transformationList)).rows(selectRows);
+    stepForward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues, transformationList));//.rows(selectRows);
     
     parameterValues.at(i) -= 2.0*eps;
     
-    stepBackward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues, transformationList)).rows(selectRows);
+    stepBackward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues, transformationList));//.rows(selectRows);
     
     parameterValues.at(i) += eps;
     
     currentGradients.col(j) = (stepForward - stepBackward)/(2.0*eps);
     j++;
   }
-  
   return(currentGradients);
 }
 
@@ -307,10 +301,9 @@ arma::rowvec mgSEM::getGradients(bool raw){
   
   // compute gradients for each model
   for(int m = 0; m < models.size(); m++){
-    
     modelGradients = models.at(m).getGradients(true);
     // add the models gradients to the existing gradients:
-    parameters.uniqueGradients.elem(parameters.parameterLocationInModelUvec.at(m)) += 
+    parameters.uniqueGradients.elem(parameters.parameterLocationInVectorUvec.at(m)) += 
       modelGradients.elem(parameters.parameterLocationInModelUvec.at(m));
   }
   
@@ -320,6 +313,11 @@ arma::rowvec mgSEM::getGradients(bool raw){
   
   // compute the transformation gradients
   transformationGradients = parameters.getTransformationGradients();
+  
+  // Rcpp::Rcout << "parameters.uniqueGradients" << std::endl;
+  // Rcpp::Rcout << parameters.uniqueGradients << std::endl;
+  // Rcpp::Rcout << "transformationGradients" << std::endl;
+  // Rcpp::Rcout << transformationGradients << std::endl;
   
   return(parameters.uniqueGradients*transformationGradients);
 }
@@ -351,6 +349,7 @@ RCPP_MODULE(mgSEM_cpp){
     .constructor("Creates a new SEMCpp.")
   // fields
   .field_readonly("sampleSize", &mgSEM::sampleSize, "Sum of all N")
+  .field_readonly("m2LL", &mgSEM::m2LL, "-2 log-Likelihood")
   // methods
   .method( "addModel", &mgSEM::addModel, "Adds a model. Expects and Rcpp::List")
   .method( "implied", &mgSEM::implied, "Computes implied means and covariance matrix")

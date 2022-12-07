@@ -86,6 +86,11 @@
   
   for(m in 1:length(lavaanModels)){
     
+    if(!lavaanModels[[m]]@Options$meanstructure){
+      warning("Model ", m, " does not have an explicit mean structure. If the items in the ",
+              "submodels have the same names, lessSEM will assume that the means for ",
+              "the different groups are also the same!")
+    }
     # Note: transformation will be defined for the full model, not the submodels.
     SEMs[[m]] <- .extractSEMFromLavaan(lavaanModel = lavaanModels[[m]],
                                        whichPars = whichPars,

@@ -366,12 +366,17 @@
       Hessians$Hessian[[it]] <- result$Hessian
     
     # save implied
+    if(is(SEM, "Rcpp_SEMCpp")){
     implied$means[[it]] <- SEM$impliedMeans
     implied$covariances[[it]] <- SEM$impliedCovariance
     
     rownames(implied$means[[it]]) <- SEM$manifestNames
     dimnames(implied$covariances[[it]]) <- list(SEM$manifestNames,
                                                 SEM$manifestNames)
+    }else if(is(SEM, "Rcpp_mgSEM")){
+      implied$means[[it]] <- NULL
+      implied$covariances[[it]] <- NULL
+    }
     
     # set initial values for next iteration
     if(is(SEM, "try-Error")){
@@ -382,9 +387,15 @@
                             sep = " = "),
                      " resulted in Error!"))
       
-      SEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
-                            whichPars = startingValues,
-                            addMeans = control$addMeans)
+      if(is(lavaanModel, "lavaan")){
+        SEM <- .initializeSEMForRegularization(lavaanModel = lavaanModel,
+                                               startingValues = startingValues,
+                                               modifyModel = modifyModel)
+      }else if(is.vector(lavaanModel)){
+        SEM <- .initializeMultiGroupSEMForRegularization(lavaanModels = lavaanModel,
+                                                         startingValues = startingValues,
+                                                         modifyModel = modifyModel)
+      }
       
       if(method == "glmnet"){
         regularizedModel$setHessian(controlIntern$initialHessian)
@@ -404,11 +415,17 @@
     
   }
   
-  internalOptimization <- list(
+  if(is(SEM, "Rcpp_SEMCpp")) internalOptimization <- list(
     "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = SEM$functionCalls,
     "gradientCalls" = SEM$gradientCalls
+  )
+  if(is(SEM, "Rcpp_mgSEM")) internalOptimization <- list(
+    "implied" = implied,
+    "HessiansOfDifferentiablePart" = Hessians,
+    "functionCalls" = NA,
+    "gradientCalls" = NA
   )
   
   results <- new("regularizedSEM",

@@ -14,7 +14,6 @@ arma::mat approximateHessian(T& SEM,
                              double eps){
   int nPar = label_.length();
   arma::mat hessian(nPar, nPar, arma::fill::zeros);
-  
   arma::vec stepLeft = value_, 
     twoStepLeft = value_, 
     stepRight = value_, 
