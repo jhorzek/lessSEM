@@ -245,9 +245,9 @@
     
   }
   
-  
   internalOptimization <- list(
-    "HessiansOfDifferentiablePart" = Hessians
+    "HessiansOfDifferentiablePart" = Hessians,
+    "N" = SEM$sampleSize
   )
   
   results <- new("regularizedSEM",
