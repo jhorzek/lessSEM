@@ -12,7 +12,7 @@ Description: Provides regularized structural equation modeling
   [lslx](https://github.com/psyphh/lslx) packages. See ?lessSEM::lessSEM for an introduction.
 License: GPL (>= 2)
 Encoding: UTF-8
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 Depends: lavaan
 Imports: Rcpp (>= 1.0.8), RcppArmadillo(>= 0.11.2.0.0), ggplot2, tidyr, stringr, methods, numDeriv, utils, stats, graphics
