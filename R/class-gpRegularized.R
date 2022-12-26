@@ -175,11 +175,11 @@ setMethod("plot",
               
               return(
                 ggplot2::ggplot(data = parametersLong,
-                              mapping = ggplot2::aes_string(x = colnames(tuningParameters), 
-                                                            y = "value", 
-                                                            group = "name")) +
-                ggplot2::geom_line(colour = "#008080")+
-                ggplot2::ggtitle("Regularized Parameters")
+                                mapping = ggplot2::aes_string(x = colnames(tuningParameters), 
+                                                              y = "value", 
+                                                              group = "name")) +
+                  ggplot2::geom_line(colour = "#008080")+
+                  ggplot2::ggtitle("Regularized Parameters")
               )
               
             }else{
@@ -188,15 +188,19 @@ setMethod("plot",
                                             unlist(parametersLong[,colnames(tuningParameters)[2]]))
               parametersLong$tp1 <- unlist(parametersLong[,colnames(tuningParameters)[1]])
               parametersLong$tp2 <- unlist(parametersLong[,colnames(tuningParameters)[2]])
-              plt <- plotly::plot_ly(parametersLong, 
-                                     x = ~tp1, y = ~tp2, z = ~value, 
-                                     type = 'scatter3d',
-                                     mode = 'lines',
-                                     opacity = 1,
-                                     color = ~name,
-                                     split = ~tp2,
-                                     line = list(width = 6, 
-                                                 reverscale = FALSE)
+              plt <- plotly::layout(
+                plotly::plot_ly(parametersLong, 
+                                x = ~tp1, y = ~tp2, z = ~value, 
+                                type = 'scatter3d',
+                                mode = 'lines',
+                                opacity = 1,
+                                color = ~name,
+                                split = ~tp2,
+                                line = list(width = 6, 
+                                            reverscale = FALSE)
+                ), 
+                scene = list(xaxis = list(title = colnames(tuningParameters)[1]), 
+                             yaxis = list(title = colnames(tuningParameters)[2]))
               )
               return(plt)
               

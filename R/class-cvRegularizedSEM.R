@@ -105,13 +105,17 @@ setMethod("plot",
     fits$tp1 <- unlist(fits[,colnames(tuningParameters)[1]])
     fits$tp2 <- unlist(fits[,colnames(tuningParameters)[2]])
     return(
-      plotly::plot_ly(fits, 
+      plotly::layout(
+        plotly::plot_ly(fits, 
                     x = ~tp1, y = ~tp2, z = ~cvfit, 
                     type = 'scatter3d', mode = 'lines',
                     opacity = 1,
                     split = ~tp2,
                     line = list(width = 6, 
-                                reverscale = FALSE))
+                                reverscale = FALSE)), 
+        scene = list(xaxis = list(title = colnames(tuningParameters)[1]), 
+                     yaxis = list(title = colnames(tuningParameters)[2]))
+        )
     )
     
   }
