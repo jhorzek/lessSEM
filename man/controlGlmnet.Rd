@@ -60,7 +60,7 @@ Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421. Defaults to 
 
 \item{breakInner}{Stopping criterion for inner iterations}
 
-\item{convergenceCriterion}{which convergence criterion should be used for the outer iterations? possible are 0 = GLMNET, 1 = gradients, 2 = fitChange
+\item{convergenceCriterion}{which convergence criterion should be used for the outer iterations? possible are 0 = GLMNET, 1 = fitChange, 2 = gradients.
 Note that in case of gradients and GLMNET, we divide the gradients (and the Hessian) of the log-Likelihood by N as it would otherwise be
 considerably more difficult for larger sample sizes to reach the convergence criteria.}
 
