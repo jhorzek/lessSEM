@@ -32,7 +32,10 @@ Setting up such models with lavaan is explained [here](https://lavaan.ugent.be/t
 Unfortunately, **lessSEM** does not support the same syntax at the moment. "Throwing"
 a multi-group SEM into **lessSEM** will just result in errors. Instead,
 **lessSEM** follows a slightly different approach: You can pass multiple **lavaan**
-models at once which are then combined into a multi-group model. In the following, we will look at a two-group model. 
+models at once which are then combined into a multi-group model. 
+
+In the following, we will look at a two-group model to better understand how multi-group
+models are implemented in **lessSEM**. 
 
 
 ## First Step: Setting up a Multi-Group Model
@@ -312,7 +315,19 @@ you will unfortunately have to set up the procedure manually.
 
 Models with definition variables are basically the same as multi-group models,
 with the sole exception that the group-specific parameters are not estimated but
-fixed to specific values. Unfortunately, **lavaan** does not allow us to set
+fixed to specific values. 
+
+> If your main interest is in setting up a multi-group SEM with **lessSEM** and
+you don't care about the details, the **lessTemplates** package (https://github.com/jhorzek/lessTemplates)
+provides means to easily set up such models (see SEMWithDefinitionVariables function
+in **lessTemplates**).
+
+In the following, we will look in detail at how definition variables can be used 
+in **lessSEM**
+
+### The details ...
+
+Unfortunately, **lavaan** does not allow us to set
 up models for $N=1$, however. This is required for many definition variable
 applications, such as latent growth curve models with subject-specific measurement
 occasions. In the following, we will use a workaround.
