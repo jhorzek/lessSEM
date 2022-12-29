@@ -63,7 +63,7 @@ setMethod("summary", "gpRegularized", function (object) {
 #' Returns the parameter estimates of a gpRegularized
 #' 
 #' @param object object of class gpRegularized
-#' @param criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
+#' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
 #' @returns parameter estimates
 #' @export
 setMethod("coef", "gpRegularized", function (object, ...) {

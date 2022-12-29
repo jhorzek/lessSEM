@@ -34,6 +34,7 @@ setMethod("summary", "regularizedSEMWithCustomPenalty", function (object) {
 #' Returns the parameter estimates of a regularizedSEMWithCustomPenalty
 #' 
 #' @param object object of class regularizedSEMWithCustomPenalty
+#' @param ... not used
 #' @returns data.frame with all parameter estimates
 #' @export
 setMethod("coef", "regularizedSEMWithCustomPenalty", function (object, ...) {

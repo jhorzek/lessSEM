@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{object of class gpRegularized}
 
-\item{criterion}{can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned}
+\item{...}{criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned}
 }
 \value{
 parameter estimates

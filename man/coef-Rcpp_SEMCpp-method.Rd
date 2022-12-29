@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{object}{object of class Rcpp_SEMCpp}
+
+\item{...}{not used}
 }
 \value{
 all coefficients of the model in transformed form

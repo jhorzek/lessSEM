@@ -34,6 +34,7 @@ setMethod("logLik", "Rcpp_SEMCpp", function (object) {
 #' coef
 #' 
 #' @param object object of class Rcpp_SEMCpp
+#' @param ... not used
 #' @returns all coefficients of the model in transformed form
 setMethod("coef", "Rcpp_SEMCpp", function (object, ...) {
   return(.getParameters(object, raw = FALSE))

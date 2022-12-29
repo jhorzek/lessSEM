@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{object}{object of class regularizedSEMWithCustomPenalty}
+
+\item{...}{not used}
 }
 \value{
 data.frame with all parameter estimates

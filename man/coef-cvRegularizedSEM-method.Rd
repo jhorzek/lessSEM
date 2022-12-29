@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{object}{object of class cvRegularizedSEM}
+
+\item{...}{not used}
 }
 \value{
 the parameter estimates of an cvRegularizedSEM
