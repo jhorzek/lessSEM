@@ -4,10 +4,12 @@
 \alias{coef,Rcpp_SEMCpp-method}
 \title{coef}
 \usage{
-\S4method{coef}{Rcpp_SEMCpp}(object)
+\S4method{coef}{Rcpp_SEMCpp}(object, ...)
 }
 \arguments{
 \item{object}{object of class Rcpp_SEMCpp}
+
+\item{...}{not used}
 }
 \value{
 all coefficients of the model in transformed form

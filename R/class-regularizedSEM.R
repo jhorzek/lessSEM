@@ -63,10 +63,17 @@ setMethod("summary", "regularizedSEM", function (object) {
 #' Returns the parameter estimates of a regularizedSEM
 #' 
 #' @param object object of class regularizedSEM
-#' @param criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
+#' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
 #' @returns parameters of the model as data.frame
 #' @export
-setMethod("coef", "regularizedSEM", function (object, criterion = NULL) {
+setMethod("coef", "regularizedSEM", function (object, ...) {
+  dotdotdot <- list(...)
+  if("criterion" %in% names(dotdotdot)){
+    criterion <- dotdotdot$criterion
+  }else{
+    criterion <- NULL
+  }
+  
   if(!is.null(criterion) && criterion %in% c("AIC", "BIC")){
     if(length(unique(object@fits$nonZeroParameters)) == 1) 
       stop("Selection by criterion currently only supported for sparsity inducing penalties. Either none of your parameters was zeroed or the penalty used does not induce sparsity.")

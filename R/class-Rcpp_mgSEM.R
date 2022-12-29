@@ -34,8 +34,9 @@ setMethod("logLik", "Rcpp_mgSEM", function (object) {
 #' coef
 #' 
 #' @param object object of class Rcpp_mgSEM
+#' @param ... not used
 #' @returns all coefficients of the model in transformed form
-setMethod("coef", "Rcpp_mgSEM", function (object) {
+setMethod("coef", "Rcpp_mgSEM", function (object, ...) {
   return(.getParameters(object, raw = FALSE))
 })
 

@@ -63,9 +63,10 @@ setMethod("summary", "cvRegularizedSEM", function (object) {
 #' Returns the parameter estimates of an cvRegularizedSEM
 #'  
 #' @param object object of class cvRegularizedSEM
+#' @param ... not used
 #' @returns the parameter estimates of an cvRegularizedSEM
 #' @export
-setMethod("coef", "cvRegularizedSEM", function (object) {
+setMethod("coef", "cvRegularizedSEM", function (object, ...) {
   return(unlist(object@parameters[,object@parameterLabels]))
 })
 

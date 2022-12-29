@@ -4,12 +4,12 @@
 \alias{coef,regularizedSEM-method}
 \title{coef}
 \usage{
-\S4method{coef}{regularizedSEM}(object, criterion = NULL)
+\S4method{coef}{regularizedSEM}(object, ...)
 }
 \arguments{
 \item{object}{object of class regularizedSEM}
 
-\item{criterion}{can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned}
+\item{...}{criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned}
 }
 \value{
 parameters of the model as data.frame

@@ -4,10 +4,12 @@
 \alias{coef,regularizedSEMWithCustomPenalty-method}
 \title{coef}
 \usage{
-\S4method{coef}{regularizedSEMWithCustomPenalty}(object)
+\S4method{coef}{regularizedSEMWithCustomPenalty}(object, ...)
 }
 \arguments{
 \item{object}{object of class regularizedSEMWithCustomPenalty}
+
+\item{...}{not used}
 }
 \value{
 data.frame with all parameter estimates

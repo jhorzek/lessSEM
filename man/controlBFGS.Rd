@@ -47,7 +47,7 @@ If set to "compute", the initial hessian will be computed. If set to a single va
 
 \item{breakInner}{Stopping criterion for inner iterations}
 
-\item{convergenceCriterion}{which convergence criterion should be used for the outer iterations? possible are 0 = GLMNET, 1 = gradients, 2 = fitChange
+\item{convergenceCriterion}{which convergence criterion should be used for the outer iterations? possible are 0 = GLMNET, 1 = fitChange, 2 = gradients.
 Note that in case of gradients and GLMNET, we divide the gradients (and the Hessian) of the log-Likelihood by N as it would otherwise be
 considerably more difficult for larger sample sizes to reach the convergence criteria.}
 
