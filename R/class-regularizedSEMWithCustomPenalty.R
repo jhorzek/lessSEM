@@ -36,7 +36,7 @@ setMethod("summary", "regularizedSEMWithCustomPenalty", function (object) {
 #' @param object object of class regularizedSEMWithCustomPenalty
 #' @returns data.frame with all parameter estimates
 #' @export
-setMethod("coef", "regularizedSEMWithCustomPenalty", function (object) {
+setMethod("coef", "regularizedSEMWithCustomPenalty", function (object, ...) {
   pars <- object@parameters
   return(pars)
 })

@@ -4,7 +4,7 @@
 \alias{coef,cvRegularizedSEM-method}
 \title{coef}
 \usage{
-\S4method{coef}{cvRegularizedSEM}(object)
+\S4method{coef}{cvRegularizedSEM}(object, ...)
 }
 \arguments{
 \item{object}{object of class cvRegularizedSEM}

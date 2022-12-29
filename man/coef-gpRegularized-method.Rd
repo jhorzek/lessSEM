@@ -4,7 +4,7 @@
 \alias{coef,gpRegularized-method}
 \title{coef}
 \usage{
-\S4method{coef}{gpRegularized}(object, criterion = NULL)
+\S4method{coef}{gpRegularized}(object, ...)
 }
 \arguments{
 \item{object}{object of class gpRegularized}

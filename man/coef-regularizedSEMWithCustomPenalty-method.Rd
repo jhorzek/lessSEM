@@ -4,7 +4,7 @@
 \alias{coef,regularizedSEMWithCustomPenalty-method}
 \title{coef}
 \usage{
-\S4method{coef}{regularizedSEMWithCustomPenalty}(object)
+\S4method{coef}{regularizedSEMWithCustomPenalty}(object, ...)
 }
 \arguments{
 \item{object}{object of class regularizedSEMWithCustomPenalty}
