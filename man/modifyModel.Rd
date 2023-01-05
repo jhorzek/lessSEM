@@ -9,7 +9,8 @@ modifyModel(
   activeSet = NULL,
   dataSet = NULL,
   transformations = NULL,
-  transformationList = list()
+  transformationList = list(),
+  transformationGradientStepSize = 1e-06
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ modifyModel(
 \item{transformations}{allows for transformations of parameters - useful for measurement invariance tests etc.}
 
 \item{transformationList}{optional list used within the transformations. NOTE: This must be used as an Rcpp::List.}
+
+\item{transformationGradientStepSize}{step size used to compute the gradients of the
+transformations}
 }
 \value{
 Object of class modifyModel

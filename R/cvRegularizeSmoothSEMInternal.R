@@ -228,8 +228,10 @@
       activeSet = modifyModel$activeSet, 
       dataSet = testSet,
       transformations = modifyModel$transformations,
-      transformationList = modifyModel$transformationList
-    )
+      transformationList = modifyModel$transformationList,
+      transformationGradientStepSize = modifyModel$transformationGradientStepSize
+      )
+    
     
     for(p in 1:nrow(regularizedSEM_s@parameters)){
       SEM_s <- .setParameters(

@@ -18,6 +18,8 @@ public:
   arma::mat uniqueHessian;
   std::vector<bool> isTransformation;
   bool hasTransformations = false;
+  double gradientStepSize = 1e-6; // step size used to compute the gradients of
+  // the transformations
   
   // vectors telling us where the parameters of 
   // a model are located in the parameter vector. We need two vectors of indices:
@@ -102,6 +104,8 @@ public:
                        arma::vec value_,
                        bool raw,
                        double eps);
+  
+  void setTransformationGradientStepSize(double gradientStepSize);
   
 };
 

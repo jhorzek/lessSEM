@@ -12,7 +12,8 @@
   activeSet = NULL,
   dataSet = NULL,
   transformations = NULL,
-  transformationList = list()
+  transformationList = list(),
+  transformationGradientStepSize = 1e-06
 )
 }
 \arguments{
@@ -29,6 +30,9 @@ be optimized afterwards as setting the parameters to "est" may result in the mod
 \item{activeSet}{Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.}
 
 \item{dataSet}{optional: Pass an alternative data set to lessSEM:::.SEMFromLavaan which will replace the original data set in lavaanModel.}
+
+\item{transformationGradientStepSize}{step size used to compute the gradients of the
+transformations}
 }
 \value{
 Object of class Rcpp_SEMCpp

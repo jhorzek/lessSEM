@@ -71,7 +71,8 @@
                            activeSet = modifyModel$activeSet,
                            dataSet = modifyModel$dataSet,
                            transformations = modifyModel$transformations,
-                           transformationList = modifyModel$transformationList)
+                           transformationList = modifyModel$transformationList,
+                           transformationGradientStepSize = modifyModel$transformationGradientStepSize)
   
   
   parameterLabels <- names(lessSEM:::.getParameters(SEM = tmpSEM, 

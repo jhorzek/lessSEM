@@ -27,6 +27,7 @@
 //' parameters and the values of the parameters as well as a boolean indicating if 
 //' these are raw. Finally, a double (eps) controls the precision of the approximation.
 //' @field computeTransformations compute the transformations.
+//' @field setTransformationGradientStepSize change the step size of the gradient computation for the transformations
 
 void SEMCpp::fill(Rcpp::List SEMList){
   
@@ -375,6 +376,10 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   return(hessian);
 }
 
+void SEMCpp::setTransformationGradientStepSize(double gradientStepSize){
+  parameterTable.gradientStepSize = gradientStepSize;
+}
+
 RCPP_MODULE(SEM_cpp){
   using namespace Rcpp;
   Rcpp::class_<SEMCpp>( "SEMCpp" )
@@ -406,5 +411,6 @@ RCPP_MODULE(SEM_cpp){
   .method( "getHessian", &SEMCpp::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
   .method( "addTransformation", &SEMCpp::addTransformation, "Add a transformation function. Expects parameterLabels and pointer to function.")
   .method( "computeTransformations", &SEMCpp::computeTransformations, "Compute all transformations")
+  .method( "setTransformationGradientStepSize", &SEMCpp::setTransformationGradientStepSize, "Change the step size used in the computation of the transformation gradients.")
   ;
 }

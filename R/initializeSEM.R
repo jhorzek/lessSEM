@@ -10,6 +10,8 @@
 #' @param activeSet Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.
 #' @param addMeans If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average
 #' @param dataSet optional: Pass an alternative data set to lessSEM:::.SEMFromLavaan which will replace the original data set in lavaanModel.
+#' @param transformationGradientStepSize step size used to compute the gradients of the
+#' transformations
 #' @returns Object of class Rcpp_SEMCpp
 #' @keywords internal
 .SEMFromLavaan <- function(lavaanModel, 
@@ -19,7 +21,8 @@
                            activeSet = NULL,
                            dataSet = NULL,
                            transformations = NULL,
-                           transformationList = list()){
+                           transformationList = list(),
+                           transformationGradientStepSize = 1e-6){
   
   SEMObj <- .extractSEMFromLavaan(lavaanModel = lavaanModel,
                                   whichPars = whichPars,
@@ -37,6 +40,7 @@
   
   if(!is.null(transformations)){
     mySEM$addTransformation(SEMObj$transformationFunctionPointer, transformationList)
+    mySEM$setTransformationGradientStepSize(transformationGradientStepSize)
   }
   
   # the following step is necessary if the parameters of the lavaanModel do not correspond to those in
@@ -73,6 +77,8 @@
 #' @param addMeans If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average
 #' @param transformations string with transformations
 #' @param transformationList list for transformations
+#' @param transformationGradientStepSize step size used to compute the gradients of the
+#' transformations
 #' @returns Object of class Rcpp_mgSEMCpp
 #' @keywords internal
 .multiGroupSEMFromLavaan <- function(lavaanModels, 
@@ -80,7 +86,8 @@
                                      fit = TRUE,
                                      addMeans = TRUE,
                                      transformations = NULL,
-                                     transformationList = list()){
+                                     transformationList = list(),
+                                     transformationGradientStepSize = 1e-6){
   
   SEMs <- vector("list", length(lavaanModels))
   
@@ -121,6 +128,8 @@
                             transforms$isTransformation,
                             transforms$transformationFunctionPointer,
                             transformationList)
+    
+    mySEM$setTransformationGradientStepSize(transformationGradientStepSize)
   }
   
   # the following step is necessary if the parameters of the lavaanModel do not correspond to those in

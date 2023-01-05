@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
-namespace parmeterModule{
+namespace parameterModule{
 struct parameterElements{
   // every parameter value can only have one value
   // but may appear in multiple rows and columns of a matrix
@@ -37,7 +37,7 @@ typedef Rcpp::XPtr<transformationFunctionPtr> transformationFunctionPtr_t;
 class parameters{
 public: 
   
-  std::map< std::string, parmeterModule::parameterElements> parameterMap;
+  std::map< std::string, parameterModule::parameterElements> parameterMap;
   
   // for export to R
   Rcpp::CharacterVector uniqueParameterLabels;
@@ -47,6 +47,8 @@ public:
   std::vector<bool> uniqueIsTransformation;
   
   bool hasTransformations = false;
+  double gradientStepSize = 1e-6; // step size used to compute the gradients of
+  // the transformations
   
   // to decide which elements should be recomputed
   bool AChanged = true;

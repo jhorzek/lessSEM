@@ -176,23 +176,21 @@ arma::mat parameters::getTransformationGradients(){
   
   parameterValues.names() = parameterLabelsRcpp;
   
-  double eps = 1e-6;
-  
   j = 0;
   for(int i = 0; i < parameterValues.size(); i++){
     currentParameter = parameterLabelsRcpp.at(i);
     if(parameterMap.at(currentParameter).isTransformation) continue;
-    parameterValues.at(i) += eps;
+    parameterValues.at(i) += gradientStepSize;
     
     stepForward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues, transformationList)).rows(selectRows);
     
-    parameterValues.at(i) -= 2.0*eps;
+    parameterValues.at(i) -= 2.0*gradientStepSize;
     
     stepBackward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues, transformationList)).rows(selectRows);
     
-    parameterValues.at(i) += eps;
+    parameterValues.at(i) += gradientStepSize;
     
-    currentGradients.col(j) = (stepForward - stepBackward)/(2.0*eps);
+    currentGradients.col(j) = (stepForward - stepBackward)/(2.0*gradientStepSize);
     j++;
   }
   
