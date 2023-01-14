@@ -1,4 +1,4 @@
-test_that("testing smooth lasso", {
+test_that("testing translation from lessSEM to lavaan", {
   testthat::skip_on_cran()
   library(lavaan)
   library(lessSEM)

@@ -162,7 +162,7 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
   lessSEMEstimates <- unlist(regularizedSEM@parameters[whichRow,expectedParameters])
   
   # Now we can change the parameters of the lavaan model to match ours
-  lavaanParTable <- parameterEstimates(object = lavaanModel)
+  lavaanParTable <- lavaan::parameterEstimates(object = lavaanModel)
   lavaanParTable$se <- NA
   lavaanParTable$z <- NA
   lavaanParTable$pvalue <- NA
@@ -182,8 +182,9 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
     }
   }
   
-  updatedLavaanModel <- update(object = lavaanModel,
-                               start = lavaanParTable,
-                               do.fit= FALSE)
+  updatedLavaanModel <- lavaan::update(object = lavaanModel,
+                                       data = lavInspect(lavaanModel, "data"),
+                                       start = lavaanParTable,
+                                       do.fit= FALSE)
   return(updatedLavaanModel)
 }
