@@ -1,6 +1,6 @@
 #' lessSEM
 #'
-#' lessSEM (**l**essSEM **e**stimates **s**parse **SEMr**) 
+#' lessSEM (**l**essSEM **e**stimates **s**parse **SEM**) 
 #' is an R package which provides regularized 
 #' structural equation modeling (regularized SEM) 
 #' building on lavaan.
