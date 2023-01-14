@@ -7,13 +7,16 @@
 #' @param dataSet option to replace the data set in the lavaan model with a different data set. Can be useful for cross-validation
 #' @param transformations allows for transformations of parameters - useful for measurement invariance tests etc.
 #' @param transformationList optional list used within the transformations. NOTE: This must be used as an Rcpp::List.
+#' @param transformationGradientStepSize step size used to compute the gradients of the
+#' transformations
 #' @returns Object of class modifyModel
 modifyModel <- function(
     addMeans = TRUE,
     activeSet = NULL,
     dataSet = NULL,
     transformations = NULL,
-    transformationList = list()
+    transformationList = list(),
+    transformationGradientStepSize = 1e-6
   ){
   mod <- as.list(environment())
   class(mod) <- "modifyModel"

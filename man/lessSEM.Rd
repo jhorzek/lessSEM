@@ -6,7 +6,7 @@
 \alias{lessSEM-package}
 \title{lessSEM}
 \description{
-lessSEM (\strong{l}essSEM \strong{e}stimates \strong{s}parse \strong{SEMr})
+lessSEM (\strong{l}essSEM \strong{e}stimates \strong{s}parse \strong{SEM})
 is an R package which provides regularized
 structural equation modeling (regularized SEM)
 building on lavaan.

@@ -84,22 +84,20 @@ arma::mat mgParameters::getTransformationGradients(){
   }
   parameterValues.names() = uniqueLabels;
   
-  double eps = 1e-6;
-  
   j = 0;
   for(int i = 0; i < parameterValues.size(); i++){
     if(isTransformation.at(i)) continue;
-    parameterValues.at(i) += eps;
+    parameterValues.at(i) += gradientStepSize;
     
     stepForward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues, transformationList));//.rows(selectRows);
     
-    parameterValues.at(i) -= 2.0*eps;
+    parameterValues.at(i) -= 2.0*gradientStepSize;
     
     stepBackward = Rcpp::as<arma::colvec>(transformationFunction(parameterValues, transformationList));//.rows(selectRows);
     
-    parameterValues.at(i) += eps;
+    parameterValues.at(i) += gradientStepSize;
     
-    currentGradients.col(j) = (stepForward - stepBackward)/(2.0*eps);
+    currentGradients.col(j) = (stepForward - stepBackward)/(2.0*gradientStepSize);
     j++;
   }
   return(currentGradients);
@@ -125,7 +123,7 @@ arma::mat mgParameters::getTransformationGradients(){
 //' parameters and the values of the parameters as well as a boolean indicating if 
 //' these are raw. Finally, a double (eps) controls the precision of the approximation.
 //' @field computeTransformations compute the transformations.
-//' 
+//' @field setTransformationGradientStepSize change the step size of the gradient computation for the transformations
 void mgSEM::addModel(Rcpp::List SEMList){
   if(parameters.hasTransformations){
     Rcpp::stop("It seems like transformations were already added to the model. You cannot add further models.");
@@ -342,6 +340,9 @@ arma::mat mgSEM::getHessian(Rcpp::StringVector label_,
   return(Hessian);
 }
 
+void mgSEM::setTransformationGradientStepSize(double gradientStepSize){
+  parameters.gradientStepSize = gradientStepSize;
+}
 
 RCPP_MODULE(mgSEM_cpp){
   using namespace Rcpp;
@@ -363,5 +364,6 @@ RCPP_MODULE(mgSEM_cpp){
     .method( "getHessian", &mgSEM::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
     .method( "addTransformation", &mgSEM::addTransformation, "Add a transformation function. Expects parameterLabels and pointer to function.")
     .method( "computeTransformations", &mgSEM::computeTransformations, "Compute all transformations")
+    .method( "setTransformationGradientStepSize", &mgSEM::setTransformationGradientStepSize, "Change the step size used in the computation of the transformation gradients.")
   ;
 }

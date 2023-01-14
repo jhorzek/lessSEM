@@ -181,9 +181,10 @@ setMethod("plot",
               
               return(
                 ggplot2::ggplot(data = parametersLong,
-                                mapping = ggplot2::aes_string(x = colnames(tuningParameters), 
-                                                              y = "value", 
-                                                              group = "name")) +
+                                mapping = ggplot2::aes(
+                                  x = .data[[colnames(tuningParameters)]], 
+                                  y = .data[["value"]],
+                                  group = .data[["name"]])) +
                   ggplot2::geom_line(colour = "#008080")+
                   ggplot2::ggtitle("Regularized Parameters")
               )

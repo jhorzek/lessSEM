@@ -20,6 +20,7 @@
 #' parameters and the values of the parameters as well as a boolean indicating if 
 #' these are raw. Finally, a double (eps) controls the precision of the approximation.
 #' @field computeTransformations compute the transformations.
+#' @field setTransformationGradientStepSize change the step size of the gradient computation for the transformations
 NULL
 
 #' callFitFunction
@@ -418,7 +419,7 @@ mcpPenalty_C <- function(par, lambda_p, theta) {
 #' parameters and the values of the parameters as well as a boolean indicating if 
 #' these are raw. Finally, a double (eps) controls the precision of the approximation.
 #' @field computeTransformations compute the transformations.
-#' 
+#' @field setTransformationGradientStepSize change the step size of the gradient computation for the transformations
 NULL
 
 #'@name istaScadSEM

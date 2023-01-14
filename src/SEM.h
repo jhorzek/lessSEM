@@ -85,6 +85,8 @@ public:
                        bool raw,
                        double eps);
   
+  void setTransformationGradientStepSize(double gradientStepSize);
+  
 };
 
 RCPP_EXPOSED_CLASS(SEMCpp)

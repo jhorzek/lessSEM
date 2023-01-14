@@ -79,45 +79,47 @@ setMethod("coef", "cvRegularizedSEM", function (object, ...) {
 setMethod("plot", 
           signature = c(x = "cvRegularizedSEM",
                         y = "missing"), 
-          definition = function (x, y, ...) {
-  
-  fits <- x@cvfits
-  tuningParameters <- fits[,colnames(fits)!= "cvfit",drop=FALSE]
-  tuningParameters <- tuningParameters[,apply(tuningParameters,2,function(x) length(unique(x)) > 1),drop=FALSE]
-  
-  nTuning <- ncol(tuningParameters)
-  
-  if(nTuning > 2) 
-    stop("Plotting currently only supported for up to 2 tuning parameters")
-  if(nTuning == 2 & !("plotly" %in% rownames(utils::installed.packages())))
-    stop("Plotting more than one tuning parameter requires the package plotly")
-  
-  if(nTuning == 1){
-    
-    return(
-      ggplot2::ggplot(data = fits,
-                    mapping = ggplot2::aes_string(x = colnames(tuningParameters), 
-                                                  y = "cvfit")) +
-      ggplot2::geom_line(colour = "#008080")+
-      ggplot2::ggtitle("Regularized Parameters")
-      )
-    
-  }else{
-    fits$tp1 <- unlist(fits[,colnames(tuningParameters)[1]])
-    fits$tp2 <- unlist(fits[,colnames(tuningParameters)[2]])
-    return(
-      plotly::layout(
-        plotly::plot_ly(fits, 
-                    x = ~tp1, y = ~tp2, z = ~cvfit, 
-                    type = 'scatter3d', mode = 'lines',
-                    opacity = 1,
-                    split = ~tp2,
-                    line = list(width = 6, 
-                                reverscale = FALSE)), 
-        scene = list(xaxis = list(title = colnames(tuningParameters)[1]), 
-                     yaxis = list(title = colnames(tuningParameters)[2]))
-        )
-    )
-    
-  }
-})
+          definition = function (x, y, ...) 
+          {
+            
+            fits <- x@cvfits
+            tuningParameters <- fits[,colnames(fits)!= "cvfit",drop=FALSE]
+            tuningParameters <- tuningParameters[,apply(tuningParameters,2,function(x) length(unique(x)) > 1),drop=FALSE]
+            
+            nTuning <- ncol(tuningParameters)
+            
+            if(nTuning > 2) 
+              stop("Plotting currently only supported for up to 2 tuning parameters")
+            if(nTuning == 2 & !("plotly" %in% rownames(utils::installed.packages())))
+              stop("Plotting more than one tuning parameter requires the package plotly")
+            
+            if(nTuning == 1){
+              # .data[[v1]], .data[["y"]])
+              return(
+                ggplot2::ggplot(data = fits,
+                                mapping = ggplot2::aes(
+                                  x = .data[[colnames(tuningParameters)]], 
+                                  y = .data[["cvfit"]])) +
+                  ggplot2::geom_line(colour = "#008080") +
+                  ggplot2::ggtitle("Regularized Parameters")
+              )
+              
+            }else{
+              fits$tp1 <- unlist(fits[,colnames(tuningParameters)[1]])
+              fits$tp2 <- unlist(fits[,colnames(tuningParameters)[2]])
+              return(
+                plotly::layout(
+                  plotly::plot_ly(fits, 
+                                  x = ~tp1, y = ~tp2, z = ~cvfit, 
+                                  type = 'scatter3d', mode = 'lines',
+                                  opacity = 1,
+                                  split = ~tp2,
+                                  line = list(width = 6, 
+                                              reverscale = FALSE)), 
+                  scene = list(xaxis = list(title = colnames(tuningParameters)[1]), 
+                               yaxis = list(title = colnames(tuningParameters)[2]))
+                )
+              )
+              
+            }
+          })

@@ -16,7 +16,8 @@
                           activeSet = modifyModel$activeSet,
                           dataSet = modifyModel$dataSet,
                           transformations = modifyModel$transformations,
-                          transformationList = modifyModel$transformationList)
+                          transformationList = modifyModel$transformationList,
+                          transformationGradientStepSize = modifyModel$transformationGradientStepSize)
   }else if(any(startingValues == "start")){
     SEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
                           whichPars = "start",
@@ -24,7 +25,8 @@
                           activeSet = modifyModel$activeSet,
                           dataSet = modifyModel$dataSet,
                           transformations = modifyModel$transformations,
-                          transformationList = modifyModel$transformationList)
+                          transformationList = modifyModel$transformationList,
+                          transformationGradientStepSize = modifyModel$transformationGradientStepSize)
   }else if(is.numeric(startingValues)){
     
     if(!all(names(startingValues) %in% names(getLavaanParameters(lavaanModel))))
@@ -36,7 +38,8 @@
                           activeSet = modifyModel$activeSet,
                           dataSet = modifyModel$dataSet,
                           transformations = modifyModel$transformations,
-                          transformationList = modifyModel$transformationList)
+                          transformationList = modifyModel$transformationList,
+                          transformationGradientStepSize = modifyModel$transformationGradientStepSize)
     SEM <- .setParameters(SEM = SEM, 
                           labels = names(startingValues), 
                           values = startingValues, 
@@ -69,13 +72,16 @@
                                     whichPars = "est",
                                     addMeans = modifyModel$addMeans,
                                     transformations = modifyModel$transformations,
-                                    transformationList = modifyModel$transformationList)
+                                    transformationList = modifyModel$transformationList,
+                                    transformationGradientStepSize = modifyModel$transformationGradientStepSize
+                                    )
   }else if(any(startingValues == "start")){
     SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModels,
                                     whichPars = "start",
                                     addMeans = modifyModel$addMeans,
                                     transformations = modifyModel$transformations,
-                                    transformationList = modifyModel$transformationList)
+                                    transformationList = modifyModel$transformationList,
+                                    transformationGradientStepSize = modifyModel$transformationGradientStepSize)
   }else if(is.numeric(startingValues)){
     
     SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModel,
@@ -83,7 +89,8 @@
                                     fit = FALSE,
                                     addMeans = modifyModel$addMeans,
                                     transformations = modifyModel$transformations,
-                                    transformationList = modifyModel$transformationList)
+                                    transformationList = modifyModel$transformationList,
+                                    transformationGradientStepSize = modifyModel$transformationGradientStepSize)
     SEM <- .setParameters(SEM = SEM, 
                           labels = names(startingValues), 
                           values = startingValues, 

@@ -32,5 +32,7 @@ parameters and the values of the parameters as well as a boolean indicating if
 these are raw. Finally, a double (eps) controls the precision of the approximation.}
 
 \item{\code{computeTransformations}}{compute the transformations.}
+
+\item{\code{setTransformationGradientStepSize}}{change the step size of the gradient computation for the transformations}
 }}
 

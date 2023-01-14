@@ -10,7 +10,8 @@
   fit = TRUE,
   addMeans = TRUE,
   transformations = NULL,
-  transformationList = list()
+  transformationList = list(),
+  transformationGradientStepSize = 1e-06
 )
 }
 \arguments{
@@ -27,6 +28,9 @@ be optimized afterwards as setting the parameters to "est" may result in the mod
 \item{transformations}{string with transformations}
 
 \item{transformationList}{list for transformations}
+
+\item{transformationGradientStepSize}{step size used to compute the gradients of the
+transformations}
 }
 \value{
 Object of class Rcpp_mgSEMCpp
