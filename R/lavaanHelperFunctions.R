@@ -155,6 +155,49 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
   if(sum(whichRow) != 1) 
     stop("Error while selecting parameters: Instead of returning parameters for a single model, multiple model parameters have been returned")
   
+  # check if it is a multi-group model
+  if(is(object = regularizedSEM@inputArguments$lavaanModel, class2 = "list")){
+    nModels <- length(regularizedSEM@inputArguments$lavaanModel)
+    lavaanModels <- vector("list", nModels)
+    
+    for(m in 1:length(lavaanModels)){
+      # We only need those parameters that are also in the lavaan model:
+      lavaanModel <- regularizedSEM@inputArguments$lavaanModel[[m]]
+      expectedParameters <- names(getLavaanParameters(lavaanModel))
+      
+      lessSEMEstimates <- unlist(regularizedSEM@parameters[whichRow,expectedParameters])
+      
+      # Now we can change the parameters of the lavaan model to match ours
+      lavaanParTable <- lavaan::parameterEstimates(object = lavaanModel)
+      lavaanParTable$se <- NA
+      lavaanParTable$z <- NA
+      lavaanParTable$pvalue <- NA
+      lavaanParTable$ci.lower <- NA
+      lavaanParTable$ci.upper <- NA
+      
+      for(i in 1:nrow(lavaanParTable)){
+        if(! "label" %in% colnames(lavaanParTable) ||
+           lavaanParTable$label[i] == ""){
+          label <- paste0(lavaanParTable$lhs[i], lavaanParTable$op[i], lavaanParTable$rhs[i])
+        }else{
+          label <- lavaanParTable$label[i]
+        }
+        
+        if(label %in% names(lessSEMEstimates)){
+          lavaanParTable$est[i] <- lessSEMEstimates[label]
+        }
+      }
+      
+      lavaanModels[[m]] <- lavaan::update(object = lavaanModel,
+                                          data = lavInspect(lavaanModel, "data"),
+                                          start = lavaanParTable,
+                                          do.fit= FALSE)
+      
+      
+    }
+    return(lavaanModels)
+    
+  }
   # We only need those parameters that are also in the lavaan model:
   lavaanModel <- regularizedSEM@inputArguments$lavaanModel
   expectedParameters <- names(getLavaanParameters(lavaanModel))
