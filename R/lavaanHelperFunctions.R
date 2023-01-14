@@ -155,6 +155,14 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
   if(sum(whichRow) != 1) 
     stop("Error while selecting parameters: Instead of returning parameters for a single model, multiple model parameters have been returned")
   
+  # extract lesssem parameters
+  if(ncol(regularizedSEM@transformations) == 0){
+    # model without transformations
+    lessSEMEstimates <- regularizedSEM@parameters
+  }else{
+    lessSEMEstimates <- cbind(regularizedSEM@parameters, regularizedSEM@transformations)
+  }
+  
   # check if it is a multi-group model
   if(is(object = regularizedSEM@inputArguments$lavaanModel, class2 = "list")){
     nModels <- length(regularizedSEM@inputArguments$lavaanModel)
@@ -165,7 +173,7 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
       lavaanModel <- regularizedSEM@inputArguments$lavaanModel[[m]]
       expectedParameters <- names(getLavaanParameters(lavaanModel))
       
-      lessSEMEstimates <- unlist(regularizedSEM@parameters[whichRow,expectedParameters])
+      lessSEMEstimates <- unlist(cbind(regularizedSEM@parameters, regularizedSEM@transformations)[whichRow,expectedParameters])
       
       # Now we can change the parameters of the lavaan model to match ours
       lavaanParTable <- lavaan::parameterEstimates(object = lavaanModel)
@@ -202,7 +210,7 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
   lavaanModel <- regularizedSEM@inputArguments$lavaanModel
   expectedParameters <- names(getLavaanParameters(lavaanModel))
   
-  lessSEMEstimates <- unlist(regularizedSEM@parameters[whichRow,expectedParameters])
+  lessSEMEstimates <- unlist(lessSEMEstimates[whichRow,expectedParameters])
   
   # Now we can change the parameters of the lavaan model to match ours
   lavaanParTable <- lavaan::parameterEstimates(object = lavaanModel)
