@@ -134,6 +134,13 @@
     regularized <- ""
   }else if(!is.numeric(weights)){
     regularized <- weights
+    
+    if(any(!regularized %in% names(rawParameters))){
+      stop("The parameter(s) ", paste0(regularized[!regularized %in% names(rawParameters)], sep = ", "),
+      " were specified as regularized but could not be found in the model. The model parameters are ", 
+      paste0(names(rawParameters), sep = ", "))
+    }
+    
     if(penalty == "adaptiveLasso"){
       
       if(createAdaptiveLassoWeights){

@@ -132,11 +132,12 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-regsem <- lasso(
+rsem <- lasso(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
-  regularized = paste0("l", 6:15),
+  regularized = c("l6", "l7", "l8", "l9", "l10",
+                  "l11", "l12", "l13", "l14", "l15"),
   # in case of lasso and adaptive lasso, we can specify the number of lambda
   # values to use. lessSEM will automatically find lambda_max and fit
   # models for nLambda values between 0 and lambda_max. For the other
@@ -144,22 +145,23 @@ regsem <- lasso(
   nLambdas = 50)
 
 # use the plot-function to plot the regularized parameters:
-plot(regsem)
+plot(rsem)
 
-# elements of regsem can be accessed with the @ operator:
-regsem@parameters[1,]
+# elements of rsem can be accessed with the @ operator:
+rsem@parameters[1,]
 
 # AIC and BIC:
-AIC(regsem)
-BIC(regsem)
+AIC(rsem)
+BIC(rsem)
 
 # The best parameters can also be extracted with:
-coef(regsem, criterion = "AIC")
-coef(regsem, criterion = "BIC")
+coef(rsem, criterion = "AIC")
+coef(rsem, criterion = "BIC")
 
 # cross-validation
 cv <- cvLasso(lavaanModel = lavaanModel,
-              regularized = paste0("l", 6:15),
+              regularized = c("l6", "l7", "l8", "l9", "l10",
+                              "l11", "l12", "l13", "l14", "l15"),
               lambdas = seq(0,1,.1),
               standardize = TRUE)
 
@@ -170,7 +172,7 @@ coef(cv)
 # Switching the optimizer # 
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-regsemIsta <- lasso(
+rsemIsta <- lasso(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   nLambdas = 50,
@@ -178,7 +180,32 @@ regsemIsta <- lasso(
   control = controlIsta())
 
 # Note: The results are basically identical:
-regsemIsta@parameters - regsem@parameters
+rsemIsta@parameters - rsem@parameters
+```
+
+An experimental feature to be used with caution is the option to extract
+a lavaan object from a fitted regularized SEM. This can be very useful
+when fitting the final model. In our case, the best model is given for:
+
+``` r
+lambdaBest <- coef(rsem, criterion = "BIC")$lambda 
+```
+
+We can get the lavaan model with the parameters corresponding to those
+of the regularized model with `lambda = lambdaBest` as follows:
+
+``` r
+lavaanModel <- lessSEM2Lavaan(regularizedSEM = rsem, 
+                              lambda = lambdaBest)
+```
+
+The result can be plotted with, for instance, semPlot:
+
+``` r
+library(semPlot)
+semPaths(lavaanModel,
+         what = "est",
+         fade = FALSE)
 ```
 
 # Transformations
