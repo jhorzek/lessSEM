@@ -257,7 +257,7 @@ c2 = c1 + delta_c2;
 
 # setting delta_a2, delta_b2, or delta_c2 to zero implies measurement invariance
 # for the respective parameters (a1, b1, c1)
-lassoFit <- lasso(lavaanModel = lavaanFit, 
+lassoFit <- lasso(lavaanModel = fit, 
                   # we want to regularize the differences between the parameters
                   regularized = c("delta_a2", "delta_b2", "delta_c2"),
                   nLambdas = 100,
