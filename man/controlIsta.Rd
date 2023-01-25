@@ -45,7 +45,7 @@ depends directly on the sample size}
 1 = gist, as presented by Gong et al. (2013) (Equation 3)}
 
 \item{sigma}{sigma in (0,1) is used by the gist convergence criterion. larger
-simga enforce larger improvement in fit}
+sigma enforce larger improvement in fit}
 
 \item{stepSizeInheritance}{how should step sizes be carried forward from iteration to iteration?
 0 = resets the step size to L0 in each iteration
