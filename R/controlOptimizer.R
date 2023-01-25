@@ -18,7 +18,7 @@
 #' 0 = ista, as presented by Beck & Teboulle (2009); see Remark 3.1 on p. 191 (ISTA with backtracking)
 #' 1 = gist, as presented by Gong et al. (2013) (Equation 3)
 #' @param sigma sigma in (0,1) is used by the gist convergence criterion. larger
-#'  simga enforce larger improvement in fit
+#'  sigma enforce larger improvement in fit
 #' @param stepSizeInheritance how should step sizes be carried forward from iteration to iteration? 
 #' 0 = resets the step size to L0 in each iteration
 #' 1 = takes the previous step size as initial value for the next iteration
