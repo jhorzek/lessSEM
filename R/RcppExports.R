@@ -422,6 +422,28 @@ mcpPenalty_C <- function(par, lambda_p, theta) {
 #' @field setTransformationGradientStepSize change the step size of the gradient computation for the transformations
 NULL
 
+#'@name istaMixedPenaltySEM
+#'@title mixed penalty optimization with ista
+#'@description Object for elastic net optimization with
+#'ista optimizer
+#'@field new creates a new object. Requires (1) a vector with weights for each
+#'parameter and (2) a list with control elements
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
+#'@returns a list with fit results
+NULL
+
+#'@name istaMixedPenaltymgSEM
+#'@title mixed penalty optimization with ista
+#'@description Object for elastic net optimization with
+#'ista optimizer
+#'@field new creates a new object. Requires (1) a vector with weights for each
+#'parameter and (2) a list with control elements
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
+#'@returns a list with fit results
+NULL
+
 #'@name istaScadSEM
 #'@title scad optimization with ista
 #'@description Object for scad optimization with

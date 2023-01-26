@@ -12,7 +12,7 @@ public:
   
   Rcpp::NumericVector startingValues;
   
-  const std:vector<lessSEM::penaltyType> penaltyType;
+  std::vector<lessSEM::penaltyType> pType;
   arma::rowvec lambda;
   arma::rowvec theta;
   arma::rowvec alpha;
@@ -33,11 +33,10 @@ public:
   // constructor
   istaMixedPenalty(
     const arma::rowvec weights_,
-    const std::vector<int> penaltyType_int,
+    const std::vector<int> pType_int,
     Rcpp::List control
   ): 
     weights(weights_),
-    penaltyType(static_cast<lessSEM::penaltyType>(Rcpp::as<std::vector<int>> (control["penaltyType_int"]))),
     L0(Rcpp::as<double> (control["L0"])),
     eta(Rcpp::as<double> (control["eta"])),
     accelerate(Rcpp::as<bool> (control["accelerate"])),
@@ -47,7 +46,15 @@ public:
     convCritInner(static_cast<lessSEM::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
     sigma(Rcpp::as<double> (control["sigma"])),
     stepSizeInh(static_cast<lessSEM::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
-    verbose(Rcpp::as<int> (control["verbose"])){}
+    verbose(Rcpp::as<int> (control["verbose"])){
+    
+    pType.resize(pType_int.size());
+    
+    for(int i = 0; i < pType_int.size(); i++){
+      pType.at(i) = static_cast<lessSEM::penaltyType>(pType_int.at(i));
+    }
+    
+  }
   
   Rcpp::List optimize(
       Rcpp::NumericVector startingValues_, 
@@ -61,14 +68,15 @@ public:
     int sampleSize = SEMFF.SEM.sampleSize;
     
     lessSEM::tuningParametersMixedPenalty tp;
+    tp.pt = pType;
     tp.lambda = lambda_;
     tp.theta = theta_;
     tp.alpha = alpha_;
     tp.weights = weights;
     
     lessSEM::tuningParametersEnet smoothTp;
-    smoothTp.alpha = alpha_;
-    smoothTp.lambda = lambda_;
+    smoothTp.alpha = 0.0;
+    smoothTp.lambda = 0.0;
     smoothTp.weights = weights;
     
     lessSEM::proximalOperatorMixedPenalty proximalOperatorMixedPenalty_;

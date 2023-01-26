@@ -134,6 +134,8 @@ RcppExport SEXP _rcpp_module_boot_istaLSPMgSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaMcpSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaMcpMgSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_mgSEM_cpp();
+RcppExport SEXP _rcpp_module_boot_istaMixedPenaltySEM_cpp();
+RcppExport SEXP _rcpp_module_boot_istaMixedPenaltymgSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaScadSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaScadMgSEM_cpp();
 
@@ -171,6 +173,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_istaMcpSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcpSEM_cpp, 0},
     {"_rcpp_module_boot_istaMcpMgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcpMgSEM_cpp, 0},
     {"_rcpp_module_boot_mgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_mgSEM_cpp, 0},
+    {"_rcpp_module_boot_istaMixedPenaltySEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaMixedPenaltySEM_cpp, 0},
+    {"_rcpp_module_boot_istaMixedPenaltymgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaMixedPenaltymgSEM_cpp, 0},
     {"_rcpp_module_boot_istaScadSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaScadSEM_cpp, 0},
     {"_rcpp_module_boot_istaScadMgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaScadMgSEM_cpp, 0},
     {NULL, NULL, 0}

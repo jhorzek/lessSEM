@@ -147,23 +147,23 @@ public:
         abs_u_k = std::abs(u_k.at(p));
         
         tempValue = std::pow(L,2) * 
-          std::pow(abs_u_k - tuningParameters.theta, 2) -
-          4.0*L*(tuningParameters.lambda - L*abs_u_k*tuningParameters.theta);
+          std::pow(abs_u_k - tuningParameters.theta.at(p), 2) -
+          4.0*L*(tuningParameters.lambda.at(p) - L*abs_u_k*tuningParameters.theta.at(p));
         
         if(tempValue >= 0){
           C.at(1) = std::max(
-            (L*(abs_u_k - tuningParameters.theta) + std::sqrt(tempValue)) / (2*L), 
+            (L*(abs_u_k - tuningParameters.theta.at(p)) + std::sqrt(tempValue)) / (2*L), 
             0.0);
           C.at(2) = std::max(
-            (L*(abs_u_k - tuningParameters.theta) - std::sqrt(tempValue)) / (2*L),
+            (L*(abs_u_k - tuningParameters.theta.at(p)) - std::sqrt(tempValue)) / (2*L),
             0.0);
           
           for(int c = 0; c < 3; c++){
             
             xVec.at(c) = .5*std::pow(C.at(c) - abs_u_k, 2) +
               (1.0/L)*
-              tuningParameters.lambda * 
-              std::log(1.0 + C.at(c) / tuningParameters.theta);
+              tuningParameters.lambda.at(p) * 
+              std::log(1.0 + C.at(c) / tuningParameters.theta.at(p));
             
           }
           
@@ -243,7 +243,7 @@ public:
         std::vector<double> h(4, 0.0); // to save the function values of the 
         // four possible minima saved in x
         int sign; // sign of u_k
-        double thetaXlambda = tuningParameters.theta*tuningParameters.lambda;
+        double thetaXlambda = tuningParameters.theta.at(p)*tuningParameters.lambda.at(p);
         
         sign = (u_k.at(p) > 0);
         if(u_k.at(p) < 0) sign = -1;
@@ -258,32 +258,32 @@ public:
         
         // identical to Gong et al. (2013)
         x.at(0) = sign * std::min(
-          tuningParameters.lambda, 
+          tuningParameters.lambda.at(p), 
           std::max(
             0.0,
-            abs_u_k - tuningParameters.lambda/L
+            abs_u_k - tuningParameters.lambda.at(p)/L
           )
         );
         
         // assume that lambda <= |u| <= theta*lambda
         // The following differs from Gong et al. (2013)
         
-        v = 1.0 - 1.0/(L*(tuningParameters.theta - 1.0)); // used repeatedly;
+        v = 1.0 - 1.0/(L*(tuningParameters.theta.at(p) - 1.0)); // used repeatedly;
         // only computed for convenience
         
         x.at(1) = std::min(
           thetaXlambda, 
           std::max(
-            tuningParameters.lambda,
-            (u_k.at(p) / v) - (thetaXlambda)/(L*(tuningParameters.theta - 1.0)*v)
+            tuningParameters.lambda.at(p),
+            (u_k.at(p) / v) - (thetaXlambda)/(L*(tuningParameters.theta.at(p) - 1.0)*v)
           )
         );
         
         x.at(2) = std::max(
           -thetaXlambda, 
           std::min(
-            -tuningParameters.lambda,
-            (u_k.at(p) / v) + (thetaXlambda)/(L*(tuningParameters.theta - 1.0)*v)
+            -tuningParameters.lambda.at(p),
+            (u_k.at(p) / v) + (thetaXlambda)/(L*(tuningParameters.theta.at(p) - 1.0)*v)
           )
         );
         
@@ -297,7 +297,7 @@ public:
         
         for(int i = 0; i < 4; i++){
           h.at(i) = .5 * std::pow(x.at(i) - u_k.at(p), 2) + // distance between parameters
-            (1.0/L) * scadPenalty(x.at(i), tuningParameters.lambda, tuningParameters.theta);
+            (1.0/L) * scadPenalty(x.at(i), tuningParameters.lambda.at(p), tuningParameters.theta.at(p));
         }
         
         parameters_kp1.at(p) = x.at(std::distance(std::begin(h), 
@@ -331,9 +331,9 @@ public:
       // unregularized values:
       if(tuningParameters.weights.at(p) == 0.0) continue;
       
-      switch{
+      switch(tuningParameters.pt.at(p)){
       
-      case tuningParameters.at(p) == cappedL1:
+      case cappedL1:
         lambda_i = tuningParameters.alpha.at(p) *
           tuningParameters.lambda.at(p) * 
           tuningParameters.weights.at(p);
@@ -343,7 +343,7 @@ public:
         
         break;
         
-      case tuningParameters.at(p) == lasso:
+      case lasso:
         
         tuningParameters.alpha.at(p) *
           tuningParameters.lambda.at(p) * 
@@ -352,7 +352,7 @@ public:
         penalty += lambda_i * std::abs(parameterValues.at(p));
         break;
         
-      case tuningParameters.at(p) == lsp:
+      case lsp:
         
         penalty += lspPenalty(parameterValues.at(p),
                               tuningParameters.lambda.at(p),
@@ -360,7 +360,7 @@ public:
         
         break;
         
-      case tuningParameters.at(p) == mcp: 
+      case mcp: 
         
         penalty += mcpPenalty(parameterValues.at(p), 
                               tuningParameters.lambda.at(p),
@@ -368,7 +368,7 @@ public:
         
         break;
         
-      case tuningParameters.at(p) == scad:  
+      case scad:  
         
         penalty += scadPenalty(parameterValues.at(p), 
                                tuningParameters.lambda.at(p),
@@ -379,11 +379,6 @@ public:
       default:
         Rcpp::stop("Penalty not found.");
       }
-      
-      // scad penalty value:
-      penalty += scadPenalty(parameterValues.at(p), 
-                             tuningParameters.lambda,
-                             tuningParameters.theta);
       
     }
     
