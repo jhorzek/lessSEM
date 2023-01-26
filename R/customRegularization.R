@@ -27,9 +27,6 @@
 #' Trends in Optimization, 1(3), 123–231.
 #'  
 #' @param lavaanModel model of class lavaan 
-#' @param regularized vector with names of parameters which are to be regularized.
-#' If you are unsure what these parameters are called, use 
-#' getLavaanParameters(model) with your lavaan model object
 #' @param method which optimizer should be used? Only ista is supported.
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
@@ -64,14 +61,18 @@
 #' 
 #' # We can add multiple penalties as follows:
 #' 
-#' regularized <- mixedPenalty(lavaanModel, control = controlIsta(verbose = 1)) |>
-#'   # add lasso penalty on loadings l6 - l10
+#' regularized <- lavaanModel |>
+#'   # create template for regularized model with mixed penalty:
+#'   mixedPenalty() |>
+#'   # add lasso penalty on loadings l6 - l10:
 #'   addLasso(regularized = paste0("l", 6:10), 
 #'            lambdas = seq(0,1,.1)) |>
-#'   # add scad penalty on loadings l11 - l15
+#'   # add scad penalty on loadings l11 - l15:
 #'   addScad(regularized = paste0("l", 11:15), 
 #'           lambdas = seq(0,1,.1),
-#'           thetas = 3.1)
+#'           thetas = 3.1) |>
+#'   # fit the model:
+#'   fit()
 #' 
 #' # elements of regularized can be accessed with the @ operator:
 #' regularized@parameters[1,]
@@ -86,6 +87,13 @@
 #' 
 #' # The tuningParameterConfiguration corresponds to the rows
 #' # in the lambda, theta, and alpha matrices in regularized@tuningParamterConfigurations.
+#' # Configuration 3, for example, is given by
+#' regularized@tuningParameterConfigurations$lambda[3,]
+#' regularized@tuningParameterConfigurations$theta[3,]
+#' regularized@tuningParameterConfigurations$alpha[3,] 
+#' # Note that lambda, theta, and alpha may correspond to tuning parameters
+#' # of different penalties for different parameters (e.g., lambda for l6 is the lambda
+#' # of the lasso penalty, while lambda for l12 is the lambda of the scad penalty).
 #' 
 #' @export
 mixedPenalty <- function(lavaanModel,

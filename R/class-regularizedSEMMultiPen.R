@@ -1,5 +1,7 @@
 #' Class for regularized SEM
 #' @slot penalty penalty used (e.g., "lasso")
+#' @slot tuningParameterConfigurations list with settings for the lambda, theta, 
+#' and alpha tuning parameters.
 #' @slot parameters data.frame with parameter estimates
 #' @slot fits data.frame with all fit results
 #' @slot parameterLabels character vector with names of all parameters

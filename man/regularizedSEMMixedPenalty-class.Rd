@@ -12,6 +12,9 @@ Class for regularized SEM
 \describe{
 \item{\code{penalty}}{penalty used (e.g., "lasso")}
 
+\item{\code{tuningParameterConfigurations}}{list with settings for the lambda, theta,
+and alpha tuning parameters.}
+
 \item{\code{parameters}}{data.frame with parameter estimates}
 
 \item{\code{fits}}{data.frame with all fit results}
