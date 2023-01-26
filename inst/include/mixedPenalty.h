@@ -26,6 +26,7 @@
 namespace lessSEM{
 
 enum penaltyType{
+  none,
   cappedL1,
   lasso,
   lsp,
@@ -33,6 +34,7 @@ enum penaltyType{
   scad
 };
 const std::vector<std::string> penaltyType_txt = {
+  "none",
   "cappedL1",
   "lasso",
   "lsp",
@@ -76,10 +78,11 @@ public:
       }
       
       if(tuningParameters.pt.at(p) == cappedL1){
+        
         double lambda_i, x_1, x_2, h_1, h_2, abs_u_k;
         Rcpp::String parameterLabel;
         int sign;
-        lambda_i = tuningParameters.theta.at(p) *
+        lambda_i = tuningParameters.alpha.at(p) *
           tuningParameters.lambda.at(p) * 
           tuningParameters.weights.at(p);
         
@@ -123,8 +126,7 @@ public:
         Rcpp::String parameterLabel;
         int sign;
         
-        lambda_i = tuningParameters.alpha.at(p) *
-          tuningParameters.lambda.at(p) * 
+        lambda_i = tuningParameters.lambda.at(p) * 
           tuningParameters.weights.at(p);
         
         sign = (u_k.at(p) > 0);
@@ -345,8 +347,7 @@ public:
         
       case lasso:
         
-        tuningParameters.alpha.at(p) *
-          tuningParameters.lambda.at(p) * 
+        lambda_i = tuningParameters.lambda.at(p) * 
           tuningParameters.weights.at(p);
         
         penalty += lambda_i * std::abs(parameterValues.at(p));

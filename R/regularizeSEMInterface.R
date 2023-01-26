@@ -706,7 +706,6 @@ elasticNet <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Model of class regularizedSEM
-
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -831,7 +830,6 @@ cappedL1 <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Model of class regularizedSEM
-
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -958,7 +956,6 @@ lsp <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Model of class regularizedSEM
-
 #' @examples 
 #' library(lessSEM)
 #' 

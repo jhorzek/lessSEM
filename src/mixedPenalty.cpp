@@ -59,8 +59,8 @@ public:
   Rcpp::List optimize(
       Rcpp::NumericVector startingValues_, 
       sem& SEM_,
-      arma::rowvec theta_,
       arma::rowvec lambda_, 
+      arma::rowvec theta_,
       arma::rowvec alpha_){
     
     SEMFitFramework<sem> SEMFF(SEM_);
@@ -130,7 +130,7 @@ public:
 //'@description Object for elastic net optimization with
 //'ista optimizer
 //'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
+//'parameter, (2) a vector indicating which penalty is used, and (3) a list with control elements
 //'@field optimize optimize the model. Expects a vector with starting values,
 //'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
 //'@returns a list with fit results
@@ -139,7 +139,7 @@ RCPP_EXPOSED_CLASS_NODECL(istaMixedPenaltySEM)
   RCPP_MODULE(istaMixedPenaltySEM_cpp){
     using namespace Rcpp;
     Rcpp::class_<istaMixedPenaltySEM>( "istaMixedPenaltySEM" )
-      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaMixedPenaltySEM.")
+      .constructor<arma::rowvec,std::vector<int>,Rcpp::List>("Creates a new istaMixedPenaltySEM.")
     // methods
     .method( "optimize", &istaMixedPenaltySEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
     ;
@@ -150,7 +150,7 @@ RCPP_EXPOSED_CLASS_NODECL(istaMixedPenaltySEM)
 //'@description Object for elastic net optimization with
 //'ista optimizer
 //'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
+//'parameter, (2) a vector indicating which penalty is used, and (3) a list with control elements
 //'@field optimize optimize the model. Expects a vector with starting values,
 //'a SEM of type SEM_Cpp, a theta value, a lambda and an alpha value (alpha must be 1).
 //'@returns a list with fit results
@@ -159,7 +159,7 @@ RCPP_EXPOSED_CLASS_NODECL(istaMixedPenaltymgSEM)
   RCPP_MODULE(istaMixedPenaltymgSEM_cpp){
     using namespace Rcpp;
     Rcpp::class_<istaMixedPenaltymgSEM>( "istaMixedPenaltymgSEM" )
-      .constructor<arma::rowvec,Rcpp::List>("Creates a new istaMixedPenaltymgSEM.")
+      .constructor<arma::rowvec,std::vector<int>,Rcpp::List>("Creates a new istaMixedPenaltymgSEM.")
     // methods
     .method( "optimize", &istaMixedPenaltymgSEM::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
     ;

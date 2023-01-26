@@ -32,7 +32,7 @@ setMethod("show", "regularizedSEM", function (object) {
   cat("regularized parameters: ")
   cat(paste0(object@regularized, collapse = ", "))
   cat("\n\n")
-  cat(paste0("- Use coef(object) to get the parameter estimates of the model. With coef(object, lambda = x, delta = y) parameters estimates at the values x and y for lambda and delta can be extracted.\n\n"))
+  cat(paste0("- Use coef(object) to get the parameter estimates of the model. With coef(object, criterion = 'BIC') parameters estimates at the lowest BIC can be extracted.\n\n"))
   cat(paste0("- Use plot(object) to plot the parameter estimates of the model.\n\n"))
   cat(paste0("- Information criteria can be computed with AIC(object) or BIC(object).\n\n"))
   cat("################################################\n")
@@ -49,7 +49,7 @@ setMethod("summary", "regularizedSEM", function (object) {
   cat("\n\n")
   cat(paste0("- Use coef(", modelName, 
              ") to get the parameter estimates of the model. With coef(", 
-             modelName, "lambda = x, delta = y) parameters estimates at the values x and y for lambda and delta can be extracted.\n\n"))
+             modelName, ", criterion = 'BIC') parameters estimates at the lowest BIC can be extracted.\n\n"))
   cat(paste0("- Use plot(", modelName, 
              ") to plot the parameter estimates of the model.\n\n"))
   cat(paste0("- Information criteria can be computed with AIC(", modelName, 
