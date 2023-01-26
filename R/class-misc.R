@@ -102,3 +102,10 @@ setClass("Rcpp_glmnetEnetGeneralPurpose")
 #' @keywords internal
 setClass("Rcpp_glmnetEnetGeneralPurposeCpp")
 
+#' Wrapper for C++ module. See ?lessSEM::istaEnetSEM
+#' @keywords internal
+setClass("Rcpp_istaEnetSEM")
+
+#' Wrapper for C++ module. See ?lessSEM::istaEnetMgSEM
+#' @keywords internal
+setClass("Rcpp_istaEnetMgSEM")

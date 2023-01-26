@@ -11,4 +11,6 @@
 #include "scad.h"
 #include "mcp.h"
 #include "ridge.h"
+#include "mixedPenalty.h"
+
 #endif

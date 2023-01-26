@@ -293,8 +293,7 @@ inline lessSEM::fitResults ista(
     if((control_.verbose > 0) && (outer_iteration % control_.verbose == 0)){
       Rcpp::Rcout << "Fit in iteration outer_iteration " << 
         outer_iteration + 1 << 
-          ": " << penalizedFit_k << 
-            std::endl;
+          ": " << penalizedFit_k << " (" << fit_k << " + " << penalty_k  << ")" << std::endl;
       Rcpp::Rcout << parameters_k << std::endl;
     } 
     

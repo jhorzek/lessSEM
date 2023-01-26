@@ -142,7 +142,7 @@ public:
       // unregularized values:
       if(tuningParameters.weights.at(p) == 0.0) continue;
       
-      // scad penalty value:
+      // mcp penalty value:
       penalty += mcpPenalty(parameterValues.at(p), 
                              tuningParameters.lambda,
                              tuningParameters.theta);
