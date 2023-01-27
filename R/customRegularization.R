@@ -100,6 +100,10 @@ mixedPenalty <- function(lavaanModel,
                          method = "ista", 
                          modifyModel = lessSEM::modifyModel(),
                          control = lessSEM::controlIsta()){
+  
+  message("Mixed penalties is a very new feature. Please note that there may still ",
+          "be bugs in the procedure. Use carefully!")
+  
   mixedPenalty <- list(
     lavaanModel = lavaanModel,
     method = method,
@@ -862,7 +866,7 @@ fit <- function(mixedPenalty){
                    lambda = cbind("configuration" = 1:nrow(tpGrid),
                                   lambda),
                    theta = cbind("configuration" = 1:nrow(tpGrid),
-                                 lambda),
+                                 theta),
                    alpha = cbind("configuration" = 1:nrow(tpGrid),
                                  alpha)
                  ),

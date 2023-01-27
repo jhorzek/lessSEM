@@ -126,3 +126,34 @@ setMethod("BIC", "regularizedSEMMixedPenalty", function (object) {
   return(fits)
   
 })
+
+#' getTuningParameterConfiguration
+#' 
+#' Returns the lambda, theta, and alpha values for the tuning parameters
+#' of a regularized SEM with mixed penalty.
+#' @param regularizedSEMMixedPenalty object of type regularizedSEMMixedPenalty (see ?mixedPenalty)
+#' @param tuningParameterConfiguration integer indicating which tuningParameterConfiguration 
+#' should be extracted (e.g., 1). See the entry in the row tuningParameterConfiguration of
+#' regularizedSEMMixedPenalty@fits and regularizedSEMMixedPenalty@parameters.
+#' @return data frame with penalty and tuning parameter settings
+#' @export
+getTuningParameterConfiguration <- function(regularizedSEMMixedPenalty, 
+                                            tuningParameterConfiguration){
+  if(!is(regularizedSEMMixedPenalty, "regularizedSEMMixedPenalty"))
+    stop("regularizedSEMMixedPenalty must be of class 'regularizedSEMMixedPenalty'")
+  if(length(tuningParameterConfiguration) != 1)
+    stop("tuningParameterConfiguration must be a single value (e.g., 1)")
+  if(!tuningParameterConfiguration %in% 1:nrow(regularizedSEMMixedPenalty@tuningParameterConfigurations$lambda)){
+    stop("tuningParameterConfiguration must be an integer in [1, ", nrow(regularizedSEMMixedPenalty@tuningParameterConfigurations$lambda), "]")
+  }
+  
+  return(
+    data.frame(
+      parameter = regularizedSEMMixedPenalty@parameterLabels,
+      penalty = regularizedSEMMixedPenalty@penalty[regularizedSEMMixedPenalty@parameterLabels],
+      lambda = regularizedSEMMixedPenalty@tuningParameterConfigurations$lambda[tuningParameterConfiguration,regularizedSEMMixedPenalty@parameterLabels],
+      theta = regularizedSEMMixedPenalty@tuningParameterConfigurations$theta[tuningParameterConfiguration,regularizedSEMMixedPenalty@parameterLabels],
+      alpha = regularizedSEMMixedPenalty@tuningParameterConfigurations$alpha[tuningParameterConfiguration,regularizedSEMMixedPenalty@parameterLabels]
+    )
+  )
+}
