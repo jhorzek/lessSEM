@@ -364,7 +364,7 @@ lavaanModel <- sem(model,
 
 # Let's add a lasso penalty on the cross-loadings c2 - c4 and 
 # scad penalty on the regressions r1-r3
-mp <- lavaanModel |>
+fitMp <- lavaanModel |>
   mixedPenalty() |>
   addLasso(regularized = c("c2", "c3", "c4"), 
            lambdas = seq(0,1,.1)) |>
