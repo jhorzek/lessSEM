@@ -457,29 +457,98 @@ coef(lassoFit, criterion = "BIC")
 
 More details are provided in `vignette("Parameter-transformations", package = "lessSEM")`.
 
+# Experimental Features
+
+The following features are relatively new and you may still experience some bugs.
+Please be aware of that when using these features.
+
+## From **lessSEM** to **lavaan**
+
+**lessSEM** supports exporting specific models to **lavaan**. This can be very useful when plotting the 
+final model. In our case, the best model is given by:
+```{r, eval = FALSE}
+lambdaBest <- coef(rsem, criterion = "BIC")$lambda 
+```
+
+We can get the **lavaan** model with the parameters corresponding to those of the
+regularized model with `lambda = lambdaBest` as follows:
+
+```{r, eval = FALSE}
+lavaanModel <- lessSEM2Lavaan(regularizedSEM = rsem, 
+                              lambda = lambdaBest)
+```
+
+The result can be plotted with, for instance, [**semPlot**](https://github.com/SachaEpskamp/semPlot):
+```{r, eval = FALSE}
+library(semPlot)
+semPaths(lavaanModel,
+         what = "est",
+         fade = FALSE)
+```
+
 ## Multi-Group Models and Definition Variables
 
 **lessSEM** supports multi-group SEM and, to some degree, definition variables.
 Regularized multi-group SEM have been proposed by Huang (2018) and are 
-implemented in **lslx** (Huang, 2020). The approach by Huang (2018) is currently
-more flexible than what **lessSEM** can do because **lslx** allows for separate
-penalties for the parameter itself and differences in the parameter value between
-groups. With **lessSEM**, this is not possible out of the box. However,
-differences between parameters can be regularized. A detailed introduction
-can be found in `vignette(topic = "Definition-Variables-and-Multi-Group-SEM", package = "lessSEM")`.
+implemented in **lslx** (Huang, 2020). Here, differences between groups are regularized.
+A detailed introduction can be found in 
+`vignette(topic = "Definition-Variables-and-Multi-Group-SEM", package = "lessSEM")`.
 Therein it is also explained how the multi-group SEM can be used to implement
 definition variables (e.g., for latent growth curve models).
 
-## More information
+## Mixed Penalties
+
+**lessSEM** allows for defining different penalties for different parts
+of the model. This feature is new and very experimental. Please keep that
+in mind when using the procedure. A detailed introduction
+can be found in `vignette(topic = "Mixed-Penalties", package = "lessSEM")`.
+
+To provide a short example, we will regularize the loadings and the regression
+parameters of the Political Democracy data set with different penalties. The 
+following script is adapted from `?lavaan::sem`.
+
+```{r, eval=FALSE}
+model <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3 + c2*y2 + c3*y3 + c4*y4
+     dem60 =~ y1 + y2 + y3 + y4
+     dem65 =~ y5 + y6 + y7 + c*y8
+
+  # regressions
+    dem60 ~ r1*ind60
+    dem65 ~ r2*ind60 + r3*dem60
+'
+
+lavaanModel <- sem(model,
+                   data = PoliticalDemocracy)
+
+# Let's add a lasso penalty on the cross-loadings c2 - c4 and 
+# scad penalty on the regressions r1-r3
+mp <- lavaanModel |>
+  mixedPenalty() |>
+  addLasso(regularized = c("c2", "c3", "c4"), 
+           lambdas = seq(0,1,.1)) |>
+  addLasso(regularized = c("r1", "r2", "r3"), 
+           lambdas = seq(0,1,.2)) |>
+  fit()
+```
+
+The best model according to the BIC can be extracted with:
+
+```{r, eval = FALSE}
+coef(fitMp, criterion = "BIC")
+```
+
+# More information
 
 We provide more information in the documentation of the individual functions.
 For instance, see `?lessSEM::lasso` for more details on the lasso penalty. If you
 are interested in the general purpose interface, have a look at `?lessEM::gpLasso`,
 `?lesssEM::gpMcp`, etc. To get more details on implementing the **lessSEM** optimizers in
 your own package, have a look at the vignettes `vignette('General-Purpose-Optimization')` and 
-`vignette('The-optimizer-interface')` and at the [lessLM](https://github.com/jhorzek/lessLM) package.
+`vignette('The-optimizer-interface')` and at the [**lessLM**](https://github.com/jhorzek/lessLM) package.
 
-## Table of the most relevant functions
+# Table of the most relevant functions
 
 Fitting _regularized SEM_:
 

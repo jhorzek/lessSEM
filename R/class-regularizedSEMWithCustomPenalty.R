@@ -23,7 +23,7 @@ setMethod("summary", "regularizedSEMWithCustomPenalty", function (object) {
   cat(paste0("- Use coef(", modelName, 
              ") to get the parameter estimates of the model. With coef(", 
              modelName, "lambda = x, delta = y) parameters estimates at the values x and y for lambda and delta can be extracted.\n\n"))
-  cat(paste0("- Information criteria can be compute with AIC(", modelName, 
+  cat(paste0("- Information criteria can be computed with AIC(", modelName, 
              ") or BIC(", modelName, 
              ").\n\n"))
   cat("################################################\n")

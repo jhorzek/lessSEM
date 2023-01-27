@@ -6,5 +6,7 @@
 \title{Wrapper for C++ module. See ?lessSEM::istaEnetMgSEM}
 \description{
 Wrapper for C++ module. See ?lessSEM::istaEnetMgSEM
+
+Wrapper for C++ module. See ?lessSEM::istaEnetMgSEM
 }
 \keyword{internal}
