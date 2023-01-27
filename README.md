@@ -11,7 +11,7 @@ inspired by the [**regsem**](https://github.com/Rjacobucci/regsem)
 package and the [**lslx**](https://github.com/psyphh/lslx) packages that
 have similar functionality.
 
-The objectives of **lessSEM** are to provide …:
+The objectives of **lessSEM** are to provide …
 
 1.  a flexible framework for regularizing SEM and
 2.  optimizers for other SEM packages which can be used with an
@@ -339,8 +339,9 @@ mp <- lavaanModel |>
   mixedPenalty() |>
   addLasso(regularized = c("c2", "c3", "c4"), 
            lambdas = seq(0,1,.1)) |>
-  addLasso(regularized = c("r1", "r2", "r3"), 
-           lambdas = seq(0,1,.2)) |>
+  addScad(regularized = c("r1", "r2", "r3"), 
+          lambdas = seq(0,1,.2),
+          thetas = 3.7) |>
   fit()
 ```
 
