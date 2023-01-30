@@ -43,6 +43,19 @@
   if(method == "glmnet" && !is(control, "controlGlmnet")) 
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
+  if(method == "glmnet" && !is.null(modifyModel$transformations)){
+    if(control$initialHessian == "lavaan"){
+      message("Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'.")
+      control$initialHessian <- "compute"
+    }
+  }
+  if(method == "glmnet" && is.vector(lavaanModel)){
+    if(control$initialHessian == "lavaan"){
+      message("Your specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
+      control$initialHessian <- "compute"
+    }
+  }
+  
   .checkLavaanModel(lavaanModel = lavaanModel)
 
   ### initialize model ####
