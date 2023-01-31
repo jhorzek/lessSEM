@@ -205,15 +205,18 @@
   if(any(initialHessian == "lavaan")){
     
     lavaanParameters <- getLavaanParameters(lavaanModel) 
-    if(any(!names(lavaanParameters) %in% names(rawParameters)) |
-       any(!names(rawParameters) %in% names(lavaanParameters))
-    ){
-      message("Your model seems to have transformations. Switching initialHessian from 'lavaan' to compute.")
+    if(!lavaanModel@Options$meanstructure){
+      message("Your lavaan model has no mean structure. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
     }else if(!lavaanModel@Options$do.fit){
-      message("Your lavaan model was not optimized. Switching initialHessian from 'lavaan' to compute.")
+      message("Your lavaan model was not optimized. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
       
+    }else if(any(!names(lavaanParameters) %in% names(rawParameters)) |
+       any(!names(rawParameters) %in% names(lavaanParameters))
+    ){
+      message("Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'.")
+      initialHessian <- "compute"
     }else{
       lavaanVcov <- vcov(lavaanModel)
       

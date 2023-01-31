@@ -51,7 +51,7 @@
   }
   if(method == "glmnet" && is.vector(lavaanModel)){
     if(control$initialHessian == "lavaan"){
-      message("Your specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
+      message("You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
   }
