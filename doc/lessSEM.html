@@ -788,24 +788,80 @@ best model using information criteria:</p>
 <p>More details are provided in
 <code>vignette(&quot;Parameter-transformations&quot;, package = &quot;lessSEM&quot;)</code>.</p>
 </div>
+<div id="experimental-features" class="section level1">
+<h1>Experimental Features</h1>
+<p>The following features are relatively new and you may still
+experience some bugs. Please be aware of that when using these
+features.</p>
+<div id="from-lesssem-to-lavaan" class="section level2">
+<h2>From <strong>lessSEM</strong> to <strong>lavaan</strong></h2>
+<p><strong>lessSEM</strong> supports exporting specific models to
+<strong>lavaan</strong>. This can be very useful when plotting the final
+model. In our case, the best model is given by:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>lambdaBest <span class="ot">&lt;-</span> <span class="fu">coef</span>(rsem, <span class="at">criterion =</span> <span class="st">&quot;BIC&quot;</span>)<span class="sc">$</span>lambda </span></code></pre></div>
+<p>We can get the <strong>lavaan</strong> model with the parameters
+corresponding to those of the regularized model with
+<code>lambda = lambdaBest</code> as follows:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>lavaanModel <span class="ot">&lt;-</span> <span class="fu">lessSEM2Lavaan</span>(<span class="at">regularizedSEM =</span> rsem, </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">lambda =</span> lambdaBest)</span></code></pre></div>
+<p>The result can be plotted with, for instance, <a href="https://github.com/SachaEpskamp/semPlot"><strong>semPlot</strong></a>:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(semPlot)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">semPaths</span>(lavaanModel,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">what =</span> <span class="st">&quot;est&quot;</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">fade =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+</div>
 <div id="multi-group-models-and-definition-variables" class="section level2">
 <h2>Multi-Group Models and Definition Variables</h2>
 <p><strong>lessSEM</strong> supports multi-group SEM and, to some
 degree, definition variables. Regularized multi-group SEM have been
 proposed by Huang (2018) and are implemented in <strong>lslx</strong>
-(Huang, 2020). The approach by Huang (2018) is currently more flexible
-than what <strong>lessSEM</strong> can do because <strong>lslx</strong>
-allows for separate penalties for the parameter itself and differences
-in the parameter value between groups. With <strong>lessSEM</strong>,
-this is not possible out of the box. However, differences between
-parameters can be regularized. A detailed introduction can be found in
+(Huang, 2020). Here, differences between groups are regularized. A
+detailed introduction can be found in
 <code>vignette(topic = &quot;Definition-Variables-and-Multi-Group-SEM&quot;, package = &quot;lessSEM&quot;)</code>.
 Therein it is also explained how the multi-group SEM can be used to
 implement definition variables (e.g., for latent growth curve
 models).</p>
 </div>
-<div id="more-information" class="section level2">
-<h2>More information</h2>
+<div id="mixed-penalties" class="section level2">
+<h2>Mixed Penalties</h2>
+<p><strong>lessSEM</strong> allows for defining different penalties for
+different parts of the model. This feature is new and very experimental.
+Please keep that in mind when using the procedure. A detailed
+introduction can be found in
+<code>vignette(topic = &quot;Mixed-Penalties&quot;, package = &quot;lessSEM&quot;)</code>.</p>
+<p>To provide a short example, we will regularize the loadings and the
+regression parameters of the Political Democracy data set with different
+penalties. The following script is adapted from
+<code>?lavaan::sem</code>.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="st">&#39; </span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="st">  # latent variable definitions</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="st">     ind60 =~ x1 + x2 + x3 + c2*y2 + c3*y3 + c4*y4</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="st">     dem60 =~ y1 + y2 + y3 + y4</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="st">     dem65 =~ y5 + y6 + y7 + c*y8</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="st">  # regressions</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="st">    dem60 ~ r1*ind60</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="st">    dem65 ~ r2*ind60 + r3*dem60</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>lavaanModel <span class="ot">&lt;-</span> <span class="fu">sem</span>(model,</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> PoliticalDemocracy)</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Let&#39;s add a lasso penalty on the cross-loadings c2 - c4 and </span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a><span class="co"># scad penalty on the regressions r1-r3</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>mp <span class="ot">&lt;-</span> lavaanModel <span class="sc">|&gt;</span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mixedPenalty</span>() <span class="sc">|&gt;</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addLasso</span>(<span class="at">regularized =</span> <span class="fu">c</span>(<span class="st">&quot;c2&quot;</span>, <span class="st">&quot;c3&quot;</span>, <span class="st">&quot;c4&quot;</span>), </span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>           <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addLasso</span>(<span class="at">regularized =</span> <span class="fu">c</span>(<span class="st">&quot;r1&quot;</span>, <span class="st">&quot;r2&quot;</span>, <span class="st">&quot;r3&quot;</span>), </span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>()</span></code></pre></div>
+<p>The best model according to the BIC can be extracted with:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fitMp, <span class="at">criterion =</span> <span class="st">&quot;BIC&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="more-information" class="section level1">
+<h1>More information</h1>
 <p>We provide more information in the documentation of the individual
 functions. For instance, see <code>?lessSEM::lasso</code> for more
 details on the lasso penalty. If you are interested in the general
@@ -813,10 +869,11 @@ purpose interface, have a look at <code>?lessEM::gpLasso</code>,
 <code>?lesssEM::gpMcp</code>, etc. To get more details on implementing
 the <strong>lessSEM</strong> optimizers in your own package, have a look
 at the vignettes <code>vignette(&#39;General-Purpose-Optimization&#39;)</code>
-and <code>vignette(&#39;The-optimizer-interface&#39;)</code> and at the <a href="https://github.com/jhorzek/lessLM">lessLM</a> package.</p>
+and <code>vignette(&#39;The-optimizer-interface&#39;)</code> and at the <a href="https://github.com/jhorzek/lessLM"><strong>lessLM</strong></a>
+package.</p>
 </div>
-<div id="table-of-the-most-relevant-functions" class="section level2">
-<h2>Table of the most relevant functions</h2>
+<div id="table-of-the-most-relevant-functions" class="section level1">
+<h1>Table of the most relevant functions</h1>
 <p>Fitting <em>regularized SEM</em>:</p>
 <table>
 <colgroup>

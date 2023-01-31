@@ -78,19 +78,23 @@ modelSyntax <- '
 Here, each loading is estimated separately. This results in a more complex model. 
 How do we know which model to use? There are many procedures to answer this 
 question (e.g., using modification indexes, setting up separate models by hand, etc.).
-In the following, we will show how regularization could be used (see e.g., Belzak & Bauer, 2020).
+In the following, we will show how regularization could be used (see e.g., Belzak & Bauer, 2020;
+Jacobucci & Grimm, 2018).
 
 ## Using Regularization
 
 First, note that measurement invariance can be rephrased as $a_1-a_2 = 0$, $b_1-b_2 = 0$, 
 and $c_1-c_2 = 0$. Thus, regularizing the differences between these parameters may
 allow for testing measurement invariance (e.g., Belzak & Bauer, 2020; Liang et al., 2018; 
-Muthen & Asparouhov, 2013). In fact, this is used in Bayesian SEM to test 
+Muthen & Asparouhov, 2013). 
+In fact, this is used in Bayesian SEM to test 
 approximate measurement invariance (Liang et al., 2018; Muthen & Asparouhov, 2013).
 Similar procedures have also been developed by Huang (2018) for multi-group differences
 in parameter estimates and by Fisher et al. (2022) in vector autoregressive models.
-In **regsem**, there is a "diff_lasso" implementation which regularizes 
-differences between parameters, however this is not available in **lessSEM**. 
+Furthermore, Jacobucci & Grimm (2018) proposed regularizing differences 
+in latent change score models to test equivalence of autoproportion parameters over
+time using a two-step procedure. To this end, there they implemented the `diff_lasso`
+in **regsem** (Jacobucci et al., 2019). Such a `diff_lasso` is not available in **lessSEM**. 
 Instead, **lessSEM** provides a flexible workaround: parameter transformations. 
 To make this work, we have to re-define our parameters.
 
@@ -309,7 +313,8 @@ It is often assumed that the autoregressive effect $a_t$ is constant over time;
 that is, the same autoregressive effect is used for all time points. This is 
 a strong assumption and we may want to test it. One way to do so is by using the
 same procedure outlined above, where we define
-$a_t = a_1 + \Delta a_t$
+$a_t = a_1 + \Delta a_t$ (see Jacobucci & Grimm, 2018 for a similar procedure in latent
+change score models).
 In this case, each autoregressive effect is composed of the first
 autoregressive effect ($a_1$) and the difference between the parameters ($\Delta a_t$). 
 By regularizing $\Delta a_t$, we can enforce stationarity. 
@@ -1081,6 +1086,8 @@ solutions.
 * Driver, C. C., Oud, J. H. L., & Voelkle, M. C. (2017). Continuous time structural equation modelling with R package ctsem. Journal of Statistical Software, 77(5), 1–36. https://doi.org/10.18637/jss.v077.i05
 * Fisher, Z. F., Kim, Y., Fredrickson, B. L., & Pipiras, V. (2022). Penalized Estimation and Forecasting of Multiple Subject Intensive Longitudinal Data. Psychometrika, 87(2), 1–29. https://doi.org/10.1007/s11336-021-09825-7
 * Huang, P.-H. (2018). A penalized likelihood method for multi-group structural equation modelling. British Journal of Mathematical and Statistical Psychology, 71(3), 499–522. https://doi.org/10.1111/bmsp.12130
+* Jacobucci, R., & Grimm, K. J. (2018). Regularized Estimation of Multivariate Latent Change Score Models. In E. Ferrer, S. M. Boker, & K. J. Grimm (Eds.), Longitudinal Multivariate Psychology (1st ed., pp. 109–125). Routledge. https://doi.org/10.4324/9781315160542-6
+* Jacobucci, R., Grimm, K. J., Brandmaier, A. M., Serang, S., Kievit, R. A., & Scharf, F. (2019). regsem: Regularized structural equation modeling. https://CRAN.R-project.org/package=regsem
 * Liang, X., Yang, Y., & Huang, J. (2018). Evaluation of Structural Relationships in Autoregressive Cross-Lagged Models Under Longitudinal Approximate Invariance:A Bayesian Analysis. Structural Equation Modeling: A Multidisciplinary Journal, 25(4), 558–572. https://doi.org/10.1080/10705511.2017.1410706
 * Muthen, B., & Asparouhov, T. (2013). BSEM Measurement Invariance Analysis. Mplus Web Notes: No. 17.
 * Ou, L., Hunter, M., D., & Chow, S.-M. (2019). Whats for dynr: A package for linear and nonlinear dynamic modeling in r. The R Journal, 11(1), 91–111. https://doi.org/10.32614/RJ-2019-012

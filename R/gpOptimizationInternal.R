@@ -51,6 +51,11 @@
   if(method == "glmnet" && !is(control, "controlGlmnet")) 
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
+  if(method == "glmnet" && control$initialHessian == "lavaan") {
+    message("Changing initialHessian from 'lavaan' to 'compute'")
+    control$initialHessian <- "compute"
+  }
+  
   # gradient function
   if(is.null(gr)){
     

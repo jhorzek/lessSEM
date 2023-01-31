@@ -74,7 +74,7 @@
                                     transformations = modifyModel$transformations,
                                     transformationList = modifyModel$transformationList,
                                     transformationGradientStepSize = modifyModel$transformationGradientStepSize
-                                    )
+    )
   }else if(any(startingValues == "start")){
     SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModels,
                                     whichPars = "start",
@@ -137,8 +137,8 @@
     
     if(any(!regularized %in% names(rawParameters))){
       stop("The parameter(s) ", paste0(regularized[!regularized %in% names(rawParameters)], sep = ", "),
-      " were specified as regularized but could not be found in the model. The model parameters are ", 
-      paste0(names(rawParameters), sep = ", "))
+           " were specified as regularized but could not be found in the model. The model parameters are ", 
+           paste0(names(rawParameters), sep = ", "))
     }
     
     if(penalty == "adaptiveLasso"){
@@ -200,7 +200,46 @@
        !all(colnames(initialHessian) %in% names(getLavaanParameters(lavaanModel)))
     ) stop("initialHessian must have the parameter names as rownames and colnames. See lessSEM::getLavaanParameters(lavaanModel).")
     
-  }else if(any(initialHessian == "compute")){
+  }
+  
+  if(any(initialHessian == "lavaan")){
+    
+    lavaanParameters <- getLavaanParameters(lavaanModel) 
+    if(!lavaanModel@Options$meanstructure){
+      message("Your lavaan model has no mean structure. Switching initialHessian from 'lavaan' to 'compute'.")
+      initialHessian <- "compute"
+    }else if(!lavaanModel@Options$do.fit){
+      message("Your lavaan model was not optimized. Switching initialHessian from 'lavaan' to 'compute'.")
+      initialHessian <- "compute"
+      
+    }else if(any(!names(lavaanParameters) %in% names(rawParameters)) |
+       any(!names(rawParameters) %in% names(lavaanParameters))
+    ){
+      message("Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'.")
+      initialHessian <- "compute"
+    }else{
+      lavaanVcov <- vcov(lavaanModel)
+      
+      lavaanVcov <- lavaanVcov[!duplicated(rownames(lavaanVcov)), 
+                               !duplicated(colnames(lavaanVcov))][names(rawParameters),
+                                                                  names(rawParameters)]
+      initialHessian <- 2*solve(lavaanVcov)
+      
+      if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
+        # make positive definite
+        # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
+        eigenValues = eigen(initialHessian, only.values = )$values
+        diagMat = diag(-1.1*min(eigenValues), nrow(initialHessian), ncol(initialHessian))
+        initialHessian = initialHessian +  diagMat
+      }
+      
+      return(initialHessian)
+    }
+    
+  }
+  
+  
+  if(any(initialHessian == "compute")){
     
     initialHessian <- .getHessian(SEM = SEM, raw = TRUE)
     
@@ -225,7 +264,7 @@
     stop("Invalid initialHessian passed to glmnet See ?controlGlmnet for more information.")
   }
   
-  if(any(eigen(initialHessian, only.values = )$values < 0)){
+  if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
     # make positive definite
     # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
     eigenValues = eigen(initialHessian, only.values = )$values
