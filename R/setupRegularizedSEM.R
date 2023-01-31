@@ -225,7 +225,7 @@
                                                                   names(rawParameters)]
       initialHessian <- 2*solve(lavaanVcov)
       
-      if(any(eigen(initialHessian, only.values = )$values < 0)){
+      if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
         # make positive definite
         # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
         eigenValues = eigen(initialHessian, only.values = )$values
@@ -264,7 +264,7 @@
     stop("Invalid initialHessian passed to glmnet See ?controlGlmnet for more information.")
   }
   
-  if(any(eigen(initialHessian, only.values = )$values < 0)){
+  if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
     # make positive definite
     # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
     eigenValues = eigen(initialHessian, only.values = )$values
