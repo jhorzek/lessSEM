@@ -5,7 +5,7 @@
 \title{modifyModel}
 \usage{
 modifyModel(
-  addMeans = TRUE,
+  addMeans = FALSE,
   activeSet = NULL,
   dataSet = NULL,
   transformations = NULL,
@@ -14,7 +14,7 @@ modifyModel(
 )
 }
 \arguments{
-\item{addMeans}{If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to the average}
+\item{addMeans}{If lavaanModel has meanstructure = FALSE, addMeans = TRUE will add a mean structure. FALSE will set the means of the observed variables to their observed means.}
 
 \item{activeSet}{Option to only use a subset of the individuals in the data set. Logical vector of length N indicating which subjects should remain in the sample.}
 
