@@ -94,7 +94,8 @@
   control$initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
                                                    rawParameters = rawParameters, 
                                                    lavaanModel = lavaanModel, 
-                                                   SEM = SEM)
+                                                   SEM = SEM,
+                                                   addMeans = modifyModel$addMeans)
   
   #### prepare regularized model object ####
   

@@ -62,7 +62,9 @@ controlIsta <- function(
 #' (see https://en.wikipedia.org/wiki/Berndt%E2%80%93Hall%E2%80%93Hall%E2%80%93Hausman_algorithm).
 #' If set to "compute", the initial hessian will be computed. If set to a single 
 #' value, a diagonal matrix with the single value along the diagonal will be used.
-#' The default is "lavaan" which extracts the Hessian from the lavaanModel.
+#' The default is "lavaan" which extracts the Hessian from the lavaanModel. This Hessian
+#' will typically deviate from that of the internal SEM represenation of lessSEM (due to
+#' the transformation of the variances), but works quite well in practice.
 #' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
 #' @param stepSize Initial stepSize of the outer iteration 
 #' (theta_{k+1} = theta_k + stepSize * Stepdirection)
@@ -114,7 +116,9 @@ controlGlmnet <- function(
 #' @param initialHessian option to provide an initial Hessian to the optimizer. Must have row and column names corresponding to the parameter labels. use getLavaanParameters(lavaanModel) to 
 #' see those labels. If set to "scoreBased", the outer product of the scores will be used as an approximation (see https://en.wikipedia.org/wiki/Berndt%E2%80%93Hall%E2%80%93Hall%E2%80%93Hausman_algorithm).
 #' If set to "compute", the initial hessian will be computed. If set to a single value, a diagonal matrix with the single value along the diagonal will be used.
-#' The default is "lavaan" which extracts the Hessian from the lavaanModel.
+#' The default is "lavaan" which extracts the Hessian from the lavaanModel. This Hessian
+#' will typically deviate from that of the internal SEM represenation of lessSEM (due to
+#' the transformation of the variances), but works quite well in practice.
 #' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
 #' @param stepSize Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)
 #' @param sigma only relevant when lineSearch = 'GLMNET'. Controls the sigma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.

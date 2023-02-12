@@ -191,8 +191,29 @@
 }
 
 
+#' .computeInitialHessian
 #' 
-.computeInitialHessian <- function(initialHessian, rawParameters, lavaanModel, SEM){
+#' computes the initial Hessian used in the optimization. Because we use the parameter
+#' estimates from lavaan as starting values, it typcially makes sense to just use the
+#' Hessian of the lavaan model as initial Hessian
+#' @param initialHessian option to provide an initial Hessian to the optimizer. 
+#' Must have row and column names corresponding to the parameter labels. use 
+#' getLavaanParameters(lavaanModel) to 
+#' see those labels. If set to "scoreBased", the outer product of the scores 
+#' will be used as an approximation 
+#' (see https://en.wikipedia.org/wiki/Berndt%E2%80%93Hall%E2%80%93Hall%E2%80%93Hausman_algorithm).
+#' If set to "compute", the initial hessian will be computed. If set to a single 
+#' value, a diagonal matrix with the single value along the diagonal will be used.
+#' The default is "lavaan" which extracts the Hessian from the lavaanModel. This Hessian
+#' will typically deviate from that of the internal SEM represenation of lessSEM (due to
+#' the transformation of the variances), but works quite well in practice.
+#' @param rawParameters vector with raw parameters
+#' @param lavaanModel lavaan model object
+#' @param SEM internal SEM representation
+#' @param addMeans should a mean structure be added to the model?
+#' @return Hessian matrix
+#' @keywords internal
+.computeInitialHessian <- function(initialHessian, rawParameters, lavaanModel, SEM, addMeans){
   
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
     
@@ -205,7 +226,7 @@
   if(any(initialHessian == "lavaan")){
     
     lavaanParameters <- getLavaanParameters(lavaanModel) 
-    if(!lavaanModel@Options$meanstructure){
+    if((!lavaanModel@Options$meanstructure) && addMeans){
       message("Your lavaan model has no mean structure. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
     }else if(!lavaanModel@Options$do.fit){
