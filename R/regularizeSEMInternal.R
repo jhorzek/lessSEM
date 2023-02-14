@@ -55,6 +55,12 @@
       control$initialHessian <- "compute"
     }
   }
+  if(!is.null(modifyModel$transformations)){
+    message("Your model has transformations. Please note that, if you transform variances",
+            "the variance estimates returned by lessSEM may not be the true variances",
+            "but transformations thereof. Check model@transformations to find the actual variance",
+            "estimates for your regularized variances")
+  }
   
   .checkLavaanModel(lavaanModel = lavaanModel)
 
