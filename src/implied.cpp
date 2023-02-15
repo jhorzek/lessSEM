@@ -3,34 +3,67 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
+//' computeImpliedCovarianceFull
+//' 
+//' computes the implied covariance matrix including latent vaiables of a SEM using RAM notation
+//' @param Amatrix matrix with directed effects
+//' @param Smatrix matrix with undirected effects
+//' @param IminusAInverse (I-Amatrix)^(-1)
+//' @returns matrix with implied covariances
+// [[Rcpp::export]]
+arma::mat computeImpliedCovarianceFull(const arma::mat& Amatrix, 
+                                       const arma::mat& Smatrix,
+                                       const arma::mat& IminusAInverse){
+  
+  return(IminusAInverse*Smatrix*arma::trans(IminusAInverse));
+  
+}
+
 //' computeImpliedCovariance
 //' 
 //' computes the implied covariance matrix of a SEM using RAM notation
 //' @param Fmatrix filter matrix
-//' @param Amatrix matrix with directed effects
-//' @param Smatrix matrix with undirected effects
+//' @param impliedCovarianceFull implied covariance matrix including latent variables
 //' @returns matrix with implied covariances
 // [[Rcpp::export]]
-arma::mat computeImpliedCovariance(const arma::mat& Fmatrix, const arma::mat& Amatrix, const arma::mat& Smatrix){
+arma::mat computeImpliedCovariance(const arma::mat& Fmatrix, 
+                                   const arma::mat& impliedCovarianceFull){
   
-  arma::mat IminusAInverse = arma::inv(arma::eye(arma::size(Amatrix)) - Amatrix);
-  arma::mat impliedCovariance = Fmatrix*IminusAInverse*Smatrix*arma::trans(IminusAInverse)*arma::trans(Fmatrix);
+  arma::mat impliedCovariance = Fmatrix * impliedCovarianceFull * arma::trans(Fmatrix);
   
   return(impliedCovariance);
+}
+
+
+//' computeImpliedMeansFull
+//' 
+//' computes the implied means vector of a SEM including the latent variables using RAM notation
+//' @param Fmatrix filter matrix
+//' @param Amatrix matrix with directed effects
+//' @param Mvector vector with means
+//' @param IminusAInverse (I-Amatrix)^(-1)
+//' @returns matrix with implied means
+// [[Rcpp::export]]
+arma::colvec computeImpliedMeansFull(const arma::mat& Amatrix, 
+                                  const arma::colvec& Mvector,
+                                  const arma::mat& IminusAInverse){
+  
+  arma::colvec impliedMeans = IminusAInverse*Mvector;
+  
+  return(impliedMeans);
 }
 
 //' computeImpliedMeans
 //' 
 //' computes the implied means vector of a SEM using RAM notation
 //' @param Fmatrix filter matrix
-//' @param Amatrix matrix with directed effects
-//' @param Mvector vector with means
+//' @param impliedMeansFull implied means vector including latent variables
 //' @returns matrix with implied means
 // [[Rcpp::export]]
-arma::mat computeImpliedMeans(const arma::mat& Fmatrix, const arma::mat& Amatrix, const arma::colvec& Mvector){
+arma::colvec computeImpliedMeans(const arma::mat& Fmatrix, 
+                              const arma::mat& impliedMeansFull){
   
-  arma::mat I = arma::eye(arma::size(Amatrix));
-  arma::mat impliedMeans = Fmatrix*arma::solve(I-Amatrix, Mvector);
+  arma::colvec impliedMeans = Fmatrix*impliedMeansFull;
   
   return(impliedMeans);
 }

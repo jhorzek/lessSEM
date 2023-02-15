@@ -45,12 +45,30 @@ public:
   arma::colvec Mvector;
   
   // fit elements
-  arma::mat impliedCovariance;
   arma::colvec impliedMeans;
+  arma::colvec impliedMeansFull;
+  arma::mat impliedCovariance;
+  arma::mat impliedCovarianceFull;
+  arma::mat IminusAInverse; // this element is used repeatedly, so we
+  // define it once and reuse it.
   double m2LL; // minus 2 log-Likelihood
+  
+  // in case of missing data, we have to compute
+  // means and covariances for each subset. These are going
+  // to be saved in the following vectors:
+  std::vector<arma::colvec> subsetImpliedMeans;
+  std::vector<arma::mat> subsetImpliedCovariance;
+  std::vector<arma::mat> subsetImpliedCovarianceInverse;
   
   arma::rowvec gradients;
   arma::mat transformationGradients;
+  
+  // in case of missing data, we have to compute
+  // derivatives for the means and covariances with respect to the parameters
+  // for each subset. These are going to be saved in the following vectors:
+  bool subgroupDetivativesInitialized = false;
+  std::vector<std::vector<arma::mat>> subsetImpliedCovarianceDerivatives;
+  std::vector<std::vector<arma::mat>> subsetImpliedMeansDerivatives;
   
   // constructor
   SEMCpp(){};

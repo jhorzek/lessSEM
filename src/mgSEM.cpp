@@ -312,11 +312,6 @@ arma::rowvec mgSEM::getGradients(bool raw){
   // compute the transformation gradients
   transformationGradients = parameters.getTransformationGradients();
   
-  // Rcpp::Rcout << "parameters.uniqueGradients" << std::endl;
-  // Rcpp::Rcout << parameters.uniqueGradients << std::endl;
-  // Rcpp::Rcout << "transformationGradients" << std::endl;
-  // Rcpp::Rcout << transformationGradients << std::endl;
-  
   return(parameters.uniqueGradients*transformationGradients);
 }
 

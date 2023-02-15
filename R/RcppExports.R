@@ -144,36 +144,6 @@ NULL
 #'
 NULL
 
-#' computeIndividualM2LL
-#' 
-#' Computes the -2log likelihood in a SEM for a single person 
-#' @param nObservedVariables number of non-missing variables 
-#' @param rawData observed data for this person
-#' @param impliedMeans implied means of the SEM
-#' @param impliedCovariance implied covariance of the SEM
-#' @returns -2 log-Lilekelihood
-#' 
-computeIndividualM2LL <- function(nObservedVariables, rawData, impliedMeans, impliedCovariance) {
-    .Call(`_lessSEM_computeIndividualM2LL`, nObservedVariables, rawData, impliedMeans, impliedCovariance)
-}
-
-#' computeGroupM2LL
-#' Computes the -2log likelihood in a RAM model for a  group of people with identical 
-#' missing structure. The idea is based on OpenMx (Boker, S. M., Neale, M. C., Maes, H. H., 
-#' Wilde, M. J., Spiegel, M., Brick, T. R., Estabrook, R., Bates, T. C., & Mehta, P. (2022). 
-#' OpenMx: Extended structural equation modelling (2.20.0). https://cran.r-project.org/web/packages/OpenMx/OpenMx.pdf)
-#' @param sampleSize number of persons
-#' @param nObservedVariables number of non-missing variables
-#' @param observedMeans vector with means of the observed variables
-#' @param observedCov matrix with (co-)variances of the observed variables
-#' @param impliedMeans implied means of the SEM
-#' @param impliedCovariance implied covariance of the SEM
-#' @returns -2 log-Lilekelihood
-#' 
-computeGroupM2LL <- function(sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance) {
-    .Call(`_lessSEM_computeGroupM2LL`, sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance)
-}
-
 #'@name istaCappedL1GeneralPurpose
 #'@title cappedL1 optimization with ista
 #'@description Object for cappedL1 optimization with
@@ -322,26 +292,47 @@ NULL
 #'@returns a list with fit results
 NULL
 
+#' computeImpliedCovarianceFull
+#' 
+#' computes the implied covariance matrix including latent vaiables of a SEM using RAM notation
+#' @param Amatrix matrix with directed effects
+#' @param Smatrix matrix with undirected effects
+#' @param IminusAInverse (I-Amatrix)^(-1)
+#' @returns matrix with implied covariances
+computeImpliedCovarianceFull <- function(Amatrix, Smatrix, IminusAInverse) {
+    .Call(`_lessSEM_computeImpliedCovarianceFull`, Amatrix, Smatrix, IminusAInverse)
+}
+
 #' computeImpliedCovariance
 #' 
 #' computes the implied covariance matrix of a SEM using RAM notation
 #' @param Fmatrix filter matrix
-#' @param Amatrix matrix with directed effects
-#' @param Smatrix matrix with undirected effects
+#' @param impliedCovarianceFull implied covariance matrix including latent variables
 #' @returns matrix with implied covariances
-computeImpliedCovariance <- function(Fmatrix, Amatrix, Smatrix) {
-    .Call(`_lessSEM_computeImpliedCovariance`, Fmatrix, Amatrix, Smatrix)
+computeImpliedCovariance <- function(Fmatrix, impliedCovarianceFull) {
+    .Call(`_lessSEM_computeImpliedCovariance`, Fmatrix, impliedCovarianceFull)
+}
+
+#' computeImpliedMeansFull
+#' 
+#' computes the implied means vector of a SEM including the latent variables using RAM notation
+#' @param Fmatrix filter matrix
+#' @param Amatrix matrix with directed effects
+#' @param Mvector vector with means
+#' @param IminusAInverse (I-Amatrix)^(-1)
+#' @returns matrix with implied means
+computeImpliedMeansFull <- function(Amatrix, Mvector, IminusAInverse) {
+    .Call(`_lessSEM_computeImpliedMeansFull`, Amatrix, Mvector, IminusAInverse)
 }
 
 #' computeImpliedMeans
 #' 
 #' computes the implied means vector of a SEM using RAM notation
 #' @param Fmatrix filter matrix
-#' @param Amatrix matrix with directed effects
-#' @param Mvector vector with means
+#' @param impliedMeansFull implied means vector including latent variables
 #' @returns matrix with implied means
-computeImpliedMeans <- function(Fmatrix, Amatrix, Mvector) {
-    .Call(`_lessSEM_computeImpliedMeans`, Fmatrix, Amatrix, Mvector)
+computeImpliedMeans <- function(Fmatrix, impliedMeansFull) {
+    .Call(`_lessSEM_computeImpliedMeans`, Fmatrix, impliedMeansFull)
 }
 
 #'@name istaLSPSEM

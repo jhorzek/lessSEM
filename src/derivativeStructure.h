@@ -19,11 +19,11 @@ public:
   void initialize(int nParam,
                   Rcpp::StringVector uniqueParameterLabels,
                   Rcpp::StringVector uniqueParameterLocations);
-    
-    void addDerivativeElement(std::string label_, 
-                              std::string location_,
-                              bool isVariance_, 
-                              arma::mat positionMatrix_);
+  
+  void addDerivativeElement(std::string label_, 
+                            std::string location_,
+                            bool isVariance_, 
+                            arma::mat positionMatrix_);
 };
 
 #endif
