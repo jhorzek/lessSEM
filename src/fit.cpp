@@ -19,8 +19,10 @@ double computeIndividualM2LL(const int nObservedVariables,
                              const arma::mat& impliedCovariance){
   double m2LL;
   double klog2pi = nObservedVariables*std::log(2*M_PI);
-  double logDetExpCov = std::log(arma::det(impliedCovariance));
-  arma::mat dist = arma::trans(rawData - impliedMeans)*arma::inv(impliedCovariance)*(rawData - impliedMeans);
+  double logDetExpCov = arma::log_det(impliedCovariance);
+  arma::colvec meanDiff = rawData - impliedMeans;
+  arma::mat covInverseXmeanDiff = arma::solve(impliedCovariance, meanDiff);
+  arma::mat dist = arma::trans(log_det)*arma::as_scalar(arma::trans(meanDiff) * covInverseXmeanDiff);
   m2LL = klog2pi +
     logDetExpCov +
     dist(0,0); // note: dist is a 1x1 matrix; extraction is necessary for the data type to be compatible
@@ -51,7 +53,7 @@ double computeGroupM2LL(const int sampleSize,
   double m2LL;
   arma::mat inv = arma::inv(impliedCovariance);
   double Nklog2pi = sampleSize*nObservedVariables*std::log(2*M_PI);
-  double NlogDetExpCov = sampleSize*std::log(arma::det(impliedCovariance));
+  double NlogDetExpCov = sampleSize*arma::log_det(impliedCovariance);
   double NtrSSigma = sampleSize*arma::trace(observedCov * inv);
   arma::mat Ndist = sampleSize*arma::trans(observedMeans - impliedMeans)*inv*(observedMeans - impliedMeans);
 
