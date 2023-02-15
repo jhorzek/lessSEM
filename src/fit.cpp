@@ -51,7 +51,6 @@ double computeGroupM2LL(const int sampleSize,
                         const arma::colvec& impliedMeans,
                         const arma::mat& impliedCovariance){
   double m2LL;
-  //arma::mat inv = arma::inv(impliedCovariance);
   double Nklog2pi = sampleSize*nObservedVariables*std::log(2*M_PI);
   double NlogDetExpCov = sampleSize*arma::log_det_sympd(impliedCovariance);
   double NtrSSigma = sampleSize*arma::trace(arma::solve(impliedCovariance, observedCov.t()));
