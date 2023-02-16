@@ -32,25 +32,42 @@ double m2LLMultiVariateNormalDerivative(
     // parameter is in means vector
     
     // \frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) :
-    const double element_2 = as_scalar(2.0*arma::trans(observed - impliedMeansDerivative)*
+    const double element_2 = as_scalar(2.0*arma::trans(- impliedMeansDerivative)*
                                        impliedCovarianceInverse * (meanDiff));
     
     return(element_2);
     
-  }else{
-    // parameter is in covariance matrix
-    // \frac{\partial}{\partial \theta_j}\ln(|\pmb\Sigma(\pmb\theta)|) : 
-    const double element_1 = arma::trace(impliedCovarianceInverse * impliedCovarianceDerivative);
+  }
+  
+  
+  // parameter is in covariance matrix
+  const arma::mat implInvXimplDer = impliedCovarianceInverse * 
+    impliedCovarianceDerivative;
+  // \frac{\partial}{\partial \theta_j}\ln(|\pmb\Sigma(\pmb\theta)|) : 
+  const double element_1 = arma::trace(implInvXimplDer);
+  
+  // \frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) :
+  
+  if(location.compare("Smatrix") == 0){
+    const double element_2 = arma::as_scalar(
+      arma::trans(meanDiff)*(-implInvXimplDer) * impliedCovarianceInverse * meanDiff);
     
-    // \frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) :
-    const double element_2 = as_scalar((2.0 * arma::trans(observed) - arma::trans(meanDiff) *
-                                       impliedCovarianceInverse * impliedCovarianceDerivative)*
-                                       impliedCovarianceInverse * meanDiff);
+    return(element_1 + element_2);
+  }
+  
+  if(location.compare("Amatrix") == 0){
+    
+    const double element_2 = arma::as_scalar(arma::trans(meanDiff)*(
+      2.0 * impliedCovarianceInverse * (-impliedMeansDerivative) +
+      (-implInvXimplDer) * impliedCovarianceInverse * meanDiff));
     
     return(element_1 + element_2);
     
   }
   
+  Rcpp::stop("Unknown parameter location.")
+}
+
 }
 
 double m2LLGroupMultiVariateNormal(double N,
@@ -96,19 +113,35 @@ double m2LLGroupMultiVariateNormalDerivative(
                                  impliedCovarianceInverse * (meanDiff));
     return(element_3);
     
-  }else{
-    // parameter is in covariance matrix
-    const arma::mat implInvXimplDer = impliedCovarianceInverse * impliedCovarianceDerivative;
-    // \frac{\partial}{\partial \theta_j}\ln(|\pmb\Sigma(\pmb\theta)|) : 
-    double element_1 = N*arma::trace(implInvXimplDer);
-    const double element_2 = N*arma::trace(-observedCov * implInvXimplDer * impliedCovarianceInverse);
+  }
+  
+  // parameter is in covariance matrix
+  const arma::mat implInvXimplDer = impliedCovarianceInverse * impliedCovarianceDerivative;
+  // \frac{\partial}{\partial \theta_j}\ln(|\pmb\Sigma(\pmb\theta)|) : 
+  double element_1 = N*arma::trace(implInvXimplDer);
+  const double element_2 = N*arma::trace(-observedCov * implInvXimplDer * impliedCovarianceInverse);
+  
+  if(location.compare("Smatrix") == 0){
+    
     // \frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) :
-    const double element_3 = as_scalar(N*(arma::trans(meanDiff) * 
-                                       impliedCovarianceInverse * impliedCovarianceDerivative * impliedCovarianceInverse *
-                                       meanDiff));
+    const double element_3 = arma::as_scalar(
+      N*
+        arma::trans(meanDiff) * (-implInvXimplDer) * impliedCovarianceInverse * meanDiff);
+    
+    return(element_1 + element_2 + element_3);
+  }
+  
+  if(location.compare("Amatrix") == 0){
+    
+    // \frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) :
+    const double element_3 = arma::as_scalar(N*(
+      2.0 * arma::trans(meanDiff) * impliedCovarianceInverse * (-impliedMeansDerivative) +
+      arma::trans(meanDiff) * (-implInvXimplDer) * impliedCovarianceInverse * meanDiff));
     
     return(element_1 + element_2 + element_3);
     
   }
   
+  Rcpp::stop("Unknown parameter location.")
+    
 }

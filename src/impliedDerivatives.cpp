@@ -37,7 +37,7 @@ arma::colvec impliedMeansDerivative(const std::string& location,
                                  const arma::mat& derivativeElement){
   
   if(location.compare("Amatrix") == 0){
-    return(-1.0 * Fmatrix * IminusAInverse * ( arma::eye(derivativeElement.n_rows, derivativeElement.n_cols) - derivativeElement ) * impliedMeansFull);
+    return(-1.0 * Fmatrix * IminusAInverse * derivativeElement * impliedMeansFull);
   }
   
   if(location.compare("Smatrix") == 0){

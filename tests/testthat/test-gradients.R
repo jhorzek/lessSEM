@@ -16,8 +16,8 @@ test_that("testing gradients", {
   # residual correlations
     y1 ~~ y5
     y2 ~~ y4 
-    y3 ~~ y7
-    y4 ~~ y8
+    y3 ~~ d*y7
+    y4 ~~ d*y8
     y6 ~~ y8
     
     ind60 ~ 1
