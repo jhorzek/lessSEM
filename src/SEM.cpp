@@ -312,7 +312,7 @@ double SEMCpp::fit(){
     subsetImpliedCovariance.at(s) = impliedCovariance.submat(currentSubset.notMissing, currentSubset.notMissing);
     subsetImpliedCovarianceInverse.at(s) =  arma::inv(subsetImpliedCovariance.at(s));
     
-    logDetImplied = arma::log_det_sympd(subsetImpliedCovariance.at(s));
+    logDetImplied = std::log(arma::det(subsetImpliedCovariance.at(s)));
     
     if(currentSubset.N == 1){
       
