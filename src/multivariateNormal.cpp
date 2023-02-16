@@ -92,9 +92,8 @@ double m2LLGroupMultiVariateNormalDerivative(
     // parameter is in means vector
     
     // \frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) :
-    double element_3 = as_scalar(N*2.0*arma::trans(observedMeans - impliedMeansDerivative)*
+    double element_3 = as_scalar(N*2.0*arma::trans(-impliedMeansDerivative)*
                                  impliedCovarianceInverse * (meanDiff));
-    
     return(element_3);
     
   }else{
@@ -104,9 +103,10 @@ double m2LLGroupMultiVariateNormalDerivative(
     double element_1 = N*arma::trace(implInvXimplDer);
     const double element_2 = N*arma::trace(-observedCov * implInvXimplDer * impliedCovarianceInverse);
     // \frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) :
-    const double element_3 = as_scalar(N*(2.0 * arma::trans(observedMeans) - 
-                                       arma::trans(meanDiff) * implInvXimplDer)*
-                                       impliedCovarianceInverse * meanDiff);
+    const double element_3 = as_scalar(N*(arma::trans(meanDiff) * 
+                                       impliedCovarianceInverse * impliedCovarianceDerivative * impliedCovarianceInverse *
+                                       meanDiff));
+    
     return(element_1 + element_2 + element_3);
     
   }

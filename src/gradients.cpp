@@ -32,10 +32,10 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
           uniqueLocations.at(p),
           dataSubsets.at(mp).rawData(dataSubsets.at(mp).notMissing),
           SEM.subsetImpliedMeans.at(mp),
-          SEM.impliedMeansDerivatives.at(p)(dataSubsets.at(mp).notMissing),
+          SEM.impliedMeansDerivatives.at(p).rows(dataSubsets.at(mp).notMissing),
           SEM.subsetImpliedCovariance.at(mp),
           SEM.subsetImpliedCovarianceInverse.at(mp),
-          SEM.impliedCovarianceDerivatives.at(p)(dataSubsets.at(mp).notMissing,
+          SEM.impliedCovarianceDerivatives.at(p).submat(dataSubsets.at(mp).notMissing,
                                               dataSubsets.at(mp).notMissing));
       }else{
         Rcpp::Rcout << "N>1" << std::endl;
@@ -45,7 +45,7 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
         Rcpp::Rcout << dataSubsets.at(mp).covariance << std::endl;
         Rcpp::Rcout << SEM.subsetImpliedCovariance.at(mp) << std::endl;
         Rcpp::Rcout << SEM.subsetImpliedCovarianceInverse.at(mp) << std::endl;
-        Rcpp::Rcout << SEM.impliedCovarianceDerivatives.at(p)(dataSubsets.at(mp).notMissing,
+        Rcpp::Rcout << SEM.impliedCovarianceDerivatives.at(p).submat(dataSubsets.at(mp).notMissing,
                                                            dataSubsets.at(mp).notMissing) << std::endl;
         Rcpp::Rcout << gradients << std::endl;
         gradients.col(p) += m2LLGroupMultiVariateNormalDerivative(
@@ -53,11 +53,11 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
           dataSubsets.at(mp).N,
           dataSubsets.at(mp).means,
           SEM.subsetImpliedMeans.at(mp),
-          SEM.impliedMeansDerivatives.at(p)(dataSubsets.at(mp).notMissing),
+          SEM.impliedMeansDerivatives.at(p).rows(dataSubsets.at(mp).notMissing),
           dataSubsets.at(mp).covariance,
           SEM.subsetImpliedCovariance.at(mp),
           SEM.subsetImpliedCovarianceInverse.at(mp),
-          SEM.impliedCovarianceDerivatives.at(p)(dataSubsets.at(mp).notMissing,
+          SEM.impliedCovarianceDerivatives.at(p).submat(dataSubsets.at(mp).notMissing,
                                               dataSubsets.at(mp).notMissing));
       }
       
