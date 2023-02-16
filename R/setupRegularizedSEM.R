@@ -144,26 +144,21 @@
     if(penalty == "adaptiveLasso"){
       
       if(createAdaptiveLassoWeights){
-        if(method == "bfgs") {
-          method <- "glmnet" # bfgs is used by smooth lasso
-          control <- controlGlmnet()
-        }
-        control_s <- control
-        control_s$verbose <- 0
-        # optimize model: We set lambda = 0, so we get the MLE
-        cat("Computing MLE for adaptive lasso...\n")
-        MLE <- lasso(
-          lavaanModel = lavaanModel,
-          lambdas = 0, 
-          regularized = regularized,
-          method = method, 
-          modifyModel = modifyModel,
-          control = control_s
-        )
         
-        # MLE:
-        MLEs <- unlist(MLE@parameters[,MLE@parameterLabels])
-        weights <- 1/abs(MLEs)
+        # We will use the nlminb optimizer, similar to lavaan to get the MLE
+        opt <- .optNLMINB(SEM = .SEMFromLavaan(
+          lavaanModel = lavaanModel,
+          whichPars = control$startingValues,
+          addMeans = modifyModel$addMeans,
+          activeSet = modifyModel$activeSet,
+          dataSet = modifyModel$dataSet, 
+          transformations = modifyModel$transformations, 
+          transformationList = modifyModel$transformationList, 
+          fit = FALSE,
+          transformationGradientStepSize = modifyModel$transformationGradientStepSize
+        ))
+        
+        weights <- 1/abs(.getParameters(opt, raw = TRUE))
         weights[!names(weights) %in% regularized] <- 0
       }else{
         
@@ -246,7 +241,7 @@
                                                                   names(rawParameters)]
       initialHessian <- 2*solve(lavaanVcov)
       
-      if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
+      if(any(eigen(initialHessian, only.values = TRUE)$values <= 0)){
         # make positive definite
         # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
         eigenValues = eigen(initialHessian, only.values = )$values
@@ -263,6 +258,12 @@
   if(any(initialHessian == "compute")){
     
     initialHessian <- .getHessian(SEM = SEM, raw = TRUE)
+    
+    if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
+      initialHessian <- diag(abs(diag(initialHessian)))
+      rownames(initialHessian) <- names(rawParameters)
+      colnames(initialHessian) <- names(rawParameters)
+    }
     
   }else if(any(initialHessian == "scoreBased")){
     
@@ -285,11 +286,11 @@
     stop("Invalid initialHessian passed to glmnet See ?controlGlmnet for more information.")
   }
   
-  if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
+  if(any(eigen(initialHessian, only.values = TRUE)$values <= 0)){
     # make positive definite
     # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
-    eigenValues = eigen(initialHessian, only.values = )$values
-    diagMat = diag(-1.1*min(eigenValues), nrow(initialHessian), ncol(initialHessian))
+    eigenValues = eigen(initialHessian, only.values = TRUE)$values
+    diagMat = diag(-1.1*min(min(eigenValues),-2), nrow(initialHessian), ncol(initialHessian))
     initialHessian = initialHessian +  diagMat
   }
   
