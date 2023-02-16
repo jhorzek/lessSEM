@@ -63,12 +63,12 @@ public:
   arma::rowvec gradients;
   arma::mat transformationGradients;
   
-  // in case of missing data, we have to compute
-  // derivatives for the means and covariances with respect to the parameters
-  // for each subset. These are going to be saved in the following vectors:
-  bool subgroupDetivativesInitialized = false;
-  std::vector<std::vector<arma::mat>> subsetImpliedCovarianceDerivatives;
-  std::vector<std::vector<arma::mat>> subsetImpliedMeansDerivatives;
+  // We have to compute
+  // derivatives for the means and covariances with respect to the parameters. 
+  // These are going to be saved in the following vectors:
+  bool detivativesInitialized = false;
+  std::vector<arma::mat> impliedCovarianceDerivatives;
+  std::vector<arma::colvec> impliedMeansDerivatives;
   
   // constructor
   SEMCpp(){};

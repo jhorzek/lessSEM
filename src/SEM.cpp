@@ -370,40 +370,36 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   const int numberOfMissingnessPatterns = data.nGroups;
   const int nParameters = derivElements.uniqueLabels.size();
   
-  if(!subgroupDetivativesInitialized){
+  if(!detivativesInitialized){
     // we have to initialize the subgroup gradients first
     
-    subsetImpliedCovarianceDerivatives.resize(numberOfMissingnessPatterns, std::vector<arma::mat>(nParameters));
-    subsetImpliedMeansDerivatives.resize(numberOfMissingnessPatterns, std::vector<arma::mat>(nParameters));
+    impliedCovarianceDerivatives.resize(nParameters);
+    impliedMeansDerivatives.resize(nParameters);
     
-    subgroupDetivativesInitialized = true;
+    detivativesInitialized = true;
   }
   
   // We will start by computing the derivatives of the implied covariance
-  // matrix and the implied means vector for every missingness group and every parameter.
+  // matrix and the implied means vector for every parameter.
   
-  for(int mp = 0; mp < numberOfMissingnessPatterns; mp++){
+  for(int p = 0; p < nParameters; p++){
     
-    for(int p = 0; p < nParameters; p++){
-      
-      subsetImpliedCovarianceDerivatives.at(mp).at(p) = 
-        impliedCovarianceDerivative(derivElements.uniqueLocations.at(p),
-                                    subsetImpliedCovariance.at(mp),
-                                    impliedCovarianceFull,
-                                    Fmatrix,
-                                    IminusAInverse,
-                                    derivElements.positionInLocation.at(p)
-        );
-
-      subsetImpliedMeansDerivatives.at(mp).at(p) =
-        impliedMeansDerivative(derivElements.uniqueLocations.at(p),
-                               subsetImpliedMeans.at(mp),
-                               impliedMeansFull,
-                               Fmatrix,
-                               IminusAInverse,
-                               derivElements.positionInLocation.at(p));
-    }
+    impliedCovarianceDerivatives.at(p) = 
+      impliedCovarianceDerivative(derivElements.uniqueLocations.at(p),
+                                  impliedCovariance,
+                                  impliedCovarianceFull,
+                                  Fmatrix,
+                                  IminusAInverse,
+                                  derivElements.positionInLocation.at(p)
+      );
     
+    impliedMeansDerivatives.at(p) =
+      impliedMeansDerivative(derivElements.uniqueLocations.at(p),
+                             impliedMeans,
+                             impliedMeansFull,
+                             Fmatrix,
+                             IminusAInverse,
+                             derivElements.positionInLocation.at(p));
   }
   
   gradients = gradientsByGroup(*this, raw);

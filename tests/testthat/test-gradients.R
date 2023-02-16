@@ -20,6 +20,9 @@ test_that("testing gradients", {
     y4 ~~ y8
     y6 ~~ y8
     
+    ind60 ~ 1
+    y1 ~ 0; y2 ~ 0; y3 ~ 0
+    
 '
   
   model <- sem(model1, data = PoliticalDemocracy, meanstructure = TRUE)

@@ -29,7 +29,7 @@ arma::mat impliedCovarianceDerivative(const std::string& location,
   Rcpp::stop("Unknown parameter location");
 }
 
-arma::mat impliedMeansDerivative(const std::string& location, 
+arma::colvec impliedMeansDerivative(const std::string& location, 
                                  const arma::mat& impliedMeans, 
                                  const arma::mat& impliedMeansFull,
                                  const arma::mat& Fmatrix,
