@@ -353,6 +353,13 @@ arma::mat SEMCpp::getScores(bool raw){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
   if(hasTransformations) Rcpp::stop("Not yet implemented for models with transformations.");
+  
+  if(!detivativesInitialized){
+    // there are some elements that are used repeatedly that 
+    // are only initialized if the gradients have been computed at least once.
+    getGradients(true);
+  }
+  
   arma::mat scoresMat = scores(*this, raw);
   
   return(scoresMat);
