@@ -57,17 +57,15 @@ double m2LLMultiVariateNormalDerivative(
   
   if(location.compare("Amatrix") == 0){
     
-    const double element_2 = arma::as_scalar(arma::trans(meanDiff)*(
-      2.0 * impliedCovarianceInverse * (-impliedMeansDerivative) +
-      (-implInvXimplDer) * impliedCovarianceInverse * meanDiff));
+    const double element_2 = arma::as_scalar(
+      2.0 * arma::trans(impliedMeansDerivative) * impliedCovarianceInverse * meanDiff +
+        arma::trans(meanDiff)*(-implInvXimplDer) * impliedCovarianceInverse * meanDiff);
     
     return(element_1 + element_2);
     
   }
   
-  Rcpp::stop("Unknown parameter location.")
-}
-
+  Rcpp::stop("Unknown parameter location.");
 }
 
 double m2LLGroupMultiVariateNormal(double N,
@@ -135,13 +133,13 @@ double m2LLGroupMultiVariateNormalDerivative(
     
     // \frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) :
     const double element_3 = arma::as_scalar(N*(
-      2.0 * arma::trans(meanDiff) * impliedCovarianceInverse * (-impliedMeansDerivative) +
+      2.0 * arma::trans(impliedMeansDerivative) * impliedCovarianceInverse * meanDiff +
       arma::trans(meanDiff) * (-implInvXimplDer) * impliedCovarianceInverse * meanDiff));
     
     return(element_1 + element_2 + element_3);
     
   }
   
-  Rcpp::stop("Unknown parameter location.")
+  Rcpp::stop("Unknown parameter location.");
     
 }
