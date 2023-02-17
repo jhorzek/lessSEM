@@ -62,7 +62,7 @@ public:
   // those that are transformations
   
   // constructor
-  parameters(){};
+  parameters(){}
   
   //
   void initialize(Rcpp::StringVector label_,

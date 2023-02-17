@@ -6,7 +6,7 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-void initializeGradients(SEMCpp& SEM);
+void initializeGradients(SEMCpp& SEM, const bool raw);
 
 arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw);
 

@@ -375,7 +375,7 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   gradientCalls++;
   
   // initialize some elements that are used when computing the gradients:
-  initializeGradients(*this);
+  initializeGradients(*this, raw);
   
   // compute the actual gradients
   gradients = gradientsByGroup(*this, raw);

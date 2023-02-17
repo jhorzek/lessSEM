@@ -7,7 +7,7 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-void initializeGradients(SEMCpp& SEM){
+void initializeGradients(SEMCpp& SEM, const bool raw){
   
   const int nParameters = SEM.derivElements.uniqueLabels.size();
   
@@ -25,13 +25,22 @@ void initializeGradients(SEMCpp& SEM){
   
   for(int p = 0; p < nParameters; p++){
     
+    double parameterValue = SEM.parameterTable.parameterMap.at(
+      SEM.derivElements.uniqueLabels.at(p)).value;
+    bool isVariance = SEM.parameterTable.parameterMap.at(
+      SEM.derivElements.uniqueLabels.at(p)).isVariance;
+    
     SEM.impliedCovarianceDerivatives.at(p) = 
-      impliedCovarianceDerivative(SEM.derivElements.uniqueLocations.at(p),
-                                  SEM.impliedCovariance,
-                                  SEM.impliedCovarianceFull,
-                                  SEM.Fmatrix,
-                                  SEM.IminusAInverse,
-                                  SEM.derivElements.positionInLocation.at(p)
+      impliedCovarianceDerivative(
+        parameterValue,
+        SEM.derivElements.uniqueLocations.at(p),
+        isVariance,
+        raw,
+        SEM.impliedCovariance,
+        SEM.impliedCovarianceFull,
+        SEM.Fmatrix,
+        SEM.IminusAInverse,
+        SEM.derivElements.positionInLocation.at(p)
       );
     
     SEM.impliedMeansDerivatives.at(p) =

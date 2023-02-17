@@ -3,7 +3,10 @@
 
 #include <RcppArmadillo.h>
 
-arma::mat impliedCovarianceDerivative(const std::string& location, 
+arma::mat impliedCovarianceDerivative(const double parameterValue, // only required for variances due to the internal transformation used by lessSEM.
+                                      const std::string& location, 
+                                      const bool isVariance, // only required for variances due to the internal transformation used by lessSEM.
+                                      const bool raw, // only required for variances due to the internal transformation used by lessSEM.
                                       const arma::mat& impliedCovariance, 
                                       const arma::mat& impliedCovarianceFull,
                                       const arma::mat& Fmatrix,
