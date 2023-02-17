@@ -233,11 +233,11 @@ inline arma::rowvec glmnetLineSearch(
     currentStepSize = stepSize;
   }
   
-  // randomNumber = Rcpp::runif(1,0.0,1.0);
-  // if(randomNumber.at(0) < 0.25){
-  //   Rcpp::NumericVector tmp = Rcpp::runif(1,.5,.99);
-  //   currentStepSize = tmp.at(0);
-  // }
+  randomNumber = Rcpp::runif(1,0.0,1.0);
+  if(randomNumber.at(0) < 0.25){
+    Rcpp::NumericVector tmp = Rcpp::runif(1,.5,.99);
+    currentStepSize = tmp.at(0);
+  }
   
   bool converged = false;
   
