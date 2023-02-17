@@ -37,22 +37,22 @@ arma::mat approximateHessian(T& SEM,
     
     // step left
     SEM.setParameters(label_, stepLeft, raw);
-    SEM.implied();
+    SEM.fit();
     gradientsStepLeft = SEM.getGradients(raw);
     
     // two step left
     SEM.setParameters(label_, twoStepLeft, raw);
-    SEM.implied();
+    SEM.fit();
     gradientsTwoStepLeft = SEM.getGradients(raw);
     
     // step right
     SEM.setParameters(label_, stepRight, raw);
-    SEM.implied();
+    SEM.fit();
     gradientsStepRight = SEM.getGradients(raw);
     
     // two step right
     SEM.setParameters(label_, twoStepRight, raw);
-    SEM.implied();
+    SEM.fit();
     gradientsTwoStepRight = SEM.getGradients(raw);
     
     // approximate hessian

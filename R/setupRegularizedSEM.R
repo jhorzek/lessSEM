@@ -259,12 +259,6 @@
     
     initialHessian <- .getHessian(SEM = SEM, raw = TRUE)
     
-    if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
-      initialHessian <- diag(abs(diag(initialHessian)))
-      rownames(initialHessian) <- names(rawParameters)
-      colnames(initialHessian) <- names(rawParameters)
-    }
-    
   }else if(any(initialHessian == "scoreBased")){
     
     scores <- .getScores(SEM = SEM, raw = TRUE)

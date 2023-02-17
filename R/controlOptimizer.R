@@ -88,7 +88,7 @@ controlIsta <- function(
 #' @export
 controlGlmnet <- function(
     startingValues = "est",
-    initialHessian = ifelse(all(startingValues=="est"),"lavaan",1),
+    initialHessian = ifelse(all(startingValues=="est"),"lavaan","compute"),
     saveHessian = FALSE,
     stepSize = .9,
     sigma = 1e-5,
@@ -136,7 +136,7 @@ controlGlmnet <- function(
 #' @export
 controlBFGS <- function(
     startingValues = "est",
-    initialHessian = ifelse(all(startingValues=="est"),"lavaan",1),
+    initialHessian = ifelse(all(startingValues=="est"),"lavaan","compute"),
     saveHessian = FALSE,
     stepSize = .9,
     sigma = 1e-5,

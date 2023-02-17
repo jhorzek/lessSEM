@@ -24,7 +24,7 @@ arma::mat scores(const SEMCpp& SEM, bool raw){
   arma::uvec rowi(1);
   
   // we can speed up the computation considerably by going over the missingness patterns
-  for(unsigned int miss = 0; miss < numberOfMissingnessPatterns; miss++){
+  for(int miss = 0; miss < numberOfMissingnessPatterns; miss++){
     
     // iterate over individuals
     for(arma::uword i = 0; i < dataSubsets.at(miss).N; i++){
