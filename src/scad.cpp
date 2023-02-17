@@ -104,7 +104,7 @@ public:
     );
     
     Rcpp::NumericVector finalParameters(fitResults_.parameterValues.n_elem);
-    for(int i = 0; i < fitResults_.parameterValues.n_elem; i++){
+    for(unsigned int i = 0; i < fitResults_.parameterValues.n_elem; i++){
       finalParameters.at(i) = fitResults_.parameterValues.at(i);
     }
     finalParameters.names() = startingValues_.names();

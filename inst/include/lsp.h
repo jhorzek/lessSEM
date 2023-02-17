@@ -56,7 +56,7 @@ public:
     double tempValue;
     int sign;
     
-    for(int p = 0; p < parameterValues.n_elem; p ++)
+    for(unsigned int p = 0; p < parameterValues.n_elem; p ++)
     {
       if(tuningParameters.weights.at(p) == 0.0) 
       {
@@ -119,7 +119,7 @@ public:
     
     double penalty = 0.0;
     
-    for(int p = 0; p < parameterValues.n_elem; p ++){
+    for(unsigned int p = 0; p < parameterValues.n_elem; p ++){
       
       // check if parameter is regularized
       if(tuningParameters.weights.at(p) == 0.0 ) continue;

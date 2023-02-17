@@ -22,7 +22,7 @@ public:
                     double lambda_i;
                     Rcpp::String parameterLabel;
                     
-                    for(int p = 0; p < parameterValues.n_elem; p ++){
+                    for(unsigned int p = 0; p < parameterValues.n_elem; p ++){
                       
                       lambda_i = (1.0-tuningParameters.alpha) *
                         tuningParameters.lambda * 
@@ -48,7 +48,7 @@ public:
                               
                               double lambda_i;
                               
-                              for(int p = 0; p < parameterValues.n_elem; p ++){
+                              for(unsigned int p = 0; p < parameterValues.n_elem; p ++){
                                 
                                 lambda_i = (1.0-tuningParameters.alpha) *
                                   tuningParameters.lambda * 

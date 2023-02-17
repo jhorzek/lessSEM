@@ -15,7 +15,7 @@ void derivativeElements::initialize(int nParam,
   positionInLocation.resize(nParam);
   
   int j = 0;
-  for(int i = 0; i < uniqueParameterLabels.length(); i++){
+  for(unsigned int i = 0; i < uniqueParameterLabels.length(); i++){
     if(uniqueParameterLocations.at(i) == "transformation")
       continue;
       // the derivative structure only takes care of model parameters!
@@ -33,7 +33,7 @@ void derivativeElements::addDerivativeElement(std::string label_,
                                               bool isVariance_, 
                                               arma::mat positionMatrix_){
   
-  for(int i = 0; i < uniqueLabels.size(); i++){
+  for(unsigned int i = 0; i < uniqueLabels.size(); i++){
     if((uniqueLabels.at(i).compare(label_) == 0) & wasInitialized.at(i)){
       Rcpp::stop("The label passed to addDerivativeElement is already present in the vector uniqueLabels");
     }else if((uniqueLabels.at(i).compare(label_) == 0)){

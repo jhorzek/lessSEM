@@ -72,7 +72,7 @@ public:
     int sign;
     double thetaXlambda = tuningParameters.theta*tuningParameters.lambda;
     
-    for(int p = 0; p < parameterValues.n_elem; p ++)
+    for(unsigned int p = 0; p < parameterValues.n_elem; p ++)
     {
       
       if(tuningParameters.weights.at(p) == 0.0) 
@@ -137,7 +137,7 @@ public:
     
     double penalty = 0.0;
     
-    for(int p = 0; p < parameterValues.n_elem; p ++){
+    for(unsigned int p = 0; p < parameterValues.n_elem; p ++){
       
       // unregularized values:
       if(tuningParameters.weights.at(p) == 0.0) continue;

@@ -13,7 +13,7 @@ void parameters::initialize(Rcpp::StringVector label_,
   
   std::string currentLabel;
   // create hash values
-  for(int i = 0; i < label_.length(); i++){
+  for(unsigned int i = 0; i < label_.length(); i++){
     
     currentLabel = Rcpp::as< std::string >(label_.at(i));
     
@@ -47,7 +47,7 @@ void parameters::initialize(Rcpp::StringVector label_,
 
 Rcpp::DataFrame parameters::getParameters(){
   Rcpp::LogicalVector isTransformation(uniqueParameterLabels.length());
-  for(int i = 0; i < uniqueParameterLabels.length(); i++){
+  for(unsigned int i = 0; i < uniqueParameterLabels.length(); i++){
     uniqueParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].value;
     uniqueRawParameterValues.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].rawValue;
     isTransformation.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].isTransformation;
@@ -66,7 +66,7 @@ void parameters::setParameters(Rcpp::StringVector label_,
                                arma::vec value_,
                                bool raw){
   std::string parameterLabel;
-  for(int param = 0; param < label_.size(); param++){
+  for(unsigned int param = 0; param < label_.size(); param++){
     parameterLabel = Rcpp::as< std::string >(label_.at(param));
     
     // all parameters are saved as a hash in parameterMap
@@ -128,7 +128,7 @@ void parameters::transform()
 {
   Rcpp::NumericVector params(uniqueParameterLabels.length());
   Rcpp::CharacterVector paramLabels(uniqueParameterLabels.length());
-  for(int i = 0; i < uniqueParameterLabels.length(); i++){
+  for(unsigned int i = 0; i < uniqueParameterLabels.length(); i++){
     params.at(i) = parameterMap[Rcpp::as< std::string >(uniqueParameterLabels.at(i))].rawValue;
     paramLabels.at(i) = uniqueParameterLabels.at(i);
   }
@@ -139,7 +139,7 @@ void parameters::transform()
   // also change the parameter values in the parameter map; these are the ones that
   // are actually used internally
   std::string parameterLabel;
-  for(int p = 0; p < paramLabels.length(); p++){
+  for(unsigned int p = 0; p < paramLabels.length(); p++){
     parameterLabel = Rcpp::as< std::string >(paramLabels.at(p));
     parameterMap.at(parameterLabel).rawValue = params.at(p);
     if(parameterMap.at(parameterLabel).isVariance){
@@ -161,7 +161,7 @@ arma::mat parameters::getTransformationGradients(){
   arma::colvec stepForward, stepBackward;
   std::string currentParameter;
   int j = 0;
-  for(int i = 0; i < uniqueParameterLabels.size(); i++){
+  for(unsigned int i = 0; i < uniqueParameterLabels.size(); i++){
     currentParameter = uniqueParameterLabels.at(i);
     
     parameterValues.at(i) = parameterMap.at(currentParameter).rawValue;
@@ -177,7 +177,7 @@ arma::mat parameters::getTransformationGradients(){
   parameterValues.names() = parameterLabelsRcpp;
   
   j = 0;
-  for(int i = 0; i < parameterValues.size(); i++){
+  for(unsigned int i = 0; i < parameterValues.size(); i++){
     currentParameter = parameterLabelsRcpp.at(i);
     if(parameterMap.at(currentParameter).isTransformation) continue;
     parameterValues.at(i) += gradientStepSize;

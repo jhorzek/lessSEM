@@ -25,7 +25,7 @@ public:
     double lambda_i;
     Rcpp::String parameterLabel;
     int sign;
-    for(int p = 0; p < parameterValues.n_elem; p ++)
+    for(unsigned int p = 0; p < parameterValues.n_elem; p ++)
     {
       
       lambda_i = tuningParameters.alpha *
@@ -53,7 +53,7 @@ public:
     double penalty = 0.0;
     double lambda_i;
     
-    for(int p = 0; p < parameterValues.n_elem; p ++){
+    for(unsigned int p = 0; p < parameterValues.n_elem; p ++){
       
       lambda_i = tuningParameters.alpha *
         tuningParameters.lambda * 
@@ -73,7 +73,7 @@ public:
     double lower, upper;
     int sign;
     
-    for(int p = 0; p < parameterValues.n_elem; p++){
+    for(unsigned int p = 0; p < parameterValues.n_elem; p++){
       
       // if not regularized: nothing to do here
       if(tuningParameters.weights.at(p) == 0) continue;

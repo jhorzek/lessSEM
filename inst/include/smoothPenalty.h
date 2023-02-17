@@ -56,7 +56,7 @@ public:
     double penalty = 0.0;
     double lambda_i;
     
-    for(int p = 0; p < parameterValues.n_elem; p ++){
+    for(unsigned int p = 0; p < parameterValues.n_elem; p ++){
       // lasso part:
       lambda_i = tuningParameters.alpha *
         tuningParameters.lambda * 
@@ -85,7 +85,7 @@ public:
                               gradients.fill(0.0);
                               double lambda_i;
                               
-                              for(int p = 0; p < parameterValues.n_elem; p++){
+                              for(unsigned int p = 0; p < parameterValues.n_elem; p++){
                                 
                                 // if not regularized: nothing to do here
                                 if(tuningParameters.weights.at(p) == 0) continue;

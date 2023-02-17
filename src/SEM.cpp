@@ -64,7 +64,7 @@ void SEMCpp::fill(Rcpp::List SEMList){
   parameterTable.nModelParameters = 0;
   parameterTable.nRealParameters = 0;
   std::string currentParameter;
-  for(int i = 0; i < parameterTable.uniqueParameterLabels.length(); i++){
+  for(unsigned int i = 0; i < parameterTable.uniqueParameterLabels.length(); i++){
     currentParameter = parameterTable.uniqueParameterLabels.at(i);
     if(parameterTable.parameterMap.at(currentParameter).location.compare("transformation") == 0){
       // parameter is not in the model but only in the transformations
@@ -89,7 +89,7 @@ void SEMCpp::fill(Rcpp::List SEMList){
   // after initializing the derivative elements, we now have to fill them
   Rcpp::List fillDerivElementsWith = SEMList["DerivativeElements"];
   
-  for(int de = 0; de < fillDerivElementsWith.length(); de++){
+  for(unsigned int de = 0; de < fillDerivElementsWith.length(); de++){
     
     Rcpp::List currentDerivElement = fillDerivElementsWith[de];
     
@@ -114,7 +114,7 @@ void SEMCpp::fill(Rcpp::List SEMList){
   // add subsets
   Rcpp::List subsets = SEMList["subsets"];
   
-  for(int s = 0; s < subsets.length(); s++){
+  for(unsigned int s = 0; s < subsets.length(); s++){
     
     Rcpp::List subset = subsets[s];
     
@@ -155,8 +155,8 @@ void SEMCpp::addTransformation(SEXP transformationFunctionSEXP,
 }
 
 bool SEMCpp::checkModel(){
-  int N_ = 0;
-  for(int i = 0; i < data.dataSubsets.size(); i++){
+  unsigned int N_ = 0;
+  for(unsigned int i = 0; i < data.dataSubsets.size(); i++){
     N_ += data.dataSubsets.at(i).N;
   }
   
@@ -196,7 +196,7 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
     if(param.second.location.compare("Amatrix") == 0){
       parameterTable.AChanged = true;
       
-      for(int elem = 0; elem < param.second.row.size(); elem ++){
+      for(unsigned int elem = 0; elem < param.second.row.size(); elem ++){
         
         Amatrix(param.second.row.at(elem), 
                 param.second.col.at(elem)) = param.second.value;
@@ -207,7 +207,7 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
     if(param.second.location.compare("Smatrix") == 0){
       parameterTable.SChanged = true;
       
-      for(int elem = 0; elem < param.second.row.size(); elem ++){
+      for(unsigned int elem = 0; elem < param.second.row.size(); elem ++){
         
         Smatrix(param.second.row.at(elem), 
                 param.second.col.at(elem)) = param.second.value;
@@ -218,7 +218,7 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
     if(param.second.location.compare("Mvector") == 0){
       parameterTable.mChanged = true;
       
-      for(int elem = 0; elem < param.second.row.size(); elem ++){
+      for(unsigned int elem = 0; elem < param.second.row.size(); elem ++){
         
         Mvector(param.second.row.at(elem), 
                 param.second.col.at(elem)) = param.second.value;
@@ -370,45 +370,14 @@ arma::rowvec SEMCpp::getGradients(bool raw){
     wasChecked = checkModel();
   }
   if((currentStatus != computedImplied) & (currentStatus != fitted)){
-    Rcpp::stop("The model implied matrices have not been computed yet. Call Model$implied() first.");
+    Rcpp::stop("The model implied matrices have not been computed yet. Call Model$fit() first.");
   }
   gradientCalls++;
   
-  const int numberOfMissingnessPatterns = data.nGroups;
-  const int nParameters = derivElements.uniqueLabels.size();
+  // initialize some elements that are used when computing the gradients:
+  initializeGradients(*this);
   
-  if(!detivativesInitialized){
-    // we have to initialize the subgroup gradients first
-    
-    impliedCovarianceDerivatives.resize(nParameters);
-    impliedMeansDerivatives.resize(nParameters);
-    
-    detivativesInitialized = true;
-  }
-  
-  // We will start by computing the derivatives of the implied covariance
-  // matrix and the implied means vector for every parameter.
-  
-  for(int p = 0; p < nParameters; p++){
-    
-    impliedCovarianceDerivatives.at(p) = 
-      impliedCovarianceDerivative(derivElements.uniqueLocations.at(p),
-                                  impliedCovariance,
-                                  impliedCovarianceFull,
-                                  Fmatrix,
-                                  IminusAInverse,
-                                  derivElements.positionInLocation.at(p)
-      );
-    
-    impliedMeansDerivatives.at(p) =
-      impliedMeansDerivative(derivElements.uniqueLocations.at(p),
-                             impliedMeans,
-                             impliedMeansFull,
-                             Fmatrix,
-                             IminusAInverse,
-                             derivElements.positionInLocation.at(p));
-  }
-  
+  // compute the actual gradients
   gradients = gradientsByGroup(*this, raw);
   
   if(hasTransformations){

@@ -105,7 +105,7 @@ inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
   // the order in which parameters are updated should be random
   Rcpp::NumericVector randOrder(stepDirection.n_elem);
   Rcpp::NumericVector sampleFrom(stepDirection.n_elem);
-  for(int i = 0; i < stepDirection.n_elem; i++) sampleFrom.at(i) = i;
+  for(unsigned int i = 0; i < stepDirection.n_elem; i++) sampleFrom.at(i) = i;
   
   for(int it = 0; it < maxIterIn; it++){
     
@@ -116,7 +116,7 @@ inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
     // iterate over parameters in random order
     randOrder = Rcpp::sample(sampleFrom, stepDirection.n_elem,false);
     
-    for(int p = 0; p < stepDirection.n_elem; p++){
+    for(unsigned int p = 0; p < stepDirection.n_elem; p++){
       
       // compute derivative elements:
       hessianXdirection = Hessian*arma::trans(stepDirection);
@@ -233,11 +233,11 @@ inline arma::rowvec glmnetLineSearch(
     currentStepSize = stepSize;
   }
   
-  randomNumber = Rcpp::runif(1,0.0,1.0);
-  if(randomNumber.at(0) < 0.25){
-    Rcpp::NumericVector tmp = Rcpp::runif(1,.5,.99);
-    currentStepSize = tmp.at(0);
-  }
+  // randomNumber = Rcpp::runif(1,0.0,1.0);
+  // if(randomNumber.at(0) < 0.25){
+  //   Rcpp::NumericVector tmp = Rcpp::runif(1,.5,.99);
+  //   currentStepSize = tmp.at(0);
+  // }
   
   bool converged = false;
   
@@ -390,6 +390,9 @@ inline lessSEM::fitResults glmnet(model& model_,
   
   // outer iteration
   for(int outer_iteration = 0; outer_iteration < control_.maxIterOut; outer_iteration ++){
+    
+    // check if user wants to stop the computation:
+    Rcpp::checkUserInterrupt();
     
     // the gradients will be used by the inner iteration to compute the new 
     // parameters

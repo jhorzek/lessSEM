@@ -67,7 +67,7 @@ public:
     arma::rowvec parameters_kp1(parameterValues.n_elem);
     parameters_kp1.fill(arma::datum::nan);
     
-    for(int p = 0; p < parameterValues.n_elem; p ++)
+    for(unsigned int p = 0; p < parameterValues.n_elem; p ++)
     {
       
       if(tuningParameters.weights.at(p) == 0.0) 
@@ -329,7 +329,7 @@ public:
     double penalty = 0.0;
     double lambda_i;
     
-    for(int p = 0; p < parameterValues.n_elem; p ++){
+    for(unsigned int p = 0; p < parameterValues.n_elem; p ++){
       // unregularized values:
       if(tuningParameters.weights.at(p) == 0.0) continue;
       
