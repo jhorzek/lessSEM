@@ -111,7 +111,7 @@ inline arma::rowvec bfgsLineSearch(
   }
   
   randomNumber = Rcpp::runif(1,0.0,1.0);
-  // randomly resetting the step size can help 
+  // randomly resetting the step size can help
   // if the optimizer is stuck
   if(randomNumber.at(0) < 0.25){
     Rcpp::NumericVector tmp = Rcpp::runif(1,.5,.99);
@@ -250,6 +250,9 @@ inline lessSEM::fitResults bfgsOptim(model& model_,
   
   // outer iteration
   for(int outer_iteration = 0; outer_iteration < control_.maxIterOut; outer_iteration ++){
+
+    // check if user wants to stop the computation:
+    Rcpp::checkUserInterrupt();
     
     // the gradients will be used by the inner iteration to compute the new 
     // parameters
@@ -257,7 +260,7 @@ inline lessSEM::fitResults bfgsOptim(model& model_,
       smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
     
     // find step direction -> simple quasi-Newton step
-    direction = -arma::trans(arma::inv_sympd(Hessian_kMinus1)*arma::trans(gradients_kMinus1));
+    direction = -arma::trans(arma::solve(Hessian_kMinus1,arma::trans(gradients_kMinus1)));
     
     // find length of step in direction
     parameters_k = bfgsLineSearch(model_, 

@@ -102,7 +102,7 @@ public:
   
   double fit(arma::rowvec parameterValues,
              Rcpp::StringVector parameterLabels) override{
-               for(int i = 0; i < parameterValues.n_elem; i++){
+               for(unsigned int i = 0; i < parameterValues.n_elem; i++){
                  parameters.at(i) = parameterValues.at(i);
                }
                
@@ -124,7 +124,7 @@ public:
   arma::rowvec gradients(arma::rowvec parameterValues,
                          Rcpp::StringVector parameterLabels) override{
                            
-                           for(int i = 0; i < parameterValues.n_elem; i++){
+                           for(unsigned int i = 0; i < parameterValues.n_elem; i++){
                              parameters.at(i) = parameterValues.at(i);
                            }
                            

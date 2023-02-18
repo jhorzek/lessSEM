@@ -54,7 +54,8 @@
   
   if(SEMObj$fit){
     mySEM <- .fit(SEM = mySEM)
-    if(whichPars == "est" && SEMObj$checkFit){
+    
+    if(whichPars == "est" && SEMObj$checkFit && lavaanModel@Options$do.fit){
       # check model fit
       if(round(mySEM$m2LL - (-2*logLik(lavaanModel)), 4) !=0) 
         stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")

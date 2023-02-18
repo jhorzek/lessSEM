@@ -176,6 +176,9 @@ inline lessSEM::fitResults ista(
   // outer iteration
   for(int outer_iteration = 0; outer_iteration < control_.maxIterOut; outer_iteration ++){
     
+    // check if user wants to stop the computation:
+    Rcpp::checkUserInterrupt();
+    
     for(int inner_iteration = 0; inner_iteration < control_.maxIterIn; inner_iteration ++){
       // inner iteration: reduce step size until the convergence criterion is met
       L_k = std::pow(control_.eta, inner_iteration)*L_kMinus1;

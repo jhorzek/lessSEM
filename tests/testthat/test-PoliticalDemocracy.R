@@ -26,11 +26,20 @@ test_that("testing optimization with PoliticalDemocracy", {
                meanstructure = TRUE)
   
   regsem <- lasso(lavaanModel = model, 
-                          regularized = c("a", "b", "c"),
-                          lambdas = 0)
+                  regularized = c("a", "b", "c"),
+                  lambdas = 0,
+                  control = controlGlmnet(startingValues = "start"))
   testthat::expect_equal(abs(regsem@fits$m2LL[1] - (-2*logLik(model))) < 1e-3,TRUE)
   
-  regsem <- bfgs(lavaanModel = model)
+  regsem <- lasso(lavaanModel = model, 
+                  regularized = c("a", "b", "c"),
+                  lambdas = 0,
+                  method = "ista",
+                  control = controlIsta(startingValues = "start"))
+  testthat::expect_equal(abs(regsem@fits$m2LL[1] - (-2*logLik(model))) < 1e-3,TRUE)
+  
+  regsem <- bfgs(lavaanModel = model,
+                 control = controlBFGS(startingValues = "start"))
   testthat::expect_equal(abs(regsem@fits$m2LL[1] - (-2*logLik(model))) < 1e-3,TRUE)
   
 })

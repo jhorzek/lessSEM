@@ -10,7 +10,7 @@ void mgParameters::addTransformation(
   // existing parameter vector
   Rcpp::StringVector extendedLabels = extendedParameters.names();
   
-  for(int p = 0; p < uniqueLabelsRcpp.size(); p++){
+  for(unsigned int p = 0; p < uniqueLabelsRcpp.size(); p++){
     
     if(uniqueLabelsRcpp.at(p) != extendedLabels.at(p)) Rcpp::stop("Mismatch in parameters");
     
@@ -18,13 +18,13 @@ void mgParameters::addTransformation(
   
   // extend existing vectors
   uniqueLabelsRcpp = extendedLabels;
-  for(int p = uniqueLabels.size(); p < extendedLabels.size(); p++){
+  for(unsigned int p = uniqueLabels.size(); p < extendedLabels.size(); p++){
     uniqueLabels.push_back(Rcpp::as<std::string>(extendedLabels.at(p)));
   }
   uniqueGradients.resize(extendedLabels.size());
   uniqueHessian.resize(extendedLabels.size(), extendedLabels.size());
   uniqueValues.resize(extendedLabels.size());
-  for(int p = 0; p < extendedParameters.size(); p++){
+  for(unsigned int p = 0; p < extendedParameters.size(); p++){
     uniqueValues.at(p) = extendedParameters.at(p);
   }
   
@@ -40,7 +40,7 @@ void mgParameters::transform()
 {
   Rcpp::NumericVector params(uniqueLabels.size());
   Rcpp::CharacterVector paramLabels(uniqueLabels.size());
-  for(int i = 0; i < uniqueLabels.size(); i++){
+  for(unsigned int i = 0; i < uniqueLabels.size(); i++){
     params.at(i) = uniqueValues.at(i);
     paramLabels.at(i) = uniqueLabels.at(i);
   }
@@ -52,7 +52,7 @@ void mgParameters::transform()
   // these are the ones that are actually used internally
   std::string parameterLabel;
   int location;
-  for(int p = 0; p < paramLabels.length(); p++){
+  for(unsigned int p = 0; p < paramLabels.length(); p++){
     parameterLabel = Rcpp::as< std::string >(paramLabels.at(p));
     location = findStringInVector(parameterLabel, uniqueLabels, true);
     uniqueValues.at(location) = params.at(p);
@@ -63,7 +63,7 @@ arma::mat mgParameters::getTransformationGradients(){
   if(!hasTransformations) Rcpp::stop("Does not have transformations.");
   int nRealParameters = 0; // number of parameters that are not transformations 
   // of other parameters
-  for (int i = 0; i < isTransformation.size(); i++){
+  for(unsigned int i = 0; i < isTransformation.size(); i++){
     nRealParameters += !isTransformation.at(i);
   }
   arma::mat currentGradients(uniqueLabels.size(), 
@@ -73,7 +73,7 @@ arma::mat mgParameters::getTransformationGradients(){
   arma::uvec selectRows(nRealParameters);
   arma::colvec stepForward, stepBackward;
   int j = 0;
-  for(int i = 0; i < isTransformation.size(); i++){
+  for(unsigned int i = 0; i < isTransformation.size(); i++){
     parameterValues.at(i) = uniqueValues.at(i);
     if(isTransformation.at(i)){
       // we want to remove all parameters which are only in transformations and not in the model
@@ -85,7 +85,7 @@ arma::mat mgParameters::getTransformationGradients(){
   parameterValues.names() = uniqueLabels;
   
   j = 0;
-  for(int i = 0; i < parameterValues.size(); i++){
+  for(unsigned int i = 0; i < parameterValues.size(); i++){
     if(isTransformation.at(i)) continue;
     parameterValues.at(i) += gradientStepSize;
     
@@ -145,7 +145,7 @@ void mgSEM::addModel(Rcpp::List SEMList){
   // for each parameter, we check if this parameter is already present in
   // one of the existing models. If not, we add the 
   // parameter to our parameter vector.
-  for(int i = 0; i < newLabels.length(); i++){
+  for(unsigned int i = 0; i < newLabels.length(); i++){
     
     parameterLabel = Rcpp::as< std::string >(newLabels.at(i));
     
@@ -166,7 +166,7 @@ void mgSEM::addModel(Rcpp::List SEMList){
   parameters.parameterLocationInModelUvec.resize(models.size());
   parameters.parameterLocationInVectorUvec.resize(models.size());
   
-  for(int m = 0; m < models.size(); m++){
+  for(unsigned int m = 0; m < models.size(); m++){
     // initialize as empty vector:
     Rcpp::IntegerVector currentInteger = {};
     parameters.parameterLocationInModelRcpp.at(m) = currentInteger;
@@ -175,7 +175,7 @@ void mgSEM::addModel(Rcpp::List SEMList){
     Rcpp::StringVector currentLabels = models.at(m).getParameterLabels();
     
     // now, let's fill the vectors:
-    for(int p = 0; p < parameters.uniqueLabels.size(); p++){
+    for(unsigned int p = 0; p < parameters.uniqueLabels.size(); p++){
       // check if this parameter is in the current model; if so, add its position 
       // to the indices
       int locatedInVector = findStringInVector(parameters.uniqueLabels.at(p), currentLabels, false);
@@ -220,7 +220,7 @@ void mgSEM::setParameters(Rcpp::StringVector label_,
   if(!raw) Rcpp::stop("Cannot set parameters for non-raw values");
   // change the global parameters
   int loc;
-  for(int i = 0; i < label_.size(); i++){
+  for(unsigned int i = 0; i < label_.size(); i++){
     // change parameter
     loc = findStringInVector(Rcpp::as<std::string>(label_.at(i)), parameters.uniqueLabels, true);
     
@@ -232,7 +232,7 @@ void mgSEM::setParameters(Rcpp::StringVector label_,
   if(parameters.hasTransformations) computeTransformations();
   
   // update the parameters in the models
-  for(int m = 0; m < models.size(); m++){
+  for(unsigned int m = 0; m < models.size(); m++){
     models.at(m).setParameters(parameters.uniqueLabelsRcpp[parameters.parameterLocationInVectorRcpp.at(m)],
               parameters.uniqueValues.elem(parameters.parameterLocationInVectorUvec.at(m)),
               true
@@ -243,7 +243,7 @@ void mgSEM::setParameters(Rcpp::StringVector label_,
 // getter
 Rcpp::List mgSEM::getParameters(){
   Rcpp::NumericVector param(parameters.uniqueValues.size());
-  for(int p = 0; p < param.size(); p++){
+  for(unsigned int p = 0; p < param.size(); p++){
     param.at(p) = parameters.uniqueValues.at(p);
   }
   param.names() = parameters.uniqueLabelsRcpp;
@@ -254,7 +254,7 @@ Rcpp::List mgSEM::getParameters(){
 
 Rcpp::List mgSEM::getSubmodelParameters(){
   Rcpp::List paramList;
-  for(int m = 0; m < models.size(); m++){
+  for(unsigned int m = 0; m < models.size(); m++){
     paramList.push_back(models.at(m).getParameters());
   }
   return(paramList);
@@ -267,14 +267,14 @@ Rcpp::StringVector mgSEM::getParameterLabels(){
 // fit related functions
 void mgSEM::implied(){
   // compute implied means and covariance for each model
-  for(int m = 0; m < models.size(); m++){
+  for(unsigned int m = 0; m < models.size(); m++){
     models.at(m).implied();
   }
 }
 
 bool mgSEM::impliedIsPD(){
   bool isPd = true;
-  for(int m = 0; m < models.size(); m++){
+  for(unsigned int m = 0; m < models.size(); m++){
     isPd = isPd & models.at(m).impliedIsPD();
   }
   return(isPd);
@@ -284,7 +284,7 @@ double mgSEM::fit(){
   
   m2LL = 0.0;
   // compute fit for each model
-  for(int m = 0; m < models.size(); m++){
+  for(unsigned int m = 0; m < models.size(); m++){
     m2LL += models.at(m).fit();
   }
   
@@ -298,7 +298,7 @@ arma::rowvec mgSEM::getGradients(bool raw){
   parameters.uniqueGradients.fill(arma::fill::zeros);
   
   // compute gradients for each model
-  for(int m = 0; m < models.size(); m++){
+  for(unsigned int m = 0; m < models.size(); m++){
     modelGradients = models.at(m).getGradients(true);
     // add the models gradients to the existing gradients:
     parameters.uniqueGradients.elem(parameters.parameterLocationInVectorUvec.at(m)) += 
@@ -311,11 +311,6 @@ arma::rowvec mgSEM::getGradients(bool raw){
   
   // compute the transformation gradients
   transformationGradients = parameters.getTransformationGradients();
-  
-  // Rcpp::Rcout << "parameters.uniqueGradients" << std::endl;
-  // Rcpp::Rcout << parameters.uniqueGradients << std::endl;
-  // Rcpp::Rcout << "transformationGradients" << std::endl;
-  // Rcpp::Rcout << transformationGradients << std::endl;
   
   return(parameters.uniqueGradients*transformationGradients);
 }

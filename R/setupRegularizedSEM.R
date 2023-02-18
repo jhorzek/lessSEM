@@ -144,6 +144,7 @@
     if(penalty == "adaptiveLasso"){
       
       if(createAdaptiveLassoWeights){
+        
         if(method == "bfgs") {
           method <- "glmnet" # bfgs is used by smooth lasso
           control <- controlGlmnet()
@@ -246,7 +247,7 @@
                                                                   names(rawParameters)]
       initialHessian <- 2*solve(lavaanVcov)
       
-      if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
+      if(any(eigen(initialHessian, only.values = TRUE)$values <= 0)){
         # make positive definite
         # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
         eigenValues = eigen(initialHessian, only.values = )$values
@@ -285,11 +286,11 @@
     stop("Invalid initialHessian passed to glmnet See ?controlGlmnet for more information.")
   }
   
-  if(any(eigen(initialHessian, only.values = TRUE)$values < 0)){
+  if(any(eigen(initialHessian, only.values = TRUE)$values <= 0)){
     # make positive definite
     # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
-    eigenValues = eigen(initialHessian, only.values = )$values
-    diagMat = diag(-1.1*min(eigenValues), nrow(initialHessian), ncol(initialHessian))
+    eigenValues = eigen(initialHessian, only.values = TRUE)$values
+    diagMat = diag(-1.1*min(min(eigenValues),-2), nrow(initialHessian), ncol(initialHessian))
     initialHessian = initialHessian +  diagMat
   }
   

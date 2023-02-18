@@ -1,7 +1,8 @@
 #include <RcppArmadillo.h>
 #include "SEM.h"
 #include "implied.h"
-#include "fit.h"
+#include "impliedDerivatives.h"
+#include "multivariateNormal.h"
 #include "scores.h"
 #include "gradients.h"
 #include "hessian.h"
@@ -63,7 +64,7 @@ void SEMCpp::fill(Rcpp::List SEMList){
   parameterTable.nModelParameters = 0;
   parameterTable.nRealParameters = 0;
   std::string currentParameter;
-  for(int i = 0; i < parameterTable.uniqueParameterLabels.length(); i++){
+  for(unsigned int i = 0; i < parameterTable.uniqueParameterLabels.length(); i++){
     currentParameter = parameterTable.uniqueParameterLabels.at(i);
     if(parameterTable.parameterMap.at(currentParameter).location.compare("transformation") == 0){
       // parameter is not in the model but only in the transformations
@@ -88,7 +89,7 @@ void SEMCpp::fill(Rcpp::List SEMList){
   // after initializing the derivative elements, we now have to fill them
   Rcpp::List fillDerivElementsWith = SEMList["DerivativeElements"];
   
-  for(int de = 0; de < fillDerivElementsWith.length(); de++){
+  for(unsigned int de = 0; de < fillDerivElementsWith.length(); de++){
     
     Rcpp::List currentDerivElement = fillDerivElementsWith[de];
     
@@ -113,7 +114,7 @@ void SEMCpp::fill(Rcpp::List SEMList){
   // add subsets
   Rcpp::List subsets = SEMList["subsets"];
   
-  for(int s = 0; s < subsets.length(); s++){
+  for(unsigned int s = 0; s < subsets.length(); s++){
     
     Rcpp::List subset = subsets[s];
     
@@ -137,6 +138,10 @@ void SEMCpp::fill(Rcpp::List SEMList){
                    // raw data is required for N == 1
                    rawData_);
   }
+  // intialize some elements for the subsets:
+  subsetImpliedMeans.resize(subsets.length());
+  subsetImpliedCovariance.resize(subsets.length());
+  subsetImpliedCovarianceInverse.resize(subsets.length());
   
   return;
   
@@ -150,8 +155,8 @@ void SEMCpp::addTransformation(SEXP transformationFunctionSEXP,
 }
 
 bool SEMCpp::checkModel(){
-  int N_ = 0;
-  for(int i = 0; i < data.dataSubsets.size(); i++){
+  unsigned int N_ = 0;
+  for(unsigned int i = 0; i < data.dataSubsets.size(); i++){
     N_ += data.dataSubsets.at(i).N;
   }
   
@@ -191,7 +196,7 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
     if(param.second.location.compare("Amatrix") == 0){
       parameterTable.AChanged = true;
       
-      for(int elem = 0; elem < param.second.row.size(); elem ++){
+      for(unsigned int elem = 0; elem < param.second.row.size(); elem ++){
         
         Amatrix(param.second.row.at(elem), 
                 param.second.col.at(elem)) = param.second.value;
@@ -202,7 +207,7 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
     if(param.second.location.compare("Smatrix") == 0){
       parameterTable.SChanged = true;
       
-      for(int elem = 0; elem < param.second.row.size(); elem ++){
+      for(unsigned int elem = 0; elem < param.second.row.size(); elem ++){
         
         Smatrix(param.second.row.at(elem), 
                 param.second.col.at(elem)) = param.second.value;
@@ -213,7 +218,7 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
     if(param.second.location.compare("Mvector") == 0){
       parameterTable.mChanged = true;
       
-      for(int elem = 0; elem < param.second.row.size(); elem ++){
+      for(unsigned int elem = 0; elem < param.second.row.size(); elem ++){
         
         Mvector(param.second.row.at(elem), 
                 param.second.col.at(elem)) = param.second.value;
@@ -257,8 +262,17 @@ void SEMCpp::implied(){
   currentStatus = computedImplied;
   
   // step one: compute implied mean and covariance
-  if(parameterTable.AChanged | parameterTable.SChanged) impliedCovariance = computeImpliedCovariance(Fmatrix, Amatrix, Smatrix);
-  if(parameterTable.mChanged | parameterTable.AChanged) impliedMeans = computeImpliedMeans(Fmatrix, Amatrix, Mvector);
+  if(parameterTable.AChanged){
+    IminusAInverse = arma::inv(arma::eye(arma::size(Amatrix))- Amatrix);
+  }
+  if(parameterTable.AChanged | parameterTable.SChanged) {
+    impliedCovarianceFull = computeImpliedCovarianceFull(Amatrix, Smatrix, IminusAInverse);
+    impliedCovariance = computeImpliedCovariance(Fmatrix, impliedCovarianceFull);
+  }
+  if(parameterTable.mChanged | parameterTable.AChanged){
+    impliedMeansFull = computeImpliedMeansFull(Amatrix, Mvector, IminusAInverse);
+    impliedMeans = computeImpliedMeans(Fmatrix, impliedMeansFull);
+  } 
   
   parameterTable.AChanged = false;
   parameterTable.SChanged = false;
@@ -284,31 +298,42 @@ double SEMCpp::fit(){
   // step one: compute implied mean and covariance
   implied();
   
+  double logDetImplied;
+  
   // step two: compute fit for each subset
   
   for(int s = 0; s < data.nGroups; s++){
     
     // convenient pointer to current subset:
     subset& currentSubset = data.dataSubsets.at(s);
-    arma::mat currentImpliedCovariance = impliedCovariance.submat(currentSubset.notMissing, currentSubset.notMissing);
-    arma::colvec currentImpliedMeans = impliedMeans.rows(currentSubset.notMissing);
+    
+    
+    subsetImpliedMeans.at(s) = impliedMeans.rows(currentSubset.notMissing);
+    subsetImpliedCovariance.at(s) = impliedCovariance.submat(currentSubset.notMissing, currentSubset.notMissing);
+    subsetImpliedCovarianceInverse.at(s) =  arma::inv(subsetImpliedCovariance.at(s));
+    
+    logDetImplied = std::log(arma::det(subsetImpliedCovariance.at(s)));
     
     if(currentSubset.N == 1){
       
-      currentSubset.m2LL = computeIndividualM2LL(currentSubset.observed, 
-                                                 currentSubset.rawData(currentSubset.notMissing), 
-                                                 currentImpliedMeans, 
-                                                 currentImpliedCovariance);
+      currentSubset.m2LL = m2LLMultiVariateNormal(
+        currentSubset.rawData(currentSubset.notMissing), 
+        subsetImpliedMeans.at(s),
+        subsetImpliedCovariance.at(s),
+        subsetImpliedCovarianceInverse.at(s),
+        logDetImplied);
       m2LL += currentSubset.m2LL;
       
     }else if(currentSubset.N > 1){
       
-      currentSubset.m2LL = computeGroupM2LL(currentSubset.N, 
-                                            currentSubset.observed, 
-                                            currentSubset.means, 
-                                            currentSubset.covariance,
-                                            currentImpliedMeans, 
-                                            currentImpliedCovariance);
+      currentSubset.m2LL = m2LLGroupMultiVariateNormal(
+        currentSubset.N, 
+        currentSubset.means,
+        subsetImpliedMeans.at(s), 
+        currentSubset.covariance,
+        subsetImpliedCovariance.at(s),
+        subsetImpliedCovarianceInverse.at(s),
+        logDetImplied);
       m2LL += currentSubset.m2LL;
       
     }else{
@@ -328,6 +353,13 @@ arma::mat SEMCpp::getScores(bool raw){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
   if(hasTransformations) Rcpp::stop("Not yet implemented for models with transformations.");
+  
+  if(!detivativesInitialized){
+    // there are some elements that are used repeatedly that 
+    // are only initialized if the gradients have been computed at least once.
+    getGradients(raw);
+  }
+  
   arma::mat scoresMat = scores(*this, raw);
   
   return(scoresMat);
@@ -338,10 +370,14 @@ arma::rowvec SEMCpp::getGradients(bool raw){
     wasChecked = checkModel();
   }
   if((currentStatus != computedImplied) & (currentStatus != fitted)){
-    Rcpp::stop("The model implied matrices have not been computed yet. Call Model$implied() first.");
+    Rcpp::stop("The model implied matrices have not been computed yet. Call Model$fit() first.");
   }
   gradientCalls++;
   
+  // initialize some elements that are used when computing the gradients:
+  initializeGradients(*this, raw);
+  
+  // compute the actual gradients
   gradients = gradientsByGroup(*this, raw);
   
   if(hasTransformations){

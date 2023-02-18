@@ -3,7 +3,7 @@
 
 inline int findStringInVector(std::string what, std::vector<std::string> where, bool throwError){
   
-  for (int i = 0; i < where.size(); i++){
+  for (unsigned int i = 0; i < where.size(); i++){
     if(where.at(i).compare(what) == 0){
       return(i);
     }

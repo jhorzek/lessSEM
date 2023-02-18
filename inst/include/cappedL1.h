@@ -41,7 +41,7 @@ namespace lessSEM{
       double lambda_i, x_1, x_2, h_1, h_2, abs_u_k;
       Rcpp::String parameterLabel;
       int sign;
-      for(int p = 0; p < parameterValues.n_elem; p ++)
+      for(unsigned int p = 0; p < parameterValues.n_elem; p ++)
       {
         
         lambda_i = tuningParameters.alpha *
@@ -94,7 +94,7 @@ namespace lessSEM{
       double penalty = 0.0;
       double lambda_i;
       
-      for(int p = 0; p < parameterValues.n_elem; p ++){
+      for(unsigned int p = 0; p < parameterValues.n_elem; p ++){
         
         lambda_i = tuningParameters.alpha *
           tuningParameters.lambda * 

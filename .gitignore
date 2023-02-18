@@ -17,3 +17,5 @@ src/*/*.dll
 docs
 tests/testthat/*.pdf
 seafile-ignore.txt
+vignettes/.*
+!.gitignore

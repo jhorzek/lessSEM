@@ -25,59 +25,53 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// computeIndividualM2LL
-double computeIndividualM2LL(const int nObservedVariables, const arma::colvec& rawData, const arma::colvec& impliedMeans, const arma::mat& impliedCovariance);
-RcppExport SEXP _lessSEM_computeIndividualM2LL(SEXP nObservedVariablesSEXP, SEXP rawDataSEXP, SEXP impliedMeansSEXP, SEXP impliedCovarianceSEXP) {
+// computeImpliedCovarianceFull
+arma::mat computeImpliedCovarianceFull(const arma::mat& Amatrix, const arma::mat& Smatrix, const arma::mat& IminusAInverse);
+RcppExport SEXP _lessSEM_computeImpliedCovarianceFull(SEXP AmatrixSEXP, SEXP SmatrixSEXP, SEXP IminusAInverseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const int >::type nObservedVariables(nObservedVariablesSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type rawData(rawDataSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type impliedMeans(impliedMeansSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type impliedCovariance(impliedCovarianceSEXP);
-    rcpp_result_gen = Rcpp::wrap(computeIndividualM2LL(nObservedVariables, rawData, impliedMeans, impliedCovariance));
-    return rcpp_result_gen;
-END_RCPP
-}
-// computeGroupM2LL
-double computeGroupM2LL(const int sampleSize, const int nObservedVariables, const arma::colvec& observedMeans, const arma::mat& observedCov, const arma::colvec& impliedMeans, const arma::mat& impliedCovariance);
-RcppExport SEXP _lessSEM_computeGroupM2LL(SEXP sampleSizeSEXP, SEXP nObservedVariablesSEXP, SEXP observedMeansSEXP, SEXP observedCovSEXP, SEXP impliedMeansSEXP, SEXP impliedCovarianceSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const int >::type sampleSize(sampleSizeSEXP);
-    Rcpp::traits::input_parameter< const int >::type nObservedVariables(nObservedVariablesSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type observedMeans(observedMeansSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type observedCov(observedCovSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type impliedMeans(impliedMeansSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type impliedCovariance(impliedCovarianceSEXP);
-    rcpp_result_gen = Rcpp::wrap(computeGroupM2LL(sampleSize, nObservedVariables, observedMeans, observedCov, impliedMeans, impliedCovariance));
+    Rcpp::traits::input_parameter< const arma::mat& >::type Amatrix(AmatrixSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Smatrix(SmatrixSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type IminusAInverse(IminusAInverseSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeImpliedCovarianceFull(Amatrix, Smatrix, IminusAInverse));
     return rcpp_result_gen;
 END_RCPP
 }
 // computeImpliedCovariance
-arma::mat computeImpliedCovariance(const arma::mat& Fmatrix, const arma::mat& Amatrix, const arma::mat& Smatrix);
-RcppExport SEXP _lessSEM_computeImpliedCovariance(SEXP FmatrixSEXP, SEXP AmatrixSEXP, SEXP SmatrixSEXP) {
+arma::mat computeImpliedCovariance(const arma::mat& Fmatrix, const arma::mat& impliedCovarianceFull);
+RcppExport SEXP _lessSEM_computeImpliedCovariance(SEXP FmatrixSEXP, SEXP impliedCovarianceFullSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type Fmatrix(FmatrixSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type impliedCovarianceFull(impliedCovarianceFullSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeImpliedCovariance(Fmatrix, impliedCovarianceFull));
+    return rcpp_result_gen;
+END_RCPP
+}
+// computeImpliedMeansFull
+arma::colvec computeImpliedMeansFull(const arma::mat& Amatrix, const arma::colvec& Mvector, const arma::mat& IminusAInverse);
+RcppExport SEXP _lessSEM_computeImpliedMeansFull(SEXP AmatrixSEXP, SEXP MvectorSEXP, SEXP IminusAInverseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type Amatrix(AmatrixSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type Smatrix(SmatrixSEXP);
-    rcpp_result_gen = Rcpp::wrap(computeImpliedCovariance(Fmatrix, Amatrix, Smatrix));
+    Rcpp::traits::input_parameter< const arma::colvec& >::type Mvector(MvectorSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type IminusAInverse(IminusAInverseSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeImpliedMeansFull(Amatrix, Mvector, IminusAInverse));
     return rcpp_result_gen;
 END_RCPP
 }
 // computeImpliedMeans
-arma::mat computeImpliedMeans(const arma::mat& Fmatrix, const arma::mat& Amatrix, const arma::colvec& Mvector);
-RcppExport SEXP _lessSEM_computeImpliedMeans(SEXP FmatrixSEXP, SEXP AmatrixSEXP, SEXP MvectorSEXP) {
+arma::colvec computeImpliedMeans(const arma::mat& Fmatrix, const arma::mat& impliedMeansFull);
+RcppExport SEXP _lessSEM_computeImpliedMeans(SEXP FmatrixSEXP, SEXP impliedMeansFullSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type Fmatrix(FmatrixSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type Amatrix(AmatrixSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type Mvector(MvectorSEXP);
-    rcpp_result_gen = Rcpp::wrap(computeImpliedMeans(Fmatrix, Amatrix, Mvector));
+    Rcpp::traits::input_parameter< const arma::mat& >::type impliedMeansFull(impliedMeansFullSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeImpliedMeans(Fmatrix, impliedMeansFull));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -141,10 +135,10 @@ RcppExport SEXP _rcpp_module_boot_istaScadMgSEM_cpp();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_lessSEM_callFitFunction", (DL_FUNC) &_lessSEM_callFitFunction, 3},
-    {"_lessSEM_computeIndividualM2LL", (DL_FUNC) &_lessSEM_computeIndividualM2LL, 4},
-    {"_lessSEM_computeGroupM2LL", (DL_FUNC) &_lessSEM_computeGroupM2LL, 6},
-    {"_lessSEM_computeImpliedCovariance", (DL_FUNC) &_lessSEM_computeImpliedCovariance, 3},
-    {"_lessSEM_computeImpliedMeans", (DL_FUNC) &_lessSEM_computeImpliedMeans, 3},
+    {"_lessSEM_computeImpliedCovarianceFull", (DL_FUNC) &_lessSEM_computeImpliedCovarianceFull, 3},
+    {"_lessSEM_computeImpliedCovariance", (DL_FUNC) &_lessSEM_computeImpliedCovariance, 2},
+    {"_lessSEM_computeImpliedMeansFull", (DL_FUNC) &_lessSEM_computeImpliedMeansFull, 3},
+    {"_lessSEM_computeImpliedMeans", (DL_FUNC) &_lessSEM_computeImpliedMeans, 2},
     {"_lessSEM_mcpPenalty_C", (DL_FUNC) &_lessSEM_mcpPenalty_C, 3},
     {"_lessSEM_scadPenalty_C", (DL_FUNC) &_lessSEM_scadPenalty_C, 3},
     {"_rcpp_module_boot_SEM_cpp", (DL_FUNC) &_rcpp_module_boot_SEM_cpp, 0},
