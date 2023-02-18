@@ -21,7 +21,14 @@ void initializeGradients(SEMCpp& SEM, const bool raw){
   }
   
   // We will start by computing the derivatives of the implied covariance
-  // matrix and the implied means vector for every parameter.
+  // matrix and the implied means vector for every parameter. Some elements 
+  // are used repeatedly, so it makes sense to just compute them once and
+  // re-use them:
+  derivPrecompute precomputedElements;
+  precomputedElements.FIminusAInverse = SEM.Fmatrix * SEM.IminusAInverse;
+  precomputedElements.tFIminusAInverse = arma::trans(precomputedElements.FIminusAInverse);
+  precomputedElements.FimpliedCovarianceFull = SEM.Fmatrix * SEM.impliedCovarianceFull;
+  precomputedElements.impliedCovarianceFulltF = SEM.impliedCovarianceFull*arma::trans(SEM.Fmatrix);
   
   for(int p = 0; p < nParameters; p++){
     
@@ -37,7 +44,7 @@ void initializeGradients(SEMCpp& SEM, const bool raw){
         isVariance,
         raw,
         SEM.impliedCovariance,
-        SEM.impliedCovarianceFull,
+        precomputedElements,
         SEM.Fmatrix,
         SEM.IminusAInverse,
         SEM.derivElements.positionInLocation.at(p)
@@ -48,6 +55,7 @@ void initializeGradients(SEMCpp& SEM, const bool raw){
                              SEM.impliedMeans,
                              SEM.impliedMeansFull,
                              SEM.Fmatrix,
+                             precomputedElements,
                              SEM.IminusAInverse,
                              SEM.derivElements.positionInLocation.at(p));
   }

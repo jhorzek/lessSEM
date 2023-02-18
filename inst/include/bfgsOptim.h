@@ -260,7 +260,7 @@ inline lessSEM::fitResults bfgsOptim(model& model_,
       smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
     
     // find step direction -> simple quasi-Newton step
-    direction = -arma::trans(arma::inv_sympd(Hessian_kMinus1)*arma::trans(gradients_kMinus1));
+    direction = -arma::trans(arma::solve(Hessian_kMinus1,arma::trans(gradients_kMinus1)));
     
     // find length of step in direction
     parameters_k = bfgsLineSearch(model_, 

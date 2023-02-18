@@ -5,18 +5,18 @@ arma::mat impliedCovarianceDerivative(const double parameterValue, // only requi
                                       const bool isVariance, // only required for variances due to the internal transformation used by lessSEM.
                                       const bool raw, // only required for variances due to the internal transformation used by lessSEM.
                                       const arma::mat& impliedCovariance, 
-                                      const arma::mat& impliedCovarianceFull,
+                                      const derivPrecompute& precomputedElements,
                                       const arma::mat& Fmatrix,
                                       const arma::mat& IminusAInverse,
                                       const arma::mat& derivativeElement){
   
   if(location.compare("Amatrix") == 0){
-    arma::mat temp = Fmatrix*IminusAInverse*derivativeElement;
+    arma::mat temp = precomputedElements.FIminusAInverse*derivativeElement;
     
     // there is probably some more speed to be found here:
     return(
-      temp * impliedCovarianceFull * arma::trans(Fmatrix) +
-        Fmatrix * impliedCovarianceFull * arma::trans(temp)
+      temp * precomputedElements.impliedCovarianceFulltF +
+        precomputedElements.FimpliedCovarianceFull * arma::trans(temp)
     );
   }
   
@@ -25,11 +25,11 @@ arma::mat impliedCovarianceDerivative(const double parameterValue, // only requi
       // note: lessSEM uses a log-transform internally. This must be accounted for here.
       // find value of variance
       
-      return(Fmatrix * IminusAInverse * (parameterValue*derivativeElement)*arma::trans(Fmatrix * IminusAInverse));
+      return(precomputedElements.FIminusAInverse * (parameterValue*derivativeElement)*precomputedElements.tFIminusAInverse);
       
     }
     
-    return(Fmatrix * IminusAInverse * derivativeElement * arma::trans(Fmatrix*IminusAInverse)); 
+    return(precomputedElements.FIminusAInverse * derivativeElement * precomputedElements.tFIminusAInverse); 
   }
   
   if(location.compare("Mvector") == 0){
@@ -44,11 +44,12 @@ arma::colvec impliedMeansDerivative(const std::string& location,
                                  const arma::mat& impliedMeans, 
                                  const arma::mat& impliedMeansFull,
                                  const arma::mat& Fmatrix,
+                                 const derivPrecompute& precomputedElements,
                                  const arma::mat& IminusAInverse,
                                  const arma::mat& derivativeElement){
   
   if(location.compare("Amatrix") == 0){
-    return(-1.0 * Fmatrix * IminusAInverse * derivativeElement * impliedMeansFull);
+    return(-1.0 * precomputedElements.FIminusAInverse * derivativeElement * impliedMeansFull);
   }
   
   if(location.compare("Smatrix") == 0){
@@ -56,7 +57,7 @@ arma::colvec impliedMeansDerivative(const std::string& location,
   }
   
   if(location.compare("Mvector") == 0){
-    return( Fmatrix * IminusAInverse * derivativeElement );
+    return( precomputedElements.FIminusAInverse * derivativeElement );
   }
   
   Rcpp::stop("Unknown parameter location");
