@@ -4,14 +4,12 @@
 \alias{computeImpliedMeans}
 \title{computeImpliedMeans}
 \usage{
-computeImpliedMeans(Fmatrix, Amatrix, Mvector)
+computeImpliedMeans(Fmatrix, impliedMeansFull)
 }
 \arguments{
 \item{Fmatrix}{filter matrix}
 
-\item{Amatrix}{matrix with directed effects}
-
-\item{Mvector}{vector with means}
+\item{impliedMeansFull}{implied means vector including latent variables}
 }
 \value{
 matrix with implied means

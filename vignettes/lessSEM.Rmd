@@ -121,13 +121,13 @@ table above. For instance, let's have a look at the lasso penalty:
 ```{r, eval = FALSE}
 fitLasso <- lasso(lavaanModel = lavaanModel, 
                   regularized = regularized,
-                  nLambdas = 50)
+                  nLambdas = 5)
 ```
 
 ```{r, include = FALSE}
 fitLasso <- lasso(lavaanModel = lavaanModel, 
                   regularized = regularized,
-                  nLambdas = 50)
+                  nLambdas = 5)
 ```
 
 Plot the paths to see what is going on:
@@ -155,7 +155,7 @@ plot(fitLasso) + ggplot2::theme_bw()
 The `coef` function gives access to all parameter estimates:
 
 ```{r}
-head(coef(fitLasso))
+coef(fitLasso)
 ```
 
 
@@ -165,15 +165,15 @@ all you have to do is to replace the `lasso()` function with the `scad()` functi
 ```{r, eval = FALSE}
 fitScad <- scad(lavaanModel = lavaanModel, 
                 regularized = regularized,
-                lambdas = seq(0,1,.1),
-                thetas = seq(2.1, 5,length.out = 4))
+                lambdas = seq(0,1,length.out = 4),
+                thetas = seq(2.1, 5,length.out = 2))
 ```
 
 ```{r, include = FALSE}
 fitScad <- scad(lavaanModel = lavaanModel, 
                 regularized = regularized,
-                lambdas = seq(0,1,.1),
-                thetas = seq(2.1, 5,length.out = 4))
+                lambdas = seq(0,1,length.out = 4),
+                thetas = seq(2.1, 5,length.out = 2))
 ```
 
 The scad penalty has two tuning parmeters $\lambda$ and $\theta$. The naming follows
@@ -187,7 +187,7 @@ plot(fitScad)
 The parameter estimates can again be accessed with the `coef()` function:
 
 ```{r}
-head(coef(fitScad))
+coef(fitScad)
 ```
 
 ### Selecting a model

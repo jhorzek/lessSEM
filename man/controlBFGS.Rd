@@ -6,7 +6,7 @@
 \usage{
 controlBFGS(
   startingValues = "est",
-  initialHessian = ifelse(all(startingValues == "est"), "lavaan", 1),
+  initialHessian = ifelse(all(startingValues == "est"), "lavaan", "compute"),
   saveHessian = FALSE,
   stepSize = 0.9,
   sigma = 1e-05,

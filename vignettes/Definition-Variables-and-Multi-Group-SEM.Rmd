@@ -289,7 +289,7 @@ fit <- lasso(lavaanModel = c(fit_Pasteur, fit_Grant_White),
 ```
 Now, let's look at the parameter estimates:
 ```{r}
-coef(fit, criterion = "AIC")[,c("l1_Pasteur", "l1_delta")]
+coef(fit, criterion = "AIC")@estimates[,c("l1_Pasteur", "l1_delta")]
 ```
 As the `l1_delta` parameter has been set to zero, we can assume measurement invariance.
 Note that you won't find `l1_Grant_White` in the parameters of the model. This

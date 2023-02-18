@@ -4,14 +4,12 @@
 \alias{computeImpliedCovariance}
 \title{computeImpliedCovariance}
 \usage{
-computeImpliedCovariance(Fmatrix, Amatrix, Smatrix)
+computeImpliedCovariance(Fmatrix, impliedCovarianceFull)
 }
 \arguments{
 \item{Fmatrix}{filter matrix}
 
-\item{Amatrix}{matrix with directed effects}
-
-\item{Smatrix}{matrix with undirected effects}
+\item{impliedCovarianceFull}{implied covariance matrix including latent variables}
 }
 \value{
 matrix with implied covariances

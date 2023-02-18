@@ -206,7 +206,7 @@ test_that("testing transformations", {
     all(
       abs(
         omxGetParameters(fitMx)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")] -
-          unlist(coef(rsemBFGS)[c("a", "b", "c", "deltaA", "deltaB", "deltaC")])
+          unlist(rsemBFGS@parameters[c("a", "b", "c", "deltaA", "deltaB", "deltaC")])
       ) < .01), 
     TRUE)
   
@@ -279,7 +279,7 @@ test_that("testing transformations", {
     all(
       abs(
         omxGetParameters(fitMx)[c("a", "b", "c", "dlog", "deltaB", "deltaC")] -
-          unlist(coef(rsemBFGS)[c("a", "b", "c", "dlog", "deltaB", "deltaC")])
+          unlist(rsemBFGS@parameters[c("a", "b", "c", "dlog", "deltaB", "deltaC")])
       ) < .01), 
     TRUE)
 })

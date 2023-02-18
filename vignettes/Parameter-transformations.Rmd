@@ -201,7 +201,7 @@ lassoFit <- lasso(lavaanModel = lavaanFit,
 Let's have a look at the parameter estimates:
 
 ```{r}
-coef(lassoFit)[seq(1,100,10),c("lambda", "a1", "b1", "c1", "delta_a2", "delta_b2", "delta_c2")]
+coef(lassoFit)@estimates[seq(1,100,10),c("a1", "b1", "c1", "delta_a2", "delta_b2", "delta_c2")]
 ```
 Note that the differences between the parameters get smaller with larger $\lambda$ values. 
 We can also plot the differences:
@@ -493,9 +493,9 @@ a[2:10]
 while the estimates are
 ```{r,echo = FALSE}
 aEst <- rep(NA, 9)
-aEst[1] <- unlist(coef(lassoFit, criterion = "BIC")["a1"])
+aEst[1] <- coef(lassoFit, criterion = "BIC")@estimates[,"a1"]
 for(i in 2:9){
-  aEst[i] <- aEst[i-1] + unlist(coef(lassoFit, criterion = "BIC")[paste0("delta",i)])
+  aEst[i] <- aEst[i-1] + coef(lassoFit, criterion = "BIC")@estimates[,paste0("delta",i)]
 }
 
 print(aEst)
@@ -793,7 +793,7 @@ ctsem summary and the parameter `ctV` corresponds to the root of the
 `DIFFUSION` parameter in the ctsem summary:
 
 ```{r}
-coef(lessSEMFit)[,c("ctA", "ctV")]
+coef(lessSEMFit)@estimates[,c("ctA", "ctV")]
 
 # drift value from ctsem:
 ctSummary$DRIFT
@@ -1007,7 +1007,7 @@ model:
 
 lessSEM:
 ```{r}
-matrix(unlist(coef(lessSEMFit)[,c("ctA_11", "ctA_21", "ctA_12", "ctA_22")]),2,2)
+matrix(coef(lessSEMFit)@estimates[,c("ctA_11", "ctA_21", "ctA_12", "ctA_22")],2,2)
 ```
 ctsemOMX:
 ```{r}
@@ -1018,7 +1018,7 @@ The diffusions are given by:
 
 lessSEM:
 ```{r}
-matrix(unlist(coef(lessSEMFit)[,c("ctV_11", "ctV_12", "ctV_12", "ctV_22")]),2,2)
+matrix(coef(lessSEMFit)@estimates[,c("ctV_11", "ctV_12", "ctV_12", "ctV_22")],2,2)
 ```
 
 ctsemOMX:

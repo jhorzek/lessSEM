@@ -235,27 +235,34 @@
       initialHessian <- "compute"
       
     }else if(any(!names(lavaanParameters) %in% names(rawParameters)) |
-       any(!names(rawParameters) %in% names(lavaanParameters))
+             any(!names(rawParameters) %in% names(lavaanParameters))
     ){
       message("Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
     }else{
-      lavaanVcov <- lavaan:::vcov(lavaanModel)
-      
-      lavaanVcov <- lavaanVcov[!duplicated(rownames(lavaanVcov)), 
-                               !duplicated(colnames(lavaanVcov))][names(rawParameters),
-                                                                  names(rawParameters)]
-      initialHessian <- 2*solve(lavaanVcov)
-      
-      if(any(eigen(initialHessian, only.values = TRUE)$values <= 0)){
-        # make positive definite
-        # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
-        eigenValues = eigen(initialHessian, only.values = )$values
-        diagMat = diag(-1.1*min(eigenValues), nrow(initialHessian), ncol(initialHessian))
-        initialHessian = initialHessian +  diagMat
+      lavaanVcov <- try(lavaan:::vcov(lavaanModel))
+      if(is(lavaanVcov, "try-error")){
+        warning("Could not extract initial Hessian from lavaan. Switching to ",
+                "initialHessian = 'compute'.")
+        initialHessian <- "compute"
+        
+      }else{
+        
+        lavaanVcov <- lavaanVcov[!duplicated(rownames(lavaanVcov)), 
+                                 !duplicated(colnames(lavaanVcov))][names(rawParameters),
+                                                                    names(rawParameters)]
+        initialHessian <- 2*solve(lavaanVcov)
+        
+        if(any(eigen(initialHessian, only.values = TRUE)$values <= 0)){
+          # make positive definite
+          # see https://nhigham.com/2021/02/16/diagonally-perturbing-a-symmetric-matrix-to-make-it-positive-definite/
+          eigenValues = eigen(initialHessian, only.values = )$values
+          diagMat = diag(-1.1*min(eigenValues), nrow(initialHessian), ncol(initialHessian))
+          initialHessian = initialHessian +  diagMat
+        }
+        
+        return(initialHessian)
       }
-      
-      return(initialHessian)
     }
     
   }
