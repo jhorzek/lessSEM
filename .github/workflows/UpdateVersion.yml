@@ -1,0 +1,39 @@
+name: Update Version in DESCRIPTION
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get current version number
+        id: get-version
+        run: |
+          current_version=$(grep "Version:" DESCRIPTION | sed 's/Version: \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)/\1.\2.\3/')
+          echo "::set-output name=version::$current_version"
+      - name: Increment version number
+        id: increment-version
+        run: |
+          current_version=${{ steps.get-version.outputs.version }}
+          major=$(echo $current_version | cut -d '.' -f 1)
+          minor=$(echo $current_version | cut -d '.' -f 2)
+          patch=$(echo $current_version | cut -d '.' -f 3)
+          new_version="$major.$minor.$((patch+1))"
+          echo "::set-output name=new_version::$new_version"
+      - name: Update DESCRIPTION file
+        run: |
+         sed -i "s/Version:.*$/Version: ${{ steps.increment-version.outputs.new_version }}/g" DESCRIPTION
+         
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add DESCRIPTION
+          git commit -m "Bump version number in DESCRIPTION"
+          git push
