@@ -59,7 +59,8 @@ test_that("testing elasticNet-lasso-with-transformation", {
   coef(rsemGlmnet, criterion = "AIC")
   coef(rsemGlmnet, criterion = "BIC")
   
-  testthat::expect_equal(all(abs(coef(rsemGlmnet) - coef(rsemIsta)) < 1e-2), TRUE)
+  testthat::expect_equal(all(abs(coef(rsemGlmnet)@estimates - 
+                                   coef(rsemIsta)@estimates) < 1e-2), TRUE)
   
   # test multi-line transformations
   transformations <- "
@@ -81,7 +82,7 @@ test_that("testing elasticNet-lasso-with-transformation", {
                        control = controlGlmnet(),
                        modifyModel = modifyModel(transformations = transformations)
   )
-  testthat::expect_equal(all(abs(coef(rsemGlmnet) - coef(rsemGlmnet2)) < 1e-4), TRUE)
+  testthat::expect_equal(all(abs(coef(rsemGlmnet)@estimates - coef(rsemGlmnet2)@estimates) < 1e-4), TRUE)
   
   # test multi-line transformations and starting values
   transformations <- "
@@ -103,7 +104,7 @@ test_that("testing elasticNet-lasso-with-transformation", {
                        control = controlGlmnet(),
                        modifyModel = modifyModel(transformations = transformations)
   )
-  testthat::expect_equal(all(abs(coef(rsemGlmnet) - coef(rsemGlmnet3)) < 1e-2), TRUE)
+  testthat::expect_equal(all(abs(coef(rsemGlmnet)@estimates - coef(rsemGlmnet3)@estimates) < 1e-2), TRUE)
   
   # set automatic lambda:
   transformations <- "

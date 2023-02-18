@@ -38,7 +38,6 @@ arma::mat computeImpliedCovariance(const arma::mat& Fmatrix,
 //' computeImpliedMeansFull
 //' 
 //' computes the implied means vector of a SEM including the latent variables using RAM notation
-//' @param Fmatrix filter matrix
 //' @param Amatrix matrix with directed effects
 //' @param Mvector vector with means
 //' @param IminusAInverse (I-Amatrix)^(-1)

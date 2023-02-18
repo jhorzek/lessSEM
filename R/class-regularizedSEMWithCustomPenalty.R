@@ -38,8 +38,14 @@ setMethod("summary", "regularizedSEMWithCustomPenalty", function (object) {
 #' @returns data.frame with all parameter estimates
 #' @export
 setMethod("coef", "regularizedSEMWithCustomPenalty", function (object, ...) {
-  pars <- object@parameters
-  return(pars)
+  tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
+  estimates <- as.matrix(object@parameters[,object@parameterLabels,drop=FALSE])
+
+  coefs <- new("lessSEMCoef")
+  coefs@tuningParameters <- tuningParameters
+  coefs@estimates <- estimates
+  
+  return(coefs)
 })
 
 #' AIC

@@ -74,25 +74,41 @@ setMethod("coef", "regularizedSEM", function (object, ...) {
     criterion <- NULL
   }
   
+  tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
+  estimates <- as.matrix(object@parameters[,object@parameterLabels,drop=FALSE])
+  
   if(!is.null(criterion) && criterion %in% c("AIC", "BIC")){
     if(length(unique(object@fits$nonZeroParameters)) == 1) 
       stop("Selection by criterion currently only supported for sparsity inducing penalties. Either none of your parameters was zeroed or the penalty used does not induce sparsity.")
     if(criterion == "AIC"){
       AICs <- AIC(object)
       bestAIC <- which(AICs$AIC == min(AICs$AIC))[1]
-      return(object@parameters[bestAIC,]) 
+      
+      coefs <- new("lessSEMCoef")
+      coefs@tuningParameters <- tuningParameters[bestAIC,,drop = FALSE]
+      coefs@estimates <- estimates[bestAIC,,drop = FALSE]
+      
+      return(coefs) 
     }
     
     if(criterion == "BIC"){
       BICs <- BIC(object)
       bestBIC <- which(BICs$BIC == min(BICs$BIC))[1]
-      return(object@parameters[bestBIC,])
+      
+      coefs <- new("lessSEMCoef")
+      coefs@tuningParameters <- tuningParameters[bestBIC,,drop = FALSE]
+      coefs@estimates <- estimates[bestBIC,,drop = FALSE]
+      
+      return(coefs)
     }
     
   }
   
-  pars <- object@parameters
-  return(pars)
+  coefs <- new("lessSEMCoef")
+  coefs@tuningParameters <- tuningParameters
+  coefs@estimates <- estimates
+  
+  return(coefs)
 })
 
 #' AIC
