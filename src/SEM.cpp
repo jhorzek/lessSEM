@@ -357,7 +357,7 @@ arma::mat SEMCpp::getScores(bool raw){
   if(!detivativesInitialized){
     // there are some elements that are used repeatedly that 
     // are only initialized if the gradients have been computed at least once.
-    getGradients(true);
+    getGradients(raw);
   }
   
   arma::mat scoresMat = scores(*this, raw);

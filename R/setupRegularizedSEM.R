@@ -145,20 +145,26 @@
       
       if(createAdaptiveLassoWeights){
         
-        # We will use the nlminb optimizer, similar to lavaan to get the MLE
-        opt <- .optNLMINB(SEM = .SEMFromLavaan(
+        if(method == "bfgs") {
+          method <- "glmnet" # bfgs is used by smooth lasso
+          control <- controlGlmnet()
+        }
+        control_s <- control
+        control_s$verbose <- 0
+        # optimize model: We set lambda = 0, so we get the MLE
+        cat("Computing MLE for adaptive lasso...\n")
+        MLE <- lasso(
           lavaanModel = lavaanModel,
-          whichPars = control$startingValues,
-          addMeans = modifyModel$addMeans,
-          activeSet = modifyModel$activeSet,
-          dataSet = modifyModel$dataSet, 
-          transformations = modifyModel$transformations, 
-          transformationList = modifyModel$transformationList, 
-          fit = FALSE,
-          transformationGradientStepSize = modifyModel$transformationGradientStepSize
-        ))
+          lambdas = 0, 
+          regularized = regularized,
+          method = method, 
+          modifyModel = modifyModel,
+          control = control_s
+        )
         
-        weights <- 1/abs(.getParameters(opt, raw = TRUE))
+        # MLE:
+        MLEs <- unlist(MLE@parameters[,MLE@parameterLabels])
+        weights <- 1/abs(MLEs)
         weights[!names(weights) %in% regularized] <- 0
       }else{
         

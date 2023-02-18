@@ -73,30 +73,6 @@
   return(standardErrors)
 }
 
-#' .individualMinus2LogLikelihood
-#' 
-#' internal function which returns the -2 log Likelihood for a single subject
-#' 
-#' @param par labeled vector with parameter values
-#' @param SEM model of class Rcpp_SEMCpp. 
-#' @param data vector with data points for this single individual
-#' @param raw controls if the internal transformations of lessSEM is used.
-#' @returns -2 log Likelihood for each subject in the data set
-#' @keywords internal
-.individualMinus2LogLikelihood <- function(par, SEM, data, raw){
-  if(any(names(data) != SEM$manifestNames)) stop("SEM$manifestNames and colnames of data do not match!")
-  if(any(.getParameters(SEM, raw = raw)[names(par)] != par)) SEM <- .setParameters(SEM, labels = names(par), values = as.numeric(par), raw = raw)
-  if(anyNA(SEM$impliedCovariance) || anyNA(SEM$impliedMeans)) SEM$implied()
-  isMissing <- is.na(data)
-  return(
-    computeIndividualM2LL(nObservedVariables = sum(!isMissing),  
-                          rawData = data[!isMissing], 
-                          impliedMeans = SEM$impliedMeans[!isMissing], 
-                          impliedCovariance = SEM$impliedCovariance[!isMissing,!isMissing])
-  )
-  
-}
-
 #' .likelihoodRatioFit
 #' 
 #' internal function which returns the likelihood ratio fit statistic

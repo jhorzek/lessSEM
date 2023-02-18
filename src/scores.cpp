@@ -44,7 +44,7 @@ arma::mat scores(const SEMCpp& SEM, bool raw){
         );
       }
 
-      individualGradients.row(i) = currentGradients;
+      individualGradients.row(dataSubsets.at(miss).persons.at(i)) = currentGradients;
 
     }
     

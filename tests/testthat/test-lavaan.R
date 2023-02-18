@@ -28,14 +28,6 @@ test_that("testing lavaan", {
   testthat::expect_equal(round(BIC(SEM) - BIC(model),5),0)
   
   testthat::expect_equal(round(SEM$m2LL - (-2*as.numeric(logLik(model))),4),0)
-
-  individualFit <- rep(NA, nrow(PoliticalDemocracy))
-  for(i in 1:nrow(PoliticalDemocracy)){
-    individualFit[i] <- lessSEM:::.individualMinus2LogLikelihood(par = lessSEM:::.getParameters(SEM), SEM = SEM, data = SEM$rawData[i,], raw = FALSE)
-  }
-  
-  testthat::expect_equal(round(sum(individualFit) - (-2*as.numeric(logLik(model))),4),0)
-  
   testthat::expect_equal(round(model@Fit@test$standard$stat - lessSEM:::.likelihoodRatioFit(par = lessSEM:::.getParameters(SEM), SEM),4)[1,1],0)
 
   # test missing data
