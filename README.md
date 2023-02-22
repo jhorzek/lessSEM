@@ -53,13 +53,13 @@ packages.** There are three ways to implement them which are documented
 in `vignette("General-Purpose-Optimization", package = "lessSEM")`. In
 short, these are:
 
-1.  using the R interface: All general purpose implementations of the
+1.  Using the R interface. All general purpose implementations of the
     functions are called with prefix “gp” (`gpLasso`, `gpScad`, …). More
     information and examples can be found in the documentation of these
     functions (e.g., `?lessSEM::gpLasso`, `?lessSEM::gpAdaptiveLasso`,
     `?lessSEM::gpElasticNet`). The interface is similar to the optim
     optimizers in R.
-2.  using Rcpp, we can pass C++ function pointers to the general purpose
+2.  Using Rcpp, we can pass C++ function pointers to the general purpose
     optimizers `gpLassoCpp`, `gpScadCpp`, … (e.g.,
     `?lessSEM::gpLassoCpp`)
 3.  All optimizers are implemented as C++ header-only files in
