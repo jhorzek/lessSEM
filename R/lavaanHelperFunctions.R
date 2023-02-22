@@ -176,12 +176,8 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
       lessSEMEstimates <- unlist(cbind(regularizedSEM@parameters, regularizedSEM@transformations)[whichRow,expectedParameters])
       
       # Now we can change the parameters of the lavaan model to match ours
-      lavaanParTable <- lavaan::parameterEstimates(object = lavaanModel)
+      lavaanParTable <- lavaan::parTable(object = lavaanModel)
       lavaanParTable$se <- NA
-      lavaanParTable$z <- NA
-      lavaanParTable$pvalue <- NA
-      lavaanParTable$ci.lower <- NA
-      lavaanParTable$ci.upper <- NA
       
       for(i in 1:nrow(lavaanParTable)){
         if(! "label" %in% colnames(lavaanParTable) ||
@@ -196,16 +192,16 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
         }
       }
       
-      lavaanModels[[m]] <- lavaan::update(object = lavaanModel,
-                                          data = lavInspect(lavaanModel, "data"),
-                                          start = lavaanParTable,
-                                          do.fit= FALSE)
+      lavaanModels[[m]] <- suppressWarnings(lavaan::sem(model = lavaanParTable,
+                                                        data = lavInspect(lavaanModel, "data"),
+                                                        do.fit= FALSE))
       
       
     }
     return(lavaanModels)
     
   }
+  
   # We only need those parameters that are also in the lavaan model:
   lavaanModel <- regularizedSEM@inputArguments$lavaanModel
   expectedParameters <- names(getLavaanParameters(lavaanModel))
@@ -213,12 +209,8 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
   lessSEMEstimates <- unlist(lessSEMEstimates[whichRow,expectedParameters])
   
   # Now we can change the parameters of the lavaan model to match ours
-  lavaanParTable <- lavaan::parameterEstimates(object = lavaanModel)
+  lavaanParTable <- lavaan::parTable(object = lavaanModel)
   lavaanParTable$se <- NA
-  lavaanParTable$z <- NA
-  lavaanParTable$pvalue <- NA
-  lavaanParTable$ci.lower <- NA
-  lavaanParTable$ci.upper <- NA
   
   for(i in 1:nrow(lavaanParTable)){
     if(! "label" %in% colnames(lavaanParTable) ||
@@ -233,9 +225,8 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
     }
   }
   
-  updatedLavaanModel <- lavaan::update(object = lavaanModel,
-                                       data = lavInspect(lavaanModel, "data"),
-                                       start = lavaanParTable,
-                                       do.fit= FALSE)
+  updatedLavaanModel <- suppressWarnings(lavaan::sem(model = lavaanParTable,
+                                                     data = lavInspect(lavaanModel, "data"),
+                                                     do.fit= FALSE))
   return(updatedLavaanModel)
 }
