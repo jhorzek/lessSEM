@@ -63,6 +63,10 @@
   }
   
   .checkLavaanModel(lavaanModel = lavaanModel)
+  
+  ## Setup Multi-Core ##
+  
+  setupMulticore(control)
 
   ### initialize model ####
   startingValues <- control$startingValues

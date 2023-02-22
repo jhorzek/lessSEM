@@ -54,6 +54,12 @@
   }
   
   .checkLavaanModel(lavaanModel = lavaanModel)
+  
+  ## Setup Multi-Core ##
+  
+  setupMulticore(control)
+  
+  ## check starting values ##
 
   startingValues <- control$startingValues
   if(!any(startingValues == "est") & penalty == "adaptiveLasso" & !is.numeric(weights)){

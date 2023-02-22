@@ -17,7 +17,8 @@ controlBFGS(
   breakOuter = 1e-08,
   breakInner = 1e-10,
   convergenceCriterion = 0,
-  verbose = 0
+  verbose = 0,
+  nCores = 1
 )
 }
 \arguments{
@@ -55,6 +56,8 @@ Note that in case of gradients and GLMNET, we divide the gradients (and the Hess
 considerably more difficult for larger sample sizes to reach the convergence criteria.}
 
 \item{verbose}{0 prints no additional information, > 0 prints GLMNET iterations}
+
+\item{nCores}{number of core to use. Multi-core support is provided by RcppParallel and only supported for SEM, not for general purpose optimization.}
 }
 \value{
 object of class controlBFGS

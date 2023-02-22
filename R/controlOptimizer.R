@@ -25,6 +25,7 @@
 #' 3 = Barzilai-Borwein procedure 
 #' 4 = Barzilai-Borwein procedure, but sometimes resets the step size; this can help when the optimizer is caught in a bad spot.
 #' @param verbose if set to a value > 0, the fit every "verbose" iterations is printed.
+#' @param nCores number of core to use. Multi-core support is provided by RcppParallel and only supported for SEM, not for general purpose optimization.
 #' @returns object of class controlIsta
 #' @export
 controlIsta <- function(
@@ -38,7 +39,8 @@ controlIsta <- function(
     convCritInner = 1,
     sigma = .1,
     stepSizeInheritance = ifelse(accelerate,1,3),
-    verbose = 0
+    verbose = 0,
+    nCores = 1
 ){
   control <- as.list(environment())
   class(control) <- "controlIsta"
@@ -84,6 +86,7 @@ controlIsta <- function(
 #' Note that in case of gradients and GLMNET, we divide the gradients (and the Hessian) of the log-Likelihood by N as it would otherwise be
 #' considerably more difficult for larger sample sizes to reach the convergence criteria.
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
+#' @param nCores number of core to use. Multi-core support is provided by RcppParallel and only supported for SEM, not for general purpose optimization.
 #' @returns object of class controlGlmnet
 #' @export
 controlGlmnet <- function(
@@ -99,7 +102,8 @@ controlGlmnet <- function(
     breakOuter = 1e-8,
     breakInner = 1e-10,
     convergenceCriterion = 0,
-    verbose = 0
+    verbose = 0,
+    nCores = 1
 ){
   control <- as.list(environment())
   class(control) <- "controlGlmnet"
@@ -132,6 +136,7 @@ controlGlmnet <- function(
 #' Note that in case of gradients and GLMNET, we divide the gradients (and the Hessian) of the log-Likelihood by N as it would otherwise be
 #' considerably more difficult for larger sample sizes to reach the convergence criteria.
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
+#' @param nCores number of core to use. Multi-core support is provided by RcppParallel and only supported for SEM, not for general purpose optimization.
 #' @returns object of class controlBFGS
 #' @export
 controlBFGS <- function(
@@ -147,9 +152,26 @@ controlBFGS <- function(
     breakOuter = 1e-8,
     breakInner = 1e-10,
     convergenceCriterion = 0,
-    verbose = 0
+    verbose = 0,
+    nCores = 1
 ){
   control <- as.list(environment())
   class(control) <- "controlBFGS"
   return(control)
+}
+
+#' setupMulticore
+#' 
+#' setup for multi-core support
+#' @param control object created with controlBFGS, controlIsta or controlGlmnet function
+#' @return nothing
+setupMulticore <- function(control){
+  if(RcppParallel::defaultNumThreads() < control$nCores)
+    warning("Your selected number of cores (", control$nCores,
+            ") is larger than the number of cores detected by RcppParallel (",
+            RcppParallel::defaultNumThreads(), "). You may consider using fewer cores."
+            )
+  
+  RcppParallel::setThreadOptions(numThreads = control$nCores)
+  
 }
