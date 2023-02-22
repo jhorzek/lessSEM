@@ -26,8 +26,7 @@ jobs:
     - name: pull container
       run: docker pull ghcr.io/jhorzek/lesssem_dependencies:latest
     - name: Install devtools
-      run: install.packages("devtools")
-      shell: Rscript {0}
+      run: Rscript suppressWarnings(install.packages('devtools'))
     - name: Check
       run: devtools::check(error_on = "warning", manual = FALSE)
       shell: Rscript {0}
