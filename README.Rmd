@@ -37,7 +37,7 @@ The following penalty functions are currently implemented in **lessSEM**:
 
 ![](man/figures/penalty_functions.png)
 
-"penalty" refers to the name of the function call in the **lessSEM** package 
+The column "penalty" refers to the name of the function call in the **lessSEM** package 
 (e.g., lasso is called with the `lasso()` function). Smooth functions are called 
 with `smoothLasso`, `smoothAdaptiveLasso`, and `smoothElasticNet`. 
 These are only implemented for the comparison of exact and approximate optimization 
@@ -68,7 +68,7 @@ examples can be found in the documentation of these functions (e.g., `?lessSEM::
 the optim optimizers in R. 
 2. using Rcpp, we can pass C++ function pointers to the general purpose optimizers
 `gpLassoCpp`, `gpScadCpp`, ... (e.g., `?lessSEM::gpLassoCpp`)
-2. All optimizers are implemented as C++ header-only files in **lessSEM**. Thus, 
+3. All optimizers are implemented as C++ header-only files in **lessSEM**. Thus, 
 they can be accessed from other packages using C++. The interface is similar 
 to that of the [**ensmallen**](https://ensmallen.org/) library. We have implemented
 a simple example for elastic net regularization of linear regressions in the 
@@ -83,7 +83,8 @@ check out
 [**regsem**](https://github.com/Rjacobucci/regsem) and [**lslx**](https://github.com/psyphh/lslx) 
 which offer some features that are still missing in **lessSEM**. A distinct feature of
 **lessSEM** are parameter transformations (see below for an example). Additionally,
-**lessSEM** allows for mixed penalties.
+**lessSEM** allows for mixed penalties. Finally, **lessSEM** can make use of multiple
+cores.
 
 # Installation
 
@@ -176,7 +177,9 @@ rsemIsta <- lasso(
   regularized = paste0("l", 6:15),
   nLambdas = 50,
   method = "ista",
-  control = controlIsta())
+  control = controlIsta(
+    # Here, we can also specify that we want to use multiple cores:
+    nCores = 2))
 
 # Note: The results are basically identical:
 rsemIsta@parameters - rsem@parameters

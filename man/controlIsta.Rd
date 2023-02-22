@@ -15,7 +15,8 @@ controlIsta(
   convCritInner = 1,
   sigma = 0.1,
   stepSizeInheritance = ifelse(accelerate, 1, 3),
-  verbose = 0
+  verbose = 0,
+  nCores = 1
 )
 }
 \arguments{
@@ -54,6 +55,8 @@ sigma enforce larger improvement in fit}
 4 = Barzilai-Borwein procedure, but sometimes resets the step size; this can help when the optimizer is caught in a bad spot.}
 
 \item{verbose}{if set to a value > 0, the fit every "verbose" iterations is printed.}
+
+\item{nCores}{number of core to use. Multi-core support is provided by RcppParallel and only supported for SEM, not for general purpose optimization.}
 }
 \value{
 object of class controlIsta

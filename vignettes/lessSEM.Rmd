@@ -62,12 +62,11 @@ $$
 
 ## Objectives
 
-The objectives of **lessSEM** are two-fold
+The objectives of **lessSEM** are to provide ...
 
-1. We wanted to test general purpose optimizers (the default in regsem 1.8.0 is solnp) 
-against specialized optimizers (the default in lslx is a variant of GLMNET)
-2. To make the optimizers used within **lessSEM** available for other researchers
-in order to simplify the implementation of new regularized SEM
+1. a flexible framework for regularizing SEM and
+2. optimizers for other SEM packages which can be used with an interface
+similar to `optim`.
 
 ## Regularizing SEM
 
@@ -320,6 +319,36 @@ Compare this to:
 ```{r}
 -2*logLik(lavaanModel)
 ```
+
+## Using multiple cores
+
+By default, **lessSEM** will only use one computer core. However,
+if a model has many parameters, parallel computations can be considerably faster.
+Multi-Core support is therefore provided using the **RcppParallel** package (Allaire et. al, 2023).
+To make use of multiple cores, the number of cores must be specified in the
+`control` argument (see below). Before doing that, it makes sense to check how
+many cores the computer has:
+```{r, include=FALSE}
+library(RcppParallel) # to suppress the loading message
+```
+```{r}
+library(RcppParallel)
+# Print the number of threads (we call them cores for simplicity, but technically they are threads)
+RcppParallel::defaultNumThreads()
+```
+Note that using all cores can block the computer because there are no resources
+left for other tasks than R. To use 2 cores, we can set `nCores = 2` as follows:
+
+```{r, eval = FALSE}
+fitLasso <- lasso(lavaanModel = lavaanModel, 
+                  regularized = regularized,
+                  nLambdas = 10,
+                  control = controlGlmnet(nCores = 2))
+```
+
+Note that multi-core support is only provided for SEM. Using the optimizers implemented
+in **lessSEM** for models other than SEM (e.g., in the [**lessLM**](https://github.com/jhorzek/lessLM) 
+package) will not automatically allow for multi-core execution.
 
 ## Changing the optimizer
 
@@ -613,6 +642,7 @@ Another implementation of the fista algorithm (Beck & Teboulle, 2009)
 * [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M., Prabhu, R. G., 
 Basak, S., Lou, Z., & Sanderson, C. (2021). The ensmallen library for ﬂexible 
 numerical optimization. Journal of Machine Learning Research, 22, 1–6.
+* [RcppParallel](https://rcppcore.github.io/RcppParallel/) Allaire J, Francois R, Ushey K, Vandenbrouck G, Geelnard M, Intel (2023). _RcppParallel: Parallel Programming Tools for 'Rcpp'_. R package version 5.1.6, <https://CRAN.R-project.org/package=RcppParallel>.
 
 ## Regularized Structural Equation Modeling
 

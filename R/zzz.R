@@ -8,19 +8,17 @@
 #' penalty functions (e.g., lasso) building on [lavaan](https://github.com/yrosseel/lavaan). 
 #' lessSEM is heavily inspired by the [regsem](https://github.com/Rjacobucci/regsem) package 
 #' and the [lslx](https://github.com/psyphh/lslx) package which provide similar functionality.
+#'  
+#' The objectives of **lessSEM** are to provide ...
 #' 
-#' The objectives of lessSEM are:
-#'   
-#'   1. to compare exact and approximate optimization of regularized SEM
-#' 2. to provide optimizers for other SEM packages which can be used with an interface 
-#' similar to optim
-#' 
-#' **Warning**: The package is relatively new and you may find more stable 
-#' implementations of regularized SEM in the more mature R packages 
-#' [regsem](https://github.com/Rjacobucci/regsem) and [lslx](https://github.com/psyphh/lslx). 
+#' 1. a flexible framework for regularizing SEM and
+#' 2. optimizers for other SEM packages which can be used with an interface
+#' similar to `optim`.
+#'  
+#' **Note**: Please also check out the implementations of regularized SEM in the more 
+#' mature R packages [**regsem**](https://github.com/Rjacobucci/regsem) and [**lslx**](https://github.com/psyphh/lslx). 
 #' Finally, you may want to check out the julia package 
-#' [StructuralEquationModels.jl](https://github.com/StructuralEquationModels/StructuralEquationModels.jl). 
-#' They provide a more flexible implementation of (regularized) SEM with very interesting penalty functions.
+#' [**StructuralEquationModels.jl**](https://github.com/StructuralEquationModels/StructuralEquationModels.jl).
 #' 
 #' Currently, lessSEM has the following optimizers:
 #'   
@@ -43,7 +41,7 @@
 #' the optim optimizers in R. 
 #' 2. using Rcpp, we can pass C++ function pointers to the general purpose optimizers
 #' `gpLassoCpp`, `gpScadCpp`, ... (e.g., `?lessSEM::gpLassoCpp`)
-#' 2. All optimizers are implemented as C++ header-only files in lessSEM. Thus, 
+#' 3. All optimizers are implemented as C++ header-only files in lessSEM. Thus, 
 #' they can be accessed from other packages using C++. The interface is similar 
 #' to that of the [ensmallen](https://ensmallen.org/) library. We have implemented
 #' a simple example for elastic net regularization of linear regressions in the 
@@ -57,7 +55,9 @@
 #' check out 
 #' [regsem](https://github.com/Rjacobucci/regsem) and [lslx](https://github.com/psyphh/lslx) 
 #' which offer some features that are still missing in **lessSEM**. A distinct feature of
-#' lessSEM are parameter transformations (see below for an example).
+#' lessSEM are parameter transformations (see below for an example) and mixed penalties.
+#' Furthermore, **lessSEM** provides multi-core support. See `vignette("lessSEM", package = "lessSEM")`
+#' for more details.
 #' 
 #' # Installation
 #' 
@@ -150,7 +150,9 @@
 #'   regularized = paste0("l", 6:15),
 #'   nLambdas = 50,
 #'   method = "ista",
-#'   control = controlIsta())
+#'   control = controlIsta(
+#'     # Here, we can also specify that we want to use multiple cores:
+#'     nCores = 2))
 #' 
 #' # Note: The results are basically identical:
 #' rsemIsta@parameters - rsem@parameters
@@ -304,7 +306,7 @@
 #' - Zhang, T. (2010). Analysis of Multi-stage Convex Relaxation for Sparse Regularization. 
 #' Journal of Machine Learning Research, 11, 1081–1107.
 #' - Zou, H. (2006). The adaptive lasso and its oracle properties. Journal of the 
-#' American Statistical Association, 101(476), 1418–1429. https://doi.org/10.1198/016214506000000735
+#' American Statistical Association, 101(476), 1418-1429. https://doi.org/10.1198/016214506000000735
 #' - Zou, H., & Hastie, T. (2005). Regularization and variable selection via the 
 #' elastic net. Journal of the Royal Statistical Society: Series B, 67(2), 301–320. 
 #' https://doi.org/10.1111/j.1467-9868.2005.00503.x

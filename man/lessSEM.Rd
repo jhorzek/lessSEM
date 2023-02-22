@@ -16,19 +16,17 @@ penalty functions (e.g., lasso) building on \href{https://github.com/yrosseel/la
 lessSEM is heavily inspired by the \href{https://github.com/Rjacobucci/regsem}{regsem} package
 and the \href{https://github.com/psyphh/lslx}{lslx} package which provide similar functionality.
 
-The objectives of lessSEM are:
+The objectives of \strong{lessSEM} are to provide ...
 \enumerate{
-\item to compare exact and approximate optimization of regularized SEM
-\item to provide optimizers for other SEM packages which can be used with an interface
-similar to optim
+\item a flexible framework for regularizing SEM and
+\item optimizers for other SEM packages which can be used with an interface
+similar to \code{optim}.
 }
 
-\strong{Warning}: The package is relatively new and you may find more stable
-implementations of regularized SEM in the more mature R packages
-\href{https://github.com/Rjacobucci/regsem}{regsem} and \href{https://github.com/psyphh/lslx}{lslx}.
+\strong{Note}: Please also check out the implementations of regularized SEM in the more
+mature R packages \href{https://github.com/Rjacobucci/regsem}{\strong{regsem}} and \href{https://github.com/psyphh/lslx}{\strong{lslx}}.
 Finally, you may want to check out the julia package
-\href{https://github.com/StructuralEquationModels/StructuralEquationModels.jl}{StructuralEquationModels.jl}.
-They provide a more flexible implementation of (regularized) SEM with very interesting penalty functions.
+\href{https://github.com/StructuralEquationModels/StructuralEquationModels.jl}{\strong{StructuralEquationModels.jl}}.
 
 Currently, lessSEM has the following optimizers:
 \itemize{
@@ -67,7 +65,9 @@ and allows for equality constraints on parameters. You may, however, also want t
 check out
 \href{https://github.com/Rjacobucci/regsem}{regsem} and \href{https://github.com/psyphh/lslx}{lslx}
 which offer some features that are still missing in \strong{lessSEM}. A distinct feature of
-lessSEM are parameter transformations (see below for an example).
+lessSEM are parameter transformations (see below for an example) and mixed penalties.
+Furthermore, \strong{lessSEM} provides multi-core support. See \code{vignette("lessSEM", package = "lessSEM")}
+for more details.
 }
 \section{Installation}{
 If you want to install lessSEM from GitHub, use the following commands in R:
@@ -157,7 +157,9 @@ rsemIsta <- lasso(
   regularized = paste0("l", 6:15),
   nLambdas = 50,
   method = "ista",
-  control = controlIsta())
+  control = controlIsta(
+    # Here, we can also specify that we want to use multiple cores:
+    nCores = 2))
 
 # Note: The results are basically identical:
 rsemIsta@parameters - rsem@parameters
@@ -310,7 +312,7 @@ The Annals of Statistics, 38(2), 894–942. https://doi.org/10.1214/09-AOS729
 \item Zhang, T. (2010). Analysis of Multi-stage Convex Relaxation for Sparse Regularization.
 Journal of Machine Learning Research, 11, 1081–1107.
 \item Zou, H. (2006). The adaptive lasso and its oracle properties. Journal of the
-American Statistical Association, 101(476), 1418–1429. https://doi.org/10.1198/016214506000000735
+American Statistical Association, 101(476), 1418-1429. https://doi.org/10.1198/016214506000000735
 \item Zou, H., & Hastie, T. (2005). Regularization and variable selection via the
 elastic net. Journal of the Royal Statistical Society: Series B, 67(2), 301–320.
 https://doi.org/10.1111/j.1467-9868.2005.00503.x
