@@ -12,8 +12,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Login to GitHub Packages
-      run: echo ${{secrets.DOCKER}} | docker login ghcr.io -u jhorzek --password-stdin
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{secrets.DOCKER}}
     
     - name: Build Docker with Dependencies
       run: ls && docker build . --file .github/workflows/Dockerfile --tag ghcr.io/jhorzek/lesssem_dependencies:latest
