@@ -18,7 +18,8 @@ jobs:
   steps:
     - uses: actions/checkout@v3
     - name: Install devtools
-      run: Rscript suppressWarnings(install.packages('devtools'))
+      run: install.packages("devtools")
+      shell: Rscript {0}
     - name: Check
       run: devtools::check(error_on = "warning", manual = FALSE)
       shell: Rscript {0}
