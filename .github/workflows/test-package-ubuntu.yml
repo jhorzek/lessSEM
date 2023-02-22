@@ -12,11 +12,25 @@ jobs:
   container:
    image: ghcr.io/jhorzek/lesssem_dependencies:latest
    credentials:
-    username: jhorzek
-    password: ${{secrets.DOCKER}}
+    username: ${{ github.actor }}
+    password: ${{ secrets.github_token }}
     
   steps:
     - uses: actions/checkout@v3
     - name: Check
       run: devtools::check(error_on = "warning", manual = FALSE)
       shell: Rscript {0}
+      # If the test above did not fail, we will create a new release for the package:
+    - name: Build package
+      run: R CMD build .
+
+    - name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.ref }}
+        release_name: Release ${{ github.ref }} (ubuntu)
+        draft: false
+        prerelease: false
+        files: mypackage_*.tar.gz
