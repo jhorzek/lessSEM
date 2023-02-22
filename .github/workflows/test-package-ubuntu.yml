@@ -9,14 +9,18 @@ permissions:
 jobs:
  build:
   runs-on: ubuntu-latest
-  container:
-   image: ghcr.io/jhorzek/lesssem_dependencies:latest
-   credentials:
-    username: ${{ github.actor }}
-    password: ${{ secrets.github_token }}
+ # container:
+ #  image: ghcr.io/jhorzek/lesssem_dependencies:latest
+ #  credentials:
+ #   username: ${{ github.actor }}
+ #   password: ${{ secrets.github_token }}
     
   steps:
     - uses: actions/checkout@v3
+    - name: Log in to registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+    - name: pull container
+      run: docker pull ghcr.io/jhorzek/lesssem_dependencies:latest
     - name: Check
       run: devtools::check(error_on = "warning", manual = FALSE)
       shell: Rscript {0}
