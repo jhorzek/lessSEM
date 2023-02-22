@@ -1,6 +1,30 @@
 # installing all dependencies one by one while also checking if they could be loaded
 
-pkgs <- c('Rcpp')
+pkgs <- c('lavaan',
+'Rcpp',
+'RcppArmadillo',
+'RcppParallel',
+'ggplot2',
+'tidyr',
+'stringr',
+'methods',
+'numDeriv',
+'utils',
+'stats',
+'graphics',
+'knitr',
+'plotly',
+'rmarkdown',
+'Rsolnp',
+'testthat',
+'glmnet',
+'ncvreg',
+'regsem',
+'lslx',
+'mvtnorm',
+'Matrix',
+'OpenMx',
+'ctsemOMX')
 
 for(pkg in pkgs)
 {
