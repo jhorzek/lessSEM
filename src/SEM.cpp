@@ -1,4 +1,5 @@
 #include <RcppArmadillo.h>
+#include <RcppParallel.h>
 #include "SEM.h"
 #include "implied.h"
 #include "impliedDerivatives.h"
@@ -7,7 +8,7 @@
 #include "gradients.h"
 #include "hessian.h"
 
-// [[Rcpp :: depends ( RcppArmadillo )]]
+// [[Rcpp :: depends ( RcppArmadillo , RcppParallel)]]
 
 //' @name SEMCpp
 //' 
@@ -375,7 +376,12 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   gradientCalls++;
   
   // initialize some elements that are used when computing the gradients:
-  initializeGradients(*this, raw);
+  initializeGradients initializedGradients(*this, raw);
+  
+  RcppParallel::parallelFor(0, 
+                            derivElements.uniqueLabels.size(), //number of parameters
+                            initializedGradients
+                            );
   
   // compute the actual gradients
   gradients = gradientsByGroup(*this, raw);

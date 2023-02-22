@@ -1,3 +1,4 @@
 useDynLib(lessSEM, .registration=TRUE)
+importFrom(RcppParallel, RcppParallelLibs)
 import(methods, Rcpp)
 exportPattern("^[[:alpha:]]+")

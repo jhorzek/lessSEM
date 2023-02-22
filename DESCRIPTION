@@ -15,7 +15,18 @@ Encoding: UTF-8
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 Depends: lavaan
-Imports: Rcpp (>= 1.0.8), RcppArmadillo(>= 0.11.2.0.0), ggplot2, tidyr, stringr, methods, numDeriv, utils, stats, graphics
+Imports: 
+    Rcpp (>= 1.0.8), 
+    RcppArmadillo(>= 0.11.2.0.0), 
+    RcppParallel, 
+    ggplot2, 
+    tidyr,
+    stringr, 
+    methods, 
+    numDeriv, 
+    utils,
+    stats, 
+    graphics
 Suggests: 
     knitr,
     plotly,
@@ -30,5 +41,9 @@ Suggests:
     Matrix,
     OpenMx,
     ctsemOMX
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: 
+    Rcpp, 
+    RcppArmadillo, 
+    RcppParallel
 VignetteBuilder: knitr
+SystemRequirements: GNU make
