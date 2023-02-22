@@ -43,23 +43,24 @@
   if(method == "glmnet" && !is(control, "controlGlmnet")) 
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
-  if(method == "glmnet" && !is.null(modifyModel$transformations)){
-    if(control$initialHessian == "lavaan"){
-      message("Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'.")
-      control$initialHessian <- "compute"
-    }
-  }
   if(method == "glmnet" && is.vector(lavaanModel)){
     if(control$initialHessian == "lavaan"){
-      message("You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
+      .printNote("You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
   }
   if(!is.null(modifyModel$transformations)){
-    message("Your model has transformations. Please note that, if you transform variances ",
-            "the variance estimates returned by lessSEM may not be the true variances ",
-            "but transformations thereof. Check model@transformations to find the actual variance ",
-            "estimates for your regularized variances")
+    .printNote("Your model has transformations:")
+    cat(" - If you transform variances",
+        "the variance estimates returned by lessSEM may not be the true variances",
+        "but transformations thereof. Check model@transformations to find the actual variance",
+        "estimates for your regularized variances\n")
+    if(method == "glmnet"){
+      if(control$initialHessian == "lavaan"){
+        cat(" - Switching initialHessian from 'lavaan' to 'compute'.\n")
+        control$initialHessian <- "compute"
+      }
+    }
   }
   
   .checkLavaanModel(lavaanModel = lavaanModel)
@@ -229,9 +230,9 @@
   if(!is.null(tuningParameters$nLambdas)){
     # for lasso type penalties, the maximal lambda value can be determined
     # automatically
-    message(paste0(
-      "Automatically selecting the maximal lambda value.\n",
-      "Note: This may fail if a model with all regularized parameters set to zero is not identified.")
+    .printNote(paste0(
+      "Automatically selecting the maximal lambda value. ",
+      " \033[35mThis may fail if a model with all regularized parameters set to zero is not identified.\033[39m")
     )
     
     maxLambda <- .getMaxLambda_C(regularizedModel = regularizedModel,

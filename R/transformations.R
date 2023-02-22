@@ -69,7 +69,7 @@
   hasComment <- grepl(pattern = "#",
                       x = syntax)
   if(any(hasComment)){
-    message("Note: Found a # in your transformations. Did you want to write a comment? Please use the C++ comment syntax (e.g., \\\\ my comment)")
+    .printNote("Found a # in your transformations. Did you want to write a comment? Please use the C++ comment syntax (e.g., \\\\ my comment)")
   }
   
   return(syntax)
@@ -230,7 +230,7 @@
   missingSemicolon <- grepl(pattern = "[\\)a-zA-Z0-9_]$", x = syntax) &
     !grepl(pattern = "^\\s*\\/\\/", x = syntax)
   for(ms in which(missingSemicolon)){
-    message("Note: found the following statement:\n  > ", syntax[ms], "\nDid you forget a semicolon?")
+    .printNote("Found the following statement:\n  > ", syntax[ms], "\nDid you forget a semicolon?")
   }
   
   functionHead <- "

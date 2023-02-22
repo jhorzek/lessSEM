@@ -22,7 +22,7 @@ GIC <- function(regularizedSEM, k = 2){
   warning("GIC IS EXPERIMENTAL AND SHOULD NOT BE USED!")
   penalty <- regularizedSEM@penalty
   
-  if(!penalty %in% c("scad", "mcp", "adaptiveLasso")) message("GIC has been proposed for consistent estimators.")
+  if(!penalty %in% c("scad", "mcp", "adaptiveLasso")) .printNote("GIC has been proposed for consistent estimators.")
   
   # check if regularizedSEM uses approximated penalty function
   if(!is.null(regularizedSEM@inputArguments$epsilon)){

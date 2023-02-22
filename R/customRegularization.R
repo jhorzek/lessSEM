@@ -101,7 +101,7 @@ mixedPenalty <- function(lavaanModel,
                          modifyModel = lessSEM::modifyModel(),
                          control = lessSEM::controlIsta()){
   
-  message("Mixed penalties is a very new feature. Please note that there may still ",
+  .printNote("Mixed penalties is a very new feature. Please note that there may still ",
           "be bugs in the procedure. Use carefully!")
   
   mixedPenalty <- list(

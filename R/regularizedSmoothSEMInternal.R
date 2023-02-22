@@ -42,13 +42,13 @@
   
   if(!is.null(modifyModel$transformations)){
     if(control$initialHessian == "lavaan"){
-      message("Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'.")
+      .printNote("Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
   }
   if(is.vector(lavaanModel)){
     if(control$initialHessian == "lavaan"){
-      message("You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
+      .printNote("You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
   }

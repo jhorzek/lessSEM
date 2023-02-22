@@ -368,7 +368,7 @@ gpAdaptiveLasso <- function(par,
   if(is.null(weights)){
     weights <- 1/abs(par)
     weights[!names(weights) %in% regularized] <- 0
-    message("Building weights based on par as weights = 1/abs(par).")
+    .printNote("Building weights based on par as weights = 1/abs(par).")
   }
   
   if(! all(regularized %in% names(weights))) stop(paste0(
