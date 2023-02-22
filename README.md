@@ -29,10 +29,10 @@ The following penalty functions are currently implemented in
 
 ![](man/figures/penalty_functions.png)
 
-“penalty” refers to the name of the function call in the **lessSEM**
-package (e.g., lasso is called with the `lasso()` function). Smooth
-functions are called with `smoothLasso`, `smoothAdaptiveLasso`, and
-`smoothElasticNet`. These are only implemented for the comparison of
+The column “penalty” refers to the name of the function call in the
+**lessSEM** package (e.g., lasso is called with the `lasso()` function).
+Smooth functions are called with `smoothLasso`, `smoothAdaptiveLasso`,
+and `smoothElasticNet`. These are only implemented for the comparison of
 exact and approximate optimization and should not be used. They will be
 marked as deprecated soon. The best model can be selected with the AIC
 or BIC. If you want to use cross-validation, use `cvLasso`,
@@ -82,7 +82,8 @@ also want to check out
 [**lslx**](https://github.com/psyphh/lslx) which offer some features
 that are still missing in **lessSEM**. A distinct feature of **lessSEM**
 are parameter transformations (see below for an example). Additionally,
-**lessSEM** allows for mixed penalties.
+**lessSEM** allows for mixed penalties. Finally, **lessSEM** can make
+use of multiple cores.
 
 # Installation
 
@@ -178,7 +179,9 @@ rsemIsta <- lasso(
   regularized = paste0("l", 6:15),
   nLambdas = 50,
   method = "ista",
-  control = controlIsta())
+  control = controlIsta(
+    # Here, we can also specify that we want to use multiple cores:
+    nCores = 2))
 
 # Note: The results are basically identical:
 rsemIsta@parameters - rsem@parameters
@@ -247,18 +250,17 @@ Finally, we can extract the best parameters:
 
 ``` r
 coef(lassoFit, criterion = "BIC")
-#>      lambda alpha ind60=~x2 ind60=~x3       a1       b1       c1 dem60~ind60
-#> 9 0.2128191     1  2.179657   1.81821 1.190779 1.174537 1.250974    1.471332
-#>   dem65~ind60 dem65~dem60    y1~~y5   y2~~y4   y2~~y6    y3~~y7    y4~~y8
-#> 9   0.6004813   0.8650407 0.5825286 1.440141 2.183011 0.7115793 0.3628185
-#>     y6~~y8     x1~~x1    x2~~x2    x3~~x3   y1~~y1   y2~~y2   y3~~y3   y4~~y4
-#> 9 1.371797 0.08138773 0.1204276 0.4666599 1.854632 7.581361 4.955663 3.224511
-#>    y5~~y5   y6~~y6   y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
-#> 9 2.31303 4.968197 3.560042 3.307714    0.4485989     3.875357    0.1644641
-#>       x1~1     x2~1    x3~1     y1~1     y2~1    y3~1     y4~1     y5~1
-#> 9 5.054384 4.792195 3.55769 5.464667 4.256443 6.56311 4.452533 5.136252
-#>       y6~1     y7~1    y8~1 delta_a2 delta_b2 delta_c2
-#> 9 2.978074 6.196264 4.04339        0        0        0
+#> Parameter estimates:
+#>       lambda alpha ind60=~x2 ind60=~x3       a1      b1       c1 dem60~ind60
+#> 10 0.2105091     1  2.179657   1.81821 1.190784 1.17454 1.250981    1.471331
+#>    dem65~ind60 dem65~dem60    y1~~y5   y2~~y4   y2~~y6    y3~~y7    y4~~y8
+#> 10   0.6004751   0.8650413 0.5825463 1.440125 2.183009 0.7115841 0.3628036
+#>      y6~~y8     x1~~x1    x2~~x2    x3~~x3   y1~~y1   y2~~y2   y3~~y3   y4~~y4
+#> 10 1.371783 0.08138773 0.1204276 0.4666599 1.854651 7.581341 4.955673 3.224487
+#>      y5~~y5   y6~~y6   y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
+#> 10 2.313045 4.968186 3.560037 3.307691    0.4485989     3.875321    0.1644646
+#>    delta_a2 delta_b2 delta_c2
+#> 10        0        0        0
 ```
 
 As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been
