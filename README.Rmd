@@ -68,7 +68,7 @@ examples can be found in the documentation of these functions (e.g., `?lessSEM::
 the optim optimizers in R. 
 2. using Rcpp, we can pass C++ function pointers to the general purpose optimizers
 `gpLassoCpp`, `gpScadCpp`, ... (e.g., `?lessSEM::gpLassoCpp`)
-2. All optimizers are implemented as C++ header-only files in **lessSEM**. Thus, 
+3. All optimizers are implemented as C++ header-only files in **lessSEM**. Thus, 
 they can be accessed from other packages using C++. The interface is similar 
 to that of the [**ensmallen**](https://ensmallen.org/) library. We have implemented
 a simple example for elastic net regularization of linear regressions in the 
