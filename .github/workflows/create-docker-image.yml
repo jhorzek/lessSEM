@@ -11,11 +11,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build Docker with Dependencies
-      run: ls && docker build . --file .github/workflows/Dockerfile --tag ghcr.io/jhorzek/lesssem_dependencies:latest
-      
+    
     - name: Login to GitHub Packages
       run: echo ${{secrets.DOCKER}} | docker login ghcr.io -u jhorzek --password-stdin
+    
+    - name: Build Docker with Dependencies
+      run: ls && docker build . --file .github/workflows/Dockerfile --tag ghcr.io/jhorzek/lesssem_dependencies:latest
       
     - name: Push Package
       run: docker push ghcr.io/jhorzek/lesssem_dependencies:latest
