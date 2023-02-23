@@ -47,7 +47,8 @@ jobs:
         
       # If the test above did not fail, we will create a new release for the package:
       - name: Build package
-        run: R CMD build .
+        run: tools:::.build_packages(".")
+        shell: Rscript {0}
         
       - name: Create release
         uses: actions/create-release@v1
@@ -58,4 +59,4 @@ jobs:
           release_name: Release ${{ github.ref }} (windows)
           draft: false
           prerelease: false
-          files: mypackage_*.tar.gz
+          files: lessSEM_*.tar.gz
