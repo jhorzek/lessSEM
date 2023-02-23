@@ -23,9 +23,11 @@ jobs:
     - name: Check
       run: devtools::check(error_on = "warning", manual = FALSE)
       shell: Rscript {0}
-      # If the test above did not fail, we will create a new release for the package:
+      
+    # If the test above did not fail, we will create a new release for the package:
     - name: Build package
-      run: R CMD build .
+      run: tools:::.build_packages(".")
+      shell: Rscript {0}
 
     - name: Create release
       uses: actions/create-release@v1
@@ -36,4 +38,4 @@ jobs:
         release_name: Release ${{ github.ref }} (ubuntu)
         draft: false
         prerelease: false
-        files: mypackage_*.tar.gz
+        files: lessSEM_*.tar.gz
