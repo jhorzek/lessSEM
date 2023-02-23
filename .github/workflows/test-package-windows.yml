@@ -45,18 +45,3 @@ jobs:
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
         
-      # If the test above did not fail, we will create a new release for the package:
-      - name: Build package
-        run: tools:::.build_packages(".")
-        shell: Rscript {0}
-        
-      - name: Create release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.ref }}
-          release_name: Release ${{ github.ref }} (windows)
-          draft: false
-          prerelease: false
-          files: lessSEM_*.tar.gz
