@@ -21,7 +21,7 @@ struct parameterElements{
   //arma::uvec row = {0}; // row in the matrix
   //arma::uvec col = {0}; // col in the matrix
 };
-};
+}
 
 // In some SEMs, we also allow for parameters to be transformations of one another.
 // To this end, we define some types to allow for passing compiled
