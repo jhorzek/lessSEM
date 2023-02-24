@@ -84,7 +84,7 @@
                                     transformationGradientStepSize = modifyModel$transformationGradientStepSize)
   }else if(is.numeric(startingValues)){
     
-    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModel,
+    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModels,
                                     whichPars = "start", 
                                     fit = FALSE,
                                     addMeans = modifyModel$addMeans,
@@ -94,7 +94,7 @@
     SEM <- .setParameters(SEM = SEM, 
                           labels = names(startingValues), 
                           values = startingValues, 
-                          raw = FALSE)
+                          raw = TRUE)
     SEM <- try(.fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
       stop("Infeasible starting values.")
