@@ -84,7 +84,7 @@
                                     transformationGradientStepSize = modifyModel$transformationGradientStepSize)
   }else if(is.numeric(startingValues)){
     
-    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModel,
+    SEM <- .multiGroupSEMFromLavaan(lavaanModels = lavaanModels,
                                     whichPars = "start", 
                                     fit = FALSE,
                                     addMeans = modifyModel$addMeans,
@@ -94,7 +94,7 @@
     SEM <- .setParameters(SEM = SEM, 
                           labels = names(startingValues), 
                           values = startingValues, 
-                          raw = FALSE)
+                          raw = TRUE)
     SEM <- try(.fit(SEM))
     if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
       stop("Infeasible starting values.")
@@ -218,10 +218,18 @@
   
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
     
-    if(!all(rownames(initialHessian) %in% names(getLavaanParameters(lavaanModel))) ||
-       !all(colnames(initialHessian) %in% names(getLavaanParameters(lavaanModel)))
-    ) stop("initialHessian must have the parameter names as rownames and colnames. See lessSEM::getLavaanParameters(lavaanModel).")
+    if(!all(rownames(initialHessian) %in% names(rawParameters)) ||
+       !all(colnames(initialHessian) %in% names(rawParameters))
+    ){
+      if(!all(rownames(initialHessian) %in% names(getLavaanParameters(lavaanModel))) ||
+         !all(colnames(initialHessian) %in% names(getLavaanParameters(lavaanModel)))
+      ) stop("initialHessian must have the parameter names as rownames and colnames. See lessSEM::getLavaanParameters(lavaanModel).")
+    }
     
+    if(any(eigen(initialHessian)$values < 0))
+      stop("Provided initial Hessian is not positive definite.")
+    
+    return(initialHessian)
   }
   
   if(any(initialHessian == "lavaan")){
@@ -240,11 +248,11 @@
       .printNote("Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
     }else{
-      lavaanVcov <- try(lavaan:::vcov(lavaanModel),
-                        silent = TRUE)
+      lavaanVcov <- suppressWarnings(try(lavaan:::vcov(lavaanModel),
+                                         silent = TRUE))
       if(is(lavaanVcov, "try-error")){
-        warning("Could not extract initial Hessian from lavaan. Switching to ",
-                "initialHessian = 'compute'.")
+        .printNote("Could not extract initial Hessian from lavaan. Switching to ",
+                   "initialHessian = 'compute'.")
         initialHessian <- "compute"
         
       }else{
