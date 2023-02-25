@@ -27,7 +27,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ubuntu_release
-        path: D:/a/lessSEM/lessSEM_*.zip
+        path: /__w/lessSEM/lessSEM_*.tar.gz
     - name: Check
       run: devtools::check(error_on = "warning", manual = FALSE)
       shell: Rscript {0}
