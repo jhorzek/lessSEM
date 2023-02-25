@@ -218,10 +218,18 @@
   
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
     
-    if(!all(rownames(initialHessian) %in% names(getLavaanParameters(lavaanModel))) ||
-       !all(colnames(initialHessian) %in% names(getLavaanParameters(lavaanModel)))
-    ) stop("initialHessian must have the parameter names as rownames and colnames. See lessSEM::getLavaanParameters(lavaanModel).")
+    if(!all(rownames(initialHessian) %in% names(rawParameters)) ||
+       !all(colnames(initialHessian) %in% names(rawParameters))
+    ){
+      if(!all(rownames(initialHessian) %in% names(getLavaanParameters(lavaanModel))) ||
+         !all(colnames(initialHessian) %in% names(getLavaanParameters(lavaanModel)))
+      ) stop("initialHessian must have the parameter names as rownames and colnames. See lessSEM::getLavaanParameters(lavaanModel).")
+    }
     
+    if(any(eigen(initialHessian)$values < 0))
+      stop("Provided initial Hessian is not positive definite.")
+    
+    return(initialHessian)
   }
   
   if(any(initialHessian == "lavaan")){

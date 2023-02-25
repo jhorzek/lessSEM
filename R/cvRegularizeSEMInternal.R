@@ -51,7 +51,7 @@
   if(method == "glmnet" && !is(control, "controlGlmnet")) 
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
-  if(method == "glmnet" && control$initialHessian == "lavaan"){
+  if(method == "glmnet" && any(control$initialHessian == "lavaan")){
     .printNote("Switching initialHessian from 'lavaan' to 'compute'.")
     control$initialHessian <- "compute"
   }

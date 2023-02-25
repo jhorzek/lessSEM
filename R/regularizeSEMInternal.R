@@ -44,7 +44,7 @@
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
   if(method == "glmnet" && is.vector(lavaanModel)){
-    if(control$initialHessian == "lavaan"){
+    if(any(control$initialHessian == "lavaan")){
       .printNote("You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
@@ -56,7 +56,7 @@
         "but transformations thereof. Check model@transformations to find the actual variance",
         "estimates for your regularized variances\n")
     if(method == "glmnet"){
-      if(control$initialHessian == "lavaan"){
+      if(any(control$initialHessian == "lavaan")){
         cat(" - Switching initialHessian from 'lavaan' to 'compute'.\n")
         control$initialHessian <- "compute"
       }

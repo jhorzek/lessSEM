@@ -41,13 +41,13 @@
     stop("control must be of class controlBfgs See ?controlBfgs.")
   
   if(!is.null(modifyModel$transformations)){
-    if(control$initialHessian == "lavaan"){
+    if(any(control$initialHessian == "lavaan")){
       .printNote("Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
   }
   if(is.vector(lavaanModel)){
-    if(control$initialHessian == "lavaan"){
+    if(any(control$initialHessian == "lavaan")){
       .printNote("You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
