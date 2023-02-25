@@ -41,7 +41,14 @@ jobs:
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
+      - name: build and save as artifact
+        run: devtools::build(pkg = ".", binary = TRUE)
+        shell: Rscript {0}
+      - name: upload package
+      - uses: actions/upload-artifact@v3
+        with:
+          name: windows_release
+          path: mypackage_*.tar.gz
       - name: Check
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
-        
