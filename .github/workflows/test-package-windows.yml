@@ -45,7 +45,7 @@ jobs:
         run: devtools::build(pkg = ".", binary = TRUE)
         shell: Rscript {0}
       - name: upload package
-      - uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3
         with:
           name: windows_release
           path: mypackage_*.tar.gz
