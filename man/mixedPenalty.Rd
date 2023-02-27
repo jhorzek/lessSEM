@@ -32,7 +32,13 @@ most standard SEM are supported. \pkg{lessSEM} also provides full information
 maximum likelihood for missing data. To use this functionality,
 fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.
 \pkg{lessSEM} will then automatically switch to full information maximum likelihood
-as well. Models are fitted with the ISTA optimizer.
+as well. Models are fitted with the ISTA optimizer or the glmnet optimizer.
+Not all penalty combinations are currently supported by all optimizers. By default,
+ista will be used which can combine any of the following penalties: cappedL1, lasso,
+lsp, mcp, and scad.
+The glmnet optimizer, in contrast, only allows for different combinations of elasticNet.
+The elasticNet encompasses ridge and lasso as special cases, so these are also supported.
+Check vignette(topic = "Mixed-Penalties", package = "lessSEM") for more details.
 }
 \details{
 Regularized SEM

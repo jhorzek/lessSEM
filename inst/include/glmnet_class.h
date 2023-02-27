@@ -78,8 +78,8 @@ inline controlGLMNET controlGlmnetDefault(){
 inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
                                 const arma::rowvec& gradients_kMinus1,
                                 const arma::mat& Hessian,
-                                const double lambda,
-                                const double alpha,
+                                const arma::rowvec& lambda,
+                                const arma::rowvec& alpha,
                                 const arma::rowvec& weights,
                                 const int maxIterIn,
                                 const double breakInner,
@@ -128,19 +128,19 @@ inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
         newParameter = parameters_kMinus1.at(randOrder.at(p));
         
         // adjust stepDirection for regularized parameters
-        if((dp_k(0,0)-alpha*lambda*weights.col(randOrder.at(p))(0,0)) >= 
+        if((dp_k(0,0)-alpha.col(randOrder.at(p))(0,0)*lambda.col(randOrder.at(p))(0,0)*weights.col(randOrder.at(p))(0,0)) >= 
            (d2p_k(0,0)*(newParameter(0,0) + stepDirection.col(randOrder.at(p))(0,0)))){
           
           // condition 1
-          z_j = -(dp_k-alpha*lambda*weights.col(randOrder.at(p)))/(d2p_k);
+          z_j = -(dp_k-alpha.col(randOrder.at(p))(0,0)*lambda.col(randOrder.at(p))(0,0)*weights.col(randOrder.at(p)))/(d2p_k);
           z.col(randOrder.at(p)) = z_j(0,0);
           stepDirection.col(randOrder.at(p)) += z_j(0,0);
           
-        }else if((dp_k(0,0)+alpha*lambda*weights.col(randOrder.at(p))(0,0)) <=
+        }else if((dp_k(0,0)+alpha.col(randOrder.at(p))(0,0)*lambda.col(randOrder.at(p))(0,0)*weights.col(randOrder.at(p))(0,0)) <=
           (d2p_k(0,0)*(newParameter(0,0) + stepDirection.col(randOrder.at(p))(0,0)))){
           
           // condition 2
-          z_j = -(dp_k+alpha*lambda*weights.col(randOrder.at(p)))/(d2p_k);
+          z_j = -(dp_k+alpha.col(randOrder.at(p))(0,0)*lambda.col(randOrder.at(p))(0,0)*weights.col(randOrder.at(p)))/(d2p_k);
           z.col(randOrder.at(p)) = z_j(0,0);
           stepDirection.col(randOrder.at(p)) = stepDirection.col(randOrder.at(p)) + z_j(0,0);
           
@@ -183,8 +183,8 @@ inline arma::rowvec glmnetInner(const arma::rowvec& parameters_kMinus1,
 
 inline arma::rowvec glmnetLineSearch(
     model& model_,
-    penaltyLASSO& penalty_,
-    penaltyRidge& smoothPenalty_, 
+    penaltyLASSOGlmnet& penalty_,
+    penaltyRidgeGlmnet& smoothPenalty_, 
     const arma::rowvec& parameters_kMinus1, 
     const Rcpp::StringVector& parameterLabels,
     const arma::rowvec& direction,
@@ -192,7 +192,7 @@ inline arma::rowvec glmnetLineSearch(
     const arma::rowvec& gradients_kMinus1,
     const arma::mat& Hessian_kMinus1,
     
-    const tuningParametersEnet& tuningParameters,
+    const tuningParametersEnetGlmnet& tuningParameters,
     
     const double stepSize, 
     const double sigma,
@@ -309,9 +309,9 @@ inline arma::rowvec glmnetLineSearch(
 
 inline lessSEM::fitResults glmnet(model& model_, 
                                   Rcpp::NumericVector startingValuesRcpp,
-                                  penaltyLASSO& penalty_,
-                                  penaltyRidge& smoothPenalty_, 
-                                  const tuningParametersEnet tuningParameters,
+                                  penaltyLASSOGlmnet& penalty_,
+                                  penaltyRidgeGlmnet& smoothPenalty_, 
+                                  const tuningParametersEnetGlmnet tuningParameters,
                                   const controlGLMNET& control_ = controlGlmnetDefault())
 {
   

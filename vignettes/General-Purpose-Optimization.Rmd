@@ -800,7 +800,7 @@ Rcpp::List elasticNet(
     for(int l = 0; l < lambda.n_elem; l++){
       
       // set the tuning parameters
-tpLasso.alpha = alpha.at(a);
+      tpLasso.alpha = alpha.at(a);
       tpLasso.lambda = lambda.at(l);
       tpRidge.alpha = alpha.at(a);
       tpRidge.lambda = lambda.at(l);

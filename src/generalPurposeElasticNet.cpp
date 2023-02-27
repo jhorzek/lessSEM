@@ -178,21 +178,41 @@ public:
       Rcpp::Function fitFunction,
       Rcpp::Function gradientFunction,
       Rcpp::List userSuppliedElements,
-      double lambda_,
-      double alpha_){
+      arma::rowvec lambda_,
+      arma::rowvec alpha_){
     
     generalPurposeFitFramework gpFF(fitFunction, 
                                     gradientFunction,
                                     userSuppliedElements);
     
-    lessSEM::tuningParametersEnet tp;
-    tp.lambda = lambda_;
+    lessSEM::tuningParametersEnetGlmnet tp;
     tp.weights = weights;
-    tp.alpha = alpha_;
+    
+    if((alpha_.n_elem != tp.weights.n_elem) && (alpha_.n_elem == 1)){
+      // glmnet wants one alpha for each parameter; assume that they are all the
+      // same value if the user just supplied one.
+      tp.alpha = arma::rowvec(tp.weights.n_elem);
+      tp.alpha.fill(alpha_.at(0));
+    }else if(alpha_.n_elem == tp.weights.n_elem){
+      tp.alpha = alpha_;
+    }else{
+      Rcpp::stop("alpha must be either of size 1 or of the same length as the weights.");
+    }
+    
+    if((lambda_.n_elem != tp.weights.n_elem) && (lambda_.n_elem == 1)){
+      // glmnet wants one alpha for each parameter; assume that they are all the
+      // same value if the user just supplied one.
+      tp.lambda = arma::rowvec(tp.weights.n_elem);
+      tp.lambda.fill(lambda_.at(0));
+    }else if(lambda_.n_elem == tp.weights.n_elem){
+      tp.lambda = lambda_;
+    }else{
+      Rcpp::stop("lambda must be either of size 1 or of the same length as the weights.");
+    }
     
     lessSEM::proximalOperatorLasso proximalOperatorLasso_;
-    lessSEM::penaltyLASSO penalty_;
-    lessSEM::penaltyRidge smoothPenalty_;
+    lessSEM::penaltyLASSOGlmnet penalty_;
+    lessSEM::penaltyRidgeGlmnet smoothPenalty_;
     
     lessSEM::controlGLMNET control_ = {
       initialHessian,
@@ -410,22 +430,41 @@ public:
       SEXP fitFunction,
       SEXP gradientFunction,
       Rcpp::List userSuppliedElements,
-      double lambda_,
-      double alpha_){
+      arma::rowvec lambda_,
+      arma::rowvec alpha_){
     
     generalPurposeFitFrameworkCpp gpFF(startingValues_, 
                                        fitFunction, 
                                        gradientFunction, 
                                        userSuppliedElements);
     
-    lessSEM::tuningParametersEnet tp;
-    tp.lambda = lambda_;
+    lessSEM::tuningParametersEnetGlmnet tp;
     tp.weights = weights;
-    tp.alpha = alpha_;
+    if((alpha_.n_elem != tp.weights.n_elem) && (alpha_.n_elem == 1)){
+      // glmnet wants one alpha for each parameter; assume that they are all the
+      // same value if the user just supplied one.
+      tp.alpha = arma::rowvec(tp.weights.n_elem);
+      tp.alpha.fill(alpha_.at(0));
+    }else if(alpha_.n_elem == tp.weights.n_elem){
+      tp.alpha = alpha_;
+    }else{
+      Rcpp::stop("alpha must be either of size 1 or of the same length as the weights.");
+    }
+    
+    if((lambda_.n_elem != tp.weights.n_elem) && (lambda_.n_elem == 1)){
+      // glmnet wants one alpha for each parameter; assume that they are all the
+      // same value if the user just supplied one.
+      tp.lambda = arma::rowvec(tp.weights.n_elem);
+      tp.lambda.fill(lambda_.at(0));
+    }else if(lambda_.n_elem == tp.weights.n_elem){
+      tp.lambda = lambda_;
+    }else{
+      Rcpp::stop("lambda must be either of size 1 or of the same length as the weights.");
+    }
     
     lessSEM::proximalOperatorLasso proximalOperatorLasso_;
-    lessSEM::penaltyLASSO penalty_;
-    lessSEM::penaltyRidge smoothPenalty_;
+    lessSEM::penaltyLASSOGlmnet penalty_;
+    lessSEM::penaltyRidgeGlmnet smoothPenalty_;
     
     lessSEM::controlGLMNET control_ = {
       initialHessian,
