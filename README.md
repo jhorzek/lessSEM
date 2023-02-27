@@ -53,13 +53,13 @@ packages.** There are three ways to implement them which are documented
 in `vignette("General-Purpose-Optimization", package = "lessSEM")`. In
 short, these are:
 
-1.  Using the R interface. All general purpose implementations of the
+1.  using the R interface: All general purpose implementations of the
     functions are called with prefix “gp” (`gpLasso`, `gpScad`, …). More
     information and examples can be found in the documentation of these
     functions (e.g., `?lessSEM::gpLasso`, `?lessSEM::gpAdaptiveLasso`,
     `?lessSEM::gpElasticNet`). The interface is similar to the optim
     optimizers in R.
-2.  Using Rcpp, we can pass C++ function pointers to the general purpose
+2.  using Rcpp, we can pass C++ function pointers to the general purpose
     optimizers `gpLassoCpp`, `gpScadCpp`, … (e.g.,
     `?lessSEM::gpLassoCpp`)
 3.  All optimizers are implemented as C++ header-only files in
@@ -109,6 +109,9 @@ cross-lagged panel model) in the package
 
 ``` r
 library(lessSEM)
+#> Loading required package: lavaan
+#> This is lavaan 0.6-14
+#> lavaan is FREE software! Please report any bugs.
 library(lavaan)
 
 # Identical to regsem, lessSEM builds on the lavaan
@@ -148,6 +151,11 @@ rsem <- lasso(
 
 # use the plot-function to plot the regularized parameters:
 plot(rsem)
+```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+
+``` r
 
 # elements of rsem can be accessed with the @ operator:
 rsem@parameters[1,]
@@ -251,16 +259,16 @@ Finally, we can extract the best parameters:
 ``` r
 coef(lassoFit, criterion = "BIC")
 #> Parameter estimates:
-#>       lambda alpha ind60=~x2 ind60=~x3       a1      b1       c1 dem60~ind60
-#> 10 0.2105091     1  2.179657   1.81821 1.190784 1.17454 1.250981    1.471331
-#>    dem65~ind60 dem65~dem60    y1~~y5   y2~~y4   y2~~y6    y3~~y7    y4~~y8
-#> 10   0.6004751   0.8650413 0.5825463 1.440125 2.183009 0.7115841 0.3628036
-#>      y6~~y8     x1~~x1    x2~~x2    x3~~x3   y1~~y1   y2~~y2   y3~~y3   y4~~y4
-#> 10 1.371783 0.08138773 0.1204276 0.4666599 1.854651 7.581341 4.955673 3.224487
-#>      y5~~y5   y6~~y6   y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
-#> 10 2.313045 4.968186 3.560037 3.307691    0.4485989     3.875321    0.1644646
-#>    delta_a2 delta_b2 delta_c2
-#> 10        0        0        0
+#>      lambda alpha ind60=~x2 ind60=~x3       a1       b1       c1 dem60~ind60
+#> 9 0.2128321     1  2.179657   1.81821 1.190777 1.174536 1.250972    1.471335
+#>   dem65~ind60 dem65~dem60    y1~~y5  y2~~y4   y2~~y6    y3~~y7    y4~~y8
+#> 9   0.6004815   0.8650405 0.5825253 1.44015 2.183017 0.7115766 0.3628152
+#>     y6~~y8     x1~~x1    x2~~x2    x3~~x3   y1~~y1  y2~~y2   y3~~y3   y4~~y4
+#> 9 1.371806 0.08138772 0.1204277 0.4666599 1.854623 7.58137 4.955659 3.224517
+#>     y5~~y5   y6~~y6   y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
+#> 9 2.313027 4.968206 3.560045 3.307727    0.4485988     3.875361     0.164463
+#>   delta_a2 delta_b2 delta_c2
+#> 9        0        0        0
 ```
 
 As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been
@@ -278,7 +286,7 @@ be very useful when plotting the final model. In our case, the best
 model is given by:
 
 ``` r
-lambdaBest <- coef(rsem, criterion = "BIC")$lambda 
+lambdaBest <- coef(rsem, criterion = "BIC")@tuningParameters$lambda 
 ```
 
 We can get the **lavaan** model with the parameters corresponding to
@@ -298,6 +306,8 @@ semPaths(lavaanModel,
          what = "est",
          fade = FALSE)
 ```
+
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 ## Multi-Group Models and Definition Variables
 
