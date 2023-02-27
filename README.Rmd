@@ -105,7 +105,7 @@ Finally, you will find templates for a selection of models which can be used wit
 
 # Example
 
-```{r, eval = FALSE}
+```{r, results = 'hide'}
 library(lessSEM)
 library(lavaan)
 
@@ -193,56 +193,7 @@ A thorough introduction is provided in ``vignette('Parameter-transformations', p
 As an example, we will test measurement invariance in the `PoliticalDemocracy`
 data set.
 
-```{r, eval = FALSE}
-library(lessSEM)
-library(lavaan)
-# we will use the PoliticalDemocracy from lavaan (see ?lavaan::sem)
-model <- ' 
-  # latent variable definitions
-     ind60 =~ x1 + x2 + x3
-     # assuming different loadings for different time points:
-     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
-     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
-
-  # regressions
-    dem60 ~ ind60
-    dem65 ~ ind60 + dem60
-
-  # residual correlations
-    y1 ~~ y5
-    y2 ~~ y4 + y6
-    y3 ~~ y7
-    y4 ~~ y8
-    y6 ~~ y8
-'
-
-fit <- sem(model, data = PoliticalDemocracy)
-
-# We will define a transformation which regularizes differences
-# between loadings over time:
-
-transformations <- "
-// which parameters do we want to use?
-parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
-
-// transformations:
-a2 = a1 + delta_a2;
-b2 = b1 + delta_b2;
-c2 = c1 + delta_c2;
-"
-
-# setting delta_a2, delta_b2, or delta_c2 to zero implies measurement invariance
-# for the respective parameters (a1, b1, c1)
-lassoFit <- lasso(lavaanModel = fit, 
-                  # we want to regularize the differences between the parameters
-                  regularized = c("delta_a2", "delta_b2", "delta_c2"),
-                  nLambdas = 100,
-                  # Our model modification must make use of the modifyModel - function:
-                  modifyModel = modifyModel(transformations = transformations)
-)
-```
-
-```{r, include = FALSE}
+```{r, results = 'hide'}
 library(lessSEM)
 library(lavaan)
 # we will use the PoliticalDemocracy from lavaan (see ?lavaan::sem)
@@ -309,20 +260,20 @@ Please be aware of that when using these features.
 
 **lessSEM** supports exporting specific models to **lavaan**. This can be very useful when plotting the 
 final model. In our case, the best model is given by:
-```{r, eval = FALSE}
-lambdaBest <- coef(rsem, criterion = "BIC")$lambda 
+```{r, results = 'hide'}
+lambdaBest <- coef(rsem, criterion = "BIC")@tuningParameters$lambda 
 ```
 
 We can get the **lavaan** model with the parameters corresponding to those of the
 regularized model with `lambda = lambdaBest` as follows:
 
-```{r, eval = FALSE}
+```{r, results = 'hide'}
 lavaanModel <- lessSEM2Lavaan(regularizedSEM = rsem, 
                               lambda = lambdaBest)
 ```
 
 The result can be plotted with, for instance, [**semPlot**](https://github.com/SachaEpskamp/semPlot):
-```{r, eval = FALSE}
+```{r, results = 'hide'}
 library(semPlot)
 semPaths(lavaanModel,
          what = "est",
@@ -350,7 +301,7 @@ To provide a short example, we will regularize the loadings and the regression
 parameters of the Political Democracy data set with different penalties. The 
 following script is adapted from `?lavaan::sem`.
 
-```{r, eval=FALSE}
+```{r, results = 'hide'}
 model <- ' 
   # latent variable definitions
      ind60 =~ x1 + x2 + x3 + c2*y2 + c3*y3 + c4*y4
@@ -379,7 +330,7 @@ fitMp <- lavaanModel |>
 
 The best model according to the BIC can be extracted with:
 
-```{r, eval = FALSE}
+```{r, results = 'hide'}
 coef(fitMp, criterion = "BIC")
 ```
 
