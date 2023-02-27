@@ -248,7 +248,7 @@
       .printNote("Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
     }else{
-      lavaanVcov <- suppressWarnings(try(lavaan:::vcov(lavaanModel),
+      lavaanVcov <- suppressWarnings(try(lavaan::vcov(lavaanModel),
                                          silent = TRUE))
       if(is(lavaanVcov, "try-error")){
         .printNote("Could not extract initial Hessian from lavaan. Switching to ",
