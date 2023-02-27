@@ -38,10 +38,17 @@ jobs:
       - name: Install dependencies
         run: |
           options(install.packages.compile.from.source = "never")
-          install.packages(c("remotes", "rcmdcheck"))
+          install.packages(c("devtools", "remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
+      - name: build and save as artifact
+        run: devtools::build(pkg = ".", binary = TRUE)
+        shell: Rscript {0}
+      - name: upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows_release
+          path: D:/a/lessSEM/lessSEM_*.zip
       - name: Check
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
-        

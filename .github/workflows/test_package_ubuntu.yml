@@ -20,6 +20,14 @@ jobs:
     - name: Install devtools
       run: install.packages("devtools")
       shell: Rscript {0}
+    - name: build and save as artifact
+      run: devtools::build(pkg = ".", binary = TRUE)
+      shell: Rscript {0}
+    - name: upload package
+      uses: actions/upload-artifact@v3
+      with:
+        name: ubuntu_release
+        path: /__w/lessSEM/lessSEM_*.tar.gz
     - name: Check
       run: devtools::check(error_on = "warning", manual = FALSE)
       shell: Rscript {0}
