@@ -2,6 +2,7 @@ test_that("multiplication works", {
   testthat::skip_on_cran()
   library(lslx)
   library(lessSEM)
+  set.seed(123)
   HS <- lavaan::HolzingerSwineford1939[complete.cases(lavaan::HolzingerSwineford1939),]
   
   lambdas <- seq(0,1,.01)
