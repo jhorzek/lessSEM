@@ -14,6 +14,13 @@ namespace lessSEM{
     arma::rowvec weights;
   };
   
+  // for glmnet, we will allow for different alphas and lambdas to combine penalties
+  class tuningParametersEnetGlmnet{
+  public:
+    arma::rowvec lambda;
+    arma::rowvec alpha;
+    arma::rowvec weights;
+  };
 }
 
 #endif

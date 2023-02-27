@@ -26,10 +26,9 @@ For instance, you may want to regularize both loadings and regressions in a SEM.
 In this case, using the same penalty (e.g., lasso) for both types of penalties may
 actually not be what you want to use because the penalty function is sensitive to
 the scales of the parameters. Instead, you may want to use two separate lasso
-penalties for loadings and regressions. Similary, separate penalties for 
+penalties for loadings and regressions. Similarly, separate penalties for 
 different parameters have, for instance, been proposed in multi-group models
 (Geminiani et al., 2021).
-
 
 Mixed penalties are currently supported for:
 
@@ -38,8 +37,16 @@ Mixed penalties are currently supported for:
 - lsp
 - mcp
 - scad
+- elasticNet
 
 Important: You cannot impose two penalties on the same parameter!
+
+Not all penalty combinations are currently supported by all optimizers. By default,
+ista will be used which can combine any of the following penalties: cappedL1, lasso,
+lsp, mcp, and scad.
+The glmnet optimizer, in contrast, only allows for different combinations of elasticNet.
+The elasticNet encompasses ridge and lasso as special cases, so these are also supported.
+
 
 ## Getting Started
 
@@ -120,6 +127,27 @@ getTuningParameterConfiguration(regularizedSEMMixedPenalty = fitMp,
 In this case, the best model has no cross-loadings, but the regressions remained
 unregularized: The lambda for the cross-loadings is large (1), while the
 lambda for the regressions is 0 (no regularization).
+
+## Using glmnet
+
+The glmnet optimizer is typically considerably faster than ista. However, as mentioned
+above, not all penalty functions are currently supported. Mixed penalties for glmnet
+can be specified as follows:
+
+```{r}
+mp <- lavaanModel |>
+  mixedPenalty() |>
+  # We will add two lasso penalties, identical to the example given above.
+  # Because glmnet only supports elasticNet penalties, we have to set alpha to
+  # 1 for the elasticNet to get a lasso penalty. Setting alpha to zero results in
+  # ridge regularization.
+  addElasticNet(regularized = c("c2", "c3", "c4"), 
+                lambdas = seq(0,1,.1),
+                alphas = 1) |>
+  addElasticNet(regularized = c("r1", "r2", "r3"), 
+                lambdas = seq(0,1,.2),
+                alphas = 1) 
+```
 
 ## Bibliography
 

@@ -29,7 +29,7 @@ The scad penalty is given by:
 
 $$p(x) = \begin{cases}
 \lambda |x| & \text{if } |x| \leq \theta\\
-\frac{-x^2 + 2\theta\lambda |x| - \lambda^2}{2(\theta -1)} & \text{if } \lambda < |x| \leq \lambda\theta\\
+\frac{-x^2 + 2\theta\lambda |x| - \lambda^2}{2(\theta -1)} & \text{if } \lambda < |x| < \lambda\theta\\
 (\theta + 1) \lambda^2/2 & \text{if } |x| \geq \theta\lambda\\
 \end{cases}$$
 

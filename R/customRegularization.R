@@ -6,7 +6,13 @@
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
 #' \pkg{lessSEM} will then automatically switch to full information maximum likelihood
-#' as well. Models are fitted with the ISTA optimizer.
+#' as well. Models are fitted with the ISTA optimizer or the glmnet optimizer. 
+#' Not all penalty combinations are currently supported by all optimizers. By default,
+#' ista will be used which can combine any of the following penalties: cappedL1, lasso,
+#' lsp, mcp, and scad.
+#' The glmnet optimizer, in contrast, only allows for different combinations of elasticNet.
+#' The elasticNet encompasses ridge and lasso as special cases, so these are also supported.
+#' Check vignette(topic = "Mixed-Penalties", package = "lessSEM") for more details.
 #' 
 #' Regularized SEM
 #' 
@@ -102,7 +108,7 @@ mixedPenalty <- function(lavaanModel,
                          control = lessSEM::controlIsta()){
   
   .printNote("Mixed penalties is a very new feature. Please note that there may still ",
-          "be bugs in the procedure. Use carefully!")
+             "be bugs in the procedure. Use carefully!")
   
   mixedPenalty <- list(
     lavaanModel = lavaanModel,
@@ -576,23 +582,156 @@ addScad <- function(mixedPenalty,
 }
 
 
+#' addElasticNet
+#' 
+#' Adds an elastic net penalty to specified parameters.
+#' The penalty function is given by:
+#' \deqn{p( x_j) = \alpha\lambda|x_j| + (1-\alpha)\lambda x_j^2}
+#' Note that the elastic net combines ridge and lasso regularization. If \eqn{\alpha = 0}, 
+#' the elastic net reduces to ridge regularization. If \eqn{\alpha = 1} it reduces
+#' to lasso regularization. In between, elastic net is a compromise between the shrinkage of
+#' the lasso and the ridge penalty. 
+#' 
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
+#' most standard SEM are supported. \pkg{lessSEM} also provides full information
+#' maximum likelihood for missing data. To use this functionality,
+#' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
+#' \pkg{lessSEM} will then automatically switch to full information maximum likelihood
+#' as well.
+#' 
+#' Elastic net regularization:
+#' 
+#' * Zou, H., & Hastie, T. (2005). Regularization and variable selection via the elastic net. 
+#' Journal of the Royal Statistical Society: Series B, 67(2), 301–320. https://doi.org/10.1111/j.1467-9868.2005.00503.x
+#' 
+#' Regularized SEM
+#' 
+#' * Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
+#' * Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural 
+#' Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+#' 
+#' For more details on GLMNET, see:
+#' 
+#' * Friedman, J., Hastie, T., & Tibshirani, R. (2010). 
+#' Regularization Paths for Generalized Linear Models via Coordinate Descent. 
+#' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
+#' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
+#' A Comparison of Optimization Methods and Software for Large-scale 
+#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
+#' An improved GLMNET for l1-regularized logistic regression. 
+#' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
+#' 
+#' For more details on ISTA, see:
+#' 
+#' * Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding 
+#' Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
+#' 183–202. https://doi.org/10.1137/080716542
+#' * Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 
+#' A General Iterative Shrinkage and Thresholding Algorithm for Non-convex 
+#' Regularized Optimization Problems. Proceedings of the 30th International 
+#' Conference on Machine Learning, 28(2)(2), 37–45.
+#' * Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
+#' Trends in Optimization, 1(3), 123–231.
+#'  
+#' @param mixedPenalty model of class mixedPenalty created with the mixedPenalty function (see ?mixedPenalty) 
+#' @param regularized vector with names of parameters which are to be regularized.
+#' If you are unsure what these parameters are called, use 
+#' getLavaanParameters(model) with your lavaan model object
+#' @param alphas numeric vector: values for the tuning parameter alpha. Set to 1 for lasso and
+#' to zero for ridge. Anything in between is an elastic net penalty.
+#' @param lambdas numeric vector: values for the tuning parameter lambda
+#' @param weights can be used to give different weights to the different parameters
+#' @returns Model of class mixedPenalty. Use the fit() - function to fit the model
+#' @export
+addElasticNet <- function(mixedPenalty,
+                          regularized,
+                          alphas,
+                          lambdas,
+                          weights = 1){
+  
+  if(!is(mixedPenalty, "mixedPenalty"))
+    stop("mixedPenalty must be of class mixedPenalty. ",
+         "These models can be created with the regularize() function.")
+  if(!mixedPenalty$method == "glmnet"){
+    .printNote("Mixed penalty with addElasticNet is only supported for method = 'glmnet'. Swithing optimizer to glmnet")
+    mixedPenalty$method = "glmnet"
+    mixedPenalty$control = controlGlmnet()
+  }
+  
+  if(any(alphas > 1) || any(alphas < 0))
+    stop("alphas must be in the interval [0,1]")
+  
+  tps <- expand.grid(alpha = alphas,
+                     lambda = lambdas)
+  
+  if((length(weights) != 1) && (length(weights) != length(regularized)))
+    stop("Weights argument must be of length 1 or of length(regularized).")
+  
+  mixedPenalty$penalties <- c(
+    mixedPenalty$penalties,
+    list(list(regularized = regularized,
+              weight = weights,
+              tps = tps,
+              penaltyType = "elasticNet"))
+  )
+  
+  return(mixedPenalty)
+}
 
 #' fit
 #' 
 #' Optimizes an object with mixed penalty. See ?mixedPenalty for more details.
 #' 
 #' @param mixedPenalty object of class mixedPenalty. This object can be created
-#' with the mixedPenalty function. Penalties can be added with the addCappedL1,
+#' with the mixedPenalty function. Penalties can be added with the addCappedL1, addElastiNet,
 #' addLasso, addLsp, addMcp, and addScad functions.
+#' @return throws error in case of undefined penalty combinations.
 #' @export 
 fit <- function(mixedPenalty){
   
+  .checkPenalties(mixedPenalty)
+  
+  if(mixedPenalty$method == "ista")
+    return(.fitIsta(mixedPenalty))
+  if(mixedPenalty$method == "glmnet")
+    return(.fitGlmnet(mixedPenalty))
+  stop("Unknown method used.")
+}
+
+#' .checkPenalties
+#' 
+#' Internal function to check a mixedPenalty object
+#' @param mixedPenalty object of class mixedPenalty. This object can be created
+#' with the mixedPenalty function. Penalties can be added with the addCappedL1,
+#' addLasso, addLsp, addMcp, and addScad functions.
+.checkPenalties <- function(mixedPenalty){
+  
   if(!is(mixedPenalty, "mixedPenalty")){
     stop("mixedPenalty must be of class mixedPenalty.")
-  }  
+  }
   
   if(length(mixedPenalty$penalties) == 0)
     stop("Penaties are missing")
+  
+  for(i in 1:length(mixedPenalty$penalties)){
+    if(mixedPenalty$penalties[[i]]$penaltyType == "elasticNet" && mixedPenalty$method == "ista")
+      stop("Ista currently does not support elasticNet type penalties.")
+    if(mixedPenalty$penalties[[i]]$penaltyType != "elasticNet" && mixedPenalty$method == "glmnet")
+      stop("Glmnet currently only supports elasticNet type penalties.")
+  }
+  
+}
+
+#' .fitIsta
+#' 
+#' Optimizes an object with mixed penalty. See ?mixedPenalty for more details.
+#' 
+#' @param mixedPenalty object of class mixedPenalty. This object can be created
+#' with the mixedPenalty function. Penalties can be added with the addCappedL1, addElastiNet,
+#' addLasso, addLsp, addMcp, and addScad functions.
+#' @keywords internal 
+.fitIsta <- function(mixedPenalty){
   
   lavaanModel = mixedPenalty$lavaanModel
   method = mixedPenalty$method
@@ -867,6 +1006,314 @@ fit <- function(mixedPenalty){
                                   lambda),
                    theta = cbind("configuration" = 1:nrow(tpGrid),
                                  theta),
+                   alpha = cbind("configuration" = 1:nrow(tpGrid),
+                                 alpha)
+                 ),
+                 parameters = parameterEstimates,
+                 fits = fits,
+                 parameterLabels = names(rawParameters),
+                 weights = weights,
+                 regularized = names(weights)[weights!=0],
+                 transformations = transformations,
+                 internalOptimization = internalOptimization,
+                 inputArguments = inputArguments)
+  
+  return(results)
+  
+}
+
+#' .fitGlmnet
+#' 
+#' Optimizes an object with mixed penalty. See ?mixedPenalty for more details.
+#' 
+#' @param mixedPenalty object of class mixedPenalty. This object can be created
+#' with the mixedPenalty function. Penalties can be added with the addCappedL1, addElastiNet,
+#' addLasso, addLsp, addMcp, and addScad functions.
+#' @keywords internal 
+.fitGlmnet <- function(mixedPenalty){
+  
+  lavaanModel = mixedPenalty$lavaanModel
+  method = mixedPenalty$method
+  modifyModel = mixedPenalty$modifyModel
+  control = mixedPenalty$control
+  
+  inputArguments <- as.list(environment())
+  
+  if(! method %in% c("glmnet")) 
+    stop("Currently ony methods = 'glmnet' is supported for mixtures of elastic net penalties.")
+  
+  if(method == "glmnet" && !is(control, "controlGlmnet")) 
+    stop("control must be of class controlGlmnet See ?controlGlmnet.")
+  
+  .checkLavaanModel(lavaanModel = lavaanModel)
+  
+  ### initialize model ####
+  startingValues <- control$startingValues
+  
+  ### initialize model ####
+  if(is(lavaanModel, "lavaan")){
+    SEM <- .initializeSEMForRegularization(lavaanModel = lavaanModel,
+                                           startingValues = startingValues,
+                                           modifyModel = modifyModel)
+  }else if(is.vector(lavaanModel)){
+    SEM <- .initializeMultiGroupSEMForRegularization(lavaanModels = lavaanModel,
+                                                     startingValues = startingValues,
+                                                     modifyModel = modifyModel)
+  }
+  
+  N <- SEM$sampleSize
+  
+  # get parameters in raw form
+  startingValues <- .getParameters(SEM, raw = TRUE)
+  rawParameters <- .getParameters(SEM, raw = TRUE)
+  
+  # set weights
+  weights <- rep(0, length(startingValues))
+  names(weights) <- names(startingValues)
+  penaltyType <- rep(0, length(startingValues))
+  names(penaltyType) <- names(startingValues)
+  
+  tpRows <- vector("list", length(mixedPenalty$penalties))
+  names(tpRows) <- paste0("penalty", 1:length(tpRows))
+  
+  for(p in 1:length(mixedPenalty$penalties)){
+    if(any(weights[mixedPenalty$penalties[[p]]$regularized] != 0))
+      stop("It seems like some parameters appeared in multiple penalties. This is not supported. ",
+           "The following parameters were found in multiple penalties: ",
+           paste0(mixedPenalty$penalties[[p]]$regularized[weights[mixedPenalty$penalties[[p]]$regularized] != 0], sep = ","))
+    
+    weights[mixedPenalty$penalties[[p]]$regularized] <- mixedPenalty$penalties[[p]]$weight
+    
+    tpRows[[p]] <- 1:nrow(mixedPenalty$penalties[[p]]$tp)
+  }
+  
+  tpGrid <- unique(expand.grid(tpRows))
+  
+  lambda <- alpha <- matrix(0, 
+                            nrow = nrow(tpGrid), 
+                            ncol = length(startingValues),
+                            dimnames = list(NULL, names(startingValues)))
+  for(p in 1:ncol(tpGrid)){
+    
+    lambda[,mixedPenalty$penalties[[p]]$regularized] <-  matrix(
+      rep(mixedPenalty$penalties[[p]]$tps$lambda[tpGrid[,p]], 
+          length(mixedPenalty$penalties[[p]]$regularized)),
+      ncol = length(mixedPenalty$penalties[[p]]$regularized))
+    
+    alpha[,mixedPenalty$penalties[[p]]$regularized] <-  matrix(
+      rep(mixedPenalty$penalties[[p]]$tps$alpha[tpGrid[,p]], 
+          length(mixedPenalty$penalties[[p]]$regularized)),
+      ncol = length(mixedPenalty$penalties[[p]]$regularized))
+    
+  }
+  
+  #### glmnet requires an initial Hessian ####
+  control$initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
+                                                   rawParameters = rawParameters, 
+                                                   lavaanModel = lavaanModel, 
+                                                   SEM = SEM,
+                                                   addMeans = modifyModel$addMeans)
+  
+  #### prepare regularized model object ####
+  controlIntern <- list(
+    initialHessian = control$initialHessian,
+    stepSize = control$stepSize,
+    sigma = control$sigma,
+    gamma = control$gamma,
+    maxIterOut = control$maxIterOut,
+    maxIterIn = control$maxIterIn,
+    maxIterLine = control$maxIterLine,
+    breakOuter = N*control$breakOuter,
+    breakInner = N*control$breakInner,
+    convergenceCriterion = control$convergenceCriterion, 
+    verbose = control$verbose
+  )
+  
+  if(is(SEM, "Rcpp_SEMCpp")){
+    regularizedModel <- new(glmnetEnetSEM, 
+                            weights, 
+                            controlIntern)
+  }else if(is(SEM, "Rcpp_mgSEM")){
+    regularizedModel <- new(glmnetEnetMgSEM, 
+                            weights, 
+                            controlIntern)
+  }
+  
+  
+  #### define tuning parameters and prepare fit results ####
+  
+  fits <- data.frame(
+    "tuningParameterConfiguration" = 1:nrow(tpGrid),
+    "m2LL" = NA,
+    "regM2LL"= NA,
+    "nonZeroParameters" = NA,
+    "convergence" = NA
+  )
+  
+  parameterEstimates <- as.data.frame(matrix(NA,
+                                             nrow = nrow(tpGrid), 
+                                             ncol = length(rawParameters)))
+  colnames(parameterEstimates) <- names(rawParameters)
+  parameterEstimates <- cbind(
+    "tuningParameterConfiguration" = 1:nrow(tpGrid),
+    parameterEstimates
+  )
+  
+  if(!is.null(modifyModel$transformations)){
+    transformationsAre <- .getParameters(SEM,
+                                         raw = FALSE,
+                                         transformations = TRUE)
+    transformationsAre <- transformationsAre[!names(transformationsAre)%in%names(rawParameters)]
+    
+    transformations <- as.data.frame(matrix(NA,
+                                            nrow = nrow(tpGrid), 
+                                            ncol = length(transformationsAre)))
+    colnames(transformations) <- names(transformationsAre)
+    
+    transformations <- cbind(
+      "tuningParameterConfiguration" = 1:nrow(tpGrid),
+      transformations
+    )
+  }else{
+    transformations <- data.frame()
+  }
+  
+  if(control$saveHessian){
+    Hessians <- list(
+      "lambda" = tuningParameters$lambda,
+      "alpha" = tuningParameters$alpha,
+      "Hessian" = lapply(1:nrow(tuningParameters), 
+                         matrix, 
+                         data= NA, 
+                         nrow=nrow(control$initialHessian), 
+                         ncol=ncol(control$initialHessian))
+    )
+  }else{
+    Hessians <- list(NULL)
+  }
+  
+  # save model implied matrices
+  implied <- list(means = vector("list", nrow(tpGrid)),
+                  covariances = vector("list", nrow(tpGrid)))
+  
+  #### print progress ####
+  if(control$verbose == 0){
+    progressbar = utils::txtProgressBar(min = 0, 
+                                        max = nrow(tpGrid), 
+                                        initial = 0, 
+                                        style = 3)
+  }
+  
+  #### Iterate over all tuning parameter combinations and fit models ####
+  
+  for(it in 1:nrow(tpGrid)){
+    if(control$verbose == 0){
+      utils::setTxtProgressBar(progressbar,it)
+    }else{
+      cat(paste0("\nIteration [", it, "/", nrow(tpGrid),"]\n"))
+    }
+    
+    result <- try(regularizedModel$optimize(rawParameters,
+                                            SEM,
+                                            lambda[it,],
+                                            alpha[it,]
+    )
+    )
+    
+    if(is(result, "try-error")) next
+    
+    rawParameters <- result$rawParameters
+    fits$nonZeroParameters[it] <- length(rawParameters) - 
+      sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
+    fits$regM2LL[it] <- result$fit
+    fits$convergence[it] <- result$convergence
+    
+    # get unregularized fit:
+    SEM <- .setParameters(SEM, 
+                          names(rawParameters), 
+                          values = rawParameters, 
+                          raw = TRUE)
+    fits$m2LL[it] <- SEM$fit()
+    # transform internal parameter representation to "natural" form
+    transformedParameters <- .getParameters(SEM,
+                                            raw = FALSE)
+    parameterEstimates[it, 
+                       names(rawParameters)] <- transformedParameters[names(rawParameters)]
+    
+    if(!is.null(modifyModel$transformations)){
+      transformationsAre <- .getParameters(SEM,
+                                           raw = FALSE,
+                                           transformations = TRUE)
+      transformationsAre <- transformationsAre[!names(transformationsAre)%in%names(rawParameters)]
+      transformations[it,
+                      names(transformationsAre)] <- transformationsAre
+    }
+    
+    # save implied
+    if(is(SEM, "Rcpp_SEMCpp")){
+      implied$means[[it]] <- SEM$impliedMeans
+      implied$covariances[[it]] <- SEM$impliedCovariance
+      
+      rownames(implied$means[[it]]) <- SEM$manifestNames
+      dimnames(implied$covariances[[it]]) <- list(SEM$manifestNames,
+                                                  SEM$manifestNames)
+    }else if(is(SEM, "Rcpp_mgSEM")){
+      implied$means[[it]] <- NULL
+      implied$covariances[[it]] <- NULL
+    }
+    
+    # set initial values for next iteration
+    if(is(SEM, "try-Error")){
+      # reset
+      warning(paste0("Fit for ",
+                     paste0(names(tuningParameters),
+                            tuningParameters[it,], 
+                            sep = " = "),
+                     " resulted in Error!"))
+      
+      if(is(lavaanModel, "lavaan")){
+        SEM <- .initializeSEMForRegularization(lavaanModel = lavaanModel,
+                                               startingValues = startingValues,
+                                               modifyModel = modifyModel)
+      }else if(is.vector(lavaanModel)){
+        SEM <- .initializeMultiGroupSEMForRegularization(lavaanModels = lavaanModel,
+                                                         startingValues = startingValues,
+                                                         modifyModel = modifyModel)
+      }
+      
+    }else{
+      
+      if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
+      
+      # set Hessian for next iteration
+      regularizedModel$setHessian(result$Hessian)
+      
+    }
+    
+  }
+  
+  if(is(SEM, "Rcpp_SEMCpp")) internalOptimization <- list(
+    "implied" = implied,
+    "HessiansOfDifferentiablePart" = Hessians,
+    "functionCalls" = SEM$functionCalls,
+    "gradientCalls" = SEM$gradientCalls,
+    "N" = SEM$sampleSize
+  )
+  if(is(SEM, "Rcpp_mgSEM")) internalOptimization <- list(
+    "implied" = implied,
+    "HessiansOfDifferentiablePart" = Hessians,
+    "functionCalls" = NA,
+    "gradientCalls" = NA,
+    "N" = SEM$sampleSize
+  )
+  
+  
+  
+  results <- new("regularizedSEMMixedPenalty",
+                 penalty =  sapply(penaltyType, .penaltyTypes),
+                 tuningParameterConfigurations = list(
+                   lambda = cbind("configuration" = 1:nrow(tpGrid),
+                                  lambda),
                    alpha = cbind("configuration" = 1:nrow(tpGrid),
                                  alpha)
                  ),

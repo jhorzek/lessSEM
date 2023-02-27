@@ -2,7 +2,6 @@ test_that("multiplication works", {
   testthat::skip_on_cran()
   library(lslx)
   library(lessSEM)
-  library(magrittr)
   HS <- lavaan::HolzingerSwineford1939[complete.cases(lavaan::HolzingerSwineford1939),]
   
   lambdas <- seq(0,1,.01)
@@ -128,11 +127,11 @@ x9 ~ m9_g*1
     # check loadings
     loadings_lsem_pasteur <- coef_lsem_l[grepl(pattern = "l[0-9][0-9]_pasteur", x = names(coef_lsem_l))]
     # rename to match lslx names:
-    names(loadings_lsem_pasteur) <- names(loadings_lsem_pasteur) %>%
-      gsub(pattern = "^l", replacement = "x") %>%
-      gsub(pattern = "1_", replacement = "<-visual") %>%
-      gsub(pattern = "2_", replacement = "<-textual") %>%
-      gsub(pattern = "3_", replacement = "<-speed") %>%
+    names(loadings_lsem_pasteur) <- names(loadings_lsem_pasteur) |>
+      gsub(pattern = "^l", replacement = "x") |>
+      gsub(pattern = "1_", replacement = "<-visual") |>
+      gsub(pattern = "2_", replacement = "<-textual") |>
+      gsub(pattern = "3_", replacement = "<-speed") |>
       gsub(pattern = "pasteur", replacement = "/Pasteur")
     
     
@@ -146,11 +145,11 @@ x9 ~ m9_g*1
     ### grand white
     loadings_lsem_delta <- coef_lsem_l[grepl(pattern = "l[0-9][0-9]_delta", x = names(coef_lsem_l))]
     # rename to match lslx names:
-    names(loadings_lsem_delta) <- names(loadings_lsem_delta) %>%
-      gsub(pattern = "^l", replacement = "x") %>%
-      gsub(pattern = "1_", replacement = "<-visual") %>%
-      gsub(pattern = "2_", replacement = "<-textual") %>%
-      gsub(pattern = "3_", replacement = "<-speed") %>%
+    names(loadings_lsem_delta) <- names(loadings_lsem_delta) |>
+      gsub(pattern = "^l", replacement = "x") |>
+      gsub(pattern = "1_", replacement = "<-visual") |>
+      gsub(pattern = "2_", replacement = "<-textual") |>
+      gsub(pattern = "3_", replacement = "<-speed") |>
       gsub(pattern = "delta", replacement = "/Grant-White")
     
     

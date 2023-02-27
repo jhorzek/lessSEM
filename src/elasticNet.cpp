@@ -110,9 +110,9 @@ class glmnetEnet{
 public:
   
   Rcpp::NumericVector startingValues;
-  double alpha;
-  double lambda;
-  const arma::rowvec weights;
+  arma::rowvec alpha;
+  arma::rowvec lambda;
+  arma::rowvec weights;
   // control optimizer
   arma::mat initialHessian;
   const double stepSize;
@@ -155,21 +155,42 @@ public:
   
   Rcpp::List optimize(Rcpp::NumericVector startingValues_, 
                       sem& SEM_, 
-                      double lambda_, 
-                      double alpha_){
+                      arma::rowvec lambda_, 
+                      arma::rowvec alpha_){
     
     SEMFitFramework<sem> SEMFF(SEM_);
     
     int N = SEMFF.SEM.sampleSize;
     
-    lessSEM::tuningParametersEnet tp;
-    tp.alpha = alpha_;
-    tp.lambda = lambda_*N;
+    lessSEM::tuningParametersEnetGlmnet tp;
+    
     tp.weights = weights;
     
+    if((alpha_.n_elem != tp.weights.n_elem) && (alpha_.n_elem == 1)){
+      // glmnet wants one alpha for each parameter; assume that they are all the
+      // same value if the user just supplied one.
+      tp.alpha = arma::rowvec(tp.weights.n_elem);
+      tp.alpha.fill(alpha_.at(0));
+    }else if(alpha_.n_elem == tp.weights.n_elem){
+      tp.alpha = alpha_;
+    }else{
+      Rcpp::stop("alpha must be either of size 1 or of the same length as the weights.");
+    }
+    
+    if((lambda_.n_elem != tp.weights.n_elem) && (lambda_.n_elem == 1)){
+      // glmnet wants one alpha for each parameter; assume that they are all the
+      // same value if the user just supplied one.
+      tp.lambda = arma::rowvec(tp.weights.n_elem);
+      tp.lambda.fill(lambda_.at(0)*N);
+    }else if(lambda_.n_elem == tp.weights.n_elem){
+      tp.lambda = lambda_*N;
+    }else{
+      Rcpp::stop("lambda must be either of size 1 or of the same length as the weights.");
+    }
+    
     lessSEM::proximalOperatorLasso proximalOperatorLasso_;
-    lessSEM::penaltyLASSO penalty_;
-    lessSEM::penaltyRidge smoothPenalty_;
+    lessSEM::penaltyLASSOGlmnet penalty_;
+    lessSEM::penaltyRidgeGlmnet smoothPenalty_;
     
     lessSEM::controlGLMNET control_ = {
       initialHessian,
