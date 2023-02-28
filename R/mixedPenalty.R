@@ -1,17 +1,28 @@
 #' mixedPenalty
 #' 
+#' Provides possibility to impose different penalties on different parameters.
+#' 
 #' Builds the basis for adding different penalty functions for different parameters
 #' in the model. Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 #' most standard SEM are supported. \pkg{lessSEM} also provides full information
 #' maximum likelihood for missing data. To use this functionality,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
 #' \pkg{lessSEM} will then automatically switch to full information maximum likelihood
-#' as well. Models are fitted with the ISTA optimizer or the glmnet optimizer. 
-#' Not all penalty combinations are currently supported by all optimizers. By default,
-#' ista will be used which can combine any of the following penalties: cappedL1, lasso,
-#' lsp, mcp, and scad.
-#' The glmnet optimizer, in contrast, only allows for different combinations of elasticNet.
-#' The elasticNet encompasses ridge and lasso as special cases, so these are also supported.
+#' as well. Models are fitted with the glmnet or ista optimizer. Note that the 
+#' optimizers differ in which penalties they support. The following table provides
+#' an overview:
+#' 
+#' | Penalty | Function | glmnet | ista |
+#' | --- | ---- | ---- | ---- |
+#' | ridge | addRidge | x | - |
+#' | lasso | addLasso | x | x |
+#' | elastic net | addElasticNet | x | - |
+#' | cappedL1 | addCappedL1 | - | x |
+#' | lsp | addLsp | - | x |
+#' | scad | addScad | - | x |
+#' | mcp | addMcp | - | x |
+#' 
+#' By default, ista will be used. 
 #' Check vignette(topic = "Mixed-Penalties", package = "lessSEM") for more details.
 #' 
 #' Regularized SEM
@@ -101,6 +112,7 @@
 #' # of different penalties for different parameters (e.g., lambda for l6 is the lambda
 #' # of the lasso penalty, while lambda for l12 is the lambda of the scad penalty).
 #' 
+#' @md
 #' @export
 mixedPenalty <- function(lavaanModel,
                          method = "ista", 
@@ -222,6 +234,17 @@ addCappedL1 <- function(mixedPenalty,
 #' * Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural 
 #' Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
 #' 
+#' For more details on GLMNET, see:
+#' 
+#' * Friedman, J., Hastie, T., & Tibshirani, R. (2010). 
+#' Regularization Paths for Generalized Linear Models via Coordinate Descent. 
+#' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
+#' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
+#' A Comparison of Optimization Methods and Software for Large-scale 
+#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
+#' An improved GLMNET for l1-regularized logistic regression. 
+#' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
 #' 
 #' For more details on ISTA, see:
 #' 
@@ -252,12 +275,21 @@ addLasso <- function(mixedPenalty,
     stop("mixedPenalty must be of class mixedPenalty. ",
          "These models can be created with the regularize() function.")
   
+  if((length(weights) != 1) && (length(weights) != length(regularized)))
+    stop("Weights argument must be of length 1 or of length(regularized).")
+  
+  if(mixedPenalty$method == "glmnet")
+    return(
+      addElasticNet(mixedPenalty = mixedPenalty, 
+                    regularized = regularized, 
+                    alphas = 1, 
+                    lambdas = lambdas, 
+                    weights = weights)
+    )
+  
   tps <- expand.grid(lambda = lambdas,
                      theta = 0,
                      alpha = 0)
-  
-  if((length(weights) != 1) && (length(weights) != length(regularized)))
-    stop("Weights argument must be of length 1 or of length(regularized).")
   
   mixedPenalty$penalties <- c(
     mixedPenalty$penalties,
@@ -270,6 +302,89 @@ addLasso <- function(mixedPenalty,
   return(mixedPenalty)
 }
 
+
+#' addRidge
+#' 
+#' 
+#' Implements ridge regularization for structural equation models.
+#' The penalty function is given by:
+#' \deqn{p( x_j) = \lambda x_j^2}
+#' Note that ridge regularization will not set any of the parameters to zero
+#' but result in a shrinkage towards zero. 
+#' 
+#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
+#' most standard SEM are supported. \pkg{lessSEM} also provides full information
+#' maximum likelihood for missing data. To use this functionality,
+#' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
+#' \pkg{lessSEM} will then automatically switch to full information maximum likelihood
+#' as well.
+#' 
+#' Ridge regularization:
+#' 
+#' * Hoerl, A. E., & Kennard, R. W. (1970). Ridge Regression: Biased Estimation 
+#' for Nonorthogonal Problems. Technometrics, 12(1), 55–67. 
+#' https://doi.org/10.1080/00401706.1970.10488634
+#' 
+#' Regularized SEM
+#' 
+#' * Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
+#' * Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural 
+#' Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
+#' 
+#' For more details on GLMNET, see:
+#' 
+#' * Friedman, J., Hastie, T., & Tibshirani, R. (2010). 
+#' Regularization Paths for Generalized Linear Models via Coordinate Descent. 
+#' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
+#' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
+#' A Comparison of Optimization Methods and Software for Large-scale 
+#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
+#' An improved GLMNET for l1-regularized logistic regression. 
+#' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
+#' 
+#' For more details on ISTA, see:
+#' 
+#' * Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding 
+#' Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
+#' 183–202. https://doi.org/10.1137/080716542
+#' * Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 
+#' A General Iterative Shrinkage and Thresholding Algorithm for Non-convex 
+#' Regularized Optimization Problems. Proceedings of the 30th International 
+#' Conference on Machine Learning, 28(2)(2), 37–45.
+#' * Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
+#' Trends in Optimization, 1(3), 123–231.
+#'  
+#' @param mixedPenalty model of class mixedPenalty created with the mixedPenalty function (see ?mixedPenalty) 
+#' @param regularized vector with names of parameters which are to be regularized.
+#' If you are unsure what these parameters are called, use 
+#' getLavaanParameters(model) with your lavaan model object
+#' @param lambdas numeric vector: values for the tuning parameter lambda
+#' @param weights can be used to give different weights to the different parameters
+#' @returns Model of class mixedPenalty. Use the fit() - function to fit the model
+#' @export
+addRidge <- function(mixedPenalty,
+                     regularized,
+                     weights = 1,
+                     lambdas){
+  
+  if(!is(mixedPenalty, "mixedPenalty"))
+    stop("mixedPenalty must be of class mixedPenalty. ",
+         "These models can be created with the regularize() function.")
+  
+  if((length(weights) != 1) && (length(weights) != length(regularized)))
+    stop("Weights argument must be of length 1 or of length(regularized).")
+  
+  ## ridge is currently only implemented for glmnet:
+  
+  return(
+    addElasticNet(mixedPenalty = mixedPenalty, 
+                  regularized = regularized, 
+                  alphas = 0, 
+                  lambdas = lambdas, 
+                  weights = weights)
+  )
+}
 
 #' addLsp
 #' 
@@ -654,7 +769,7 @@ addElasticNet <- function(mixedPenalty,
     stop("mixedPenalty must be of class mixedPenalty. ",
          "These models can be created with the regularize() function.")
   if(!mixedPenalty$method == "glmnet"){
-    .printNote("Mixed penalty with addElasticNet is only supported for method = 'glmnet'. Swithing optimizer to glmnet")
+    .printNote("Mixed penalty with addElasticNet is only supported for method = 'glmnet'. Switching optimizer to glmnet")
     mixedPenalty$method = "glmnet"
     mixedPenalty$control = controlGlmnet()
   }
@@ -1070,7 +1185,7 @@ fit <- function(mixedPenalty){
   # set weights
   weights <- rep(0, length(startingValues))
   names(weights) <- names(startingValues)
-  penaltyType <- rep(0, length(startingValues))
+  penaltyType <- rep("none", length(startingValues))
   names(penaltyType) <- names(startingValues)
   
   tpRows <- vector("list", length(mixedPenalty$penalties))
@@ -1083,6 +1198,8 @@ fit <- function(mixedPenalty){
            paste0(mixedPenalty$penalties[[p]]$regularized[weights[mixedPenalty$penalties[[p]]$regularized] != 0], sep = ","))
     
     weights[mixedPenalty$penalties[[p]]$regularized] <- mixedPenalty$penalties[[p]]$weight
+    
+    penaltyType[mixedPenalty$penalties[[p]]$regularized] <- "elasticNet"
     
     tpRows[[p]] <- 1:nrow(mixedPenalty$penalties[[p]]$tp)
   }
@@ -1310,7 +1427,7 @@ fit <- function(mixedPenalty){
   
   
   results <- new("regularizedSEMMixedPenalty",
-                 penalty =  sapply(penaltyType, .penaltyTypes),
+                 penalty =  penaltyType,
                  tuningParameterConfigurations = list(
                    lambda = cbind("configuration" = 1:nrow(tpGrid),
                                   lambda),

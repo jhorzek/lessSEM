@@ -164,6 +164,16 @@ getTuningParameterConfiguration <- function(regularizedSEMMixedPenalty,
     stop("tuningParameterConfiguration must be an integer in [1, ", nrow(regularizedSEMMixedPenalty@tuningParameterConfigurations$lambda), "]")
   }
   
+  if(regularizedSEMMixedPenalty@inputArguments$method == "glmnet")
+    return(
+      data.frame(
+        parameter = regularizedSEMMixedPenalty@parameterLabels,
+        penalty = regularizedSEMMixedPenalty@penalty[regularizedSEMMixedPenalty@parameterLabels],
+        lambda = regularizedSEMMixedPenalty@tuningParameterConfigurations$lambda[tuningParameterConfiguration,regularizedSEMMixedPenalty@parameterLabels],
+        alpha = regularizedSEMMixedPenalty@tuningParameterConfigurations$alpha[tuningParameterConfiguration,regularizedSEMMixedPenalty@parameterLabels]
+      )
+    )
+  
   return(
     data.frame(
       parameter = regularizedSEMMixedPenalty@parameterLabels,
