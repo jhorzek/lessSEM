@@ -146,13 +146,11 @@ f ~~ 1*f
     addElasticNet(regularized = paste0("l", 6:10), 
                   lambdas = seq(0,1,.1),
                   alphas = 1) |>
-    # add scad penalty on loadings l11 - l15:
+    # add penalty on loadings l11 - l15:
     addElasticNet(regularized = paste0("l", 11:15), 
                   lambdas = seq(0,1,.1),
                   alphas = 1) |>
     fit()
-  
-  
   
   
   # We can add multiple penalties as follows:
@@ -162,9 +160,23 @@ f ~~ 1*f
     # add lasso penalty on loadings l6 - l10:
     addLasso(regularized = paste0("l", 6:10), 
              lambdas = seq(0,1,.1)) |>
-    # add scad penalty on loadings l11 - l15:
+    # add penalty on loadings l11 - l15:
     addLasso(regularized = paste0("l", 11:15), 
              lambdas = seq(0,1,.1)) |>
+    fit()
+  
+  testthat::expect_equal(all(abs(coef(mixedPenaltyGlmnet)@estimates - coef(mixedPenaltyIsta)@estimates) < .001), TRUE)
+  
+  # We can add multiple penalties as follows:
+  mixedPenaltyGlmnet <- lavaanModel |>
+    # create template for regularized model with mixed penalty:
+    mixedPenalty(method = "glmnet", control = controlGlmnet()) |>
+    # add lasso penalty on loadings l6 - l10:
+    addLasso(regularized = paste0("l", 6:10), 
+                  lambdas = seq(0,1,.1)) |>
+    # add penalty on loadings l11 - l15:
+    addLasso(regularized = paste0("l", 11:15), 
+                  lambdas = seq(0,1,.1)) |>
     fit()
   
   testthat::expect_equal(all(abs(coef(mixedPenaltyGlmnet)@estimates - coef(mixedPenaltyIsta)@estimates) < .001), TRUE)
@@ -178,9 +190,10 @@ f ~~ 1*f
       addElasticNet(regularized = paste0("l", 6:10), 
                     lambdas = seq(0,1,.1),
                     alphas = 1) |>
-      # add scad penalty on loadings l11 - l15:
-      addLasso(regularized = paste0("l", 11:15), 
-               lambdas = seq(0,1,.1)) |>
+      # add penalty on loadings l11 - l15:
+      addScad(regularized = paste0("l", 11:15), 
+               lambdas = seq(0,1,.1), 
+              thetas = 2.4) |>
       fit()
     
   )
@@ -195,8 +208,9 @@ f ~~ 1*f
                     lambdas = seq(0,1,.1),
                     alphas = 1) |>
       # add scad penalty on loadings l11 - l15:
-      addLasso(regularized = paste0("l", 11:15), 
-               lambdas = seq(0,1,.1)) |>
+      addScad(regularized = paste0("l", 11:15), 
+              lambdas = seq(0,1,.1), 
+              thetas = 2.4) |>
       fit()
   )
   

@@ -30,22 +30,20 @@ penalties for loadings and regressions. Similarly, separate penalties for
 different parameters have, for instance, been proposed in multi-group models
 (Geminiani et al., 2021).
 
-Mixed penalties are currently supported for:
+> Important: You cannot impose two penalties on the same parameter!
 
-- cappedL1
-- lasso
-- lsp
-- mcp
-- scad
-- elasticNet
+Not all penalty combinations are currently supported by all optimizers. The following
+table provides an overview of the penalties you can use with each optimizer:
 
-Important: You cannot impose two penalties on the same parameter!
-
-Not all penalty combinations are currently supported by all optimizers. By default,
-ista will be used which can combine any of the following penalties: cappedL1, lasso,
-lsp, mcp, and scad.
-The glmnet optimizer, in contrast, only allows for different combinations of elasticNet.
-The elasticNet encompasses ridge and lasso as special cases, so these are also supported.
+| Penalty | Function | glmnet | ista |
+| --- | ---- | ---- | ---- |
+| ridge | addRidge | x | - |
+| lasso | addLasso | x | x |
+| elastic net | addElasticNet | x | - |
+| cappedL1 | addCappedL1 | - | x |
+| lsp | addLsp | - | x |
+| scad | addScad | - | x |
+| mcp | addMcp | - | x |
 
 
 ## Getting Started
@@ -88,13 +86,6 @@ mp <- lavaanModel |>
           lambdas = seq(0,1,.2),
           thetas = 3.7) 
 ```
-The functions to add penalties are called
-
-- `addCappedL1`
-- `addLasso`
-- `addLsp`
-- `addMcp`
-- `addScad`
 
 To fit the model, we use the `fit`- function:
 ```{r, eval = FALSE}
@@ -136,18 +127,66 @@ can be specified as follows:
 
 ```{r}
 mp <- lavaanModel |>
-  mixedPenalty() |>
-  # We will add two lasso penalties, identical to the example given above.
-  # Because glmnet only supports elasticNet penalties, we have to set alpha to
-  # 1 for the elasticNet to get a lasso penalty. Setting alpha to zero results in
-  # ridge regularization.
-  addElasticNet(regularized = c("c2", "c3", "c4"), 
-                lambdas = seq(0,1,.1),
-                alphas = 1) |>
-  addElasticNet(regularized = c("r1", "r2", "r3"), 
-                lambdas = seq(0,1,.2),
-                alphas = 1) 
+  # Change the optimizer and the control object:
+  mixedPenalty(method = "glmnet",
+               control = controlGlmnet()) |>
+  addLasso(regularized = c("c2", "c3", "c4"), 
+                lambdas = seq(0,1,.1)) |>
+  addLasso(regularized = c("r1", "r2", "r3"), 
+                lambdas = seq(0,1,.2)) 
 ```
+To fit the model, we use the `fit`- function:
+```{r, eval = FALSE}
+fitMp <- fit(mp)
+```
+```{r, include = FALSE}
+fitMp <- fit(mp)
+```
+
+```{r}
+coef(fitMp, criterion = "BIC")
+```
+The `tuningParameterConfiguration` refers to the rows in the lambda, theta, and alpha
+matrices that resulted in the best fit:
+
+```{r}
+getTuningParameterConfiguration(regularizedSEMMixedPenalty = fitMp, 
+                                tuningParameterConfiguration = 11)
+```
+
+
+```{r, include = FALSE}
+start_ista <- Sys.time()
+for(i in 1:5){
+  mp <- lavaanModel |>
+  mixedPenalty() |>
+  addLasso(regularized = c("c2", "c3", "c4"), 
+                lambdas = seq(0,1,.1)) |>
+  addLasso(regularized = c("r1", "r2", "r3"), 
+                lambdas = seq(0,1,.2)) |>
+    fit()
+}
+end_ista <- Sys.time()
+
+start_glmnet <- Sys.time()
+for(i in 1:5){
+  mp <- lavaanModel |>
+  # Change the optimizer and the control object:
+  mixedPenalty(method = "glmnet",
+               control = controlGlmnet()) |>
+  addLasso(regularized = c("c2", "c3", "c4"), 
+                lambdas = seq(0,1,.1)) |>
+  addLasso(regularized = c("r1", "r2", "r3"), 
+                lambdas = seq(0,1,.2)) |>
+    fit()
+}
+end_glmnet <- Sys.time()
+```
+
+Here is a short run-time comparison of ista and glmnet with the lasso-regularized 
+model from above: Five repetitions using ista took `r round(difftime(end_ista, start_ista),3)` seconds,
+while glmnet took `r round(difftime(end_glmnet, start_glmnet),3)` seconds. That is, if you 
+can use glmnet with your model, we recommend that you do.
 
 ## Bibliography
 
