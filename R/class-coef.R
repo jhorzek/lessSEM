@@ -24,11 +24,6 @@ setMethod("show", "lessSEMCoef", function (object) {
   # round tuning parameters to 4 digits as well:
   res_tuning_out <- format(as.matrix(object@tuningParameters), nsmall = 4)
   
-  # we determine the maximum number of chars in each of the columns to 
-  # know how many separators (e.g., =, -), we have to print:
-  nchar_estimates <- apply(nchar(res_estimates_out),2,max)
-  nchar_tuning <- apply(nchar(res_tuning_out),2,max)
-  
   # now, we combine estimates and tuning parameters and separate them by ||--||
   res_out <-cbind(format(as.matrix(object@tuningParameters), nsmall = 4), 
                   matrix("||--||", nrow = nrow(object@tuningParameters), ncol = 1, dimnames = list(NULL, "||--||")),
@@ -37,10 +32,17 @@ setMethod("show", "lessSEMCoef", function (object) {
   # we extract the column names; they will become their own row
   cnames <- matrix(colnames(res_out), nrow = 1, dimnames = list("", NULL))
   
-  # the following will be used to print an additional header:
-  header <- paste0(
-    paste0("\n  Tuning", paste0(rep(" ", sum(nchar_tuning) - nchar("Tuning")), collapse = "")),
-    " ||--|| ", " Estimates\n")
+  # we determine the maximum number of chars in each of the columns to 
+  # know how many separators (e.g., =, -), we have to print:
+  nchar_tuning <- apply(nchar(
+    rbind(colnames(res_tuning_out),
+          res_tuning_out)),2,max)
+  nchar_tuning[nchar_tuning <= nchar("Tuning")] <- nchar("Tuning") + 1 
+  
+  nchar_estimates <- apply(nchar(
+    rbind(colnames(res_estimates_out),
+          res_estimates_out)),2,max)
+  nchar_estimates[nchar_estimates <= nchar("Estimates")] <- nchar("Estimates") + 1 
   
   # here, we add a == under each parameter name to separate parameter name from parameter value
   res_out <- rbind(
@@ -52,17 +54,20 @@ setMethod("show", "lessSEMCoef", function (object) {
   # remove all rownames
   rownames(res_out) <- rep("", nrow(res_out))
   
-  # add colum names as first row
-  res_out <- rbind(cnames,
-                   res_out
-                   )
+  # add column names as first row
+  res_out <- rbind(
+    c("Tuning", rep("", ncol(object@tuningParameters)-1), 
+      "||--||", "Estimates", rep("", ncol(object@estimates)-1)
+    ),
+    c(unlist(sapply(nchar_tuning, function(times) paste0(rep(x = "-", times), collapse = ""))), 
+      "||--||",
+      unlist(sapply(nchar_estimates, function(times) paste0(rep(x = "-", times), collapse = "")))),
+    cnames,
+    res_out
+  )
   
   # add -- as column names
-  colnames(res_out) <- c(
-    unlist(sapply(nchar_tuning, function(times) paste0(rep(x = "-", times), collapse = ""))), 
-                         "||--||",
-                         unlist(sapply(nchar_estimates, function(times) paste0(rep(x = "-", times), collapse = ""))))
-  cat(header)
+  colnames(res_out) <- rep("", ncol(res_out))
   print(res_out, 
         quote = FALSE, 
         right = TRUE)
