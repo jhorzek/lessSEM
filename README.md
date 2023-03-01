@@ -157,16 +157,19 @@ plot(rsem)
 
 ``` r
 
+# use the coef-function to show the estimates
+coef(rsem)
+
+# The best parameters can be extracted with:
+coef(rsem, criterion = "AIC")
+coef(rsem, criterion = "BIC")
+
 # elements of rsem can be accessed with the @ operator:
 rsem@parameters[1,]
 
-# AIC and BIC:
+# AIC and BIC for all tuning parameter configurations:
 AIC(rsem)
 BIC(rsem)
-
-# The best parameters can also be extracted with:
-coef(rsem, criterion = "AIC")
-coef(rsem, criterion = "BIC")
 
 # cross-validation
 cv <- cvLasso(lavaanModel = lavaanModel,
@@ -258,17 +261,42 @@ Finally, we can extract the best parameters:
 
 ``` r
 coef(lassoFit, criterion = "BIC")
-#> Parameter estimates:
-#>      lambda alpha ind60=~x2 ind60=~x3       a1       b1       c1 dem60~ind60
-#> 9 0.2128321     1  2.179657   1.81821 1.190777 1.174536 1.250972    1.471335
-#>   dem65~ind60 dem65~dem60    y1~~y5  y2~~y4   y2~~y6    y3~~y7    y4~~y8
-#> 9   0.6004815   0.8650405 0.5825253 1.44015 2.183017 0.7115766 0.3628152
-#>     y6~~y8     x1~~x1    x2~~x2    x3~~x3   y1~~y1  y2~~y2   y3~~y3   y4~~y4
-#> 9 1.371806 0.08138772 0.1204277 0.4666599 1.854623 7.58137 4.955659 3.224517
-#>     y5~~y5   y6~~y6   y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
-#> 9 2.313027 4.968206 3.560045 3.307727    0.4485988     3.875361     0.164463
-#>   delta_a2 delta_b2 delta_c2
-#> 9        0        0        0
+#>                                                                        
+#>     Tuning           ||--||  Estimates                                 
+#>  --------- --------- ||--|| ---------- ---------- ---------- ----------
+#>     lambda     alpha ||--||  ind60=~x2  ind60=~x3         a1         b1
+#>  ========= ========= ||--|| ========== ========== ========== ==========
+#>  0.2128321 1.0000000 ||--||     2.1797     1.8182     1.1908     1.1745
+#>                                                                      
+#>                                                                      
+#>  ---------- ----------- ----------- ----------- ---------- ----------
+#>          c1 dem60~ind60 dem65~ind60 dem65~dem60     y1~~y5     y2~~y4
+#>  ========== =========== =========== =========== ========== ==========
+#>      1.2510      1.4713      0.6005      0.8650     0.5825     1.4401
+#>                                                                              
+#>                                                                              
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>      y2~~y6     y3~~y7     y4~~y8     y6~~y8     x1~~x1     x2~~x2     x3~~x3
+#>  ========== ========== ========== ========== ========== ========== ==========
+#>      2.1830     0.7116     0.3628     1.3718     0.0814     0.1204     0.4667
+#>                                                                              
+#>                                                                              
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>      y1~~y1     y2~~y2     y3~~y3     y4~~y4     y5~~y5     y6~~y6     y7~~y7
+#>  ========== ========== ========== ========== ========== ========== ==========
+#>      1.8546     7.5814     4.9557     3.2245     2.3130     4.9682     3.5600
+#>                                                                         
+#>                                                                         
+#>  ---------- ------------ ------------ ------------ ---------- ----------
+#>      y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65   delta_a2   delta_b2
+#>  ========== ============ ============ ============ ========== ==========
+#>      3.3077       0.4486       3.8754       0.1645          .          .
+#>            
+#>            
+#>  ----------
+#>    delta_c2
+#>  ==========
+#>           .
 ```
 
 As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been

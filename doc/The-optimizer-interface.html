@@ -407,9 +407,9 @@ functions. We will start with glmnet (see function glmnet in the file
 inst/include/glmnet_class.hpp). This function is called as follows:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>inline lessSEM<span class="sc">::</span>fitResults <span class="fu">glmnet</span>(model<span class="sc">&amp;</span> model_, </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                                  Rcpp<span class="sc">::</span>NumericVector startingValuesRcpp,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                                  penaltyLASSO<span class="sc">&amp;</span> penalty_,</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                                  penaltyRidge<span class="sc">&amp;</span> smoothPenalty_, </span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                                  const tuningParametersEnet tuningParameters,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                                  penaltyLASSOGlmnet<span class="sc">&amp;</span> penalty_,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                                  penaltyRidgeGlmnet<span class="sc">&amp;</span> smoothPenalty_, </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                                  const tuningParametersEnetGlmnet tuningParameters,</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                                  const controlGLMNET<span class="sc">&amp;</span> <span class="at">control_ =</span> <span class="fu">controlGlmnetDefault</span>())</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>{...}</span></code></pre></div>
 <p>The first argument is a model. This model has to be created by you
@@ -423,17 +423,18 @@ in its current implementation <strong>lessSEM</strong> expects that you
 give all your startingValues names.</p>
 <p>Now come the actual penalty functions. The first one is the
 non-differentiable penalty: the lasso <span class="math inline">\(p(\pmb\theta)\)</span>. This must be an object of
-class penaltyLASSO which can be created with lessSEM::penaltyLASSO().
-Next comes the differentiable ridge penalty which must be of class
-penaltyRidge and can be created with lessSEM::penaltyRidge.</p>
+class penaltyLASSOGlmnet which can be created with
+lessSEM::penaltyLASSOGlmnet(). Next comes the differentiable ridge
+penalty which must be of class penaltyRidgeGlmnet and can be created
+with lessSEM::penaltyRidgeGlmnet.</p>
 <p>Now, the tuning parameters deviate a bit from what we discussed
 before. We said that the differentiable and the non-differentiable
 penalty functions will each take their own vector of tuning parameters
 (<span class="math inline">\(\pmb t_s\)</span> and <span class="math inline">\(\pmb t_p\)</span> respectively). Note, however,
 that the elastic net uses the same tuning parameters for both, ridge and
 lasso penalty. In the glmnet optimizer we therefore decided to combine
-both of these into one: the tuningParametersEnet struct.
-tuningParametersEnet has three slots: alpha (to set <span class="math inline">\(\alpha\)</span>), lambda (to set <span class="math inline">\(\lambda\)</span>) and a slot called weights. Now,
+both of these into one: the tuningParametersEnetGlmnet struct.
+tuningParametersEnetGlmnet has three slots: alpha (to set <span class="math inline">\(\alpha\)</span>), lambda (to set <span class="math inline">\(\lambda\)</span>) and a slot called weights. Now,
 the weights allow us to switch off the penalty for selected parameters.
 For instance, in a linear regression we would not want to penalize the
 intercept. To this end, the fitting function that is actually

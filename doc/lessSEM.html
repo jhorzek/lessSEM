@@ -402,14 +402,11 @@ x_j^2 &amp; \text{(Zou &amp; Hastie, 2005)}\\
 </div>
 <div id="objectives" class="section level2">
 <h2>Objectives</h2>
-<p>The objectives of <strong>lessSEM</strong> are two-fold</p>
+<p>The objectives of <strong>lessSEM</strong> are to provide …</p>
 <ol style="list-style-type: decimal">
-<li>We wanted to test general purpose optimizers (the default in regsem
-1.8.0 is solnp) against specialized optimizers (the default in lslx is a
-variant of GLMNET)</li>
-<li>To make the optimizers used within <strong>lessSEM</strong>
-available for other researchers in order to simplify the implementation
-of new regularized SEM</li>
+<li>a flexible framework for regularizing SEM and</li>
+<li>optimizers for other SEM packages which can be used with an
+interface similar to <code>optim</code>.</li>
 </ol>
 </div>
 <div id="regularizing-sem" class="section level2">
@@ -469,10 +466,10 @@ functions are identical to the “penalty” column in the table above. For
 instance, let’s have a look at the lasso penalty:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fitLasso <span class="ot">&lt;-</span> <span class="fu">lasso</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">regularized =</span> regularized,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">nLambdas =</span> <span class="dv">50</span>)</span></code></pre></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">nLambdas =</span> <span class="dv">5</span>)</span></code></pre></div>
 <p>Plot the paths to see what is going on:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fitLasso)</span></code></pre></div>
-<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAABF1BMVEUAAAAAADoAAGYAOjoAOmYAOpAAZpAAZrYAgIAzMzM6AAA6ADo6AGY6OgA6OmY6ZmY6ZpA6ZrY6kLY6kNtNTU1NTW5NTY5NbqtNjshmAABmADpmOgBmOmZmkJBmkLZmkNtmtpBmtttmtv9uTU1uTW5uTY5ubqtuq+SOTU2OTW6OTY6OyP+QOgCQZgCQZjqQZmaQkGaQkLaQtpCQttuQ27aQ2/+rbk2rbm6rbo6ryKur5P+2ZgC2Zjq2kDq2tpC2ttu229u22/+2/9u2///Ijk3I///bkDrbkGbbtmbbtpDb27bb29vb/7bb/9vb///kq27k///r6+v/tmb/yI7/25D/27b/29v/5Kv//7b//8j//9v//+T////TOK3xAAAACXBIWXMAAA7DAAAOwwHHb6hkAAANZElEQVR4nO2dj3/cphXAZceZ1eu2/jhn7S3burjdktbu1jVzt+W2NZ3dm7u2bnO51OcL///fMRD6hQA9QKCT0Huf5HTgJ0DfAwTiPZEQlFZJ9l2AoQsCAgQBAYKAAEFAgCAgQBAQIAgIEC+AVgmXX34Fae7O79+YxFV/OxbzOHrqVMLNby6dzvMMKDmEitEZUJKcOpUQLJlO/ADi2e/+mcwBzTYYav0SEM/jOrFLQDzbQXwCItsFA/TqYdHYrmfJwe/oJXIsu/Lb9S+S5OCDLGaVHD6nceuydghnHz1vAiJLdhQT+KoMb2bz6xn9sp4lb99URdmd07TnVdr5abs/0bMe9QjopyUrxWbGLvXgomwVEqBVQWN3fm+W3P++Dqhx9tFDFaBGAjer6uy36PkHn8+ybMvEckBl2kW+Jk3Wex+0O2c/yjezY1qfDp6SV+cSoN05/c1paVmIES2a3Tphf5PPFgBdZ8k1EyjCFMEjqpLBqCeWnV0F+Wmb2Ts32Vm9ATqgGbJanl/POuuR+HWITYx8++8/z/iVXpaANjMaqM7m36ryFz8Cq1yNBKpwpr5d0PRYolVi2f8qyE/bzO799jl4bf6a2PUsa/br8kJW2bXs5D6IV/VazWKftMZc1M9eZ3Vfuotl3VMjgSqcMdgu2DnLst0ypqyEVTA/bclCbwNDE4990Dq7wcCAtovkrb98+d1CBLTMgLQAqu5DzQSqsB0g8s1DeGjis5PO++ii16uaGL/1bPMr4hr1ppd13Fn9r87mDYJfbANQM4EqLAKqEsubWBGsDTb+9ynQS/sEtF3wrpAOdl/RVl7rZpfJB6xnLAAd37A7LutFC0DrvDMWzn7Ez1EAEhOowiKgKjGyyu5dRZCftk7epX3Vv3in1gsgWg2Oy1Yyr93meRy7ZfO7GI+vAcrvuPSeW51dniMBkhMowiIgsSjzKiicBgw8vQKiWdL6uqEt+142/mIDxd9nxf0vHbl9X/RGbLx29HRZ/JICoNrZtIc4+o+qD2omUIUbgKrEtg8TWsuKYH5aNlB8BxiYB5/N89H1eCUgoM3sZ7SNL91ml4ORgIDM2vjQJWQTM2rjQxd8oggIAgIEAQGCgABBQIAgIEB8AHpRSu1rXTTRlup+UjFVR0BANAICohEQEI2AgGgEBEQjICAaAQHRCAiIRkBAdBhAachLiwEQURNCQFUuSkIIqJaLihACqueiIISAhFxkQghIzEUiNHVAkqQhEt2ThBkoNurQ1GuQIheREAKScxEIISA5FwQEABIIISBVLqk62v3SYgNUI4SA1Lmk6mjXS4sPUEkIAelySX1eWoyAckIISJs5AgIAcUIIqCXz1NulRQqIEUJArZmnCKg9cwQEZZ4iICBzzYJrDIDunpy892P9m3gwBKRZcI0A0OsvzsgP79e+iQdjQJo6NH5Ad598TW7/8HX1TTyYA7Jakh4RoNs//kjuPn5WfRMPNP4NKq1JFJKOQ6RytwN6+V4BIv8mHixqkIffvhGdAg9TwEzTtO2xsK8atDdA4PNKINMUWLszA+SvD7KJN4mGn3i3Zwouj5sBev3F4/Iu9pjfvuqH/QEyWDNpy7RZfRTqZoDy8Q6rLJ3GQS1ldYvuBsjEhskQkJF0KatbtMmypDZTRfVRqI8akNHKv27aYziqHzMgM9sRzcR5kJPVwQBK9U/vIgLUbCPmqbQ9II8HkKmBnxSdti6xTB6Q7cxktICMbWg7zkzGCsjcClsYV9rPTCYFyGVcOVJAFo4O1ajAaVw5TkAOzyWlkTMCqkcbTNs10aMEZPvoXznvihiQ7eJRp6WU+AGZTts10T4B9SR2LjK+HGrGU4OsVvjTzhYTUQNKPVhtjQ6QRZXwYhg5NkDmdmpF5zwtQOZtxpd5f6SAUvCxRpyADI2JWxfbLTMdFSDDXterH+iYAJn1upA1gmWm0QHy7aw/IkAmTlXmjzXiA2Rw37Z5rDFBQJpp+1QAQQObVDdHmwggaL3GfLHdItMsHAWgtmn7NAC1D42tFtvNM+XhUQBqX/FrHx9NHlBnO+n2aENAkjPL7YcnJ2eE/HBycvKr4GbALZMreNreCyDJmYVZj99+9IxcnfVQg/STK5Npey+AJEPyl4zW1dnrvz2raYUqqxZQFyNOv4AkV4SM2sfPaHvLWpqFM4u96BZuFB4nAcXSmYVwm3vWyqpaFObH1E3PnU3w7NRhQFcnJ+8ratDdk8eFQtEPhSmrGoS7NYKlulkNkvogehcru+ewgJQgulgjWKqbAZKcWXI+rMG9/nvI27zKksxu2h4E0CpJTlf1LeWazixs/MO6Z3p8UN7IApRVgUJnjNAnoOX97xan1ea4phKgrBKM7ovtluoqQNvFKf1H1rab1/sva5OPj8V2S/VBA5L4OKXSTV0FiKxYE7PfGNV3WRt8PC22W6orAfHNfq03jvVd1lQdGgIgN/FcVuEhs7/Fdkv14QKq3658LrZbqqsAbRd8R+r9dtIVIDMT+d5r0PbX7RuwBwZULlOYmsj338TWtrsz+yxrMeDxv5Zsqd4GaJ9NjAMKsZZsqd4CaLnHGsQtpYKsJVuqqwDlnfTB/vqgjIylifykbvPpCwvPdl+ZqqMHCSi18mz3lKkmWgJUDIL2OA5K89Y1TEADqEHArHS8gPxIv6s5xiIA2sz21sTS4GvJluoqQLvz+e48e2bWNyBGZwSAGJrlfA9TjfRF95eS+VbXAVod9z7VSBt8hguILDM6q35rUFp+dEnFu7oSEO2EyLLfqUbeN48EkKO4l7W4dfVhz2KpPgRA5Z29y0vJ+u2krRc0OgCq1krd37kVUF0FiC3NJ7aDIEdA9bXS8QCisuzleZDwOrGeLKIs1XWAGKPQ4yDRgLcviyhLdR2gpf1UzBJQc9I1JkAu7csWUHPI7PZSsvDqKkD201RrQGlzRNifTZ2lugqQq5hnLg94EFAtWrFW6vBSsp7U+wekWivt0yrTUt0QkOTMknuxWL+RXL1WOnpAkjNLbhxtuzOLZi2w20u0wqqbAZIMyXP/A7tdEXRLpZbuuEMEJLki5F4sNjuzaFcrhrmK0RRLZ5bci8ViZxa9Aa/tGvPQapDGmYX95cx4Z5aWpVLrNeahAWIiO7NwQIZ9UNtSqb1D9xABSc4suReL0c4sVd+saXkRAJJ3Zsm9WOBxEPCO61gAGYkiF2lS2hCXVwJEBAh8GZSTGUc0gORxIQKq5aIaNjczd3tnQhSAjHZegtxTIgZkNvucMCCjzF0NgaYCyNkQCAG5RccGyN1SahqAOhgCISC36LgAdbGUmgKgTpZSCMgtOiZA3Syl4gfU0VJqvIAMZRzLPE3psQZ1tZQabw0yy7yzpVTkgLobAsUNyIMhEAJyi44DkA9DIATkFh0FIC+WUgjILToGQH5eERkvIKvtG62jERAQPX5Avl4yGisgvakdAsoEAbUD8veaWgTkFj1yQG22iDEAajqz1N5IbrYzS+SAZGcWwo3uTXdm8fkm6CECUhmSMwt7451ZYgekckVg9ch0Z5ZxLmQIYr0zS/ZhujOL13eJD60GaZxZXpYW9vDGI4A168gBMVH0QVfFzjUIiCicWfKGZbYzi+e30Q8RkOzMknuJmezM4vtt9IMEZCSaXBBQOyDYmnXagPzvZ4CA3KJHCsjEmnXKgELsiIGA3KJHCcjMmnW6gMLsqYKA3KJHCMjU3BcB+b20aACF2rYIAblFjw6QuT30NAGF2/gKAblFjwBQXSJY6BHF96spAv72461BtVQREAAo5KUhoF5SQUCe1BEQEI2AgGgEBEQjICAaAQHRCAiIRkBAtE9AlQDv3u6mHjRxrToCAtQREKCOgAD14WxlPFBBQIAgIEAQECAICJCOgKTNkcQDqH77YeYUI7if6bVVOy/p1ZW+bSp1wn0I1EXvBkjyJxMPoDozS2eOMYL7mVZbufNSizpR+LYp1KkWA6gpejdAki+HeADVX7KSXJ2J7mdabeXOS3p1ovJtU6iTqwf/YK4E6qJ3AyR5A4kHUJ3wi6jcz1q1pZ2XwMRF3zaNOuFNTFP0boAkfzLxAKoT7iUjup9ptZU7L7UlrvBtU6gTDkhT9H3XoLsnhXuV1FWY7bzUpq7wbVOok4A1qGsfRO9iZcmlazDbealNXeHbplAnHFCQPkjyJxMPoHrOR3Q/02ord17Sqyt92xTqhAPSFN3LOKjuT2YwDqrUa0OVB1KbMdt5qa0sCt82lXrAcdAEBAEBgoAAQUCAICBAEBAgAwW0efMCjl8fXoYvCQICBAEBMmBAm1mSJHP69XP6Zc5CpzTwWZLcvyFku0gOPqOAcqVwMlxA28UpIavDy82MAlkxKnlgd35M+czp/8PLQilcSYYL6KcbftzMKAP+UQTevMhaFwVTKIUryXAB0T6Gtp6Di+xr8bH5+SVrXqcr1syyAFcKV5LhAtou6HUzJm2ACqVwJRkuoDVjsG7WoPyYNTH6USiFK8mAAbG6MWsCKjvp46yTLpTClWS4gMiSdi5/XZw2ahC9zR+T6jafK4UryUABDUcQECAICBAEBAgCAgQBAYKAAEFAgCAgQBAQIP8HdIpUAcSNtJUAAAAASUVORK5CYII=" /><!-- --></p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>Note that the parameters are pulled towards zero as <span class="math inline">\(\lambda\)</span> increases. Note also that we did
 not specify specific values for <span class="math inline">\(\lambda\)</span> in the lasso function above.
 Instead, we only specified how many <span class="math inline">\(\lambda\)</span>s we want to have
@@ -485,38 +482,47 @@ penalties.</p>
 parameter), or created with plotly (in case of 2 tuning parameters). You
 can change a plot post-hoc:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fitLasso) <span class="sc">+</span> ggplot2<span class="sc">::</span><span class="fu">theme_bw</span>()</span></code></pre></div>
-<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAABF1BMVEUAAAAAADoAAGYAOjoAOmYAOpAAZpAAZrYAgIAzMzM6AAA6ADo6AGY6OgA6OmY6ZmY6ZpA6ZrY6kLY6kNtNTU1NTW5NTY5NbqtNjshmAABmADpmOgBmOmZmkJBmkLZmkNtmtpBmtttmtv9uTU1uTW5uTY5ubqtuq+SOTU2OTW6OTY6OyP+QOgCQZgCQZjqQZmaQkGaQkLaQtpCQttuQ27aQ2/+rbk2rbm6rbo6ryKur5P+2ZgC2Zjq2kDq2tpC2ttu229u22/+2/9u2///Ijk3I///bkDrbkGbbtmbbtpDb27bb29vb/7bb/9vb///kq27k///r6+v/tmb/yI7/25D/27b/29v/5Kv//7b//8j//9v//+T////TOK3xAAAACXBIWXMAAA7DAAAOwwHHb6hkAAANWElEQVR4nO2dC38cNxHA146DlyvQlnNojwAlLpCADygN5pEDmmL3cKF1m8ulPl/0/T8H0mpfWj1G0kp7+5j5Jd5beVbS/S1ppZ2ZVUJQjJIcugJ9FwQECAICBAEBgoAAQUCAICBAEBAgQQCtEy4/+hzS3C8f3tqkVb87Fcs4ee5Vw+3PrryuCwwoOYaq0RpQkpx71RCsmU7CAOLF7/+RzAFNEwy1fgmIl3GTuGUgXu0hIQGR3YIBevO46Gw3s+ToF/Qrciz78tPND5Pk6KMsZZ0cv6Rpm7J1CFefvGwCIit2FDP4vDzfzuY3M/phM0veu62qsl/SvOdV3vll+z/Qq550COi7FavFdsa+6tFl2SskQOuCxn75YJY8/LoOqHH1yWMVoEYGt+vq6nfp9UefzrJiy8xyQGXeRbk2XTb4GLRfsj/Kl7NT2p6OnpM3SwnQfkn/5rS27IwRLbrdJmG/k68WAN1k2TUzKM4pgidUJYNRzyy7ujrll21n799mV3UG6IgWyFp5/n022YjEv4fYxcj//vXHGf+mVyWg7YyeVFfzT1X9iz8Ca1yNDKrzTH23oPmxTKvMsv/VKb9sO3vw85fgdwvXxW5mWbfflF9knX2XvTwG8aZea1nsJ20xl/WrN1nbl+5i2fDUyKA6zxjsFuyaVdlvGVNWw+o0v2zFzt4DpiYBx6BNdoOBAe0Wybt/+uyrhQholQExAKruQ80MqnM3QOTLx/DUJOQgnY/RxahXdTF+69nl34hr1LteNnBn7b+6mncI/mUbgJoZVOcioCqzvIsVp7XJxn9/D4zSIQHtFnwopJPdN7SX14bZVfIRGxkLQKe37I7LRtEC0CYfjIWrn/BrFIDEDKpzEVCVGVln967ilF+2SX5Mx6p/8kGtE0C0GZyWvWReu83zNHbL5ncxnl4DlN9x6T23urq8RgIkZ1Cci4DEqsyrU+EyYOIZFBAtkrbXLe3ZD7L5F5so/jKr7n/ozO3rYjRi87WT56viLykAql1NR4iTf6vGoGYG1XkDUJXZ7nFCW1lxml+WTRTfBybm0VfzfHY9XIkIaDv7Hu3jK7/VZW8kIiC7Pt53idnFrPp43wWfKAKCgABBQIAgIEAQECAICJAQgL4/SgkJqPz0Sq2gSXZUD5OLrToCApIREJCMgIBkBAQkIyAgGQEByQgISEZAQHIcQKld4UD6iAG9UhNCQFUpSkIIqFaKihACqpeiIISAhFJkQghILEUiNHlArxqSNhMGKHEnio02NPkWJJciEkJAcikCIQQkl4KAFHkJpdQJISBVKTVCCEhZSqpONlTKK3m4gCpCCEhTSqpO1lbKK3nIgApCCEhbeGqqEwJCQGJeqsJTQ50QEJNUXycElEmKgAC7WIqAzIUjIMiymiIgoHCNwXUMgO6fnX3wbf2TeBDz0hfuZpIeEKC3f7kg33xY+yQeGnkZCncySQ8I0P3vviB3v/6i+iQeGnmZCncxSQ8I0N1vviX3v31RfRIPJPeRtjGjpMMQR7PP6w8KEPkn8dCAHflv33yWAjxMAQtNU9Nj4VAtqJ5Xp4DA55VAoSlgu+t6DHJJt0mGn3ibCwXN47Z3saflXewpv33VD428OgRkYTMxFdpsPgp1p3kQayyt5kGGuvoltwNk48M0bCdOG7OktlBF81GoDxqQleVft+yxnNUPGZCd74hm4dzLxWpvAKX6p3cjAtTsI/a5mB6QjweQrYOflJwaTSyTB+S6MhksIGsf2pYrk6ECsvfCFuaV7iuTSQHymVcOFJBDoEM1K/CaVw4TkMdzSWnmjIDqyRbLdk3yIAG5PvpXrrtGDMjVeNTKlDJ+QLbLdk1y1GCWOOIWItM2oGZ4LcjJwp+29pgYNaA0gNfW4AA5NIkgjpFDA2Tvp1YMztMCZN9nQrn3jxRQCj7WGCcgS2dio7HdsdBBAbIcdYPGgQ4JkN2oC3kjOBY6OkChg/UHBMgmqMr+scb4AFnct10ea0wQkGbZPhVA0MQm1a3RJgIIstfYG9sdCmUyDkCmZfs0AJmnxk7GdvtCMxkGILPFzzw/mjyg1n7S5mTfYJa7j8/OLgj55uzs7CfR3YANiyt42d4JICmYhXmP3/3qBbm+UOQVuq76xZXNsr0TQJIj+WtG6/ri7V9f1LQ6B9TGiTMsICkUgSXSA+1vWU9zCGZxF53hJu3kFWmewSyE+9yzXla1ojgtSLc893bBc1OHAV2fnX2oaEH3z54WCsU41CUgf28ER3XPMYjexcrhOS4gJYg23giO6p7BLDkf1uHe/i3mbV7lSea2bI8CaJ0k5+v6lnLNYBY2/2HDMz0+etHMK2BdFSh0zghdAlo9/GpxXm2OaytdAGpvbHdUVwHaLc7pP7Jx3bw+PKAmnxDGdkf1XgOS+Hjl0k5d2cXWrIu5b4waGlCDTyBju6O6epDe5Dv/uklcQIHfpTeCxx3CQ+ZwxnZH9f4Cqt+uQhrbHdXVgzTfkfqwg3QFyM5FvvMWtPupeQN2WYICKs0Uti7y3XexjevuzCEBFROe8LZkR3UToEN2MQ4ohi3ZUd0AaHXAFsQ9paLYkh3VDYP00eHGoIyMo4v8pG7zKXGIbA9VqDq5l4BSp8j2QIVqkiVAxSTogPOgNO9d/QTUQoIBimpLdlTvX7RPN9Yca1EC2s4O1sXS6LZkR3UVoP1yvl9mz8zcpD0gRmcAgBia1fwAS42UtH8pWWh1HaD1aedLjbTBp7+AyCqjs+62BaXljza5BFdXAqKDEFl1u9TIx+aBAPIUf0DFrasLfxZH9T4AKu/sbV5K1u0g7WzQEPJyq2tlK/V/51ZEdbVdjM4SXSdBxA9Q3VY6HEBUVp08DxJeJ9aRR5SjuumJYux5kOjA25VHlKO6oQW58nEE1Fx0DQmQT/8ijoCaU2a/l5LFV9ctNXzEAVDanBF251PnqH6YeZA84UFAtWSFrdTjpWQdqXcPSGUr7dIr01HdN5glj2JxfiO52lY6eEBSMEvuHO26M4vGFtjuJVpx1T0dyfP4A7ddEXSmUsdw3D4CkkIR8igWl51ZtNaKflkxmuIZzJJHsTjszKJ34HW1MfetBWmCWdhvLqx3ZjGYSp1tzH0DxEQOZmFyfWE5BplMpe4B3X0EJAWz5FEsVjuzVGOzpueNAJC8M0sexQLPg4B3XI8FkJUoAEmL0ob4vBJgRIDAl0F5uXGMBpA8L0RAtVJU0+Zm4X7vTBgFIKudl6DwlBEDslt9ThiQVeG+jkBTAeTtCISA/JLHBsjfU2oagFo4AiEgv+RxAWrjKTUFQK08pRCQX/KYALXzlBo/oJaeUgMGZGdI6beZpykHaEFtPaUG3IKsCm/tKTVyQO0dgcYNKIAjEALySx4HoBCOQAjIL3kUgIJ4SiEgv+QxAArzisjxAnLavtE5GQEBycMHFOolo2MFpHe1Q0CZICBfL1cElAkCMgMy+SKOAVAzmKX2RnK7nVlGDkgOZiHc6d52Z5aQb4LuIyCVIznzsLfemWXsgFShCKwd2e7MMixDhiCewSy8AVnvzBL0XeJ9a0GaYJbXpYc9vPEI4M06cEBMFGPQdbFzDQIiimCWvGPZ7cwS+G30fQQkB7PkUWI2O7OEfht9LwFZCQICRA0I9madNqDw+xkgIL/kgQKy8WadMqAYO2IgIL/kQQKy82adLqA4e6ogIL/kAQKydfdFQECdpgoo1rZFCMgveXCA7P2hpwko3sZXCMgveQiAataSARt6RIn1agqlwuRbUFUKAlKJ46spwHQE5KeOgDrJBQEFUkdAQDICApIREJCMgIBkBAQkIyAgOSigUUpAQDVUMdWjZq5VR0CAOgIC1MMCGqEgIEAQECAICBAEBEhLQNLmSOIBVL/7OAuKEcLP9NqqnZf06srYNpU64TEE6qq3AyTFk4kHUJ25pbPAGCH8TKut3HnJoE4UsW0KdarFAGqq3g6QFMshHkD116wm1xdi+JlWW7nzkl6dqGLbFOrk+tHfWSiBuurtAEnRQOIBVCf8S1ThZ0ZtaeclMHMxtk2jTngX01S9HSApnkw8gOqER8mI4WdabeXOS6bMFbFtCnXCAWmqfugWdP+sCK+Shgq7nZdM6orYNoU6idiC2o5B9C5W1lz6DnY7L5nUFbFtCnXCAUUZg6R4MvEAqud8xPAzrbZy5yW9ujK2TaFOOCBN1YPMg+rxZBbzoEq9NlV5JPUZu52XTHVRxLap1CPOgyYgCAgQBAQIAgIEAQGCgADpKaDtO5dw+ub4Kn5NEBAgCAiQHgPazpIkmdOPn9IPc3Z2Tk8+SZKHt4TsFsnRJxRQrhRP+gtotzgnZH18tZ1RIGtGJT/ZL08pnzn9f3xVKMWrSX8BfXfLj9sZZcB/FCfvXGa9i4IplOLVpL+A6BhDe8/RZfax+LH9wRXrXudr1s2yE64Uryb9BbRb0O/NmJgAFUrxatJfQBvGYNNsQfkx62L0R6EUryY9BsTaxqwJqBykT7NBulCKV5P+AiIrOrj8eXHeaEH0Nn9Kqtt8rhSvJj0F1B9BQIAgIEAQECAICBAEBAgCAgQBAYKAAEFAgPwfGOGH0pgemcUAAAAASUVORK5CYII=" /><!-- --></p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>The <code>coef</code> function gives access to all parameter
 estimates:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">coef</span>(fitLasso))</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       lambda alpha        l2        l3        l4            l5 l6 l7    y1~~y1</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.10335067     1 0.7523136 0.7536714 0.5742459  0.0000000000  0  0 0.8812837</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.10124148     1 0.7523132 0.7536546 0.5742333  0.0000000000  0  0 0.8812421</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.09913228     1 0.7522949 0.7536155 0.5742279  0.0000000000  0  0 0.8812268</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.09702308     1 0.7522865 0.7536011 0.5742215  0.0000000000  0  0 0.8812114</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.09491388     1 0.7522724 0.7535976 0.5742190  0.0000000000  0  0 0.8812020</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 0.09280469     1 0.7519951 0.7532876 0.5740679 -0.0007369679  0  0 0.8807731</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     y2~~y2   y3~~y3   y4~~y4    y5~~y5    y6~~y6   y7~~y7      y1~1      y2~1</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 1.147736 1.927263 1.080352 0.5710382 0.9628053 1.532021 0.1295361 0.1446137</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 1.147749 1.927341 1.080351 0.5710365 0.9628056 1.532010 0.1295361 0.1446137</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 1.147758 1.927368 1.080354 0.5710366 0.9628056 1.532010 0.1295361 0.1446137</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 1.147779 1.927372 1.080359 0.5710366 0.9628056 1.532010 0.1295361 0.1446137</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 1.147789 1.927386 1.080360 0.5710366 0.9628056 1.532010 0.1295361 0.1446137</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 1.148044 1.927718 1.080459 0.5709970 0.9628056 1.532010 0.1295361 0.1446137</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        y3~1      y4~1        y5~1       y6~1       y7~1</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fitLasso)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                          </span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      Tuning            ||--||  Estimates                                 </span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ---------- ||--|| ---------- ---------- ---------- ----------</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      lambda      alpha ||--||         l2         l3         l4         l5</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== ========== ||--|| ========== ========== ========== ==========</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.10340887 1.00000000 ||--||     0.7523     0.7536     0.5742          .</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.07755666 1.00000000 ||--||     0.7477     0.7480     0.5720    -0.0104</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.05170444 1.00000000 ||--||     0.7399     0.7396     0.5688    -0.0266</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.02585222 1.00000000 ||--||     0.7301     0.7332     0.5677    -0.0418</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.00000000 1.00000000 ||--||     0.7239     0.7319     0.5688    -0.0562</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          l6         l7     y1~~y1     y2~~y2     y3~~y3     y4~~y4     y5~~y5</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .          .     0.8812     1.1477     1.9273     1.0804     0.5710</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .          .     0.8742     1.1523     1.9331     1.0818     0.5705</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .    -0.0090     0.8631     1.1602     1.9417     1.0838     0.5697</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .    -0.0478     0.8528     1.1706     1.9482     1.0841     0.5689</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.0166    -0.0894     0.8491     1.1779     1.9496     1.0830     0.5685</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                       </span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                       </span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ----------</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y6~~y6     y7~~y7</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== ==========</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5320</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5320</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5312</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5282</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9626     1.5255</span></span></code></pre></div>
 <p>Now, let’s assume you also want to try out the scad penalty. In this
 case, all you have to do is to replace the <code>lasso()</code> function
 with the <code>scad()</code> function:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fitScad <span class="ot">&lt;-</span> <span class="fu">scad</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">regularized =</span> regularized,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">1</span>),</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">thetas =</span> <span class="fu">seq</span>(<span class="fl">2.1</span>, <span class="dv">5</span>,<span class="at">length.out =</span> <span class="dv">4</span>))</span></code></pre></div>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">length.out =</span> <span class="dv">4</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">thetas =</span> <span class="fu">seq</span>(<span class="fl">2.1</span>, <span class="dv">5</span>,<span class="at">length.out =</span> <span class="dv">2</span>))</span></code></pre></div>
 <p>The scad penalty has two tuning parmeters <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\theta\)</span>. The naming follows that used by
 Gong et al. (2013). We can plot the results again, however this requires
 the <strong>plotly</strong> package and is currently not supported in
@@ -524,28 +530,46 @@ Rmarkdown.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fitScad)</span></code></pre></div>
 <p>The parameter estimates can again be accessed with the
 <code>coef()</code> function:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">coef</span>(fitScad))</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   lambda theta        l2        l3        l4          l5         l6          l7</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    0.0   2.1 0.7239911 0.7319714 0.5688589 -0.05622015 0.01659171 -0.08937208</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    0.1   2.1 0.7520576 0.7532832 0.5741473  0.00000000 0.00000000  0.00000000</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    0.2   2.1 0.7522396 0.7535498 0.5742082  0.00000000 0.00000000  0.00000000</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    0.3   2.1 0.7522622 0.7535810 0.5742190  0.00000000 0.00000000  0.00000000</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    0.4   2.1 0.7522598 0.7535800 0.5742161  0.00000000 0.00000000  0.00000000</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    0.5   2.1 0.7522600 0.7535788 0.5742161  0.00000000 0.00000000  0.00000000</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y1~~y1   y2~~y2   y3~~y3   y4~~y4    y5~~y5    y6~~y6   y7~~y7      y1~1</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.8492389 1.177799 1.949500 1.082941 0.5684487 0.9625806 1.525471 0.1295361</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.8808792 1.148010 1.927707 1.080401 0.5710366 0.9628056 1.532010 0.1295361</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.8811526 1.147820 1.927432 1.080365 0.5710366 0.9628056 1.532010 0.1295361</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.8811879 1.147800 1.927406 1.080360 0.5710366 0.9628056 1.532010 0.1295361</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.8811854 1.147798 1.927400 1.080360 0.5710366 0.9628056 1.532010 0.1295361</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 0.8811825 1.147800 1.927403 1.080362 0.5710366 0.9628056 1.532010 0.1295361</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        y2~1      y3~1      y4~1        y5~1       y6~1       y7~1</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 0.1446137 0.4210241 0.1480334 -0.05439108 0.05590112 0.02733187</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fitScad)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                        </span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Tuning           ||--||  Estimates                                 </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  --------- --------- ||--|| ---------- ---------- ---------- ----------</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     lambda     theta ||--||         l2         l3         l4         l5</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========= ========= ||--|| ========== ========== ========== ==========</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.0000000 2.1000000 ||--||     0.7240     0.7320     0.5689    -0.0562</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.3333333 2.1000000 ||--||     0.7520     0.7533     0.5741          .</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.6666667 2.1000000 ||--||     0.7522     0.7535     0.5742          .</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1.0000000 2.1000000 ||--||     0.7523     0.7536     0.5742          .</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.0000000 5.0000000 ||--||     0.7244     0.7326     0.5690    -0.0561</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.3333333 5.0000000 ||--||     0.7520     0.7533     0.5741          .</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.6666667 5.0000000 ||--||     0.7522     0.7535     0.5742          .</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1.0000000 5.0000000 ||--||     0.7523     0.7536     0.5742          .</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          l6         l7     y1~~y1     y2~~y2     y3~~y3     y4~~y4     y5~~y5</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.0166    -0.0894     0.8492     1.1778     1.9495     1.0829     0.5684</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .          .     0.8808     1.1480     1.9277     1.0804     0.5710</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .          .     0.8812     1.1478     1.9274     1.0804     0.5710</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .          .     0.8812     1.1478     1.9274     1.0804     0.5710</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.0167    -0.0894     0.8499     1.1774     1.9489     1.0828     0.5685</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .          .     0.8808     1.1480     1.9277     1.0804     0.5710</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .          .     0.8812     1.1478     1.9274     1.0804     0.5710</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .          .     0.8812     1.1478     1.9274     1.0804     0.5710</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                       </span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                       </span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ----------</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y6~~y6     y7~~y7</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== ==========</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9626     1.5255</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5320</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5320</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5320</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9626     1.5255</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5320</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5320</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5320</span></span></code></pre></div>
 </div>
 <div id="selecting-a-model" class="section level3">
 <h3>Selecting a model</h3>
@@ -557,28 +581,37 @@ criteria.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>AICs <span class="ot">&lt;-</span> <span class="fu">AIC</span>(fitLasso)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(AICs)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       lambda alpha     m2LL  regM2LL nonZeroParameters convergence      AIC</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.10335067     1 1071.078 1071.078                17        TRUE 1105.078</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.10124148     1 1071.078 1071.078                17        TRUE 1105.078</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.09913228     1 1071.078 1071.078                17        TRUE 1105.078</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.09702308     1 1071.078 1071.078                17        TRUE 1105.078</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.09491388     1 1071.078 1071.078                17        TRUE 1105.078</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 0.09280469     1 1071.075 1071.078                18        TRUE 1107.075</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>fitLasso<span class="sc">@</span>parameters[<span class="fu">which.min</span>(AICs<span class="sc">$</span>AIC),]</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       lambda alpha        l2        l3       l4 l5 l6 l7   y1~~y1   y2~~y2</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.09491388     1 0.7522724 0.7535976 0.574219  0  0  0 0.881202 1.147789</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     y3~~y3  y4~~y4    y5~~y5    y6~~y6  y7~~y7      y1~1      y2~1      y3~1</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 1.927386 1.08036 0.5710366 0.9628056 1.53201 0.1295361 0.1446137 0.4210241</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        y4~1        y5~1       y6~1       y7~1</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.1480334 -0.05439108 0.05590112 0.02733187</span></span></code></pre></div>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.10340887     1 1071.078 1071.078                10        TRUE 1091.078</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 0.07755666     1 1071.033 1071.074                11        TRUE 1093.033</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 0.05170444     1 1070.956 1071.048                12        TRUE 1094.956</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 0.02585222     1 1070.851 1070.967                12        TRUE 1094.851</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.00000000     1 1070.810 1070.810                13        TRUE 1096.810</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>fitLasso<span class="sc">@</span>parameters[<span class="fu">which.min</span>(AICs<span class="sc">$</span>AIC),]</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      lambda alpha        l2       l3        l4 l5 l6 l7    y1~~y1   y2~~y2</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 0.1034089     1 0.7522904 0.753614 0.5742228  0  0  0 0.8812416 1.147737</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    y3~~y3   y4~~y4    y5~~y5    y6~~y6   y7~~y7</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 1.92735 1.080353 0.5710041 0.9628056 1.531997</span></span></code></pre></div>
 <p>An easier way is to use the <code>coef()</code> function again:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fitLasso, <span class="at">criterion =</span> <span class="st">&quot;AIC&quot;</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       lambda alpha        l2        l3       l4 l5 l6 l7   y1~~y1   y2~~y2</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.09491388     1 0.7522724 0.7535976 0.574219  0  0  0 0.881202 1.147789</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     y3~~y3  y4~~y4    y5~~y5    y6~~y6  y7~~y7      y1~1      y2~1      y3~1</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 1.927386 1.08036 0.5710366 0.9628056 1.53201 0.1295361 0.1446137 0.4210241</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        y4~1        y5~1       y6~1       y7~1</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 0.1480334 -0.05439108 0.05590112 0.02733187</span></span></code></pre></div>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                        </span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Tuning           ||--||  Estimates                                 </span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  --------- --------- ||--|| ---------- ---------- ---------- ----------</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     lambda     alpha ||--||         l2         l3         l4         l5</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========= ========= ||--|| ========== ========== ========== ==========</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.1034089 1.0000000 ||--||     0.7523     0.7536     0.5742          .</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          l6         l7     y1~~y1     y2~~y2     y3~~y3     y4~~y4     y5~~y5</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .          .     0.8812     1.1477     1.9273     1.0804     0.5710</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                       </span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                       </span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ----------</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y6~~y6     y7~~y7</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== ==========</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.9628     1.5320</span></span></code></pre></div>
 <div id="cross-validation" class="section level4">
 <h4>Cross-Validation</h4>
 <p>A very good alternative to information criteria is the use of
@@ -598,14 +631,24 @@ non-cross-validated lsp, you would use</p>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">thetas =</span> <span class="fu">seq</span>(.<span class="dv">1</span>,<span class="dv">2</span>,<span class="at">length.out =</span> <span class="dv">4</span>))</span></code></pre></div>
 <p>The best model can now be accessed with</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fitCvLsp)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          l2          l3          l4          l5          l6          l7 </span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.75203790  0.75325437  0.57414066  0.00000000  0.00000000  0.00000000 </span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y1~~y1      y2~~y2      y3~~y3      y4~~y4      y5~~y5      y6~~y6 </span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.88084961  1.14803077  1.92773697  1.08040457  0.57103655  0.96280562 </span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y7~~y7        y1~1        y2~1        y3~1        y4~1        y5~1 </span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1.53201041  0.12953609  0.14461369  0.42102411  0.14803336 -0.05439108 </span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        y6~1        y7~1 </span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.05590112  0.02733187</span></span></code></pre></div>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                               </span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Tuning         ||--||  Estimates                                            </span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   lambda   theta ||--||         l2         l3         l4         l5         l6</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ======= ======= ||--|| ========== ========== ========== ========== ==========</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   1.0000  0.1000 ||--||     0.7520     0.7533     0.5741          .          .</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          l7     y1~~y1     y2~~y2     y3~~y3     y4~~y4     y5~~y5     y6~~y6</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           .     0.8808     1.1480     1.9277     1.0804     0.5710     0.9628</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            </span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            </span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ----------</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y7~~y7</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ==========</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      1.5320</span></span></code></pre></div>
 </div>
 </div>
 <div id="missing-data" class="section level3">
@@ -673,6 +716,31 @@ used (<span class="math inline">\(\lambda = 0\)</span>):</p>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &#39;log Lik.&#39; 2034.104 (df=20)</span></span></code></pre></div>
 </div>
 </div>
+<div id="using-multiple-cores" class="section level2">
+<h2>Using multiple cores</h2>
+<p>By default, <strong>lessSEM</strong> will only use one computer core.
+However, if a model has many parameters, parallel computations can be
+considerably faster. Multi-Core support is therefore provided using the
+<strong>RcppParallel</strong> package (Allaire et. al, 2023). To make
+use of multiple cores, the number of cores must be specified in the
+<code>control</code> argument (see below). Before doing that, it makes
+sense to check how many cores the computer has:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RcppParallel)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the number of threads (we call them cores for simplicity, but technically they are threads)</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>RcppParallel<span class="sc">::</span><span class="fu">defaultNumThreads</span>()</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 16</span></span></code></pre></div>
+<p>Note that using all cores can block the computer because there are no
+resources left for other tasks than R. To use 2 cores, we can set
+<code>nCores = 2</code> as follows:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fitLasso <span class="ot">&lt;-</span> <span class="fu">lasso</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">regularized =</span> regularized,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">nLambdas =</span> <span class="dv">10</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">controlGlmnet</span>(<span class="at">nCores =</span> <span class="dv">2</span>))</span></code></pre></div>
+<p>Note that multi-core support is only provided for SEM. Using the
+optimizers implemented in <strong>lessSEM</strong> for models other than
+SEM (e.g., in the <a href="https://github.com/jhorzek/lessLM"><strong>lessLM</strong></a>
+package) will not automatically allow for multi-core execution.</p>
+</div>
 <div id="changing-the-optimizer" class="section level2">
 <h2>Changing the optimizer</h2>
 <p><strong>lessSEM</strong> comes with two specialized optimization
@@ -686,12 +754,12 @@ lot more than glment. If you are using an elastic-net-type penalty
 first test the glmnet optimizer and then switch to ista if glmnet
 results in errors due to the Hessian matrix. Switching to ista is done
 as follows:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fitLasso <span class="ot">&lt;-</span> <span class="fu">lasso</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">regularized =</span> regularized,</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">nLambdas =</span> <span class="dv">10</span>,</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">method =</span> <span class="st">&quot;ista&quot;</span>, <span class="co"># change the method</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">controlIsta</span>() <span class="co"># change the control argument</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                  )</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fitLasso <span class="ot">&lt;-</span> <span class="fu">lasso</span>(<span class="at">lavaanModel =</span> lavaanModel, </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">regularized =</span> regularized,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">nLambdas =</span> <span class="dv">10</span>,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">method =</span> <span class="st">&quot;ista&quot;</span>, <span class="co"># change the method</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">controlIsta</span>() <span class="co"># change the control argument</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>                  )</span></code></pre></div>
 </div>
 <div id="parameter-transformations" class="section level2">
 <h2>Parameter transformations</h2>
@@ -700,91 +768,109 @@ is explained in detail in the vignette Parameter-transformations (see
 <code>vignette(&quot;Parameter-transformations&quot;, package = &quot;lessSEM&quot;)</code>).
 To provide a short example, let’s have a look at the political democracy
 data set:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># example from ?lavaan::sem</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lavaan)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>modelSyntax <span class="ot">&lt;-</span> <span class="st">&#39; </span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="st">  # latent variable definitions</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="st">     ind60 =~ x1 + x2 + x3</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="st">     dem60 =~ y1 + a*y2 + b*y3 + c*y4</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="st">     dem65 =~ y5 + a*y6 + b*y7 + c*y8</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="st">  # regressions</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="st">    dem60 ~ ind60</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="st">    dem65 ~ ind60 + dem60</span></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="st">  # residual correlations</span></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="st">    y1 ~~ y5</span></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="st">    y2 ~~ y4 </span></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="st">    y3 ~~ y7</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="st">    y4 ~~ y8</span></span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="st">    y6 ~~ y8</span></span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span></span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>lavaanFit <span class="ot">&lt;-</span> <span class="fu">sem</span>(<span class="at">model =</span> modelSyntax,</span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> PoliticalDemocracy)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># example from ?lavaan::sem</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lavaan)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>modelSyntax <span class="ot">&lt;-</span> <span class="st">&#39; </span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="st">  # latent variable definitions</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="st">     ind60 =~ x1 + x2 + x3</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="st">     dem60 =~ y1 + a*y2 + b*y3 + c*y4</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="st">     dem65 =~ y5 + a*y6 + b*y7 + c*y8</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="st">  # regressions</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="st">    dem60 ~ ind60</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="st">    dem65 ~ ind60 + dem60</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="st">  # residual correlations</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="st">    y1 ~~ y5</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="st">    y2 ~~ y4 </span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="st">    y3 ~~ y7</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="st">    y4 ~~ y8</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="st">    y6 ~~ y8</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>lavaanFit <span class="ot">&lt;-</span> <span class="fu">sem</span>(<span class="at">model =</span> modelSyntax,</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> PoliticalDemocracy)</span></code></pre></div>
 <p>Note that in the model estimated above, loadings on the latent
 variables are constrained to equality over time. We could also relax
 this assumption by allowing for time point specific loadings:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lavaan)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>modelSyntax <span class="ot">&lt;-</span> <span class="st">&#39; </span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="st">  # latent variable definitions</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="st">     ind60 =~ x1 + x2 + x3</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="st">     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4</span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="st">     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="st">  # regressions</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="st">    dem60 ~ ind60</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="st">    dem65 ~ ind60 + dem60</span></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="st">  # residual correlations</span></span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="st">    y1 ~~ y5</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="st">    y2 ~~ y4 </span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="st">    y3 ~~ y7</span></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="st">    y4 ~~ y8</span></span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="st">    y6 ~~ y8</span></span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span></span>
-<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>lavaanFit <span class="ot">&lt;-</span> <span class="fu">sem</span>(<span class="at">model =</span> modelSyntax,</span>
-<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> PoliticalDemocracy)</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lavaan)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>modelSyntax <span class="ot">&lt;-</span> <span class="st">&#39; </span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="st">  # latent variable definitions</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="st">     ind60 =~ x1 + x2 + x3</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="st">     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="st">     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="st">  # regressions</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="st">    dem60 ~ ind60</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="st">    dem65 ~ ind60 + dem60</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="st">  # residual correlations</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="st">    y1 ~~ y5</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="st">    y2 ~~ y4 </span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="st">    y3 ~~ y7</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="st">    y4 ~~ y8</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="st">    y6 ~~ y8</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>lavaanFit <span class="ot">&lt;-</span> <span class="fu">sem</span>(<span class="at">model =</span> modelSyntax,</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> PoliticalDemocracy)</span></code></pre></div>
 <p>Deciding between both approaches can be difficult as there may be
 some parameters for which equality over time holds, while others violate
 the assumption. Here, transformations can be used to regularize
 differences between parameters. To this end, we define the
 transformations:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>transformations <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="st">// IMPORTANT: Our transformations always have to start with the follwing line:</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="st">parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="st">// In the line above, we defined the names of the parameters which we</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="st">// want to use in our transformations. EACH AND EVERY PARAMETER USED IN</span></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="st">// THE FOLLOWING MUST BE STATED ABOVE. The line must always start with</span></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="st">// the keyword &#39;parameters&#39; followed by a colon. The parameters must be</span></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="st">// separated by commata.</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="st">// Comments are added with double-backslash</span></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="st">// Now we can state our transformations:</span></span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="st">a2 = a1 + delta_a2; // statements must end with semicolon</span></span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="st">b2 = b1 + delta_b2;</span></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="st">c2 = c1 + delta_c2;</span></span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>transformations <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="st">// IMPORTANT: Our transformations always have to start with the follwing line:</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="st">parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="st">// In the line above, we defined the names of the parameters which we</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="st">// want to use in our transformations. EACH AND EVERY PARAMETER USED IN</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="st">// THE FOLLOWING MUST BE STATED ABOVE. The line must always start with</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="st">// the keyword &#39;parameters&#39; followed by a colon. The parameters must be</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="st">// separated by commata.</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="st">// Comments are added with double-backslash</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="st">// Now we can state our transformations:</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a><span class="st">a2 = a1 + delta_a2; // statements must end with semicolon</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="st">b2 = b1 + delta_b2;</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="st">c2 = c1 + delta_c2;</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span></span></code></pre></div>
 <p>Next, we have to pass the <code>transformations</code> variable to
 the penalty function:</p>
 <p>To check if measurement invariance can be assumed, we can select the
 best model using information criteria:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(lassoFit, <span class="at">criterion =</span> <span class="st">&quot;BIC&quot;</span>)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      lambda alpha ind60=~x2 ind60=~x3      a1       b1       c1 dem60~ind60</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9 0.2215973     1  2.182548  1.818931 1.21097 1.167923 1.233982    1.453452</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   dem65~ind60 dem65~dem60   y1~~y5   y2~~y4    y3~~y7    y4~~y8   y6~~y8</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9   0.5935043   0.8659037 0.555197 1.594782 0.7806428 0.6536855 1.535046</span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       x1~~x1    x2~~x2    x3~~x3   y1~~y1   y2~~y2   y3~~y3   y4~~y4   y5~~y5</span></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9 0.08199241 0.1176512 0.4674843 1.792833 7.384369 5.017503 3.407469 2.285703</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     y6~~y6  y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65     x1~1</span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9 4.897783 3.55096 3.451203    0.4479943     3.940864    0.2033848 5.054384</span></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       x2~1    x3~1     y1~1     y2~1    y3~1     y4~1     y5~1     y6~1</span></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9 4.792195 3.55769 5.464667 4.256443 6.56311 4.452533 5.136252 2.978074</span></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       y7~1    y8~1 delta_a2 delta_b2 delta_c2</span></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9 6.196264 4.04339        0        0        0</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(lassoFit, <span class="at">criterion =</span> <span class="st">&quot;BIC&quot;</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                      </span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Tuning          ||--||  Estimates                                 </span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  -------- -------- ||--|| ---------- ---------- ---------- ----------</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    lambda    alpha ||--||  ind60=~x2  ind60=~x3         a1         b1</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ======== ======== ||--|| ========== ========== ========== ==========</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  0.221615 1.000000 ||--||     2.1825     1.8189     1.2110     1.1679</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                      </span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                      </span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ----------- ----------- ----------- ---------- ----------</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          c1 dem60~ind60 dem65~ind60 dem65~dem60     y1~~y5     y2~~y4</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== =========== =========== =========== ========== ==========</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      1.2340      1.4534      0.5935      0.8659     0.5552     1.5947</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y3~~y7     y4~~y8     y6~~y8     x1~~x1     x2~~x2     x3~~x3     y1~~y1</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      0.7807     0.6537     1.5350     0.0820     0.1177     0.4675     1.7929</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                              </span></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      y2~~y2     y3~~y3     y4~~y4     y5~~y5     y6~~y6     y7~~y7     y8~~y8</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      7.3843     5.0175     3.4074     2.2857     4.8977     3.5510     3.4511</span></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                         </span></span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                         </span></span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ------------ ------------ ------------ ---------- ---------- ----------</span></span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ind60~~ind60 dem60~~dem60 dem65~~dem65   delta_a2   delta_b2   delta_c2</span></span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  ============ ============ ============ ========== ========== ==========</span></span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        0.4480       3.9408       0.2034          .          .          .</span></span></code></pre></div>
 <p>More details are provided in
 <code>vignette(&quot;Parameter-transformations&quot;, package = &quot;lessSEM&quot;)</code>.</p>
 </div>
@@ -798,17 +884,17 @@ features.</p>
 <p><strong>lessSEM</strong> supports exporting specific models to
 <strong>lavaan</strong>. This can be very useful when plotting the final
 model. In our case, the best model is given by:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>lambdaBest <span class="ot">&lt;-</span> <span class="fu">coef</span>(rsem, <span class="at">criterion =</span> <span class="st">&quot;BIC&quot;</span>)<span class="sc">$</span>lambda </span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>lambdaBest <span class="ot">&lt;-</span> <span class="fu">coef</span>(rsem, <span class="at">criterion =</span> <span class="st">&quot;BIC&quot;</span>)<span class="sc">$</span>lambda </span></code></pre></div>
 <p>We can get the <strong>lavaan</strong> model with the parameters
 corresponding to those of the regularized model with
 <code>lambda = lambdaBest</code> as follows:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>lavaanModel <span class="ot">&lt;-</span> <span class="fu">lessSEM2Lavaan</span>(<span class="at">regularizedSEM =</span> rsem, </span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">lambda =</span> lambdaBest)</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>lavaanModel <span class="ot">&lt;-</span> <span class="fu">lessSEM2Lavaan</span>(<span class="at">regularizedSEM =</span> rsem, </span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">lambda =</span> lambdaBest)</span></code></pre></div>
 <p>The result can be plotted with, for instance, <a href="https://github.com/SachaEpskamp/semPlot"><strong>semPlot</strong></a>:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(semPlot)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">semPaths</span>(lavaanModel,</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">what =</span> <span class="st">&quot;est&quot;</span>,</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">fade =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(semPlot)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">semPaths</span>(lavaanModel,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">what =</span> <span class="st">&quot;est&quot;</span>,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">fade =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 </div>
 <div id="multi-group-models-and-definition-variables" class="section level2">
 <h2>Multi-Group Models and Definition Variables</h2>
@@ -833,31 +919,31 @@ introduction can be found in
 regression parameters of the Political Democracy data set with different
 penalties. The following script is adapted from
 <code>?lavaan::sem</code>.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="st">&#39; </span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="st">  # latent variable definitions</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="st">     ind60 =~ x1 + x2 + x3 + c2*y2 + c3*y3 + c4*y4</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="st">     dem60 =~ y1 + y2 + y3 + y4</span></span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="st">     dem65 =~ y5 + y6 + y7 + c*y8</span></span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="st">  # regressions</span></span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="st">    dem60 ~ r1*ind60</span></span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="st">    dem65 ~ r2*ind60 + r3*dem60</span></span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span></span>
-<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>lavaanModel <span class="ot">&lt;-</span> <span class="fu">sem</span>(model,</span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> PoliticalDemocracy)</span>
-<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Let&#39;s add a lasso penalty on the cross-loadings c2 - c4 and </span></span>
-<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a><span class="co"># scad penalty on the regressions r1-r3</span></span>
-<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>mp <span class="ot">&lt;-</span> lavaanModel <span class="sc">|&gt;</span></span>
-<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mixedPenalty</span>() <span class="sc">|&gt;</span></span>
-<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addLasso</span>(<span class="at">regularized =</span> <span class="fu">c</span>(<span class="st">&quot;c2&quot;</span>, <span class="st">&quot;c3&quot;</span>, <span class="st">&quot;c4&quot;</span>), </span>
-<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>           <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addLasso</span>(<span class="at">regularized =</span> <span class="fu">c</span>(<span class="st">&quot;r1&quot;</span>, <span class="st">&quot;r2&quot;</span>, <span class="st">&quot;r3&quot;</span>), </span>
-<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="st">&#39; </span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="st">  # latent variable definitions</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="st">     ind60 =~ x1 + x2 + x3 + c2*y2 + c3*y3 + c4*y4</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="st">     dem60 =~ y1 + y2 + y3 + y4</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="st">     dem65 =~ y5 + y6 + y7 + c*y8</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="st">  # regressions</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="st">    dem60 ~ r1*ind60</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="st">    dem65 ~ r2*ind60 + r3*dem60</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>lavaanModel <span class="ot">&lt;-</span> <span class="fu">sem</span>(model,</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> PoliticalDemocracy)</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Let&#39;s add a lasso penalty on the cross-loadings c2 - c4 and </span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a><span class="co"># scad penalty on the regressions r1-r3</span></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>mp <span class="ot">&lt;-</span> lavaanModel <span class="sc">|&gt;</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mixedPenalty</span>() <span class="sc">|&gt;</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addLasso</span>(<span class="at">regularized =</span> <span class="fu">c</span>(<span class="st">&quot;c2&quot;</span>, <span class="st">&quot;c3&quot;</span>, <span class="st">&quot;c4&quot;</span>), </span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>           <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addLasso</span>(<span class="at">regularized =</span> <span class="fu">c</span>(<span class="st">&quot;r1&quot;</span>, <span class="st">&quot;r2&quot;</span>, <span class="st">&quot;r3&quot;</span>), </span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">lambdas =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>()</span></code></pre></div>
 <p>The best model according to the BIC can be extracted with:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fitMp, <span class="at">criterion =</span> <span class="st">&quot;BIC&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fitMp, <span class="at">criterion =</span> <span class="st">&quot;BIC&quot;</span>)</span></code></pre></div>
 </div>
 </div>
 <div id="more-information" class="section level1">
@@ -1071,6 +1157,10 @@ Another implementation of the fista algorithm (Beck &amp; Teboulle,
 M., Prabhu, R. G., Basak, S., Lou, Z., &amp; Sanderson, C. (2021). The
 ensmallen library for ﬂexible numerical optimization. Journal of Machine
 Learning Research, 22, 1–6.</li>
+<li><a href="https://rcppcore.github.io/RcppParallel/">RcppParallel</a>
+Allaire J, Francois R, Ushey K, Vandenbrouck G, Geelnard M, Intel
+(2023). <em>RcppParallel: Parallel Programming Tools for ‘Rcpp’</em>. R
+package version 5.1.6, <a href="https://CRAN.R-project.org/package=RcppParallel" class="uri">https://CRAN.R-project.org/package=RcppParallel</a>.</li>
 </ul>
 </div>
 <div id="regularized-structural-equation-modeling-1" class="section level2">

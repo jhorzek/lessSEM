@@ -68,7 +68,7 @@ bfgs <- function(lavaanModel,
 .optNLMINB <- function(SEM){
   
   objective <- function(x, SEM){
-    SEM <- try(lessSEM:::.setParameters(SEM = SEM, labels = names(x), values = x, raw = TRUE))
+    SEM <- try(.setParameters(SEM = SEM, labels = names(x), values = x, raw = TRUE))
     fit <- try(SEM$fit())
     if(is(fit, "try-error"))
       return (9999999999)
@@ -76,17 +76,17 @@ bfgs <- function(lavaanModel,
   }
   
   gradients <- function(x, SEM){
-    SEM <- lessSEM:::.setParameters(SEM = SEM, labels = names(x), values = x, raw = TRUE)
+    SEM <- .setParameters(SEM = SEM, labels = names(x), values = x, raw = TRUE)
     fit <- try(SEM$fit())
     if(is(fit, "try-error")){
       gr <- rep(NA, length(x))
       names(gr) <- names(x)
       return(gr)
     }
-    return(lessSEM:::.getGradients(SEM, raw = TRUE))
+    return(.getGradients(SEM, raw = TRUE))
   }
   
-  x <- lessSEM:::.getParameters(SEM, raw = TRUE)
+  x <- .getParameters(SEM, raw = TRUE)
   
   o <- nlminb(start = x, objective = objective, gradient = gradients, SEM = SEM)
   SEM <- lessSEM:::.setParameters(SEM = SEM, labels = names(o$par), values = o$par, raw = TRUE)

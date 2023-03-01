@@ -147,16 +147,19 @@ rsem <- lasso(
 # use the plot-function to plot the regularized parameters:
 plot(rsem)
 
+# use the coef-function to show the estimates
+coef(rsem)
+
+# The best parameters can be extracted with:
+coef(rsem, criterion = "AIC")
+coef(rsem, criterion = "BIC")
+
 # elements of rsem can be accessed with the @ operator:
 rsem@parameters[1,]
 
-# AIC and BIC:
+# AIC and BIC for all tuning parameter configurations:
 AIC(rsem)
 BIC(rsem)
-
-# The best parameters can also be extracted with:
-coef(rsem, criterion = "AIC")
-coef(rsem, criterion = "BIC")
 
 # cross-validation
 cv <- cvLasso(lavaanModel = lavaanModel,
