@@ -105,7 +105,7 @@ Finally, you will find templates for a selection of models which can be used wit
 
 # Example
 
-```{r, results = 'hide'}
+```{r, results = 'hide', fig.show='hide'}
 library(lessSEM)
 library(lavaan)
 
@@ -196,7 +196,7 @@ A thorough introduction is provided in ``vignette('Parameter-transformations', p
 As an example, we will test measurement invariance in the `PoliticalDemocracy`
 data set.
 
-```{r, results = 'hide'}
+```{r, results = 'hide', fig.show='hide'}
 library(lessSEM)
 library(lavaan)
 # we will use the PoliticalDemocracy from lavaan (see ?lavaan::sem)
@@ -276,7 +276,7 @@ lavaanModel <- lessSEM2Lavaan(regularizedSEM = rsem,
 ```
 
 The result can be plotted with, for instance, [**semPlot**](https://github.com/SachaEpskamp/semPlot):
-```{r, results = 'hide'}
+```{r, results = 'hide', fig.show='hide'}
 library(semPlot)
 semPaths(lavaanModel,
          what = "est",
