@@ -35,7 +35,7 @@ the smallest lambda and gradually increase it.}
 
 \item{curve}{Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20).
 If curve is close to 1 all lambda values will be equally spaced, if curve is large
-lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.}
+lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.}
 
 \item{method}{which optimizer should be used? Currently implemented are ista
 and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -129,7 +129,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-regsem <- lasso(
+lsem <- lasso(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
@@ -141,25 +141,28 @@ regsem <- lasso(
   nLambdas = 50)
 
 # use the plot-function to plot the regularized parameters:
-plot(regsem)
+plot(lsem)
 
-# elements of regsem can be accessed with the @ operator:
-regsem@parameters[1,]
+# the coefficients can be accessed with:
+coef(lsem)
+
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters[1,]
 
 # AIC and BIC:
-AIC(regsem)
-BIC(regsem)
+AIC(lsem)
+BIC(lsem)
 
 # The best parameters can also be extracted with:
-coef(regsem, criterion = "AIC")
-coef(regsem, criterion = "BIC")
+coef(lsem, criterion = "AIC")
+coef(lsem, criterion = "BIC")
 
 
 #### Advanced ###
 # Switching the optimizer # 
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-regsemIsta <- lasso(
+lsemIsta <- lasso(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   nLambdas = 50,
@@ -167,5 +170,5 @@ regsemIsta <- lasso(
   control = controlIsta())
 
 # Note: The results are basically identical:
-regsemIsta@parameters - regsem@parameters
+lsemIsta@parameters - lsem@parameters
 }

@@ -132,7 +132,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-regsem <- cvElasticNet(
+lsem <- cvElasticNet(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
@@ -140,11 +140,12 @@ regsem <- cvElasticNet(
   lambdas = seq(0,1,length.out = 20),
   alphas = seq(0,1,.1))
 
-# elements of regsem can be accessed with the @ operator:
-regsem@parameters
+# the coefficients can be accessed with:
+coef(lsem)
+
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters
 
 # optional: plotting the cross-validation fit requires installation of plotly
-# plot(regsem)
-
-coef(regsem)
+# plot(lsem)
 }

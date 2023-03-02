@@ -22,10 +22,10 @@ setMethod("show", "lessSEMCoef", function (object) {
                                                   nsmall = 4)
   
   # round tuning parameters to 4 digits as well:
-  res_tuning_out <- format(as.matrix(object@tuningParameters), nsmall = 4)
+  res_tuning_out <- format(round(as.matrix(object@tuningParameters),4), nsmall = 4)
   
   # now, we combine estimates and tuning parameters and separate them by ||--||
-  res_out <-cbind(format(as.matrix(object@tuningParameters), nsmall = 4), 
+  res_out <-cbind(res_tuning_out, 
                   matrix("||--||", nrow = nrow(object@tuningParameters), ncol = 1, dimnames = list(NULL, "||--||")),
                   res_estimates_out)
   

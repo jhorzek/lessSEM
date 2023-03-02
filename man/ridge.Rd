@@ -116,7 +116,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-regsem <- ridge(
+lsem <- ridge(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
@@ -124,17 +124,20 @@ regsem <- ridge(
   lambdas = seq(0,1,length.out = 20))
 
 # use the plot-function to plot the regularized parameters:
-plot(regsem)
+plot(lsem)
 
-# elements of regsem can be accessed with the @ operator:
-regsem@parameters[1,]
+# the coefficients can be accessed with:
+coef(lsem)
+
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters[1,]
 
 
 #### Advanced ###
 # Switching the optimizer #
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-regsemIsta <- ridge(
+lsemIsta <- ridge(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   lambdas = seq(0,1,length.out = 20),
@@ -142,5 +145,5 @@ regsemIsta <- ridge(
   control = controlIsta())
 
 # Note: The results are basically identical:
-regsemIsta@parameters - regsem@parameters
+lsemIsta@parameters - lsem@parameters
 }

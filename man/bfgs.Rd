@@ -48,10 +48,13 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
                            std.lv = TRUE)
 
 
-regsem <- bfgs(
+lsem <- bfgs(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel)
 
-# elements of regsem can be accessed with the @ operator:
-regsem@parameters
+# the coefficients can be accessed with:
+coef(lsem)
+
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters
 }

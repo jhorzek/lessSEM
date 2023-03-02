@@ -93,7 +93,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 # names of the regularized parameters:
 regularized = paste0("l", 6:15)
 
-regsem <- smoothElasticNet(
+lsem <- smoothElasticNet(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   regularized = regularized,
@@ -102,6 +102,9 @@ regsem <- smoothElasticNet(
   lambdas = seq(0,1,length.out = 50),
   alphas = seq(0,1,length.out = 4))
 
-# elements of regsem can be accessed with the @ operator:
-regsem@parameters[1,]
+# the coefficients can be accessed with:
+coef(lsem)
+
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters[1,]
 }

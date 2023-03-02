@@ -60,7 +60,7 @@
 #' the smallest lambda and gradually increase it.
 #' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
 #' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
-#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
+#' lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -254,7 +254,7 @@ gpLasso <- function(par,
 #' the smallest lambda and gradually increase it.
 #' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
 #' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
-#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
+#' lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures

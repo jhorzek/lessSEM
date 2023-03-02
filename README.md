@@ -137,7 +137,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-rsem <- lasso(
+lsem <- lasso(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
@@ -150,21 +150,21 @@ rsem <- lasso(
   nLambdas = 50)
 
 # use the plot-function to plot the regularized parameters:
-plot(rsem)
+plot(lsem)
 
 # use the coef-function to show the estimates
-coef(rsem)
+coef(lsem)
 
 # The best parameters can be extracted with:
-coef(rsem, criterion = "AIC")
-coef(rsem, criterion = "BIC")
+coef(lsem, criterion = "AIC")
+coef(lsem, criterion = "BIC")
 
-# elements of rsem can be accessed with the @ operator:
-rsem@parameters[1,]
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters[1,]
 
 # AIC and BIC for all tuning parameter configurations:
-AIC(rsem)
-BIC(rsem)
+AIC(lsem)
+BIC(lsem)
 
 # cross-validation
 cv <- cvLasso(lavaanModel = lavaanModel,
@@ -180,7 +180,7 @@ coef(cv)
 # Switching the optimizer # 
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-rsemIsta <- lasso(
+lsemIsta <- lasso(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   nLambdas = 50,
@@ -190,7 +190,7 @@ rsemIsta <- lasso(
     nCores = 2))
 
 # Note: The results are basically identical:
-rsemIsta@parameters - rsem@parameters
+lsemIsta@parameters - lsem@parameters
 ```
 
 # Transformations
@@ -256,17 +256,6 @@ Finally, we can extract the best parameters:
 
 ``` r
 coef(lassoFit, criterion = "BIC")
-#> Parameter estimates:
-#>      lambda alpha ind60=~x2 ind60=~x3       a1       b1       c1 dem60~ind60
-#> 9 0.2128321     1  2.179657   1.81821 1.190777 1.174536 1.250972    1.471335
-#>   dem65~ind60 dem65~dem60    y1~~y5  y2~~y4   y2~~y6    y3~~y7    y4~~y8
-#> 9   0.6004815   0.8650405 0.5825253 1.44015 2.183017 0.7115766 0.3628152
-#>     y6~~y8     x1~~x1    x2~~x2    x3~~x3   y1~~y1  y2~~y2   y3~~y3   y4~~y4
-#> 9 1.371806 0.08138772 0.1204277 0.4666599 1.854623 7.58137 4.955659 3.224517
-#>     y5~~y5   y6~~y6   y7~~y7   y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
-#> 9 2.313027 4.968206 3.560045 3.307727    0.4485988     3.875361     0.164463
-#>   delta_a2 delta_b2 delta_c2
-#> 9        0        0        0
 ```
 
 As all differences (`delta_a2`, `delta_b2`, and `delta_c2`) have been
@@ -284,14 +273,14 @@ be very useful when plotting the final model. In our case, the best
 model is given by:
 
 ``` r
-lambdaBest <- coef(rsem, criterion = "BIC")@tuningParameters$lambda 
+lambdaBest <- coef(lsem, criterion = "BIC")@tuningParameters$lambda 
 ```
 
 We can get the **lavaan** model with the parameters corresponding to
 those of the regularized model with `lambda = lambdaBest` as follows:
 
 ``` r
-lavaanModel <- lessSEM2Lavaan(regularizedSEM = rsem, 
+lavaanModel <- lessSEM2Lavaan(regularizedSEM = lsem, 
                               lambda = lambdaBest)
 ```
 

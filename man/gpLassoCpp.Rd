@@ -36,7 +36,7 @@ It will then generate nLambda values between 0 and the computed lambda.}
 
 \item{curve}{Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20).
 If curve is close to 1 all lambda values will be equally spaced, if curve is large
-lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.}
+lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.}
 
 \item{additionalArguments}{list with additional arguments passed to fn and gr}
 
