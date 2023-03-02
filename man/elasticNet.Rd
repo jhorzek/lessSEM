@@ -120,7 +120,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-regsem <- elasticNet(
+lsem <- elasticNet(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
@@ -128,17 +128,20 @@ regsem <- elasticNet(
   lambdas = seq(0,1,length.out = 20),
   alphas = seq(0,1,.1))
 
-# elements of regsem can be accessed with the @ operator:
-regsem@parameters[1,]
+# the coefficients can be accessed with:
+coef(lsem)
+
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters[1,]
 
 # optional: plotting the paths requires installation of plotly
-# plot(regsem)
+# plot(lsem)
 
 #### Advanced ###
 # Switching the optimizer #
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-regsemIsta <- elasticNet(
+lsemIsta <- elasticNet(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   lambdas = seq(0,1,length.out = 20),
@@ -147,5 +150,5 @@ regsemIsta <- elasticNet(
   control = controlIsta())
 
 # Note: The results are basically identical:
-regsemIsta@parameters - regsem@parameters
+lsemIsta@parameters - lsem@parameters
 }

@@ -51,7 +51,7 @@
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
 #' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
-#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
+#' lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.
 #' @param additionalArguments list with additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
@@ -275,7 +275,7 @@ gpLassoCpp <- function(par,
 #' It will then generate nLambda values between 0 and the computed lambda.
 #' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
 #' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
-#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
+#' lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.
 #' @param weights labeled vector with adaptive lasso weights. NULL will use 1/abs(par)
 #' @param additionalArguments list with additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista

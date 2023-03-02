@@ -92,7 +92,7 @@
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- cvLasso(
+#' lsem <- cvLasso(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -102,13 +102,16 @@
 #'   standardize = TRUE) # automatic standardization
 #' 
 #' # use the plot-function to plot the cross-validation fit:
-#' plot(regsem)
+#' plot(lsem)
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters
 #' 
 #' # The best parameters can also be extracted with:
-#' coef(regsem)
+#' coef(lsem)
 #' @export
 cvLasso <- function(lavaanModel,
                     regularized,
@@ -239,7 +242,7 @@ cvLasso <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- cvAdaptiveLasso(
+#' lsem <- cvAdaptiveLasso(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -247,13 +250,16 @@ cvLasso <- function(lavaanModel,
 #'   lambdas = seq(0,1,.1))
 #' 
 #' # use the plot-function to plot the cross-validation fit
-#' plot(regsem)
+#' plot(lsem)
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters
 #' 
 #' # The best parameters can also be extracted with:
-#' coef(regsem)
+#' coef(lsem)
 #' @export
 cvAdaptiveLasso <- function(lavaanModel,
                             regularized,
@@ -384,7 +390,7 @@ cvAdaptiveLasso <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- cvRidge(
+#' lsem <- cvRidge(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -392,10 +398,13 @@ cvAdaptiveLasso <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20))
 #' 
 #' # use the plot-function to plot the cross-validation fit:
-#' plot(regsem)
+#' plot(lsem)
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters
 #' 
 #' @export
 cvRidge <- function(lavaanModel,
@@ -525,7 +534,7 @@ cvRidge <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- cvElasticNet(
+#' lsem <- cvElasticNet(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -533,13 +542,14 @@ cvRidge <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20),
 #'   alphas = seq(0,1,.1))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters
 #' 
 #' # optional: plotting the cross-validation fit requires installation of plotly
-#' # plot(regsem)
-#' 
-#' coef(regsem)
+#' # plot(lsem)
 #' @export
 cvElasticNet <- function(lavaanModel,
                          regularized,
@@ -670,7 +680,7 @@ cvElasticNet <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- cvCappedL1(
+#' lsem <- cvCappedL1(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -678,13 +688,14 @@ cvElasticNet <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20),
 #'   thetas = seq(0.01,2,length.out = 5))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters
 #' 
 #' # optional: plotting the cross-validation fit requires installation of plotly
-#' # plot(regsem)
-#' 
-#' coef(regsem)
+#' # plot(lsem)
 #' @export
 cvCappedL1 <- function(lavaanModel,
                        regularized,
@@ -809,7 +820,7 @@ cvCappedL1 <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- cvLsp(
+#' lsem <- cvLsp(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -817,13 +828,14 @@ cvCappedL1 <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20),
 #'   thetas = seq(0.01,2,length.out = 5))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters
 #' 
 #' # optional: plotting the cross-validation fit requires installation of plotly
-#' # plot(regsem)
-#' 
-#' coef(regsem)
+#' # plot(lsem)
 #' @export
 cvLsp <- function(lavaanModel,
                   regularized,
@@ -951,7 +963,7 @@ cvLsp <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- cvMcp(
+#' lsem <- cvMcp(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -959,13 +971,14 @@ cvLsp <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20),
 #'   thetas = seq(0.01,2,length.out = 5))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters
 #' 
 #' # optional: plotting the cross-validation fit requires installation of plotly
-#' # plot(regsem)
-#' 
-#' coef(regsem)
+#' # plot(lsem)
 #' @export
 cvMcp <- function(lavaanModel,
                   regularized,
@@ -1097,7 +1110,7 @@ cvMcp <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- cvScad(
+#' lsem <- cvScad(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -1105,13 +1118,14 @@ cvMcp <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20),
 #'   thetas = seq(2.01,5,length.out = 5))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters
 #' 
 #' # optional: plotting the cross-validation fit requires installation of plotly
-#' # plot(regsem)
-#' 
-#' coef(regsem)
+#' # plot(lsem)
 #' @export
 cvScad <- function(lavaanModel,
                    regularized,

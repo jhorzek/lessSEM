@@ -78,7 +78,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-regsem <- smoothLasso(
+lsem <- smoothLasso(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
@@ -88,16 +88,19 @@ regsem <- smoothLasso(
   lambdas = seq(0,1,length.out = 50))
 
 # use the plot-function to plot the regularized parameters:
-plot(regsem)
+plot(lsem)
 
-# elements of regsem can be accessed with the @ operator:
-regsem@parameters[1,]
+# the coefficients can be accessed with:
+coef(lsem)
+
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters[1,]
 
 # AIC and BIC:
-AIC(regsem)
-BIC(regsem)
+AIC(lsem)
+BIC(lsem)
 
 # The best parameters can also be extracted with:
-coef(regsem, criterion = "AIC")
-coef(regsem, criterion = "BIC")
+coef(lsem, criterion = "AIC")
+coef(lsem, criterion = "BIC")
 }

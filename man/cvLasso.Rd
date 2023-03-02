@@ -125,7 +125,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-regsem <- cvLasso(
+lsem <- cvLasso(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
@@ -135,11 +135,14 @@ regsem <- cvLasso(
   standardize = TRUE) # automatic standardization
 
 # use the plot-function to plot the cross-validation fit:
-plot(regsem)
+plot(lsem)
 
-# elements of regsem can be accessed with the @ operator:
-regsem@parameters
+# the coefficients can be accessed with:
+coef(lsem)
+
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters
 
 # The best parameters can also be extracted with:
-coef(regsem)
+coef(lsem)
 }

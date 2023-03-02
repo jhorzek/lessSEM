@@ -113,7 +113,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-regsem <- lsp(
+lsem <- lsp(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
@@ -121,9 +121,12 @@ regsem <- lsp(
   lambdas = seq(0,1,length.out = 20),
   thetas = seq(0.01,2,length.out = 5))
 
-# elements of regsem can be accessed with the @ operator:
-regsem@parameters[1,]
+# the coefficients can be accessed with:
+coef(lsem)
+
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters[1,]
 
 # optional: plotting the paths requires installation of plotly
-# plot(regsem)
+# plot(lsem)
 }

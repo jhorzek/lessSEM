@@ -60,7 +60,7 @@
 #' the smallest lambda and gradually increase it.
 #' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
 #' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
-#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
+#' lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
@@ -96,7 +96,7 @@
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- lasso(
+#' lsem <- lasso(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -108,25 +108,28 @@
 #'   nLambdas = 50)
 #' 
 #' # use the plot-function to plot the regularized parameters:
-#' plot(regsem)
+#' plot(lsem)
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' 
 #' # AIC and BIC:
-#' AIC(regsem)
-#' BIC(regsem)
+#' AIC(lsem)
+#' BIC(lsem)
 #' 
 #' # The best parameters can also be extracted with:
-#' coef(regsem, criterion = "AIC")
-#' coef(regsem, criterion = "BIC")
+#' coef(lsem, criterion = "AIC")
+#' coef(lsem, criterion = "BIC")
 #' 
 #' 
 #' #### Advanced ###
 #' # Switching the optimizer # 
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
-#' regsemIsta <- lasso(
+#' lsemIsta <- lasso(
 #'   lavaanModel = lavaanModel,
 #'   regularized = paste0("l", 6:15),
 #'   nLambdas = 50,
@@ -134,7 +137,7 @@
 #'   control = controlIsta())
 #' 
 #' # Note: The results are basically identical:
-#' regsemIsta@parameters - regsem@parameters
+#' lsemIsta@parameters - lsem@parameters
 #' @export
 lasso <- function(lavaanModel,
                   regularized,
@@ -240,7 +243,7 @@ lasso <- function(lavaanModel,
 #' the smallest lambda and gradually increase it.
 #' @param curve Allows for unequally spaced lambda steps (e.g., .01,.02,.05,1,5,20). 
 #' If curve is close to 1 all lambda values will be equally spaced, if curve is large 
-#' lambda values will be more concentrated close to 0. See ?lessSEM:::.curve for more information.
+#' lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.
 #' @param method which optimizer should be used? Currently implemented are ista
 #' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' (currently gist).
@@ -276,7 +279,7 @@ lasso <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- adaptiveLasso(
+#' lsem <- adaptiveLasso(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -288,25 +291,28 @@ lasso <- function(lavaanModel,
 #'   nLambdas = 50)
 #' 
 #' # use the plot-function to plot the regularized parameters:
-#' plot(regsem)
+#' plot(lsem)
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' 
 #' # AIC and BIC:
-#' AIC(regsem)
-#' BIC(regsem)
+#' AIC(lsem)
+#' BIC(lsem)
 #' 
 #' # The best parameters can also be extracted with:
-#' coef(regsem, criterion = "AIC")
-#' coef(regsem, criterion = "BIC")
+#' coef(lsem, criterion = "AIC")
+#' coef(lsem, criterion = "BIC")
 #' 
 #' 
 #' #### Advanced ###
 #' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
-#' regsemIsta <- adaptiveLasso(
+#' lsemIsta <- adaptiveLasso(
 #'   lavaanModel = lavaanModel,
 #'   regularized = paste0("l", 6:15),
 #'   nLambdas = 50,
@@ -314,7 +320,7 @@ lasso <- function(lavaanModel,
 #'   control = controlIsta())
 #' 
 #' # Note: The results are basically identical:
-#' regsemIsta@parameters - regsem@parameters
+#' lsemIsta@parameters - lsem@parameters
 #' @export
 adaptiveLasso <- function(lavaanModel,
                           regularized,
@@ -445,7 +451,7 @@ adaptiveLasso <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- ridge(
+#' lsem <- ridge(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -453,17 +459,20 @@ adaptiveLasso <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20))
 #' 
 #' # use the plot-function to plot the regularized parameters:
-#' plot(regsem)
+#' plot(lsem)
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' 
 #' 
 #' #### Advanced ###
 #' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
-#' regsemIsta <- ridge(
+#' lsemIsta <- ridge(
 #'   lavaanModel = lavaanModel,
 #'   regularized = paste0("l", 6:15),
 #'   lambdas = seq(0,1,length.out = 20),
@@ -471,7 +480,7 @@ adaptiveLasso <- function(lavaanModel,
 #'   control = controlIsta())
 #' 
 #' # Note: The results are basically identical:
-#' regsemIsta@parameters - regsem@parameters
+#' lsemIsta@parameters - lsem@parameters
 #' @export
 ridge <- function(lavaanModel,
                   regularized,
@@ -561,7 +570,7 @@ ridge <- function(lavaanModel,
 #' @param control used to control the optimizer. This element is generated with 
 #' the lessSEM::controlIsta() and controlGlmnet() functions.
 #' @returns Model of class regularizedSEM
-
+#'
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -588,7 +597,7 @@ ridge <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- elasticNet(
+#' lsem <- elasticNet(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -596,17 +605,20 @@ ridge <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20),
 #'   alphas = seq(0,1,.1))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' 
 #' # optional: plotting the paths requires installation of plotly
-#' # plot(regsem)
+#' # plot(lsem)
 #' 
 #' #### Advanced ###
 #' # Switching the optimizer #
 #' # Use the "method" argument to switch the optimizer. The control argument
 #' # must also be changed to the corresponding function:
-#' regsemIsta <- elasticNet(
+#' lsemIsta <- elasticNet(
 #'   lavaanModel = lavaanModel,
 #'   regularized = paste0("l", 6:15),
 #'   lambdas = seq(0,1,length.out = 20),
@@ -615,7 +627,7 @@ ridge <- function(lavaanModel,
 #'   control = controlIsta())
 #' 
 #' # Note: The results are basically identical:
-#' regsemIsta@parameters - regsem@parameters
+#' lsemIsta@parameters - lsem@parameters
 #' @export
 elasticNet <- function(lavaanModel,
                        regularized,
@@ -732,7 +744,7 @@ elasticNet <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- cappedL1(
+#' lsem <- cappedL1(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -740,11 +752,14 @@ elasticNet <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20),
 #'   thetas = seq(0.01,2,length.out = 5))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' 
 #' # optional: plotting the paths requires installation of plotly
-#' # plot(regsem)
+#' # plot(lsem)
 #' @export
 cappedL1 <- function(lavaanModel,
                      regularized,
@@ -856,7 +871,7 @@ cappedL1 <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- lsp(
+#' lsem <- lsp(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -864,11 +879,14 @@ cappedL1 <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20),
 #'   thetas = seq(0.01,2,length.out = 5))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' 
 #' # optional: plotting the paths requires installation of plotly
-#' # plot(regsem)
+#' # plot(lsem)
 #' @export
 lsp <- function(lavaanModel,
                 regularized,
@@ -982,7 +1000,7 @@ lsp <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- mcp(
+#' lsem <- mcp(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -990,11 +1008,14 @@ lsp <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20),
 #'   thetas = seq(0.01,2,length.out = 5))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' 
 #' # optional: plotting the paths requires installation of plotly
-#' # plot(regsem)
+#' # plot(lsem)
 #' @export
 mcp <- function(lavaanModel,
                 regularized,
@@ -1114,7 +1135,7 @@ mcp <- function(lavaanModel,
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- scad(
+#' lsem <- scad(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -1122,11 +1143,14 @@ mcp <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 20),
 #'   thetas = seq(2.01,5,length.out = 5))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' 
 #' # optional: plotting the paths requires installation of plotly
-#' # plot(regsem)
+#' # plot(lsem)
 #' @export
 scad <- function(lavaanModel,
                  regularized,

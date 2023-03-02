@@ -132,7 +132,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-rsem <- lasso(
+lsem <- lasso(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
@@ -145,21 +145,21 @@ rsem <- lasso(
   nLambdas = 50)
 
 # use the plot-function to plot the regularized parameters:
-plot(rsem)
+plot(lsem)
 
 # use the coef-function to show the estimates
-coef(rsem)
+coef(lsem)
 
 # The best parameters can be extracted with:
-coef(rsem, criterion = "AIC")
-coef(rsem, criterion = "BIC")
+coef(lsem, criterion = "AIC")
+coef(lsem, criterion = "BIC")
 
-# elements of rsem can be accessed with the @ operator:
-rsem@parameters[1,]
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters[1,]
 
 # AIC and BIC for all tuning parameter configurations:
-AIC(rsem)
-BIC(rsem)
+AIC(lsem)
+BIC(lsem)
 
 # cross-validation
 cv <- cvLasso(lavaanModel = lavaanModel,
@@ -175,7 +175,7 @@ coef(cv)
 # Switching the optimizer # 
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-rsemIsta <- lasso(
+lsemIsta <- lasso(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   nLambdas = 50,
@@ -185,7 +185,7 @@ rsemIsta <- lasso(
     nCores = 2))
 
 # Note: The results are basically identical:
-rsemIsta@parameters - rsem@parameters
+lsemIsta@parameters - lsem@parameters
 ```
 
 # Transformations
@@ -247,7 +247,7 @@ lassoFit <- lasso(lavaanModel = fit,
 
 Finally, we can extract the best parameters:
 
-```{r}
+```{r, results = 'hide'}
 coef(lassoFit, criterion = "BIC")
 ```
 
@@ -264,14 +264,14 @@ Please be aware of that when using these features.
 **lessSEM** supports exporting specific models to **lavaan**. This can be very useful when plotting the 
 final model. In our case, the best model is given by:
 ```{r, results = 'hide'}
-lambdaBest <- coef(rsem, criterion = "BIC")@tuningParameters$lambda 
+lambdaBest <- coef(lsem, criterion = "BIC")@tuningParameters$lambda 
 ```
 
 We can get the **lavaan** model with the parameters corresponding to those of the
 regularized model with `lambda = lambdaBest` as follows:
 
 ```{r, results = 'hide'}
-lavaanModel <- lessSEM2Lavaan(regularizedSEM = rsem, 
+lavaanModel <- lessSEM2Lavaan(regularizedSEM = lsem, 
                               lambda = lambdaBest)
 ```
 

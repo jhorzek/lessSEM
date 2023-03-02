@@ -52,7 +52,7 @@
 #' #                   what = "est",
 #' #                   fade = FALSE)
 #' 
-#' regsem <- smoothLasso(
+#' lsem <- smoothLasso(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   # names of the regularized parameters:
@@ -62,18 +62,21 @@
 #'   lambdas = seq(0,1,length.out = 50))
 #' 
 #' # use the plot-function to plot the regularized parameters:
-#' plot(regsem)
+#' plot(lsem)
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' 
 #' # AIC and BIC:
-#' AIC(regsem)
-#' BIC(regsem)
+#' AIC(lsem)
+#' BIC(lsem)
 #' 
 #' # The best parameters can also be extracted with:
-#' coef(regsem, criterion = "AIC")
-#' coef(regsem, criterion = "BIC")
+#' coef(lsem, criterion = "AIC")
+#' coef(lsem, criterion = "BIC")
 #' @export
 smoothLasso <- function(lavaanModel,
                         regularized,
@@ -171,7 +174,7 @@ smoothLasso <- function(lavaanModel,
 #' weights <- 1/abs(getLavaanParameters(lavaanModel))
 #' weights[!names(weights) %in% regularized] <- 0
 #' 
-#' regsem <- smoothAdaptiveLasso(
+#' lsem <- smoothAdaptiveLasso(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   regularized = regularized,
@@ -181,18 +184,21 @@ smoothLasso <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 50))
 #' 
 #' # use the plot-function to plot the regularized parameters:
-#' plot(regsem)
+#' plot(lsem)
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' 
 #' # AIC and BIC:
-#' AIC(regsem)
-#' BIC(regsem)
+#' AIC(lsem)
+#' BIC(lsem)
 #' 
 #' # The best parameters can also be extracted with:
-#' coef(regsem, criterion = "AIC")
-#' coef(regsem, criterion = "BIC")
+#' coef(lsem, criterion = "AIC")
+#' coef(lsem, criterion = "BIC")
 #' @export
 smoothAdaptiveLasso <- function(lavaanModel,
                                 regularized,
@@ -276,16 +282,19 @@ smoothAdaptiveLasso <- function(lavaanModel,
 #' # names of the regularized parameters:
 #' regularized = paste0("l", 6:15)
 #' 
-#' regsem <- ridgeBfgs(
+#' lsem <- ridgeBfgs(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   regularized = regularized,
 #'   lambdas = seq(0,1,length.out = 50))
 #' 
-#' plot(regsem)
+#' plot(lsem)
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' @export
 ridgeBfgs <- function(lavaanModel,
                       regularized,
@@ -373,7 +382,7 @@ ridgeBfgs <- function(lavaanModel,
 #' # names of the regularized parameters:
 #' regularized = paste0("l", 6:15)
 #' 
-#' regsem <- smoothElasticNet(
+#' lsem <- smoothElasticNet(
 #'   # pass the fitted lavaan model
 #'   lavaanModel = lavaanModel,
 #'   regularized = regularized,
@@ -382,8 +391,11 @@ ridgeBfgs <- function(lavaanModel,
 #'   lambdas = seq(0,1,length.out = 50),
 #'   alphas = seq(0,1,length.out = 4))
 #' 
-#' # elements of regsem can be accessed with the @ operator:
-#' regsem@parameters[1,]
+#' # the coefficients can be accessed with:
+#' coef(lsem)
+#' 
+#' # elements of lsem can be accessed with the @ operator:
+#' lsem@parameters[1,]
 #' @export
 smoothElasticNet <- function(lavaanModel,
                              regularized,
