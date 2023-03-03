@@ -20,7 +20,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: r-lib/actions/setup-pandoc@v2
     - name: Install dependencies
-      run: install.packages("devtools", "pkgdown")
+      run: install.packages(c("devtools", "pkgdown"))
       shell: Rscript {0}
     - name: Build site
       run: pkgdown::build_site_github_pages(new_process = FALSE, examples = FALSE, install = FALSE)
