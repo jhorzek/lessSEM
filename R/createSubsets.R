@@ -12,7 +12,7 @@ createSubsets <- function(N,k){
     
     randomCases <- sample(1:N,N)
     
-    subsets <- split(randomCases, sort(randomCases%%k)) # https://stackoverflow.com/questions/3318333/split-a-vector-into-chunks
+    subsets <- split(randomCases, sort(randomCases%%k)) # Harlan on https://stackoverflow.com/questions/3318333/split-a-vector-into-chunks
     
   }else if(k == N){
     

@@ -273,6 +273,7 @@
   ptrFunction <- "
   
   
+  // Dirk Eddelbuettel at
   // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 typedef Rcpp::NumericVector (*transformationFunctionPtr)(Rcpp::NumericVector&, //parameters
 Rcpp::List // transformationList

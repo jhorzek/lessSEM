@@ -26,7 +26,7 @@ struct parameterElements{
 // In some SEMs, we also allow for parameters to be transformations of one another.
 // To this end, we define some types to allow for passing compiled
 // functions to our SEM. These functions will be used to transform the parameters
-// See: https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+// See Dirk Eddelbuettel at https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 typedef Rcpp::NumericVector (*transformationFunctionPtr)(
     Rcpp::NumericVector&, //labeled parameter values
     Rcpp::List& //additional arguments

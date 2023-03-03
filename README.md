@@ -87,11 +87,18 @@ use of multiple cores.
 
 # Installation
 
-If you want to install **lessSEM** from GitHub, use the following
-commands in R:
+If you want to install **lessSEM** from CRAN, use the following commands
+in R:
 
 ``` r
-if(!require(devtools))install.packages("devtools")
+install.packages("lessSEM")
+```
+
+The newest version of the package can be installed from GitHub using the
+following commands in R:
+
+``` r
+if(!require(devtools)) install.packages("devtools")
 devtools::install_github("jhorzek/lessSEM")
 ```
 

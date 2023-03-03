@@ -116,6 +116,7 @@
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -341,6 +342,7 @@ gpLassoCpp <- function(par,
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -766,6 +768,7 @@ gpRidgeCpp <- function(par,
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -1162,6 +1165,7 @@ gpCappedL1Cpp <- function(par,
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -1361,6 +1365,7 @@ gpLspCpp <- function(par,
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -1566,6 +1571,7 @@ gpMcpCpp <- function(par,
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements

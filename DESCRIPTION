@@ -1,8 +1,11 @@
 Package: lessSEM
 Type: Package
-Title: Regularized structural equation models with non-smooth penalties
+Title: Non-Smooth Regularization for Structural Equation Models
 Version: 1.4.3
-Author: Jannik H. Orzek
+Authors@R: c(person(given   = "Jannik H.", family = "Orzek",
+                    role    = c("aut", "cre", "cph"),
+                    email   = "orzek@mpib-berlin.mpg.de",
+                    comment = c(ORCID = "0000-0002-3123-2248")))
 Maintainer: Jannik H. Orzek <orzek@mpib-berlin.mpg.de>
 Description: Provides regularized structural equation modeling 
   (regularized SEM) with non-smooth penalty functions (e.g., lasso) building 

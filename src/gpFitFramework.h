@@ -61,7 +61,7 @@ public:
   
 };
 
-// creating types for user supplied C++ functions. See
+// creating types for user supplied C++ functions. See Dirk Eddelbuettel at
 // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
                 Rcpp::List& //additional elements

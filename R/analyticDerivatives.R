@@ -60,9 +60,6 @@
 #' to each parameter
 #' @keywords internal
 .getHessian <- function (SEM, raw, eps = 1e-7){
-  # THE FOLLOWING CODE IS ADAPTED FROM LAVAAN. 
-  # SEE lavaan:::lav_model_hessian FOR THE IMPLEMENTATION
-  # BY Yves Rosseel
   
   SEM <- .fit(SEM = SEM)
   parameters <- .getParameters(SEM = SEM, raw = raw)
