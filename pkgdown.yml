@@ -1,0 +1,15 @@
+pandoc: 2.19.2
+pkgdown: 2.0.7
+pkgdown_sha: ~
+articles:
+  Definition-Variables-and-Multi-Group-SEM: Definition-Variables-and-Multi-Group-SEM.html
+  General-Purpose-Optimization: General-Purpose-Optimization.html
+  Mixed-Penalties: Mixed-Penalties.html
+  Parameter-transformations: Parameter-transformations.html
+  SCAD-and-MCP: SCAD-and-MCP.html
+  The-Structural-Equation-Model: The-Structural-Equation-Model.html
+  The-optimizer-interface: The-optimizer-interface.html
+  lessSEM: lessSEM.html
+  log-likelihood-gradients: log-likelihood-gradients.html
+last_built: 2023-03-03T14:23Z
+
