@@ -65,6 +65,7 @@ setMethod("summary", "regularizedSEM", function (object) {
 #' @param object object of class regularizedSEM
 #' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
 #' @returns parameters of the model as data.frame
+#' @import stats
 #' @export
 setMethod("coef", "regularizedSEM", function (object, ...) {
   dotdotdot <- list(...)
@@ -154,6 +155,7 @@ setMethod("BIC", "regularizedSEM", function (object) {
 #' @param x object of class gpRegularized
 #' @param y not used
 #' @param ... use regularizedOnly=FALSE to plot all parameters
+#' @import graphics, ggplot2
 #' @export
 setMethod("plot", 
           c(x = "regularizedSEM", y = "missing"), 

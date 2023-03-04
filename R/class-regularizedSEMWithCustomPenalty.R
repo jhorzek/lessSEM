@@ -36,6 +36,7 @@ setMethod("summary", "regularizedSEMWithCustomPenalty", function (object) {
 #' @param object object of class regularizedSEMWithCustomPenalty
 #' @param ... not used
 #' @returns data.frame with all parameter estimates
+#' @import stats
 #' @export
 setMethod("coef", "regularizedSEMWithCustomPenalty", function (object, ...) {
   tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
@@ -78,6 +79,7 @@ setMethod("AIC", "regularizedSEMWithCustomPenalty", function (object, penalizedP
 #' @param penalizedParameterLabels vector with labels of penalized parameters
 #' @param zeroThreshold penalized parameters below this threshold will be counted as zeroed
 #' @returns BIC values
+#' @import lavaan
 #' @export
 setMethod("BIC", "regularizedSEMWithCustomPenalty", function (object, penalizedParameterLabels, zeroThreshold) {
   fits <- object@fits

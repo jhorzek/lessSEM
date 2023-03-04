@@ -119,6 +119,7 @@
 #' head(regsemExact@parameters[,regsemExact@parameterLabels] -
 #'        regsemApprox@parameters[,regsemExact@parameterLabels])
 #' # Note that the parameter estimates are basically identical.
+#' @import lavaan
 #' @keywords internal
 .regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel, 
                                                   individualPenaltyFunction,

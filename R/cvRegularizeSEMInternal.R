@@ -23,6 +23,7 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
 #' @returns model of class cvRegularizedSEM
+#' @import lavaan
 #' @keywords internal
 .cvRegularizeSEMInternal <- function(lavaanModel,
                                      k,
@@ -80,9 +81,9 @@
                            transformationGradientStepSize = modifyModel$transformationGradientStepSize)
   
   
-  parameterLabels <- names(lessSEM:::.getParameters(SEM = tmpSEM, 
-                                                    raw = TRUE, 
-                                                    transformations = FALSE))
+  parameterLabels <- names(.getParameters(SEM = tmpSEM, 
+                                          raw = TRUE, 
+                                          transformations = FALSE))
   
   # check if the data was standardized:
   if(all(apply(rawData, 2, function(x) abs(mean(x)) <= 1e-5))) 
@@ -104,10 +105,10 @@
   
   if(penalty == "adaptiveLasso") 
     .printNote(paste0("Automatic cross-validation for adaptiveLasso requested. ", 
-                   "Note that using weights which are based on the full sample ",
-                   "may undermine cross-validation. If the default is used (weights = NULL), ",
-                   "weights for each subset will be computed using the inverse of the absolute MLE. ",
-                   "Alternatively, pass a matrix as weights argument with weights for each subset.")
+                      "Note that using weights which are based on the full sample ",
+                      "may undermine cross-validation. If the default is used (weights = NULL), ",
+                      "weights for each subset will be computed using the inverse of the absolute MLE. ",
+                      "Alternatively, pass a matrix as weights argument with weights for each subset.")
     )
   
   cvfits <- data.frame(

@@ -370,7 +370,7 @@ coef(fitMp, criterion = "BIC")
   Semi-confirmatory structural equation modeling via penalized
   likelihood. Journal of Statistical Software, 93(7).
   <https://doi.org/10.18637/jss.v093.i07>
-- [fasta](https://cran.r-project.org/web/packages/fasta/index.html):
+- [fasta](https://CRAN.R-project.org/package=fasta):
   Another implementation of the fista algorithm (Beck & Teboulle, 2009).
 - [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M.,
   Prabhu, R. G., Basak, S., Lou, Z., & Sanderson, C. (2021). The

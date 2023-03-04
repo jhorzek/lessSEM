@@ -213,6 +213,7 @@
 #' @param SEM internal SEM representation
 #' @param addMeans should a mean structure be added to the model?
 #' @return Hessian matrix
+#' @import lavaan
 #' @keywords internal
 .computeInitialHessian <- function(initialHessian, rawParameters, lavaanModel, SEM, addMeans){
   

@@ -154,6 +154,7 @@ arma::rowvec gradientfunction(const Rcpp::NumericVector& parameters, Rcpp::List&
     return(gradients);
 }
 
+// Dirk Eddelbuettel at
 // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
                 Rcpp::List& //additional elements

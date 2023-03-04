@@ -133,6 +133,7 @@ lavaan2lslxLabels <- function(lavaanModel){
 #' @param regularizedSEM object created with lessSEM
 #' @param lambda value for tuning parameter lambda
 #' @param theta value for tuning parameter theta
+#' @import lavaan
 #' @return lavaan model
 lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
   if("theta" %in% colnames(regularizedSEM@fits) &

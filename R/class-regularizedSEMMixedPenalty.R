@@ -64,6 +64,7 @@ setMethod("summary", "regularizedSEMMixedPenalty", function (object) {
 #' @param object object of class regularizedSEMMixedPenalty
 #' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
 #' @returns parameters of the model as data.frame
+#' @import stats
 #' @export
 setMethod("coef", "regularizedSEMMixedPenalty", function (object, ...) {
   dotdotdot <- list(...)
