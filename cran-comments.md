@@ -1,10 +1,10 @@
 ## R CMD check results
 
-0 errors | 0 warnings | 5 note
+0 errors | 0 warnings | 7 notes
 
 * This is a new release.
 
-## 5 Notes:
+## 7 Notes:
 
 ### N  checking CRAN incoming feasibility
 

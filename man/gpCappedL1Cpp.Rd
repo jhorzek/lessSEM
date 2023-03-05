@@ -88,6 +88,7 @@ Trends in Optimization, 1(3), 123–231.
 }
 }
 \examples{
+\dontrun{
 # This example shows how to use the optimizers
 # for C++ objective functions. We will use
 # a linear regression as an example. Note that
@@ -190,5 +191,5 @@ cL1 <- gpCappedL1Cpp(par = parameters,
                  additionalArguments = data)
 
 cL1@parameters
-
+}
 }
