@@ -31,7 +31,8 @@ Imports:
     numDeriv,
     utils,
     stats,
-    graphics
+    graphics,
+    rlang
 Suggests:
     knitr,
     plotly,

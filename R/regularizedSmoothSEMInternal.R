@@ -174,8 +174,8 @@
       "Hessian" = lapply(1:nrow(tuningParameters), 
                          matrix, 
                          data= NA, 
-                         nrow=nrow(initialHessian), 
-                         ncol=ncol(initialHessian))
+                         nrow=nrow(control$initialHessian), 
+                         ncol=ncol(control$initialHessian))
     )
   }else{
     Hessians <- list(NULL)

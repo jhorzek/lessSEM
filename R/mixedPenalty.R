@@ -1077,10 +1077,7 @@ fit <- function(mixedPenalty){
     # set initial values for next iteration
     if(is(SEM, "try-Error")){
       # reset
-      warning(paste0("Fit for ",
-                     paste0(names(tuningParameters),
-                            tuningParameters[it,], 
-                            sep = " = "),
+      warning(paste0("Fit for tuningParameterConfiguration = ", it,
                      " resulted in Error!"))
       
       if(is(lavaanModel, "lavaan")){
@@ -1297,9 +1294,9 @@ fit <- function(mixedPenalty){
   
   if(control$saveHessian){
     Hessians <- list(
-      "lambda" = tuningParameters$lambda,
-      "alpha" = tuningParameters$alpha,
-      "Hessian" = lapply(1:nrow(tuningParameters), 
+      "lambda" = lambda,
+      "alpha" = alpha,
+      "Hessian" = lapply(1:nrow(tpGrid), 
                          matrix, 
                          data= NA, 
                          nrow=nrow(control$initialHessian), 
@@ -1382,10 +1379,7 @@ fit <- function(mixedPenalty){
     # set initial values for next iteration
     if(is(SEM, "try-Error")){
       # reset
-      warning(paste0("Fit for ",
-                     paste0(names(tuningParameters),
-                            tuningParameters[it,], 
-                            sep = " = "),
+      warning(paste0("Fit for tuningParameterConfiguration = ", it,
                      " resulted in Error!"))
       
       if(is(lavaanModel, "lavaan")){

@@ -363,6 +363,14 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 }
 
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/jhorzek/lessSEM}
+  \item Report bugs at \url{https://github.com/jhorzek/lessSEM/issues}
+}
+
+}
 \author{
 Jannik Orzek \href{mailto:orzek@mpib-berlin.mpg.de}{orzek@mpib-berlin.mpg.de}
 }

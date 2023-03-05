@@ -5,10 +5,11 @@
 #' @param lavaanModel model of class lavaan
 #' @param removeDuplicates should duplicated parameters be removed?
 #' @returns returns a labeled vector with parameters from lavaan
+#' @import lavaan, stats
 #' @export
 getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
-  parameters <- coef(lavaanModel)
+  parameters <- lavaan::coef(lavaanModel)
   if(!removeDuplicates) return(parameters)
   return(parameters[unique(names(parameters))])
 }
@@ -194,7 +195,7 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
       }
       
       lavaanModels[[m]] <- suppressWarnings(lavaan::sem(model = lavaanParTable,
-                                                        data = lavInspect(lavaanModel, "data"),
+                                                        data = lavaan::lavInspect(lavaanModel, "data"),
                                                         do.fit= FALSE))
       
       
@@ -227,7 +228,7 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
   }
   
   updatedLavaanModel <- suppressWarnings(lavaan::sem(model = lavaanParTable,
-                                                     data = lavInspect(lavaanModel, "data"),
+                                                     data = lavaan::lavInspect(lavaanModel, "data"),
                                                      do.fit= FALSE))
   return(updatedLavaanModel)
 }
