@@ -2,10 +2,7 @@
 % Please edit documentation in R/gpOptimizationInterfaceCpp.R
 \name{gpLspCpp}
 \alias{gpLspCpp}
-\title{Implements lsp regularization for general purpose optimization problems with C++ functions.
-The penalty function is given by:
-\deqn{p( x_j) = \lambda \log(1 + |x_j|/\theta)}
-where \eqn{\theta > 0}.}
+\title{gpLspCpp}
 \usage{
 gpLspCpp(
   par,
@@ -45,12 +42,17 @@ the controlIsta (see ?controlIsta)}
 Object of class gpRegularized
 }
 \description{
+Implements lsp regularization for general purpose optimization problems with C++ functions.
+The penalty function is given by:
+\deqn{p( x_j) = \lambda \log(1 + |x_j|/\theta)}
+where \eqn{\theta > 0}.
+}
+\details{
 The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector
 with starting values (important: This vector must have labels), a fitting
 function, and a gradient function. These fitting functions must take an const Rcpp::NumericVector& with parameter
 values as first argument and an Rcpp::List& as second argument
-}
-\details{
+
 lsp regularization:
 \itemize{
 \item Candès, E. J., Wakin, M. B., & Boyd, S. P. (2008). Enhancing Sparsity by

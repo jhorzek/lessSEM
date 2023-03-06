@@ -856,7 +856,8 @@ gpElasticNetCpp <- function(par,
   return(result)
 }
 
-
+#' gpCappedL1Cpp
+#' 
 #' Implements cappedL1 regularization for general purpose optimization problems with C++ functions.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \lambda \min(| x_j|, \theta)}
@@ -1058,6 +1059,8 @@ gpCappedL1Cpp <- function(par,
   
 }
 
+#' gpLspCpp
+#' 
 #' Implements lsp regularization for general purpose optimization problems with C++ functions.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \lambda \log(1 + |x_j|/\theta)}
