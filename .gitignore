@@ -10,10 +10,8 @@ src/*.dll
 src/*/*.o
 src/*/*.so
 src/*/*.dll
-/doc/*
-!/doc/*.html
 /Meta/
-/doc/
+doc
 docs
 tests/testthat/*.pdf
 seafile-ignore.txt

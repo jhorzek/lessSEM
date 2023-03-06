@@ -35,8 +35,9 @@ Found the following (possibly) invalid URLs:
        Message: Forbidden
 ```
 
-Four dois of cited papers are flagged as 404, Forbidden. I've checked these dois manually and 
-they link to the correct papers.
+Comment: Four dois of cited papers are flagged as 404, Forbidden. 
+These dois also result in errors when using `urlchecker::url_check()`. I've 
+checked the dois manually and they link to the correct papers. 
 
 ### checking package dependencies (1.1s)
 
@@ -44,7 +45,7 @@ they link to the correct papers.
 Package in Depends/Imports which should probably only be in LinkingTo: 'RcppArmadillo'
 ```
 
-The package allows users to define custom C++ functions which are compiled
+Comment: The package allows users to define custom C++ functions which are compiled
 using Rcpp with `#include <RcppArmadillo.h>`. Without adding RcppArmadillo to
 Imports, compiling these functions seems to not work.
 
@@ -69,7 +70,7 @@ Namespace in Imports field not imported from: 'RcppArmadillo'
      All declared Imports should be used.
 ```
 
-See above: The package allows users to define custom C++ functions which are compiled
+Comment:  As outlined above, the package allows users to define custom C++ functions which are compiled
 using Rcpp with `#include <RcppArmadillo.h>`. Without adding RcppArmadillo to
 Imports, compiling these functions seems to not work.
 
@@ -84,7 +85,7 @@ Imports, compiling these functions seems to not work.
      getPtr transformationFunction
 ```
 
-See above: The package allows users to define custom C++ functions which are compiled
+Comment: The package allows users to define custom C++ functions which are compiled
 using Rcpp with `#include <RcppArmadillo.h>`. These functions are called "getPtr" and
 "transformationFunction" and are used after compilation throughout the package.
 
