@@ -1,5 +1,10 @@
 test_that("testing default control for glmnet", {
   testthat::skip_on_cran()
+  testthat::skip_if_not_installed("Rcpp")
+  testthat::skip_if_not_installed("RcppArmadillo")
+  testthat::skip_if_not_installed("Matrix")
+  testthat::skip_if_not_installed("glmnet")
+  
 tmp <-   try({
   library(Rcpp)
   library(RcppArmadillo)
@@ -47,6 +52,10 @@ arma::rowvec sumSquaredErrorGradients(
   return(gradients);
 }
 
+// THE FOLLOWING CODE IS ADAPTED FROM LAVAAN. 
+// SEE lavaan:::lav_model_hessian FOR THE IMPLEMENTATION
+// BY Yves Rosseel. The code is under GPL (>= 2)
+
 // [[Rcpp::export]]
 arma::mat approximateHessian(arma::colvec b, // the parameter vector
                              arma::colvec y, // the dependent variable
@@ -65,10 +74,6 @@ arma::mat approximateHessian(arma::colvec b, // the parameter vector
   arma::rowvec gradientsTwoStepLeft(nPar);
   arma::rowvec gradientsStepRight(nPar);
   arma::rowvec gradientsTwoStepRight(nPar);
-  
-  // THE FOLLOWING CODE IS ADAPTED FROM LAVAAN. 
-  // SEE lavaan:::lav_model_hessian FOR THE IMPLEMENTATION
-  // BY Yves Rosseel
   
   for(int p = 0; p < nPar; p++) {
     

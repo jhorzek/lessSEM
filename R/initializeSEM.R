@@ -13,6 +13,7 @@
 #' @param transformationGradientStepSize step size used to compute the gradients of the
 #' transformations
 #' @returns Object of class Rcpp_SEMCpp
+#' @import stats
 #' @keywords internal
 .SEMFromLavaan <- function(lavaanModel, 
                            whichPars = "est",
@@ -159,6 +160,7 @@
 #' @param transformations optional: transform parameter values.
 #' @returns list with SEMList (model in RAM representation) and fit (boolean indicating if the model should
 #' be fit and compared to lavaan)
+#' @import lavaan
 #' @keywords internal
 .extractSEMFromLavaan <- function(lavaanModel,
                                   whichPars = "est",
@@ -374,6 +376,7 @@
 #' @param lavaanModel model fitted with lavaan
 #' @param dataSet user supplied data set
 #' @return raw data
+#' @import lavaan
 #' @keywords internal
 .getRawData <- function(lavaanModel, dataSet){
   if(is.null(dataSet)){

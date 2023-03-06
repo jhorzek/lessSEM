@@ -46,8 +46,8 @@
     list("parameters" = parameters$parameters,
          "isTransformation" = parameters$parameters[parameters$isTransformation],
          "startingValues" = parameters$startingValues,
-         "getPtr" = getPtr,
-         "transformationFunction" = transformationFunction     
+         "getPtr" = getPtr, # this function is created when compiling the C++ code.
+         "transformationFunction" = transformationFunction # this function is created when compiling the C++ code.
     )
   )
 }
@@ -273,6 +273,7 @@
   ptrFunction <- "
   
   
+  // Dirk Eddelbuettel at
   // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 typedef Rcpp::NumericVector (*transformationFunctionPtr)(Rcpp::NumericVector&, //parameters
 Rcpp::List // transformationList

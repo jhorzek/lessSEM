@@ -1,5 +1,6 @@
 test_that("testing regsem", {
   testthat::skip_on_cran()
+  testthat::skip_if_not_installed("regsem")
   library(regsem)
   library(lessSEM)
   # put variables on same scale for regsem

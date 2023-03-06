@@ -68,7 +68,7 @@ GIC <- function(regularizedSEM, k = 2){
     
     if(penalty == "lasso"){
       
-      penaltyHessian <- N*smoothLASSOHessian(parameters = unlist(parameters[p,]), 
+      penaltyHessian <- N*.smoothLASSOHessian(parameters = unlist(parameters[p,]), 
                                              tuningParameters = list(
                                                lambda = regularizedSEM@fits$lambda[p]
                                              ), 

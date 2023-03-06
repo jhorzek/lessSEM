@@ -337,7 +337,7 @@ regularization procedure, we want to detect if and when the process changes.
 
 We won't go into the details of how to set up the model here, but you can 
 find them in the source of this file 
-([e.g., in GitHub](https://github.com/jhorzek/lessSEM/tree/main/vignettes/Parameter-transformations.Rmd)).
+([e.g., in GitHub](https://github.com/jhorzek/lessSEM/blob/main/vignettes/Parameter-transformations.Rmd)).
 We simulated a data set with 200 individuals measured at 10 time points. The
 autoregressive effect $a_t$ changes at $t=4$ from $.6$ to $.2$.
 

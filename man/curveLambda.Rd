@@ -13,12 +13,16 @@ curveLambda(maxLambda, lambdasAutoCurve, lambdasAutoLength)
 
 \item{lambdasAutoLength}{number of lambda values to generate}
 }
+\value{
+numeric vector
+}
 \description{
 generates lambda values between 0 and lambdaMax using the function described here:
 https://math.stackexchange.com/questions/384613/exponential-function-with-values-between-0-and-1-for-x-values-between-0-and-1.
 The function is identical to the one implemented in the regCtsem package.
 }
 \examples{
+library(lessSEM)
 plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 1, lambdasAutoLength = 100))
 plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 5, lambdasAutoLength = 100))
 plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 100, lambdasAutoLength = 100))

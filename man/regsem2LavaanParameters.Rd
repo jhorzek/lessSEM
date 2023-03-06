@@ -18,3 +18,24 @@ regsem parameters with lavaan labels
 helper function: regsem and lavaan use slightly different parameter labels. This function
 can be used to translate the parameter labels of a cv_regsem object to lavaan labels
 }
+\examples{
+## The following is adapted from ?regsem::regsem.
+library(lessSEM)
+library(regsem)
+# put variables on same scale for regsem
+HS <- data.frame(scale(HolzingerSwineford1939[,7:15]))
+
+mod <- '
+f =~ 1*x1 + l1*x2 + l2*x3 + l3*x4 + l4*x5 + l5*x6 + l6*x7 + l7*x8 + l8*x9
+'
+# Recommended to specify meanstructure in lavaan
+lavaanModel <- cfa(mod, HS, meanstructure=TRUE)
+
+regsemModel <- regsem(lavaanModel, 
+               lambda = 0.3, 
+               gradFun = "ram",
+               type="lasso",
+               pars_pen=c("l1", "l2", "l6", "l7", "l8"))
+regsem2LavaanParameters(regsemModel = regsemModel,
+                        lavaanModel = lavaanModel)
+}

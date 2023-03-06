@@ -1,5 +1,7 @@
 test_that("testing general purpose optimization", {
   testthat::skip_on_cran()
+  testthat::skip_if_not_installed("glmnet")
+  testthat::skip_if_not_installed("ncvreg")
   library(lessSEM)
   library(glmnet)
   library(ncvreg)

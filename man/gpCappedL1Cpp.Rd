@@ -2,13 +2,7 @@
 % Please edit documentation in R/gpOptimizationInterfaceCpp.R
 \name{gpCappedL1Cpp}
 \alias{gpCappedL1Cpp}
-\title{Implements cappedL1 regularization for general purpose optimization problems with C++ functions.
-The penalty function is given by:
-\deqn{p( x_j) = \lambda \min(| x_j|, \theta)}
-where \eqn{\theta > 0}. The cappedL1 penalty is identical to the lasso for
-parameters which are below \eqn{\theta} and identical to a constant for parameters
-above \eqn{\theta}. As adding a constant to the fitting function will not change its
-minimum, larger parameters can stay unregularized while smaller ones are set to zero.}
+\title{gpCappedL1Cpp}
 \usage{
 gpCappedL1Cpp(
   par,
@@ -49,12 +43,20 @@ the controlIsta (see ?controlIsta)}
 Object of class gpRegularized
 }
 \description{
+Implements cappedL1 regularization for general purpose optimization problems with C++ functions.
+The penalty function is given by:
+\deqn{p( x_j) = \lambda \min(| x_j|, \theta)}
+where \eqn{\theta > 0}. The cappedL1 penalty is identical to the lasso for
+parameters which are below \eqn{\theta} and identical to a constant for parameters
+above \eqn{\theta}. As adding a constant to the fitting function will not change its
+minimum, larger parameters can stay unregularized while smaller ones are set to zero.
+}
+\details{
 The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector
 with starting values (important: This vector \emph{must} have labels), a fitting
 function, and a gradient function. These fitting functions \emph{must} take an const Rcpp::NumericVector& with parameter
 values as first argument and an Rcpp::List& as second argument
-}
-\details{
+
 CappedL1 regularization:
 \itemize{
 \item Zhang, T. (2010). Analysis of Multi-stage Convex Relaxation for Sparse Regularization.
@@ -88,6 +90,7 @@ Trends in Optimization, 1(3), 123–231.
 }
 }
 \examples{
+\dontrun{
 # This example shows how to use the optimizers
 # for C++ objective functions. We will use
 # a linear regression as an example. Note that
@@ -190,5 +193,5 @@ cL1 <- gpCappedL1Cpp(par = parameters,
                  additionalArguments = data)
 
 cL1@parameters
-
+}
 }

@@ -1,4 +1,7 @@
 useDynLib(lessSEM, .registration=TRUE)
 importFrom(RcppParallel, RcppParallelLibs)
-import(methods, Rcpp)
+importFrom("stats", "coef", "logLik")
+importFrom("graphics", "plot")
+importFrom(rlang, .data)
+import(methods, Rcpp, lavaan)
 exportPattern("^[[:alpha:]]+")

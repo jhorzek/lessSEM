@@ -5,10 +5,28 @@
 #' @param lavaanModel model of class lavaan
 #' @param removeDuplicates should duplicated parameters be removed?
 #' @returns returns a labeled vector with parameters from lavaan
+#' @import lavaan, stats
+#' @examples 
+#' library(lessSEM)
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' getLavaanParameters(lavaanModel)                       
 #' @export
 getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
-  parameters <- coef(lavaanModel)
+  parameters <- lavaan::coef(lavaanModel)
   if(!removeDuplicates) return(parameters)
   return(parameters[unique(names(parameters))])
 }
@@ -75,6 +93,26 @@ getLavaanParameters <- function(lavaanModel, removeDuplicates = TRUE){
 #' @param regsemModel model of class regsem
 #' @param lavaanModel model of class lavaan
 #' @returns regsem parameters with lavaan labels
+#' @examples
+#' ## The following is adapted from ?regsem::regsem.
+#' library(lessSEM)
+#' library(regsem)
+#' # put variables on same scale for regsem
+#' HS <- data.frame(scale(HolzingerSwineford1939[,7:15]))
+#' 
+#' mod <- '
+#' f =~ 1*x1 + l1*x2 + l2*x3 + l3*x4 + l4*x5 + l5*x6 + l6*x7 + l7*x8 + l8*x9
+#' '
+#' # Recommended to specify meanstructure in lavaan
+#' lavaanModel <- cfa(mod, HS, meanstructure=TRUE)
+#' 
+#' regsemModel <- regsem(lavaanModel, 
+#'                lambda = 0.3, 
+#'                gradFun = "ram",
+#'                type="lasso",
+#'                pars_pen=c("l1", "l2", "l6", "l7", "l8"))
+#' regsem2LavaanParameters(regsemModel = regsemModel,
+#'                         lavaanModel = lavaanModel)
 #' @export
 regsem2LavaanParameters <- function(regsemModel, lavaanModel){
   if(!is(regsemModel, "regsem")) stop("regsemModel must be of class cvregsem.")
@@ -99,6 +137,28 @@ regsem2LavaanParameters <- function(regsemModel, lavaanModel){
 #'
 #' @param lavaanModel model of class lavaan
 #' @returns list with lavaan labels and lslx labels
+#' @examples
+#' library(lessSEM)
+#' 
+#' # Identical to regsem, lessSEM builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' lavaan2lslxLabels(lavaanModel)
 #' @export
 lavaan2lslxLabels <- function(lavaanModel){
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
@@ -133,6 +193,35 @@ lavaan2lslxLabels <- function(lavaanModel){
 #' @param regularizedSEM object created with lessSEM
 #' @param lambda value for tuning parameter lambda
 #' @param theta value for tuning parameter theta
+#' @import lavaan
+#' @examples 
+#' library(lessSEM)
+#' 
+#' # Identical to regsem, lessSEM builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Regularization:
+#' regularized <- lasso(lavaanModel,
+#'                      regularized = paste0("l", 11:15), 
+#'                      lambdas = seq(0,1,.1))
+#' 
+#' lessSEM2Lavaan(regularizedSEM = regularized, 
+#'                lambda = 1)
 #' @return lavaan model
 lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
   if("theta" %in% colnames(regularizedSEM@fits) &
@@ -193,7 +282,7 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
       }
       
       lavaanModels[[m]] <- suppressWarnings(lavaan::sem(model = lavaanParTable,
-                                                        data = lavInspect(lavaanModel, "data"),
+                                                        data = lavaan::lavInspect(lavaanModel, "data"),
                                                         do.fit= FALSE))
       
       
@@ -226,7 +315,7 @@ lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
   }
   
   updatedLavaanModel <- suppressWarnings(lavaan::sem(model = lavaanParTable,
-                                                     data = lavInspect(lavaanModel, "data"),
+                                                     data = lavaan::lavInspect(lavaanModel, "data"),
                                                      do.fit= FALSE))
   return(updatedLavaanModel)
 }

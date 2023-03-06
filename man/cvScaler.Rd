@@ -20,3 +20,11 @@ scaled test set
 uses the means and standard deviations of the training set to standardize
 the test set. See, e.g., https://scikit-learn.org/stable/modules/cross_validation.html .
 }
+\examples{
+library(lessSEM)
+data <- matrix(rnorm(50),10,5)
+
+cvScaler(testSet = data, 
+         means = 1:5, 
+         standardDeviations = 1:5)
+}

@@ -10,9 +10,8 @@
 #' avoid negative variances. When set to TRUE, the scores will be given for the 
 #' internal parameter representation. Set to FALSE to get the usual 
 #' scores
-#' @returns matrix with derivatives of the -2log-Likelihood for each person and parameter 
+#' @returns matrix with derivatives of the -2log-Likelihood for each person and parameter (rows are persons, columns are parameters) 
 #' @keywords internal
-#' (rows are persons, columns are parameters)
 .getScores <- function(SEM, raw){
   scores <- SEM$getScores(raw)
   colnames(scores) <- SEM$getParameterLabels()
@@ -60,9 +59,6 @@
 #' to each parameter
 #' @keywords internal
 .getHessian <- function (SEM, raw, eps = 1e-7){
-  # THE FOLLOWING CODE IS ADAPTED FROM LAVAAN. 
-  # SEE lavaan:::lav_model_hessian FOR THE IMPLEMENTATION
-  # BY Yves Rosseel
   
   SEM <- .fit(SEM = SEM)
   parameters <- .getParameters(SEM = SEM, raw = raw)

@@ -149,6 +149,8 @@ simulateExampleData <- function(N = 100, # sample size
 #' (IMPORTANT: This must be the name
 #' used in C++)
 #' @returns a string which can be copied in the C++ function to create the pointers.
+#' @examples 
+#' # see vignette("General-Purpose-Optimization", package = "lessSEM") for an example
 #' @export
 makePtrs <- function(fitFunName, gradFunName){
   
@@ -160,7 +162,9 @@ makePtrs <- function(fitFunName, gradFunName){
 // // [[Rcpp::depends(RcppArmadillo)]]
 // #include <RcppArmadillo.h>
 
+// Dirk Eddelbuettel at
 // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+
 typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
                 Rcpp::List& //additional elements
 );
