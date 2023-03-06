@@ -1,5 +1,6 @@
 test_that("testing hessian", {
   testthat::skip_on_cran()
+  testthat::skip_if_not_installed("numDeriv")
   library(lavaan)
   library(lessSEM)
   model1 <- ' 

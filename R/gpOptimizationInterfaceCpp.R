@@ -515,6 +515,7 @@ gpAdaptiveLassoCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -616,6 +617,7 @@ gpAdaptiveLassoCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' r@parameters
+#' }
 #' @export
 gpRidgeCpp <- function(par,
                     regularized,
@@ -716,6 +718,7 @@ gpRidgeCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -819,6 +822,7 @@ gpRidgeCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' en@parameters
+#' }
 #' @export
 gpElasticNetCpp <- function(par,
                          regularized,

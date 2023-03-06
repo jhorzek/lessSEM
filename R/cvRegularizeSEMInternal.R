@@ -305,6 +305,13 @@
 #' @param testSet test data set
 #' @param means means of the training set
 #' @param standardDeviations standard deviations of the training set
+#' @examples 
+#' library(lessSEM)
+#' data <- matrix(rnorm(50),10,5)
+#' 
+#' cvScaler(testSet = data, 
+#'          means = 1:5, 
+#'          standardDeviations = 1:5)
 #' @returns scaled test set
 cvScaler <- function(testSet, means, standardDeviations){
   if(any(names(means) != colnames(testSet))) stop("Mismatch in names of means and testSet.")

@@ -1,5 +1,10 @@
 test_that("testing default control for glmnet", {
   testthat::skip_on_cran()
+  testthat::skip_if_not_installed("Rcpp")
+  testthat::skip_if_not_installed("RcppArmadillo")
+  testthat::skip_if_not_installed("Matrix")
+  testthat::skip_if_not_installed("glmnet")
+  
 tmp <-   try({
   library(Rcpp)
   library(RcppArmadillo)

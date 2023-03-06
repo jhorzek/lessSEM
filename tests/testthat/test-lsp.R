@@ -1,5 +1,6 @@
 test_that("testing lsp", {
   testthat::skip_on_cran()
+  testthat::skip_if_not_installed("lslx")
   library(lslx)
   library(lavaan)
   library(lessSEM)
@@ -53,7 +54,7 @@ test_that("testing lsp", {
   
   #### Now we are ready to optimize! ####
   regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
-                                                       individualPenaltyFunction = smoothLspValue,
+                                                       individualPenaltyFunction = lessSEM:::.smoothLspValue,
                                                        tuningParameters = tuningParameters,
                                                        penaltyFunctionArguments = penaltyFunctionArguments)
   for(th in rsemIsta@fits$theta){

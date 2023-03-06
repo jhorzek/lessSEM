@@ -67,7 +67,7 @@
   
   ## Setup Multi-Core ##
   
-  setupMulticore(control)
+  .setupMulticore(control)
 
   ### initialize model ####
   startingValues <- control$startingValues

@@ -1,5 +1,6 @@
 test_that("testing cross-validation for adaptive lasso", {
   testthat::skip_on_cran()
+  testthat::skip_if_not_installed("regsem")
   library(regsem)
   library(lessSEM)
   set.seed(123)

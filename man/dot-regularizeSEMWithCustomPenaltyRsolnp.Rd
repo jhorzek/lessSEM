@@ -41,6 +41,7 @@ Model of class regularizedSEMWithCustomPenalty
 Optimize a SEM with custom penalty function using the Rsolnp optimizer (see ?Rsolnp::solnp). This optimizer is the default in regsem (see ?regsem::cv_regsem).
 }
 \examples{
+\dontrun{
 library(lessSEM)
 
 # Identical to regsem, lessSEM builds on the lavaan
@@ -144,5 +145,6 @@ regsemExact <- lasso(
 head(regsemExact@parameters[,regsemExact@parameterLabels] -
        regsemApprox@parameters[,regsemExact@parameterLabels])
 # Note that the parameter estimates are basically identical.
+}
 }
 \keyword{internal}

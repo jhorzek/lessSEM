@@ -160,12 +160,12 @@ controlBFGS <- function(
   return(control)
 }
 
-#' setupMulticore
+#' .setupMulticore
 #' 
 #' setup for multi-core support
 #' @param control object created with controlBFGS, controlIsta or controlGlmnet function
 #' @return nothing
-setupMulticore <- function(control){
+.setupMulticore <- function(control){
   if(RcppParallel::defaultNumThreads() < control$nCores)
     warning("Your selected number of cores (", control$nCores,
             ") is larger than the number of cores detected by RcppParallel (",

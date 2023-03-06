@@ -4,96 +4,93 @@
 
 * This is a new release.
 
-## 7 Notes:
+## Comments
 
-### N  checking CRAN incoming feasibility
+Some functions in the package allow users to compile user-specified functions 
+with Rcpp. These functions are compiled using `#include <RcppArmadillo.h>` which
+I could only get to work with Imports RcppArmadillo. Several notes refer to this
+setup:
 
+```
+N checking package dependencies (1.1s)
+  Package in Depends/Imports which should probably only be in LinkingTo: 'RcppArmadillo'
+```
+
+```
+N checking dependencies in R code ... NOTE
+  Namespace in Imports field not imported from: 'RcppArmadillo'
+    All declared Imports should be used.
+```
+
+```
+N checking R code for possible problems ... [12s] NOTE (11.9s)
+  .compileTransformations: no visible binding for global variable
+       'getPtr'
+     .compileTransformations: no visible binding for global variable
+       'transformationFunction'
+     Undefined global functions or variables:
+       getPtr transformationFunction
+```
+
+The functions mentioned above (getPtr and transformationFunction) are generated 
+by the package based on user input and compiled with Rcpp.
+
+## Additional Notes:
+
+Depending on the configuration used to check the package, there is a note regarding
+links used in the documentation:
 ```
 Found the following (possibly) invalid URLs:
-     URL: https://doi.org/10.1111/bmsp.12130
-       From: inst/doc/Definition-Variables-and-Multi-Group-SEM.html
-             inst/doc/Parameter-transformations.html
-             inst/doc/lessSEM.html
-             README.md
-       Status: 403
-       Message: Forbidden
-     URL: https://doi.org/10.1111/j.1467-9868.2005.00503.x
-       From: inst/doc/lessSEM.html
-             README.md
-       Status: 403
-       Message: Forbidden
-     URL: https://doi.org/10.1111/j.2044-8317.1984.tb00802.x
-       From: inst/doc/The-Structural-Equation-Model.html
-       Status: 403
-       Message: Forbidden
-     URL: https://doi.org/10.1137/080716542
-       From: inst/doc/SCAD-and-MCP.html
-             inst/doc/The-optimizer-interface.html
-             inst/doc/lessSEM.html
-             README.md
-       Status: 403
-       Message: Forbidden
+    URL: https://doi.org/10.1111/bmsp.12130
+      From: inst/doc/Definition-Variables-and-Multi-Group-SEM.html
+            inst/doc/Parameter-transformations.html
+            inst/doc/lessSEM.html
+            README.md
+      Status: 403
+      Message: Forbidden
+    URL: https://doi.org/10.1111/j.1467-9868.2005.00503.x
+      From: inst/doc/lessSEM.html
+            README.md
+      Status: 403
+      Message: Forbidden
+    URL: https://doi.org/10.1111/j.2044-8317.1984.tb00802.x
+      From: inst/doc/The-Structural-Equation-Model.html
+      Status: 403
+      Message: Forbidden
+    URL: https://doi.org/10.1137/080716542
+      From: inst/doc/SCAD-and-MCP.html
+            inst/doc/The-optimizer-interface.html
+            inst/doc/lessSEM.html
+            README.md
+      Status: 403
+      Message: Forbidden
 ```
-
-Comment: Four dois of cited papers are flagged as 404, Forbidden. 
-These dois also result in errors when using `urlchecker::url_check()`. I've 
-checked the dois manually and they link to the correct papers. 
-
-### checking package dependencies (1.1s)
+I've checked all of these dois and they seem to work.
 
 ```
-Package in Depends/Imports which should probably only be in LinkingTo: 'RcppArmadillo'
+N checking CRAN incoming feasibility
+  New submission
+  
+  Possibly misspelled words in DESCRIPTION:
+    SEM (14:16)
+    lavaan (15:6)
+    lessSEM (17:59, 17:68)
+    lslx (17:4)
+    regsem (16:4)
 ```
 
-Comment: The package allows users to define custom C++ functions which are compiled
-using Rcpp with `#include <RcppArmadillo.h>`. Without adding RcppArmadillo to
-Imports, compiling these functions seems to not work.
-
-### checking installed package size ... 
+The words are all correct; they refer to R packages or common abbreviations of
+the models used in the package.
 
 ```
-     installed size is  5.6Mb
-     sub-directories of 1Mb or more:
-       libs   3.3Mb
-```
-
-### checking for future file timestamps ...
-
-```
-   unable to verify current time
-```
-
-### checking dependencies in R code (1.7s)
+N checking installed package size ... NOTE
+  installed size is  5.6Mb
+  sub-directories of 1Mb or more:
+    libs   3.4Mb
+``` 
 
 ```
-Namespace in Imports field not imported from: 'RcppArmadillo'
-     All declared Imports should be used.
+N checking for GNU extensions in Makefiles ... NOTE
+  GNU make is a SystemRequirements.
 ```
-
-Comment:  As outlined above, the package allows users to define custom C++ functions which are compiled
-using Rcpp with `#include <RcppArmadillo.h>`. Without adding RcppArmadillo to
-Imports, compiling these functions seems to not work.
-
-### checking R code for possible problems ... [12s] NOTE (11.9s)
-
-```
-.compileTransformations: no visible binding for global variable
-     'getPtr'
-   .compileTransformations: no visible binding for global variable
-     'transformationFunction'
-   Undefined global functions or variables:
-     getPtr transformationFunction
-```
-
-Comment: The package allows users to define custom C++ functions which are compiled
-using Rcpp with `#include <RcppArmadillo.h>`. These functions are called "getPtr" and
-"transformationFunction" and are used after compilation throughout the package.
-
-### N  checking for GNU extensions in Makefiles
-
-```
-   GNU make is a SystemRequirements.
-```
-
-GNU make is used because the package allows for multi-core execution using 
-RcppParallel.
+The package uses RcppParallel which requires GNU make.

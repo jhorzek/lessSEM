@@ -51,7 +51,7 @@ test_that("testing smooth lasso", {
   )
   tuningParameters <- data.frame("lambda" = lambdas)
   apprRegsem4 <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit, 
-                                                      individualPenaltyFunction = smoothLASSOValue, 
+                                                      individualPenaltyFunction = lessSEM:::.smoothLASSOValue, 
                                                       tuningParameters = tuningParameters, 
                                                       penaltyFunctionArguments = penaltyFunctionArguments)
   parameterDifference4 <- apprRegsem4@parameters[,rsem@parameterLabels] - rsem@parameters[,rsem@parameterLabels]

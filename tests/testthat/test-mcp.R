@@ -1,5 +1,6 @@
 test_that("testing mcp", {
   testthat::skip_on_cran()
+  testthat::skip_if_not_installed("lslx")
   library(lslx)
   library(lavaan)
   library(lessSEM)
@@ -171,7 +172,7 @@ test_that("testing mcp", {
   
   #### Now we are ready to optimize! ####
   regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
-                                                       individualPenaltyFunction = smoothMcpValue,
+                                                       individualPenaltyFunction = lessSEM:::.smoothMcpValue,
                                                        tuningParameters = tuningParameters,
                                                        penaltyFunctionArguments = penaltyFunctionArguments)
   

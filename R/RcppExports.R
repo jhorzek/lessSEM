@@ -292,48 +292,6 @@ NULL
 #'@returns a list with fit results
 NULL
 
-#' computeImpliedCovarianceFull
-#' 
-#' computes the implied covariance matrix including latent vaiables of a SEM using RAM notation
-#' @param Amatrix matrix with directed effects
-#' @param Smatrix matrix with undirected effects
-#' @param IminusAInverse (I-Amatrix)^(-1)
-#' @returns matrix with implied covariances
-computeImpliedCovarianceFull <- function(Amatrix, Smatrix, IminusAInverse) {
-    .Call(`_lessSEM_computeImpliedCovarianceFull`, Amatrix, Smatrix, IminusAInverse)
-}
-
-#' computeImpliedCovariance
-#' 
-#' computes the implied covariance matrix of a SEM using RAM notation
-#' @param Fmatrix filter matrix
-#' @param impliedCovarianceFull implied covariance matrix including latent variables
-#' @returns matrix with implied covariances
-computeImpliedCovariance <- function(Fmatrix, impliedCovarianceFull) {
-    .Call(`_lessSEM_computeImpliedCovariance`, Fmatrix, impliedCovarianceFull)
-}
-
-#' computeImpliedMeansFull
-#' 
-#' computes the implied means vector of a SEM including the latent variables using RAM notation
-#' @param Amatrix matrix with directed effects
-#' @param Mvector vector with means
-#' @param IminusAInverse (I-Amatrix)^(-1)
-#' @returns matrix with implied means
-computeImpliedMeansFull <- function(Amatrix, Mvector, IminusAInverse) {
-    .Call(`_lessSEM_computeImpliedMeansFull`, Amatrix, Mvector, IminusAInverse)
-}
-
-#' computeImpliedMeans
-#' 
-#' computes the implied means vector of a SEM using RAM notation
-#' @param Fmatrix filter matrix
-#' @param impliedMeansFull implied means vector including latent variables
-#' @returns matrix with implied means
-computeImpliedMeans <- function(Fmatrix, impliedMeansFull) {
-    .Call(`_lessSEM_computeImpliedMeans`, Fmatrix, impliedMeansFull)
-}
-
 #'@name istaLSPSEM
 #'@title lsp optimization with ista
 #'@description Object for lsp optimization with

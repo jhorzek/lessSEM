@@ -149,6 +149,8 @@ simulateExampleData <- function(N = 100, # sample size
 #' (IMPORTANT: This must be the name
 #' used in C++)
 #' @returns a string which can be copied in the C++ function to create the pointers.
+#' @examples 
+#' # see vignette("General-Purpose-Optimization", package = "lessSEM") for an example
 #' @export
 makePtrs <- function(fitFunName, gradFunName){
   
