@@ -16,7 +16,7 @@ Lasso regularization will set parameters to zero if \(\lambda\) is large enough"
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,13 @@ Lasso regularization will set parameters to zero if \(\lambda\) is large enough"
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/jhorzek/lessSEM/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -54,7 +60,7 @@ Lasso regularization will set parameters to zero if \(\lambda\) is large enough"
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>addLasso</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/jhorzek/lessSEM/blob/HEAD/R/mixedPenalty.R" class="external-link"><code>R/mixedPenalty.R</code></a></small>
       <div class="d-none name"><code>addLasso.Rd</code></div>
     </div>
 
@@ -129,6 +135,39 @@ Conference on Machine Learning, 28(2)(2), 37–45.</p></li>
 Trends in Optimization, 1(3), 123–231.</p></li>
 </ul></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Identical to regsem, lessSEM builds on the lavaan</span></span>
+<span><span class="co"># package for model specification. The first step</span></span>
+<span><span class="co"># therefore is to implement the model in lavaan.</span></span>
+<span></span>
+<span><span class="va">dataset</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulateExampleData.html">simulateExampleData</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">lavaanSyntax</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
+<span><span class="st">f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + </span></span>
+<span><span class="st">     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + </span></span>
+<span><span class="st">     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15</span></span>
+<span><span class="st">f ~~ 1*f</span></span>
+<span><span class="st">"</span></span>
+<span></span>
+<span><span class="va">lavaanModel</span> <span class="op">&lt;-</span> <span class="fu">lavaan</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/sem.html" class="external-link">sem</a></span><span class="op">(</span><span class="va">lavaanSyntax</span>,</span>
+<span>                           data <span class="op">=</span> <span class="va">dataset</span>,</span>
+<span>                           meanstructure <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                           std.lv <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># We can add mixed penalties as follows:</span></span>
+<span></span>
+<span><span class="va">regularized</span> <span class="op">&lt;-</span> <span class="va">lavaanModel</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># create template for regularized model with mixed penalty:</span></span>
+<span>  <span class="fu"><a href="mixedPenalty.html">mixedPenalty</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># add penalty on loadings l6 - l10:</span></span>
+<span>  <span class="fu">addLasso</span><span class="op">(</span>regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="fl">11</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span>, </span>
+<span>          lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># fit the model:</span></span>
+<span>  <span class="fu"><a href="fit.html">fit</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

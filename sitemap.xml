@@ -4,6 +4,9 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/LICENSE.html</loc>
+  </url>
+  <url>
     <loc>/articles/Definition-Variables-and-Multi-Group-SEM.html</loc>
   </url>
   <url>
@@ -235,18 +238,6 @@
     <loc>/reference/coef-regularizedSEMWithCustomPenalty-method.html</loc>
   </url>
   <url>
-    <loc>/reference/computeImpliedCovariance.html</loc>
-  </url>
-  <url>
-    <loc>/reference/computeImpliedCovarianceFull.html</loc>
-  </url>
-  <url>
-    <loc>/reference/computeImpliedMeans.html</loc>
-  </url>
-  <url>
-    <loc>/reference/computeImpliedMeansFull.html</loc>
-  </url>
-  <url>
     <loc>/reference/controlBFGS.html</loc>
   </url>
   <url>
@@ -418,9 +409,6 @@
     <loc>/reference/dot-noDotDotDot.html</loc>
   </url>
   <url>
-    <loc>/reference/dot-optNLMINB.html</loc>
-  </url>
-  <url>
     <loc>/reference/dot-penaltyTypes.html</loc>
   </url>
   <url>
@@ -439,6 +427,15 @@
     <loc>/reference/dot-regularizeSmoothSEMInternal.html</loc>
   </url>
   <url>
+    <loc>/reference/dot-ridgeGradient.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-ridgeHessian.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-ridgeValue.html</loc>
+  </url>
+  <url>
     <loc>/reference/dot-setAMatrix.html</loc>
   </url>
   <url>
@@ -454,6 +451,48 @@
     <loc>/reference/dot-setSMatrix.html</loc>
   </url>
   <url>
+    <loc>/reference/dot-setupMulticore.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothAdaptiveLASSOGradient.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothAdaptiveLASSOHessian.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothAdaptiveLASSOValue.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothCappedL1Value.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothElasticNetGradient.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothElasticNetHessian.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothElasticNetValue.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothLASSOGradient.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothLASSOHessian.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothLASSOValue.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothLspValue.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothMcpValue.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-smoothScadValue.html</loc>
+  </url>
+  <url>
     <loc>/reference/dot-standardErrors.html</loc>
   </url>
   <url>
@@ -461,12 +500,6 @@
   </url>
   <url>
     <loc>/reference/fit.html</loc>
-  </url>
-  <url>
-    <loc>/reference/genericGradientApproximiation.html</loc>
-  </url>
-  <url>
-    <loc>/reference/genericHessianApproximiation.html</loc>
   </url>
   <url>
     <loc>/reference/getLavaanParameters.html</loc>
@@ -682,22 +715,10 @@
     <loc>/reference/ridgeBfgs.html</loc>
   </url>
   <url>
-    <loc>/reference/ridgeGradient.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ridgeHessian.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ridgeValue.html</loc>
-  </url>
-  <url>
     <loc>/reference/scad.html</loc>
   </url>
   <url>
     <loc>/reference/scadPenalty_C.html</loc>
-  </url>
-  <url>
-    <loc>/reference/setupMulticore.html</loc>
   </url>
   <url>
     <loc>/reference/show-Rcpp_SEMCpp-method.html</loc>
@@ -727,52 +748,13 @@
     <loc>/reference/simulateExampleData.html</loc>
   </url>
   <url>
-    <loc>/reference/smoothAdaptiveLASSOGradient.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothAdaptiveLASSOHessian.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothAdaptiveLASSOValue.html</loc>
-  </url>
-  <url>
     <loc>/reference/smoothAdaptiveLasso.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothCappedL1Value.html</loc>
   </url>
   <url>
     <loc>/reference/smoothElasticNet.html</loc>
   </url>
   <url>
-    <loc>/reference/smoothElasticNetGradient.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothElasticNetHessian.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothElasticNetValue.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothLASSOGradient.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothLASSOHessian.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothLASSOValue.html</loc>
-  </url>
-  <url>
     <loc>/reference/smoothLasso.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothLspValue.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothMcpValue.html</loc>
-  </url>
-  <url>
-    <loc>/reference/smoothScadValue.html</loc>
   </url>
   <url>
     <loc>/reference/summary-cvRegularizedSEM-method.html</loc>

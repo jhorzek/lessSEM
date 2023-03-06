@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,14 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/jhorzek/lessSEM/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -81,7 +88,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>General-Purpose-Optimization</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/jhorzek/lessSEM/blob/HEAD/vignettes/General-Purpose-Optimization.Rmd" class="external-link"><code>vignettes/General-Purpose-Optimization.Rmd</code></a></small>
       <div class="d-none name"><code>General-Purpose-Optimization.Rmd</code></div>
     </div>
 
@@ -191,7 +198,7 @@ intercept:</p>
 <span><span class="va">lambdas</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.1</span>,length.out <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
 <p>Now, we are ready to estimate the model:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">lessSEM</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
 <span><span class="va">l1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gpLasso.html">gpLasso</a></span><span class="op">(</span>par <span class="op">=</span> <span class="va">par</span>, </span>
 <span>              regularized <span class="op">=</span> <span class="va">regularized</span>, </span>
 <span>              fn <span class="op">=</span> <span class="va">sseFun</span>, </span>
@@ -254,9 +261,9 @@ gradients, this can result in faster estimation:</p>
 <span><span class="co">#&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003303777</span></span></code></pre>
 <p>Here is a short comparison of running both models 5 times each:</p>
 <p>Runtime in seconds without gradients:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.2893515 0.2759173 0.2746017 0.2737622 0.2745516</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.2936151 0.2855573 0.2864594 0.2882059 0.2918658</span></span></code></pre>
 <p>Runtime in seconds with gradients:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.02399015 0.02863860 0.02363658 0.02460742 0.02580047</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.02779579 0.02745748 0.03086901 0.03508329 0.02736592</span></span></code></pre>
 <p>Now, that’s quite a difference!</p>
 <p>Note that you can also pass a C++ function to gpLasso similar to the
 approach above:</p>
@@ -327,7 +334,7 @@ approach above:</p>
 <span><span class="co">#&gt; 5 0.000000000  0.000000000 0.0001769795 0.002036461  0.000000000 0.007970247</span></span>
 <span><span class="co">#&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003304510</span></span></code></pre>
 <p>The runtime in seconds with C++ is:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.02534795 0.02021194 0.01996326 0.02018714 0.02033544</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.02339554 0.02261019 0.02972651 0.02250576 0.02265143</span></span></code></pre>
 <p>Which is even lower than what we had before!</p>
 </div>
 <div class="section level2">
@@ -460,7 +467,9 @@ helps setting things up:</p>
 <span><span class="co">#&gt; // // [[Rcpp::depends(RcppArmadillo)]]</span></span>
 <span><span class="co">#&gt; // #include &lt;RcppArmadillo.h&gt;</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; // Dirk Eddelbuettel at</span></span>
 <span><span class="co">#&gt; // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/</span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; typedef double (*fitFunPtr)(const Rcpp::NumericVector&amp;, //parameters</span></span>
 <span><span class="co">#&gt;                 Rcpp::List&amp; //additional elements</span></span>
 <span><span class="co">#&gt; );</span></span>
@@ -545,6 +554,7 @@ functions:</p>
 <span><span class="st">// // [[Rcpp::depends(RcppArmadillo)]]</span></span>
 <span><span class="st">// #include &lt;RcppArmadillo.h&gt;</span></span>
 <span><span class="st"></span></span>
+<span><span class="st">// Dirk Eddelbuettel at</span></span>
 <span><span class="st">// https://gallery.rcpp.org/articles/passing-cpp-function-pointers/</span></span>
 <span><span class="st">typedef double (*fitFunPtr)(const Rcpp::NumericVector&amp;, //parameters</span></span>
 <span><span class="st">                Rcpp::List&amp; //additional elements</span></span>
@@ -613,7 +623,7 @@ end, use the <code>gpLassoCpp</code> function:</p>
 <span><span class="co">#&gt; 5 0.000000000  0.000000000 0.0001773114 0.002036028  0.000000000 0.007969742</span></span>
 <span><span class="co">#&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003303730</span></span></code></pre>
 <p>Benchmarking this approach results in:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.01577735 0.01567864 0.01552200 0.01528883 0.01555324</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.01805472 0.01747346 0.01729846 0.02295518 0.01747847</span></span></code></pre>
 <p>So, we have reduced our run time even more!</p>
 </div>
 </div>
@@ -640,7 +650,7 @@ the <a href="https://github.com/jhorzek/lessLM" class="external-link">lessLM</a>
 <span><span class="co">#&gt; [5,] 0.0001374354 0.002100692  0.000000000 0.008033475</span></span>
 <span><span class="co">#&gt; [6,] 0.0000000000 0.000000000  0.000000000 0.003352431</span></span></code></pre>
 <p>And the run times are even lower:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.002645731 0.001603842 0.001608372 0.001487017 0.001482248</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.002773285 0.001590729 0.001489162 0.001471043 0.001459360</span></span></code></pre>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

@@ -28,7 +28,7 @@ where \(\theta &amp;gt; 2\)."><meta property="og:image" content="/logo.svg"><!--
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,13 @@ where \(\theta &amp;gt; 2\)."><meta property="og:image" content="/logo.svg"><!--
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/jhorzek/lessSEM/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -66,7 +72,7 @@ where \(\theta &amp;gt; 2\)."><meta property="og:image" content="/logo.svg"><!--
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>gpScadCpp</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/jhorzek/lessSEM/blob/HEAD/R/gpOptimizationInterfaceCpp.R" class="external-link"><code>R/gpOptimizationInterfaceCpp.R</code></a></small>
       <div class="d-none name"><code>gpScadCpp.Rd</code></div>
     </div>
 
@@ -182,7 +188,7 @@ Trends in Optimization, 1(3), 123–231.</p></li>
 <span><span class="co"># (e.g., glmnet)</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.rcpp.org" class="external-link">Rcpp</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">lessSEM</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">linreg</span> <span class="op">&lt;-</span> <span class="st">'</span></span>
 <span><span class="st">// [[Rcpp::depends(RcppArmadillo)]]</span></span>
@@ -228,6 +234,7 @@ Trends in Optimization, 1(3), 123–231.</p></li>
 <span><span class="st">    return(gradients);</span></span>
 <span><span class="st">}</span></span>
 <span><span class="st"></span></span>
+<span><span class="st">// Dirk Eddelbuettel at</span></span>
 <span><span class="st">// https://gallery.rcpp.org/articles/passing-cpp-function-pointers/</span></span>
 <span><span class="st">typedef double (*fitFunPtr)(const Rcpp::NumericVector&amp;, //parameters</span></span>
 <span><span class="st">                Rcpp::List&amp; //additional elements</span></span>

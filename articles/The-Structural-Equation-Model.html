@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,14 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/jhorzek/lessSEM/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -81,14 +88,14 @@
       <img src="../logo.svg" class="logo" alt=""><h1>The-Structural-Equation-Model</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/jhorzek/lessSEM/blob/HEAD/vignettes/The-Structural-Equation-Model.Rmd" class="external-link"><code>vignettes/The-Structural-Equation-Model.Rmd</code></a></small>
       <div class="d-none name"><code>The-Structural-Equation-Model.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">lessSEM</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; Loading required package: lavaan</span></span>
 <span><span class="co">#&gt; This is lavaan 0.6-14</span></span>
 <span><span class="co">#&gt; lavaan is FREE software! Please report any bugs.</span></span></code></pre></div>
@@ -131,7 +138,7 @@ documentation of lavaan in the following:</p>
 function is not exported by lessSEM. That is, you <em>must</em> use the
 three colons as shown above to access this function!</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">lessSEM</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># won't work:</span></span>
 <span><span class="va">mySEM</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dot-SEMFromLavaan.html">.SEMFromLavaan</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span><span class="op">)</span></span>

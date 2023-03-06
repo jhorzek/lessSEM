@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,14 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/jhorzek/lessSEM/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -81,14 +88,14 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Parameter-transformations</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/jhorzek/lessSEM/blob/HEAD/vignettes/Parameter-transformations.Rmd" class="external-link"><code>vignettes/Parameter-transformations.Rmd</code></a></small>
       <div class="d-none name"><code>Parameter-transformations.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">lessSEM</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; Loading required package: lavaan</span></span>
 <span><span class="co">#&gt; This is lavaan 0.6-14</span></span>
 <span><span class="co">#&gt; lavaan is FREE software! Please report any bugs.</span></span></code></pre></div>
@@ -254,17 +261,17 @@ the penalty function:</p>
 <p>Let’s have a look at the parameter estimates:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lassoFit</span><span class="op">)</span><span class="op">@</span><span class="va">estimates</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">100</span>,<span class="fl">10</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a1"</span>, <span class="st">"b1"</span>, <span class="st">"c1"</span>, <span class="st">"delta_a2"</span>, <span class="st">"delta_b2"</span>, <span class="st">"delta_c2"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;             a1       b1       c1    delta_a2    delta_b2 delta_c2</span></span>
-<span><span class="co">#&gt;  [1,] 1.210973 1.167917 1.233987  0.00000000 0.000000000        0</span></span>
-<span><span class="co">#&gt;  [2,] 1.211087 1.166369 1.234012  0.00000000 0.002697893        0</span></span>
-<span><span class="co">#&gt;  [3,] 1.212569 1.150755 1.234643  0.00000000 0.030061810        0</span></span>
-<span><span class="co">#&gt;  [4,] 1.214346 1.135706 1.235561  0.00000000 0.057011496        0</span></span>
-<span><span class="co">#&gt;  [5,] 1.216417 1.121165 1.236776  0.00000000 0.083706587        0</span></span>
-<span><span class="co">#&gt;  [6,] 1.218770 1.107057 1.238262  0.00000000 0.110189007        0</span></span>
-<span><span class="co">#&gt;  [7,] 1.221411 1.093357 1.240041  0.00000000 0.136518096        0</span></span>
-<span><span class="co">#&gt;  [8,] 1.226621 1.080073 1.242027 -0.00396875 0.162494972        0</span></span>
-<span><span class="co">#&gt;  [9,] 1.246399 1.067703 1.244333 -0.03213194 0.186303618        0</span></span>
-<span><span class="co">#&gt; [10,] 1.266518 1.055795 1.247167 -0.06025881 0.210169907        0</span></span></code></pre></div>
+<span><span class="co">#&gt;             a1       b1       c1     delta_a2    delta_b2 delta_c2</span></span>
+<span><span class="co">#&gt;  [1,] 1.210958 1.167905 1.233965  0.000000000 0.000000000        0</span></span>
+<span><span class="co">#&gt;  [2,] 1.211086 1.166354 1.234022  0.000000000 0.002721191        0</span></span>
+<span><span class="co">#&gt;  [3,] 1.212583 1.150763 1.234648  0.000000000 0.030074766        0</span></span>
+<span><span class="co">#&gt;  [4,] 1.214365 1.135727 1.235582  0.000000000 0.056990269        0</span></span>
+<span><span class="co">#&gt;  [5,] 1.216418 1.121146 1.236774  0.000000000 0.083716168        0</span></span>
+<span><span class="co">#&gt;  [6,] 1.218764 1.107042 1.238259  0.000000000 0.110190895        0</span></span>
+<span><span class="co">#&gt;  [7,] 1.221404 1.093388 1.240032  0.000000000 0.136510671        0</span></span>
+<span><span class="co">#&gt;  [8,] 1.226646 1.080090 1.242048 -0.003972279 0.162482967        0</span></span>
+<span><span class="co">#&gt;  [9,] 1.246394 1.067714 1.244341 -0.032110399 0.186308834        0</span></span>
+<span><span class="co">#&gt; [10,] 1.266544 1.055813 1.247175 -0.060268897 0.210163836        0</span></span></code></pre></div>
 <p>Note that the differences between the parameters get smaller with
 larger <span class="math inline">\(\lambda\)</span> values. We can also
 plot the differences:</p>
@@ -286,37 +293,37 @@ best model using information criteria:</p>
 <span><span class="co">#&gt;  ----------- ----------- ----------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;  dem60~ind60 dem65~ind60 dem65~dem60     y1~~y5     y2~~y4     y3~~y7</span></span>
 <span><span class="co">#&gt;  =========== =========== =========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;       1.4534      0.5935      0.8659     0.5552     1.5948     0.7806</span></span>
+<span><span class="co">#&gt;       1.4535      0.5935      0.8659     0.5552     1.5948     0.7806</span></span>
 <span><span class="co">#&gt;                                                                              </span></span>
 <span><span class="co">#&gt;                                                                              </span></span>
 <span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;      y4~~y8     y6~~y8     x1~~x1     x2~~x2     x3~~x3     y1~~y1     y2~~y2</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;      0.6537     1.5350     0.0820     0.1177     0.4675     1.7929     7.3843</span></span>
+<span><span class="co">#&gt;      0.6537     1.5350     0.0820     0.1177     0.4675     1.7928     7.3844</span></span>
 <span><span class="co">#&gt;                                                                                </span></span>
 <span><span class="co">#&gt;                                                                                </span></span>
 <span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ------------</span></span>
 <span><span class="co">#&gt;      y3~~y3     y4~~y4     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ============</span></span>
-<span><span class="co">#&gt;      5.0175     3.4074     2.2857     4.8978     3.5510     3.4512       0.4480</span></span>
+<span><span class="co">#&gt;      5.0175     3.4075     2.2857     4.8978     3.5510     3.4512       0.4480</span></span>
 <span><span class="co">#&gt;                                                            </span></span>
 <span><span class="co">#&gt;                                                            </span></span>
 <span><span class="co">#&gt;  ------------ ------------ ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;  dem60~~dem60 dem65~~dem65   delta_a2   delta_b2   delta_c2</span></span>
 <span><span class="co">#&gt;  ============ ============ ========== ========== ==========</span></span>
-<span><span class="co">#&gt;        3.9408       0.2034          .          .          .</span></span></code></pre></div>
+<span><span class="co">#&gt;        3.9409       0.2034          .          .          .</span></span></code></pre></div>
 <p>Note that all differences have been zeroed – that is, a model with
 full measurement invariance did fit best.</p>
 <p>We can also access the transformed parameters:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">lassoFit</span><span class="op">@</span><span class="va">transformations</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      lambda alpha       a2       b2       c2</span></span>
-<span><span class="co">#&gt; 1 0.2411201     1 1.210973 1.167917 1.233987</span></span>
-<span><span class="co">#&gt; 2 0.2386846     1 1.210976 1.167915 1.233991</span></span>
-<span><span class="co">#&gt; 3 0.2362490     1 1.210981 1.167924 1.233993</span></span>
-<span><span class="co">#&gt; 4 0.2338134     1 1.210980 1.167928 1.233995</span></span>
-<span><span class="co">#&gt; 5 0.2313779     1 1.210980 1.167929 1.233994</span></span>
-<span><span class="co">#&gt; 6 0.2289423     1 1.210979 1.167928 1.233993</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 0.2410890     1 1.210958 1.167905 1.233965</span></span>
+<span><span class="co">#&gt; 2 0.2386538     1 1.210958 1.167911 1.233972</span></span>
+<span><span class="co">#&gt; 3 0.2362186     1 1.210970 1.167917 1.233978</span></span>
+<span><span class="co">#&gt; 4 0.2337833     1 1.210973 1.167921 1.233983</span></span>
+<span><span class="co">#&gt; 5 0.2313481     1 1.210973 1.167923 1.233985</span></span>
+<span><span class="co">#&gt; 6 0.2289128     1 1.210972 1.167924 1.233985</span></span></code></pre></div>
 <p>Limitation: Above, we did not take into account that the variables
 may have different scales; a thorough use of the method should scale the
 data first.</p>
@@ -423,7 +430,7 @@ changes over time (see also Ou et al., 2019 for regime switching
 models). With our regularization procedure, we want to detect if and
 when the process changes.</p>
 <p>We won’t go into the details of how to set up the model here, but you
-can find them in the source of this file (<a href="https://github.com/jhorzek/lessSEM/tree/main/vignettes/Parameter-transformations.Rmd" class="external-link">e.g.,
+can find them in the source of this file (<a href="https://github.com/jhorzek/lessSEM/blob/main/vignettes/Parameter-transformations.Rmd" class="external-link">e.g.,
 in GitHub</a>). We simulated a data set with 200 individuals measured at
 10 time points. The autoregressive effect <span class="math inline">\(a_t\)</span> changes at <span class="math inline">\(t=4\)</span> from <span class="math inline">\(.6\)</span> to <span class="math inline">\(.2\)</span>.</p>
 <p>The data looks as follows:</p>
@@ -763,6 +770,7 @@ parameters.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   </span></span>
 <span><span class="co">#&gt;   </span></span>
+<span><span class="co">#&gt;   // Dirk Eddelbuettel at</span></span>
 <span><span class="co">#&gt;   // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/</span></span>
 <span><span class="co">#&gt; typedef Rcpp::NumericVector (*transformationFunctionPtr)(Rcpp::NumericVector&amp;, //parameters</span></span>
 <span><span class="co">#&gt; Rcpp::List // transformationList</span></span>
