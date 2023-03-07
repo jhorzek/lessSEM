@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         r-version: ['release']
-        os: ['windows-latest'] # 'macOS-latest' -> add later on; running on macOS is more expensive
+        os: ['windows-latest', 'macOS-latest']
 
     steps:
       - uses: actions/checkout@v2
