@@ -8,7 +8,7 @@
 
 Some functions in the package allow users to compile user-specified functions 
 with Rcpp. These functions are compiled using `#include <RcppArmadillo.h>` which
-I could only get to work with Imports RcppArmadillo. Several notes refer to this
+I could only get to work with "Imports: RcppArmadillo". Several notes refer to this
 setup:
 
 ```
