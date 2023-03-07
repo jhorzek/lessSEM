@@ -328,7 +328,7 @@ supported. Mixed penalties for glmnet can be specified as follows:</p>
 <span><span class="co">#&gt;  ---------------------------- ||--|| ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2</span></span>
 <span><span class="co">#&gt;  ============================ ||--|| ========== ========== ==========</span></span>
-<span><span class="co">#&gt;                       11.0000 ||--||     2.1818     1.8188          .</span></span>
+<span><span class="co">#&gt;                       11.0000 ||--||     2.1817     1.8188          .</span></span>
 <span><span class="co">#&gt;                                                                              </span></span>
 <span><span class="co">#&gt;                                                                              </span></span>
 <span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
@@ -346,13 +346,13 @@ supported. Mixed penalties for glmnet can be specified as follows:</p>
 <span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;      y2~~y2     y3~~y3     y4~~y4     y1~~y1     y5~~y5     y6~~y6     y7~~y7</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;      6.4896     5.3399     2.8871     1.9419     2.3901     4.3429     3.5095</span></span>
+<span><span class="co">#&gt;      6.4895     5.3399     2.8872     1.9419     2.3901     4.3429     3.5096</span></span>
 <span><span class="co">#&gt;                                                   </span></span>
 <span><span class="co">#&gt;                                                   </span></span>
 <span><span class="co">#&gt;  ---------- ------------ ------------ ------------</span></span>
 <span><span class="co">#&gt;      y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65</span></span>
 <span><span class="co">#&gt;  ========== ============ ============ ============</span></span>
-<span><span class="co">#&gt;      2.9403       0.4482       3.8716       0.1149</span></span></code></pre></div>
+<span><span class="co">#&gt;      2.9403       0.4482       3.8718       0.1149</span></span></code></pre></div>
 <p>The <code>tuningParameterConfiguration</code> refers to the rows in
 the lambda, theta, and alpha matrices that resulted in the best fit:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -389,8 +389,8 @@ the lambda, theta, and alpha matrices that resulted in the best fit:</p>
 <span><span class="co">#&gt; dem65~~dem65 dem65~~dem65       none      0     0</span></span></code></pre></div>
 <p>Here is a short run-time comparison of ista and glmnet with the
 lasso-regularized model from above: Five repetitions using ista took
-1.415 seconds, while glmnet took 1.851 seconds. That is, if you can use
-glmnet with your model, we recommend that you do.</p>
+179.595 seconds, while glmnet took 2.924 seconds. That is, if you can
+use glmnet with your model, we recommend that you do.</p>
 </div>
 <div class="section level2">
 <h2 id="bibliography">Bibliography<a class="anchor" aria-label="anchor" href="#bibliography"></a>

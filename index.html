@@ -93,28 +93,106 @@
 <img src="logo.svg" class="logo" alt=""><h1 id="lesssem-">lessSEM <a class="anchor" aria-label="anchor" href="#lesssem-"></a>
 </h1>
 </div>
-<p><strong>lessSEM</strong> (<strong>l</strong>essSEM <strong>es</strong>timates <strong>s</strong>parse <strong>SEM</strong>) is an R package for regularized structural equation modeling (regularized SEM) with non-smooth penalty functions (e.g., lasso) building on <a href="https://github.com/yrosseel/lavaan" class="external-link"><strong>lavaan</strong></a>. <strong>lessSEM</strong> is heavily inspired by the <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> package and the <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a> packages that have similar functionality.</p>
+<p><strong>lessSEM</strong> (<strong>l</strong>essSEM <strong>es</strong>timates <strong>s</strong>parse <strong>SEM</strong>) is an R package for regularized structural equation modeling (regularized SEM) with non-smooth penalty functions (e.g., lasso) building on <a href="https://github.com/yrosseel/lavaan" class="external-link"><strong>lavaan</strong></a>. <strong>lessSEM</strong> is heavily inspired by the <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> package and the <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a> packages that have similar functionality. <strong>If you use lessSEM, please also cite <a href="https://github.com/Rjacobucci/regsem" class="external-link">regsem</a> and and <a href="https://github.com/psyphh/lslx" class="external-link">lslx</a>!</strong></p>
 <p>The objectives of <strong>lessSEM</strong> are to provide …</p>
 <ol style="list-style-type: decimal">
 <li>a flexible framework for regularizing SEM and</li>
 <li>optimizers for other SEM packages which can be used with an interface similar to <code>optim</code>.</li>
 </ol>
-<p><strong>Note</strong>: Please also check out the implementations of regularized SEM in the more mature R packages <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> and <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>. Finally, you may want to check out the julia package <a href="https://github.com/StructuralEquationModels/StructuralEquationModels.jl" class="external-link"><strong>StructuralEquationModels.jl</strong></a>.</p>
+<p><strong>Important</strong>: Please also check out the implementations of regularized SEM in the more mature R packages <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> and <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>. Finally, you may want to check out the julia package <a href="https://github.com/StructuralEquationModels/StructuralEquationModels.jl" class="external-link"><strong>StructuralEquationModels.jl</strong></a>.</p>
 <p>The following penalty functions are currently implemented in <strong>lessSEM</strong>:</p>
 <p><img src="reference/figures/penalty_functions.png"></p>
 <p>The column “penalty” refers to the name of the function call in the <strong>lessSEM</strong> package (e.g., lasso is called with the <code><a href="reference/lasso.html">lasso()</a></code> function). Smooth functions are called with <code>smoothLasso</code>, <code>smoothAdaptiveLasso</code>, and <code>smoothElasticNet</code>. These are only implemented for the comparison of exact and approximate optimization and should not be used. They will be marked as deprecated soon. The best model can be selected with the AIC or BIC. If you want to use cross-validation, use <code>cvLasso</code>, <code>cvAdaptiveLasso</code>, etc. instead (see, e.g., <code><a href="reference/cvLasso.html">?lessSEM::cvLasso</a></code>). The smooth versions are called <code>cvSmoothLasso</code>, etc.</p>
-<p>Currently, <strong>lessSEM</strong> has the following optimizers:</p>
-<ul>
-<li>(variants of) iterative shrinkage and thresholding (e.g., Beck &amp; Teboulle, 2009; Gong et al., 2013; Parikh &amp; Boyd, 2013); optimization of cappedL1, lsp, scad, and mcp is based on Gong et al. (2013)</li>
-<li>glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)</li>
-</ul>
-<p>These optimizers are implemented based on the <a href="https://github.com/jhorzek/regCtsem" class="external-link"><strong>regCtsem</strong></a> package. Most importantly, <strong>all optimizers in lessSEM are available for other packages.</strong> There are three ways to implement them which are documented in <code><a href="articles/General-Purpose-Optimization.html">vignette("General-Purpose-Optimization", package = "lessSEM")</a></code>. In short, these are:</p>
-<ol style="list-style-type: decimal">
-<li>using the R interface: All general purpose implementations of the functions are called with prefix “gp” (<code>gpLasso</code>, <code>gpScad</code>, …). More information and examples can be found in the documentation of these functions (e.g., <code><a href="reference/gpLasso.html">?lessSEM::gpLasso</a></code>, <code><a href="reference/gpAdaptiveLasso.html">?lessSEM::gpAdaptiveLasso</a></code>, <code><a href="reference/gpElasticNet.html">?lessSEM::gpElasticNet</a></code>). The interface is similar to the optim optimizers in R.</li>
-<li>using Rcpp, we can pass C++ function pointers to the general purpose optimizers <code>gpLassoCpp</code>, <code>gpScadCpp</code>, … (e.g., <code><a href="reference/gpLassoCpp.html">?lessSEM::gpLassoCpp</a></code>)</li>
-<li>All optimizers are implemented as C++ header-only files in <strong>lessSEM</strong>. Thus, they can be accessed from other packages using C++. The interface is similar to that of the <a href="https://ensmallen.org/" class="external-link"><strong>ensmallen</strong></a> library. We have implemented a simple example for elastic net regularization of linear regressions in the <a href="https://github.com/jhorzek/lessLM" class="external-link"><strong>lessLM</strong></a> package. You can also find more details on the general design of the optimizer interface in <code><a href="articles/The-optimizer-interface.html">vignette("The-optimizer-interface", package = "lessSEM")</a></code>.</li>
-</ol>
-<p>Identical to <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a>, <strong>lessSEM</strong> is specified using a model built in <a href="https://github.com/yrosseel/lavaan" class="external-link"><strong>lavaan</strong></a>. <strong>lessSEM</strong> can handle missing data by means of full information maximum likelihood estimation and allows for equality constraints on parameters. You may, however, also want to check out <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> and <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a> which offer some features that are still missing in <strong>lessSEM</strong>. A distinct feature of <strong>lessSEM</strong> are parameter transformations (see below for an example). Additionally, <strong>lessSEM</strong> allows for mixed penalties. Finally, <strong>lessSEM</strong> can make use of multiple cores.</p>
+<div class="section level2">
+<h2 id="regsem-lslx-and-lesssem">
+<a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a>, <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>, and <strong>lessSEM</strong>
+<a class="anchor" aria-label="anchor" href="#regsem-lslx-and-lesssem"></a>
+</h2>
+<p>The packages <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a>, <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>, and <strong>lessSEM</strong> can all be used to regularize basic SEM. In fact, as outlined above, <strong>lessSEM</strong> is heavily inspired by <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> and <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>. However, the packages differ in their targets: The objective of <strong>lessSEM</strong> is not to replace the more major packages <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> and <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>. Instead, our objective is to provide method developers with a flexible framework for regularized SEM. The following shows an incomplete comparison of some features implemented in the three packages:</p>
+<table class="table">
+<colgroup>
+<col width="36%">
+<col width="19%">
+<col width="24%">
+<col width="19%">
+</colgroup>
+<thead><tr class="header">
+<th></th>
+<th><strong>regsem</strong></th>
+<th><strong>lslx</strong></th>
+<th><strong>lessSEM</strong></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Model specification</td>
+<td>based on lavaan</td>
+<td>similar to lavaan</td>
+<td>based on lavaan</td>
+</tr>
+<tr class="even">
+<td>Maximum likelihood estimation</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Least squares estimation</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Confidence Intervals</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Missing Data</td>
+<td>FIML</td>
+<td>Auxiliary Variables</td>
+<td>FIML</td>
+</tr>
+<tr class="even">
+<td>Multi-group models</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Stability selection</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Mixed penalties</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Equality constraints</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Parameter transformations</td>
+<td>diff_lasso</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Definition variables</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Because <strong>lessSEM</strong> is fairly new, we currently recommend using <strong>lslx</strong> for cases that are covered by both, <strong>lessSEM</strong> and <strong>lslx</strong>.</p>
+</div>
 </div>
 <div class="section level1">
 <h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -339,6 +417,21 @@
 </div>
 </div>
 <div class="section level1">
+<h1 id="optimizers">Optimizers<a class="anchor" aria-label="anchor" href="#optimizers"></a>
+</h1>
+<p>Currently, <strong>lessSEM</strong> has the following optimizers:</p>
+<ul>
+<li>(variants of) iterative shrinkage and thresholding (e.g., Beck &amp; Teboulle, 2009; Gong et al., 2013; Parikh &amp; Boyd, 2013); optimization of cappedL1, lsp, scad, and mcp is based on Gong et al. (2013)</li>
+<li>glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)</li>
+</ul>
+<p>These optimizers are implemented based on the <a href="https://github.com/jhorzek/regCtsem" class="external-link"><strong>regCtsem</strong></a> package. Most importantly, <strong>all optimizers in lessSEM are available for other packages.</strong> There are three ways to implement them which are documented in <code><a href="articles/General-Purpose-Optimization.html">vignette("General-Purpose-Optimization", package = "lessSEM")</a></code>. In short, these are:</p>
+<ol style="list-style-type: decimal">
+<li>using the R interface: All general purpose implementations of the functions are called with prefix “gp” (<code>gpLasso</code>, <code>gpScad</code>, …). More information and examples can be found in the documentation of these functions (e.g., <code><a href="reference/gpLasso.html">?lessSEM::gpLasso</a></code>, <code><a href="reference/gpAdaptiveLasso.html">?lessSEM::gpAdaptiveLasso</a></code>, <code><a href="reference/gpElasticNet.html">?lessSEM::gpElasticNet</a></code>). The interface is similar to the optim optimizers in R.</li>
+<li>using Rcpp, we can pass C++ function pointers to the general purpose optimizers <code>gpLassoCpp</code>, <code>gpScadCpp</code>, … (e.g., <code><a href="reference/gpLassoCpp.html">?lessSEM::gpLassoCpp</a></code>)</li>
+<li>All optimizers are implemented as C++ header-only files in <strong>lessSEM</strong>. Thus, they can be accessed from other packages using C++. The interface is similar to that of the <a href="https://ensmallen.org/" class="external-link"><strong>ensmallen</strong></a> library. We have implemented a simple example for elastic net regularization of linear regressions in the <a href="https://github.com/jhorzek/lessLM" class="external-link"><strong>lessLM</strong></a> package. You can also find more details on the general design of the optimizer interface in <code><a href="articles/The-optimizer-interface.html">vignette("The-optimizer-interface", package = "lessSEM")</a></code>.</li>
+</ol>
+</div>
+<div class="section level1">
 <h1 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h1>
 <div class="section level2">
@@ -346,7 +439,7 @@
 </h2>
 <ul>
 <li>
-<a href="https://github.com/yrosseel/lavaan" class="external-link">lavaan</a> Rosseel, Y. (2012). lavaan: An R Package for Structural Equation Modeling. Journal of Statistical Software, 48(2), 1–36. <a href="https://doi.org/10.18637/jss.v048.i02" class="external-link uri">https://doi.org/10.18637/jss.v048.i02</a>
+<a href="https://github.com/yrosseel/lavaan" class="external-link">lavaan</a> Rosseel, Y. (2012). lavaan: An R Package for Structural Equation Modeling. Journal of Statistical Software, 48(2), 1-36. <a href="https://doi.org/10.18637/jss.v048.i02" class="external-link uri">https://doi.org/10.18637/jss.v048.i02</a>
 </li>
 <li>
 <a href="https://github.com/Rjacobucci/regsem" class="external-link">regsem</a>: Jacobucci, R. (2017). regsem: Regularized Structural Equation Modeling. ArXiv:1703.08489 [Stat]. <a href="https://arxiv.org/abs/1703.08489" class="external-link uri">https://arxiv.org/abs/1703.08489</a>
@@ -462,7 +555,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Jannik H. Orzek <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-3123-2248" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Jannik H. Orzek <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0002-3123-2248" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>

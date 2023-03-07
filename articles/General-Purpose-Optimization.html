@@ -261,9 +261,9 @@ gradients, this can result in faster estimation:</p>
 <span><span class="co">#&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003303777</span></span></code></pre>
 <p>Here is a short comparison of running both models 5 times each:</p>
 <p>Runtime in seconds without gradients:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.2936151 0.2855573 0.2864594 0.2882059 0.2918658</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.2913232 0.2728541 0.2716427 0.2724802 0.2724946</span></span></code></pre>
 <p>Runtime in seconds with gradients:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.02779579 0.02745748 0.03086901 0.03508329 0.02736592</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.02408624 0.02362585 0.02487636 0.03003144 0.02347445</span></span></code></pre>
 <p>Now, that’s quite a difference!</p>
 <p>Note that you can also pass a C++ function to gpLasso similar to the
 approach above:</p>
@@ -334,7 +334,7 @@ approach above:</p>
 <span><span class="co">#&gt; 5 0.000000000  0.000000000 0.0001769795 0.002036461  0.000000000 0.007970247</span></span>
 <span><span class="co">#&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003304510</span></span></code></pre>
 <p>The runtime in seconds with C++ is:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.02339554 0.02261019 0.02972651 0.02250576 0.02265143</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.02098274 0.02046251 0.02067590 0.02634645 0.02035904</span></span></code></pre>
 <p>Which is even lower than what we had before!</p>
 </div>
 <div class="section level2">
@@ -623,7 +623,7 @@ end, use the <code>gpLassoCpp</code> function:</p>
 <span><span class="co">#&gt; 5 0.000000000  0.000000000 0.0001773114 0.002036028  0.000000000 0.007969742</span></span>
 <span><span class="co">#&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003303730</span></span></code></pre>
 <p>Benchmarking this approach results in:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.01805472 0.01747346 0.01729846 0.02295518 0.01747847</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.01594949 0.01577759 0.01581883 0.01601601 0.02000070</span></span></code></pre>
 <p>So, we have reduced our run time even more!</p>
 </div>
 </div>
@@ -650,7 +650,7 @@ the <a href="https://github.com/jhorzek/lessLM" class="external-link">lessLM</a>
 <span><span class="co">#&gt; [5,] 0.0001374354 0.002100692  0.000000000 0.008033475</span></span>
 <span><span class="co">#&gt; [6,] 0.0000000000 0.000000000  0.000000000 0.003352431</span></span></code></pre>
 <p>And the run times are even lower:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.002773285 0.001590729 0.001489162 0.001471043 0.001459360</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.002654314 0.001626730 0.001687527 0.001690149 0.001587391</span></span></code></pre>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
