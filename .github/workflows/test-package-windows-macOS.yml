@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: macos_release
-          path: D:/a/lessSEM/lessSEM_*.tgz       
+          path: /Users/runner/work/lessSEM/lessSEM_*.tgz       
       - name: Check
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
