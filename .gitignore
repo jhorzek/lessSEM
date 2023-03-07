@@ -16,4 +16,5 @@ docs
 tests/testthat/*.pdf
 seafile-ignore.txt
 vignettes/.*
+^CRAN-SUBMISSION$
 !.gitignore

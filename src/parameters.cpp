@@ -31,7 +31,7 @@ void parameters::initialize(Rcpp::StringVector label_,
       
       parameterMap[currentLabel].location = Rcpp::as< std::string >(location_.at(i));
       
-      if((row_.at(i) == col_.at(i)) & (location_.at(i) == "Smatrix")){
+      if((row_.at(i) == col_.at(i)) && (location_.at(i) == "Smatrix")){
         parameterMap[currentLabel].isVariance = true;
       }else{
         parameterMap[currentLabel].isVariance = false;

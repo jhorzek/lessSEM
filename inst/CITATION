@@ -3,9 +3,7 @@ citHeader("To cite lessSEM in publications, please cite the original publication
 bibentry(
   bibtype  = "Manual",
   title    = "lessSEM: Non-Smooth Regularization for Structural Equation Models",
-  author   = c(person(c("Jannik H."), "Orzek"),
-               person(c("Manuel"), "Arnold"),
-               person(("Manuel C."), "Voelkle")),
+  author   = c(person(c("Jannik H."), "Orzek")),
   year     = "2023",
   url      = "https://github.com/jhorzek/lessSEM",
   note     = "R package version 1.4",

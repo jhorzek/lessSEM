@@ -34,7 +34,7 @@ void derivativeElements::addDerivativeElement(std::string label_,
                                               arma::mat positionMatrix_){
   
   for(unsigned int i = 0; i < uniqueLabels.size(); i++){
-    if((uniqueLabels.at(i).compare(label_) == 0) & wasInitialized.at(i)){
+    if((uniqueLabels.at(i).compare(label_) == 0) && wasInitialized.at(i)){
       Rcpp::stop("The label passed to addDerivativeElement is already present in the vector uniqueLabels");
     }else if((uniqueLabels.at(i).compare(label_) == 0)){
       wasInitialized.at(i) = true;
