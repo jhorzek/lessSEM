@@ -12,7 +12,6 @@ arma::rowvec gradientsByGroup(const SEMCpp& SEM, bool raw){
   
   const int numberOfMissingnessPatterns = SEM.data.nGroups;
   const std::vector<std::string>& uniqueParameterLabels = SEM.derivElements.uniqueLabels;
-  const std::vector<std::string>& uniqueLocations = SEM.derivElements.uniqueLocations;
   
   const int nParameters = uniqueParameterLabels.size();
   

@@ -188,7 +188,6 @@ public:
       Rcpp::stop("lambda must be either of size 1 or of the same length as the weights.");
     }
     
-    lessSEM::proximalOperatorLasso proximalOperatorLasso_;
     lessSEM::penaltyLASSOGlmnet penalty_;
     lessSEM::penaltyRidgeGlmnet smoothPenalty_;
     

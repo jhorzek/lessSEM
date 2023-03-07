@@ -374,7 +374,7 @@ inline lessSEM::fitResults glmnet(model& model_,
   // prepare Hessian elements
   arma::mat Hessian_k(startingValues.n_elem,startingValues.n_elem, arma::fill::zeros), 
   Hessian_kMinus1(startingValues.n_elem,startingValues.n_elem, arma::fill::zeros);
-  if((control_.initialHessian.n_cols == 1) & (control_.initialHessian.n_rows == 1)){
+  if((control_.initialHessian.n_cols == 1) && (control_.initialHessian.n_rows == 1)){
     // Hessian comes from default initializer and has to be redefined
     double hessianValue = control_.initialHessian(0,0);
     Hessian_k.diag().fill(hessianValue);
