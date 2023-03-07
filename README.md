@@ -9,7 +9,9 @@ with non-smooth penalty functions (e.g., lasso) building on
 [**lavaan**](https://github.com/yrosseel/lavaan). **lessSEM** is heavily
 inspired by the [**regsem**](https://github.com/Rjacobucci/regsem)
 package and the [**lslx**](https://github.com/psyphh/lslx) packages that
-have similar functionality.
+have similar functionality. **If you use lessSEM, please also cite
+[regsem](https://github.com/Rjacobucci/regsem) and and
+[lslx](https://github.com/psyphh/lslx)!**
 
 The objectives of **lessSEM** are to provide …
 
@@ -17,8 +19,8 @@ The objectives of **lessSEM** are to provide …
 2.  optimizers for other SEM packages which can be used with an
     interface similar to `optim`.
 
-**Note**: Please also check out the implementations of regularized SEM
-in the more mature R packages
+**Important**: Please also check out the implementations of regularized
+SEM in the more mature R packages
 [**regsem**](https://github.com/Rjacobucci/regsem) and
 [**lslx**](https://github.com/psyphh/lslx). Finally, you may want to
 check out the julia package
@@ -39,51 +41,37 @@ or BIC. If you want to use cross-validation, use `cvLasso`,
 `cvAdaptiveLasso`, etc. instead (see, e.g., `?lessSEM::cvLasso`). The
 smooth versions are called `cvSmoothLasso`, etc.
 
-Currently, **lessSEM** has the following optimizers:
+## [**regsem**](https://github.com/Rjacobucci/regsem), [**lslx**](https://github.com/psyphh/lslx), and **lessSEM**
 
-- (variants of) iterative shrinkage and thresholding (e.g., Beck &
-  Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013); optimization
-  of cappedL1, lsp, scad, and mcp is based on Gong et al. (2013)
-- glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
-
-These optimizers are implemented based on the
-[**regCtsem**](https://github.com/jhorzek/regCtsem) package. Most
-importantly, **all optimizers in lessSEM are available for other
-packages.** There are three ways to implement them which are documented
-in `vignette("General-Purpose-Optimization", package = "lessSEM")`. In
-short, these are:
-
-1.  using the R interface: All general purpose implementations of the
-    functions are called with prefix “gp” (`gpLasso`, `gpScad`, …). More
-    information and examples can be found in the documentation of these
-    functions (e.g., `?lessSEM::gpLasso`, `?lessSEM::gpAdaptiveLasso`,
-    `?lessSEM::gpElasticNet`). The interface is similar to the optim
-    optimizers in R.
-2.  using Rcpp, we can pass C++ function pointers to the general purpose
-    optimizers `gpLassoCpp`, `gpScadCpp`, … (e.g.,
-    `?lessSEM::gpLassoCpp`)
-3.  All optimizers are implemented as C++ header-only files in
-    **lessSEM**. Thus, they can be accessed from other packages using
-    C++. The interface is similar to that of the
-    [**ensmallen**](https://ensmallen.org/) library. We have implemented
-    a simple example for elastic net regularization of linear
-    regressions in the [**lessLM**](https://github.com/jhorzek/lessLM)
-    package. You can also find more details on the general design of the
-    optimizer interface in
-    `vignette("The-optimizer-interface", package = "lessSEM")`.
-
-Identical to [**regsem**](https://github.com/Rjacobucci/regsem),
-**lessSEM** is specified using a model built in
-[**lavaan**](https://github.com/yrosseel/lavaan). **lessSEM** can handle
-missing data by means of full information maximum likelihood estimation
-and allows for equality constraints on parameters. You may, however,
-also want to check out
+The packages [**regsem**](https://github.com/Rjacobucci/regsem),
+[**lslx**](https://github.com/psyphh/lslx), and **lessSEM** can all be
+used to regularize basic SEM. In fact, as outlined above, **lessSEM** is
+heavily inspired by [**regsem**](https://github.com/Rjacobucci/regsem)
+and [**lslx**](https://github.com/psyphh/lslx). However, the packages
+differ in their targets: The objective of **lessSEM** is not to replace
+the more major packages
 [**regsem**](https://github.com/Rjacobucci/regsem) and
-[**lslx**](https://github.com/psyphh/lslx) which offer some features
-that are still missing in **lessSEM**. A distinct feature of **lessSEM**
-are parameter transformations (see below for an example). Additionally,
-**lessSEM** allows for mixed penalties. Finally, **lessSEM** can make
-use of multiple cores.
+[**lslx**](https://github.com/psyphh/lslx). Instead, our objective is to
+provide method developers with a flexible framework for regularized SEM.
+The following shows an incomplete comparison of some features
+implemented in the three packages:
+
+|                               | **regsem**      | **lslx**            | **lessSEM**     |
+|-------------------------------|-----------------|---------------------|-----------------|
+| Model specification           | based on lavaan | similar to lavaan   | based on lavaan |
+| Maximum likelihood estimation | Yes             | Yes                 | Yes             |
+| Least squares estimation      | No              | Yes                 | No              |
+| Confidence Intervals          | No              | Yes                 | No              |
+| Missing Data                  | FIML            | Auxiliary Variables | FIML            |
+| Multi-group models            | No              | Yes                 | Yes             |
+| Stability selection           | Yes             | No                  | No              |
+| Mixed penalties               | No              | No                  | Yes             |
+| Equality constraints          | Yes             | No                  | Yes             |
+| Parameter transformations     | diff_lasso      | No                  | Yes             |
+| Definition variables          | No              | No                  | Yes             |
+
+Because **lessSEM** is fairly new, we currently recommend using **lslx**
+for cases that are covered by both, **lessSEM** and **lslx**.
 
 # Installation
 
@@ -355,13 +343,48 @@ The best model according to the BIC can be extracted with:
 coef(fitMp, criterion = "BIC")
 ```
 
+# Optimizers
+
+Currently, **lessSEM** has the following optimizers:
+
+- (variants of) iterative shrinkage and thresholding (e.g., Beck &
+  Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013); optimization
+  of cappedL1, lsp, scad, and mcp is based on Gong et al. (2013)
+- glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
+
+These optimizers are implemented based on the
+[**regCtsem**](https://github.com/jhorzek/regCtsem) package. Most
+importantly, **all optimizers in lessSEM are available for other
+packages.** There are three ways to implement them which are documented
+in `vignette("General-Purpose-Optimization", package = "lessSEM")`. In
+short, these are:
+
+1.  using the R interface: All general purpose implementations of the
+    functions are called with prefix “gp” (`gpLasso`, `gpScad`, …). More
+    information and examples can be found in the documentation of these
+    functions (e.g., `?lessSEM::gpLasso`, `?lessSEM::gpAdaptiveLasso`,
+    `?lessSEM::gpElasticNet`). The interface is similar to the optim
+    optimizers in R.
+2.  using Rcpp, we can pass C++ function pointers to the general purpose
+    optimizers `gpLassoCpp`, `gpScadCpp`, … (e.g.,
+    `?lessSEM::gpLassoCpp`)
+3.  All optimizers are implemented as C++ header-only files in
+    **lessSEM**. Thus, they can be accessed from other packages using
+    C++. The interface is similar to that of the
+    [**ensmallen**](https://ensmallen.org/) library. We have implemented
+    a simple example for elastic net regularization of linear
+    regressions in the [**lessLM**](https://github.com/jhorzek/lessLM)
+    package. You can also find more details on the general design of the
+    optimizer interface in
+    `vignette("The-optimizer-interface", package = "lessSEM")`.
+
 # References
 
 ## R - Packages / Software
 
 - [lavaan](https://github.com/yrosseel/lavaan) Rosseel, Y. (2012).
   lavaan: An R Package for Structural Equation Modeling. Journal of
-  Statistical Software, 48(2), 1–36.
+  Statistical Software, 48(2), 1-36.
   <https://doi.org/10.18637/jss.v048.i02>
 - [regsem](https://github.com/Rjacobucci/regsem): Jacobucci, R. (2017).
   regsem: Regularized Structural Equation Modeling. ArXiv:1703.08489
@@ -370,8 +393,8 @@ coef(fitMp, criterion = "BIC")
   Semi-confirmatory structural equation modeling via penalized
   likelihood. Journal of Statistical Software, 93(7).
   <https://doi.org/10.18637/jss.v093.i07>
-- [fasta](https://CRAN.R-project.org/package=fasta):
-  Another implementation of the fista algorithm (Beck & Teboulle, 2009).
+- [fasta](https://CRAN.R-project.org/package=fasta): Another
+  implementation of the fista algorithm (Beck & Teboulle, 2009).
 - [ensmallen](https://ensmallen.org/): Curtin, R. R., Edel, M.,
   Prabhu, R. G., Basak, S., Lou, Z., & Sanderson, C. (2021). The
   ensmallen library for ﬂexible numerical optimization. Journal of

@@ -184,8 +184,8 @@ end_glmnet <- Sys.time()
 ```
 
 Here is a short run-time comparison of ista and glmnet with the lasso-regularized 
-model from above: Five repetitions using ista took `r round(difftime(end_ista, start_ista),3)` seconds,
-while glmnet took `r round(difftime(end_glmnet, start_glmnet),3)` seconds. That is, if you 
+model from above: Five repetitions using ista took `r round(difftime(end_ista, start_ista, units = "secs"),3)` seconds,
+while glmnet took `r round(difftime(end_glmnet, start_glmnet, units = "secs"),3)` seconds. That is, if you 
 can use glmnet with your model, we recommend that you do.
 
 ## Bibliography
