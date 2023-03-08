@@ -188,7 +188,8 @@ lavaan2lslxLabels <- function(lavaanModel){
 
 #' lessSEM2Lavaan
 #' 
-#' Creates a lavaan model object from lessSEM (only if possible).
+#' Creates a lavaan model object from lessSEM (only if possible). Pass either
+#' a criterion or a combination of lambda, alpha, and theta.
 #' 
 #' @param regularizedSEM object created with lessSEM
 #' @param criterion criterion used for model selection. Currently supported are
@@ -223,6 +224,13 @@ lavaan2lslxLabels <- function(lavaanModel){
 #'                      regularized = paste0("l", 11:15), 
 #'                      lambdas = seq(0,1,.1))
 #' 
+#' # using criterion
+#' lessSEM2Lavaan(regularizedSEM = regularized, 
+#'                criterion = "AIC")
+#'                
+#' # using tuning parameters (note: we only have to specify the tuning
+#' # parameters that are actually used by the penalty function. In case
+#' # of lasso, this is lambda):
 #' lessSEM2Lavaan(regularizedSEM = regularized, 
 #'                lambda = 1)
 #' @return lavaan model
