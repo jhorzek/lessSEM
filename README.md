@@ -264,19 +264,11 @@ some bugs. Please be aware of that when using these features.
 ## From **lessSEM** to **lavaan**
 
 **lessSEM** supports exporting specific models to **lavaan**. This can
-be very useful when plotting the final model. In our case, the best
-model is given by:
-
-``` r
-lambdaBest <- coef(lsem, criterion = "BIC")@tuningParameters$lambda 
-```
-
-We can get the **lavaan** model with the parameters corresponding to
-those of the regularized model with `lambda = lambdaBest` as follows:
+be very useful when plotting the final model.
 
 ``` r
 lavaanModel <- lessSEM2Lavaan(regularizedSEM = lsem, 
-                              lambda = lambdaBest)
+                              criterion = "BIC")
 ```
 
 The result can be plotted with, for instance,
