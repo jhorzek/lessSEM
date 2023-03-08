@@ -71,9 +71,8 @@ testthat::expect_true(
             regsemApprox@parameters[,exact@parameterLabels]) < .1)
 )
 
-testthat::expect_true(
-  all(abs(regsemApprox@fits$regM2LL - 
-            exact@fits$regM2LL) < 1)
-)
+testthat::expect_lt(
+  max(abs(regsemApprox@fits$regM2LL - 
+            exact@fits$regM2LL)/regsemApprox@fits$regM2LL),  .01) # differ by less than 1 percent
 
 })

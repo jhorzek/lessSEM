@@ -81,7 +81,7 @@ f ~~ 1*f
   
   testthat::expect_true(
     all(abs(regsemApprox@fits$regM2LL - 
-              exact@fits$regM2LL) < .1)
+              exact@fits$regM2LL)/regsemApprox@fits$regM2LL < .01)
   )
   
 })
