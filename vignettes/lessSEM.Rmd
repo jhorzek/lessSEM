@@ -457,7 +457,7 @@ c2 = c1 + delta_c2;
 
 Next, we have to pass the `transformations` variable to the penalty function:
 
-```{r, include=FALSE}
+```{r, eval=FALSE}
 lassoFit <- lasso(lavaanModel = lavaanFit, 
                   regularized = c("delta_a2", "delta_b2", "delta_c2"),# we want to regularize 
                   # the differences between the parameters
