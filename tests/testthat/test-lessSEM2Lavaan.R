@@ -60,4 +60,8 @@ test_that("testing translation from lessSEM to lavaan", {
         TRUE)
     }
   }
+  
+  testthat::expect_equal(is(lessSEM2Lavaan(regularizedSEM = rsem, criterion = "AIC"), "lavaan"), TRUE)
+  
+  testthat::expect_equal(is(try(lessSEM2Lavaan(regularizedSEM = rsem, criterion = "GAIC"), silent = TRUE), "try-error"), TRUE)
 })

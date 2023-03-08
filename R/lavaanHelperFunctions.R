@@ -188,10 +188,14 @@ lavaan2lslxLabels <- function(lavaanModel){
 
 #' lessSEM2Lavaan
 #' 
-#' Creates a lavaan model object from lessSEM (only if possible).
+#' Creates a lavaan model object from lessSEM (only if possible). Pass either
+#' a criterion or a combination of lambda, alpha, and theta.
 #' 
 #' @param regularizedSEM object created with lessSEM
+#' @param criterion criterion used for model selection. Currently supported are
+#' "AIC" or "BIC"
 #' @param lambda value for tuning parameter lambda
+#' @param alpha value for tuning parameter alpha
 #' @param theta value for tuning parameter theta
 #' @import lavaan
 #' @examples 
@@ -220,13 +224,41 @@ lavaan2lslxLabels <- function(lavaanModel){
 #'                      regularized = paste0("l", 11:15), 
 #'                      lambdas = seq(0,1,.1))
 #' 
+#' # using criterion
+#' lessSEM2Lavaan(regularizedSEM = regularized, 
+#'                criterion = "AIC")
+#'                
+#' # using tuning parameters (note: we only have to specify the tuning
+#' # parameters that are actually used by the penalty function. In case
+#' # of lasso, this is lambda):
 #' lessSEM2Lavaan(regularizedSEM = regularized, 
 #'                lambda = 1)
 #' @return lavaan model
-lessSEM2Lavaan <- function(regularizedSEM, lambda, theta = NULL){
+lessSEM2Lavaan <- function(regularizedSEM, criterion = NULL, lambda = NULL, alpha = NULL, theta = NULL){
+  
+  if(is.null(criterion) & is.null(lambda) & is.null(alpha) & is.null(theta))
+    stop("Either specify a criterion or lambda, alpha, and theta.")
+  
+  if(!is.null(criterion)){
+    
+    bestEstimates <- coef(regularizedSEM, criterion = criterion)
+    lambda <- bestEstimates@tuningParameters$lambda
+    alpha <- bestEstimates@tuningParameters$alpha
+    theta <- bestEstimates@tuningParameters$theta
+    
+  }
+  
   if("theta" %in% colnames(regularizedSEM@fits) &
-     is.null(theta))
-    stop("Your model uses tuning parameter theta, but no theta value was specified")
+     is.null(theta)){
+    if(length(unique(regularizedSEM@fits$theta)) != 1)
+      stop("Your model uses tuning parameter theta, but no theta value was specified")
+  }
+  
+  if("alpha" %in% colnames(regularizedSEM@fits) &
+     is.null(theta)){
+    if(length(unique(regularizedSEM@fits$alpha)) != 1)
+      stop("Your model uses tuning parameter alpha, but no alpha value was specified")
+  }
   
   if(!any(regularizedSEM@fits$lambda == lambda))
     stop("Could not find the specified lambda in your model.")
