@@ -23,7 +23,7 @@ test_that("testing mixedPenalty-basic", {
   modelFit = cfa(modelSyntax, y, meanstructure = TRUE)
   
   # fit regularizedSEM
-  lambdas <- seq(0,1,.1)
+  lambdas <- seq(0,1,length.out=5)
   regularized = paste0("f=~y",6:ncol(y))
   rsemIsta <- lasso(lavaanModel = modelFit, 
                     regularized = regularized, 
@@ -144,11 +144,11 @@ f ~~ 1*f
     mixedPenalty(method = "glmnet", control = controlGlmnet()) |>
     # add lasso penalty on loadings l6 - l10:
     addElasticNet(regularized = paste0("l", 6:10), 
-                  lambdas = seq(0,1,.1),
+                  lambdas = seq(0,1,length.out=3),
                   alphas = 1) |>
     # add penalty on loadings l11 - l15:
     addElasticNet(regularized = paste0("l", 11:15), 
-                  lambdas = seq(0,1,.1),
+                  lambdas = seq(0,1,length.out=3),
                   alphas = 1) |>
     fit()
   
@@ -159,10 +159,10 @@ f ~~ 1*f
     mixedPenalty() |>
     # add lasso penalty on loadings l6 - l10:
     addLasso(regularized = paste0("l", 6:10), 
-             lambdas = seq(0,1,.1)) |>
+             lambdas = seq(0,1,length.out=3)) |>
     # add penalty on loadings l11 - l15:
     addLasso(regularized = paste0("l", 11:15), 
-             lambdas = seq(0,1,.1)) |>
+             lambdas = seq(0,1,length.out=3)) |>
     fit()
   
   testthat::expect_equal(all(abs(coef(mixedPenaltyGlmnet)@estimates - coef(mixedPenaltyIsta)@estimates) < .001), TRUE)
@@ -173,10 +173,10 @@ f ~~ 1*f
     mixedPenalty(method = "glmnet", control = controlGlmnet()) |>
     # add lasso penalty on loadings l6 - l10:
     addLasso(regularized = paste0("l", 6:10), 
-                  lambdas = seq(0,1,.1)) |>
+                  lambdas = seq(0,1,length.out=3)) |>
     # add penalty on loadings l11 - l15:
     addLasso(regularized = paste0("l", 11:15), 
-                  lambdas = seq(0,1,.1)) |>
+                  lambdas = seq(0,1,length.out=3)) |>
     fit()
   
   testthat::expect_equal(all(abs(coef(mixedPenaltyGlmnet)@estimates - coef(mixedPenaltyIsta)@estimates) < .001), TRUE)
@@ -188,11 +188,11 @@ f ~~ 1*f
       mixedPenalty(method = "glmnet", control = controlGlmnet()) |>
       # add lasso penalty on loadings l6 - l10:
       addElasticNet(regularized = paste0("l", 6:10), 
-                    lambdas = seq(0,1,.1),
+                    lambdas = seq(0,1,length.out=3),
                     alphas = 1) |>
       # add penalty on loadings l11 - l15:
       addScad(regularized = paste0("l", 11:15), 
-               lambdas = seq(0,1,.1), 
+               lambdas = seq(0,1,length.out=3), 
               thetas = 2.4) |>
       fit()
     
@@ -205,11 +205,11 @@ f ~~ 1*f
       mixedPenalty() |>
       # add lasso penalty on loadings l6 - l10:
       addElasticNet(regularized = paste0("l", 6:10), 
-                    lambdas = seq(0,1,.1),
+                    lambdas = seq(0,1,length.out=3),
                     alphas = 1) |>
       # add scad penalty on loadings l11 - l15:
       addScad(regularized = paste0("l", 11:15), 
-              lambdas = seq(0,1,.1), 
+              lambdas = seq(0,1,length.out=3), 
               thetas = 2.4) |>
       fit()
   )

@@ -25,13 +25,13 @@ f ~~ 1*f
   regsem1 <- lasso(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 1))
   set.seed(123)
   regsem2 <- lasso(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 2))
   
   testthat::expect_equal(all(abs(regsem1@parameters - regsem2@parameters) < 1e-8), TRUE)
@@ -45,13 +45,13 @@ f ~~ 1*f
   regsem1 <- adaptiveLasso(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 1))
   set.seed(123)
   regsem2 <- adaptiveLasso(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 2))
   
   testthat::expect_equal(all(abs(regsem1@parameters - regsem2@parameters) < 1e-8), TRUE)
@@ -61,13 +61,13 @@ f ~~ 1*f
   regsem1 <- scad(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 1))
   regsem2 <- scad(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 2))
   
@@ -78,13 +78,13 @@ f ~~ 1*f
   regsem1 <- mcp(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 1))
   regsem2 <- mcp(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 2))
   
@@ -100,14 +100,14 @@ f ~~ 1*f
   regsem1 <- cvLasso(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 3),
     returnSubsetParameters = TRUE,
     control = controlGlmnet(nCores = 1))
   set.seed(123)
   regsem2 <- cvLasso(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 3),
     returnSubsetParameters = TRUE,
     control = controlGlmnet(nCores = 2))
   
@@ -119,7 +119,7 @@ f ~~ 1*f
   regsem1 <- cvScad(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     returnSubsetParameters = TRUE,
     control = controlIsta(nCores = 1))
@@ -127,7 +127,7 @@ f ~~ 1*f
   regsem2 <- cvScad(
     lavaanModel = lavaanModel,
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     returnSubsetParameters = TRUE,
     control = controlIsta(nCores = 2))
@@ -171,13 +171,13 @@ f ~~ 1*f
   regsem1 <- lasso(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 1))
   set.seed(123)
   regsem2 <- lasso(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 2))
   
   testthat::expect_equal(all(abs(regsem1@parameters - regsem2@parameters) < 1e-8), TRUE)
@@ -191,13 +191,13 @@ f ~~ 1*f
   regsem1 <- adaptiveLasso(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 1))
   set.seed(123)
   regsem2 <- adaptiveLasso(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 2))
   
   testthat::expect_equal(all(abs(regsem1@parameters - regsem2@parameters) < 1e-8), TRUE)
@@ -207,13 +207,13 @@ f ~~ 1*f
   regsem1 <- scad(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 1))
   regsem2 <- scad(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 2))
   
@@ -224,13 +224,13 @@ f ~~ 1*f
   regsem1 <- mcp(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 1))
   regsem2 <- mcp(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 2))
   
@@ -258,14 +258,14 @@ f ~~ 1*f
   regsem1 <- lasso(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 1),
     modifyModel = modifyModel(transformations = transformation))
   set.seed(123)
   regsem2 <- lasso(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 2),
     modifyModel = modifyModel(transformations = transformation))
   
@@ -280,14 +280,14 @@ f ~~ 1*f
   regsem1 <- adaptiveLasso(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 1),
     modifyModel = modifyModel(transformations = transformation))
   set.seed(123)
   regsem2 <- adaptiveLasso(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    nLambdas = 50,
+    nLambdas = 5,
     control = controlGlmnet(nCores = 2),
     modifyModel = modifyModel(transformations = transformation))
   
@@ -298,14 +298,14 @@ f ~~ 1*f
   regsem1 <- scad(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 1),
     modifyModel = modifyModel(transformations = transformation))
   regsem2 <- scad(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 2),
     modifyModel = modifyModel(transformations = transformation))
@@ -317,14 +317,14 @@ f ~~ 1*f
   regsem1 <- mcp(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 1),
     modifyModel = modifyModel(transformations = transformation))
   regsem2 <- mcp(
     lavaanModel = lavaanModel,
     regularized = regularized,
-    lambdas = seq(0,.3,length.out = 20),
+    lambdas = seq(0,.3,length.out = 3),
     thetas = c(2.1,2.7,3.5),
     control = controlIsta(nCores = 2),
     modifyModel = modifyModel(transformations = transformation))

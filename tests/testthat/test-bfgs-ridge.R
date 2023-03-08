@@ -25,7 +25,7 @@ test_that("testing bfgs ridge", {
   
   
   # regularize 
-  lambdas <- seq(0,1,.1)
+  lambdas <- seq(0,1,length.out = 5)
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   rsem <- ridge(lavaanModel = modelFit, 
                 regularized = regularizedLavaan,

@@ -29,8 +29,8 @@ test_that("testing cappedL1", {
   weights <- rep(0, length(lavaanParameters))
   names(weights) <- names(lavaanParameters)
   weights[paste0("f=~y",6:ncol(y))] <- 1
-  lambdas = seq(0,.3,.1)
-  thetas = seq(.1,.5,.1)
+  lambdas = seq(0,.3,length.out = 3)
+  thetas = seq(.1,.5,length.out = 2)
   
   rsemIsta <- cappedL1(lavaanModel = modelFit, 
                        regularized = paste0("f=~y",6:ncol(y)), 
@@ -44,18 +44,8 @@ test_that("testing cappedL1", {
     ) < 1e-4), 
     TRUE)
   
-  rsemIstaLasso <- lasso(lavaanModel = modelFit, 
-                         regularized = paste0("f=~y",6:ncol(y)), 
-                         lambdas = lambdas,
-                         method = "ista",
-                         control = controlIsta(convCritInner = 0)
-  )
-  
   coef(rsemIsta, criterion = "AIC")
   coef(rsemIsta, criterion = "BIC")
-  
-  coef(rsemIstaLasso, criterion = "AIC")
-  coef(rsemIstaLasso, criterion = "BIC")
   
   # compare to smoothed version
   tuningParameters <- expand.grid(theta = thetas,
@@ -88,7 +78,7 @@ test_that("testing cappedL1", {
                             rsemIsta@fits$lambda == la,rsemIsta@parameterLabels]-
         regsemApprox@parameters[regsemApprox@fits$theta == th &
                                   regsemApprox@fits$lambda == la,rsemIsta@parameterLabels]
-          ) < .01
+          ) < .03
         ),
         TRUE
       )

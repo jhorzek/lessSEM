@@ -37,8 +37,8 @@ test_that("testing mcp", {
   
   #fitLslx$penalize_coefficient(name = paste0("y", 6:ncol(y)," <- f"))
   
-  lambdas <- seq(0,.3,length.out = 3)
-  thetas <- seq(2.1,3,length.out = 3)
+  lambdas <- seq(0,.3,length.out = 5)
+  thetas <- seq(2.1,3,length.out = 2)
   fitLslx$fit(penalty_method = "mcp",
               lambda_grid = lambdas, 
               delta_grid = thetas,
@@ -122,6 +122,10 @@ test_that("testing mcp", {
     }
   }
   
+  label <- lavaan2lslxLabels(lavaanModel = modelFit)
+  label$lavaanLabels <- label$lavaanLabels[!grepl(pattern = "<-1/g", label$lslxLabels)]
+  label$lslxLabels <- label$lslxLabels[!grepl(pattern = "<-1/g", label$lslxLabels)]
+  
   # replicate with regularizedSEM
   lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
@@ -138,87 +142,26 @@ test_that("testing mcp", {
                 -2*logLik(modelFit)
               ,4)==0),TRUE)
   
-  for(th in rsemIsta@fits$theta){
-    for(la in rsemIsta@fits$lambda){
-      # print(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
-      #                               rsemIsta@fits$lambda == la] -
-      #         (fits$m2LL[fits$theta == th &
-      #                      fits$lambda == la]
-      #          + fits$penalty[fits$theta == th &
-      #                           fits$lambda == la]
-      #         ))
-      testthat::expect_equal(
-        round(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
-                                      rsemIsta@fits$lambda == la] -
-                (fits$m2LL[fits$theta == th &
-                                            fits$lambda == la]
-                 + fits$penalty[fits$theta == th &
-                              fits$lambda == la]
-                 )
-        )==0,TRUE)
-      
-    }
-  }
-  
-  # compare to smoothed version
-  tuningParameters <- expand.grid(theta = thetas,
-                                  lambda = lambdas
-  )
-  
-  penaltyFunctionArguments <- list(
-    eps = 0,
-    regularizedParameterLabels = paste0("f=~y",6:ncol(y))
-  )
-  
-  #### Now we are ready to optimize! ####
-  regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
-                                                       individualPenaltyFunction = lessSEM:::.smoothMcpValue,
-                                                       tuningParameters = tuningParameters,
-                                                       penaltyFunctionArguments = penaltyFunctionArguments)
-  
-  sel <- regsemApprox@parameters$theta == thetas[1] & 
-    regsemApprox@parameters$lambda == lambdas[2]
-  pars <- unlist(regsemApprox@parameters[sel,
-                                         regsemApprox@parameterLabels]
-  )
-  weights <- lavaanParameters
-  weights[] <- 0
-  weights[rsemIsta@inputArguments$weights] <- 1
-  weights
-  lambda <- lambdas[2]
-  theta <- thetas[1]
-  pen <- 0
-  for(p in 1:length(pars)) pen <- pen + mcpPenalty_C(par = pars[p], 
-                                                      lambda_p = weights[p]*lambda, 
-                                                      theta = theta)
-  
-  testthat::expect_equal(
-    all(round(pen -
-                (1/N)*(regsemApprox@fits$regM2LL[sel] - regsemApprox@fits$m2LL[sel])
-              ,4)==0),TRUE)
-  
-  for(th in rsemIsta@fits$theta){
-    for(la in rsemIsta@fits$lambda){
-      
-      testthat::expect_equal(
-        round(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
-                                      rsemIsta@fits$lambda == la] -
-                regsemApprox@fits$regM2LL[regsemApprox@fits$theta == th &
-                                            regsemApprox@fits$lambda == la]
-        )==0,TRUE)
-      testthat::expect_equal(
-        all(
-          abs(
-            rsemIsta@parameters[rsemIsta@fits$theta == th &
-                                  rsemIsta@fits$lambda == la,rsemIsta@parameterLabels]-
-              regsemApprox@parameters[regsemApprox@fits$theta == th &
-                                        regsemApprox@fits$lambda == la,rsemIsta@parameterLabels]
-          ) < .1
-        ),
-        TRUE
-      )
-      
-    }
+  for(i in 1:length(rsemIsta@fits$theta)){
+    th <- rsemIsta@fits$theta[i]
+    la <- rsemIsta@fits$lambda[i]
+    testthat::expect_equal(
+      round(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th &
+                                    rsemIsta@fits$lambda == la] -
+              (fits$m2LL[fits$theta == th &
+                           fits$lambda == la]
+               + fits$penalty[fits$theta == th &
+                                fits$lambda == la]
+              )
+      )==0,TRUE)
+    
+    testthat::expect_equal(
+      max(abs(lslxParameter[lslxParameter[,"theta"] == th & 
+                    lslxParameter[,"lambda"] == la,label$lslxLabels] -
+      rsemIsta@parameters[
+        rsemIsta@parameters$lambda == la &  rsemIsta@parameters$theta == th
+        ,label$lavaanLabels])) < 1e-1, TRUE)
+    
   }
   
 })

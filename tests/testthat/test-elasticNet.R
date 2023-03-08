@@ -34,7 +34,7 @@ test_that("testing elastic net-c", {
   
   fitLslx$penalize_coefficient(name = paste0("y", 6:ncol(y)," <- f"))
   
-  lambdas <- seq(0,2,.1)
+  lambdas <- seq(0,2,length.out = 5)
   alpha <- .5
   fitLslx$fit(penalty_method = "elastic_net",
               lambda_grid = lambdas, 

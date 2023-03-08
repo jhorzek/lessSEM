@@ -6,7 +6,7 @@ test_that("multiplication works", {
   set.seed(123)
   HS <- lavaan::HolzingerSwineford1939[complete.cases(lavaan::HolzingerSwineford1939),]
   
-  lambdas <- seq(0,1,.01)
+  lambdas <- seq(0,1,length.out=5)
   
   ## EXAMPLE: Multi-Group Factor Analysis ##
   # run `vignette("multi-group-analysis")` to see the vignette

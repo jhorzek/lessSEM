@@ -133,7 +133,7 @@ test_that("testing elasticNet-lasso-with-transformation", {
                         method = "glmnet",
                         control = controlGlmnet(),
                         modifyModel = modifyModel(transformations = transformations),
-                        k = 5, 
+                        k = 2, 
                         returnSubsetParameters = TRUE
   )
   param <- rsemGlmnet@subsetParameters

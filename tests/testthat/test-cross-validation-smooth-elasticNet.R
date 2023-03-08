@@ -1,4 +1,6 @@
 test_that("testing cross-validation for smooth elasticNet", {
+  # Smooth penalty functions should not be used and are not tested.
+  testthat::skip("Skipping test for smooth penalty functions")
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("regsem")
   library(regsem)
