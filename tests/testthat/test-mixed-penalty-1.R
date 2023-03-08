@@ -19,8 +19,8 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
                            std.lv = TRUE)
 
 
-tuningParameters <- expand.grid(lambda1 = seq(0,1,.1),
-                                lambda2 = seq(0,1,.1))
+tuningParameters <- expand.grid(lambda1 = seq(0,1,length.out = 3),
+                                lambda2 = seq(0,1,length.out = 3))
 
 penaltyFunctionArguments <- list(
   eps = 1e-8,
@@ -60,9 +60,9 @@ regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = la
 exact <- lavaanModel |>
   mixedPenalty() |>
   addLasso(regularized = paste0("l", 6:10),
-           lambdas = seq(0,1,.1)) |>
+           lambdas = seq(0,1,length.out = 3)) |>
   addLasso(regularized = paste0("l", 11:15),
-           lambdas = seq(0,1,.1)) |>
+           lambdas = seq(0,1,length.out = 3)) |>
   fit()
 
 

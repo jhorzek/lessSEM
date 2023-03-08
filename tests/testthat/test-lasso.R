@@ -37,7 +37,7 @@ test_that("testing elasticNet-lasso-c", {
   
   #fitLslx$penalize_coefficient(name = paste0("y", 6:ncol(y)," <- f"))
   
-  lambdas <- seq(0,.3,.01)
+  lambdas <- seq(0,.3,length.out = 5)
   fitLslx$fit(penalty_method = "lasso",lambda_grid = lambdas, loss = "ml")
   
   # extract fits
@@ -68,13 +68,13 @@ test_that("testing elasticNet-lasso-c", {
   }
   
   # replicate with regularizedSEM
-
+  
   rsemIsta <- lasso(lavaanModel = modelFit, 
-                         regularized = paste0("f=~y",6:ncol(y)), 
-                         lambdas = lambdas,
-                         method = "ista",
-                         control = controlIsta(verbose = 0, 
-                                               startingValues = "est")
+                    regularized = paste0("f=~y",6:ncol(y)), 
+                    lambdas = lambdas,
+                    method = "ista",
+                    control = controlIsta(verbose = 0, 
+                                          startingValues = "est")
   )
   
   testthat::expect_equal(all(abs(rsemIsta@parameters[,rsemIsta@regularized] - lslxParameter[,regularized]) < .002), TRUE)
@@ -89,9 +89,9 @@ test_that("testing elasticNet-lasso-c", {
   
   rsemGlmnet <- lasso(lavaanModel = modelFit, 
                       regularized = paste0("f=~y",6:ncol(y)), 
-                           lambdas = lambdas,
-                           method = "glmnet",
-                           control = controlGlmnet()
+                      lambdas = lambdas,
+                      method = "glmnet",
+                      control = controlGlmnet()
   )
   testthat::expect_equal(all(abs(rsemGlmnet@parameters[,rsemGlmnet@regularized] - lslxParameter[,regularized]) < .002), TRUE)
   plot(rsemGlmnet)
@@ -105,22 +105,22 @@ test_that("testing elasticNet-lasso-c", {
   
   # set automatic lambda:
   rsem2 <- lessSEM::lasso(lavaanModel = modelFit, 
-                                  regularized = paste0("f=~y",6:ncol(y)),
-                                  nLambdas = 10)
+                          regularized = paste0("f=~y",6:ncol(y)),
+                          nLambdas = 10)
   testthat::expect_equal(all(apply(rsem2@parameters[,paste0("f=~y",6:ncol(y))] == 0,2,sum) > 0), TRUE)
   
   rsem2 <- lessSEM::lasso(lavaanModel = modelFit, 
-                                  regularized = paste0("f=~y",6:ncol(y)),
-                                  reverse = FALSE,
-                                  nLambdas = 10)
+                          regularized = paste0("f=~y",6:ncol(y)),
+                          reverse = FALSE,
+                          nLambdas = 10)
   testthat::expect_equal(all(apply(rsem2@parameters[,paste0("f=~y",6:ncol(y))] == 0,2,sum) > 0), TRUE)
   
   lassoError <- try(lasso(lavaanModel = modelFit, 
-                    regularized = paste0("f=~y",6:(ncol(y)+1)), 
-                    lambdas = lambdas,
-                    method = "ista",
-                    control = controlIsta(verbose = 0, 
-                                          startingValues = "est")
+                          regularized = paste0("f=~y",6:(ncol(y)+1)), 
+                          lambdas = lambdas,
+                          method = "ista",
+                          control = controlIsta(verbose = 0, 
+                                                startingValues = "est")
   ), silent = TRUE)
   testthat::expect_equal(is(lassoError, "try-error"), TRUE)
 })

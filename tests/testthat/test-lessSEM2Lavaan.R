@@ -29,7 +29,7 @@ test_that("testing translation from lessSEM to lavaan", {
   rsem <- lasso(lavaanModel = modelFit, 
                 regularized = regularizedLavaan,
                 reverse = FALSE,
-                nLambdas = 30)
+                nLambdas = 5)
   
   lambdas <- rsem@fits$lambda 
   
@@ -50,15 +50,13 @@ test_that("testing translation from lessSEM to lavaan", {
   thetas <- rsem@fits$theta 
   
   for(l in 1:length(lambdas)){
-    for(th in 1:length(thetas)){
-      rw <- which(thetas == thetas[th] & lambdas == lambdas[l])
+      rw <- which(thetas == thetas[l] & lambdas == lambdas[l])
       
-      lavaanModel <- lessSEM2Lavaan(regularizedSEM = rsem, lambda = lambdas[l], theta = thetas[th])
+      lavaanModel <- lessSEM2Lavaan(regularizedSEM = rsem, lambda = lambdas[l], theta = thetas[l])
       testthat::expect_equal(
         all(round(getLavaanParameters(lavaanModel) - unlist(rsem@parameters[rw,names(getLavaanParameters(lavaanModel))]),
                   10) == 0), 
         TRUE)
-    }
   }
   
   testthat::expect_equal(is(lessSEM2Lavaan(regularizedSEM = rsem, criterion = "AIC"), "lavaan"), TRUE)

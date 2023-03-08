@@ -28,7 +28,7 @@ test_that("testing new tau", {
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   rsem <- lasso(lavaanModel = modelFit, 
                 regularized = regularizedLavaan,
-                nLambdas = 30)
+                nLambdas = 5)
   
   lambdas <- rsem@fits$lambda 
   

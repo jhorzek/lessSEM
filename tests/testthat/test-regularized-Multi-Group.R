@@ -48,7 +48,7 @@ x3 ~ c(m3,m3)*1
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = "l1_1",
-    nLambdas = 10)
+    nLambdas = 5)
   
   AIC(regsem)
   BIC(regsem)
@@ -61,7 +61,7 @@ x3 ~ c(m3,m3)*1
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = "l1_1",
-    nLambdas = 10)
+    nLambdas = 5)
   
   testthat::expect_equal(any(abs(unlist(regsem@parameters[nrow(regsem@parameters),names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
@@ -71,7 +71,7 @@ x3 ~ c(m3,m3)*1
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = "l1_1",
-    lambdas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 3),
     alphas = seq(0,1,.25))
   
   AIC(regsem)
@@ -85,8 +85,8 @@ x3 ~ c(m3,m3)*1
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = "l1_1",
-    lambdas = seq(0,1,.1),
-    thetas = seq(2.5,3,.25))
+    lambdas = seq(0,1,length.out = 3),
+    thetas = seq(2.5,3,.5))
   
   testthat::expect_equal(any(abs(unlist(regsem@parameters[1,names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
@@ -96,8 +96,8 @@ x3 ~ c(m3,m3)*1
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = "l1_1",
-    lambdas = seq(0,1,.1),
-    thetas = seq(.5,1,.25))
+    lambdas = seq(0,1,length.out = 3),
+    thetas = seq(.5,1,.5))
   
   AIC(regsem)
   BIC(regsem)
@@ -110,8 +110,8 @@ x3 ~ c(m3,m3)*1
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = "l1_1",
-    lambdas = seq(0,1,.1),
-    thetas = seq(.5,1,.25))
+    lambdas = seq(0,1,length.out = 3),
+    thetas = seq(.5,1,5))
   
   testthat::expect_equal(any(abs(unlist(regsem@parameters[1,names(getLavaanParameters(fit))]) - getLavaanParameters(fit)) > .001),
                          FALSE)
@@ -121,8 +121,8 @@ x3 ~ c(m3,m3)*1
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = "l1_1",
-    lambdas = seq(0,1,.1),
-    thetas = seq(.5,1,.25))
+    lambdas = seq(0,1,length.out = 3),
+    thetas = seq(.5,1,.5))
   
   AIC(regsem)
   BIC(regsem)
@@ -145,7 +145,7 @@ l3_2 = l3_1 + delta3;
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = c("delta1", "delta2", "delta3"),
-    nLambdas = 10,
+    nLambdas = 5,
     modifyModel = modifyModel(transformations = transformation))
   
   AIC(regsem)
@@ -159,7 +159,7 @@ l3_2 = l3_1 + delta3;
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = c("delta1", "delta2", "delta3"),
-    nLambdas = 10,
+    nLambdas = 5,
     modifyModel = modifyModel(transformations = transformation))
   
   AIC(regsem)
@@ -173,8 +173,8 @@ l3_2 = l3_1 + delta3;
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = c("delta1", "delta2", "delta3"),
-    lambdas = seq(0,1,.1),
-    alphas = seq(0,1,.25),
+    lambdas = seq(0,1,length.out = 3),
+    alphas = seq(0,1,.5),
     modifyModel = modifyModel(transformations = transformation))
   
   AIC(regsem)
@@ -188,8 +188,8 @@ l3_2 = l3_1 + delta3;
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = c("delta1", "delta2", "delta3"),
-    lambdas = seq(0,1,.1),
-    thetas = seq(2.5,3,.25),
+    lambdas = seq(0,1,length.out = 3),
+    thetas = seq(2.5,3,.5),
     modifyModel = modifyModel(transformations = transformation))
   
   AIC(regsem)
@@ -203,8 +203,8 @@ l3_2 = l3_1 + delta3;
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = c("delta1", "delta2", "delta3"),
-    lambdas = seq(0,1,.1),
-    thetas = seq(.5,1,.25),
+    lambdas = seq(0,1,length.out = 3),
+    thetas = seq(.5,1,.5),
     modifyModel = modifyModel(transformations = transformation))
   
   AIC(regsem)
@@ -218,8 +218,8 @@ l3_2 = l3_1 + delta3;
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = c("delta1", "delta2", "delta3"),
-    lambdas = seq(0,1,.1),
-    thetas = seq(.5,1,.25),
+    lambdas = seq(0,1,length.out = 3),
+    thetas = seq(.5,1,.5),
     modifyModel = modifyModel(transformations = transformation))
   
   AIC(regsem)
@@ -233,8 +233,8 @@ l3_2 = l3_1 + delta3;
     # pass the fitted lavaan models
     lavaanModel = lavaanModels,
     regularized = c("delta1", "delta2", "delta3"),
-    lambdas = seq(0,1,.1),
-    thetas = seq(.5,1,.25),
+    lambdas = seq(0,1,length.out = 3),
+    thetas = seq(.5,1,.5),
     modifyModel = modifyModel(transformations = transformation))
   
   AIC(regsem)

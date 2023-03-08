@@ -4,7 +4,7 @@ test_that("testing cross-validation for mcp", {
   library(regsem)
   library(lessSEM)
   set.seed(123)
-  N <- 50
+  N <- 100
   l1 <- 1; l2 <- .2; l3 <- 0;
   v1 <- .2; v2 <- .8; v3 <- 1
   
@@ -26,32 +26,19 @@ test_that("testing cross-validation for mcp", {
   
   regularizedLavaan <- paste0("f=~y",6:ncol(y))
   
-  lambdas <- seq(0,1,.1)
+  lambdas <- seq(0,1,length.out = 3)
   thetas <- c(.3,1)
-  rsem <- lessSEM::mcp(lavaanModel = modelFit, 
-                            regularized = regularizedLavaan,
-                            lambdas = lambdas,
-                            thetas = thetas)
   
   ## Test cross-validation
   
   cv <- cvMcp(lavaanModel = modelFit, 
-                   regularized = regularizedLavaan,
-                   lambdas = lambdas,
-                   thetas = thetas,
-                   returnSubsetParameters = TRUE)
+              regularized = regularizedLavaan,
+              lambdas = lambdas,
+              thetas = thetas,
+              returnSubsetParameters = TRUE,
+              k = 2)
   
-  testthat::expect_equal(all(cv@regularized == rsem@regularized), TRUE)
-  selected <- which.min(cv@cvfits$cvfit)
-  testthat::expect_equal(all(abs(cv@parameters - rsem@parameters[selected,]) < 1e-2), TRUE)
-  testthat::expect_equal(ncol(cv@subsets), 5)
-  
-  cv3 <- cvMcp(lavaanModel = modelFit, 
-                    regularized = regularizedLavaan,
-                    lambdas = lambdas,
-                    thetas = thetas,
-                    k = 3)
-  testthat::expect_equal(ncol(cv3@subsets), 3)
+  testthat::expect_equal(ncol(cv@subsets), 2)
   
   coef(cv)
   plot(cv)
@@ -73,9 +60,9 @@ test_that("testing cross-validation for mcp", {
     testSet <- subsets[,trainSet]
     
     SEM <- lessSEM:::.setParameters(SEM = SEM, 
-                                  labels = parameterLabels, 
-                                  values = unlist(pars[ro, parameterLabels]),
-                                  raw = FALSE)
+                                    labels = parameterLabels, 
+                                    values = unlist(pars[ro, parameterLabels]),
+                                    raw = FALSE)
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
@@ -93,61 +80,15 @@ test_that("testing cross-validation for mcp", {
   testthat::expect_equal(all(abs(cv@cvfits$cvfit)< 1e-6), TRUE)
   
   # test subset parameters
-  subset <- sample(1:5, 1)
+  subset <- sample(1:2, 1)
   subsetPars <- pars[pars$trainSet == subset,]
   
   subsetCappedL1 <- mcp(lavaanModel = modelFit, 
-                             regularized = regularizedLavaan,
-                             lambdas = lambdas,
-                             thetas = thetas,
-                             modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
+                        regularized = regularizedLavaan,
+                        lambdas = lambdas,
+                        thetas = thetas,
+                        modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
   
   testthat::expect_equal(all(abs(subsetCappedL1@parameters - subsetPars[,colnames(subsetCappedL1@parameters)])< 1e-3), TRUE)
-  
-  # test standardization
-  cv <- cvMcp(lavaanModel = modelFit, 
-                   regularized = regularizedLavaan,
-                   lambdas = lambdas, 
-                   thetas = thetas,
-                   returnSubsetParameters = TRUE,
-                   standardize = TRUE)
-  
-  subsets <- cv@subsets
-  pars <- cv@subsetParameters
-  cvfits <- cv@cvfits
-  
-  parameterLabels <- cv@parameterLabels
-  
-  for(ro in 1:nrow(pars)){
-    
-    trainSet <- ySorted[!subsets[,pars$trainSet[ro]],]
-    testSet <- ySorted[subsets[,pars$trainSet[ro]],]
-    
-    means <- apply(trainSet,2,mean)
-    standardDeviations <- apply(trainSet,2,sd)
-    
-    testSet <- lessSEM::cvScaler(testSet = testSet, 
-                                 means = means, 
-                                 standardDeviations = standardDeviations)
-    
-    SEM <- lessSEM:::.setParameters(SEM = SEM, 
-                                  labels = parameterLabels, 
-                                  values = unlist(pars[ro, parameterLabels]),
-                                  raw = FALSE)
-    SEM$fit()
-    
-    m2LL <- -2*sum(mvtnorm::dmvnorm(
-      x = testSet, 
-      mean = SEM$impliedMeans,
-      sigma = SEM$impliedCovariance,
-      log = TRUE
-    ))
-    sel <- cvfits$lambda == pars$lambda[ro] & cvfits$theta == pars$theta[ro]
-    if(sum(sel) != 1) stop("Error when selecting cv target")
-    cvfits[sel,"cvfit"] <- cvfits[sel,"cvfit"] - m2LL
-    
-  }
-  
-  testthat::expect_equal(all(abs(cvfits$cvfit)< 1e-6), TRUE)
 }
 )

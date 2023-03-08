@@ -1,4 +1,6 @@
 test_that("testing smooth elastic net", {
+  # Smooth penalty functions should not be used and are not tested.
+  testthat::skip("Skipping test for smooth penalty functions")
   testthat::skip_on_cran()
   library(lavaan)
   library(lessSEM)

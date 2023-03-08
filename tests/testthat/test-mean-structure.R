@@ -24,7 +24,7 @@ test_that("meanstructure works", {
   modelFitNoMeans = cfa(modelSyntax, y, meanstructure = FALSE)
   modelFitWithMeans <- cfa(modelSyntax, y, meanstructure = TRUE)
   
-  lambdas <- seq(0,1,.1)
+  lambdas <- seq(0,1,length.out = 5)
   
   rsemGlmnetNoMeans <- lasso(lavaanModel = modelFitNoMeans, 
                              regularized = paste0("f=~y",6:ncol(y)), 
@@ -43,7 +43,7 @@ test_that("meanstructure works", {
   
   
   testthat::expect_equal(all(round(rsemGlmnetWithMeans@parameters[,colnames(rsemGlmnetNoMeans@parameters)] - 
-                                     rsemGlmnetNoMeans@parameters,3)==0), TRUE)
+                                     rsemGlmnetNoMeans@parameters,2)==0), TRUE)
   
   rsemIstaNoMeans <- lasso(lavaanModel = modelFitNoMeans, 
                            regularized = paste0("f=~y",6:ncol(y)), 

@@ -27,7 +27,7 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 5),
     method = "ista",
     control = controlIsta())
   )
@@ -39,7 +39,7 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 5),
     method = "ista",
     control = controlIsta()) 
   )
@@ -51,7 +51,7 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 5),
     method = "glmnet",
     control = controlGlmnet())
   )
@@ -63,7 +63,7 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    nLambdas = 50,
+    nLambdas = 5,
     method = "glmnet",
     control = controlGlmnet())
   )
@@ -74,7 +74,7 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 5),
     method = "ista",
     control = controlIsta()) 
   )
@@ -85,7 +85,7 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 5),
     method = "glmnet",
     control = controlGlmnet())
   )
@@ -96,7 +96,7 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 5),
     method = "ista",
     control = controlIsta()) 
   )
@@ -108,7 +108,7 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    nLambdas = 50,
+    nLambdas = 5,
     method = "ista",
     control = controlIsta()) 
   )
@@ -120,7 +120,7 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 5),
     method = "glmnet",
     control = controlGlmnet())
   )
@@ -131,7 +131,7 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    nLambdas = 50,
+    nLambdas = 5,
     method = "glmnet",
     control = controlGlmnet())
   )
@@ -143,8 +143,8 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
-    alphas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 5),
+    alphas = seq(0,1,length.out = 3),
     method = "ista",
     control = controlIsta()) 
   )
@@ -155,8 +155,8 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
-    alphas = seq(0,1,.1),
+    lambdas = seq(0,1,length.out = 5),
+    alphas = seq(0,1,length.out = 3),
     method = "glmnet",
     control = controlGlmnet())
   )
@@ -168,8 +168,8 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
-    thetas = seq(0.1,1,.1), 
+    lambdas = seq(0,1,length.out = 5),
+    thetas = seq(0.1,1,length.out = 3), 
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
@@ -179,8 +179,8 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
-    thetas = seq(0.1,1,.1), 
+    lambdas = seq(0,1,length.out = 5),
+    thetas = seq(0.1,1,length.out = 3), 
     control = controlIsta())
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
@@ -190,8 +190,8 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
-    thetas = seq(0.1,1,.1), 
+    lambdas = seq(0,1,length.out = 5),
+    thetas = seq(0.1,1,length.out = 3), 
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)
@@ -201,8 +201,8 @@ f ~~ 1*f
     lavaanModel = lavaanModel,
     # names of the regularized parameters:
     regularized = paste0("l", 6:15),
-    lambdas = seq(0,1,.1),
-    thetas = seq(2.1,3,.1), 
+    lambdas = seq(0,1,length.out = 5),
+    thetas = seq(2.1,3,length.out = 3), 
     control = controlIsta()) 
   )
   testthat::expect_equal(is(regsem, "try-error"), FALSE)

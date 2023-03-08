@@ -102,11 +102,11 @@ test_that("testing ista-lasso", {
     L0 = .1,
     eta = 2,
     accelerate = TRUE,
-    maxIterOut = 10000,
+    maxIterOut = 20000,
     maxIterIn = 10000,
     breakOuter = .00000000001,
     convCritInner = 1,
-    sigma = .1,
+    sigma = .01,
     stepSizeInheritance = 3,
     verbose = 0
   )

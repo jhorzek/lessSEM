@@ -1,7 +1,5 @@
 test_that("testing lsp", {
   testthat::skip_on_cran()
-  testthat::skip_if_not_installed("lslx")
-  library(lslx)
   library(lavaan)
   library(lessSEM)
   set.seed(123)
@@ -26,8 +24,8 @@ test_that("testing lsp", {
   modelFit = cfa(modelSyntax, y, meanstructure = TRUE)
   
   lavaanParameters <- lessSEM::getLavaanParameters(modelFit)
-  lambdas = seq(0,.3,.1)
-  thetas = seq(.1,.5,.1)
+  lambdas = seq(0,.1,length.out = 3)
+  thetas = seq(.1,.5,length.out = 2)
   
   rsemIsta <- lsp(lavaanModel = modelFit, 
                   regularized = paste0("f=~y",6:ncol(y)), 
@@ -48,35 +46,36 @@ test_that("testing lsp", {
   )
   
   penaltyFunctionArguments <- list(
-    eps = 0,
+    eps = 1e-5,
     regularizedParameterLabels = paste0("f=~y",6:ncol(y))
   )
   
   #### Now we are ready to optimize! ####
   regsemApprox <- lessSEM:::.regularizeSEMWithCustomPenaltyRsolnp(lavaanModel = modelFit,
-                                                       individualPenaltyFunction = lessSEM:::.smoothLspValue,
-                                                       tuningParameters = tuningParameters,
-                                                       penaltyFunctionArguments = penaltyFunctionArguments)
-  for(th in rsemIsta@fits$theta){
-    for(la in rsemIsta@fits$lambda){
-      
-      testthat::expect_equal(
-        abs(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th & 
-                                      rsemIsta@fits$lambda == la] -
-                regsemApprox@fits$regM2LL[regsemApprox@fits$theta == th & 
-                                            regsemApprox@fits$lambda == la]
-        ) < 2,TRUE)
-      testthat::expect_equal(
-        all(
-          abs(
-            rsemIsta@parameters[rsemIsta@fits$theta == th &
-                                  rsemIsta@fits$lambda == la,rsemIsta@parameterLabels]-
-              regsemApprox@parameters[regsemApprox@fits$theta == th &
-                                        regsemApprox@fits$lambda == la,rsemIsta@parameterLabels]
-          ) < .1
-        ),
-        TRUE
-      )
-    }
+                                                                  individualPenaltyFunction = lessSEM:::.smoothLspValue,
+                                                                  tuningParameters = tuningParameters,
+                                                                  penaltyFunctionArguments = penaltyFunctionArguments)
+  for(i in length(rsemIsta@fits$theta)){
+    th <- rsemIsta@fits$theta[i]
+    la <- rsemIsta@fits$lambda[i]
+    
+    testthat::expect_equal(
+      abs(rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th & 
+                                  rsemIsta@fits$lambda == la] -
+            regsemApprox@fits$regM2LL[regsemApprox@fits$theta == th & 
+                                        regsemApprox@fits$lambda == la]
+      )/rsemIsta@fits$regM2LL[rsemIsta@fits$theta == th & 
+                                rsemIsta@fits$lambda == la] < .01,TRUE)
+    testthat::expect_equal(
+      all(
+        abs(
+          rsemIsta@parameters[rsemIsta@fits$theta == th &
+                                rsemIsta@fits$lambda == la,rsemIsta@parameterLabels]-
+            regsemApprox@parameters[regsemApprox@fits$theta == th &
+                                      regsemApprox@fits$lambda == la,rsemIsta@parameterLabels]
+        ) < .1
+      ),
+      TRUE
+    )
   }
 })

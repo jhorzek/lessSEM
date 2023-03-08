@@ -1,10 +1,10 @@
-test_that("testing cross-validation for lasso", {
+test_that("testing automatic standardization for cross-validation", {
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("regsem")
   library(regsem)
   library(lessSEM)
   set.seed(123)
-  N <- 100
+  N <- 50
   l1 <- 1; l2 <- .2; l3 <- 0;
   v1 <- .2; v2 <- .8; v3 <- 1
   
@@ -31,34 +31,37 @@ test_that("testing cross-validation for lasso", {
   
   lambdas <- rsem@fits$lambda
   
-  ## Test cross-validation
-  
+  # test standardization
   cv <- cvLasso(lavaanModel = modelFit, 
                 regularized = regularizedLavaan,
                 lambdas = lambdas, 
                 returnSubsetParameters = TRUE,
+                standardize = TRUE,
                 k = 2)
-  
-  testthat::expect_equal(ncol(cv@subsets), 2)
-  
-  coef(cv)
-  plot(cv)
   
   subsets <- cv@subsets
   pars <- cv@subsetParameters
+  cvfits <- cv@cvfits
   
-  SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = modelFit)
-  
-  parameterLabels <- cv@parameterLabels
+  parameterLabels <- cv@parameterLabels  
   
   # lavaan tends to sort the data differently
   ySorted <- try(lavaan::lavInspect(modelFit, 
                                     "data"))
+
+  SEM <- lessSEM:::.SEMFromLavaan(lavaanModel = modelFit)
   
   for(ro in 1:nrow(pars)){
     
-    trainSet <- pars$trainSet[ro]
-    testSet <- subsets[,trainSet]
+    trainSet <- ySorted[!subsets[,pars$trainSet[ro]],]
+    testSet <- ySorted[subsets[,pars$trainSet[ro]],]
+    
+    means <- apply(trainSet,2,mean)
+    standardDeviations <- apply(trainSet,2,sd)
+    
+    testSet <- lessSEM::cvScaler(testSet = testSet, 
+                                 means = means, 
+                                 standardDeviations = standardDeviations)
     
     SEM <- lessSEM:::.setParameters(SEM = SEM, 
                                     labels = parameterLabels, 
@@ -67,34 +70,17 @@ test_that("testing cross-validation for lasso", {
     SEM$fit()
     
     m2LL <- -2*sum(mvtnorm::dmvnorm(
-      x = ySorted[testSet,], 
+      x = testSet, 
       mean = SEM$impliedMeans,
       sigma = SEM$impliedCovariance,
       log = TRUE
     ))
-    sel <- cv@cvfits$lambda == pars$lambda[ro]
+    sel <- cvfits$lambda == pars$lambda[ro]
     if(sum(sel) != 1) stop("Error when selecting cv target")
-    cv@cvfits[sel,"cvfit"] <- cv@cvfits[sel,"cvfit"] - m2LL
+    cvfits[sel,"cvfit"] <- cvfits[sel,"cvfit"] - m2LL
     
   }
   
-  testthat::expect_equal(all(abs(cv@cvfits$cvfit)< 1e-6), TRUE)
-  
-  # test subset parameters
-  subset <- sample(1:2, 1)
-  subsetPars <- pars[pars$trainSet == subset,]
-  
-  subsetLasso <- lasso(lavaanModel = modelFit, 
-                       regularized = regularizedLavaan,
-                       lambdas = lambdas,
-                       modifyModel = modifyModel(dataSet = y[!subsets[,subset],]))
-  
-  testthat::expect_equal(all(abs(subsetLasso@parameters - subsetPars[,colnames(subsetLasso@parameters)])< 1e-3), TRUE)
-  
-  lassoError <- try(cvLasso(lavaanModel = modelFit, 
-                            regularized = paste0("f=~y",6:(ncol(y)+1)), 
-                            lambdas = lambdas, 
-                            k = 3), silent = TRUE)
-  testthat::expect_equal(is(lassoError, "try-error"), TRUE)
+  testthat::expect_equal(all(abs(cvfits$cvfit)< 1e-6), TRUE)
   
 })

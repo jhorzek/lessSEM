@@ -19,8 +19,8 @@ f ~~ 1*f
                              std.lv = TRUE)
   
   
-  tuningParameters <- expand.grid(lambdaLasso = seq(0,1,.1),
-                                  lambdaLsp = seq(0,1,.1),
+  tuningParameters <- expand.grid(lambdaLasso = seq(0,1,length.out=3),
+                                  lambdaLsp = seq(0,1,length.out=3),
                                   theta = 3.7)
   
   penaltyFunctionArguments <- list(
@@ -67,9 +67,9 @@ f ~~ 1*f
   exact <- lavaanModel |>
     mixedPenalty() |>
     addLasso(regularized = paste0("l", 6:10),
-             lambdas = seq(0,1,.1)) |>
+             lambdas = seq(0,1,length.out=3)) |>
     addLsp(regularized = paste0("l", 11:15),
-            lambdas = seq(0,1,.1),
+            lambdas = seq(0,1,length.out=3),
             thetas = 3.7) |>
     fit()
   

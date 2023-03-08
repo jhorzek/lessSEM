@@ -34,7 +34,7 @@ test_that("testing elasticNet-ridge-c", {
   
   fitLslx$penalize_coefficient(name = paste0("y", 6:ncol(y)," <- f"))
   
-  lambdas <- seq(0,50,1)
+  lambdas <- seq(0,50,10)
   fitLslx$fit(penalty_method = "ridge",lambda_grid = lambdas, loss = "ml")
   
   # extract fits

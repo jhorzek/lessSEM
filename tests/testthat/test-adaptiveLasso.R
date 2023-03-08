@@ -48,20 +48,20 @@ test_that("testing adaptive lasso", {
                                  regularized = regularizedLavaan,
                                  lambdas = regsem_cvFit$fits[,"lambda"],
                                  method = "ista",
-                                 control = controlIsta(startingValues = "start"))
+                                 control = controlIsta())
   testthat::expect_equal(any(abs(rsem@parameters[,colnames(regsemPars)] - rsem2@parameters[,colnames(regsemPars)]) > .001),
                          FALSE)
   
   # set automatic lambda:
   rsem2 <- lessSEM::adaptiveLasso(lavaanModel = modelFit, 
                                   regularized = regularizedLavaan,
-                                  nLambdas = 10)
+                                  nLambdas = 5)
   testthat::expect_equal(all(apply(rsem2@parameters[,regularizedLavaan] == 0,2,sum) > 0), TRUE)
   
   rsem2 <- lessSEM::adaptiveLasso(lavaanModel = modelFit, 
                                   regularized = regularizedLavaan,
                                   reverse = FALSE,
-                                  nLambdas = 10)
+                                  nLambdas = 5)
   testthat::expect_equal(all(apply(rsem2@parameters[,regularizedLavaan] == 0,2,sum) > 0), TRUE)
   
   

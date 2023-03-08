@@ -31,7 +31,7 @@ test_that("testing maxLambda", {
   
   rsemIsta <- lasso(lavaanModel = modelFit, 
                          regularized = paste0("f=~y",6:ncol(y)), 
-                         nLambdas = 30,
+                         nLambdas = 2,
                          method = "ista",
                          control = controlIsta()
   )
@@ -44,7 +44,7 @@ test_that("testing maxLambda", {
   
   rsemGlmnet <- lasso(lavaanModel = modelFit, 
                            regularized = paste0("f=~y",6:ncol(y)), 
-                           nLambdas = 30,
+                           nLambdas = 2,
                            method = "glmnet",
                            control = controlGlmnet()
   )

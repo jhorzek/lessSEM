@@ -133,7 +133,7 @@ test_that("testing elasticNet-lasso-with-transformation", {
                         method = "glmnet",
                         control = controlGlmnet(),
                         modifyModel = modifyModel(transformations = transformations),
-                        k = 5, 
+                        k = 2, 
                         returnSubsetParameters = TRUE
   )
   param <- rsemGlmnet@subsetParameters
@@ -153,8 +153,8 @@ test_that("testing elasticNet-lasso-with-transformation", {
   cvfits <- data.frame(
     lambda = rsemGlmnet@cvfitsDetails$lambda,
     alpha = rsemGlmnet@cvfitsDetails$alpha,
-    matrix(NA, nrow = length(rsemGlmnet@cvfitsDetails$lambda), ncol = 5,
-           dimnames = list(NULL, paste0("testSet",1:5))))
+    matrix(NA, nrow = length(rsemGlmnet@cvfitsDetails$lambda), ncol = 2,
+           dimnames = list(NULL, paste0("testSet",1:2))))
   
   for(i in 1:nrow(param)){
     

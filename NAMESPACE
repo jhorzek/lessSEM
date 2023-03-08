@@ -26,7 +26,6 @@ export(
     mixedPenalty,
     cvLasso,
     gpLasso,
-    GIC,
     lessSEM2Lavaan,
     gpCappedL1,
     getTuningParameterConfiguration,
