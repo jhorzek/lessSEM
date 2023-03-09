@@ -45,12 +45,12 @@
   
   if(method == "glmnet" && is.vector(lavaanModel)){
     if(any(control$initialHessian == "lavaan")){
-      .printNote("You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
+      rlang::inform(c("Note","You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'."))
       control$initialHessian <- "compute"
     }
   }
   if(!is.null(modifyModel$transformations)){
-    .printNote("Your model has transformations:")
+    rlang::inform(c("Note","Your model has transformations:"))
     cat(" - If you transform variances",
         "the variance estimates returned by lessSEM may not be the true variances",
         "but transformations thereof. Check model@transformations to find the actual variance",
@@ -230,9 +230,9 @@
   if(!is.null(tuningParameters$nLambdas)){
     # for lasso type penalties, the maximal lambda value can be determined
     # automatically
-    .printNote(paste0(
+    rlang::inform(c("Note",paste0(
       "Automatically selecting the maximal lambda value. ",
-      " \033[35mThis may fail if a model with all regularized parameters set to zero is not identified.\033[39m")
+      " This may fail if a model with all regularized parameters set to zero is not identified."))
     )
     
     maxLambda <- .getMaxLambda_C(regularizedModel = regularizedModel,

@@ -42,13 +42,13 @@
   
   if(!is.null(modifyModel$transformations)){
     if(any(control$initialHessian == "lavaan")){
-      .printNote("Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'.")
+      rlang::inform(c("Note","Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'."))
       control$initialHessian <- "compute"
     }
   }
   if(is.vector(lavaanModel)){
     if(any(control$initialHessian == "lavaan")){
-      .printNote("You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
+      rlang::inform(c("Note","You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'."))
       control$initialHessian <- "compute"
     }
   }

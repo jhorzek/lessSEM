@@ -797,8 +797,8 @@ Rcpp::List elasticNet(
   
   // now it is time to iterate over all lambda and alpha values:
   int it = 0;
-  for(int a = 0; a < alpha.n_elem; a++){
-    for(int l = 0; l < lambda.n_elem; l++){
+  for(unsigned int a = 0; a < alpha.n_elem; a++){
+    for(unsigned int l = 0; l < lambda.n_elem; l++){
       
       // set the tuning parameters
       tpLasso.alpha = alpha.at(a);

@@ -1,17 +1,3 @@
-
-#' .printNote
-#' 
-#' Prints a note.
-#' @param ... one or multiple strings
-#' @returns nothing
-#' @keywords internal
-.printNote <- function(...){
-  cat("\n",
-      "\033[1mNote\033[22m:",
-      paste0(...),
-      "\n")
-}
-
 #' simulateExampleData
 #' 
 #' simulate data for a simple CFA model
