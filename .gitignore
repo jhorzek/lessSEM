@@ -18,3 +18,4 @@ seafile-ignore.txt
 vignettes/.*
 CRAN-SUBMISSION
 !.gitignore
+/doc/
