@@ -8,32 +8,13 @@
 
 Some functions in the package allow users to compile user-specified functions 
 with Rcpp. These functions are compiled using `#include <RcppArmadillo.h>` which
-I could only get to work with "Imports: RcppArmadillo". Several notes refer to this
-setup:
+I could only get to work with "Imports: RcppArmadillo". The following note results
+from this setup:
 
 ```
 N checking package dependencies (1.1s)
   Package in Depends/Imports which should probably only be in LinkingTo: 'RcppArmadillo'
 ```
-
-```
-N checking dependencies in R code ... NOTE
-  Namespace in Imports field not imported from: 'RcppArmadillo'
-    All declared Imports should be used.
-```
-
-```
-N checking R code for possible problems ... [12s] NOTE (11.9s)
-  .compileTransformations: no visible binding for global variable
-       'getPtr'
-     .compileTransformations: no visible binding for global variable
-       'transformationFunction'
-     Undefined global functions or variables:
-       getPtr transformationFunction
-```
-
-The functions mentioned above (getPtr and transformationFunction) are generated 
-by the package based on user input and compiled with Rcpp.
 
 ## Additional Notes:
 
@@ -65,7 +46,7 @@ Found the following (possibly) invalid URLs:
       Status: 403
       Message: Forbidden
 ```
-I've checked all of these dois and they seem to work.
+I've checked all of these dois and they work on my system.
 
 ```
 N checking CRAN incoming feasibility

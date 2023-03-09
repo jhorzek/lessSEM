@@ -119,8 +119,8 @@ mixedPenalty <- function(lavaanModel,
                          modifyModel = lessSEM::modifyModel(),
                          control = lessSEM::controlIsta()){
   
-  .printNote("Mixed penalties is a very new feature. Please note that there may still ",
-             "be bugs in the procedure. Use carefully!")
+  rlang::inform(c("Note","Mixed penalties is a very new feature. Please note that there may still ",
+             "be bugs in the procedure. Use carefully!"))
   
   mixedPenalty <- list(
     lavaanModel = lavaanModel,
@@ -991,7 +991,7 @@ addElasticNet <- function(mixedPenalty,
     stop("mixedPenalty must be of class mixedPenalty. ",
          "These models can be created with the regularize() function.")
   if(!mixedPenalty$method == "glmnet"){
-    .printNote("Mixed penalty with addElasticNet is only supported for method = 'glmnet'. Switching optimizer to glmnet")
+    rlang::inform(c("Note","Mixed penalty with addElasticNet is only supported for method = 'glmnet'. Switching optimizer to glmnet"))
     mixedPenalty$method = "glmnet"
     mixedPenalty$control = controlGlmnet()
   }

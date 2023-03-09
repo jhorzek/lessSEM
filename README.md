@@ -104,9 +104,6 @@ cross-lagged panel model) in the package
 
 ``` r
 library(lessSEM)
-#> Loading required package: lavaan
-#> This is lavaan 0.6-14
-#> lavaan is FREE software! Please report any bugs.
 library(lavaan)
 
 # Identical to regsem, lessSEM builds on the lavaan

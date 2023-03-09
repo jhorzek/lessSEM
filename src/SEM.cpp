@@ -303,7 +303,7 @@ double SEMCpp::fit(){
   
   // step two: compute fit for each subset
   
-  for(int s = 0; s < data.nGroups; s++){
+  for(unsigned int s = 0; s < data.nGroups; s++){
     
     // convenient pointer to current subset:
     subset& currentSubset = data.dataSubsets.at(s);

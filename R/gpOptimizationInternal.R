@@ -52,7 +52,7 @@
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
   if(method == "glmnet" && any(control$initialHessian == "lavaan")) {
-    .printNote("Changing initialHessian from 'lavaan' to 'compute'")
+    rlang::inform(c("Note","Changing initialHessian from 'lavaan' to 'compute'"))
     control$initialHessian <- "compute"
   }
   
@@ -324,10 +324,10 @@
   if(!is.null(tuningParameters$nLambdas)){
     # for lasso type penalties, the maximal lambda value can be determined
     # automatically
-    .printNote(paste0(
+    rlang::inform(c("Note",paste0(
       "Automatically selecting the maximal lambda value. ",
       " \033[35mThis may fail if a model with all regularized parameters set to zero is not identified.\033[39m")
-    )
+    ))
     
     maxLambda <- .gpGetMaxLambda(regularizedModel,
                                  par,

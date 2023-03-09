@@ -237,23 +237,22 @@
     
     lavaanParameters <- getLavaanParameters(lavaanModel) 
     if((!lavaanModel@Options$meanstructure) && addMeans){
-      .printNote("Your lavaan model has no mean structure. Switching initialHessian from 'lavaan' to 'compute'.")
+      rlang::inform(c("Note","Your lavaan model has no mean structure. Switching initialHessian from 'lavaan' to 'compute'."))
       initialHessian <- "compute"
     }else if(!lavaanModel@Options$do.fit){
-      .printNote("Your lavaan model was not optimized. Switching initialHessian from 'lavaan' to 'compute'.")
+      rlang::inform(c("Note","Your lavaan model was not optimized. Switching initialHessian from 'lavaan' to 'compute'."))
       initialHessian <- "compute"
       
     }else if(any(!names(lavaanParameters) %in% names(rawParameters)) |
              any(!names(rawParameters) %in% names(lavaanParameters))
     ){
-      .printNote("Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'.")
+      rlang::inform(c("Note","Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'."))
       initialHessian <- "compute"
     }else{
       lavaanVcov <- suppressWarnings(try(lavaan::vcov(lavaanModel),
                                          silent = TRUE))
       if(is(lavaanVcov, "try-error")){
-        .printNote("Could not extract initial Hessian from lavaan. Switching to ",
-                   "initialHessian = 'compute'.")
+        rlang::inform(c("Note","Could not extract initial Hessian from lavaan. Switching to initialHessian = 'compute'."))
         initialHessian <- "compute"
         
       }else{

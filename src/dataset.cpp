@@ -6,7 +6,7 @@
 
 // add
 
-void dataset::addSubset(int N_,
+void dataset::addSubset(unsigned int N_,
                         arma::uvec persons_, // indices for which persons are in this subset
                         int observed_, // number of variables without missings
                         arma::uvec notMissing_, // vector with indices of non-missing values

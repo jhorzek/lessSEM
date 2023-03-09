@@ -9,7 +9,7 @@
 class dataset{
 public: 
   arma::mat rawData;
-  int nGroups = 0;
+  unsigned int nGroups = 0;
   std::vector<subset> dataSubsets;
   Rcpp::IntegerVector personInSubset; // tells us in which subset an individual is
 
@@ -17,7 +17,7 @@ public:
   dataset(){};
   
   // add
-  void addSubset(int N_,
+  void addSubset(unsigned int N_,
                  arma::uvec persons_, // numeric; indicates which persons are in this subset
                  int observed_, // number of variables without missings
                  arma::uvec notMissing_, // vector with indices of non-missing values
