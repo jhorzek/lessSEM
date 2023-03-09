@@ -7,7 +7,7 @@
 
 class subset{
 public: 
-  int N; // number of persons in this subset
+  unsigned int N; // number of persons in this subset
   arma::uvec persons;
   int observed; // number of variables without missings
   arma::uvec notMissing; // vector with indices of non-missing values
