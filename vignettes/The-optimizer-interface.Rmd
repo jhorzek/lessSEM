@@ -14,10 +14,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-So, you've decided to take a closer look at the optimization routines 
-implemented in **lessSEM**. That's awesome! The following document will 
-give you a short introduction to the general idea of how the optimizers
-were designed. It will not cover the optimizers themselves; here, we recommend
+**lessSEM** allows you to use its optimizers for your own functions or packages
+The following document will give you a short introduction to the general idea of how the optimizers
+were designed. If you are mostly interested in using the optimizers, please 
+refer to the `vignette("General-Purpose-Optimization", package = "lessSEM")`.
+
+We will not cover the optimizers themselves; here, we recommend
 reading the following articles:
 
 **GLMNET**: 
