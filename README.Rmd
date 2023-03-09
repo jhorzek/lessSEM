@@ -107,7 +107,7 @@ Finally, you will find templates for a selection of models which can be used wit
 
 # Example
 
-```{r, results = 'hide', fig.show='hide'}
+```{r, results = 'hide', fig.show='hide', message=FALSE}
 library(lessSEM)
 library(lavaan)
 
@@ -198,7 +198,7 @@ A thorough introduction is provided in ``vignette('Parameter-transformations', p
 As an example, we will test measurement invariance in the `PoliticalDemocracy`
 data set.
 
-```{r, results = 'hide', fig.show='hide'}
+```{r, results = 'hide', fig.show='hide', message=FALSE}
 library(lessSEM)
 library(lavaan)
 # we will use the PoliticalDemocracy from lavaan (see ?lavaan::sem)
@@ -249,7 +249,7 @@ lassoFit <- lasso(lavaanModel = fit,
 
 Finally, we can extract the best parameters:
 
-```{r, results = 'hide'}
+```{r, results = 'hide', message=FALSE}
 coef(lassoFit, criterion = "BIC")
 ```
 
@@ -266,13 +266,13 @@ Please be aware of that when using these features.
 **lessSEM** supports exporting specific models to **lavaan**. This can be very useful when plotting the 
 final model. 
 
-```{r, results = 'hide'}
+```{r, results = 'hide', message=FALSE}
 lavaanModel <- lessSEM2Lavaan(regularizedSEM = lsem, 
                               criterion = "BIC")
 ```
 
 The result can be plotted with, for instance, [**semPlot**](https://github.com/SachaEpskamp/semPlot):
-```{r, results = 'hide', fig.show='hide'}
+```{r, results = 'hide', fig.show='hide', message=FALSE}
 library(semPlot)
 semPaths(lavaanModel,
          what = "est",
@@ -300,7 +300,7 @@ To provide a short example, we will regularize the loadings and the regression
 parameters of the Political Democracy data set with different penalties. The 
 following script is adapted from `?lavaan::sem`.
 
-```{r, results = 'hide'}
+```{r, results = 'hide', message=FALSE}
 model <- ' 
   # latent variable definitions
      ind60 =~ x1 + x2 + x3 + c2*y2 + c3*y3 + c4*y4
@@ -329,7 +329,7 @@ fitMp <- lavaanModel |>
 
 The best model according to the BIC can be extracted with:
 
-```{r, results = 'hide'}
+```{r, results = 'hide', message=FALSE}
 coef(fitMp, criterion = "BIC")
 ```
 
