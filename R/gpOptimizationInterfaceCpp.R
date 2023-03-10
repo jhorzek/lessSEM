@@ -62,6 +62,7 @@
 #' @returns Object of class gpRegularized
 
 #' @examples 
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -173,6 +174,7 @@
 #' #            intercept = TRUE,
 #' #            standardize = FALSE))[,2]
 #' #l1@parameters[2,]
+#' }
 #' @export
 gpLassoCpp <- function(par,
                     regularized,
@@ -1120,7 +1122,8 @@ gpCappedL1Cpp <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Object of class gpRegularized
-#' @examples  
+#' @examples
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1224,7 +1227,7 @@ gpCappedL1Cpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' l@parameters
-#' 
+#' }
 #' @export
 gpLspCpp <- function(par,
                   fn,
@@ -1321,6 +1324,7 @@ gpLspCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1424,6 +1428,7 @@ gpLspCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' m@parameters
+#' }
 #' @export
 gpMcpCpp <- function(par,
                   fn,
@@ -1527,6 +1532,7 @@ gpMcpCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1630,6 +1636,7 @@ gpMcpCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' s@parameters
+#' }
 #' @export
 gpScadCpp <- function(par,
                    fn,
