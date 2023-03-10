@@ -1,10 +1,10 @@
 ## R CMD check results
 
-0 errors | 0 warnings | 7 notes
+0 errors | 0 warnings | 5 notes
 
 * This is a new release.
 
-## Comments
+# Comments
 
 Some functions in the package allow users to compile user-specified functions 
 with Rcpp. These functions are compiled using `#include <RcppArmadillo.h>` which
