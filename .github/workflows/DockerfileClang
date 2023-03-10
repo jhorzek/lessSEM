@@ -1,4 +1,4 @@
-FROM rhub/fedora-clang-devel
+FROM rhub/ubuntu-gcc-devel
 
 # install dependencies of dependencies ...
 RUN dnf update && dnf install -y librsvg2-dev cargo libxt-dev libudunits2-dev qpdf cmake
