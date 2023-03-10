@@ -1,0 +1,24 @@
+# https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#upgrading-a-workflow-that-accesses-a-registry-using-a-personal-access-token
+name: Docker Image For Dependencies using clang
+
+on:
+  workflow_dispatch
+  
+jobs:
+  push:
+    runs-on: fedora-latest
+    permissions:
+      packages: write
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build Docker with Dependencies
+      run: ls && docker build . --file .github/workflows/DockerfileClang --tag ghcr.io/jhorzek/lesssem_dependencies_clang:latest
+    
+    - name: Log in to registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+ 
+    - name: Push Package
+      run: docker push ghcr.io/jhorzek/lesssem_dependencies_clang:latest
