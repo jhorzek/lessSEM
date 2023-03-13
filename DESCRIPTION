@@ -12,9 +12,9 @@ Authors@R: c(person(given   = "Jannik H.", family = "Orzek",
 Maintainer: Jannik H. Orzek <orzek@mpib-berlin.mpg.de>
 Description: Provides regularized structural equation modeling 
   (regularized SEM) with non-smooth penalty functions (e.g., lasso) building 
-  on lavaan. The package is heavily inspired by the 
-  [regsem](<https://github.com/Rjacobucci/regsem>) and 
-  [lslx](<https://github.com/psyphh/lslx>) packages. See ?lessSEM::lessSEM for an introduction.
+  on 'lavaan'. The package is heavily inspired by the 
+  ['regsem'](<https://github.com/Rjacobucci/regsem>) and 
+  ['lslx'](<https://github.com/psyphh/lslx>) packages.
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.2.3
