@@ -188,7 +188,11 @@ gradientFunPtr_t ', gradFunName,'Ptr() {
 #' @import knitr
 .knitVignettes <- function(dir = "vignettes"){
   
-  files <- list.files(paste0(dir, "/"))
+  currentDit <- getwd()
+  
+  setwd(dir)
+  
+  files <- list.files()
   files <- files[grepl(pattern = ".lessmd$", 
                        x = files)]
   
@@ -199,8 +203,9 @@ gradientFunPtr_t ', gradFunName,'Ptr() {
     outFile <- gsub(pattern = ".lessmd$", 
                     replacement = "", 
                     x = f)
-    knitr::knit(input = paste0(dir, "/",f), 
-                output = paste0(dir, "/", outFile, ".Rmd"))
+    knitr::knit(input = paste0(f), 
+                output = paste0(outFile, ".Rmd"))
   }
   
+  setwd(currentDit)
 }
