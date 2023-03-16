@@ -7,7 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 **lessSEM** allows you to use its optimizers for your own functions or packages
 The following document will give you a short introduction to the general idea of how the optimizers
@@ -67,8 +72,7 @@ We will start with glmnet (see function glmnet in the file inst/include/glmnet_c
 This function is called as follows:
 
 
-
-```r
+```{R,eval=FALSE}
 inline lessSEM::fitResults glmnet(model& model_, 
                                   Rcpp::NumericVector startingValuesRcpp,
                                   penaltyLASSOGlmnet& penalty_,
@@ -119,15 +123,13 @@ Finally, there is the controlGLMNET argument. This argument lets us fine tune th
 optimizer. To use the control argument, create a new control object in C++ as
 follows:
 
-
-```r
+```{r,eval=FALSE}
 lessSEM::controlGLMNET myControlObject = lessSEM::controlGlmnetDefault();
 ```
 
 Now, you can tweak each element of myControlObject; e.g.,
 
-
-```r
+```{r,eval=FALSE}
 myControlObject.maxIterOut = 100 // only 100 outer iterations
 ```
 
@@ -153,8 +155,7 @@ normal fitting function. That is, only the non-differentiable part gets a specia
 treatment, while the differentiable part is simply added to the differntiable
 $l(\pmb\theta)$. To give an example:
 
-
-```r
+```{r, eval = FALSE}
 gradients_kMinus1 = model_.gradients(parameters_kMinus1, parameterLabels) +
       smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
 ```
@@ -175,8 +176,7 @@ glmnet optimizer above.
 First, let's have a look at the ista function located in inst/include/ista_class.hpp.
 This function is called with:
 
-
-```r
+```{r,eval = FALSE}
 template<typename T, typename U> // T is the type of the tuning parameters
 inline lessSEM::fitResults ista(
     model& model_, 
@@ -234,15 +234,13 @@ Finally, there is the control argument. This argument lets us fine tune the
 optimizer. To use the control argument, create a new control object in C++ as
 follows:
 
-
-```r
+```{r,eval=FALSE}
 lessSEM::control myControlObject = lessSEM::controlDefault();
 ```
 
 Now, you can tweak each element of myControlObject; e.g.,
 
-
-```r
+```{r,eval=FALSE}
 myControlObject.L0 = .9
 ```
 

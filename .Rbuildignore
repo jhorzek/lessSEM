@@ -2,6 +2,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
+^.*\.lessmd$
 ^doc$
 ^Meta$
 ^_pkgdown\.yml$

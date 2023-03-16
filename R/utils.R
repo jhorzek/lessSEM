@@ -174,3 +174,33 @@ gradientFunPtr_t ', gradFunName,'Ptr() {
   )
   return(makePtrsSyntax)
 }
+
+
+#' .knitVignettes
+#' 
+#' Takes vignettes of format .lessmd and knits them to .Rmd files to be used
+#' as vignettes. The Reason for this two-step approach is to reduce the runtime
+#' on CRAN. The function is adapted from Stefan Kloppenborg at 
+#' https://www.kloppenborg.ca/2021/06/long-running-vignettes/
+#' 
+#' @param dir directory, where the vignettes are located.
+#' @return creates Rmd vignettes
+#' @import knitr
+.knitVignettes <- function(dir = "vignettes"){
+  
+  files <- list.files(paste0(dir, "/"))
+  files <- files[grepl(pattern = ".lessmd$", 
+                       x = files)]
+  
+  for(f in files){
+    cat("Knitting", f, "\n")
+    
+    # knit file to markdown
+    outFile <- gsub(pattern = ".lessmd$", 
+                    replacement = "", 
+                    x = f)
+    knitr::knit(input = paste0(dir, "/",f), 
+                output = paste0(dir, "/", outFile, ".Rmd"))
+  }
+  
+}
