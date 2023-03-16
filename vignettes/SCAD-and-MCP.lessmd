@@ -7,7 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 We implemented variants of the iterative shrinkage and thresholding 
 (e.g., Beck & Teboulle, 2009; Gong et al., 2013; Parikh & Boyd, 2013) optimizer 

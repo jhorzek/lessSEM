@@ -7,14 +7,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
 
-```{r setup}
+
+
+```r
 library(lessSEM)
 ```
 
@@ -27,7 +23,8 @@ be relatively easy.
 
 We will use the political democracy example from the sem documentation of lavaan  in the following:
 
-```{r}
+
+```r
 library(lavaan)
 # see ?lavaan::sem
 model <- ' 
@@ -57,7 +54,8 @@ To translate the model from lavaan to lessSEM, we have to use the `lessSEM:::.SE
 Importantly, this function is not exported by lessSEM. That is, you _must_ use the 
 three colons as shown above to access this function!
 
-```{r, error=TRUE}
+
+```r
 library(lessSEM)
 
 # won't work:
@@ -67,8 +65,21 @@ mySEM <- .SEMFromLavaan(lavaanModel = lavaanModel)
 mySEM <- lessSEM:::.SEMFromLavaan(lavaanModel = lavaanModel)
 ```
 
-```{r}
+
+```r
 show(mySEM)
+#> Internal C++ model representation of lessSEM
+#> Parameters:
+#>    ind60=~x2    ind60=~x3            a            b            c  dem60~ind60  dem65~ind60  dem65~dem60       y1~~y5       y2~~y4 
+#>    2.1796566    1.8182100    1.1907820    1.1745407    1.2509789    1.4713302    0.6004746    0.8650430    0.5825389    1.4402477 
+#>       y2~~y6       y3~~y7       y4~~y8       y6~~y8       x1~~x1       x2~~x2       x3~~x3       y1~~y1       y2~~y2       y3~~y3 
+#>    2.1829448    0.7115901    0.3627964    1.3717741    0.0813878    0.1204271    0.4666596    1.8546417    7.5813926    4.9556766 
+#>       y4~~y4       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65         x1~1         x2~1 
+#>    3.2245521    2.3130404    4.9681408    3.5600367    3.3076854    0.4485989    3.8753039    0.1644633    5.0543838    4.7921946 
+#>         x3~1         y1~1         y2~1         y3~1         y4~1         y5~1         y6~1         y7~1         y8~1 
+#>    3.5576898    5.4646667    4.2564429    6.5631103    4.4525330    5.1362519    2.9780741    6.1962639    4.0433897 
+#> 
+#> -2 log-Likelihood: 3097.6361581071
 ```
 
 
@@ -98,13 +109,33 @@ The mySEM object is implemented in C++ to make everything run faster.
 The underlying class is `Rcpp_SEMCpp` and was created using the wonderful
 [Rcpp](https://github.com/RcppCore/Rcpp) and 
 [RcppArmadillo](https://github.com/RcppCore/RcppArmadillo) packages.
-```{r}
+
+```r
 class(mySEM)
+#> [1] "Rcpp_SEMCpp"
+#> attr(,"package")
+#> [1] "lessSEM"
 ```
 
 You can access its elements using the dollar-operator:
-```{r}
+
+```r
 mySEM$A
+#>            [,1]     [,2]     [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
+#>  [1,] 0.0000000 0.000000 0.000000    0    0    0    0    0    0     0     0     0     0     0
+#>  [2,] 1.4713302 0.000000 0.000000    0    0    0    0    0    0     0     0     0     0     0
+#>  [3,] 0.6004746 0.865043 0.000000    0    0    0    0    0    0     0     0     0     0     0
+#>  [4,] 1.0000000 0.000000 0.000000    0    0    0    0    0    0     0     0     0     0     0
+#>  [5,] 2.1796566 0.000000 0.000000    0    0    0    0    0    0     0     0     0     0     0
+#>  [6,] 1.8182100 0.000000 0.000000    0    0    0    0    0    0     0     0     0     0     0
+#>  [7,] 0.0000000 1.000000 0.000000    0    0    0    0    0    0     0     0     0     0     0
+#>  [8,] 0.0000000 1.190782 0.000000    0    0    0    0    0    0     0     0     0     0     0
+#>  [9,] 0.0000000 1.174541 0.000000    0    0    0    0    0    0     0     0     0     0     0
+#> [10,] 0.0000000 1.250979 0.000000    0    0    0    0    0    0     0     0     0     0     0
+#> [11,] 0.0000000 0.000000 1.000000    0    0    0    0    0    0     0     0     0     0     0
+#> [12,] 0.0000000 0.000000 1.190782    0    0    0    0    0    0     0     0     0     0     0
+#> [13,] 0.0000000 0.000000 1.174541    0    0    0    0    0    0     0     0     0     0     0
+#> [14,] 0.0000000 0.000000 1.250979    0    0    0    0    0    0     0     0     0     0     0
 ```
 
 Note that, identical to regsem, the model is implemented with the RAM notation (McArdle & McDonald, 1984). 
@@ -116,8 +147,17 @@ we will focus on how to get and set the parameters, fit the model, get its gradi
 
 The parameters of the model can be accessed with the `lessSEM:::.getParameters` function:
 
-```{r}
+
+```r
 (myParameters <- lessSEM:::.getParameters(mySEM))
+#>    ind60=~x2    ind60=~x3            a            b            c  dem60~ind60  dem65~ind60  dem65~dem60       y1~~y5       y2~~y4 
+#>    2.1796566    1.8182100    1.1907820    1.1745407    1.2509789    1.4713302    0.6004746    0.8650430    0.5825389    1.4402477 
+#>       y2~~y6       y3~~y7       y4~~y8       y6~~y8       x1~~x1       x2~~x2       x3~~x3       y1~~y1       y2~~y2       y3~~y3 
+#>    2.1829448    0.7115901    0.3627964    1.3717741    0.0813878    0.1204271    0.4666596    1.8546417    7.5813926    4.9556766 
+#>       y4~~y4       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65         x1~1         x2~1 
+#>    3.2245521    2.3130404    4.9681408    3.5600367    3.3076854    0.4485989    3.8753039    0.1644633    5.0543838    4.7921946 
+#>         x3~1         y1~1         y2~1         y3~1         y4~1         y5~1         y6~1         y7~1         y8~1 
+#>    3.5576898    5.4646667    4.2564429    6.5631103    4.4525330    5.1362519    2.9780741    6.1962639    4.0433897
 ```
 
 The naming is identical to that of the lavaanModel. By default, the parameters are
@@ -128,8 +168,49 @@ that all variances are positive, we use a transformation: Say we are interested 
 the variance `ind60~~ind60`. Internally, there is a parameter called `x1~~x1` and this
 parameter has a `rawValue` and a transformed value (called just `value`). 
 We can access these values with:
-```{r}
+
+```r
 mySEM$getParameters()
+#>           label     value   rawValue location isTransformation
+#> 1     ind60=~x2 2.1796566  2.1796566  Amatrix            FALSE
+#> 2     ind60=~x3 1.8182100  1.8182100  Amatrix            FALSE
+#> 3             a 1.1907820  1.1907820  Amatrix            FALSE
+#> 4             b 1.1745407  1.1745407  Amatrix            FALSE
+#> 5             c 1.2509789  1.2509789  Amatrix            FALSE
+#> 6   dem60~ind60 1.4713302  1.4713302  Amatrix            FALSE
+#> 7   dem65~ind60 0.6004746  0.6004746  Amatrix            FALSE
+#> 8   dem65~dem60 0.8650430  0.8650430  Amatrix            FALSE
+#> 9        y1~~y5 0.5825389  0.5825389  Smatrix            FALSE
+#> 10       y2~~y4 1.4402477  1.4402477  Smatrix            FALSE
+#> 11       y2~~y6 2.1829448  2.1829448  Smatrix            FALSE
+#> 12       y3~~y7 0.7115901  0.7115901  Smatrix            FALSE
+#> 13       y4~~y8 0.3627964  0.3627964  Smatrix            FALSE
+#> 14       y6~~y8 1.3717741  1.3717741  Smatrix            FALSE
+#> 15       x1~~x1 0.0813878 -2.5085299  Smatrix            FALSE
+#> 16       x2~~x2 0.1204271 -2.1167106  Smatrix            FALSE
+#> 17       x3~~x3 0.4666596 -0.7621551  Smatrix            FALSE
+#> 18       y1~~y1 1.8546417  0.6176915  Smatrix            FALSE
+#> 19       y2~~y2 7.5813926  2.0256969  Smatrix            FALSE
+#> 20       y3~~y3 4.9556766  1.6005337  Smatrix            FALSE
+#> 21       y4~~y4 3.2245521  1.1707941  Smatrix            FALSE
+#> 22       y5~~y5 2.3130404  0.8385629  Smatrix            FALSE
+#> 23       y6~~y6 4.9681408  1.6030457  Smatrix            FALSE
+#> 24       y7~~y7 3.5600367  1.2697708  Smatrix            FALSE
+#> 25       y8~~y8 3.3076854  1.1962487  Smatrix            FALSE
+#> 26 ind60~~ind60 0.4485989 -0.8016262  Smatrix            FALSE
+#> 27 dem60~~dem60 3.8753039  1.3546241  Smatrix            FALSE
+#> 28 dem65~~dem65 0.1644633 -1.8050678  Smatrix            FALSE
+#> 29         x1~1 5.0543838  5.0543838  Mvector            FALSE
+#> 30         x2~1 4.7921946  4.7921946  Mvector            FALSE
+#> 31         x3~1 3.5576898  3.5576898  Mvector            FALSE
+#> 32         y1~1 5.4646667  5.4646667  Mvector            FALSE
+#> 33         y2~1 4.2564429  4.2564429  Mvector            FALSE
+#> 34         y3~1 6.5631103  6.5631103  Mvector            FALSE
+#> 35         y4~1 4.4525330  4.4525330  Mvector            FALSE
+#> 36         y5~1 5.1362519  5.1362519  Mvector            FALSE
+#> 37         y6~1 2.9780741  2.9780741  Mvector            FALSE
+#> 38         y7~1 6.1962639  6.1962639  Mvector            FALSE
+#> 39         y8~1 4.0433897  4.0433897  Mvector            FALSE
 ```
 
 For all parameters which are _not_ variances, the `rawValue` will be identical to
@@ -137,8 +218,17 @@ the `value`. For variances, the `rawValue` can be any real value. The `value` it
 is then computed as $e^{\text{rawValue}}$; this ensures that the `value` is always
 positive. You can access the raw values as follows:
 
-```{r}
+
+```r
 lessSEM:::.getParameters(mySEM, raw = TRUE)
+#>    ind60=~x2    ind60=~x3            a            b            c  dem60~ind60  dem65~ind60  dem65~dem60       y1~~y5       y2~~y4 
+#>    2.1796566    1.8182100    1.1907820    1.1745407    1.2509789    1.4713302    0.6004746    0.8650430    0.5825389    1.4402477 
+#>       y2~~y6       y3~~y7       y4~~y8       y6~~y8       x1~~x1       x2~~x2       x3~~x3       y1~~y1       y2~~y2       y3~~y3 
+#>    2.1829448    0.7115901    0.3627964    1.3717741   -2.5085299   -2.1167106   -0.7621551    0.6176915    2.0256969    1.6005337 
+#>       y4~~y4       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65         x1~1         x2~1 
+#>    1.1707941    0.8385629    1.6030457    1.2697708    1.1962487   -0.8016262    1.3546241   -1.8050678    5.0543838    4.7921946 
+#>         x3~1         y1~1         y2~1         y3~1         y4~1         y5~1         y6~1         y7~1         y8~1 
+#>    3.5576898    5.4646667    4.2564429    6.5631103    4.4525330    5.1362519    2.9780741    6.1962639    4.0433897
 ```
 
 Note that the raw value for `ind60~~ind60` is negative while the transformed value is positive.
@@ -148,7 +238,8 @@ Note that the raw value for `ind60~~ind60` is negative while the transformed val
 Being able to change the parameters is essential for fitting a model. In lessSEM,
 this is facilitated by the `lessSEM:::.setParameters` function:
 
-```{r}
+
+```r
 # first, let's change one of the parameters:
 myParameters["a"] <- 1
 
@@ -163,7 +254,8 @@ Note that we had to specify if the parameters in `myParameters` are given in raw
 Here, we already used the transformed parameters, so we set `raw = FALSE`. Using
 the raw parameters instead would look as follows:
 
-```{r}
+
+```r
 myParameters <- lessSEM:::.getParameters(mySEM, raw = TRUE)
 # first, let's change one of the parameters:
 myParameters["a"] <- 1
@@ -177,8 +269,17 @@ mySEM <- lessSEM:::.setParameters(SEM = mySEM, # the model
 
 Let's check the parameters:
 
-```{r}
+
+```r
 lessSEM:::.getParameters(mySEM)
+#>    ind60=~x2    ind60=~x3            a            b            c  dem60~ind60  dem65~ind60  dem65~dem60       y1~~y5       y2~~y4 
+#>    2.1796566    1.8182100    1.0000000    1.1745407    1.2509789    1.4713302    0.6004746    0.8650430    0.5825389    1.4402477 
+#>       y2~~y6       y3~~y7       y4~~y8       y6~~y8       x1~~x1       x2~~x2       x3~~x3       y1~~y1       y2~~y2       y3~~y3 
+#>    2.1829448    0.7115901    0.3627964    1.3717741    0.0813878    0.1204271    0.4666596    1.8546417    7.5813926    4.9556766 
+#>       y4~~y4       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65         x1~1         x2~1 
+#>    3.2245521    2.3130404    4.9681408    3.5600367    3.3076854    0.4485989    3.8753039    0.1644633    5.0543838    4.7921946 
+#>         x3~1         y1~1         y2~1         y3~1         y4~1         y5~1         y6~1         y7~1         y8~1 
+#>    3.5576898    5.4646667    4.2564429    6.5631103    4.4525330    5.1362519    2.9780741    6.1962639    4.0433897
 ```
 
 Note that `a` now has the value `1`. 
@@ -188,14 +289,17 @@ Note that `a` now has the value `1`.
 
 To compute the -2-log-likelihood of the model, we use the `lessSEM:::.fit` function:
 
-```{r}
+
+```r
 mySEM <- lessSEM:::.fit(SEM = mySEM)
 ```
 
 The -2-log-likelihood can be accessed with:
 
-```{r}
+
+```r
 mySEM$m2LL
+#> [1] 3100.741
 ```
 
 ## Computing the gradients
@@ -203,13 +307,35 @@ mySEM$m2LL
 To compute the gradients, use the `lessSEM:::.getGradients` function. Gradients
 can be computed for the transformed parameters
 
-```{r}
+
+```r
 lessSEM:::.getGradients(mySEM, raw = FALSE)
+#>     ind60=~x2     ind60=~x3             a             b             c   dem60~ind60   dem65~ind60   dem65~dem60        y1~~y5 
+#>   0.361097622   0.105564095 -32.837359814   2.453232158  17.076222049  -0.450648533  -1.078272542  -5.357920036   0.004650747 
+#>        y2~~y4        y2~~y6        y3~~y7        y4~~y8        y6~~y8        x1~~x1        x2~~x2        x3~~x3        y1~~y1 
+#>  -0.157923486  -0.567076177   0.161163293   0.266869495  -0.271533827   0.230054158   0.306685898  -0.093753843  -0.015516535 
+#>        y2~~y2        y3~~y3        y4~~y4        y5~~y5        y6~~y6        y7~~y7        y8~~y8  ind60~~ind60  dem60~~dem60 
+#>  -0.343353554   0.099359383   0.137753880   0.131454473  -0.330083693   0.073331567   0.148964628  -0.103960291  -0.252921392 
+#>  dem65~~dem65          x1~1          x2~1          x3~1          y1~1          y2~1          y3~1          y4~1          y5~1 
+#>  -1.955349241   0.000000000   0.000000000   0.000000000   0.000000000   0.000000000   0.000000000   0.000000000   0.000000000 
+#>          y6~1          y7~1          y8~1 
+#>   0.000000000   0.000000000   0.000000000
 ```
 or for the raw parameters
 
-```{r}
+
+```r
 lessSEM:::.getGradients(mySEM, raw = TRUE)
+#>     ind60=~x2     ind60=~x3             a             b             c   dem60~ind60   dem65~ind60   dem65~dem60        y1~~y5 
+#>   0.361097622   0.105564095 -32.837359814   2.453232158  17.076222049  -0.450648533  -1.078272542  -5.357920036   0.004650747 
+#>        y2~~y4        y2~~y6        y3~~y7        y4~~y8        y6~~y8        x1~~x1        x2~~x2        x3~~x3        y1~~y1 
+#>  -0.157923486  -0.567076177   0.161163293   0.266869495  -0.271533827   0.018723602   0.036933297  -0.043751134  -0.028777612 
+#>        y2~~y2        y3~~y3        y4~~y4        y5~~y5        y6~~y6        y7~~y7        y8~~y8  ind60~~ind60  dem60~~dem60 
+#>  -2.603098086   0.492392971   0.444194569   0.304059508  -1.639902248   0.261063066   0.492728130  -0.046636468  -0.980147244 
+#>  dem65~~dem65          x1~1          x2~1          x3~1          y1~1          y2~1          y3~1          y4~1          y5~1 
+#>  -0.321583201   0.000000000   0.000000000   0.000000000   0.000000000   0.000000000   0.000000000   0.000000000   0.000000000 
+#>          y6~1          y7~1          y8~1 
+#>   0.000000000   0.000000000   0.000000000
 ```
 
 ## Computing the Hessian
@@ -217,12 +343,14 @@ lessSEM:::.getGradients(mySEM, raw = TRUE)
 To compute the Hessian, use the `lessSEM:::.getHessian` function. The Hessian
 can be computed for the transformed parameters
 
-```{r, eval = FALSE}
+
+```r
 lessSEM:::.getHessian(mySEM, raw = FALSE)
 ```
 or for the raw parameters
 
-```{r, eval = FALSE}
+
+```r
 lessSEM:::.getHessian(mySEM, raw = TRUE)
 ```
 
@@ -232,12 +360,14 @@ To compute the scores (derivative of the -2-log-likelihood for each person),
 use the `lessSEM:::.getScores` function. The scores
 can be computed for the transformed parameters
 
-```{r, eval = FALSE}
+
+```r
 lessSEM:::.getScores(mySEM, raw = FALSE)
 ```
 or for the raw parameters
 
-```{r, eval = FALSE}
+
+```r
 lessSEM:::.getScores(mySEM, raw = TRUE)
 ```
 
@@ -252,8 +382,13 @@ optimization. Using the non-raw parameters can cause errors and unnecessary head
 
 Let's have a look at the `optim` function:
 
-```{r}
+
+```r
 args(optim)
+#> function (par, fn, gr = NULL, ..., method = c("Nelder-Mead", 
+#>     "BFGS", "CG", "L-BFGS-B", "SANN", "Brent"), lower = -Inf, 
+#>     upper = Inf, control = list(), hessian = FALSE) 
+#> NULL
 ```
 
 Note that the function requires a `par` argument - the parameter estimates - 
@@ -267,11 +402,20 @@ parameters, a SEM, and an argument specifying if the parameters are in raw forma
 
 We can use this in optim as follows:
 
-```{r}
+
+```r
 # let's get the starting values:
 par <- lessSEM:::.getParameters(mySEM, raw = TRUE) # important: Use raw = TRUE!
 
 print(par)
+#>    ind60=~x2    ind60=~x3            a            b            c  dem60~ind60  dem65~ind60  dem65~dem60       y1~~y5       y2~~y4 
+#>    2.1796566    1.8182100    1.0000000    1.1745407    1.2509789    1.4713302    0.6004746    0.8650430    0.5825389    1.4402477 
+#>       y2~~y6       y3~~y7       y4~~y8       y6~~y8       x1~~x1       x2~~x2       x3~~x3       y1~~y1       y2~~y2       y3~~y3 
+#>    2.1829448    0.7115901    0.3627964    1.3717741   -2.5085299   -2.1167106   -0.7621551    0.6176915    2.0256969    1.6005337 
+#>       y4~~y4       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65         x1~1         x2~1 
+#>    1.1707941    0.8385629    1.6030457    1.2697708    1.1962487   -0.8016262    1.3546241   -1.8050678    5.0543838    4.7921946 
+#>         x3~1         y1~1         y2~1         y3~1         y4~1         y5~1         y6~1         y7~1         y8~1 
+#>    3.5576898    5.4646667    4.2564429    6.5631103    4.4525330    5.1362519    2.9780741    6.1962639    4.0433897
 
 opt <- optim(par = par, 
              fn = lessSEM:::.fitFunction, # use the fitting function wrapper
@@ -281,37 +425,108 @@ opt <- optim(par = par,
              method = "BFGS" # use the BFGS optimizer
 )
 print(opt$par)
+#>    ind60=~x2    ind60=~x3            a            b            c  dem60~ind60  dem65~ind60  dem65~dem60       y1~~y5       y2~~y4 
+#>    2.1791276    1.8180458    1.1909397    1.1740909    1.2511328    1.4725867    0.6007137    0.8649836    0.5817910    1.4336940 
+#>       y2~~y6       y3~~y7       y4~~y8       y6~~y8       x1~~x1       x2~~x2       x3~~x3       y1~~y1       y2~~y2       y3~~y3 
+#>    2.1828828    0.7229781    0.3605874    1.3774602   -2.5093044   -2.1126718   -0.7633056    0.6178333    2.0246995    1.6022529 
+#>       y4~~y4       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65         x1~1         x2~1 
+#>    1.1690474    0.8385775    1.6039528    1.2711405    1.1971146   -0.8013687    1.3542390   -1.8057174    5.0543838    4.7921946 
+#>         x3~1         y1~1         y2~1         y3~1         y4~1         y5~1         y6~1         y7~1         y8~1 
+#>    3.5576898    5.4646667    4.2564429    6.5631103    4.4525330    5.1362519    2.9780741    6.1962639    4.0433897
 ```
 
 Note that the parameter `a` is now back at the maximum likelihood estimate from before.
 However, all parameters are still in raw format. To get the transformed parameters,
 let's take one more step:
 
-```{r}
+
+```r
 mySEM <- lessSEM:::.setParameters(SEM = mySEM, # the model
                                   labels = names(opt$par), # names of the parameters
                                   values = opt$par, # values of the parameters
                                   raw = TRUE)
 print(lessSEM:::.getParameters(mySEM, raw = FALSE))
+#>    ind60=~x2    ind60=~x3            a            b            c  dem60~ind60  dem65~ind60  dem65~dem60       y1~~y5       y2~~y4 
+#>   2.17912764   1.81804575   1.19093968   1.17409087   1.25113276   1.47258673   0.60071368   0.86498364   0.58179103   1.43369401 
+#>       y2~~y6       y3~~y7       y4~~y8       y6~~y8       x1~~x1       x2~~x2       x3~~x3       y1~~y1       y2~~y2       y3~~y3 
+#>   2.18288278   0.72297808   0.36058737   1.37746019   0.08132479   0.12091448   0.46612308   1.85490471   7.57383439   4.96420359 
+#>       y4~~y4       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65         x1~1         x2~1 
+#>   3.21892497   2.31307420   4.97264951   3.56491599   3.31055101   0.44871438   3.87381195   0.16435650   5.05438384   4.79219463 
+#>         x3~1         y1~1         y2~1         y3~1         y4~1         y5~1         y6~1         y7~1         y8~1 
+#>   3.55768979   5.46466667   4.25644288   6.56311025   4.45253304   5.13625192   2.97807408   6.19626389   4.04338968
 ```
 
 Compare those to the parameter estimates from **lavaan**:
 
-```{r}
+
+```r
 coef(lavaanModel)
+#>    ind60=~x2    ind60=~x3            a            b            c            a            b            c  dem60~ind60  dem65~ind60 
+#>        2.180        1.818        1.191        1.175        1.251        1.191        1.175        1.251        1.471        0.600 
+#>  dem65~dem60       y1~~y5       y2~~y4       y2~~y6       y3~~y7       y4~~y8       y6~~y8       x1~~x1       x2~~x2       x3~~x3 
+#>        0.865        0.583        1.440        2.183        0.712        0.363        1.372        0.081        0.120        0.467 
+#>       y1~~y1       y2~~y2       y3~~y3       y4~~y4       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 
+#>        1.855        7.581        4.956        3.225        2.313        4.968        3.560        3.308        0.449        3.875 
+#> dem65~~dem65 
+#>        0.164
 ```
 
 
 Finally, we can compute the standard errors:
 
-```{r}
+
+```r
 lessSEM:::.standardErrors(SEM = mySEM, raw = FALSE)
+#>    ind60=~x2    ind60=~x3            a            b            c  dem60~ind60  dem65~ind60  dem65~dem60       y1~~y5       y2~~y4 
+#>   0.13885220   0.15204331   0.14166120   0.11987057   0.12295636   0.39139697   0.23828913   0.07567860   0.36462027   0.68977246 
+#>       y2~~y6       y3~~y7       y4~~y8       y6~~y8       x1~~x1       x2~~x2       x3~~x3       y1~~y1       y2~~y2       y3~~y3 
+#>   0.73096921   0.62119518   0.46062833   0.57969391   0.01968652   0.06991196   0.08897395   0.45717112   1.34332165   0.96373268 
+#>       y4~~y4       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65         x1~1         x2~1 
+#>   0.74092220   0.48364101   0.89600782   0.73922563   0.71425329   0.08675480   0.88802928   0.23331748   0.08406657   0.17326967 
+#>         x3~1         y1~1         y2~1         y3~1         y4~1         y5~1         y6~1         y7~1         y8~1 
+#>   0.16121433   0.29892606   0.43891242   0.39404806   0.37957637   0.30446534   0.39247640   0.36442149   0.37545879
 ```
 
 Let's compare this to **lavaan** again:
 
-```{r}
+
+```r
 parameterEstimates(lavaanModel)[,1:6]
+#>      lhs op   rhs label   est    se
+#> 1  ind60 =~    x1       1.000 0.000
+#> 2  ind60 =~    x2       2.180 0.138
+#> 3  ind60 =~    x3       1.818 0.152
+#> 4  dem60 =~    y1       1.000 0.000
+#> 5  dem60 =~    y2     a 1.191 0.139
+#> 6  dem60 =~    y3     b 1.175 0.120
+#> 7  dem60 =~    y4     c 1.251 0.117
+#> 8  dem65 =~    y5       1.000 0.000
+#> 9  dem65 =~    y6     a 1.191 0.139
+#> 10 dem65 =~    y7     b 1.175 0.120
+#> 11 dem65 =~    y8     c 1.251 0.117
+#> 12 dem60  ~ ind60       1.471 0.392
+#> 13 dem65  ~ ind60       0.600 0.226
+#> 14 dem65  ~ dem60       0.865 0.075
+#> 15    y1 ~~    y5       0.583 0.356
+#> 16    y2 ~~    y4       1.440 0.689
+#> 17    y2 ~~    y6       2.183 0.737
+#> 18    y3 ~~    y7       0.712 0.611
+#> 19    y4 ~~    y8       0.363 0.444
+#> 20    y6 ~~    y8       1.372 0.577
+#> 21    x1 ~~    x1       0.081 0.019
+#> 22    x2 ~~    x2       0.120 0.070
+#> 23    x3 ~~    x3       0.467 0.090
+#> 24    y1 ~~    y1       1.855 0.433
+#> 25    y2 ~~    y2       7.581 1.366
+#> 26    y3 ~~    y3       4.956 0.956
+#> 27    y4 ~~    y4       3.225 0.723
+#> 28    y5 ~~    y5       2.313 0.479
+#> 29    y6 ~~    y6       4.968 0.921
+#> 30    y7 ~~    y7       3.560 0.710
+#> 31    y8 ~~    y8       3.308 0.704
+#> 32 ind60 ~~ ind60       0.449 0.087
+#> 33 dem60 ~~ dem60       3.875 0.866
+#> 34 dem65 ~~ dem65       0.164 0.227
 ```
 
 ## References
