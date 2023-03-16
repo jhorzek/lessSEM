@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.7</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,10 +95,7 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: lavaan</span></span>
-<span><span class="co">#&gt; This is lavaan 0.6-14</span></span>
-<span><span class="co">#&gt; lavaan is FREE software! Please report any bugs.</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span></code></pre></div>
 <p>The lessSEM package comes with a custom implementation of structural
 equation models (SEM). This implementation supports
 full-information-maximum-likelihood computation in case of missing data
@@ -142,7 +139,6 @@ three colons as shown above to access this function!</p>
 <span></span>
 <span><span class="co"># won't work:</span></span>
 <span><span class="va">mySEM</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dot-SEMFromLavaan.html">.SEMFromLavaan</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in .SEMFromLavaan(lavaanModel = lavaanModel): could not find function ".SEMFromLavaan"</span></span>
 <span></span>
 <span><span class="co"># will work:</span></span>
 <span><span class="va">mySEM</span> <span class="op">&lt;-</span> <span class="fu">lessSEM</span><span class="fu">:::</span><span class="fu"><a href="../reference/dot-SEMFromLavaan.html">.SEMFromLavaan</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span><span class="op">)</span></span></code></pre></div>

@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.7</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,16 +94,12 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: lavaan</span></span>
-<span><span class="co">#&gt; This is lavaan 0.6-14</span></span>
-<span><span class="co">#&gt; lavaan is FREE software! Please report any bugs.</span></span></code></pre></div>
 <p>To allow for more flexible model estimation, <strong>lessSEM</strong>
-offers parameter transformations. This is an experimental feature, so be
-careful when using it. However, parameter transformations can be very
-powerful and simplify implementing some specific forms of
-regularization.</p>
+offers parameter transformations. This is an experimental feature
+inspired by OpenMx (Neale et al., 2016; Pritikin et al., 2015; Hunter
+2018). Please be careful when using it. However, parameter
+transformations can be very powerful and simplify implementing some
+specific forms of regularization.</p>
 <div class="section level2">
 <h2 id="motivation">Motivation<a class="anchor" aria-label="anchor" href="#motivation"></a>
 </h2>
@@ -113,7 +109,7 @@ can be difficult to decide and may require setting up many different
 models manually. Here, regularization techniques can be very handy. For
 instance, in the seminal political democracy example, the model is
 typically set up as follows (see <code><a href="https://rdrr.io/pkg/lavaan/man/sem.html" class="external-link">?lavaan::sem</a></code>):</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">modelSyntax</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
 <span><span class="st">  # latent variable definitions</span></span>
 <span><span class="st">     ind60 =~ x1 + x2 + x3</span></span>
@@ -134,7 +130,7 @@ typically set up as follows (see <code><a href="https://rdrr.io/pkg/lavaan/man/s
 <p>Note that the loadings a, b, and c are assumed to stay the same over
 time. That is, measurement invariance is assumed! Relaxing this
 assumption, we could define the model as follows:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">modelSyntax</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
 <span><span class="st">  # latent variable definitions</span></span>
 <span><span class="st">     ind60 =~ x1 + x2 + x3</span></span>
@@ -194,7 +190,7 @@ measurement invariance over time.</p>
 </h2>
 <p>We first start with the most flexible model which we want to
 test:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span>
 <span><span class="va">modelSyntax</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
 <span><span class="st">  # latent variable definitions</span></span>
@@ -230,7 +226,7 @@ c_2 &amp;= c_1 + \Delta c_2
 transformations and can be passed to the penalty functions (e.g., to
 <code>lasso</code>) using the <code>modifyModel</code> command.</p>
 <p>First, we have to create a definition of our transformations:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transformations</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
 <span><span class="st">// IMPORTANT: Our transformations always have to start with the follwing line:</span></span>
 <span><span class="st">parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2</span></span>
@@ -250,7 +246,7 @@ transformations and can be passed to the penalty functions (e.g., to
 <span><span class="st">"</span></span></code></pre></div>
 <p>Next, we have to pass the <code>transformations</code> variable to
 the penalty function:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lassoFit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lasso.html">lasso</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanFit</span>, </span>
 <span>                  regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"delta_a2"</span>, <span class="st">"delta_b2"</span>, <span class="st">"delta_c2"</span><span class="op">)</span>,<span class="co"># we want to regularize </span></span>
 <span>                  <span class="co"># the differences between the parameters</span></span>
@@ -259,71 +255,73 @@ the penalty function:</p>
 <span>                  modifyModel <span class="op">=</span> <span class="fu"><a href="../reference/modifyModel.html">modifyModel</a></span><span class="op">(</span>transformations <span class="op">=</span> <span class="va">transformations</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Let’s have a look at the parameter estimates:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lassoFit</span><span class="op">)</span><span class="op">@</span><span class="va">estimates</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">100</span>,<span class="fl">10</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a1"</span>, <span class="st">"b1"</span>, <span class="st">"c1"</span>, <span class="st">"delta_a2"</span>, <span class="st">"delta_b2"</span>, <span class="st">"delta_c2"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;             a1       b1       c1     delta_a2    delta_b2 delta_c2</span></span>
-<span><span class="co">#&gt;  [1,] 1.210953 1.167912 1.233964  0.000000000 0.000000000        0</span></span>
-<span><span class="co">#&gt;  [2,] 1.211100 1.166436 1.234035  0.000000000 0.002643635        0</span></span>
-<span><span class="co">#&gt;  [3,] 1.212579 1.150759 1.234650  0.000000000 0.030062058        0</span></span>
-<span><span class="co">#&gt;  [4,] 1.214363 1.135715 1.235577  0.000000000 0.057035994        0</span></span>
-<span><span class="co">#&gt;  [5,] 1.216401 1.121186 1.236757  0.000000000 0.083668945        0</span></span>
-<span><span class="co">#&gt;  [6,] 1.218769 1.107069 1.238264  0.000000000 0.110150355        0</span></span>
-<span><span class="co">#&gt;  [7,] 1.221436 1.093371 1.240059  0.000000000 0.136520092        0</span></span>
-<span><span class="co">#&gt;  [8,] 1.226644 1.080060 1.242032 -0.003964747 0.162501768        0</span></span>
-<span><span class="co">#&gt;  [9,] 1.246422 1.067730 1.244333 -0.032112379 0.186281071        0</span></span>
-<span><span class="co">#&gt; [10,] 1.266522 1.055806 1.247149 -0.060234037 0.210156231        0</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1,] 1.210993 1.167936 1.234011  0.000000000 0.000000000        0</span></span>
+<span><span class="co">#&gt;  [2,] 1.211114 1.166390 1.234046  0.000000000 0.002702789        0</span></span>
+<span><span class="co">#&gt;  [3,] 1.212584 1.150753 1.234650  0.000000000 0.030080792        0</span></span>
+<span><span class="co">#&gt;  [4,] 1.214347 1.135698 1.235563  0.000000000 0.057049529        0</span></span>
+<span><span class="co">#&gt;  [5,] 1.216419 1.121154 1.236776  0.000000000 0.083716111        0</span></span>
+<span><span class="co">#&gt;  [6,] 1.218762 1.107040 1.238259  0.000000000 0.110187427        0</span></span>
+<span><span class="co">#&gt;  [7,] 1.221414 1.093407 1.240046  0.000000000 0.136498978        0</span></span>
+<span><span class="co">#&gt;  [8,] 1.226629 1.080063 1.242051 -0.003960392 0.162516933        0</span></span>
+<span><span class="co">#&gt;  [9,] 1.246435 1.067714 1.244329 -0.032144145 0.186302860        0</span></span>
+<span><span class="co">#&gt; [10,] 1.266524 1.055803 1.247136 -0.060258715 0.210141745        0</span></span></code></pre></div>
 <p>Note that the differences between the parameters get smaller with
 larger <span class="math inline">\(\lambda\)</span> values. We can also
 plot the differences:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">lassoFit</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Parameter-transformations_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
+<div class="figure">
+<img src="figure/unnamed-chunk-9-1.png" alt=""><p class="caption">plot of chunk unnamed-chunk-9</p>
+</div>
 <p>To check if measurement invariance can be assumed, we can select the
 best model using information criteria:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lassoFit</span>, criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                                                               </span></span>
 <span><span class="co">#&gt;   Tuning         ||--||  Estimates                                            </span></span>
 <span><span class="co">#&gt;  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;   lambda   alpha ||--||  ind60=~x2  ind60=~x3         a1         b1         c1</span></span>
 <span><span class="co">#&gt;  ======= ======= ||--|| ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;   0.2192  1.0000 ||--||     2.1825     1.8189     1.2110     1.1679     1.2340</span></span>
+<span><span class="co">#&gt;   0.2216  1.0000 ||--||     2.1825     1.8189     1.2110     1.1679     1.2340</span></span>
 <span><span class="co">#&gt;                                                                      </span></span>
 <span><span class="co">#&gt;                                                                      </span></span>
 <span><span class="co">#&gt;  ----------- ----------- ----------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;  dem60~ind60 dem65~ind60 dem65~dem60     y1~~y5     y2~~y4     y3~~y7</span></span>
 <span><span class="co">#&gt;  =========== =========== =========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;       1.4535      0.5935      0.8659     0.5552     1.5948     0.7806</span></span>
+<span><span class="co">#&gt;       1.4534      0.5935      0.8659     0.5552     1.5947     0.7807</span></span>
 <span><span class="co">#&gt;                                                                              </span></span>
 <span><span class="co">#&gt;                                                                              </span></span>
 <span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;      y4~~y8     y6~~y8     x1~~x1     x2~~x2     x3~~x3     y1~~y1     y2~~y2</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;      0.6537     1.5351     0.0820     0.1177     0.4675     1.7928     7.3844</span></span>
+<span><span class="co">#&gt;      0.6537     1.5350     0.0820     0.1177     0.4675     1.7929     7.3843</span></span>
 <span><span class="co">#&gt;                                                                                </span></span>
 <span><span class="co">#&gt;                                                                                </span></span>
 <span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ------------</span></span>
 <span><span class="co">#&gt;      y3~~y3     y4~~y4     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ============</span></span>
-<span><span class="co">#&gt;      5.0175     3.4075     2.2857     4.8978     3.5510     3.4512       0.4480</span></span>
+<span><span class="co">#&gt;      5.0175     3.4074     2.2857     4.8977     3.5510     3.4511       0.4480</span></span>
 <span><span class="co">#&gt;                                                            </span></span>
 <span><span class="co">#&gt;                                                            </span></span>
 <span><span class="co">#&gt;  ------------ ------------ ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;  dem60~~dem60 dem65~~dem65   delta_a2   delta_b2   delta_c2</span></span>
 <span><span class="co">#&gt;  ============ ============ ========== ========== ==========</span></span>
-<span><span class="co">#&gt;        3.9409       0.2034          .          .          .</span></span></code></pre></div>
+<span><span class="co">#&gt;        3.9408       0.2034          .          .          .</span></span></code></pre></div>
 <p>Note that all differences have been zeroed – that is, a model with
 full measurement invariance did fit best.</p>
 <p>We can also access the transformed parameters:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">lassoFit</span><span class="op">@</span><span class="va">transformations</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      lambda alpha       a2       b2       c2</span></span>
-<span><span class="co">#&gt; 1 0.2411345     1 1.210953 1.167912 1.233964</span></span>
-<span><span class="co">#&gt; 2 0.2386988     1 1.210967 1.167908 1.233971</span></span>
-<span><span class="co">#&gt; 3 0.2362631     1 1.210970 1.167916 1.233979</span></span>
-<span><span class="co">#&gt; 4 0.2338274     1 1.210968 1.167922 1.233982</span></span>
-<span><span class="co">#&gt; 5 0.2313917     1 1.210970 1.167923 1.233983</span></span>
-<span><span class="co">#&gt; 6 0.2289560     1 1.210971 1.167923 1.233983</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 0.2410976     1 1.210993 1.167936 1.234011</span></span>
+<span><span class="co">#&gt; 2 0.2386623     1 1.210996 1.167933 1.234011</span></span>
+<span><span class="co">#&gt; 3 0.2362270     1 1.210997 1.167935 1.234010</span></span>
+<span><span class="co">#&gt; 4 0.2337916     1 1.210992 1.167933 1.234006</span></span>
+<span><span class="co">#&gt; 5 0.2313563     1 1.210991 1.167933 1.234001</span></span>
+<span><span class="co">#&gt; 6 0.2289210     1 1.210987 1.167932 1.234000</span></span></code></pre></div>
 <p>Limitation: Above, we did not take into account that the variables
 may have different scales; a thorough use of the method should scale the
 data first.</p>
@@ -337,7 +335,7 @@ default names of lavaan (e.g., <code>f=~y1</code> for loadings) are not
 supported. That is, all parameters used in the transformations should be
 given names in the lavaan syntax.</p>
 <p>In the example above, we used the following syntax:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">modelSyntax</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
 <span><span class="st">  # latent variable definitions</span></span>
 <span><span class="st">     ind60 =~ x1 + x2 + x3</span></span>
@@ -358,7 +356,7 @@ given names in the lavaan syntax.</p>
 <p>Importantly, all parameters used in the transformation
 (<code>a1, b1, c1, a2, b2, c2</code>) were labeled in the lavaan syntax.
 As a counter example:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">modelSyntax</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
 <span><span class="st">  # latent variable definitions</span></span>
 <span><span class="st">     ind60 =~ x1 + x2 + x3</span></span>
@@ -434,7 +432,7 @@ can find them in the source of this file (<a href="https://github.com/jhorzek/le
 in GitHub</a>). We simulated a data set with 200 individuals measured at
 10 time points. The autoregressive effect <span class="math inline">\(a_t\)</span> changes at <span class="math inline">\(t=4\)</span> from <span class="math inline">\(.6\)</span> to <span class="math inline">\(.2\)</span>.</p>
 <p>The data looks as follows:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;           y1_t1       y2_t1       y3_t1      y1_t2      y2_t2      y3_t2</span></span>
 <span><span class="co">#&gt; [1,]  0.2627294 -0.07745288 -0.06014729  1.1052896 -0.5125258  0.1352253</span></span>
@@ -535,7 +533,7 @@ in GitHub</a>). We simulated a data set with 200 individuals measured at
 <span><span class="co">#&gt; y2_t10 ~~ mvar2*y2_t10</span></span>
 <span><span class="co">#&gt; y3_t10 ~~ mvar3*y3_t10</span></span></code></pre>
 <p>We fit the model using lavaan:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lavaanFit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/sem.html" class="external-link">sem</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">lavaanSyntax</span>, </span>
 <span>                 data <span class="op">=</span> <span class="va">data</span>,</span>
 <span>                 orthogonal.y <span class="op">=</span> <span class="cn">TRUE</span>, </span>
@@ -586,7 +584,7 @@ each effect (a1-a9) is estimated separately.</p>
 <span><span class="co">#&gt; a8 = a7 + delta8;</span></span>
 <span><span class="co">#&gt; a9 = a8 + delta9;</span></span></code></pre>
 <p>Finally, we can fit our model:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lassoFit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lasso.html">lasso</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanFit</span>, </span>
 <span>                  regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"delta"</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span>,<span class="co"># we want to regularize </span></span>
 <span>                  <span class="co"># the differences between the parameters</span></span>
@@ -598,7 +596,7 @@ each effect (a1-a9) is estimated separately.</p>
 <span>                  modifyModel <span class="op">=</span> <span class="fu"><a href="../reference/modifyModel.html">modifyModel</a></span><span class="op">(</span>transformations <span class="op">=</span> <span class="va">transformations</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Extracting the best fitting model:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lassoFit</span>, criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                                                               </span></span>
 <span><span class="co">#&gt;   Tuning         ||--||  Estimates                                            </span></span>
@@ -658,7 +656,7 @@ allows for a lot more complicated transformations than those outlined
 before. In general, <strong>lessSEM</strong> will take your
 transformations and try to translate them to C++. Let’s assume that the
 model is given by our first example:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">modelSyntax</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
 <span><span class="st">  # latent variable definitions</span></span>
 <span><span class="st">     ind60 =~ x1 + x2 + x3</span></span>
@@ -680,7 +678,7 @@ model is given by our first example:</p>
 <span><span class="va">lavaanFit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/sem.html" class="external-link">sem</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">modelSyntax</span>, </span>
 <span>                 data <span class="op">=</span> <span class="va">PoliticalDemocracy</span><span class="op">)</span></span></code></pre></div>
 <p>We defined the transformations to be:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transformations</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
 <span><span class="st">parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2</span></span>
 <span><span class="st"></span></span>
@@ -703,24 +701,24 @@ longer be estimated. Instead, the parameters which make up a2 are
 estimated: a1 and delta_a2.</p>
 <p>To see this in action, we can create the C++ function without
 compilation:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transformationFunction</span> <span class="op">&lt;-</span> <span class="fu">lessSEM</span><span class="fu">:::</span><span class="fu"><a href="../reference/dot-compileTransformations.html">.compileTransformations</a></span><span class="op">(</span>syntax <span class="op">=</span> <span class="va">transformations</span>, </span>
 <span>                                                            parameterLabels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="../reference/getLavaanParameters.html">getLavaanParameters</a></span><span class="op">(</span><span class="va">lavaanFit</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                                                            compile <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>First, let’s have a look at the extended parameter vector:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transformationFunction</span><span class="op">$</span><span class="va">parameters</span></span>
 <span><span class="co">#&gt; [1] "a1"       "a2"       "b1"       "b2"       "c1"       "c2"       "delta_a2"</span></span>
 <span><span class="co">#&gt; [8] "delta_b2" "delta_c2"</span></span></code></pre></div>
 <p>Note that delta_a2, delta_b2, and delta_c2 have been added. Some of
 these are transformations of other parameters:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transformationFunction</span><span class="op">$</span><span class="va">isTransformation</span></span>
 <span><span class="co">#&gt; [1] "a2" "b2" "c2"</span></span></code></pre></div>
 <p>These will not be estimated but computed based on the other model
 parameters.</p>
 <p>Finally, the C++ function has been returned:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">transformationFunction</span><span class="op">$</span><span class="va">armaFunction</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   // [[Rcpp::depends(RcppArmadillo)]]</span></span>
@@ -813,7 +811,7 @@ effect is constrained to equality over time and so are the manifest
 means. We also added an initial mean for latent variable <span class="math inline">\(\eta\)</span> and changed the names of some
 variables to make using <strong>ctsem</strong> with this data
 easier:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">lavaanSyntax</span><span class="op">)</span></span>
 <span><span class="co">#&gt; eta1 ~ a*eta0</span></span>
 <span><span class="co">#&gt; eta2 ~ a*eta1</span></span>
@@ -910,7 +908,7 @@ easier:</p>
 <span><span class="co">#&gt; y1_T9 ~ mMean1*1</span></span>
 <span><span class="co">#&gt; y2_T9 ~ mMean2*1</span></span>
 <span><span class="co">#&gt; y3_T9 ~ mMean3*1</span></span></code></pre></div>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lavaanFit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/sem.html" class="external-link">sem</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">lavaanSyntax</span>, </span>
 <span>                 data <span class="op">=</span> <span class="va">data</span>,</span>
 <span>                 orthogonal.y <span class="op">=</span> <span class="cn">TRUE</span>, </span>
@@ -923,7 +921,7 @@ easier:</p>
 <span><span class="co">#&gt;  0.127999058  0.750360430  0.577566347 -0.026015718  0.005858067 -0.027032832</span></span></code></pre></div>
 <p>Now, we define the transformations for the latent variables to turn
 our model in a continuous time SEM:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transformations</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
 <span><span class="st">parameters: a, ctA, v, ctV</span></span>
 <span><span class="st">// NOTE: We can define starting values for our parameters. This</span></span>
@@ -938,13 +936,13 @@ our model in a continuous time SEM:</p>
 <span><span class="st">// the log because lessSEM internally takes the exponential of</span></span>
 <span><span class="st">// any variance parameter (v in our case) to avoid negative variances.</span></span>
 <span><span class="st">"</span></span></code></pre></div>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lessSEMFit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bfgs.html">bfgs</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanFit</span>, </span>
 <span>                   <span class="co"># Our model modification must make use of the modifyModel - function:</span></span>
 <span>                   modifyModel <span class="op">=</span> <span class="fu"><a href="../reference/modifyModel.html">modifyModel</a></span><span class="op">(</span>transformations <span class="op">=</span> <span class="va">transformations</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Let’s have a look at the parameter estimates:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lessSEMFit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                                                               </span></span>
 <span><span class="co">#&gt;   Tuning         ||--||  Estimates                                            </span></span>
@@ -960,7 +958,7 @@ our model in a continuous time SEM:</p>
 <span><span class="co">#&gt;      0.7504     0.5775    -0.0267     0.0054    -0.0276    -0.5228     0.7899</span></span></code></pre></div>
 <p>For comparison, we will run the same model with
 <strong>ctsem</strong>:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cdriveraus/ctsemOMX" class="external-link">ctsemOMX</a></span><span class="op">)</span></span>
 <span><span class="va">dataCt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">data</span>,</span>
 <span>                <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="st">"dT1"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -990,7 +988,7 @@ our model in a continuous time SEM:</p>
 <code>DRIFT</code> parameter in the ctsem summary and the parameter
 <code>ctV</code> corresponds to the root of the <code>DIFFUSION</code>
 parameter in the ctsem summary:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lessSEMFit</span><span class="op">)</span><span class="op">@</span><span class="va">estimates</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ctA"</span>, <span class="st">"ctV"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;        ctA        ctV </span></span>
 <span><span class="co">#&gt; -0.5228340  0.7899115</span></span>
@@ -1015,7 +1013,7 @@ familiar with <strong>RcppArmadillo</strong>. In the following, we will
 therefore extend the example to a multivariate continuous time SEM. We
 will use the AnomAuth data set from ctsem. The data is included in the
 <strong>ctsemOMX</strong> package:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"AnomAuth"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">AnomAuth</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Y1_T0 Y2_T0 Y1_T1 Y2_T1 Y1_T2 Y2_T2 Y1_T3 Y2_T3 Y1_T4 Y2_T4 dT1 dT2 dT3 dT4</span></span>
@@ -1029,7 +1027,7 @@ will use the AnomAuth data set from ctsem. The data is included in the
 time model, we could take care of this by implementing a model with
 different autoregressive and cross-lagged effects for the different time
 intervals:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># initial time point</span></span>
 <span><span class="va">lavaanSyntax</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="st">"eta1_T0 =~ 1 * Y1_T0</span></span>
@@ -1149,7 +1147,7 @@ intervals:</p>
 <span><span class="co">#&gt; Y1_T4 ~ mMean1 * 1</span></span>
 <span><span class="co">#&gt; Y2_T4 ~ mMean2 * 1</span></span></code></pre></div>
 <p>Setting up the model in lavaan:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lavaanFit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/sem.html" class="external-link">sem</a></span><span class="op">(</span>model <span class="op">=</span> <span class="va">lavaanSyntax</span>, data <span class="op">=</span> <span class="va">AnomAuth</span>,</span>
 <span>                 orthogonal.y <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                 orthogonal.x <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -1159,7 +1157,7 @@ intervals:</p>
 have to define the transformations again. We will not go into the
 details here. See Voelkle et al. (2012) for the underlying
 transformations.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transformations</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
 <span><span class="st">// Define all parameters which we want to use:</span></span>
 <span><span class="st">parameters: a1_11, a1_12, a1_21, a1_22, a2_11, a2_12, a2_21, a2_22, </span></span>
@@ -1228,47 +1226,47 @@ possible, because <strong>lessSEM</strong> uses
 <strong>RcppArmadillo</strong> in the background and therefore also
 provides users with all of the functions implemented therein.</p>
 <p>As before, we can now fit the model with <strong>lessSEM</strong></p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lessSEMFit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bfgs.html">bfgs</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanFit</span>,</span>
 <span>                   <span class="co"># Our model modification must make use of the modifyModel - function:</span></span>
 <span>                   modifyModel <span class="op">=</span> <span class="fu"><a href="../reference/modifyModel.html">modifyModel</a></span><span class="op">(</span>transformations <span class="op">=</span> <span class="va">transformations</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>For comparison, we will also fit the model with
 <strong>ctsemOMX</strong>:</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">AnomAuthmodel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ctsem/man/ctModel.html" class="external-link">ctModel</a></span><span class="op">(</span>LAMBDA <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, </span>
 <span>                         Tpoints <span class="op">=</span> <span class="fl">5</span>, n.latent <span class="op">=</span> <span class="fl">2</span>, n.manifest <span class="op">=</span> <span class="fl">2</span>, MANIFESTVAR<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span><span class="op">)</span>, TRAITVAR <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> </span>
 <span><span class="va">AnomAuthfit</span> <span class="op">&lt;-</span> <span class="fu">ctFit</span><span class="op">(</span><span class="va">AnomAuth</span>, <span class="va">AnomAuthmodel</span><span class="op">)</span></span></code></pre></div>
 <p>The following matrices are the drifts of the <strong>lessSEM</strong>
 model and the <strong>ctsemOMX</strong> model:</p>
 <p>lessSEM:</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lessSEMFit</span><span class="op">)</span><span class="op">@</span><span class="va">estimates</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ctA_11"</span>, <span class="st">"ctA_21"</span>, <span class="st">"ctA_12"</span>, <span class="st">"ctA_22"</span><span class="op">)</span><span class="op">]</span>,<span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             [,1]       [,2]</span></span>
 <span><span class="co">#&gt; [1,] -0.44814616  0.2320881</span></span>
 <span><span class="co">#&gt; [2,]  0.04260196 -0.1171318</span></span></code></pre></div>
 <p>ctsemOMX:</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">AnomAuthfit</span><span class="op">$</span><span class="va">mxobj</span><span class="op">$</span><span class="va">DRIFT</span><span class="op">$</span><span class="va">values</span></span>
 <span><span class="co">#&gt;             [,1]       [,2]</span></span>
 <span><span class="co">#&gt; [1,] -0.44728184  0.2324980</span></span>
 <span><span class="co">#&gt; [2,]  0.04329283 -0.1174662</span></span></code></pre></div>
 <p>The diffusions are given by:</p>
 <p>lessSEM:</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lessSEMFit</span><span class="op">)</span><span class="op">@</span><span class="va">estimates</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ctV_11"</span>, <span class="st">"ctV_12"</span>, <span class="st">"ctV_12"</span>, <span class="st">"ctV_22"</span><span class="op">)</span><span class="op">]</span>,<span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              [,1]         [,2]</span></span>
 <span><span class="co">#&gt; [1,]  0.473528285 -0.003850882</span></span>
 <span><span class="co">#&gt; [2,] -0.003850882  0.154513444</span></span></code></pre></div>
 <p>ctsemOMX:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">AnomAuthfit</span><span class="op">$</span><span class="va">mxobj</span><span class="op">$</span><span class="va">DIFFUSIONchol</span><span class="op">$</span><span class="va">result</span><span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">AnomAuthfit</span><span class="op">$</span><span class="va">mxobj</span><span class="op">$</span><span class="va">DIFFUSIONchol</span><span class="op">$</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              [,1]         [,2]</span></span>
 <span><span class="co">#&gt; [1,]  0.473241884 -0.004610149</span></span>
 <span><span class="co">#&gt; [2,] -0.004610149  0.154509547</span></span></code></pre></div>
 <p>Regularization could be used to enforce sparsity (Orzek &amp;
 Voelkle, under review):</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lassoFit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lasso.html">lasso</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanFit</span>, </span>
 <span>                  regularized <span class="op">=</span> <span class="st">"ctA_21"</span>,</span>
 <span>                  nLambdas <span class="op">=</span> <span class="fl">30</span>,</span>
@@ -1277,9 +1275,11 @@ Voelkle, under review):</p>
 <span>                  <span class="co"># Our model modification must make use of the modifyModel - function:</span></span>
 <span>                  modifyModel <span class="op">=</span> <span class="fu"><a href="../reference/modifyModel.html">modifyModel</a></span><span class="op">(</span>transformations <span class="op">=</span> <span class="va">transformations</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">lassoFit</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Parameter-transformations_files/figure-html/unnamed-chunk-55-1.png" width="700"></p>
+<div class="figure">
+<img src="figure/unnamed-chunk-55-1.png" alt=""><p class="caption">plot of chunk unnamed-chunk-55</p>
+</div>
 <p>Again, all these steps are easier when using dedicated packages such
 as <strong>ctsem</strong> and <strong>ctsemOMX</strong> for continuous
 time SEM and <strong>regCtsem</strong> (Orzek &amp; Voelkle, under
@@ -1340,6 +1340,9 @@ Intensive Longitudinal Data. Psychometrika, 87(2), 1–29. <a href="https://doi.
 structural equation modelling. British Journal of Mathematical and
 Statistical Psychology, 71(3), 499–522. <a href="https://doi.org/10.1111/bmsp.12130" class="external-link uri">https://doi.org/10.1111/bmsp.12130</a>
 </li>
+<li>Hunter, M. D. (2018). State space modeling in an open source,
+modular, structural equation modeling environment. Structural Equation
+Modeling, 25(2), 307-324. doi: 10.1080/10705511.2017.1369354</li>
 <li>Jacobucci, R., &amp; Grimm, K. J. (2018). Regularized Estimation of
 Multivariate Latent Change Score Models. In E. Ferrer, S. M. Boker,
 &amp; K. J. Grimm (Eds.), Longitudinal Multivariate Psychology (1st ed.,
@@ -1356,12 +1359,20 @@ Equation Modeling: A Multidisciplinary Journal, 25(4), 558–572. <a href="https
 </li>
 <li>Muthen, B., &amp; Asparouhov, T. (2013). BSEM Measurement Invariance
 Analysis. Mplus Web Notes: No. 17.</li>
+<li>Neale, M. C., Hunter, M. D., Pritikin, J. N., Zahery, M., Brick, T.
+R., Kirkpatrick, R. M., Estabrook, R., Bates, T. C., Maes, H. H., &amp;
+Boker, S. M. (2016). OpenMx 2.0: Extended structural equation and
+statistical modeling. Psychometrika, 81(2), 535–549. <a href="https://doi.org/10.1007/s11336-014-9435-8" class="external-link uri">https://doi.org/10.1007/s11336-014-9435-8</a>
+</li>
 <li>Ou, L., Hunter, M., D., &amp; Chow, S.-M. (2019). Whats for dynr: A
 package for linear and nonlinear dynamic modeling in r. The R Journal,
 11(1), 91–111. <a href="https://doi.org/10.32614/RJ-2019-012" class="external-link uri">https://doi.org/10.32614/RJ-2019-012</a>
 </li>
 <li>Orzek, J. H., &amp; Voelkle, M. C. (under review). Regularized
 continuous time structural equation models: A network perspective.</li>
+<li>Pritikin, J. N., Hunter, M. D., &amp; Boker, S. M. (2015). Modular
+open-source software for Item Factor Analysis. Educational and
+Psychological Measurement, 75(3), 458-474</li>
 <li>Voelkle, M. C., Oud, J. H. L., Davidov, E., &amp; Schmidt, P.
 (2012). An sem approach to continuous time modeling of panel data:
 Relating authoritarianism and anomia. Psychological Methods, 17(2),

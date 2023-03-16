@@ -79,9 +79,6 @@
     <loc>/reference/BIC-regularizedSEMWithCustomPenalty-method.html</loc>
   </url>
   <url>
-    <loc>/reference/GIC.html</loc>
-  </url>
-  <url>
     <loc>/reference/Rcpp_SEMCpp-class.html</loc>
   </url>
   <url>
@@ -410,9 +407,6 @@
   </url>
   <url>
     <loc>/reference/dot-penaltyTypes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-printNote.html</loc>
   </url>
   <url>
     <loc>/reference/dot-reduceSyntax.html</loc>
