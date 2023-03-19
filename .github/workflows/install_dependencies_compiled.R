@@ -1,7 +1,10 @@
 # installing all dependencies one by one while also checking if they could be loaded
 options(install.packages.compile.from.source = "never")
 
-pkgs <- c('lavaan',
+pkgs <- c('devtools', 
+          'remotes', 
+          'rcmdcheck',
+          'lavaan',
           'Rcpp',
           'RcppArmadillo',
           'RcppParallel',
