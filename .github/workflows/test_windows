@@ -39,34 +39,27 @@ jobs:
         with:
           r-version: ${{ matrix.r-version }}
       - uses: r-lib/actions/setup-pandoc@v1
-      - name: Install devtools
-        run: |
-         options(install.packages.compile.from.source = "never")
-         install.packages(c("devtools", "remotes", "rcmdcheck"))
-        shell: Rscript {0}
       - name: Install dependencies
         run: Rscript .github/workflows/install_dependencies_compliled.R
       - name: build and save as artifact
         run: devtools::build(pkg = ".", binary = TRUE)
         shell: Rscript {0}
-      - name: upload package windows
-        if: runner.os == 'Windows'
+      - name: upload package
         uses: actions/upload-artifact@v3
         with:
           name: windows_release
           path: D:/a/lessSEM/lessSEM_*.zip
-      - name: upload package macOS
-        if: runner.os == 'macOS'
-        uses: actions/upload-artifact@v3
-        with:
-          name: macos_release
-          path: /Users/runner/work/lessSEM/lessSEM_*.tgz   
       - name: install package
         run: |
-          devtools::install(pkg = ".")
+          # get package name
+          pkgname <- list.files(path = "D:/a/lessSEM/", pattern = "lessSEM_[0-9.]+\.zip")[1]
+          devtools::install(pkg = pkgname)
         shell: Rscript {0}
       - name: Check
-        run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning")
+        run: |
+          # get package name
+          pkgname <- list.files(path = "D:/a/lessSEM/", pattern = "lessSEM_[0-9.]+\.zip")[1]
+          run: rcmdcheck::rcmdcheck(pkg = pkgname, args = "--no-manual", error_on = "warning")
         shell: Rscript {0}
       - name: lessTest
         run: |
