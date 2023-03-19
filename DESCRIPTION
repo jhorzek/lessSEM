@@ -39,14 +39,7 @@ Suggests:
     rmarkdown,
     Rsolnp,
     testthat,
-    glmnet,
-    ncvreg,
-    regsem,
-    lslx,
-    mvtnorm,
-    Matrix,
-    OpenMx,
-    ctsemOMX
+    mvtnorm
 LinkingTo:
     Rcpp,
     RcppArmadillo,
