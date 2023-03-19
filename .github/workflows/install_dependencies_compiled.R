@@ -1,6 +1,8 @@
 # installing all dependencies one by one while also checking if they could be loaded
 options(install.packages.compile.from.source = "never")
 
+cat("Installing dependencies...\n")
+
 pkgs <- c('devtools', 
           'remotes', 
           'rcmdcheck',
