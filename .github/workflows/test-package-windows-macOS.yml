@@ -63,8 +63,8 @@ jobs:
           path: /Users/runner/work/lessSEM/lessSEM_*.tgz   
       - name: install package
         run: |
-          devtools::install()
-          shell: Rscript {0}
+          devtools::install(pkg = ".")
+        shell: Rscript {0}
       - name: Check
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning")
         shell: Rscript {0}
