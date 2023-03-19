@@ -110,7 +110,7 @@ jobs:
         run: |
           # get package name
           pkgname <- list.files(path = "D:/a/lessSEM/", pattern = "lessSEM_[0-9.]+.zip")[1]
-          install.packages(pkg = paste0("D:/a/lessSEM/", pkgname), repos = NULL, type = "win.binary"))
+          install.packages(pkg = paste0("D:/a/lessSEM/", pkgname), repos = NULL, type = "win.binary")
         shell: Rscript {0}
       - name: Check
         run: |
