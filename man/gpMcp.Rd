@@ -153,12 +153,12 @@ mcpPen <- gpMcp(
 # plot(mcpPen)
 
 # for comparison
-library(ncvreg)
-mcpFit <- ncvreg(X = X[,-1], 
-                 y = y, 
-                 penalty = "MCP",
-                 lambda =  mcpPen@fits$lambda[15],
-                 gamma =  mcpPen@fits$theta[15])
-coef(mcpFit)
-mcpPen@parameters[15,]
+#library(ncvreg)
+#mcpFit <- ncvreg(X = X[,-1], 
+#                  y = y, 
+#                  penalty = "MCP",
+#                  lambda =  mcpPen@fits$lambda[15],
+#                  gamma =  mcpPen@fits$theta[15])
+#coef(mcpFit)
+#mcpPen@parameters[15,]
 }

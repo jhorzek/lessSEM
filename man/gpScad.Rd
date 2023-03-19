@@ -159,12 +159,12 @@ scadPen <- gpScad(
 # plot(scadPen)
 
 # for comparison
-library(ncvreg)
-scadFit <- ncvreg(X = X[,-1], 
-                 y = y, 
-                 penalty = "SCAD",
-                 lambda =  scadPen@fits$lambda[15],
-                 gamma =  scadPen@fits$theta[15])
-coef(scadFit)
-scadPen@parameters[15,]
+#library(ncvreg)
+#scadFit <- ncvreg(X = X[,-1], 
+#                  y = y, 
+#                  penalty = "SCAD",
+#                  lambda =  scadPen@fits$lambda[15],
+#                  gamma =  scadPen@fits$theta[15])
+#coef(scadFit)
+#scadPen@parameters[15,]
 }

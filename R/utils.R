@@ -188,6 +188,37 @@ gradientFunPtr_t ', gradFunName,'Ptr() {
 #' @import knitr
 .knitVignettes <- function(dir = "vignettes"){
   
+  pkgs <- c('lavaan',
+            'Rcpp',
+            'RcppArmadillo',
+            'RcppParallel',
+            'ggplot2',
+            'tidyr',
+            'stringr',
+            'methods',
+            'numDeriv',
+            'utils',
+            'stats',
+            'graphics',
+            'knitr',
+            'plotly',
+            'rmarkdown',
+            'Rsolnp',
+            'testthat',
+            'glmnet',
+            'ncvreg',
+            'regsem',
+            'lslx',
+            'mvtnorm',
+            'Matrix',
+            'OpenMx',
+            'ctsemOMX')
+  
+  for(p in pkgs){
+    if(!requireNamespace(package = p))
+      stop("Package ", p, " required to build vignettes.")
+  }
+  
   currentDit <- getwd()
   
   setwd(dir)
