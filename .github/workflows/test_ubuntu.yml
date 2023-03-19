@@ -28,7 +28,24 @@ jobs:
       with:
         name: ubuntu_release
         path: /__w/lessSEM/lessSEM_*.tar.gz
+    - name: install package
+      run: |
+        devtools::install(pkg = ".")
+      shell: Rscript {0}
     - name: Check
-      run: devtools::check(error_on = "warning", manual = FALSE)
+      run: rcmdcheck::rcmdcheck(pkg = ".", args = "--no-manual", error_on = "warning")
+      shell: Rscript {0}
+    - name: lessTest
+      run: |
+       cd ..
+       mkdir lessTest
+       cd lessTest
+    - uses: actions/checkout@v2
+      with: 
+       repository: 'jhorzek/lessTest'
+    - name: Extended tests
+      run: |
+       devtools::build(pkg = ".", binary = TRUE)
+       rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning")
       shell: Rscript {0}
       
