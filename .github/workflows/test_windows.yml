@@ -113,8 +113,7 @@ jobs:
           install.packages(pkg = paste0("D:/a/lessSEM/", pkgname), repos = NULL, type = "win.binary")
         shell: Rscript {0}
       - name: Check
-        run: |
-          run: rcmdcheck::rcmdcheck(pkg = ".", args = "--no-manual", error_on = "warning")
+        run: rcmdcheck::rcmdcheck(pkg = ".", args = "--no-manual", error_on = "warning")
         shell: Rscript {0}
       - name: lessTest
         run: |
