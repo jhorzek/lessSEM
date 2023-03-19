@@ -93,7 +93,7 @@ jobs:
           }
         shell: Rscript {0}
       - name: build and save as artifact
-        run: devtools::build(pkg = ".", binary = TRUE)
+        run: devtools::build(path = ".", binary = TRUE)
         shell: Rscript {0}
       - name: upload package
         uses: actions/upload-artifact@v3
