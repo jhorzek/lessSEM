@@ -104,7 +104,7 @@ jobs:
         run: |
           # get package name
           pkgname <- list.files(path = "./", pattern = "lessSEM_[0-9.]+.tgz")[1]
-          install.packages(pkg = paste0("/Users/runner/work/lessSEM/", pkgname), repos = NULL, type = "mac.binary")
+          install.packages(pkg = paste0("./", pkgname), repos = NULL, type = "mac.binary")
         shell: Rscript {0}
       - name: Check
         run: rcmdcheck::rcmdcheck(path = ".", args = "--no-manual", error_on = "warning")
