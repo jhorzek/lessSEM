@@ -99,11 +99,11 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: macOS_release
-          path: /Users/runner/work/lessSEM/lessSEM_*.tgz
+          path: ./lessSEM_*.tgz
       - name: install package
         run: |
           # get package name
-          pkgname <- list.files(path = "/Users/runner/work/lessSEM/", pattern = "lessSEM_[0-9.]+.tgz")[1]
+          pkgname <- list.files(path = "./", pattern = "lessSEM_[0-9.]+.tgz")[1]
           install.packages(pkg = paste0("/Users/runner/work/lessSEM/", pkgname), repos = NULL, type = "mac.binary")
         shell: Rscript {0}
       - name: Check
