@@ -33,7 +33,7 @@ jobs:
         devtools::install(pkg = ".")
       shell: Rscript {0}
     - name: Check
-      run: rcmdcheck::rcmdcheck(pkg = ".", args = "--no-manual", error_on = "warning")
+      run: rcmdcheck::rcmdcheck(path = ".", args = "--no-manual", error_on = "warning")
       shell: Rscript {0}
     - name: lessTest
       run: |
