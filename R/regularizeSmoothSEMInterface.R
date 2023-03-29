@@ -388,8 +388,8 @@ ridgeBfgs <- function(lavaanModel,
 #'   regularized = regularized,
 #'   epsilon = 1e-10,
 #'   tau = 1e-4,
-#'   lambdas = seq(0,1,length.out = 50),
-#'   alphas = seq(0,1,length.out = 4))
+#'   lambdas = seq(0,1,length.out = 5),
+#'   alphas = seq(0,1,length.out = 3))
 #' 
 #' # the coefficients can be accessed with:
 #' coef(lsem)
