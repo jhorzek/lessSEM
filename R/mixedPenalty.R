@@ -83,10 +83,10 @@
 #'   mixedPenalty() |>
 #'   # add lasso penalty on loadings l6 - l10:
 #'   addLasso(regularized = paste0("l", 6:10), 
-#'            lambdas = seq(0,1,.1)) |>
+#'            lambdas = seq(0,1,length.out = 4)) |>
 #'   # add scad penalty on loadings l11 - l15:
 #'   addScad(regularized = paste0("l", 11:15), 
-#'           lambdas = seq(0,1,.1),
+#'           lambdas = seq(0,1,length.out = 3),
 #'           thetas = 3.1) |>
 #'   # fit the model:
 #'   fit()
