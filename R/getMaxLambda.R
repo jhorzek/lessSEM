@@ -97,7 +97,9 @@
 #' @param maxLambda maximal lambda value
 #' @param lambdasAutoCurve controls the curve. A value close to 1 will result in a linear increase, larger values in lambdas more concentrated around 0
 #' @param lambdasAutoLength number of lambda values to generate
+#' @return numeric vector
 #' @examples
+#' library(lessSEM)
 #' plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 1, lambdasAutoLength = 100))
 #' plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 5, lambdasAutoLength = 100))
 #' plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 100, lambdasAutoLength = 100))

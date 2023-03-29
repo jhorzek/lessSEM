@@ -21,3 +21,6 @@ a string which can be copied in the C++ function to create the pointers.
 \description{
 This function helps you create the pointers necessary to use the Cpp interface
 }
+\examples{
+# see vignette("General-Purpose-Optimization", package = "lessSEM") for an example
+}

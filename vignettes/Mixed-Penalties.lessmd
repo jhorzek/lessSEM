@@ -1,0 +1,197 @@
+---
+title: "Mixed Penalties"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mixed Penalties}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path='lessSEMFigures/lessSEM-'
+)
+library(lessSEM)
+```
+
+> **This is an experimental feature. There may be bugs; use carefully!**
+
+```{r setup}
+library(lessSEM)
+```
+
+The `mixedPenalty` function allows you to add multiple penalties to a single model.
+For instance, you may want to regularize both loadings and regressions in a SEM.
+In this case, using the same penalty (e.g., lasso) for both types of penalties may
+actually not be what you want to use because the penalty function is sensitive to
+the scales of the parameters. Instead, you may want to use two separate lasso
+penalties for loadings and regressions. Similarly, separate penalties for 
+different parameters have, for instance, been proposed in multi-group models
+(Geminiani et al., 2021).
+
+> Important: You cannot impose two penalties on the same parameter!
+
+Not all penalty combinations are currently supported by all optimizers. The following
+table provides an overview of the penalties you can use with each optimizer:
+
+| Penalty | Function | glmnet | ista |
+| --- | ---- | ---- | ---- |
+| ridge | addRidge | x | - |
+| lasso | addLasso | x | x |
+| elastic net | addElasticNet | x | - |
+| cappedL1 | addCappedL1 | - | x |
+| lsp | addLsp | - | x |
+| scad | addScad | - | x |
+| mcp | addMcp | - | x |
+
+
+## Getting Started
+
+In the following model, we will allow for cross-loadings (`c2`-`c4`). 
+We want to regularize both, cross-loadings and regression coefficients (`r1` - `r3`)
+```{r}
+model <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3 + c2*y2 + c3*y3 + c4*y4
+     dem60 =~ y1 + y2 + y3 + y4
+     dem65 =~ y5 + y6 + y7 + c*y8
+
+  # regressions
+    dem60 ~ r1*ind60
+    dem65 ~ r2*ind60 + r3*dem60
+'
+
+lavaanModel <- sem(model,
+                   data = PoliticalDemocracy)
+```
+
+Next, we add separate lasso penalties for the loadings and the regressions:
+```{r}
+mp <- lavaanModel |>
+  mixedPenalty() |>
+  addLasso(regularized = c("c2", "c3", "c4"), 
+           lambdas = seq(0,1,.1)) |>
+  addLasso(regularized = c("r1", "r2", "r3"), 
+           lambdas = seq(0,1,.2)) 
+```
+Note that we can use the pipe-operator to add multiple penalties. They
+don't have to be the same; the following would also work:
+```{r}
+mp <- lavaanModel |>
+  mixedPenalty() |>
+  addLasso(regularized = c("c2", "c3", "c4"), 
+           lambdas = seq(0,1,.1)) |>
+  addScad(regularized = c("r1", "r2", "r3"), 
+          lambdas = seq(0,1,.2),
+          thetas = 3.7) 
+```
+
+To fit the model, we use the `fit`- function:
+```{r, eval = FALSE}
+fitMp <- fit(mp)
+```
+```{r, include = FALSE}
+fitMp <- fit(mp)
+```
+
+To check which parameter has be regularized with which penalty, we can look
+at the `penalty` statement in the resulting object:
+```{r}
+fitMp@penalty
+```
+
+
+We can access the best parameters according to the BIC with:
+
+```{r}
+coef(fitMp, criterion = "BIC")
+```
+The `tuningParameterConfiguration` refers to the rows in the lambda, theta, and alpha
+matrices that resulted in the best fit:
+
+```{r}
+getTuningParameterConfiguration(regularizedSEMMixedPenalty = fitMp, 
+                                tuningParameterConfiguration = 11)
+```
+
+In this case, the best model has no cross-loadings, but the regressions remained
+unregularized: The lambda for the cross-loadings is large (1), while the
+lambda for the regressions is 0 (no regularization).
+
+## Using glmnet
+
+The glmnet optimizer is typically considerably faster than ista. However, as mentioned
+above, not all penalty functions are currently supported. Mixed penalties for glmnet
+can be specified as follows:
+
+```{r}
+mp <- lavaanModel |>
+  # Change the optimizer and the control object:
+  mixedPenalty(method = "glmnet",
+               control = controlGlmnet()) |>
+  addLasso(regularized = c("c2", "c3", "c4"), 
+                lambdas = seq(0,1,.1)) |>
+  addLasso(regularized = c("r1", "r2", "r3"), 
+                lambdas = seq(0,1,.2)) 
+```
+To fit the model, we use the `fit`- function:
+```{r, eval = FALSE}
+fitMp <- fit(mp)
+```
+```{r, include = FALSE}
+fitMp <- fit(mp)
+```
+
+```{r}
+coef(fitMp, criterion = "BIC")
+```
+The `tuningParameterConfiguration` refers to the rows in the lambda, theta, and alpha
+matrices that resulted in the best fit:
+
+```{r}
+getTuningParameterConfiguration(regularizedSEMMixedPenalty = fitMp, 
+                                tuningParameterConfiguration = 11)
+```
+
+
+```{r, include = FALSE}
+start_ista <- Sys.time()
+for(i in 1:5){
+  mp <- lavaanModel |>
+  mixedPenalty() |>
+  addLasso(regularized = c("c2", "c3", "c4"), 
+                lambdas = seq(0,1,.1)) |>
+  addLasso(regularized = c("r1", "r2", "r3"), 
+                lambdas = seq(0,1,.2)) |>
+    fit()
+}
+end_ista <- Sys.time()
+
+start_glmnet <- Sys.time()
+for(i in 1:5){
+  mp <- lavaanModel |>
+  # Change the optimizer and the control object:
+  mixedPenalty(method = "glmnet",
+               control = controlGlmnet()) |>
+  addLasso(regularized = c("c2", "c3", "c4"), 
+                lambdas = seq(0,1,.1)) |>
+  addLasso(regularized = c("r1", "r2", "r3"), 
+                lambdas = seq(0,1,.2)) |>
+    fit()
+}
+end_glmnet <- Sys.time()
+```
+
+Here is a short run-time comparison of ista and glmnet with the lasso-regularized 
+model from above: Five repetitions using ista took `r round(difftime(end_ista, start_ista, units = "secs"),3)` seconds,
+while glmnet took `r round(difftime(end_glmnet, start_glmnet, units = "secs"),3)` seconds. That is, if you 
+can use glmnet with your model, we recommend that you do.
+
+## Bibliography
+
+- Geminiani, E., Marra, G., & Moustaki, I. (2021). Single- and multiple-group penalized factor analysis: A trust-region algorithm approach with integrated automatic multiple tuning parameter selection. Psychometrika, 86(1), 65–95. https://doi.org/10.1007/s11336-021-09751-8
+
+
+

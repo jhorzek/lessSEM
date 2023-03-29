@@ -1,0 +1,124 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+#
+# See https://github.com/r-lib/actions/tree/master/examples#readme for
+# additional example workflows available for the R community.
+
+name: R CMD check macOS
+
+on:
+  workflow_dispatch
+#  push:
+#    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} (${{ matrix.r-version }})
+    
+    strategy:
+      matrix:
+        r-version: ['release']
+        os: ['macOS-latest']
+
+    steps:
+      - name: create directory
+        run: |
+         mkdir lessSEM
+         cd lessSEM
+      - uses: actions/checkout@v2
+      - name: Set up R ${{ matrix.r-version }}
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.r-version }}
+      - uses: r-lib/actions/setup-pandoc@v1
+      - name: Install dependencies
+        run: |
+          # installing all dependencies one by one while also checking if they could be loaded
+          options(install.packages.compile.from.source = "never")
+          
+          pkgs <- c('devtools', 
+                    'remotes', 
+                    'rcmdcheck',
+                    'lavaan',
+                    'Rcpp',
+                    'RcppArmadillo',
+                    'RcppParallel',
+                    'ggplot2',
+                    'tidyr',
+                    'stringr',
+                    'methods',
+                    'numDeriv',
+                    'utils',
+                    'stats',
+                    'graphics',
+                    'knitr',
+                    'plotly',
+                    'rmarkdown',
+                    'Rsolnp',
+                    'testthat',
+                    'glmnet',
+                    'ncvreg',
+                    'regsem',
+                    'lslx',
+                    'mvtnorm',
+                    'Matrix',
+                    'OpenMx',
+                    'ctsemOMX')
+          for(pkg in pkgs)
+          {
+            print(paste0("Installing package ", pkg))
+            # check if the package has already been installed
+            installed_packages <- installed.packages()
+            if(pkg %in% installed_packages)
+              next
+            install.packages(pkg, 
+                             dependencies = c("Depends", 
+                                              "Imports", 
+                                              "LinkingTo"),
+                             repos = 'http://cran.rstudio.com/')
+            # if the package could not be installed: exit
+            if(!require(pkg, character.only	= TRUE))
+            {
+              stop(paste0("Could not install package ", pkg, "."))
+              quit(status = 1, save = "no")
+            }
+          }
+        shell: Rscript {0}
+      - name: build and save as artifact
+        run: devtools::build(path = ".", binary = TRUE)
+        shell: Rscript {0}
+      - name: upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: macOS_release
+          path: ./lessSEM_*.tgz
+      - name: install package
+        run: |
+          # get package name
+          pkgname <- list.files(path = "./", pattern = "lessSEM_[0-9.]+.tgz")[1]
+          install.packages(pkg = paste0("./", pkgname), repos = NULL, type = "mac.binary")
+        shell: Rscript {0}
+      - name: Check
+        run: rcmdcheck::rcmdcheck(path = ".", args = "--no-manual", error_on = "warning")
+        shell: Rscript {0}
+      - name: lessTest
+        run: |
+         cd ..
+         mkdir lessTest
+         cd lessTest
+      - uses: actions/checkout@v2
+        with: 
+         repository: 'jhorzek/lessTest'
+      - name: Extended tests
+        run: |
+         devtools::build(pkg = ".", binary = TRUE)
+         rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning")
+        shell: Rscript {0}

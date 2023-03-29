@@ -62,6 +62,7 @@
 #' @returns Object of class gpRegularized
 
 #' @examples 
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -116,6 +117,7 @@
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -172,6 +174,7 @@
 #' #            intercept = TRUE,
 #' #            standardize = FALSE))[,2]
 #' #l1@parameters[2,]
+#' }
 #' @export
 gpLassoCpp <- function(par,
                     regularized,
@@ -287,6 +290,7 @@ gpLassoCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -341,6 +345,7 @@ gpLassoCpp <- function(par,
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -388,6 +393,7 @@ gpLassoCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' al1@parameters
+#' }
 #' @export
 gpAdaptiveLassoCpp <- function(par,
                             regularized,
@@ -411,7 +417,7 @@ gpAdaptiveLassoCpp <- function(par,
   if(is.null(weights)){
     weights <- 1/abs(par)
     weights[!names(weights) %in% regularized] <- 0
-    .printNote("Building weights based on par as weights = 1/abs(par).")
+    rlang::inform(c("Note","Building weights based on par as weights = 1/abs(par)."))
   }
   
   if(! all(regularized %in% names(weights))) stop(paste0(
@@ -511,6 +517,7 @@ gpAdaptiveLassoCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -612,6 +619,7 @@ gpAdaptiveLassoCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' r@parameters
+#' }
 #' @export
 gpRidgeCpp <- function(par,
                     regularized,
@@ -712,6 +720,7 @@ gpRidgeCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -766,6 +775,7 @@ gpRidgeCpp <- function(par,
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -814,6 +824,7 @@ gpRidgeCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' en@parameters
+#' }
 #' @export
 gpElasticNetCpp <- function(par,
                          regularized,
@@ -851,7 +862,8 @@ gpElasticNetCpp <- function(par,
   return(result)
 }
 
-
+#' gpCappedL1Cpp
+#' 
 #' Implements cappedL1 regularization for general purpose optimization problems with C++ functions.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \lambda \min(| x_j|, \theta)}
@@ -912,6 +924,7 @@ gpElasticNetCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1014,7 +1027,7 @@ gpElasticNetCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' cL1@parameters
-#' 
+#' }
 #' @export
 gpCappedL1Cpp <- function(par,
                        fn,
@@ -1052,6 +1065,8 @@ gpCappedL1Cpp <- function(par,
   
 }
 
+#' gpLspCpp
+#' 
 #' Implements lsp regularization for general purpose optimization problems with C++ functions.
 #' The penalty function is given by:
 #' \deqn{p( x_j) = \lambda \log(1 + |x_j|/\theta)}
@@ -1107,7 +1122,8 @@ gpCappedL1Cpp <- function(par,
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Object of class gpRegularized
-#' @examples  
+#' @examples
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1162,6 +1178,7 @@ gpCappedL1Cpp <- function(par,
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -1210,7 +1227,7 @@ gpCappedL1Cpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' l@parameters
-#' 
+#' }
 #' @export
 gpLspCpp <- function(par,
                   fn,
@@ -1307,6 +1324,7 @@ gpLspCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1361,6 +1379,7 @@ gpLspCpp <- function(par,
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -1409,6 +1428,7 @@ gpLspCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' m@parameters
+#' }
 #' @export
 gpMcpCpp <- function(par,
                   fn,
@@ -1512,6 +1532,7 @@ gpMcpCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
+#' \dontrun{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1566,6 +1587,7 @@ gpMcpCpp <- function(par,
 #'     return(gradients);
 #' }
 #' 
+#' // Dirk Eddelbuettel at
 #' // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 #' typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
 #'                 Rcpp::List& //additional elements
@@ -1614,6 +1636,7 @@ gpMcpCpp <- function(par,
 #'                  additionalArguments = data)
 #' 
 #' s@parameters
+#' }
 #' @export
 gpScadCpp <- function(par,
                    fn,

@@ -10,7 +10,6 @@
 //' @param Smatrix matrix with undirected effects
 //' @param IminusAInverse (I-Amatrix)^(-1)
 //' @returns matrix with implied covariances
-// [[Rcpp::export]]
 arma::mat computeImpliedCovarianceFull(const arma::mat& Amatrix, 
                                        const arma::mat& Smatrix,
                                        const arma::mat& IminusAInverse){
@@ -25,7 +24,6 @@ arma::mat computeImpliedCovarianceFull(const arma::mat& Amatrix,
 //' @param Fmatrix filter matrix
 //' @param impliedCovarianceFull implied covariance matrix including latent variables
 //' @returns matrix with implied covariances
-// [[Rcpp::export]]
 arma::mat computeImpliedCovariance(const arma::mat& Fmatrix, 
                                    const arma::mat& impliedCovarianceFull){
   
@@ -42,7 +40,6 @@ arma::mat computeImpliedCovariance(const arma::mat& Fmatrix,
 //' @param Mvector vector with means
 //' @param IminusAInverse (I-Amatrix)^(-1)
 //' @returns matrix with implied means
-// [[Rcpp::export]]
 arma::colvec computeImpliedMeansFull(const arma::mat& Amatrix, 
                                   const arma::colvec& Mvector,
                                   const arma::mat& IminusAInverse){
@@ -58,7 +55,6 @@ arma::colvec computeImpliedMeansFull(const arma::mat& Amatrix,
 //' @param Fmatrix filter matrix
 //' @param impliedMeansFull implied means vector including latent variables
 //' @returns matrix with implied means
-// [[Rcpp::export]]
 arma::colvec computeImpliedMeans(const arma::mat& Fmatrix, 
                               const arma::mat& impliedMeansFull){
   

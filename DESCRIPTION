@@ -1,14 +1,20 @@
 Package: lessSEM
 Type: Package
-Title: Regularized structural equation models with non-smooth penalties
-Version: 1.4.3
-Author: Jannik H. Orzek
+Title: Non-Smooth Regularization for Structural Equation Models
+Version: 1.4.10
+Authors@R: c(person(given   = "Jannik H.", family = "Orzek",
+                    role    = c("aut", "cre", "cph"),
+                    email   = "orzek@mpib-berlin.mpg.de",
+                    comment = c(ORCID = "0000-0002-3123-2248")),
+             person(given = "Yves", family = "Rosseel", 
+                    role  = "cph",
+                    comment = "The Hessian function implementation is adapted from lavaan"))
 Maintainer: Jannik H. Orzek <orzek@mpib-berlin.mpg.de>
 Description: Provides regularized structural equation modeling 
   (regularized SEM) with non-smooth penalty functions (e.g., lasso) building 
-  on lavaan. The package is heavily inspired by the 
-  [regsem](https://github.com/Rjacobucci/regsem) and 
-  [lslx](https://github.com/psyphh/lslx) packages. See ?lessSEM::lessSEM for an introduction.
+  on 'lavaan'. The package is heavily inspired by the 
+  ['regsem'](<https://github.com/Rjacobucci/regsem>) and 
+  ['lslx'](<https://github.com/psyphh/lslx>) packages.
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.2.3
@@ -16,7 +22,7 @@ Roxygen: list(markdown = TRUE)
 Depends: lavaan
 Imports:
     Rcpp (>= 1.0.8),
-    RcppArmadillo(>= 0.11.2.0.0),
+    RcppArmadillo,
     RcppParallel,
     ggplot2,
     tidyr,
@@ -25,24 +31,19 @@ Imports:
     numDeriv,
     utils,
     stats,
-    graphics
+    graphics,
+    rlang
 Suggests:
     knitr,
     plotly,
     rmarkdown,
     Rsolnp,
-    testthat,
-    glmnet,
-    ncvreg,
-    regsem,
-    lslx,
-    mvtnorm,
-    Matrix,
-    OpenMx,
-    ctsemOMX
+    mvtnorm
 LinkingTo:
     Rcpp,
     RcppArmadillo,
     RcppParallel
 VignetteBuilder: knitr
 SystemRequirements: GNU make
+URL: https://github.com/jhorzek/lessSEM
+BugReports: https://github.com/jhorzek/lessSEM/issues

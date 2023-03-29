@@ -7,18 +7,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
 
-```{r setup, include = FALSE}
-library(lessSEM)
-library(lavaan)
-set.seed(123)
-```
+
+
 
 The basic SEM supported by **lessSEM** assumes that the data is independently and
 identically distributed. That is, each subject in the data set comes from the same
@@ -42,7 +33,8 @@ models are implemented in **lessSEM**.
 
 To set up a multi-group model in **lessSEM**, we first have to fit
 separate models for each of the groups in **lavaan**:
-```{r}
+
+```r
 library(lavaan)
 
 # For simplicity, we will use a subset of the Holzinger Swineford data set 
@@ -94,16 +86,9 @@ fit_Grant_White <- sem(model = model_Grant_White,
 
 Now that we have our group-specific models, we can pass them to **lessSEM**:
 
-```{r, include=FALSE}
-library(lessSEM)
 
-# We will just estimate the parameters using the BFGS optimizer without any 
-# regularization.
-# Note that we pass the two models as a vector. This is very important: lessSEM
-# will then set up the multi-group model
-fit <- bfgs(lavaanModel = c(fit_Pasteur, fit_Grant_White))
-```
-```{r,eval=FALSE}
+
+```r
 library(lessSEM)
 
 # We will just estimate the parameters using the BFGS optimizer without any 
@@ -113,8 +98,27 @@ library(lessSEM)
 fit <- bfgs(lavaanModel = c(fit_Pasteur, fit_Grant_White))
 ```
 Let's have a look at the parameters:
-```{r}
+
+```r
 coef(fit)
+#>                                                                               
+#>   Tuning         ||--||  Estimates                                            
+#>  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------
+#>   lambda   alpha ||--|| l1_Pasteur l2_Pasteur l3_Pasteur         v1         v2
+#>  ======= ======= ||--|| ========== ========== ========== ========== ==========
+#>   0.0000  0.0000 ||--||     0.7240     0.5610     0.8824     0.8449     1.0711
+#>                                                                           
+#>                                                                           
+#>  ---------- ---------- ---------- ---------- -------------- --------------
+#>          v3         m1         m2         m3 l1_Grant_White l2_Grant_White
+#>  ========== ========== ========== ========== ============== ==============
+#>      0.6108     4.9212     6.0770     2.2281         0.7088         0.5536
+#>                
+#>                
+#>  --------------
+#>  l3_Grant_White
+#>  ==============
+#>          0.7360
 ```
 That's curious! There are group-specific parameters, but **only** for the parameters
 where we provided group-specific names! This is very important: 
@@ -132,46 +136,9 @@ in very annoying mistakes.
 To demonstrate this, we will use two very different models which may share some
 parameter names.
 
-```{r,include=FALSE}
-# Model from ?lavaan::sem
-model <- ' 
-  # latent variable definitions
-     ind60 =~ x1 + x2 + x3
-     dem60 =~ y1 + a*y2 + b*y3 + c*y4
-     dem65 =~ y5 + a*y6 + b*y7 + c*y8
 
-  # regressions
-    dem60 ~ ind60
-    dem65 ~ ind60 + dem60
 
-  # residual correlations
-    y1 ~~ y5
-    y2 ~~ y4 + y6
-    y3 ~~ y7
-    y4 ~~ y8
-    y6 ~~ y8
-'
-
-fitPolDem <- sem(model, 
-                 data = PoliticalDemocracy,
-                 meanstructure = TRUE)
-
-# Model from ?lavaan::cfa
-HS.model <- ' visual  =~ x1 + x2 + x3
-              textual =~ x4 + x5 + x6
-              speed   =~ x7 + x8 + x9 '
-
-fitHS <- cfa(HS.model,
-             data = HolzingerSwineford1939,
-             meanstructure = TRUE)
-
-## lessSEM does not care if the models passed to the function are similar 
-# or even use different data sets. Of course, it probably does not make much sense
-# to estimate two different models at the same time, but lessSEM won't stop you
-# from trying...
-fit <- bfgs(lavaanModel = c(fitPolDem, fitHS))
-```
-```{r,eval=FALSE}
+```r
 # Model from ?lavaan::sem
 model <- ' 
   # latent variable definitions
@@ -213,12 +180,15 @@ fit <- bfgs(lavaanModel = c(fitPolDem, fitHS))
 Let's first compare the fit of the separate models to that of the multi-group
 model. If **lessSEM** were to estimate the models truly separately we would
 expect the fit to be the same:
-```{r}
+
+```r
 # fit for separate models
 -2*logLik(fitPolDem) + (-2)*logLik(fitHS)
+#> 'log Lik.' 10573.13 (df=39)
 
 # fit for multi-group model:
 fit@fits$m2LL
+#> [1] 10813.96
 ```
 Obviously, these two fits are not the same. What may have happened? Looking
 at the parameter estimates of the multi-group model shows that the two models, 
@@ -226,8 +196,69 @@ at the parameter estimates of the multi-group model shows that the two models,
 intercepts of `x1` is called `x1~1` in both models. Therefore, **lessSEM** assumed
 that we wanted these parameters to have exactly the same value in both models.
 
-```{r}
+
+```r
 coef(fit)
+#>                                                                               
+#>   Tuning         ||--||  Estimates                                            
+#>  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------
+#>   lambda   alpha ||--||  ind60=~x2  ind60=~x3          a          b          c
+#>  ======= ======= ||--|| ========== ========== ========== ========== ==========
+#>   0.0000  0.0000 ||--||     1.8164     1.5582     1.1879     1.1706     1.2511
+#>                                                                                 
+#>                                                                                 
+#>  ----------- ----------- ----------- ---------- ---------- ---------- ----------
+#>  dem60~ind60 dem65~ind60 dem65~dem60     y1~~y5     y2~~y4     y2~~y6     y3~~y7
+#>  =========== =========== =========== ========== ========== ========== ==========
+#>       1.4062      0.4696      0.8755     0.5389     1.4270     2.2120     0.7425
+#>                                                                                         
+#>                                                                                         
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>      y4~~y8     y6~~y8     x1~~x1     x2~~x2     x3~~x3     y1~~y1     y2~~y2     y3~~y3
+#>  ========== ========== ========== ========== ========== ========== ========== ==========
+#>      0.3718     1.3734     0.0000     1.3895     1.2086     1.8544     7.5981     4.9592
+#>                                                                                  
+#>                                                                                  
+#>  ---------- ---------- ---------- ---------- ---------- ------------ ------------
+#>      y4~~y4     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60 dem60~~dem60
+#>  ========== ========== ========== ========== ========== ============ ============
+#>      3.2006     2.2664     4.9911     3.6046     3.3135       0.5305       3.8021
+#>                                                                                
+#>                                                                                
+#>  ------------ ---------- ---------- ---------- ---------- ---------- ----------
+#>  dem65~~dem65       x1~1       x2~1       x3~1       y1~1       y2~1       y3~1
+#>  ============ ========== ========== ========== ========== ========== ==========
+#>        0.2003     5.0409     5.8482     2.5445     5.4463     4.2330     6.5420
+#>                                                                              
+#>                                                                              
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>        y4~1       y5~1       y6~1       y7~1       y8~1 visual=~x2 visual=~x3
+#>  ========== ========== ========== ========== ========== ========== ==========
+#>      4.4295     5.1139     2.9502     6.1703     4.0150     0.2791     0.4461
+#>                                                                                
+#>                                                                                
+#>  ----------- ----------- ---------- ---------- ---------- ---------- ----------
+#>  textual=~x5 textual=~x6  speed=~x8  speed=~x9     x4~~x4     x5~~x5     x6~~x6
+#>  =========== =========== ========== ========== ========== ========== ==========
+#>       1.1126      0.9221     1.1746     1.0056     0.3681     0.4434     0.3610
+#>                                                                               
+#>                                                                               
+#>  ---------- ---------- ---------- -------------- ---------------- ------------
+#>      x7~~x7     x8~~x8     x9~~x9 visual~~visual textual~~textual speed~~speed
+#>  ========== ========== ========== ============== ================ ============
+#>      0.7750     0.4590     0.6025         1.3695           0.9839       0.4084
+#>                                                                               
+#>                                                                               
+#>  --------------- ------------- -------------- ---------- ---------- ----------
+#>  visual~~textual visual~~speed textual~~speed       x4~1       x5~1       x6~1
+#>  =============== ============= ============== ========== ========== ==========
+#>           0.4666        0.2615         0.1746     3.0967     4.3804     2.2186
+#>                                  
+#>                                  
+#>  ---------- ---------- ----------
+#>        x7~1       x8~1       x9~1
+#>  ========== ========== ==========
+#>      4.2060     5.5507     5.3943
 ```
 
 ## Regularized Multi-Group Models
@@ -235,21 +266,37 @@ coef(fit)
 All multi-group models can be regularized similar to the standard SEM: Instead
 of using the `bfgs`-function, we use (for instance), the `lasso`-function:
 
-```{r,include=FALSE}
-fit <- lasso(lavaanModel = c(fit_Pasteur, fit_Grant_White),
-             regularized = c("l1_Pasteur"), 
-             nLambdas = 20)
-```
 
-```{r,eval=FALSE}
+
+
+```r
 fit <- lasso(lavaanModel = c(fit_Pasteur, fit_Grant_White),
              regularized = c("l1_Pasteur"), 
              nLambdas = 20)
 ```
 
 The coefficients can be extracted as usual:
-```{r}
+
+```r
 coef(fit, criterion = "AIC")
+#>                                                                               
+#>   Tuning         ||--||  Estimates                                            
+#>  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------
+#>   lambda   alpha ||--|| l1_Pasteur l2_Pasteur l3_Pasteur         v1         v2
+#>  ======= ======= ||--|| ========== ========== ========== ========== ==========
+#>   0.0000  1.0000 ||--||     0.7241     0.5611     0.8822     0.8447     1.0710
+#>                                                                           
+#>                                                                           
+#>  ---------- ---------- ---------- ---------- -------------- --------------
+#>          v3         m1         m2         m3 l1_Grant_White l2_Grant_White
+#>  ========== ========== ========== ========== ============== ==============
+#>      0.6110     4.9211     6.0768     2.2279         0.7089         0.5537
+#>                
+#>                
+#>  --------------
+#>  l3_Grant_White
+#>  ==============
+#>          0.7358
 ```
 
 ### Regularizing Differences Between Parameters using **lessSEM**
@@ -267,37 +314,59 @@ have the same loading (i.e., we have measurement invariance). Within **lessSEM**
 we can regularize such differences using transformations 
 (see `vignette(topic = "Parameter-transformations", package = "lessSEM")` for more details).
 Therefore, the first step is to define the transformation:
-```{r}
+
+```r
 transformation <- "
 parameters: l1_Pasteur, l1_Grant_White, l1_delta
 l1_Grant_White = l1_Pasteur + l1_delta;
 "
 ```
 Next, we pass this transformation to our model:
-```{r, include = FALSE}
-fit <- lasso(lavaanModel = c(fit_Pasteur, fit_Grant_White),
-             regularized = c("l1_delta"), # we want to regularize the difference!
-             nLambdas = 20,
-             modifyModel = modifyModel(transformations = transformation))
-```
 
-```{r, eval = FALSE}
+
+
+```r
 fit <- lasso(lavaanModel = c(fit_Pasteur, fit_Grant_White),
              regularized = c("l1_delta"), # we want to regularize the difference!
              nLambdas = 20,
              modifyModel = modifyModel(transformations = transformation))
 ```
 Now, let's look at the parameter estimates:
-```{r}
+
+```r
 coef(fit, criterion = "AIC")@estimates[,c("l1_Pasteur", "l1_delta")]
+#> l1_Pasteur   l1_delta 
+#>   0.716718   0.000000
 ```
 As the `l1_delta` parameter has been set to zero, we can assume measurement invariance.
 Note that you won't find `l1_Grant_White` in the parameters of the model. This
 is because `l1_Grant_White` is a deterministic function of the actual parameters
 `l1_Pasteur` and `l1_delta`. If you want to find the value for `l1_Grant_White`,
 have a look at:
-```{r}
+
+```r
 fit@transformations
+#>          lambda alpha l1_Grant_White
+#> 1  0.0056517504     1      0.7167576
+#> 2  0.0053542898     1      0.7167180
+#> 3  0.0050568293     1      0.7166009
+#> 4  0.0047593687     1      0.7161368
+#> 5  0.0044619082     1      0.7155761
+#> 6  0.0041644476     1      0.7151688
+#> 7  0.0038669871     1      0.7147807
+#> 8  0.0035695265     1      0.7141878
+#> 9  0.0032720660     1      0.7137695
+#> 10 0.0029746054     1      0.7132645
+#> 11 0.0026771449     1      0.7128818
+#> 12 0.0023796844     1      0.7125411
+#> 13 0.0020822238     1      0.7120493
+#> 14 0.0017847633     1      0.7115889
+#> 15 0.0014873027     1      0.7110626
+#> 16 0.0011898422     1      0.7107554
+#> 17 0.0008923816     1      0.7102373
+#> 18 0.0005949211     1      0.7097089
+#> 19 0.0002974605     1      0.7094042
+#> 20 0.0000000000     1      0.7088852
 ```
 
 Note that **lslx** (Huang, 2020) supports different penalties for the delta
@@ -333,7 +402,8 @@ applications, such as latent growth curve models with subject-specific measureme
 occasions. In the following, we will use a workaround.
 
 Let's first simulate some data:
-```{r}
+
+```r
 #### Population parameters ####
 intercept_mu <- 0
 intercept_sigma <- 1
@@ -365,15 +435,30 @@ for(i in 1:N){
 lgcData <- as.data.frame(lgcData)
 
 head(lgcData)
+#>            x0         x1         x2        x3        x4        x5
+#> 1  0.26801876 -0.5353028 -1.0262295 -2.533564 -2.890246 -4.655061
+#> 2  0.26260181 -0.4802635 -2.0790754 -2.686983 -3.677022 -4.540501
+#> 3 -0.71054447 -0.5477048 -0.5747618 -1.231821 -1.229388 -1.418401
+#> 4  0.14564354  1.0690979  1.8919916  2.842025  2.953471  4.654879
+#> 5  0.09501816  1.6350899  2.6331440  4.729328  5.423381  6.799296
+#> 6  2.51013193  3.0917904  4.1193617  5.749542  6.222599  7.716919
 
 head(times)
+#>      [,1] [,2] [,3] [,4] [,5] [,6]
+#> [1,]    0 0.94 2.13 3.01 3.91 5.12
+#> [2,]    0 0.84 2.13 2.91 4.10 5.19
+#> [3,]    0 0.83 2.14 3.12 3.95 4.93
+#> [4,]    0 0.88 2.03 3.16 4.01 5.03
+#> [5,]    0 1.07 2.01 3.00 3.81 4.82
+#> [6,]    0 1.17 2.11 2.88 4.06 5.06
 ```
 
 Note that the times are random and subject-specific. We need a separate model
 for each subject. Because lavaan won't let us set up such models, we will
 instead set up models using the entire data set and replace the data post-hoc.
 
-```{r}
+
+```r
 models <- c()
 for(i in 1:N){
 model_i <- paste0(
@@ -420,22 +505,57 @@ models <- c(models,
 }
 ```
 Exemplarily, it makes sense to look at one of the models:
-```{r}
+
+```r
 cat(model_i)
+#> 
+#> int =~ 1*x0 + 1*x1 + 1*x2 + 1*x3 + 1*x4 + 1*x5
+#> slope =~ 0*x0 + 
+#>          1.13*x1 + 
+#>          1.81*x2 +  
+#>          3.06*x3 + 
+#>          4.12*x4 + 
+#>          4.98*x5
+#>          
+#>          int ~ intMean*1
+#>          slope ~ slopeMean*1
+#>          
+#>          int ~~ intVar*int + 0*slope
+#>          slope ~~ slopeVar*slope
+#> 
+#> x0 ~~ v*x0
+#> x1 ~~ v*x1
+#> x2 ~~ v*x2
+#> x3 ~~ v*x3
+#> x4 ~~ v*x4
+#> x5 ~~ v*x5
+#> 
+#> x0 ~ 0*1
+#> x1 ~ 0*1
+#> x2 ~ 0*1
+#> x3 ~ 0*1
+#> x4 ~ 0*1
+#> x5 ~ 0*1
 ```
 Note that the loadings of the slope are fixed to the time points at which person
 `i` provided data.
 
 Now we can pass the models to **lessSEM**:
-```{r,include=FALSE}
-fit <- bfgs(lavaanModel = models)
-```
-```{r,eval=FALSE}
+
+
+```r
 fit <- bfgs(lavaanModel = models)
 ```
 The parameters are given by:
-```{r}
+
+```r
 coef(fit)
+#>                                                                               
+#>   Tuning         ||--||  Estimates                                            
+#>  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------
+#>   lambda   alpha ||--||    intMean  slopeMean     intVar   slopeVar          v
+#>  ======= ======= ||--|| ========== ========== ========== ========== ==========
+#>   0.0000  0.0000 ||--||    -0.0152     0.2921     0.7703     0.9411     0.0851
 ```
 
 ## Bibliography 

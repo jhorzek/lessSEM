@@ -1,0 +1,446 @@
+---
+title: "Definition-Variables-and-Multi-Group-SEM"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Definition-Variables-and-Multi-Group-SEM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path='lessSEMFigures/lessSEM-'
+)
+```
+
+```{r setup, include = FALSE}
+library(lessSEM)
+library(lavaan)
+set.seed(123)
+```
+
+The basic SEM supported by **lessSEM** assumes that the data is independently and
+identically distributed. That is, each subject in the data set comes from the same
+population. This assumption may be unrealistic, however. Researchers may
+suspect that subgroups within the data set are more similar to one another than
+to other subgroups, for example. That is, they differ in their parameter vectors.
+
+If possible groupings within the data set are known beforehand, multi-group models
+are a convenient way to allow for group-specific parameters. 
+Setting up such models with lavaan is explained [here](https://lavaan.ugent.be/tutorial/groups.html).
+Unfortunately, **lessSEM** does not support the same syntax at the moment. "Throwing"
+a multi-group SEM into **lessSEM** will just result in errors. Instead,
+**lessSEM** follows a slightly different approach: You can pass multiple **lavaan**
+models at once which are then combined into a multi-group model. 
+
+In the following, we will look at a two-group model to better understand how multi-group
+models are implemented in **lessSEM**. 
+
+
+## First Step: Setting up a Multi-Group Model
+
+To set up a multi-group model in **lessSEM**, we first have to fit
+separate models for each of the groups in **lavaan**:
+```{r}
+library(lavaan)
+
+# For simplicity, we will use a subset of the Holzinger Swineford data set 
+# which is also used at https://lavaan.ugent.be/tutorial/groups.html
+# to demonstrate multi-group SEM
+
+# To use mutli-group SEM in lessSEM, we have to set up a separate model
+# for each of the groups: 
+# - Pasteur: Children attending the Pasteur school
+# - Grant_White: Children attending the Grant-White school
+data(HolzingerSwineford1939)
+
+## Pasteur ##
+Pasteur <- subset(HolzingerSwineford1939, school == "Pasteur")
+
+model_Pasteur <- paste0(' 
+    visual  =~ l1_Pasteur*x1 + l2_Pasteur*x2 + l3_Pasteur*x3
+    x1 ~~ v1*x1
+    x2 ~~ v2*x2
+    x3 ~~ v3*x3
+    
+    visual ~~ lv1*visual
+    x1 ~ m1*1
+    x2 ~ m2*1
+    x3 ~ m3*1')
+fit_Pasteur <- sem(model = model_Pasteur, 
+                   data = Pasteur, 
+                   std.lv = TRUE)
+
+## Grant-White
+Grant_White <- subset(HolzingerSwineford1939, school == "Grant-White")
+
+model_Grant_White <- paste0(' 
+    visual  =~ l1_Grant_White*x1 + l2_Grant_White*x2 + l3_Grant_White*x3
+    x1 ~~ v1*x1
+    x2 ~~ v2*x2
+    x3 ~~ v3*x3
+    
+    visual ~~ lv1*visual
+    x1 ~ m1*1
+    x2 ~ m2*1
+    x3 ~ m3*1')
+fit_Grant_White <- sem(model = model_Grant_White, 
+                       data = Grant_White, 
+                       std.lv = TRUE)
+```
+
+## Second Step: Pass the Model to **lessSEM**
+
+Now that we have our group-specific models, we can pass them to **lessSEM**:
+
+```{r, include=FALSE}
+library(lessSEM)
+
+# We will just estimate the parameters using the BFGS optimizer without any 
+# regularization.
+# Note that we pass the two models as a vector. This is very important: lessSEM
+# will then set up the multi-group model
+fit <- bfgs(lavaanModel = c(fit_Pasteur, fit_Grant_White))
+```
+```{r,eval=FALSE}
+library(lessSEM)
+
+# We will just estimate the parameters using the BFGS optimizer without any 
+# regularization.
+# Note that we pass the two models as a vector. This is very important: lessSEM
+# will then set up the multi-group model
+fit <- bfgs(lavaanModel = c(fit_Pasteur, fit_Grant_White))
+```
+Let's have a look at the parameters:
+```{r}
+coef(fit)
+```
+That's curious! There are group-specific parameters, but **only** for the parameters
+where we provided group-specific names! This is very important: 
+
+> **Important**: If you set up a multi-group model with **lessSEM**, **lessSEM** 
+will assume that all parameters with the same names should also have the same values. 
+This includes parameters which you may have estimated, but for whom the names were 
+provided by **lavaan** (e.g., variances). 
+
+### Different Models with Shared Parameter Labels
+
+All parameters that have the same labels in multiple models will
+be constrained to equality across models! If you are not careful, this can result 
+in very annoying mistakes.
+To demonstrate this, we will use two very different models which may share some
+parameter names.
+
+```{r,include=FALSE}
+# Model from ?lavaan::sem
+model <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a*y2 + b*y3 + c*y4
+     dem65 =~ y5 + a*y6 + b*y7 + c*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 + y6
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+fitPolDem <- sem(model, 
+                 data = PoliticalDemocracy,
+                 meanstructure = TRUE)
+
+# Model from ?lavaan::cfa
+HS.model <- ' visual  =~ x1 + x2 + x3
+              textual =~ x4 + x5 + x6
+              speed   =~ x7 + x8 + x9 '
+
+fitHS <- cfa(HS.model,
+             data = HolzingerSwineford1939,
+             meanstructure = TRUE)
+
+## lessSEM does not care if the models passed to the function are similar 
+# or even use different data sets. Of course, it probably does not make much sense
+# to estimate two different models at the same time, but lessSEM won't stop you
+# from trying...
+fit <- bfgs(lavaanModel = c(fitPolDem, fitHS))
+```
+```{r,eval=FALSE}
+# Model from ?lavaan::sem
+model <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a*y2 + b*y3 + c*y4
+     dem65 =~ y5 + a*y6 + b*y7 + c*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 + y6
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+fitPolDem <- sem(model, 
+                 data = PoliticalDemocracy,
+                 meanstructure = TRUE)
+
+# Model from ?lavaan::cfa
+HS.model <- ' visual  =~ x1 + x2 + x3
+              textual =~ x4 + x5 + x6
+              speed   =~ x7 + x8 + x9 '
+
+fitHS <- cfa(HS.model,
+             data = HolzingerSwineford1939,
+             meanstructure = TRUE)
+
+## lessSEM does not care if the models passed to the function are similar 
+# or even use different data sets. Of course, it probably does not make much sense
+# to estimate two different models at the same time, but lessSEM won't stop you
+# from trying...
+fit <- bfgs(lavaanModel = c(fitPolDem, fitHS))
+```
+Let's first compare the fit of the separate models to that of the multi-group
+model. If **lessSEM** were to estimate the models truly separately we would
+expect the fit to be the same:
+```{r}
+# fit for separate models
+-2*logLik(fitPolDem) + (-2)*logLik(fitHS)
+
+# fit for multi-group model:
+fit@fits$m2LL
+```
+Obviously, these two fits are not the same. What may have happened? Looking
+at the parameter estimates of the multi-group model shows that the two models, 
+`fitPolDem` and `fitHS` did share some parameter labels! For instance, the 
+intercepts of `x1` is called `x1~1` in both models. Therefore, **lessSEM** assumed
+that we wanted these parameters to have exactly the same value in both models.
+
+```{r}
+coef(fit)
+```
+
+## Regularized Multi-Group Models
+
+All multi-group models can be regularized similar to the standard SEM: Instead
+of using the `bfgs`-function, we use (for instance), the `lasso`-function:
+
+```{r,include=FALSE}
+fit <- lasso(lavaanModel = c(fit_Pasteur, fit_Grant_White),
+             regularized = c("l1_Pasteur"), 
+             nLambdas = 20)
+```
+
+```{r,eval=FALSE}
+fit <- lasso(lavaanModel = c(fit_Pasteur, fit_Grant_White),
+             regularized = c("l1_Pasteur"), 
+             nLambdas = 20)
+```
+
+The coefficients can be extracted as usual:
+```{r}
+coef(fit, criterion = "AIC")
+```
+
+### Regularizing Differences Between Parameters using **lessSEM**
+
+Where regularized multi-group models shine is when automatically testing 
+for group-differences. This was proposed by Huang (2018) and provides a convenient
+way to decide which of the parameters should be group-specific. To this end,
+differences between parameters must be regularized. Say, we are interested in the
+loading `l1` and wonder if we do indeed need separate loadings for students attending
+the Pasteur school (`l1_Pasteur`) and the Grant-White school (`l1_Grant_White`). 
+Using the Pasteur school as baseline group (see Huang, 2018, for more details),
+we can define `l1_Grant_White = l1_Pasteur + l1_delta`, where `l1_delta` is
+the difference between the two schools. If `l1_delta` is zero, then both schools
+have the same loading (i.e., we have measurement invariance). Within **lessSEM**,
+we can regularize such differences using transformations 
+(see `vignette(topic = "Parameter-transformations", package = "lessSEM")` for more details).
+Therefore, the first step is to define the transformation:
+```{r}
+transformation <- "
+parameters: l1_Pasteur, l1_Grant_White, l1_delta
+l1_Grant_White = l1_Pasteur + l1_delta;
+"
+```
+Next, we pass this transformation to our model:
+```{r, include = FALSE}
+fit <- lasso(lavaanModel = c(fit_Pasteur, fit_Grant_White),
+             regularized = c("l1_delta"), # we want to regularize the difference!
+             nLambdas = 20,
+             modifyModel = modifyModel(transformations = transformation))
+```
+
+```{r, eval = FALSE}
+fit <- lasso(lavaanModel = c(fit_Pasteur, fit_Grant_White),
+             regularized = c("l1_delta"), # we want to regularize the difference!
+             nLambdas = 20,
+             modifyModel = modifyModel(transformations = transformation))
+```
+Now, let's look at the parameter estimates:
+```{r}
+coef(fit, criterion = "AIC")@estimates[,c("l1_Pasteur", "l1_delta")]
+```
+As the `l1_delta` parameter has been set to zero, we can assume measurement invariance.
+Note that you won't find `l1_Grant_White` in the parameters of the model. This
+is because `l1_Grant_White` is a deterministic function of the actual parameters
+`l1_Pasteur` and `l1_delta`. If you want to find the value for `l1_Grant_White`,
+have a look at:
+```{r}
+fit@transformations
+```
+
+Note that **lslx** (Huang, 2020) supports different penalties for the delta
+parameter (`l1_delta`) and the baseline parameter (`l1_Pasteur`). This is
+currently not supported by **lessSEM**.
+
+## Cross-Validation
+
+Automatic cross-validation for multi-group models with, for instance, `cvLasso`
+is *not* yet implemented. This is because it can be difficult to decide how to
+split up the data set in each submodel. If you want to use cross-validation,
+you will unfortunately have to set up the procedure manually.
+
+## Definition Variables
+
+Models with definition variables are basically the same as multi-group models,
+with the sole exception that the group-specific parameters are not estimated but
+fixed to specific values. 
+
+> If your main interest is in setting up a multi-group SEM with **lessSEM** and
+you don't care about the details, the **lessTemplates** package (https://github.com/jhorzek/lessTemplates)
+provides means to easily set up such models (see SEMWithDefinitionVariables function
+in **lessTemplates**).
+
+In the following, we will look in detail at how definition variables can be used 
+in **lessSEM**
+
+### The details ...
+
+Unfortunately, **lavaan** does not allow us to set
+up models for $N=1$, however. This is required for many definition variable
+applications, such as latent growth curve models with subject-specific measurement
+occasions. In the following, we will use a workaround.
+
+Let's first simulate some data:
+```{r}
+#### Population parameters ####
+intercept_mu <- 0
+intercept_sigma <- 1
+slope_mu <- .3
+slope_sigma <- 1
+
+#### data set ####
+N <- 50
+intercepts <- rnorm(n = N, 
+                    mean = intercept_mu, 
+                    sd = intercept_sigma)
+slopes <- rnorm(n = N, 
+                mean = slope_mu, 
+                sd = slope_sigma)
+times <- matrix(seq(0,5,1),
+                nrow = N,
+                ncol = 6,
+                byrow = TRUE) +
+  cbind(0,matrix(round(runif(n = N*5, min = -.2,max = .2),2),
+                 nrow = N,
+                 ncol = 5,
+                 byrow = TRUE)) # we add some jitter to make the times person-specific
+
+lgcData <- matrix(NA, nrow = N, ncol = ncol(times), dimnames = list(NULL, paste0("x", 0:5)))
+
+for(i in 1:N){
+  lgcData[i,] <- intercepts[i] + times[i,]* slopes[i] + rnorm(ncol(lgcData),0,.3)
+}
+lgcData <- as.data.frame(lgcData)
+
+head(lgcData)
+
+head(times)
+```
+
+Note that the times are random and subject-specific. We need a separate model
+for each subject. Because lavaan won't let us set up such models, we will
+instead set up models using the entire data set and replace the data post-hoc.
+
+```{r}
+models <- c()
+for(i in 1:N){
+model_i <- paste0(
+  "
+int =~ 1*x0 + 1*x1 + 1*x2 + 1*x3 + 1*x4 + 1*x5
+slope =~ ",times[i,1],"*x0 + 
+         ",times[i,2],"*x1 + 
+         ",times[i,3],"*x2 +  
+         ",times[i,4],"*x3 + 
+         ",times[i,5],"*x4 + 
+         ",times[i,6],"*x5
+         
+         int ~ intMean*1
+         slope ~ slopeMean*1
+         
+         int ~~ intVar*int + 0*slope
+         slope ~~ slopeVar*slope
+
+x0 ~~ v*x0
+x1 ~~ v*x1
+x2 ~~ v*x2
+x3 ~~ v*x3
+x4 ~~ v*x4
+x5 ~~ v*x5
+
+x0 ~ 0*1
+x1 ~ 0*1
+x2 ~ 0*1
+x3 ~ 0*1
+x4 ~ 0*1
+x5 ~ 0*1
+"  
+)
+
+fit_i <- sem(model = model_i, 
+             data = lgcData, 
+             do.fit = FALSE)
+internalData <- lavInspect(fit_i, "data")
+# replace the data set
+fit_i@Data@X[[1]] <- as.matrix(lgcData[i,colnames(internalData),drop = FALSE])
+
+models <- c(models, 
+            fit_i)
+}
+```
+Exemplarily, it makes sense to look at one of the models:
+```{r}
+cat(model_i)
+```
+Note that the loadings of the slope are fixed to the time points at which person
+`i` provided data.
+
+Now we can pass the models to **lessSEM**:
+```{r,include=FALSE}
+fit <- bfgs(lavaanModel = models)
+```
+```{r,eval=FALSE}
+fit <- bfgs(lavaanModel = models)
+```
+The parameters are given by:
+```{r}
+coef(fit)
+```
+
+## Bibliography 
+
+- Huang, P.-H. (2018). A penalized likelihood method for multi-group structural equation modelling. British Journal of Mathematical and Statistical Psychology, 71(3), 499–522. https://doi.org/10.1111/bmsp.12130
+- Huang, P.-H. (2020). lslx: Semi-confirmatory structural equation modeling via penalized likelihood. Journal of Statistical Software, 93(7). https://doi.org/10.18637/jss.v093.i07
+

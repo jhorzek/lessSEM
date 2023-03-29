@@ -2,10 +2,7 @@
 % Please edit documentation in R/gpOptimizationInterfaceCpp.R
 \name{gpLspCpp}
 \alias{gpLspCpp}
-\title{Implements lsp regularization for general purpose optimization problems with C++ functions.
-The penalty function is given by:
-\deqn{p( x_j) = \lambda \log(1 + |x_j|/\theta)}
-where \eqn{\theta > 0}.}
+\title{gpLspCpp}
 \usage{
 gpLspCpp(
   par,
@@ -45,12 +42,17 @@ the controlIsta (see ?controlIsta)}
 Object of class gpRegularized
 }
 \description{
+Implements lsp regularization for general purpose optimization problems with C++ functions.
+The penalty function is given by:
+\deqn{p( x_j) = \lambda \log(1 + |x_j|/\theta)}
+where \eqn{\theta > 0}.
+}
+\details{
 The interface is inspired by optim, but a bit more restrictive. Users have to supply a vector
 with starting values (important: This vector must have labels), a fitting
 function, and a gradient function. These fitting functions must take an const Rcpp::NumericVector& with parameter
 values as first argument and an Rcpp::List& as second argument
-}
-\details{
+
 lsp regularization:
 \itemize{
 \item Candès, E. J., Wakin, M. B., & Boyd, S. P. (2008). Enhancing Sparsity by
@@ -85,7 +87,7 @@ Trends in Optimization, 1(3), 123–231.
 }
 }
 \examples{
- 
+\dontrun{
 # This example shows how to use the optimizers
 # for C++ objective functions. We will use
 # a linear regression as an example. Note that
@@ -140,6 +142,7 @@ arma::rowvec gradientfunction(const Rcpp::NumericVector& parameters, Rcpp::List&
     return(gradients);
 }
 
+// Dirk Eddelbuettel at
 // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
                 Rcpp::List& //additional elements
@@ -188,5 +191,5 @@ l <- gpLspCpp(par = parameters,
                  additionalArguments = data)
 
 l@parameters
-
+}
 }

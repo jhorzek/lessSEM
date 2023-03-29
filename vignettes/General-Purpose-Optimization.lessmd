@@ -1,0 +1,889 @@
+---
+title: "General-Purpose-Optimization"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{General-Purpose-Optimization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path='lessSEMFigures/lessSEM-'
+)
+```
+
+```{r, include=FALSE}
+runtimes <- data.frame(
+  R = rep(NA,5),
+  Rgrad = rep(NA,5),
+  RC = rep(NA,5),
+  Cpt = rep(NA,5),
+  CIncl = rep(NA,5)
+)
+```
+
+
+**lessSEM** can be used for regularized SEM and for general purpose optimization.
+That is, you can use all optimizers and penalty functions implemented in **lessSEM**
+for your own models. To this end, you must define a fitting function; i.e.,
+a function which takes in the parameters and returns a single value - the unregularized
+fit. **lessSEM** then uses this fitting function and adds the penalty terms. The 
+combined fitting function is then optimized. Currently, there are three ways to 
+use the optimizers in **lessSEM**
+
+1. You can use the R interface. This interface is very similar to that of optim (see e.g., `?lessSEM::gpLasso`). 
+2. If your functions are defined in C++, you can use a faster interface which is a bit more
+involved (see e.g., `?lessSEM::gpLassoCpp`).
+3. You can include the header files of **lessSEM** in your package to directly interface
+to the underlying C++ functions. This is the most complicated approach.
+
+In general, the approaches get faster as you transition from 1 to 3. You will
+see the largest performance gains when implementing a gradient function and not just
+a fitting function, however. As a rule of thumb: Use approach 1 if you intend to
+run your model a few times, don't want to create a new package and your model
+runs fairly fast. Use approach 2 if you want to increase the speed a bit, while
+keeping the changes necessary to your files manageable. Use approach 3 if you 
+create a new package, have some experience with **RcppArmadillo** and want to get the best performance. 
+
+In the following, we will demonstrate all three approaches using a linear regression model
+as an example. 
+
+## The example
+
+Let's start by setting up our linear regression model. To this end, we will simulate
+a data set:
+
+```{r}
+set.seed(123)
+
+# first, we simulate data for our
+# linear regression.
+N <- 100 # number of persons
+p <- 10 # number of predictors
+X <- matrix(rnorm(N*p),	nrow = N, ncol = p) # design matrix
+b <- c(rep(1,4),
+       rep(0,6)) # true regression weights
+y <- X%*%matrix(b,ncol = 1) + rnorm(N,0,.2)
+```
+
+## The first approach: Interfacing from R
+
+We will now try to implement a lasso regularized linear regression using the 
+gpLasso interface. This interface is very similar to `optim`. To use it,
+we must define our fitting function in R:
+
+```{r}
+# defining the sum-squared-errors:
+sseFun <- function(par, y, X, N){
+  # par is the parameter vector
+  # y is the observed dependent variable
+  # X is the design matrix
+  # N is the sample size
+  pred <- X %*% matrix(par, ncol = 1) #be explicit here:
+  # we need par to be a column vector
+  sse <- sum((y - pred)^2)
+  # we scale with .5/N to get the same results as glmnet
+  return((.5/N)*sse)
+}
+```
+
+Additionally, we need a *labeled* vector with starting values:
+
+```{r}
+par <- rep(0, p+1)
+names(par) <- paste0("b", 0:p)
+print(par)
+```
+
+Note that we defined one more parameter than there are variables in X. This is
+because we also want to estimate the intercept. To this end, we extend X:
+
+```{r}
+Xext <- cbind(1,X)
+head(Xext)
+```
+
+Finally, we need to decide which parameters should be regularized and the values for 
+lambda. We want to regularize everything except for the intercept:
+```{r}
+(regularized <- paste0("b", 1:p))
+lambdas  <- seq(0,.1,length.out = 20)
+```
+
+Now, we are ready to estimate the model:
+
+```{r,include=FALSE}
+library(lessSEM)
+l1 <- gpLasso(par = par, 
+              regularized = regularized, 
+              fn = sseFun, 
+              lambdas = lambdas, 
+              X = Xext,
+              y = y,
+              N = length(y)
+)
+```
+
+```{r,eval=FALSE}
+library(lessSEM)
+l1 <- gpLasso(par = par, 
+              regularized = regularized, 
+              fn = sseFun, 
+              lambdas = lambdas, 
+              X = Xext,
+              y = y,
+              N = length(y)
+)
+head(l1@parameters)
+```
+```{r, echo=FALSE}
+head(l1@parameters)
+```
+
+
+Note that we did not specify the gradients of our function. In this case, **lessSEM** will use 
+**numDeriv** to compute the gradients. However, if you know how to specify the gradients,
+this can result in faster estimation:
+
+```{r}
+sseGrad <- function(par, y, X, N){
+  
+  gradients = (-2.0*t(X) %*% y + 2.0*t(X)%*%X%*%matrix(par,ncol = 1))
+  
+  gradients = (.5/length(y))*gradients
+  return(t(gradients))
+}
+```
+
+```{r,include=FALSE}
+l1 <- gpLasso(par = par, 
+              regularized = regularized, 
+              fn = sseFun, 
+              gr = sseGrad,
+              lambdas = lambdas, 
+              X = Xext,
+              y = y,
+              N = length(y)
+)
+```
+
+```{r,eval=FALSE}
+l1 <- gpLasso(par = par, 
+              regularized = regularized, 
+              fn = sseFun, 
+              gr = sseGrad,
+              lambdas = lambdas, 
+              X = Xext,
+              y = y,
+              N = length(y)
+)
+head(l1@parameters)
+```
+```{r, echo=FALSE}
+head(l1@parameters)
+```
+
+Here is a short comparison of running both models 5 times each:
+
+```{r,include=FALSE}
+
+for(i in 1:5){
+  startTime <- Sys.time()
+  l1 <- gpLasso(par = par, 
+                regularized = regularized, 
+                fn = sseFun, 
+                gr = NULL,
+                lambdas = lambdas, 
+                X = Xext,
+                y = y,
+                N = length(y)
+  )
+  runtimes$R[i] <- difftime(Sys.time(), startTime, units = "secs")
+}
+
+for(i in 1:5){
+  startTime <- Sys.time()
+  l1 <- gpLasso(par = par, 
+                regularized = regularized, 
+                fn = sseFun, 
+                gr = sseGrad,
+                lambdas = lambdas, 
+                X = Xext,
+                y = y,
+                N = length(y)
+  )
+  runtimes$Rgrad[i] <- difftime(Sys.time(), startTime, units = "secs")
+}
+```
+Runtime in seconds without gradients:
+```{r,echo=FALSE}
+print(runtimes$R)
+```
+
+Runtime in seconds with gradients:
+```{r,echo=FALSE}
+print(runtimes$Rgrad)
+```
+
+Now, that's quite a difference!
+
+Note that you can also pass a C++ function to gpLasso similar to the approach above:
+
+```{r}
+library(RcppArmadillo)
+library(Rcpp)
+linreg <- '
+// [[Rcpp::depends(RcppArmadillo)]]
+#include <RcppArmadillo.h>
+
+// [[Rcpp::export]]
+double fitfunction(const arma::colvec parameters, const arma::mat X, const arma::colvec y, const int N){
+  
+  // compute the sum of squared errors:
+    arma::mat sse = arma::trans(y-X*parameters)*(y-X*parameters);
+    
+    // other packages, such as glmnet, scale the sse with 
+    // 1/(2*N), where N is the sample size. We will do that here as well
+    
+    sse *= 1.0/(2.0 * N);
+    
+    // note: We must return a double, but the sse is a matrix
+    // To get a double, just return the single value that is in 
+    // this matrix:
+      return(sse(0,0));
+}
+
+// [[Rcpp::export]]
+arma::rowvec gradientfunction(const arma::colvec parameters, const arma::mat X, const arma::colvec y, const int N){
+  
+  // note: we want to return our gradients as row-vector; therefore,
+  // we have to transpose the resulting column-vector:
+    arma::rowvec gradients = arma::trans(-2.0*X.t() * y + 2.0*X.t()*X*parameters);
+    
+    // other packages, such as glmnet, scale the sse with 
+    // 1/(2*N), where N is the sample size. We will do that here as well
+    
+    gradients *= (.5/N);
+    
+    return(gradients);
+}'
+
+Rcpp::sourceCpp(code = linreg)
+```
+
+Run the model as before:
+
+```{r, include=FALSE}
+l1 <- gpLasso(par = par, 
+              regularized = regularized, 
+              fn = fitfunction, 
+              gr = gradientfunction,
+              lambdas = lambdas, 
+              X = Xext,
+              y = y,
+              N = length(y)
+)
+head(l1@parameters)
+```
+
+```{r, eval = FALSE}
+l1 <- gpLasso(par = par, 
+              regularized = regularized, 
+              fn = fitfunction, 
+              gr = gradientfunction,
+              lambdas = lambdas, 
+              X = Xext,
+              y = y,
+              N = length(y)
+)
+head(l1@parameters)
+```
+
+```{r, echo=FALSE}
+head(l1@parameters)
+```
+
+```{r,include=FALSE}
+for(i in 1:5){
+  startTime <- Sys.time()
+  l1 <- gpLasso(par = par, 
+                regularized = regularized, 
+                fn = fitfunction, 
+                gr = gradientfunction,
+                lambdas = lambdas, 
+                X = Xext,
+                y = y,
+                N = length(y)
+  )
+  runtimes$RC[i] <- difftime(Sys.time(), startTime, units = "secs")
+}
+```
+
+The runtime in seconds with C++ is:
+```{r,echo=FALSE}
+print(runtimes$RC)
+```
+Which is even lower than what we had before!
+
+## The second approach: Using C++ function pointers
+
+While using the Rcpp functions defined above was quite fast for our linear regression,
+it can still be fairly slow for more involved models (e.g., SEM). This is due to
+our optimizer having to go back and forth between R and C++. To reduce this overhead,
+we can use the second approach. Here, instead of passing an Rcpp function which
+is then executed in R, we pass a pointer to the underlying C++ functions. This
+approach is more constrained than the one presented above:
+
+1. We must define both, a fitting function and a gradient function in Rcpp. We cannot
+rely on numDeriv any more!
+2. The fitting function and the gradient function are only allowed two parameters each:
+a `const Rcpp::NumericVector&` (the parameters) and an `Rcpp::List&` (everything else). While this seems restrictive, note
+that we can virtually pass anything we want in a list.
+3. We must [create pointers](https://gallery.rcpp.org/articles/passing-cpp-function-pointers/) 
+to the fit and gradient function. This is difficult, however we will provide some guidance below.
+
+This may be a bit overwhelming at first, so we will go through it step by step. 
+
+### 1. Creating a fitting function and a gradient function
+
+We already defined a fitting function and a gradient function for our linear regression
+model in the example above. However, we often do not know the gradients in closed form.
+If you don't have a gradient function, you can try a numerical approximation. More
+details can be found [here](https://en.wikipedia.org/wiki/Finite_difference).
+
+### 2. Adapting the functions to the constraints
+
+Note that our fitting function and our gradient function do not comply with
+the constraints mentioned above. That is, they do take more than two parameters
+as arguments (`const arma::colvec parameters, const arma::mat X, const arma::colvec y, const int N`),
+and these arguments are not a `const Rcpp::NumericVector&` and an `Rcpp::List&`. 
+How can we make this work? The parameter vector `const Rcpp::NumericVector&` 
+will hold all elements in the `arma::colvec pararameters` of our old function. 
+The `Rcpp::List&` must contain all of the other elements (`X,y,N`). Let's start
+by creating this list, which we will call data:
+```{r}
+data <- list("X" = Xext,
+             "y" = y,
+             "N" = length(y))
+```
+
+Next, we have to change our functions to make things work:
+
+```{r}
+linreg <- '
+// [[Rcpp::depends(RcppArmadillo)]]
+#include <RcppArmadillo.h>
+
+// [[Rcpp::export]]
+double fitfunction(const Rcpp::NumericVector& parameters, Rcpp::List& data){
+  // our function now only takes the two specified arguments: a
+  // const Rcpp::NumericVector& and an Rcpp::List&.
+  // We have to extract all elements from the list:
+  arma::colvec y = Rcpp::as<arma::colvec>(data["y"]); // the dependent variable
+  arma::mat X = Rcpp::as<arma::mat>(data["X"]); // the design matrix
+  int N = Rcpp::as<int>(data["N"]); // the sample size
+  
+  // Next, we want to get the parameters as a column-vector:
+    arma::colvec b = Rcpp::as<arma::colvec>(parameters);
+    
+  // compute the sum of squared errors:
+    arma::mat sse = arma::trans(y-X*b)*(y-X*b);
+    
+    // other packages, such as glmnet, scale the sse with 
+    // 1/(2*N), where N is the sample size. We will do that here as well
+    
+    sse *= 1.0/(2.0 * N);
+    
+    // note: We must return a double, but the sse is a matrix
+    // To get a double, just return the single value that is in 
+    // this matrix:
+      return(sse(0,0));
+}
+
+// [[Rcpp::export]]
+arma::rowvec gradientfunction(const Rcpp::NumericVector& parameters, Rcpp::List& data){
+    // our function now only takes the two specified arguments: a
+  // const Rcpp::NumericVector& and an Rcpp::List&.
+  // We have to extract all elements from the list:
+  arma::colvec y = Rcpp::as<arma::colvec>(data["y"]); // the dependent variable
+  arma::mat X = Rcpp::as<arma::mat>(data["X"]); // the design matrix
+  int N = Rcpp::as<int>(data["N"]); // the sample size
+  
+  // Next, we want to get the parameters as a column-vector:
+    arma::colvec b = Rcpp::as<arma::colvec>(parameters);
+  
+  // note: we want to return our gradients as row-vector; therefore,
+  // we have to transpose the resulting column-vector:
+    arma::rowvec gradients = arma::trans(-2.0*X.t() * y + 2.0*X.t()*X*b);
+    
+    // other packages, such as glmnet, scale the sse with 
+    // 1/(2*N), where N is the sample size. We will do that here as well
+    
+    gradients *= (.5/N);
+    
+    return(gradients);
+}
+'
+```
+
+That's it, our functions have been transformed!
+
+### Step 3: Creating pointers to our functions
+
+This is where it get's really tricky! We can't just pass our functions to C++.
+However, we can [create pointers](https://gallery.rcpp.org/articles/passing-cpp-function-pointers/).
+These have to be generated in C++ and this can be tricky to get right. To simplify 
+the process, we have created a function which helps setting things up:
+
+```{r}
+cat(lessSEM::makePtrs(fitFunName = "fitfunction", # name of the function in C++
+                      gradFunName = "gradientfunction" # name of the function in C++
+)
+)
+```
+
+Let's follow the instructions and add the lines to our C++ functions:
+
+```{r}
+linreg <- '
+// [[Rcpp::depends(RcppArmadillo)]]
+#include <RcppArmadillo.h>
+
+// [[Rcpp::export]]
+double fitfunction(const Rcpp::NumericVector& parameters, Rcpp::List& data){
+  // our function now only takes the two specified arguments: a
+  // const Rcpp::NumericVector& and an Rcpp::List&.
+  // We have to extract all elements from the list:
+  arma::colvec y = Rcpp::as<arma::colvec>(data["y"]); // the dependent variable
+  arma::mat X = Rcpp::as<arma::mat>(data["X"]); // the design matrix
+  int N = Rcpp::as<int>(data["N"]); // the sample size
+  
+  // Next, we want to get the parameters as a column-vector:
+    arma::colvec b = Rcpp::as<arma::colvec>(parameters);
+    
+  // compute the sum of squared errors:
+    arma::mat sse = arma::trans(y-X*b)*(y-X*b);
+    
+    // other packages, such as glmnet, scale the sse with 
+    // 1/(2*N), where N is the sample size. We will do that here as well
+    
+    sse *= 1.0/(2.0 * N);
+    
+    // note: We must return a double, but the sse is a matrix
+    // To get a double, just return the single value that is in 
+    // this matrix:
+      return(sse(0,0));
+}
+
+// [[Rcpp::export]]
+arma::rowvec gradientfunction(const Rcpp::NumericVector& parameters, Rcpp::List& data){
+    // our function now only takes the two specified arguments: a
+  // const Rcpp::NumericVector& and an Rcpp::List&.
+  // We have to extract all elements from the list:
+  arma::colvec y = Rcpp::as<arma::colvec>(data["y"]); // the dependent variable
+  arma::mat X = Rcpp::as<arma::mat>(data["X"]); // the design matrix
+  int N = Rcpp::as<int>(data["N"]); // the sample size
+  
+  // Next, we want to get the parameters as a column-vector:
+    arma::colvec b = Rcpp::as<arma::colvec>(parameters);
+  
+  // note: we want to return our gradients as row-vector; therefore,
+  // we have to transpose the resulting column-vector:
+    arma::rowvec gradients = arma::trans(-2.0*X.t() * y + 2.0*X.t()*X*b);
+    
+    // other packages, such as glmnet, scale the sse with 
+    // 1/(2*N), where N is the sample size. We will do that here as well
+    
+    gradients *= (.5/N);
+    
+    return(gradients);
+}
+
+/// THE FOLLOWING PART IS NEW:
+
+// INSTRUCTIONS: ADD THE FOLLOWING LINES TO YOUR C++ FUNCTIONS
+
+// IF RCPPARMADILLO IS NOT IMPORTED YET, UNCOMMENT THE FOLLOWING TWO LINES
+// // [[Rcpp::depends(RcppArmadillo)]]
+// #include <RcppArmadillo.h>
+
+// Dirk Eddelbuettel at
+// https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
+                Rcpp::List& //additional elements
+);
+typedef Rcpp::XPtr<fitFunPtr> fitFunPtr_t;
+
+typedef arma::rowvec (*gradientFunPtr)(const Rcpp::NumericVector&, //parameters
+                      Rcpp::List& //additional elements
+);
+typedef Rcpp::XPtr<gradientFunPtr> gradientFunPtr_t;
+
+// [[Rcpp::export]]
+fitFunPtr_t fitfunctionPtr() {
+        return(fitFunPtr_t(new fitFunPtr(&fitfunction)));
+}
+
+// [[Rcpp::export]]
+gradientFunPtr_t gradientfunctionPtr() {
+        return(gradientFunPtr_t(new gradientFunPtr(&gradientfunction)));
+}
+'
+```
+
+Compile the functions using Rcpp:
+
+```{r}
+Rcpp::sourceCpp(code = linreg)
+```
+
+Great! Now that this is out of the way, we can create the pointers to our functions:
+
+```{r}
+ffp <- fitfunctionPtr() # create the pointer to the fitting function
+# Note that the name of this function will depend on the name of your fitting function.
+# For instance, if your fitting function is called sse, then the pointer will be created 
+# with ffp <- ssePtr()
+gfp <- gradientfunctionPtr() # create the pointer to the gradient function
+# Note that the name of this function will depend on the name of your gradient function.
+# For instance, if your gradient function is called sseGradient, then the pointer will be created 
+# with gfp <- sseGradientPtr()
+```
+
+### Optimizing the model
+
+The last step is to call the general purpose optimization. To this end, use the
+`gpLassoCpp` function:
+```{r, include=FALSE}
+l1 <- gpLassoCpp(par = par, 
+                 regularized = regularized, 
+                 # important: pass the pointers!
+                 fn = ffp, 
+                 gr = gfp, 
+                 lambdas = lambdas, 
+                 # finally, pass the list which the fitting function and the 
+                 # gradient function need:
+                 additionalArguments = data
+)
+head(l1@parameters)
+```
+
+```{r, eval=FALSE}
+l1 <- gpLassoCpp(par = par, 
+                 regularized = regularized, 
+                 # important: pass the poinnters!
+                 fn = ffp, 
+                 gr = gfp, 
+                 lambdas = lambdas, 
+                 # finally, pass the list which the fitting function and the 
+                 # gradient function need:
+                 additionalArguments = data
+)
+head(l1@parameters)
+```
+
+```{r,echo=FALSE}
+head(l1@parameters)
+```
+
+
+
+Benchmarking this approach results in:
+
+```{r,include=FALSE}
+for(i in 1:5){
+  startTime <- Sys.time()
+  l1 <- gpLassoCpp(par = par, 
+                   regularized = regularized, 
+                   # important: pass the poinnters!
+                   fn = ffp, 
+                   gr = gfp, 
+                   lambdas = lambdas, 
+                   # finally, pass the list which the fitting function and the 
+                   # gradient function need:
+                   additionalArguments = data
+  )
+  runtimes$Cpt[i] <- difftime(Sys.time(), startTime, units = "secs")
+}
+```
+
+```{r,echo=FALSE}
+print(runtimes$Cpt)
+```
+So, we have reduced our run time even more!
+
+## The third approach: Including the header files
+
+This is, by far, the most difficult approach which is why we have created a 
+whole package to demonstrate it. You will find more information in the vignette
+`The-optimizer-interface` and in the [lessLM](https://github.com/jhorzek/lessLM) package.
+
+```{r, include=FALSE}
+funCpp <- '
+// [[Rcpp::depends(RcppArmadillo,lessSEM)]]
+
+#include <RcppArmadillo.h>
+#include "lessSEM.h"
+
+double sumSquaredError(
+    arma::colvec b, // the parameter vector
+    arma::colvec y, // the dependent variable
+    arma::mat X // the design matrix
+){
+  // compute the sum of squared errors:
+  arma::mat sse = arma::trans(y-X*b)*(y-X*b);
+  
+  // other packages, such as glmnet, scale the sse with 
+  // 1/(2*N), where N is the sample size. We will do that here as well
+  
+  sse *= 1.0/(2.0 * y.n_elem);
+  
+  // note: We must return a double, but the sse is a matrix
+  // To get a double, just return the single value that is in 
+  // this matrix:
+  return(sse(0,0));
+}
+
+arma::rowvec sumSquaredErrorGradients(
+    arma::colvec b, // the parameter vector
+    arma::colvec y, // the dependent variable
+    arma::mat X // the design matrix
+){
+  // note: we want to return our gradients as row-vector; therefore,
+  // we have to transpose the resulting column-vector:
+  arma::rowvec gradients = arma::trans(-2.0*X.t() * y + 2.0*X.t()*X*b);
+  
+  // other packages, such as glmnet, scale the sse with 
+  // 1/(2*N), where N is the sample size. We will do that here as well
+  
+  gradients *= (.5/y.n_rows);
+  
+  return(gradients);
+}
+
+// the first step when linking to lessSEM is to define a model class.
+// The procedure is very similar to the ensmallen library, from which
+// we have adapted the following approach (see https://ensmallen.org/)
+// The model MUST inherit from the model class defined in lessSEM.
+// this class lives in the lessSEM namespace and is accessed with lessSEM::model
+
+class linearRegressionModel : public lessSEM::model{
+  
+public:
+  // the lessSEM::model class has two methods: "fit" and "gradients".
+  // Both of these methods must follow a fairly strict framework.
+  // First: They must receive exactly two arguments: 
+  //        1) an arma::rowvec with current parameter values
+  //        2) an Rcpp::StringVector with current parameter labels 
+  //          (NOTE: the lessSEM package currently does not make use of these labels.
+  //                 This is just for future use. If you don"t want to use the labels,
+  //                just pass any Rcpp::StringVector you want).
+  // Second:
+  //        1) fit must return a double (e.g., the -2-log-likelihood) 
+  //        2) gradients must return an arma::rowvec with the gradients. It is
+  //           important that the gradients are returned in the same order as the 
+  //           parameters (i.e., don"t shuffle your gradients, lessSEM will assume
+  //           that the first value in gradients corresponds to the derivative with
+  //           respect to the first parameter passed to the function).
+  
+  double fit(arma::rowvec b, Rcpp::StringVector labels) override{
+    //NOTE: In sumSquaredError we assumed that b was a column-vector. We
+    // have to transpose b to make things work
+    return(sumSquaredError(b.t(), y, X));
+  }
+  
+  arma::rowvec gradients(arma::rowvec b, Rcpp::StringVector labels) override{
+    //NOTE: In sumSquaredErrorGradients we assumed that b was a column-vector. We
+    // have to transpose b to make things work
+    return(sumSquaredErrorGradients(b.t(), y, X));
+  }
+  // IMPORTANT: Note that we used some arguments above which we did not pass to
+  // the functions: y, and X. Without these arguments, we cannot use our
+  // sumSquaredError and sumSquaredErrorGradients function! To make these accessible
+  // to our functions, we have to define them:
+  
+  const arma::colvec y;
+  const arma::mat X;
+  
+  // finally, we create a constructor for our class
+  linearRegressionModel(arma::colvec y_, arma::mat X_):
+    y(y_), X(X_){}
+  
+};
+
+// Step 2: Now that we have defined our model, we can implement the functions
+// which are necessary to optimize this model. We will use the elastic net with
+// glmnet optimizer as an example.
+
+// [[Rcpp::export]]
+Rcpp::List elasticNetLR(
+    const arma::colvec y, 
+    arma::mat X,
+    const arma::rowvec alpha,
+    const arma::rowvec lambda
+)
+{
+  
+  // first, let"s add a column to X for our intercept
+  X.insert_cols(0,1);
+  X.col(0) += 1.0;
+  
+  // Now we define the parameter vector b
+  // This must be an Rcpp::NumericVector with labels
+  Rcpp::NumericVector b(X.n_cols,0);
+  Rcpp::StringVector bNames;
+  // now our vector needs names. This is a bit
+  // cumbersome and it would be easier to just let
+  // the user pass in a labeled R vector to the elasticNet
+  // function. However, we want to make this as convenient
+  // as possible for the user. Therefore, we have got to 
+  // create these labels:
+  for(int i = 0; i < b.length(); i++){
+    bNames.push_back("b" + std::to_string(i));
+  }
+  // add the labels to the parameter vector:
+  b.names() = bNames;
+  
+  // We also have to create a matrix which saves the parameter estimates
+  // for all values of alpha and lambda. 
+  Rcpp::NumericMatrix B(alpha.n_elem*lambda.n_elem, b.length());
+  B.fill(NA_REAL);
+  Rcpp::colnames(B) = bNames;
+  // we also create a matrix to save the corresponding tuning parameter values
+  Rcpp::NumericMatrix tpValues(alpha.n_elem*lambda.n_elem, 2);
+  tpValues.fill(NA_REAL);
+  Rcpp::colnames(tpValues) = Rcpp::StringVector{"alpha", "lambda"};
+  // finally, let"s also return the fitting function value
+  Rcpp::NumericVector loss(alpha.n_elem*lambda.n_elem);
+  loss.fill(NA_REAL);
+  
+  // now, it is time to set up the model we defined above
+  
+  linearRegressionModel linReg(y,X);
+  
+  // next, we have to define the penalties we want to use.
+  // The elastic net is a combination of a ridge penalty and 
+  // a lasso penalty. 
+  // NOTE: HERE COMES THE BIGGEST DIFFERENCE BETWEEN GLMNET AND ISTA:
+  // 1) ISTA ALSO REQUIRES THE DEFINITION OF A PROXIMAL OPERATOR. THESE
+  //    ARE CALLED proximalOperatorZZZ IN lessSEM (e.g., proximalOperatorLasso 
+  //    for lasso).
+  // 2) THE SMOOTH PENALTY (RIDGE) AND THE LASSO PENALTY MUST HAVE SEPARATE 
+  //    TUNING PARMAMETERS.
+  lessSEM::proximalOperatorLasso proxOp; // HERE, WE DEFINE THE PROXIMAL OPERATOR
+  lessSEM::penaltyLASSO lasso; 
+  lessSEM::penaltyRidge ridge;
+  // BOTH, LASSO AND RIDGE take tuning parameters of class tuningParametersEnet
+  lessSEM::tuningParametersEnet tpLasso;
+  lessSEM::tuningParametersEnet tpRidge;
+  
+  // finally, there is also the weights. The weights vector indicates, which
+  // of the parameters is regularized (weight = 1) and which is unregularized 
+  // (weight =0). It also allows for adaptive lasso weights (e.g., weight =.0123).
+  // weights must be an arma::rowvec of the same length as our parameter vector.
+  arma::rowvec weights(b.length());
+  weights.fill(1.0); // we want to regularize all parameters
+  weights.at(0) = 0.0; // except for the first one, which is our intercept.
+  tpLasso.weights = weights;
+  tpRidge.weights = weights;
+  
+  // if we want to fine tune the optimizer, we can use the control
+  // arguments. We will start with the default control elements and 
+  // tweak some arguments to our liking:
+  // THE CONTROL ELEMENT IS CALLED DIFFERENTLY FROM GLMNET:
+  lessSEM::control control = lessSEM::controlDefault();
+  
+  // now it is time to iterate over all lambda and alpha values:
+  int it = 0;
+  for(unsigned int a = 0; a < alpha.n_elem; a++){
+    for(unsigned int l = 0; l < lambda.n_elem; l++){
+      
+      // set the tuning parameters
+      tpLasso.alpha = alpha.at(a);
+      tpLasso.lambda = lambda.at(l);
+      tpRidge.alpha = alpha.at(a);
+      tpRidge.lambda = lambda.at(l);
+      
+      tpValues(it,0) = alpha.at(a);
+      tpValues(it,1) = lambda.at(a);
+      
+      // to optimize this model, we have to pass it to
+      // one of the optimizers in lessSEM. These are 
+      // glmnet and ista. We"ll use glmnet in the following. The optimizer will
+      // return an object of class fitResults which will have the following fields:
+      // - convergence: boolean indicating if the convergence criterion was met (true) or not (false)
+      // - fit: double with fit values
+      // - fits: a vector with the fits of all iterations
+      // - parameterValues the final parameter values as an arma::rowvec
+      // - Hessian: the BFGS Hessian approximation
+      
+      lessSEM::fitResults lmFit = lessSEM::ista(
+        linReg, // the first argument is our model
+        b, // the second are the parameters
+        proxOp,
+        lasso, // the third is our lasso penalty
+        ridge, // the fourth our ridge penalty
+        tpLasso, // the fifth is our tuning parameter FOR THE LASSO 
+        tpRidge, // THE SIXTH IS OUR TUNING PARAMETER FOR THE RIDGE PENALTY
+        control // finally, let"s fine tune with the control
+      );
+      
+      loss.at(it) = lmFit.fit;
+      
+      for(int i = 0; i < b.length(); i++){
+        // let"s save the parameters
+        B(it,i) = lmFit.parameterValues.at(i);
+        // and also carry over the current estimates for the next iteration
+        b.at(i) = lmFit.parameterValues.at(i);
+      }
+      
+      it++;
+    }
+  }
+  
+  Rcpp::List retList = Rcpp::List::create(
+    Rcpp::Named("B") = B,
+    Rcpp::Named("tuningParameters") = tpValues,
+    Rcpp::Named("loss") = loss);
+  return(
+    retList
+  );
+}
+'
+
+sourceCpp(code = funCpp)
+
+l1 <- elasticNetLR(y = y, 
+                 X = X,
+                 lambda = lambdas, 
+                 alpha = 1
+)
+```
+
+It will come to the same parameter estimates:
+```{r, echo = FALSE}
+head(l1$B)
+```
+
+
+```{r,include=FALSE}
+for(i in 1:5){
+  startTime <- Sys.time()
+  l1 <- elasticNetLR(y = y, 
+                   X = X,
+                   lambda = lambdas, 
+                   alpha = 1
+  )
+  runtimes$CIncl[i] <- difftime(Sys.time(), startTime, units = "secs")
+}
+```
+
+And the run times are even lower:
+
+```{r, echo=FALSE}
+print(runtimes$CIncl)
+```
+

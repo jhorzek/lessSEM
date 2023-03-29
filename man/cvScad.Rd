@@ -138,8 +138,8 @@ lsem <- cvScad(
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
   regularized = paste0("l", 6:15),
-  lambdas = seq(0,1,length.out = 20),
-  thetas = seq(2.01,5,length.out = 5))
+  lambdas = seq(0,1,length.out = 3),
+  thetas = seq(2.01,5,length.out = 3))
 
 # the coefficients can be accessed with:
 coef(lsem)

@@ -6,15 +6,17 @@
 \alias{lessSEM-package}
 \title{lessSEM}
 \description{
-\strong{Please see the vignettes and the readme on \href{https://github.com/jhorzek/lessSEM}{GitHub}
+\strong{Please see the vignettes and the readme on \href{https://jhorzek.github.io/lessSEM/}{GitHub}
 for the most up to date description of the package}
 }
 \details{
-lessSEM (\strong{l}essSEM \strong{es}timates \strong{s}parse \strong{SEM}) is an R package which
-provides regularized structural equation modeling (regularized SEM) with non-smooth
-penalty functions (e.g., lasso) building on \href{https://github.com/yrosseel/lavaan}{lavaan}.
-lessSEM is heavily inspired by the \href{https://github.com/Rjacobucci/regsem}{regsem} package
-and the \href{https://github.com/psyphh/lslx}{lslx} package which provide similar functionality.
+\strong{lessSEM} (\strong{l}essSEM \strong{es}timates \strong{s}parse \strong{SEM}) is an R package for
+regularized structural equation modeling (regularized SEM) with non-smooth
+penalty functions (e.g., lasso) building on \href{https://github.com/yrosseel/lavaan}{\strong{lavaan}}.
+\strong{lessSEM} is heavily inspired by the \href{https://github.com/Rjacobucci/regsem}{\strong{regsem}} package
+and the \href{https://github.com/psyphh/lslx}{\strong{lslx}} packages that have similar functionality.
+\strong{If you use lessSEM, please also cite \href{https://github.com/Rjacobucci/regsem}{regsem} and
+and \href{https://github.com/psyphh/lslx}{lslx}!}
 
 The objectives of \strong{lessSEM} are to provide ...
 \enumerate{
@@ -23,56 +25,51 @@ The objectives of \strong{lessSEM} are to provide ...
 similar to \code{optim}.
 }
 
-\strong{Note}: Please also check out the implementations of regularized SEM in the more
+\strong{Important}: Please also check out the implementations of regularized SEM in the more
 mature R packages \href{https://github.com/Rjacobucci/regsem}{\strong{regsem}} and \href{https://github.com/psyphh/lslx}{\strong{lslx}}.
 Finally, you may want to check out the julia package
 \href{https://github.com/StructuralEquationModels/StructuralEquationModels.jl}{\strong{StructuralEquationModels.jl}}.
+\subsection{\href{https://github.com/Rjacobucci/regsem}{\strong{regsem}}, \href{https://github.com/psyphh/lslx}{\strong{lslx}}, and \strong{lessSEM}}{
 
-Currently, lessSEM has the following optimizers:
-\itemize{
-\item (variants of) iterative shrinkage and thresholding (e.g., Beck & Teboulle, 2009;
-Gong et al., 2013; Parikh & Boyd, 2013); optimization of cappedL1, lsp, scad,
-and mcp is based on Gong et al. (2013)
-\item glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
+The packages \href{https://github.com/Rjacobucci/regsem}{\strong{regsem}},
+\href{https://github.com/psyphh/lslx}{\strong{lslx}}, and \strong{lessSEM} can all be used to
+regularize basic SEM. In fact, as outlined above, \strong{lessSEM} is heavily inspired
+by \href{https://github.com/Rjacobucci/regsem}{\strong{regsem}}
+and \href{https://github.com/psyphh/lslx}{\strong{lslx}}. However, the packages differ in their targets: The objective
+of \strong{lessSEM} is not to replace the more major packages \href{https://github.com/Rjacobucci/regsem}{\strong{regsem}}
+and \href{https://github.com/psyphh/lslx}{\strong{lslx}}. Instead, our objective is to
+provide method developers with a flexible framework for regularized SEM.
+The following shows an incomplete comparison of some features implemented in
+the three packages:\tabular{llll}{
+    \tab \strong{regsem} \tab \strong{lslx} \tab \strong{lessSEM} \cr
+   Model specification \tab based on lavaan \tab similar to lavaan \tab based on lavaan \cr
+   Maximum likelihood estimation \tab Yes \tab Yes \tab Yes \cr
+   Least squares estimation \tab No \tab Yes \tab No \cr
+   Confidence Intervals \tab No \tab Yes \tab No \cr
+   Missing Data \tab FIML \tab Auxiliary Variables \tab FIML \cr
+   Multi-group models \tab No \tab Yes \tab Yes \cr
+   Stability selection \tab Yes \tab No \tab No \cr
+   Mixed penalties \tab No \tab No \tab Yes \cr
+   Equality constraints \tab Yes \tab No \tab Yes \cr
+   Parameter transformations \tab diff_lasso \tab No \tab Yes \cr
+   Definition variables \tab No \tab No \tab Yes \cr
 }
 
-These optimizers are implemented based on the
-\href{https://github.com/jhorzek/regCtsem}{regCtsem} package. Most importantly,
-\strong{all optimizers in lessSEM are available for other packages.}
-There are three ways to implement them which are documented in
-\code{vignette("General-Purpose-Optimization", package = "lessSEM")}.
-In short, these are:
-\enumerate{
-\item using the R interface: All general purpose implementations of the functions
-are called with prefix "gp" (\code{gpLasso}, \code{gpScad}, ...). More information and
-examples can be found in the documentation of these functions (e.g., \code{?lessSEM::gpLasso},
-\code{?lessSEM::gpAdaptiveLasso}, \code{?lessSEM::gpElasticNet}). The interface is similar to
-the optim optimizers in R.
-\item using Rcpp, we can pass C++ function pointers to the general purpose optimizers
-\code{gpLassoCpp}, \code{gpScadCpp}, ... (e.g., \code{?lessSEM::gpLassoCpp})
-\item All optimizers are implemented as C++ header-only files in lessSEM. Thus,
-they can be accessed from other packages using C++. The interface is similar
-to that of the \href{https://ensmallen.org/}{ensmallen} library. We have implemented
-a simple example for elastic net regularization of linear regressions in the
-\href{https://github.com/jhorzek/lessLM}{lessLM} package. You can also find more
-details on the general design of the optimizer interface in \code{vignette("The-optimizer-interface", package = "lessSEM")}.
-}
 
-Similar to \href{https://github.com/Rjacobucci/regsem}{regsem}, lessSEM is specified
-using a model built in \href{https://github.com/yrosseel/lavaan}{lavaan}. lessSEM
-can handle missing data by means of full information maximum likelihood estimation
-and allows for equality constraints on parameters. You may, however, also want to
-check out
-\href{https://github.com/Rjacobucci/regsem}{regsem} and \href{https://github.com/psyphh/lslx}{lslx}
-which offer some features that are still missing in \strong{lessSEM}. A distinct feature of
-lessSEM are parameter transformations (see below for an example) and mixed penalties.
-Furthermore, \strong{lessSEM} provides multi-core support. See \code{vignette("lessSEM", package = "lessSEM")}
-for more details.
+Because \strong{lessSEM} is fairly new, we currently recommend using \strong{lslx} for cases
+that are covered by both, \strong{lessSEM} and \strong{lslx}.
+}
 }
 \section{Installation}{
-If you want to install lessSEM from GitHub, use the following commands in R:
+If you want to install \strong{lessSEM} from CRAN, use the following commands in R:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{if(!require(devtools))install.packages("devtools")
+\if{html}{\out{<div class="sourceCode">}}\preformatted{install.packages("lessSEM")
+}\if{html}{\out{</div>}}
+
+The newest version of the package can be installed from GitHub using the
+following commands in R:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{if(!require(devtools)) install.packages("devtools")
 devtools::install_github("jhorzek/lessSEM")
 }\if{html}{\out{</div>}}
 }
@@ -112,7 +109,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 #                   what = "est",
 #                   fade = FALSE)
 
-rsem <- lasso(
+lsem <- lasso(
   # pass the fitted lavaan model
   lavaanModel = lavaanModel,
   # names of the regularized parameters:
@@ -125,18 +122,21 @@ rsem <- lasso(
   nLambdas = 50)
 
 # use the plot-function to plot the regularized parameters:
-plot(rsem)
+plot(lsem)
 
-# elements of rsem can be accessed with the @ operator:
-rsem@parameters[1,]
+# use the coef-function to show the estimates
+coef(lsem)
 
-# AIC and BIC:
-AIC(rsem)
-BIC(rsem)
+# The best parameters can be extracted with:
+coef(lsem, criterion = "AIC")
+coef(lsem, criterion = "BIC")
 
-# The best parameters can also be extracted with:
-coef(rsem, criterion = "AIC")
-coef(rsem, criterion = "BIC")
+# elements of lsem can be accessed with the @ operator:
+lsem@parameters[1,]
+
+# AIC and BIC for all tuning parameter configurations:
+AIC(lsem)
+BIC(lsem)
 
 # cross-validation
 cv <- cvLasso(lavaanModel = lavaanModel,
@@ -152,7 +152,7 @@ coef(cv)
 # Switching the optimizer # 
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
-rsemIsta <- lasso(
+lsemIsta <- lasso(
   lavaanModel = lavaanModel,
   regularized = paste0("l", 6:15),
   nLambdas = 50,
@@ -162,34 +162,12 @@ rsemIsta <- lasso(
     nCores = 2))
 
 # Note: The results are basically identical:
-rsemIsta@parameters - rsem@parameters
-}\if{html}{\out{</div>}}
-
-An experimental feature to be used with caution is the option to extract a lavaan
-object from a fitted regularized SEM. This can be very useful when fitting the
-final model. In our case, the best model is given for:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{lambdaBest <- coef(rsem, criterion = "BIC")$lambda 
-}\if{html}{\out{</div>}}
-
-We can get the lavaan model with the parameters corresponding to those of the
-regularized model with \code{lambda = lambdaBest} as follows:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{lavaanModel <- lessSEM2Lavaan(regularizedSEM = rsem, 
-                              lambda = lambdaBest)
-}\if{html}{\out{</div>}}
-
-The result can be plotted with, for instance, semPlot:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{library(semPlot)
-semPaths(lavaanModel,
-         what = "est",
-         fade = FALSE)
+lsemIsta@parameters - lsem@parameters
 }\if{html}{\out{</div>}}
 }
 
 \section{Transformations}{
-lessSEM allows for parameter transformations which could, for instance, be used to test
+\strong{lessSEM} allows for parameter transformations which could, for instance, be used to test
 measurement invariance in longitudinal models (e.g., Liang, 2018; Bauer et al., 2020).
 A thorough introduction is provided in \code{vignette('Parameter-transformations', package = 'lessSEM')}.
 As an example, we will test measurement invariance in the \code{PoliticalDemocracy}
@@ -234,7 +212,7 @@ c2 = c1 + delta_c2;
 
 # setting delta_a2, delta_b2, or delta_c2 to zero implies measurement invariance
 # for the respective parameters (a1, b1, c1)
-lassoFit <- lasso(lavaanModel = lavaanFit, 
+lassoFit <- lasso(lavaanModel = fit, 
                   # we want to regularize the differences between the parameters
                   regularized = c("delta_a2", "delta_b2", "delta_c2"),
                   nLambdas = 100,
@@ -252,29 +230,129 @@ As all differences (\code{delta_a2}, \code{delta_b2}, and \code{delta_c2}) have 
 assume measurement invariance.
 }
 
-\section{Multi-Group Models and Definition Variables}{
+\section{Experimental Features}{
+The following features are relatively new and you may still experience some bugs.
+Please be aware of that when using these features.
+\subsection{From \strong{lessSEM} to \strong{lavaan}}{
+
+\strong{lessSEM} supports exporting specific models to \strong{lavaan}. This can be very useful when plotting the
+final model. In our case, the best model is given by:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{lambdaBest <- coef(lsem, criterion = "BIC")@tuningParameters$lambda 
+}\if{html}{\out{</div>}}
+
+We can get the \strong{lavaan} model with the parameters corresponding to those of the
+regularized model with \code{lambda = lambdaBest} as follows:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{lavaanModel <- lessSEM2Lavaan(regularizedSEM = lsem, 
+                              lambda = lambdaBest)
+}\if{html}{\out{</div>}}
+
+The result can be plotted with, for instance, \href{https://github.com/SachaEpskamp/semPlot}{\strong{semPlot}}:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{library(semPlot)
+semPaths(lavaanModel,
+         what = "est",
+         fade = FALSE)
+}\if{html}{\out{</div>}}
+}
+
+\subsection{Multi-Group Models and Definition Variables}{
+
 \strong{lessSEM} supports multi-group SEM and, to some degree, definition variables.
 Regularized multi-group SEM have been proposed by Huang (2018) and are
-implemented in \strong{lslx} (Huang, 2020). The approach by Huang (2018) is currently
-more flexible than what \strong{lessSEM} can do because \strong{lslx} allows for separate
-penalties for the parameter itself and differences in the parameter value between
-groups. With \strong{lessSEM}, this is not possible out of the box. However,
-differences between parameters can be regularized. A detailed introduction
-can be found in \code{vignette(topic = "Definition-Variables-and-Multi-Group-SEM", package = "lessSEM")}.
+implemented in \strong{lslx} (Huang, 2020). Here, differences between groups are regularized.
+A detailed introduction can be found in
+\code{vignette(topic = "Definition-Variables-and-Multi-Group-SEM", package = "lessSEM")}.
 Therein it is also explained how the multi-group SEM can be used to implement
 definition variables (e.g., for latent growth curve models).
+}
+
+\subsection{Mixed Penalties}{
+
+\strong{lessSEM} allows for defining different penalties for different parts
+of the model. This feature is new and very experimental. Please keep that
+in mind when using the procedure. A detailed introduction
+can be found in \code{vignette(topic = "Mixed-Penalties", package = "lessSEM")}.
+
+To provide a short example, we will regularize the loadings and the regression
+parameters of the Political Democracy data set with different penalties. The
+following script is adapted from \code{?lavaan::sem}.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{model <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3 + c2*y2 + c3*y3 + c4*y4
+     dem60 =~ y1 + y2 + y3 + y4
+     dem65 =~ y5 + y6 + y7 + c*y8
+
+  # regressions
+    dem60 ~ r1*ind60
+    dem65 ~ r2*ind60 + r3*dem60
+'
+
+lavaanModel <- sem(model,
+                   data = PoliticalDemocracy)
+
+# Let's add a lasso penalty on the cross-loadings c2 - c4 and 
+# scad penalty on the regressions r1-r3
+fitMp <- lavaanModel |>
+  mixedPenalty() |>
+  addLasso(regularized = c("c2", "c3", "c4"), 
+           lambdas = seq(0,1,.1)) |>
+  addScad(regularized = c("r1", "r2", "r3"), 
+          lambdas = seq(0,1,.2),
+          thetas = 3.7) |>
+  fit()
+}\if{html}{\out{</div>}}
+
+The best model according to the BIC can be extracted with:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{coef(fitMp, criterion = "BIC")
+}\if{html}{\out{</div>}}
+}
+}
+
+\section{Optimizers}{
+Currently, \strong{lessSEM} has the following optimizers:
+\itemize{
+\item (variants of) iterative shrinkage and thresholding (e.g., Beck & Teboulle, 2009;
+Gong et al., 2013; Parikh & Boyd, 2013); optimization of cappedL1, lsp, scad, and mcp is based on Gong et al. (2013)
+\item glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)
+}
+
+These optimizers are implemented based on the
+\href{https://github.com/jhorzek/regCtsem}{\strong{regCtsem}} package. Most importantly,
+\strong{all optimizers in lessSEM are available for other packages.}
+There are three ways to implement them which are documented in
+\code{vignette("General-Purpose-Optimization", package = "lessSEM")}.
+In short, these are:
+\enumerate{
+\item using the R interface: All general purpose implementations of the functions
+are called with prefix "gp" (\code{gpLasso}, \code{gpScad}, ...). More information and
+examples can be found in the documentation of these functions (e.g., \code{?lessSEM::gpLasso},
+\code{?lessSEM::gpAdaptiveLasso}, \code{?lessSEM::gpElasticNet}). The interface is similar to
+the optim optimizers in R.
+\item using Rcpp, we can pass C++ function pointers to the general purpose optimizers
+\code{gpLassoCpp}, \code{gpScadCpp}, ... (e.g., \code{?lessSEM::gpLassoCpp})
+\item All optimizers are implemented as C++ header-only files in \strong{lessSEM}. Thus,
+they can be accessed from other packages using C++. The interface is similar
+to that of the \href{https://ensmallen.org/}{\strong{ensmallen}} library. We have implemented
+a simple example for elastic net regularization of linear regressions in the
+\href{https://github.com/jhorzek/lessLM}{\strong{lessLM}} package. You can also find more
+details on the general design of the optimizer interface in \code{vignette("The-optimizer-interface", package = "lessSEM")}.
+}
 }
 
 \section{References}{
 \subsection{R - Packages / Software}{
 \itemize{
-\item \href{https://github.com/yrosseel/lavaan}{lavaan} Rosseel, Y. (2012). lavaan: An R Package for Structural Equation Modeling. Journal of Statistical Software, 48(2), 1–36. https://doi.org/10.18637/jss.v048.i02
+\item \href{https://github.com/yrosseel/lavaan}{lavaan} Rosseel, Y. (2012). lavaan: An R Package for Structural Equation Modeling. Journal of Statistical Software, 48(2), 1-36. https://doi.org/10.18637/jss.v048.i02
 \item \href{https://github.com/Rjacobucci/regsem}{regsem}: Jacobucci, R. (2017). regsem:
-Regularized Structural Equation Modeling. ArXiv:1703.08489 \link{Stat}. http://arxiv.org/abs/1703.08489
+Regularized Structural Equation Modeling. ArXiv:1703.08489 \link{Stat}. https://arxiv.org/abs/1703.08489
 \item \href{https://github.com/psyphh/lslx}{lslx}: Huang, P.-H. (2020). lslx:
 Semi-confirmatory structural equation modeling via penalized likelihood. Journal
 of Statistical Software, 93(7). https://doi.org/10.18637/jss.v093.i07
-\item \href{https://cran.r-project.org/web/packages/fasta/index.html}{fasta}:
+\item \href{https://CRAN.R-project.org/package=fasta}{fasta}:
 Another implementation of the fista algorithm (Beck & Teboulle, 2009).
 \item \href{https://ensmallen.org/}{ensmallen}: Curtin, R. R., Edel, M., Prabhu, R. G.,
 Basak, S., Lou, Z., & Sanderson, C. (2021). The ensmallen library for ﬂexible
@@ -312,7 +390,7 @@ The Annals of Statistics, 38(2), 894–942. https://doi.org/10.1214/09-AOS729
 \item Zhang, T. (2010). Analysis of Multi-stage Convex Relaxation for Sparse Regularization.
 Journal of Machine Learning Research, 11, 1081–1107.
 \item Zou, H. (2006). The adaptive lasso and its oracle properties. Journal of the
-American Statistical Association, 101(476), 1418-1429. https://doi.org/10.1198/016214506000000735
+American Statistical Association, 101(476), 1418–1429. https://doi.org/10.1198/016214506000000735
 \item Zou, H., & Hastie, T. (2005). Regularization and variable selection via the
 elastic net. Journal of the Royal Statistical Society: Series B, 67(2), 301–320.
 https://doi.org/10.1111/j.1467-9868.2005.00503.x
@@ -363,6 +441,14 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 }
 
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/jhorzek/lessSEM}
+  \item Report bugs at \url{https://github.com/jhorzek/lessSEM/issues}
+}
+
+}
 \author{
 Jannik Orzek \href{mailto:orzek@mpib-berlin.mpg.de}{orzek@mpib-berlin.mpg.de}
 }

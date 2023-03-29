@@ -4,12 +4,23 @@
 \alias{lessSEM2Lavaan}
 \title{lessSEM2Lavaan}
 \usage{
-lessSEM2Lavaan(regularizedSEM, lambda, theta = NULL)
+lessSEM2Lavaan(
+  regularizedSEM,
+  criterion = NULL,
+  lambda = NULL,
+  alpha = NULL,
+  theta = NULL
+)
 }
 \arguments{
 \item{regularizedSEM}{object created with lessSEM}
 
+\item{criterion}{criterion used for model selection. Currently supported are
+"AIC" or "BIC"}
+
 \item{lambda}{value for tuning parameter lambda}
+
+\item{alpha}{value for tuning parameter alpha}
 
 \item{theta}{value for tuning parameter theta}
 }
@@ -17,5 +28,42 @@ lessSEM2Lavaan(regularizedSEM, lambda, theta = NULL)
 lavaan model
 }
 \description{
-Creates a lavaan model object from lessSEM (only if possible).
+Creates a lavaan model object from lessSEM (only if possible). Pass either
+a criterion or a combination of lambda, alpha, and theta.
+}
+\examples{
+library(lessSEM)
+
+# Identical to regsem, lessSEM builds on the lavaan
+# package for model specification. The first step
+# therefore is to implement the model in lavaan.
+
+dataset <- simulateExampleData()
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           meanstructure = TRUE,
+                           std.lv = TRUE)
+
+# Regularization:
+regularized <- lasso(lavaanModel,
+                     regularized = paste0("l", 11:15), 
+                     lambdas = seq(0,1,.1))
+
+# using criterion
+lessSEM2Lavaan(regularizedSEM = regularized, 
+               criterion = "AIC")
+               
+# using tuning parameters (note: we only have to specify the tuning
+# parameters that are actually used by the penalty function. In case
+# of lasso, this is lambda):
+lessSEM2Lavaan(regularizedSEM = regularized, 
+               lambda = 1)
 }

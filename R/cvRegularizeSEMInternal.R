@@ -23,6 +23,7 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
 #' @returns model of class cvRegularizedSEM
+#' @import lavaan
 #' @keywords internal
 .cvRegularizeSEMInternal <- function(lavaanModel,
                                      k,
@@ -52,7 +53,7 @@
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
   if(method == "glmnet" && any(control$initialHessian == "lavaan")){
-    .printNote("Switching initialHessian from 'lavaan' to 'compute'.")
+    rlang::inform(c("Note","Switching initialHessian from 'lavaan' to 'compute'."))
     control$initialHessian <- "compute"
   }
   
@@ -80,9 +81,9 @@
                            transformationGradientStepSize = modifyModel$transformationGradientStepSize)
   
   
-  parameterLabels <- names(lessSEM:::.getParameters(SEM = tmpSEM, 
-                                                    raw = TRUE, 
-                                                    transformations = FALSE))
+  parameterLabels <- names(.getParameters(SEM = tmpSEM, 
+                                          raw = TRUE, 
+                                          transformations = FALSE))
   
   # check if the data was standardized:
   if(all(apply(rawData, 2, function(x) abs(mean(x)) <= 1e-5))) 
@@ -103,12 +104,12 @@
   }
   
   if(penalty == "adaptiveLasso") 
-    .printNote(paste0("Automatic cross-validation for adaptiveLasso requested. ", 
-                   "Note that using weights which are based on the full sample ",
-                   "may undermine cross-validation. If the default is used (weights = NULL), ",
-                   "weights for each subset will be computed using the inverse of the absolute MLE. ",
-                   "Alternatively, pass a matrix as weights argument with weights for each subset.")
-    )
+    rlang::inform(c("Note",paste0("Automatic cross-validation for adaptiveLasso requested. ", 
+                      "Note that using weights which are based on the full sample ",
+                      "may undermine cross-validation. If the default is used (weights = NULL), ",
+                      "weights for each subset will be computed using the inverse of the absolute MLE. ",
+                      "Alternatively, pass a matrix as weights argument with weights for each subset.")
+    ))
   
   cvfits <- data.frame(
     tuningParameters,
@@ -171,7 +172,7 @@
       }else{
         # It is important to not scale the data prior to the splitting
         # Otherwise the data sets are not truly independent!
-        .printNote("Standardizing data sets ...")
+        rlang::inform(c("Note","Standardizing data sets ..."))
         trainSet <- scale(trainSet, center = TRUE, scale = TRUE)
         
         means <- attr(trainSet, "scaled:center")
@@ -304,6 +305,13 @@
 #' @param testSet test data set
 #' @param means means of the training set
 #' @param standardDeviations standard deviations of the training set
+#' @examples 
+#' library(lessSEM)
+#' data <- matrix(rnorm(50),10,5)
+#' 
+#' cvScaler(testSet = data, 
+#'          means = 1:5, 
+#'          standardDeviations = 1:5)
 #' @returns scaled test set
 cvScaler <- function(testSet, means, standardDeviations){
   if(any(names(means) != colnames(testSet))) stop("Mismatch in names of means and testSet.")

@@ -1,0 +1,1103 @@
+---
+title: "Parameter-transformations"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Parameter-transformations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path='lessSEMFigures/lessSEM-'
+)
+library(lessSEM)
+```
+
+To allow for more flexible model estimation, **lessSEM** offers parameter 
+transformations. This is an experimental feature inspired by OpenMx (Neale et al., 2016;
+Pritikin et al., 2015; Hunter 2018). Please be careful when using it. 
+However, parameter transformations can be very powerful and simplify implementing
+some specific forms of regularization. 
+
+## Motivation
+
+In longitudinal SEM, it is important to investigate if parameters stay the same over
+time (e.g., measurement invariance of loadings). This can be difficult to decide and
+may require setting up many different models manually. Here, regularization techniques
+can be very handy. For instance, in the seminal political democracy example, the 
+model is typically set up as follows (see `?lavaan::sem`):
+
+```{r}
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a*y2 + b*y3 + c*y4
+     dem65 =~ y5 + a*y6 + b*y7 + c*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+```
+
+Note that the loadings a, b, and c are assumed to stay the same over time.
+That is, measurement invariance is assumed! Relaxing this assumption, we could
+define the model as follows:
+
+```{r}
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+```
+
+Here, each loading is estimated separately. This results in a more complex model. 
+How do we know which model to use? There are many procedures to answer this 
+question (e.g., using modification indexes, setting up separate models by hand, etc.).
+In the following, we will show how regularization could be used (see e.g., Belzak & Bauer, 2020;
+Jacobucci & Grimm, 2018).
+
+## Using Regularization
+
+First, note that measurement invariance can be rephrased as $a_1-a_2 = 0$, $b_1-b_2 = 0$, 
+and $c_1-c_2 = 0$. Thus, regularizing the differences between these parameters may
+allow for testing measurement invariance (e.g., Belzak & Bauer, 2020; Liang et al., 2018; 
+Muthen & Asparouhov, 2013). 
+In fact, this is used in Bayesian SEM to test 
+approximate measurement invariance (Liang et al., 2018; Muthen & Asparouhov, 2013).
+Similar procedures have also been developed by Huang (2018) for multi-group differences
+in parameter estimates and by Fisher et al. (2022) in vector autoregressive models.
+Furthermore, Jacobucci & Grimm (2018) proposed regularizing differences 
+in latent change score models to test equivalence of autoproportion parameters over
+time using a two-step procedure. To this end, there they implemented the `diff_lasso`
+in **regsem** (Jacobucci et al., 2019). Such a `diff_lasso` is not available in **lessSEM**. 
+Instead, **lessSEM** provides a flexible workaround: parameter transformations. 
+To make this work, we have to re-define our parameters.
+
+Redefine:
+
+$$
+\begin{align}
+a_2 &= a_1 + \Delta a_2\\
+b_2 &= b_1 + \Delta b_2\\
+c_2 &= c_1 + \Delta c_2
+\end{align}
+$$
+By regularizing $\Delta a_2$, $\Delta b_2$, and $\Delta c_2$ towards zero,
+we can enforce measurement invariance over time.
+
+## Setting up the Model
+
+We first start with the most flexible model which we want to test:
+
+```{r}
+library(lavaan)
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+lavaanFit <- sem(model = modelSyntax,
+                 data = PoliticalDemocracy)
+```
+
+Note that the model defined above estimates all parameters time-point specific. 
+That is, no measurement invariance is assumed. 
+
+Now, we want to redefine the parameters as outlined above: 
+
+$$
+\begin{align}
+a_2 &= a_1 + \Delta a_2\\
+b_2 &= b_1 + \Delta b_2\\
+c_2 &= c_1 + \Delta c_2
+\end{align}
+$$
+
+In **lessSEM** such redefinitions are called transformations and can be
+passed to the penalty functions (e.g., to `lasso`) using the `modifyModel` command.
+
+First, we have to create a definition of our transformations:
+
+```{r}
+transformations <- "
+// IMPORTANT: Our transformations always have to start with the follwing line:
+parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
+
+// In the line above, we defined the names of the parameters which we
+// want to use in our transformations. EACH AND EVERY PARAMETER USED IN
+// THE FOLLOWING MUST BE STATED ABOVE. The line must always start with
+// the keyword 'parameters' followed by a colon. The parameters must be
+// separated by commata.
+// Comments can be added by using double backslash as shown here.
+
+// Now we can state our transformations:
+
+a2 = a1 + delta_a2; // Note: Each declaration must end with a semi-colon!
+b2 = b1 + delta_b2;
+c2 = c1 + delta_c2;
+"
+```
+
+Next, we have to pass the `transformations` variable to the penalty function:
+
+```{r, include=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = c("delta_a2", "delta_b2", "delta_c2"),# we want to regularize 
+                  # the differences between the parameters
+                  nLambdas = 100,
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r, eval = FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = c("delta_a2", "delta_b2", "delta_c2"),# we want to regularize 
+                  # the differences between the parameters
+                  nLambdas = 100,
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+Let's have a look at the parameter estimates:
+
+```{r}
+coef(lassoFit)@estimates[seq(1,100,10),c("a1", "b1", "c1", "delta_a2", "delta_b2", "delta_c2")]
+```
+Note that the differences between the parameters get smaller with larger $\lambda$ values. 
+We can also plot the differences:
+
+```{r}
+plot(lassoFit)
+```
+
+To check if measurement invariance can be assumed, we can select the best model 
+using information criteria:
+
+```{r}
+coef(lassoFit, criterion = "BIC")
+```
+
+Note that all differences have been zeroed -- that is, a model with full measurement 
+invariance did fit best.
+
+We can also access the transformed parameters:
+
+```{r}
+head(lassoFit@transformations)
+```
+
+
+Limitation: Above, we did not take into account that the variables may have 
+different scales; a thorough use of the method should scale the data first.
+
+## Some Guidelines
+
+When using transformations, please make sure to give your parameters names which
+are compatible with standard naming conventions in R. The default names of
+lavaan (e.g., `f=~y1` for loadings) are not supported. That is, all parameters
+used in the transformations should be given names in the lavaan syntax.
+
+In the example above, we used the following syntax:
+
+```{r,eval=FALSE}
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+```
+
+Importantly, all parameters used in the transformation (`a1, b1, c1, a2, b2, c2`)
+were labeled in the lavaan syntax. As a counter example:
+
+```{r,eval=FALSE}
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + y2 + y3 + y4
+     dem65 =~ y5 + y6 + y7 + y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+```
+
+The syntax above specifies the same model, but will use the lavaan-specific naming
+convention for the parameters. `a1`, for example, will be named `dem60=~y2`.
+These names are not compatible with the current implementation
+of transformations used in **lessSEM**.
+
+## Further Examples
+
+Another example where the transformations could be useful is when detecting
+non-stationarity in autoregressive and cross-lagged parameters (e.g., Liang et al., 2018). 
+In the following, we will demonstrate this with an autoregressive model. 
+The model is defined as:
+
+$$
+\begin{align}
+\eta_t &= a_t\eta_{t-1} + \zeta_t\\
+\begin{bmatrix}
+y_{1,t}\\
+y_{2,t}\\
+y_{3,t}\\
+\end{bmatrix} &= \begin{bmatrix}
+l_1\\
+l_2\\
+l_3\\
+\end{bmatrix} \eta_t + \pmb\varepsilon
+\end{align}
+$$
+
+It is often assumed that the autoregressive effect $a_t$ is constant over time; 
+that is, the same autoregressive effect is used for all time points. This is 
+a strong assumption and we may want to test it. One way to do so is by using the
+same procedure outlined above, where we define
+$a_t = a_1 + \Delta a_t$ (see Jacobucci & Grimm, 2018 for a similar procedure in latent
+change score models).
+In this case, each autoregressive effect is composed of the first
+autoregressive effect ($a_1$) and the difference between the parameters ($\Delta a_t$). 
+By regularizing $\Delta a_t$, we can enforce stationarity. 
+
+A drawback of the approach outlined above is that the first autoregressive effect
+is treated differently from the rest: After all, why should $a_1$ serve as baseline and not 
+$a_2$ or $a_5$? We will take a slightly different approach, again building on the
+idea of Fisher et al. (2022). A similar approach has also been proposed by Bai et al. (2020).
+Let's define the autoregressive effect as
+
+$$a_t = a_{t-1} + \Delta a_t$$
+
+Note that $\Delta a_t$ is no longer the difference with respect to the initial
+autoregressive effect $a_1$ but the difference with respect to the directly 
+preceding time point. When regularizing $\Delta a_t$, we can now detect sudden 
+changes in the parameter -- e.g., due to an intervention. This can also 
+be thought of as a regime switching model, where the underlying model changes 
+over time (see also Ou et al., 2019 for regime switching models). With our
+regularization procedure, we want to detect if and when the process changes. 
+
+We won't go into the details of how to set up the model here, but you can 
+find them in the source of this file 
+([e.g., in GitHub](https://github.com/jhorzek/lessSEM/blob/main/vignettes/Parameter-transformations.Rmd)).
+We simulated a data set with 200 individuals measured at 10 time points. The
+autoregressive effect $a_t$ changes at $t=4$ from $.6$ to $.2$.
+
+```{r, include = FALSE}
+set.seed(123)
+# autoregressive model
+
+persons <- 200
+tps <- 10
+a <- c(rep(.6,4), # first element will be ignored
+       rep(.2,tps-4))
+
+data <- matrix(NA, 
+               nrow = persons, 
+               ncol = 3*tps)
+
+colnames(data) <- paste0("y", rep(1:3, tps), 
+                         "_t", 
+                         rep(1:tps, each = 3))
+
+loadings <- matrix(c(1,.6,.7), ncol = 1)
+
+for(id in 1:persons){
+  eta <- rep(NA, tps)
+  
+  eta[1] <- rnorm(1)
+  for(tp in 1:tps){
+    if(tp == 1) {
+      eta[1] <- rnorm(1)
+    }else{
+      eta[tp] <- a[tp]*eta[tp-1] + rnorm(1,0,1-a[tp]^2)
+    }
+    data[id, paste0("y", 1:3, "_t",tp)] <- loadings*eta[tp] + 
+      t( mvtnorm::rmvnorm(n = 1, mean = rep(0,3), sigma = diag(c(.1,1.1-.6^2,1.1-.7^2))))
+  }
+}
+
+lavaanSyntax <- paste0(
+  c(paste0("eta", 2:tps, " ~ a", 1:(tps-1), "*eta", 1:(tps-1)),
+    "\n",
+    "eta1 ~~ eta1",
+    paste0("eta", 2:tps, " ~~ v*eta", 2:tps),
+    "\n"
+  ),
+  collapse = "\n"
+)
+# add loadings
+for(tp in 1:tps){
+  lavaanSyntax <- paste0(
+    lavaanSyntax,
+    paste0("eta",tp, " =~ ", paste0(c("1*y1_t", "l2*y2_t", "l3*y3_t"), tp, collapse = " + ")),
+    sep = "\n"
+  )
+  lavaanSyntax <- paste0(
+    lavaanSyntax,
+    paste0(
+      paste0(c("y1_t", "y2_t", "y3_t"), tp , " ~~ ", paste0("mvar", 1:3),  c("*y1_t", "*y2_t", "*y3_t"), tp),
+      collapse = "\n"
+    ),
+    sep = "\n"
+  )
+}
+```
+
+The data looks as follows:
+```{r}
+head(data)
+```
+
+
+The lavaan model is defined as follows:
+
+```{r, echo=FALSE}
+cat(lavaanSyntax)
+```
+
+We fit the model using lavaan:
+
+```{r}
+lavaanFit <- sem(model = lavaanSyntax, 
+                 data = data,
+                 orthogonal.y = TRUE, 
+                 orthogonal.x = TRUE,
+                 missing = "ml")
+coef(lavaanFit)
+```
+
+Note that no constraints on autoregressive effects are implemented -- each
+effect (a1-a9) is estimated separately.
+```{r, include=FALSE}
+transformations <- 
+  paste0(
+    paste0("parameters: ", 
+           paste0(c(
+             paste0("a",1:(tps-1)),
+             paste0(paste0("delta",2:(tps-1)))), 
+             collapse = ", "),
+           collapse = ""),
+    "\n\n",
+    paste0(
+      paste0("a",2:(tps-1), " = ", paste0("a", 1:(tps-2)), " + ", paste0("delta", 2:(tps-1)), ";"),
+      collapse = "\n"),
+    collapse = "\n"
+  )
+```
+
+We now define transformations as follows:
+
+```{r, echo=FALSE}
+cat(transformations)
+```
+
+Finally, we can fit our model:
+
+```{r,include=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = paste0("delta", 2:9),# we want to regularize 
+                  # the differences between the parameters
+                  nLambdas = 100,
+                  # glmnet is considerably faster here:
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+
+```
+
+```{r,eval=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = paste0("delta", 2:9),# we want to regularize 
+                  # the differences between the parameters
+                  nLambdas = 100,
+                  # glmnet is considerably faster here:
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+Extracting the best fitting model:
+
+```{r}
+coef(lassoFit, criterion = "BIC")
+```
+
+The true autoregressive effects are given by
+```{r,echo=FALSE}
+a[2:10]
+```
+
+while the estimates are
+```{r,echo = FALSE}
+aEst <- rep(NA, 9)
+aEst[1] <- coef(lassoFit, criterion = "BIC")@estimates[,"a1"]
+for(i in 2:9){
+  aEst[i] <- aEst[i-1] + coef(lassoFit, criterion = "BIC")@estimates[,paste0("delta",i)]
+}
+
+print(aEst)
+```
+
+The result is not perfect, but **lessSEM** correctly identified a change in the
+autoregressive parameter.
+
+
+## Looking under the hood
+
+The transformations used above are implemented using [RcppArmadillo](https://github.com/RcppCore/RcppArmadillo).
+This allows for a lot more complicated transformations than those outlined before.
+In general, **lessSEM** will take your transformations and try to translate them
+to C++. Let's assume that the model is given by our first example:
+
+```{r}
+modelSyntax <- ' 
+  # latent variable definitions
+     ind60 =~ x1 + x2 + x3
+     dem60 =~ y1 + a1*y2 + b1*y3 + c1*y4
+     dem65 =~ y5 + a2*y6 + b2*y7 + c2*y8
+
+  # regressions
+    dem60 ~ ind60
+    dem65 ~ ind60 + dem60
+
+  # residual correlations
+    y1 ~~ y5
+    y2 ~~ y4 
+    y3 ~~ y7
+    y4 ~~ y8
+    y6 ~~ y8
+'
+
+lavaanFit <- sem(model = modelSyntax, 
+                 data = PoliticalDemocracy)
+```
+
+We defined the transformations to be:
+
+```{r}
+transformations <- "
+parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2
+
+a2 = a1 + delta_a2;
+b2 = b1 + delta_b2;
+c2 = c1 + delta_c2;
+"
+```
+
+When this transformation is passed to **lessSEM**, **lessSEM** will first try
+to figure out which parameters are already in the model and which ones are new.
+In our case a1, a2, b1, b2, c1, and c2 are already known, while delta_a2, 
+delta_b2, and delta_c2 are new. **lessSEM** will now add the new parameters to the
+internal parameter vector. Next, **lessSEM** will scan the names of the parameters
+which appear on the left hand side of an equation (a2, b2, and c2) in our case. 
+This will tell **lessSEM** which of your parameters are functions of other parameters
+(i.e., transformations). Knowing that a2 is a function of other parameters will
+tell **lessSEM**, that a2 should no longer be estimated. Instead, the parameters
+which make up a2 are estimated: a1 and delta_a2.
+
+To see this in action, we can create the C++ function without compilation:
+
+```{r}
+transformationFunction <- lessSEM:::.compileTransformations(syntax = transformations, 
+                                                            parameterLabels = names(getLavaanParameters(lavaanFit)),
+                                                            compile = FALSE)
+```
+
+First, let's have a look at the extended parameter vector:
+```{r}
+transformationFunction$parameters
+```
+Note that delta_a2, delta_b2, and delta_c2 have been added. Some of these are 
+transformations of other parameters:
+```{r}
+transformationFunction$isTransformation
+```
+These will not be estimated but computed based on the other model parameters.
+
+Finally, the C++ function has been returned:
+```{r}
+cat(transformationFunction$armaFunction)
+```
+
+Most importantly, note that the first step here is to extract the required
+parameters from the parameter vector (e.g., `double a1 = parameterValues["a1"];`).
+Next, all of these parameters are directly available for use in your transformations.
+This is why we can simply write `a2 = a1 + delta_a2;`. **lessSEM** also added
+the semicolons required by C++.  Finally, the transformed parameters are returned.
+To pass our function to **lessSEM**, we also create a pointer to our function, 
+but this is beyond the scope here.
+
+At this point you may be wondering where all the more complicated transformations
+are that we promised above. Importantly, you can use any of the functions implemented 
+in **Rcpp** or **RcppArmadillo** which can be applied to variables of type `double` 
+within your transformations without any in-depth knowledge of C++. For instance,
+**RcppArmadillo** comes with an exponential-function (`exp`), a `pow` and a 
+`log` function. Making use of this, we can implement a univariate continuous time
+SEM (e.g., Voelkle & Oud, 2012). Far superior versions of this model
+are implemented in [ctsem](https://github.com/cdriveraus/ctsem) and [dynr](https://github.com/mhunter1/dynr))
+and Arnold et al. (in submission) recently derived close form solutions for 
+the gradients of these models which should outperform **lessSEM** considerably in 
+terms of runtime.
+
+We will use the same model from above, but remove the change in the autoregressive 
+effect. The code to simulate the data set can be found in the source of this 
+file ([e.g., on GitHub](https://github.com/jhorzek/lessSEM/blob/main/vignettes/Parameter-transformations.Rmd)).
+
+```{r, include=FALSE}
+persons <- 200
+tps <- 10
+a <- rep(.6,tps)
+
+data <- matrix(NA, 
+               nrow = persons, 
+               ncol = 3*tps)
+
+colnames(data) <- paste0("y", rep(1:3, tps), 
+                         "_T", 
+                         rep(0:(tps-1), each = 3))
+
+loadings <- matrix(c(1,.6,.7), ncol = 1)
+
+for(id in 1:persons){
+  eta <- rep(NA, tps)
+  
+  eta[1] <- rnorm(1)
+  for(tp in 1:tps){
+    if(tp == 1) {
+      eta[1] <- rnorm(1)
+    }else{
+      eta[tp] <- a[tp]*eta[tp-1] + rnorm(1,0,1-a[tp]^2)
+    }
+    data[id, paste0("y", 1:3, "_T",tp-1)] <- loadings*eta[tp] + 
+      t( mvtnorm::rmvnorm(n = 1, mean = rep(0,3), sigma = diag(c(.1,1.1-.6^2,1.1-.7^2))))
+  }
+}
+
+lavaanSyntax <- paste0(
+  c(paste0("eta", 1:(tps-1), " ~ a*eta", 0:(tps-2)),
+    "\n",
+    "eta0 ~~ eta0",
+    paste0("eta", 1:(tps-1), " ~~ v*eta", 1:(tps-1)),
+    "\n",
+    "eta0~1",
+    "\n"
+  ),
+  collapse = "\n"
+)
+# add loadings and manifest means
+for(tp in 1:tps){
+  lavaanSyntax <- paste0(
+    lavaanSyntax,
+    paste0("eta",tp-1, " =~ ", paste0(c("1*y1_T", "l2*y2_T", "l3*y3_T"), tp-1, collapse = " + ")),
+    sep = "\n"
+  )
+  lavaanSyntax <- paste0(
+    lavaanSyntax,
+    paste0(
+      paste0(c("y1_T", "y2_T", "y3_T"), tp-1 , " ~~ ", paste0("mvar", 1:3),  c("*y1_T", "*y2_T", "*y3_T"), tp-1),
+      collapse = "\n"
+    ),
+    sep = "\n"
+  )
+  lavaanSyntax <- paste0(
+    lavaanSyntax,
+    paste0(
+      paste0(c("y1_T", "y2_T", "y3_T"), tp-1 , " ~ ", paste0("mMean", 1:3, "*1")),
+      collapse = "\n"
+    ),
+    sep = "\n"
+  )
+}
+```
+
+The initial model is the same as before, however the autoregressive effect
+is constrained to equality over time and so are the manifest means. We also added
+an initial mean for latent variable $\eta$ and changed the names of some variables
+to make using **ctsem** with this data easier:
+
+```{r}
+cat(lavaanSyntax)
+```
+
+```{r}
+lavaanFit <- sem(model = lavaanSyntax, 
+                 data = data,
+                 orthogonal.y = TRUE, 
+                 orthogonal.x = TRUE,
+                 missing = "ml")
+getLavaanParameters(lavaanFit)
+```
+
+Now, we define the transformations for the latent variables to turn our model
+in a continuous time SEM:
+
+```{r}
+transformations <- "
+parameters: a, ctA, v, ctV
+// NOTE: We can define starting values for our parameters. This
+// is implemented with the 'start:' keyword:
+start: ctA = -.1, ctV = .1
+
+// We changed the starting values for the ct parameters
+// because the auto-effect ctA should be negative.
+
+a = exp(ctA);
+v = log((1.0/(2.0*ctA))*(exp(2.0*ctA)-1)*pow(ctV,2.0)); // we take
+// the log because lessSEM internally takes the exponential of
+// any variance parameter (v in our case) to avoid negative variances.
+"
+```
+
+```{r,include=FALSE}
+lessSEMFit <- bfgs(lavaanModel = lavaanFit, 
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r,eval=FALSE}
+lessSEMFit <- bfgs(lavaanModel = lavaanFit, 
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+Let's have a look at the parameter estimates:
+```{r}
+coef(lessSEMFit)
+```
+
+For comparison, we will run the same model with **ctsem**:
+```{r,include = FALSE}
+library(ctsemOMX)
+dataCt <- cbind(data,
+                data.frame("dT1" = rep(1,nrow(data)),
+                           "dT2" = rep(1,nrow(data)),
+                           "dT3" = rep(1,nrow(data)),
+                           "dT4" = rep(1,nrow(data)),
+                           "dT5" = rep(1,nrow(data)),
+                           "dT6" = rep(1,nrow(data)),
+                           "dT7" = rep(1,nrow(data)),
+                           "dT8" = rep(1,nrow(data)),
+                           "dT9" = rep(1,nrow(data))))
+cModel <- ctModel(type = "omx", 
+                  n.manifest = 3, 
+                  n.latent = 1, 
+                  Tpoints = 10,
+                  manifestNames = c("y1","y2", "y3"), 
+                  latentNames = "eta",
+                  LAMBDA = matrix(c(1,
+                                    "l2",
+                                    "l3"),3,1,TRUE), 
+                  DRIFT = matrix("a",1,1)
+)
+
+cFit <- ctFit(dat = dataCt, ctmodelobj = cModel)
+ctSummary <- summary(cFit)
+```
+
+```{r,eval = FALSE}
+library(ctsemOMX)
+dataCt <- cbind(data,
+                data.frame("dT1" = rep(1,nrow(data)),
+                           "dT2" = rep(1,nrow(data)),
+                           "dT3" = rep(1,nrow(data)),
+                           "dT4" = rep(1,nrow(data)),
+                           "dT5" = rep(1,nrow(data)),
+                           "dT6" = rep(1,nrow(data)),
+                           "dT7" = rep(1,nrow(data)),
+                           "dT8" = rep(1,nrow(data)),
+                           "dT9" = rep(1,nrow(data))))
+cModel <- ctModel(type = "omx", 
+                  n.manifest = 3, 
+                  n.latent = 1, 
+                  Tpoints = 10,
+                  manifestNames = c("y1","y2", "y3"), 
+                  latentNames = "eta",
+                  LAMBDA = matrix(c(1,
+                                    "l2",
+                                    "l3"),3,1,TRUE), 
+                  DRIFT = matrix("a",1,1)
+)
+
+cFit <- ctFit(dat = dataCt, ctmodelobj = cModel)
+ctSummary <- summary(cFit)
+```
+
+
+The parameter `ctA` in our model corresponds to the `DRIFT` parameter in the
+ctsem summary and the parameter `ctV` corresponds to the root of the
+`DIFFUSION` parameter in the ctsem summary:
+
+```{r}
+coef(lessSEMFit)@estimates[,c("ctA", "ctV")]
+
+# drift value from ctsem:
+ctSummary$DRIFT
+# sqrt(diffusion) value from ctsem:
+sqrt(ctSummary$DIFFUSION)
+```
+
+### Making use of C++
+
+In the example above, we used a univariate ctsem. Because of this, all our 
+functions were fairly simple in that we only needed the `log`, `exp`, and `pow` functions
+for single variables. However, because **lessSEM** creates a C++ function, we can
+build much more powerful transformations if we are familiar with **RcppArmadillo**.
+In the following, we will therefore extend the example 
+to a multivariate continuous time SEM. We will use the AnomAuth data set from ctsem.
+The data is included in the **ctsemOMX** package:
+```{r}
+data("AnomAuth")
+head(AnomAuth)
+```
+
+The five measurement occasions are unequally spaced. In a discrete time model,
+we could take care of this by implementing a model with different autoregressive
+and cross-lagged effects for the different time intervals:
+
+```{r}
+# initial time point
+lavaanSyntax <- 
+  "eta1_T0 =~ 1 * Y1_T0
+eta2_T0 =~ 1 * Y2_T0
+Y1_T0 ~~ 0*Y1_T0
+Y2_T0 ~~ 0*Y2_T0\n"
+
+# variances
+lavaanSyntax <- c(lavaanSyntax,
+                  "eta1_T0 ~~ v0_11 * eta1_T0 + v0_12 * eta2_T0\neta2_T0 ~~ v0_22 * eta2_T0\n"
+)
+
+# means
+lavaanSyntax <- c(lavaanSyntax,
+                  "eta1_T0 ~ 1\neta2_T0 ~ 1\nY1_T0~mMean1*1\nY2_T0~mMean2*1\n" 
+)
+
+for(tp in c(0,1,2,3)){
+  if(tp < 2) {
+    a <- "a1"
+    v <- "v1"
+  }else{
+    a <-"a2"
+    v <- "v2"
+  }
+  
+  # autoregressive and cross-lagged
+  lavaanSyntax <- c(lavaanSyntax,
+                    paste0(
+                      "eta1_T", tp+1, " ~ ", a, "_11 * eta1_T", tp, " + ", a, "_12 * eta2_T", tp,"\n",
+                      "eta2_T", tp+1, " ~ ", a, "_21 * eta1_T", tp, " + ", a, "_22 * eta2_T", tp, "\n"
+                    )
+  )
+  
+  # variances
+  lavaanSyntax <- c(lavaanSyntax,
+                    paste0(
+                      "eta1_T", tp+1, " ~~ ", v, "_11 * eta1_T", tp+1, " + ", v, "_12 * eta2_T", tp+1,"\n",
+                      "eta2_T", tp+1, " ~~ ", v, "_22 * eta2_T", tp+1, "\n"
+                    )
+  )
+  
+  # loadings
+  lavaanSyntax <- c(lavaanSyntax,
+                    paste0(
+                      "eta1_T", tp+1, " =~ 1 * Y1_T", tp+1,"\n",
+                      "eta2_T", tp+1, " =~ 1 * Y2_T", tp+1,"\n"
+                    )
+  )
+  
+  # manifest variances
+  lavaanSyntax <- c(lavaanSyntax,
+                    paste0(
+                      "Y1_T", tp+1, " ~~ 0* Y1_T", tp+1, "\n",
+                      "Y2_T", tp+1, " ~~ 0* Y2_T", tp+1, "\n"
+                    )
+  )
+  
+  # manifest means
+  lavaanSyntax <- c(lavaanSyntax,
+                    paste0(
+                      "Y1_T", tp+1, " ~ mMean1 * 1\n",
+                      "Y2_T", tp+1, " ~ mMean2 * 1\n"
+                    )
+  )
+}
+lavaanSyntax <- paste0(lavaanSyntax, collapse = "")
+cat(lavaanSyntax)
+```
+
+Setting up the model in lavaan:
+```{r}
+lavaanFit <- sem(model = lavaanSyntax, data = AnomAuth,
+                 orthogonal.y = TRUE, 
+                 orthogonal.x = TRUE,
+                 missing = "ml",
+                 do.fit = FALSE)
+```
+
+To transform the parameters to those of a continuous time model, 
+we have to define the transformations again. We will not go into the details 
+here. See Voelkle et al. (2012) for the underlying transformations.
+
+```{r}
+transformations <- "
+// Define all parameters which we want to use:
+parameters: a1_11, a1_12, a1_21, a1_22, a2_11, a2_12, a2_21, a2_22, 
+ctA_11, ctA_12, ctA_21, ctA_22, 
+v1_11, v1_12, v1_22, v2_11, v2_12, v2_22, 
+ctV_11, ctV_12, ctV_22
+
+// Define the starting values for the continuous time parameters:
+start: ctA_11 = -1, ctA_12 = 0, ctA_21 = 0, ctA_22 = -1, 
+ctV_11 = .1, ctV_12 = 0, ctV_22 = .1
+
+// transformations:
+arma::mat drift(2,2);
+arma::mat ARCL1(2,2);
+arma::mat ARCL2(2,2);
+arma::mat driftHash(4,4);
+drift(0,0) = ctA_11;
+drift(1,0) = ctA_21;
+drift(0,1) = ctA_12;
+drift(1,1) = ctA_22;
+ARCL1 = expmat(drift);
+ARCL2 = expmat(drift*2.0);
+
+driftHash = kron(drift, arma::eye(2,2)) + kron(arma::eye(2,2), drift);
+
+arma::mat diffusion(2,2);
+arma::mat discreteDiff1(2,2);
+arma::mat discreteDiff2(2,2);
+diffusion(0,0) = ctV_11;
+diffusion(1,0) = ctV_12;
+diffusion(0,1) = ctV_12;
+diffusion(1,1) = ctV_22;
+discreteDiff1 = arma::reshape(arma::inv(driftHash) * 
+  (expmat(driftHash) - arma::eye(arma::size(expmat(driftHash))))*
+  arma::vectorise(diffusion),2,2);
+discreteDiff2 = arma::reshape(arma::inv(driftHash) * 
+  (expmat(driftHash*2.0) - arma::eye(arma::size(expmat(driftHash*2.0))))*
+  arma::vectorise(diffusion),2,2);
+
+// extract parameters
+
+a1_11 = ARCL1(0,0);
+a1_12 = ARCL1(0,1);
+a1_21 = ARCL1(1,0);
+a1_22 = ARCL1(1,1);
+
+a2_11 = ARCL2(0,0);
+a2_12 = ARCL2(0,1);
+a2_21 = ARCL2(1,0);
+a2_22 = ARCL2(1,1);
+
+v1_11 = log(discreteDiff1(0,0)); // we take the log because of the internal 
+// transformation in lessSEM
+v1_12 = discreteDiff1(0,1);
+v1_22 = log(discreteDiff1(1,1)); // we take the log because of the internal 
+// transformation in lessSEM
+
+v2_11 = log(discreteDiff2(0,0)); // we take the log because of the internal 
+// transformation in lessSEM
+v2_12 = discreteDiff2(0,1);
+v2_22 = log(discreteDiff2(1,1)); // we take the log because of the internal 
+// transformation in lessSEM
+"
+```
+
+Most importantly, we used matrices in our transformations. This is possible,
+because **lessSEM** uses **RcppArmadillo** in the background and therefore also
+provides users with all of the functions implemented therein.
+
+As before, we can now fit the model with **lessSEM**
+
+```{r,include=FALSE}
+lessSEMFit <- bfgs(lavaanModel = lavaanFit,
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r,eval=FALSE}
+lessSEMFit <- bfgs(lavaanModel = lavaanFit,
+                   # Our model modification must make use of the modifyModel - function:
+                   modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+For comparison, we will also fit the model with **ctsemOMX**:
+```{r,include=FALSE}
+AnomAuthmodel <- ctModel(LAMBDA = matrix(c(1, 0, 0, 1), nrow = 2, ncol = 2), 
+                         Tpoints = 5, n.latent = 2, n.manifest = 2, MANIFESTVAR=diag(0, 2), TRAITVAR = NULL) 
+AnomAuthfit <- ctFit(AnomAuth, AnomAuthmodel)
+```
+
+```{r,eval=FALSE}
+AnomAuthmodel <- ctModel(LAMBDA = matrix(c(1, 0, 0, 1), nrow = 2, ncol = 2), 
+                         Tpoints = 5, n.latent = 2, n.manifest = 2, MANIFESTVAR=diag(0, 2), TRAITVAR = NULL) 
+AnomAuthfit <- ctFit(AnomAuth, AnomAuthmodel)
+```
+
+The following matrices are the drifts of the **lessSEM** model and the **ctsemOMX**
+model:
+
+lessSEM:
+```{r}
+matrix(coef(lessSEMFit)@estimates[,c("ctA_11", "ctA_21", "ctA_12", "ctA_22")],2,2)
+```
+ctsemOMX:
+```{r}
+AnomAuthfit$mxobj$DRIFT$values
+```
+
+The diffusions are given by:
+
+lessSEM:
+```{r}
+matrix(coef(lessSEMFit)@estimates[,c("ctV_11", "ctV_12", "ctV_12", "ctV_22")],2,2)
+```
+
+ctsemOMX:
+```{r}
+AnomAuthfit$mxobj$DIFFUSIONchol$result%*%t(AnomAuthfit$mxobj$DIFFUSIONchol$result)
+```
+
+Regularization could be used to enforce sparsity (Orzek & Voelkle, under review):
+
+```{r,include=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = "ctA_21",
+                  nLambdas = 30,
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r,eval=FALSE}
+lassoFit <- lasso(lavaanModel = lavaanFit, 
+                  regularized = "ctA_21",
+                  nLambdas = 30,
+                  method = "glmnet",
+                  control = controlGlmnet(),
+                  # Our model modification must make use of the modifyModel - function:
+                  modifyModel = modifyModel(transformations = transformations)
+)
+```
+
+```{r}
+plot(lassoFit)
+```
+
+Again, all these steps are easier when using dedicated packages such as **ctsem** and
+**ctsemOMX** for continuous time SEM and **regCtsem** (Orzek & Voelkle, under review) 
+for regularized continuous time SEM. 
+
+## How it is implemented
+
+The basic idea behind the transformations is as follows: Assume that the 
+SEM parameters are given by $\pmb\theta$. The 2-log-likelihood of the model
+is given by $f(\pmb\theta)$. When using transformations, we redefine $\pmb\theta$
+to be a function of other parameters, say $\pmb\gamma$. That is, $\pmb\theta =\pmb g(\pmb\gamma)$,
+where $\pmb g$ is a function returning a vector. As a result, we can re-write
+the fitting function as $f(\pmb\theta) = f(\pmb g(\pmb\gamma))$.
+Instead of optimizing $\pmb\theta$, we now optimize $\pmb\gamma$. Within
+**lessSEM**, the gradients of $f(\pmb\theta)$ with respect to $\pmb\theta$
+are implemented in closed form as this results in a considerably faster run time.
+To get the gradients of $f(\pmb\theta) = f(\pmb g(\pmb\gamma))$ with respect to
+$\pmb\gamma$, **lessSEM** makes use of the [chain rule](https://en.wikipedia.org/wiki/Chain_rule). 
+The gradients of the transformation $\pmb g(\pmb\gamma)$ are approximated
+numerically. This is similar to the procedure by Arnold et al. (in submission)
+for continuous time SEM, where the derivative of the matrix exponential is 
+approximated numerically, while all other elements are derived with closed form
+solutions.
+
+
+## Bibliography
+
+* Arnold, M., Cancér, P. F., Estrada, E., & Voelkle, M. C. (in submission). Score-Guided Recursive Partitioning of Continuous-Time Structural Equation Models.
+* Bai, P., Safikhani, A., & Michailidis, G. (2020). Multiple Change Points Detection in Low Rank and Sparse High Dimensional Vector Autoregressive Models. IEEE Transactions on Signal Processing, 68, 3074–3089. https://doi.org/10.1109/TSP.2020.2993145
+* Belzak, W. C. M., & Bauer, D. J. (2020). Improving the assessment of measurement invariance: Using regularization to select anchor items and identify differential item functioning. Psychological Methods, 25(6), 673–690. https://doi.org/10.1037/met0000253
+* Driver, C. C., Oud, J. H. L., & Voelkle, M. C. (2017). Continuous time structural equation modelling with R package ctsem. Journal of Statistical Software, 77(5), 1–36. https://doi.org/10.18637/jss.v077.i05
+* Fisher, Z. F., Kim, Y., Fredrickson, B. L., & Pipiras, V. (2022). Penalized Estimation and Forecasting of Multiple Subject Intensive Longitudinal Data. Psychometrika, 87(2), 1–29. https://doi.org/10.1007/s11336-021-09825-7
+* Huang, P.-H. (2018). A penalized likelihood method for multi-group structural equation modelling. British Journal of Mathematical and Statistical Psychology, 71(3), 499–522. https://doi.org/10.1111/bmsp.12130
+* Hunter, M. D. (2018). State space modeling in an open source, modular, structural equation modeling
+  environment. Structural Equation Modeling, 25(2), 307-324. doi: 10.1080/10705511.2017.1369354
+* Jacobucci, R., & Grimm, K. J. (2018). Regularized Estimation of Multivariate Latent Change Score Models. In E. Ferrer, S. M. Boker, & K. J. Grimm (Eds.), Longitudinal Multivariate Psychology (1st ed., pp. 109–125). Routledge. https://doi.org/10.4324/9781315160542-6
+* Jacobucci, R., Grimm, K. J., Brandmaier, A. M., Serang, S., Kievit, R. A., & Scharf, F. (2019). regsem: Regularized structural equation modeling. https://CRAN.R-project.org/package=regsem
+* Liang, X., Yang, Y., & Huang, J. (2018). Evaluation of Structural Relationships in Autoregressive Cross-Lagged Models Under Longitudinal Approximate Invariance:A Bayesian Analysis. Structural Equation Modeling: A Multidisciplinary Journal, 25(4), 558–572. https://doi.org/10.1080/10705511.2017.1410706
+* Muthen, B., & Asparouhov, T. (2013). BSEM Measurement Invariance Analysis. Mplus Web Notes: No. 17.
+* Neale, M. C., Hunter, M. D., Pritikin, J. N., Zahery, M., Brick, T. R., Kirkpatrick, R. M., Estabrook, R., Bates, T. C., Maes, H. H., & Boker, S. M. (2016). OpenMx 2.0: Extended structural equation and statistical modeling. Psychometrika, 81(2), 535–549. https://doi.org/10.1007/s11336-014-9435-8
+* Ou, L., Hunter, M., D., & Chow, S.-M. (2019). Whats for dynr: A package for linear and nonlinear dynamic modeling in r. The R Journal, 11(1), 91–111. https://doi.org/10.32614/RJ-2019-012
+* Orzek, J. H., & Voelkle, M. C. (under review). Regularized continuous time structural equation models: A network perspective.
+* Pritikin, J. N., Hunter, M. D., & Boker, S. M. (2015). Modular open-source software for Item Factor
+  Analysis. Educational and Psychological Measurement, 75(3), 458-474
+* Voelkle, M. C., Oud, J. H. L., Davidov, E., & Schmidt, P. (2012). An sem approach to continuous time modeling of panel data: Relating authoritarianism and anomia. Psychological Methods, 17(2), 176–192. https://doi.org/10.1037/a0027543
+
+
+
+

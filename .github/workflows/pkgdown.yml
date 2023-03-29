@@ -1,0 +1,43 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+
+name: pkgdown
+
+on:
+  workflow_dispatch
+
+permissions:
+  contents: write
+
+jobs:
+ build:
+  runs-on: ubuntu-latest
+  container:
+   image: ghcr.io/jhorzek/lesssem_dependencies:latest
+  env:
+    GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+  steps:
+    - name: Install rsync 📚
+      run: |
+       apt-get update && apt-get install -y rsync
+    - uses: actions/checkout@v3
+    - uses: r-lib/actions/setup-pandoc@v2
+    - name: Install dependencies
+      run: install.packages(c("devtools", "pkgdown"))
+      shell: Rscript {0}
+    - name: install lessSEM
+      run: devtools::install(".", upgrade = "never")
+      shell: Rscript {0}
+    - name: update vignettes
+      run: lessSEM:::.knitVignettes()
+      shell: Rscript {0}
+    - name: Build site
+      run: pkgdown::build_site_github_pages(new_process = FALSE, examples = FALSE, install = FALSE)
+      shell: Rscript {0}
+    - name: Deploy to GitHub pages 🚀
+      if: github.event_name != 'pull_request'
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        clean: false
+        branch: gh-pages
+        folder: docs

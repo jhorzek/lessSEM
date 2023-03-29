@@ -275,7 +275,7 @@ void mgSEM::implied(){
 bool mgSEM::impliedIsPD(){
   bool isPd = true;
   for(unsigned int m = 0; m < models.size(); m++){
-    isPd = isPd & models.at(m).impliedIsPD();
+    isPd = isPd && models.at(m).impliedIsPD();
   }
   return(isPd);
 }

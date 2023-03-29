@@ -303,7 +303,7 @@ double SEMCpp::fit(){
   
   // step two: compute fit for each subset
   
-  for(int s = 0; s < data.nGroups; s++){
+  for(unsigned int s = 0; s < data.nGroups; s++){
     
     // convenient pointer to current subset:
     subset& currentSubset = data.dataSubsets.at(s);
@@ -350,7 +350,7 @@ arma::mat SEMCpp::getScores(bool raw){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if((currentStatus != computedImplied) & (currentStatus != fitted)){
+  if((currentStatus != computedImplied) && (currentStatus != fitted)){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
   if(hasTransformations) Rcpp::stop("Not yet implemented for models with transformations.");
@@ -370,7 +370,7 @@ arma::rowvec SEMCpp::getGradients(bool raw){
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if((currentStatus != computedImplied) & (currentStatus != fitted)){
+  if((currentStatus != computedImplied) && (currentStatus != fitted)){
     Rcpp::stop("The model implied matrices have not been computed yet. Call Model$fit() first.");
   }
   gradientCalls++;
@@ -405,7 +405,7 @@ arma::mat SEMCpp::getHessian(Rcpp::StringVector label_,
   if(!wasChecked){
     wasChecked = checkModel();
   }
-  if((currentStatus != computedImplied) & (currentStatus != fitted)){
+  if((currentStatus != computedImplied) && (currentStatus != fitted)){
     Rcpp::stop("The model has not been fitted yet. Call Model$fit() first.");
   }
   

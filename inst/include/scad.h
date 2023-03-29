@@ -36,7 +36,7 @@ inline double scadPenalty(const double par,
     // reduces to lasso penalty
     return(lambda * absPar);
     
-  }else if((lambda < absPar) & (absPar <= lambda * theta)){
+  }else if((lambda < absPar) && (absPar <= lambda * theta)){
     // reduces to a smooth penalty
     return(
       (-std::pow(par, 2) + 

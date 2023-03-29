@@ -368,7 +368,7 @@ gpAdaptiveLasso <- function(par,
   if(is.null(weights)){
     weights <- 1/abs(par)
     weights[!names(weights) %in% regularized] <- 0
-    .printNote("Building weights based on par as weights = 1/abs(par).")
+    rlang::inform(c("Note","Building weights based on par as weights = 1/abs(par)."))
   }
   
   if(! all(regularized %in% names(weights))) stop(paste0(
@@ -1266,14 +1266,14 @@ gpLsp <- function(par,
 #' # plot(mcpPen)
 #' 
 #' # for comparison
-#' library(ncvreg)
-#' mcpFit <- ncvreg(X = X[,-1], 
-#'                  y = y, 
-#'                  penalty = "MCP",
-#'                  lambda =  mcpPen@fits$lambda[15],
-#'                  gamma =  mcpPen@fits$theta[15])
-#' coef(mcpFit)
-#' mcpPen@parameters[15,]
+#' #library(ncvreg)
+#' #mcpFit <- ncvreg(X = X[,-1], 
+#' #                  y = y, 
+#' #                  penalty = "MCP",
+#' #                  lambda =  mcpPen@fits$lambda[15],
+#' #                  gamma =  mcpPen@fits$theta[15])
+#' #coef(mcpFit)
+#' #mcpPen@parameters[15,]
 gpMcp <- function(par,
                   fn,
                   gr = NULL,
@@ -1447,14 +1447,14 @@ gpMcp <- function(par,
 #' # plot(scadPen)
 #' 
 #' # for comparison
-#' library(ncvreg)
-#' scadFit <- ncvreg(X = X[,-1], 
-#'                  y = y, 
-#'                  penalty = "SCAD",
-#'                  lambda =  scadPen@fits$lambda[15],
-#'                  gamma =  scadPen@fits$theta[15])
-#' coef(scadFit)
-#' scadPen@parameters[15,]
+#' #library(ncvreg)
+#' #scadFit <- ncvreg(X = X[,-1], 
+#' #                  y = y, 
+#' #                  penalty = "SCAD",
+#' #                  lambda =  scadPen@fits$lambda[15],
+#' #                  gamma =  scadPen@fits$theta[15])
+#' #coef(scadFit)
+#' #scadPen@parameters[15,]
 #' @export
 gpScad <- function(par,
                    fn,

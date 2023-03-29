@@ -2,9 +2,13 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
+^.*\.lessmd$
 ^doc$
 ^Meta$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
 ^\.github$
+^cran-comments\.md$
+^LICENSE\.md$
+^CRAN-SUBMISSION$

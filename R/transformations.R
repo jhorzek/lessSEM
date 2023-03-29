@@ -37,17 +37,33 @@
     )
   }
   
-  cat("Compiling the transformation function ... ")
+  rlang::inform(c("Note",
+                  paste0("Compiling the transformation function with armadillo version ",
+                         paste0(  RcppArmadillo::armadillo_version(single = FALSE), collapse = "."),
+                         ". This may take a few seconds.")))
   
   Rcpp::sourceCpp(code = armaFunction)
-  cat("done.\n")
+  
+  # The following two definitions are there for R cmd check. The functions
+  # getPtr and transformationFunction are created by sourceCpp
+  if(!exists("getPtr")){
+    getPtr <- function(){
+      stop("Failed to compile.")
+    }
+  }
+  
+  if(!exists("transformationFunction")){
+    transformationFunction <- function(){
+      stop("Failed to compile.")
+    }
+  }
   
   return(
     list("parameters" = parameters$parameters,
          "isTransformation" = parameters$parameters[parameters$isTransformation],
          "startingValues" = parameters$startingValues,
-         "getPtr" = getPtr,
-         "transformationFunction" = transformationFunction     
+         "getPtr" = getPtr, # this function is created when compiling the C++ code.
+         "transformationFunction" = transformationFunction # this function is created when compiling the C++ code.
     )
   )
 }
@@ -69,7 +85,7 @@
   hasComment <- grepl(pattern = "#",
                       x = syntax)
   if(any(hasComment)){
-    .printNote("Found a # in your transformations. Did you want to write a comment? Please use the C++ comment syntax (e.g., \\\\ my comment)")
+    rlang::inform(c("Note","Found a # in your transformations. Did you want to write a comment? Please use the C++ comment syntax (e.g., \\\\ my comment)"))
   }
   
   return(syntax)
@@ -230,7 +246,7 @@
   missingSemicolon <- grepl(pattern = "[\\)a-zA-Z0-9_]$", x = syntax) &
     !grepl(pattern = "^\\s*\\/\\/", x = syntax)
   for(ms in which(missingSemicolon)){
-    .printNote("Found the following statement:\n  > ", syntax[ms], "\nDid you forget a semicolon?")
+    rlang::inform(c("Note",paste0("Found the following statement:\n  > ", syntax[ms], "\nDid you forget a semicolon?")))
   }
   
   functionHead <- "
@@ -273,6 +289,7 @@
   ptrFunction <- "
   
   
+  // Dirk Eddelbuettel at
   // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 typedef Rcpp::NumericVector (*transformationFunctionPtr)(Rcpp::NumericVector&, //parameters
 Rcpp::List // transformationList

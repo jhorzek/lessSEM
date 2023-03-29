@@ -1,0 +1,55 @@
+citHeader("To cite lessSEM in publications, please cite the original publications on regularized SEM and the package.")
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "lessSEM: Non-Smooth Regularization for Structural Equation Models",
+  author   = c(person(c("Jannik H."), "Orzek")),
+  year     = "2023",
+  url      = "https://github.com/jhorzek/lessSEM",
+  note     = "R package version 1.4",
+  header   = "To cite the package:"
+  )
+
+bibentry(
+  bibtype  = "Article",
+  title    = "Regularized structural equation modeling",
+  author   = c(person(c("Ross"), "Jacobucci"),
+               person(c("Kevin J."), "Grimm"),
+               person("John J.", "McArdle")),
+  journal  = "Structural Equation Modeling: A Multidisciplinary Journal",
+  year     = "2016",
+  volume   = "23",
+  number   = "4",
+  pages    = "555-566",
+  doi      = "10.1080/10705511.2016.1154793",
+  header   = "Original publication on regularized SEM - 1"
+  )
+
+bibentry(
+  bibtype  = "Article",
+  title    = "A penalized likelihood method for structural equation modeling",
+  author   = c(person(c("Po-Hsien"), "Huang"),
+               person(c("Hung"), "Chen"),
+               person("Li-Jen", "Weng")),
+  journal  = "Psychometrika",
+  year     = "2017",
+  volume   = "82",
+  number   = "2",
+  pages    = "329-354",
+  doi      = "10.1007/s11336-017-9566-9",
+  header   = "Original publication on regularized SEM - 2"
+  )
+  
+bibentry(
+  bibtype  = "Article",
+  title    = "A penalized likelihood method for multi-group structural equation modelling",
+  author   = c(person(c("Po-Hsien"), "Huang")),
+  journal  = "British Journal of Mathematical and Statistical Psychology",
+  year     = "2018",
+  volume   = "71",
+  number   = "3",
+  pages    = "499-522",
+  doi      = "10.1111/bmsp.12130",
+  header   = "For multi-group models, please cite:"
+  ) 
+  

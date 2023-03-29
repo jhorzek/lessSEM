@@ -1,0 +1,145 @@
+---
+title: "log-likelihood-gradients"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{log-likelihood-gradients}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path='lessSEMFigures/lessSEM-'
+)
+```
+
+# Ableitung der Log-Likelihood
+
+$$L(\pmb\theta) = \underbrace{k\ln(2\pi)}_{1} + \underbrace{\ln(|\pmb\Sigma(\pmb\theta)|)}_{2} +  \underbrace{(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta))}_{3}$$
+
+Wir wollen nach $\pmb \theta$ ableiten. 
+
+## Element 1
+
+Es gilt $\frac{\partial}{\partial \theta_j}  k\ln(2\pi)= 0$
+
+## Element 2
+
+Es gilt:
+
+$$\frac{\partial}{\partial \theta_j}\ln(|\pmb\Sigma(\pmb\theta)|) = \frac{1}{|\pmb\Sigma(\pmb\theta)|}\frac{\partial}{\partial \theta_j}|\pmb\Sigma(\pmb\theta)|$$
+
+[Jacobis Formel](https://en.wikipedia.org/wiki/Jacobi%27s_formula): 
+
+$$\frac{\partial}{\partial \theta_j}|\pmb\Sigma(\pmb\theta)| = |\pmb\Sigma(\pmb\theta)|tr(\pmb\Sigma(\pmb\theta)^{-1}\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta))$$
+und somit:
+
+
+$$\frac{\partial}{\partial \theta_j}\ln(|\pmb\Sigma(\pmb\theta)|) = \frac{1}{|\pmb\Sigma(\pmb\theta)|}|\pmb\Sigma(\pmb\theta)|tr(\pmb\Sigma(\pmb\theta)^{-1}\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta)) = tr(\pmb\Sigma(\pmb\theta)^{-1}\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta))$$
+
+Wir brauchen also die Ableitung der modell-implizierten Kovarianzmatrix nach den Parametern: $\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta)$. Dabei gilt: $\pmb\Sigma(\pmb\theta) = \pmb F (\pmb I - \pmb A)^{-1} \pmb S ((\pmb I - \pmb A)^{-1})^T \pmb F^T$. 
+
+### Fall 1: Der Parameter $\theta_j$ ist in $\pmb S$. 
+
+Dann gilt: Außer $\pmb S$ kann alles andere als Konstante behandelt werden. Es folgt:
+
+
+$$\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta) = \pmb F (\pmb I - \pmb A)^{-1} \frac{\partial}{\partial \theta_j}\pmb S ((\pmb I - \pmb A)^{-1})^T \pmb F^T$$
+wobei $\frac{\partial}{\partial \theta_j}\pmb S$ eine sparse Matrix mit einsen an den Stellen ist, an denen $\theta_j$ vorkommt. 
+
+Zusammenfassung:
+
+$$\frac{\partial}{\partial \theta_j}\ln(|\pmb\Sigma(\pmb\theta)|) = tr(\pmb\Sigma(\pmb\theta)^{-1}\pmb F (\pmb I - \pmb A)^{-1} \frac{\partial}{\partial \theta_j}\pmb S ((\pmb I - \pmb A)^{-1})^T \pmb F^T)$$
+
+**Achtung**: Wenn die Person Missings hat, kann man die Matrix $\pmb F$ so anpassen, dass die entsprechenden Zeilen und Spalten herausfallen.
+
+### Fall 2: Der Parameter $\theta_j$ ist in $\pmb A$.
+
+Dann gilt: Außer $\pmb A$ kann alles andere als Konstante behandelt werden. Zudem gilt: $\frac{\partial}{\partial a_i}\pmb A^{-1} = \pmb A^{-1}\frac{\partial \pmb A}{\partial a_i} \pmb A^{-1}$ (https://math.stackexchange.com/questions/4074265/derivative-involving-inverse-matrix?noredirect=1&lq=1). Es folgt: 
+
+$$\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta) = \pmb F[(\pmb I - \pmb A)^{-1} \frac{\partial\pmb A}{\partial \theta_j}(\pmb I - \pmb A)^{-1}][\pmb S ((\pmb I - \pmb A)^{-1})^T \pmb F^T] + \pmb F(\pmb I - \pmb A)^{-1} \pmb S[(\pmb I - \pmb A)^{-1} \frac{\partial\pmb A}{\partial \theta_j}(\pmb I - \pmb A)^{-1}]^T\pmb F^T$$
+
+Zusammenfassung:
+
+$$\frac{\partial}{\partial \theta_j}\ln(|\pmb\Sigma(\pmb\theta)|) = tr(\pmb\Sigma(\pmb\theta)^{-1}[\pmb F[(\pmb I - \pmb A)^{-1} \frac{\partial\pmb A}{\partial \theta_j}(\pmb I - \pmb A)^{-1}][\pmb S ((\pmb I - \pmb A)^{-1})^T \pmb F^T] + \pmb F(\pmb I - \pmb A)^{-1} \pmb S[(\pmb I - \pmb A)^{-1} \frac{\partial\pmb A}{\partial \theta_j}(\pmb I - \pmb A)^{-1}]^T\pmb F^T])$$
+
+### Fall 3: Der Parameter $\theta_j$ ist in $\pmb m$, wobei $\pmb m$ die Mittelwertstruktur des SEM ist. 
+
+Dann gilt: Die Ableitung ist $0$.
+
+**Hinweis**: Element 2 ist unabhängig vom Datensatz!
+
+## Element 3
+
+$$\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta))$$
+
+Es gilt:
+
+$$\begin{aligned}
+&\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta))\\
+=& [\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T]\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T\frac{\partial}{\partial \theta_j}[\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta))] \\
+=& [\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T]\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T[\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta)^{-1}](\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}\frac{\partial}{\partial \theta_j}[(\pmb x - \pmb \mu(\pmb\theta))] 
+\end{aligned}$$
+
+mit $\pmb\mu (\pmb\theta) = \pmb F(\pmb I - \pmb A)^{-1}\pmb m$
+wobei $\pmb m$ die Mittelwertstruktur des SEMs ist.
+
+### Fall 1: Der Parameter $\theta_j$ ist in $\pmb S$. 
+
+Dann gilt: Außer $\pmb S$ kann alles andere als Konstante behandelt werden. Es folgt: $[\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T] = 0$ und somit
+
+$$\begin{aligned}
+&[\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T]\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T[\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta)^{-1}](\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}\frac{\partial}{\partial \theta_j}[(\pmb x - \pmb \mu(\pmb\theta))] \\
+=&(\pmb x - \pmb \mu(\pmb\theta))^T[\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta)^{-1}](\pmb x - \pmb \mu(\pmb\theta))
+\end{aligned}$$
+
+Es gilt (https://math.stackexchange.com/questions/4074265/derivative-involving-inverse-matrix?noredirect=1&lq=1): 
+$$\frac{\partial}{\partial \theta_j} \pmb \Sigma(\pmb\theta)^{-1} = -\pmb \Sigma(\pmb\theta)^{-1}\frac{\partial}{\partial \theta_j}\pmb \Sigma(\pmb\theta)\Sigma(\pmb\theta)^{-1}$$
+und somit:
+
+$$\begin{aligned}
+&\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta))\\
+=&(\pmb x - \pmb \mu(\pmb\theta))^T[\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta)^{-1}](\pmb x - \pmb \mu(\pmb\theta))\\
+=& (\pmb x - \pmb \mu(\pmb\theta))^T[-\pmb \Sigma(\pmb\theta)^{-1}\frac{\partial}{\partial \theta_j}\pmb \Sigma(\pmb\theta)\Sigma(\pmb\theta)^{-1}](\pmb x - \pmb \mu(\pmb\theta))\\
+=& (\pmb x - \pmb \mu(\pmb\theta))^T[-\pmb \Sigma(\pmb\theta)^{-1}\pmb F (\pmb I - \pmb A)^{-1} \frac{\partial}{\partial \theta_j}\pmb S ((\pmb I - \pmb A)^{-1})^T \pmb F^T\pmb\Sigma(\pmb\theta)^{-1}](\pmb x - \pmb \mu(\pmb\theta))\\
+\end{aligned}$$
+
+Hinweis: Der letzte Schritt wurde bei *Element 2* besprochen.
+
+### Fall 2: Der Parameter $\theta_j$ ist in $\pmb A$. 
+
+$\pmb A$ findet sich auch in der Mittelwertstruktur wieder. Hier gilt
+
+$$\begin{aligned}
+&\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta))\\
+=& [\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T]\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T[\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta)^{-1}](\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}\frac{\partial}{\partial \theta_j}[(\pmb x - \pmb \mu(\pmb\theta))] 
+\end{aligned}$$
+
+mit $[\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))] = [- \frac{\partial}{\partial \theta_j}\pmb \mu(\pmb\theta))] = -\frac{\partial}{\partial \theta_j}\pmb F(\pmb I - \pmb A)^{-1}\pmb m = -\pmb F(\pmb I - \pmb A)^{-1}\frac{\partial (\pmb I - \pmb A)}{\partial \theta_j}(\pmb I - \pmb A)^{-1}\pmb m$
+
+Es folgt:
+$$\begin{aligned}
+&\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta))\\
+=& 2*[-\pmb F(\pmb I - \pmb A)^{-1}\frac{\partial (\pmb I - \pmb A)}{\partial \theta_j}(\pmb I - \pmb A)^{-1}\pmb m]^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T[\frac{\partial}{\partial \theta_j}\pmb\Sigma(\pmb\theta)^{-1}](\pmb x - \pmb \mu(\pmb\theta))\\
+=& 2*[-\pmb F(\pmb I - \pmb A)^{-1}\frac{\partial (\pmb I - \pmb A)}{\partial \theta_j}(\pmb I - \pmb A)^{-1}\pmb m]^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) \\
+&+ (\pmb x - \pmb \mu(\pmb\theta))^T[-\pmb \Sigma(\pmb\theta)^{-1}[\pmb F[(\pmb I - \pmb A)^{-1} \frac{\partial\pmb A}{\partial \theta_j}(\pmb I - \pmb A)^{-1}][\pmb S ((\pmb I - \pmb A)^{-1})^T \pmb F^T] \\
+&+ \pmb F(\pmb I - \pmb A)^{-1} \pmb S[(\pmb I - \pmb A)^{-1} \frac{\partial\pmb A}{\partial \theta_j}(\pmb I - \pmb A)^{-1}]^T\pmb F^T]\pmb \Sigma(\pmb\theta)^{-1}](\pmb x - \pmb \mu(\pmb\theta))\\
+\end{aligned}$$
+
+
+Hinweis: Der letzte Schritt wurde bei *Element 3* besprochen.
+
+### Fall 3: Der Parameter $\theta_j$ ist in $\pmb m$. 
+
+Dann gilt: Außer $\pmb\mu (\pmb\theta) = \pmb F(\pmb I - \pmb A)^{-1}\pmb m$ kann alles andere als Konstante behandelt werden.
+
+$$\begin{aligned}
+&\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta))\\
+=& [\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T]\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T\frac{\partial}{\partial \theta_j}[\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta))] \\
+=& [\frac{\partial}{\partial \theta_j}(\pmb x - \pmb \mu(\pmb\theta))^T]\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}\frac{\partial}{\partial \theta_j}[(\pmb x - \pmb \mu(\pmb\theta))] \\
+=& (-\pmb F(\pmb I - \pmb A)^{-1}\pmb e)^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta)) + (\pmb x - \pmb \mu(\pmb\theta))^T\pmb\Sigma(\pmb\theta)^{-1}(-\pmb F(\pmb I - \pmb A)^{-1}\pmb e)\\
+=& 2*(- \pmb F(\pmb I - \pmb A)^{-1}\pmb e)^T\pmb\Sigma(\pmb\theta)^{-1}(\pmb x - \pmb \mu(\pmb\theta))
+\end{aligned}$$
+wobei $\pmb e = \begin{bmatrix} 0 & 0 & ... & 1 & ... &0\end{bmatrix}^T$ ein Vektor ist, der eine eins an der Stelle hat, an der $\theta_j$ in $\pmb m$ sitzt.

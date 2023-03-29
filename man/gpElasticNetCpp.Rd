@@ -93,6 +93,7 @@ Trends in Optimization, 1(3), 123–231.
 }
 }
 \examples{
+\dontrun{
 # This example shows how to use the optimizers
 # for C++ objective functions. We will use
 # a linear regression as an example. Note that
@@ -147,6 +148,7 @@ arma::rowvec gradientfunction(const Rcpp::NumericVector& parameters, Rcpp::List&
     return(gradients);
 }
 
+// Dirk Eddelbuettel at
 // https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 typedef double (*fitFunPtr)(const Rcpp::NumericVector&, //parameters
                 Rcpp::List& //additional elements
@@ -195,4 +197,5 @@ en <- gpElasticNetCpp(par = parameters,
                  additionalArguments = data)
 
 en@parameters
+}
 }

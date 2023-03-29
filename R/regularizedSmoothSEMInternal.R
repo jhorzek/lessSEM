@@ -42,13 +42,13 @@
   
   if(!is.null(modifyModel$transformations)){
     if(any(control$initialHessian == "lavaan")){
-      .printNote("Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'.")
+      rlang::inform(c("Note","Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'."))
       control$initialHessian <- "compute"
     }
   }
   if(is.vector(lavaanModel)){
     if(any(control$initialHessian == "lavaan")){
-      .printNote("You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
+      rlang::inform(c("Note","You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'."))
       control$initialHessian <- "compute"
     }
   }
@@ -57,7 +57,7 @@
   
   ## Setup Multi-Core ##
   
-  setupMulticore(control)
+  .setupMulticore(control)
   
   ## check starting values ##
 
@@ -174,8 +174,8 @@
       "Hessian" = lapply(1:nrow(tuningParameters), 
                          matrix, 
                          data= NA, 
-                         nrow=nrow(initialHessian), 
-                         ncol=ncol(initialHessian))
+                         nrow=nrow(control$initialHessian), 
+                         ncol=ncol(control$initialHessian))
     )
   }else{
     Hessians <- list(NULL)
@@ -293,6 +293,41 @@
 #' 
 #' @param regularizedSEM object fitted with approximate optimization
 #' @param tau new tau value
+#' @examples 
+#' library(lessSEM)
+#' 
+#' # Identical to regsem, lessSEM builds on the lavaan
+#' # package for model specification. The first step
+#' # therefore is to implement the model in lavaan.
+#' 
+#' dataset <- simulateExampleData()
+#' 
+#' lavaanSyntax <- "
+#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +
+#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +
+#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+#' f ~~ 1*f
+#' "
+#' 
+#' lavaanModel <- lavaan::sem(lavaanSyntax,
+#'                            data = dataset,
+#'                            meanstructure = TRUE,
+#'                            std.lv = TRUE)
+#' 
+#' # Optional: Plot the model
+#' # semPlot::semPaths(lavaanModel,
+#' #                   what = "est",
+#' #                   fade = FALSE)
+#' 
+#' lsem <- smoothLasso(
+#'   # pass the fitted lavaan model
+#'   lavaanModel = lavaanModel,
+#'   # names of the regularized parameters:
+#'   regularized = paste0("l", 6:15),
+#'   epsilon = 1e-10,
+#'   tau = 1e-4,
+#'   lambdas = seq(0,1,length.out = 50))
+#' newTau(regularizedSEM = lsem, tau = .1)
 #' @returns regularizedSEM, but with new regularizedSEM@fits$nonZeroParameters
 newTau <- function(regularizedSEM, tau){
   if(!is(regularizedSEM,"regularizedSEM")) stop("regularizedSEM must be of class regularizedSEM")

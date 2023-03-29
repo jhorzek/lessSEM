@@ -7,17 +7,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
 
-So, you've decided to take a closer look at the optimization routines 
-implemented in **lessSEM**. That's awesome! The following document will 
-give you a short introduction to the general idea of how the optimizers
-were designed. It will not cover the optimizers themselves; here, we recommend
+
+**lessSEM** allows you to use its optimizers for your own functions or packages
+The following document will give you a short introduction to the general idea of how the optimizers
+were designed. If you are mostly interested in using the optimizers, please 
+refer to the `vignette("General-Purpose-Optimization", package = "lessSEM")`.
+
+We will not cover the optimizers themselves; here, we recommend
 reading the following articles:
 
 **GLMNET**: 
@@ -70,7 +67,8 @@ We will start with glmnet (see function glmnet in the file inst/include/glmnet_c
 This function is called as follows:
 
 
-```{R,eval=FALSE}
+
+```r
 inline lessSEM::fitResults glmnet(model& model_, 
                                   Rcpp::NumericVector startingValuesRcpp,
                                   penaltyLASSOGlmnet& penalty_,
@@ -121,13 +119,15 @@ Finally, there is the controlGLMNET argument. This argument lets us fine tune th
 optimizer. To use the control argument, create a new control object in C++ as
 follows:
 
-```{r,eval=FALSE}
+
+```r
 lessSEM::controlGLMNET myControlObject = lessSEM::controlGlmnetDefault();
 ```
 
 Now, you can tweak each element of myControlObject; e.g.,
 
-```{r,eval=FALSE}
+
+```r
 myControlObject.maxIterOut = 100 // only 100 outer iterations
 ```
 
@@ -153,7 +153,8 @@ normal fitting function. That is, only the non-differentiable part gets a specia
 treatment, while the differentiable part is simply added to the differntiable
 $l(\pmb\theta)$. To give an example:
 
-```{r, eval = FALSE}
+
+```r
 gradients_kMinus1 = model_.gradients(parameters_kMinus1, parameterLabels) +
       smoothPenalty_.getGradients(parameters_kMinus1, parameterLabels, tuningParameters); // ridge part
 ```
@@ -174,7 +175,8 @@ glmnet optimizer above.
 First, let's have a look at the ista function located in inst/include/ista_class.hpp.
 This function is called with:
 
-```{r,eval = FALSE}
+
+```r
 template<typename T, typename U> // T is the type of the tuning parameters
 inline lessSEM::fitResults ista(
     model& model_, 
@@ -232,13 +234,15 @@ Finally, there is the control argument. This argument lets us fine tune the
 optimizer. To use the control argument, create a new control object in C++ as
 follows:
 
-```{r,eval=FALSE}
+
+```r
 lessSEM::control myControlObject = lessSEM::controlDefault();
 ```
 
 Now, you can tweak each element of myControlObject; e.g.,
 
-```{r,eval=FALSE}
+
+```r
 myControlObject.L0 = .9
 ```
 

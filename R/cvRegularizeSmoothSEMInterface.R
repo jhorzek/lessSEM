@@ -434,8 +434,8 @@ cvRidgeBfgs <- function(lavaanModel,
 #'   # names of the regularized parameters:
 #'   regularized = paste0("l", 6:15),
 #'   epsilon = 1e-8,
-#'   lambdas = seq(0,1,length.out = 20),
-#'   alphas = seq(0,1,.1))
+#'   lambdas = seq(0,1,length.out = 5),
+#'   alphas = .3)
 #' 
 #' # the coefficients can be accessed with:
 #' coef(lsem)

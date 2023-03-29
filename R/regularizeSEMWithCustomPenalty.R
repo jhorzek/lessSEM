@@ -16,6 +16,7 @@
 #' @param control option to set parameters of the optimizer; see ?Rsolnp::solnp
 #' @returns Model of class regularizedSEMWithCustomPenalty
 #' @examples 
+#' \dontrun{
 #' library(lessSEM)
 #' 
 #' # Identical to regsem, lessSEM builds on the lavaan
@@ -119,6 +120,8 @@
 #' head(regsemExact@parameters[,regsemExact@parameterLabels] -
 #'        regsemApprox@parameters[,regsemExact@parameterLabels])
 #' # Note that the parameter estimates are basically identical.
+#' }
+#' @import lavaan
 #' @keywords internal
 .regularizeSEMWithCustomPenaltyRsolnp <- function(lavaanModel, 
                                                   individualPenaltyFunction,
@@ -127,6 +130,8 @@
                                                   startingValues = "est",
                                                   carryOverParameters = TRUE,
                                                   control = list("trace" = 0)){
+  if(!("Rsolnp" %in% rownames(utils::installed.packages())))
+    stop(".regularizeSEMWithCustomPenaltyRsolnp requires the Rsolnp package to be installed.")
   
   inputArguments <- as.list(environment())
   
