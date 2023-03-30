@@ -8,7 +8,6 @@
 #' @returns list with parameter names and two Rcpp functions: (1) the transformation function and 
 #' (2) a function to create a pointer to the transformation function. 
 #' If starting values were defined, these are returned as well.
-#' @importFrom rlang inform
 #' @importFrom Rcpp sourceCpp
 #' @keywords internal
 .compileTransformations <- function(syntax,
@@ -75,8 +74,6 @@
 #' reduce user defined parameter transformation syntax to basic elements
 #' @param syntax string with user defined transformations
 #' @returns a cut and simplified version of the syntax
-#' @importFrom rlang inform
-#' @import stringr
 #' @keywords internal
 .reduceSyntax <- function(syntax){
   
@@ -139,7 +136,6 @@
 #' @param parameterLabels names of parameters in the model
 #' @return vector with names of parameters used in the syntax and vector with
 #' boolean indicating if parameter is transformation result
-#' @import stringr
 #' @keywords internal
 .extractParametersFromSyntax <- function(syntax,
                                          parameterLabels){
@@ -223,7 +219,6 @@
 #' @param syntax syntax with user defined transformations
 #' @param parameters labels of parameters used in these transformations
 #' @return string with functions for compilations with Rcpp
-#' @importFrom rlang inform
 #' @keywords internal
 .createRcppTransformationFunction <- function(syntax, parameters){
   

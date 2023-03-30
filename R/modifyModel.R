@@ -13,6 +13,7 @@
 #' modification <- modifyModel(addMeans = TRUE) # adds intercepts to a lavaan object
 #' # that was fitted without explicit intercepts
 #' @returns Object of class modifyModel
+#' @export
 modifyModel <- function(
     addMeans = FALSE,
     activeSet = NULL,

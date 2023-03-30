@@ -16,7 +16,7 @@ setMethod("show", "Rcpp_SEMCpp", function (object) {
 #' logLik
 #' 
 #' @param object object of class Rcpp_SEMCpp
-#' @importFrom stats logLik
+#' @import stats
 #' @returns log-likelihood of the model
 setMethod("logLik", "Rcpp_SEMCpp", function (object) {
   if(!object$wasFit){
@@ -36,7 +36,7 @@ setMethod("logLik", "Rcpp_SEMCpp", function (object) {
 #' 
 #' @param object object of class Rcpp_SEMCpp
 #' @param ... not used
-#' @importFrom stats coef
+#' @import stats
 #' @returns all coefficients of the model in transformed form
 setMethod("coef", "Rcpp_SEMCpp", function (object, ...) {
   return(.getParameters(object, raw = FALSE))

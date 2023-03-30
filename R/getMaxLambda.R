@@ -103,7 +103,7 @@
 #' plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 1, lambdasAutoLength = 100))
 #' plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 5, lambdasAutoLength = 100))
 #' plot(curveLambda(maxLambda = 10, lambdasAutoCurve = 100, lambdasAutoLength = 100))
-#' @keywords export
+#' @export
 curveLambda <- function(maxLambda, 
                          lambdasAutoCurve, 
                          lambdasAutoLength){

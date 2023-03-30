@@ -69,7 +69,7 @@ setMethod("summary", "cvRegularizedSEM", function (object) {
 #' @param object object of class cvRegularizedSEM
 #' @param ... not used
 #' @return the parameter estimates of an cvRegularizedSEM
-#' @importFrom stats coef
+#' @import stats
 #' @export
 setMethod("coef", "cvRegularizedSEM", function (object, ...) {
   
@@ -88,7 +88,6 @@ setMethod("coef", "cvRegularizedSEM", function (object, ...) {
 #' @param x object of class cvRegularizedSEM
 #' @param y not used
 #' @param ... not used
-#' @import ggplot2
 #' @importFrom graphics plot
 #' @return either an object of ggplot2 or of plotly
 #' @export

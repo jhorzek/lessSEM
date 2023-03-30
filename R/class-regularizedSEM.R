@@ -67,7 +67,7 @@ setMethod("summary", "regularizedSEM", function (object) {
 #' @param object object of class regularizedSEM
 #' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
 #' @return parameters of the model as data.frame
-#' @importFrom stats coef
+#' @import stats
 #' @export
 setMethod("coef", "regularizedSEM", function (object, ...) {
   dotdotdot <- list(...)
@@ -120,7 +120,7 @@ setMethod("coef", "regularizedSEM", function (object, ...) {
 #' 
 #' @param object object of class regularizedSEM
 #' @return AIC values
-#' @importFrom stats AIC
+#' @import stats
 #' @export
 setMethod("AIC", "regularizedSEM", function (object) {
   if(object@penalty == "ridge" & !all(object@inputArguments$tuningParameters == 0))
@@ -138,7 +138,7 @@ setMethod("AIC", "regularizedSEM", function (object) {
 #' 
 #' @param object object of class regularizedSEM
 #' @return BIC values
-#' @importFrom stats BIC
+#' @import stats
 #' @export
 setMethod("BIC", "regularizedSEM", function (object) {
   N <- object@internalOptimization$N
@@ -160,7 +160,6 @@ setMethod("BIC", "regularizedSEM", function (object) {
 #' @param y not used
 #' @param ... use regularizedOnly=FALSE to plot all parameters
 #' @return either an object of ggplot2 or of plotly
-#' @import ggplot2
 #' @importFrom graphics plot
 #' @export
 setMethod("plot", 
