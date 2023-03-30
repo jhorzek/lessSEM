@@ -53,23 +53,6 @@
 #' Because **lessSEM** is fairly new, we currently recommend using **lslx** for cases
 #' that are covered by both, **lessSEM** and **lslx**.
 #' 
-#' 
-#' # Installation
-#' 
-#' If you want to install **lessSEM** from CRAN, use the following commands in R:
-#'   
-#' ```
-#' install.packages("lessSEM")
-#' ```
-#' 
-#' The newest version of the package can be installed from GitHub using the 
-#' following commands in R:
-#'   
-#' ```
-#' if(!require(devtools)) install.packages("devtools")
-#' devtools::install_github("jhorzek/lessSEM")
-#' ```
-#' 
 #' # Introduction
 #' 
 #' You will find a short introduction to regularized SEM with the **lessSEM**
