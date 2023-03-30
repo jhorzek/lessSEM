@@ -34,6 +34,6 @@ double WLSDerivative(const arma::mat& weightsInverse,
                                       arma::vectorise(impliedCovarianceDerivative));
   
   return(arma::as_scalar(
-      arma::trans((weightsInverse + arma::trans(weightsInverse)) * diff) * impl;
+      arma::trans((weightsInverse + arma::trans(weightsInverse)) * diff) * impl
   ));
 }
