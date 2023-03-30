@@ -417,7 +417,8 @@
 #' @importFrom rlang .data
 #' @import Rcpp
 #' @import methods
-#' @import lavaan
+#' @importFrom graphics plot
+#' @rawNamespace importFrom(stats,AIC,BIC,coef,logLik); import(lavaan) # NOTE: The order is relevant...
 #' @useDynLib lessSEM, .registration=TRUE
 #' @name lessSEM
 #' @keywords internal

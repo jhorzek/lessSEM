@@ -3,6 +3,7 @@
 #' @slot logLik log-Likelihood
 #' @slot nParameters number of parameters in the model
 #' @slot N number of persons in the data set
+#' @export
 setClass("logLikelihood",
          representation = representation(
            logLik="numeric",

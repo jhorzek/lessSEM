@@ -8,6 +8,7 @@
 #' @slot internalOptimization list of elements used internally
 #' @slot inputArguments list with elements passed by the user to the general
 #' purpose optimizer
+#' @export
 setClass(Class = "gpRegularized",
          representation = representation(
            penalty = "character",
@@ -67,7 +68,6 @@ setMethod("summary", "gpRegularized", function (object) {
 #' @param object object of class gpRegularized
 #' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
 #' @return parameter estimates
-#' @importMethodsFrom stats coef
 #' @export
 setMethod("coef", "gpRegularized", function (object, ...) {
   dotdotdot <- list(...)
@@ -120,7 +120,6 @@ setMethod("coef", "gpRegularized", function (object, ...) {
 #' 
 #' @param object object of class gpRegularized
 #' @return data frame with fit values, appended with AIC
-#' @importMethodsFrom stats AIC
 #' @export
 setMethod("AIC", "gpRegularized", function (object) {
   if(!object@penalty %in% c("lasso", "adaptiveLasso", "cappedL1", "mcp", "scad"))
@@ -138,7 +137,6 @@ setMethod("AIC", "gpRegularized", function (object) {
 #' 
 #' @param object object of class gpRegularized
 #' @return data frame with fit values, appended with BIC
-#' @importMethodsFrom stats BIC
 #' @export
 setMethod("BIC", "gpRegularized", function (object) {
   N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
@@ -160,7 +158,6 @@ setMethod("BIC", "gpRegularized", function (object) {
 #' @param y not used
 #' @param ... use regularizedOnly=FALSE to plot all parameters
 #' @return either an object of ggplot2 or of plotly
-#' @importMethodsFrom graphics plot
 #' @export
 setMethod("plot",
           c(x = "gpRegularized", y = "missing"), 

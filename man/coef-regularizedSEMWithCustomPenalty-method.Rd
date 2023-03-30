@@ -17,3 +17,4 @@ data.frame with all parameter estimates
 \description{
 Returns the parameter estimates of a regularizedSEMWithCustomPenalty
 }
+\keyword{internal}

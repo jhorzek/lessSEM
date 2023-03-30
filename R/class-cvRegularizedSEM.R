@@ -11,6 +11,7 @@
 #' @slot subsetParameters optional: data.frame with parameter estimates for all
 #' combinations of the tuning parameters in all subsets
 #' @slot misc list with additional return elements
+#' @export
 setClass(Class = "cvRegularizedSEM",
          representation = representation(
            parameters="data.frame",
@@ -69,7 +70,6 @@ setMethod("summary", "cvRegularizedSEM", function (object) {
 #' @param object object of class cvRegularizedSEM
 #' @param ... not used
 #' @return the parameter estimates of an cvRegularizedSEM
-#' @importMethodsFrom stats coef
 #' @export
 setMethod("coef", "cvRegularizedSEM", function (object, ...) {
   
@@ -88,7 +88,6 @@ setMethod("coef", "cvRegularizedSEM", function (object, ...) {
 #' @param x object of class cvRegularizedSEM
 #' @param y not used
 #' @param ... not used
-#' @importMethodsFrom graphics plot
 #' @return either an object of ggplot2 or of plotly
 #' @export
 setMethod("plot", 

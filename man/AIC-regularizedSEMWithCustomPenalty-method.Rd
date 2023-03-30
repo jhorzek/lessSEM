@@ -19,3 +19,4 @@ AIC values
 \description{
 returns the AIC
 }
+\keyword{internal}

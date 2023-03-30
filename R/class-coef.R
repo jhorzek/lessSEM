@@ -1,6 +1,7 @@
 #' Class for the coefficients estimated by lessSEM.
 #' @slot tuningParameters tuning parameters
 #' @slot estimates parameter estimates
+#' @export
 setClass("lessSEMCoef",
          representation = representation(
            tuningParameters = "data.frame",
