@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{object of class regularizedSEM}
 }
+\value{
+No return value, just prints estimates
+}
 \description{
 show
 }

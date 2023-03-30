@@ -28,6 +28,7 @@ setClass(Class = "regularizedSEMMixedPenalty",
 
 #' show
 #' @param object object of class regularizedSEM
+#' @return No return value, just prints estimates
 #' @export
 setMethod("show", "regularizedSEMMixedPenalty", function (object) {
   #modelName <-deparse(substitute(object)) # get the name of the object
@@ -42,6 +43,7 @@ setMethod("show", "regularizedSEMMixedPenalty", function (object) {
 
 #' summary
 #' @param object object of class regularizedSEMMixedPenalty
+#' @return No return value, just prints estimates
 #' @export
 setMethod("summary", "regularizedSEMMixedPenalty", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object

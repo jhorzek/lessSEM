@@ -13,6 +13,7 @@ setClass("logLikelihood",
 #' show
 #' 
 #' @param object object of class logLikelihood
+#' @return No return value, just prints estimates
 #' @export
 setMethod("show", "logLikelihood", function(object){
   cat(paste0(object@logLik), "(nPar = ", object@nParameters, ")")

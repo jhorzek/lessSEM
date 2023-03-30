@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{object of class cvRegularizedSEM}
 }
+\value{
+No return value, just prints estimates
+}
 \description{
 summary method for objects of class \code{cvRegularizedSEM}.
 }

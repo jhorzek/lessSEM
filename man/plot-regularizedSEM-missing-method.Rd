@@ -13,6 +13,9 @@
 
 \item{...}{use regularizedOnly=FALSE to plot all parameters}
 }
+\value{
+either an object of ggplot2 or of plotly
+}
 \description{
 plots the regularized and unregularized parameters for all levels of lambda
 }
