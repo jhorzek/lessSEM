@@ -65,3 +65,6 @@ object of class controlBFGS
 \description{
 Control the BFGS optimizer.
 }
+\examples{
+control <- controlBFGS()
+}

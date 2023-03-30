@@ -27,6 +27,8 @@
 #' @param verbose if set to a value > 0, the fit every "verbose" iterations is printed.
 #' @param nCores number of core to use. Multi-core support is provided by RcppParallel and only supported for SEM, not for general purpose optimization.
 #' @returns object of class controlIsta
+#' @examples
+#' control <- controlIsta()
 #' @export
 controlIsta <- function(
     startingValues = "est",
@@ -88,6 +90,8 @@ controlIsta <- function(
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 #' @param nCores number of core to use. Multi-core support is provided by RcppParallel and only supported for SEM, not for general purpose optimization.
 #' @returns object of class controlGlmnet
+#' @examples
+#' control <- controlGlmnet()
 #' @export
 controlGlmnet <- function(
     startingValues = "est",
@@ -138,6 +142,8 @@ controlGlmnet <- function(
 #' @param verbose 0 prints no additional information, > 0 prints GLMNET iterations
 #' @param nCores number of core to use. Multi-core support is provided by RcppParallel and only supported for SEM, not for general purpose optimization.
 #' @returns object of class controlBFGS
+#' @examples
+#' control <- controlBFGS()
 #' @export
 controlBFGS <- function(
     startingValues = "est",
@@ -165,6 +171,7 @@ controlBFGS <- function(
 #' setup for multi-core support
 #' @param control object created with controlBFGS, controlIsta or controlGlmnet function
 #' @return nothing
+#' @keywords internal
 .setupMulticore <- function(control){
   if(RcppParallel::defaultNumThreads() < control$nCores)
     warning("Your selected number of cores (", control$nCores,

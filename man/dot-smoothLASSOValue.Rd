@@ -19,3 +19,4 @@ penalty function value
 \description{
 smoothed version of non-differentiable LASSO penalty
 }
+\keyword{internal}

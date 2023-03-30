@@ -430,10 +430,12 @@
 #' 
 #' @docType package
 #' @author Jannik Orzek <orzek@mpib-berlin.mpg.de>
+#' @importFrom RcppParallel RcppParallelLibs
+#' @importFrom rlang .data
 #' @import Rcpp
-#' @importFrom Rcpp sourceCpp
-#' @useDynLib lessSEM
-#' @exportPattern("^[[:alpha:]]+")
+#' @import methods
+#' @import lavaan
+#' @useDynLib lessSEM, .registration=TRUE
 #' @name lessSEM
 #' @keywords internal
 "_PACKAGE"

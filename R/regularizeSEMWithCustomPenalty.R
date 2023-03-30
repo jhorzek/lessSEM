@@ -16,7 +16,7 @@
 #' @param control option to set parameters of the optimizer; see ?Rsolnp::solnp
 #' @returns Model of class regularizedSEMWithCustomPenalty
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' library(lessSEM)
 #' 
 #' # Identical to regsem, lessSEM builds on the lavaan

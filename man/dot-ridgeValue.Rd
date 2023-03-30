@@ -19,3 +19,4 @@ penalty function value
 \description{
 ridge penalty function
 }
+\keyword{internal}

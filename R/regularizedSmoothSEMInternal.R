@@ -329,6 +329,7 @@
 #'   lambdas = seq(0,1,length.out = 50))
 #' newTau(regularizedSEM = lsem, tau = .1)
 #' @returns regularizedSEM, but with new regularizedSEM@fits$nonZeroParameters
+#' @export
 newTau <- function(regularizedSEM, tau){
   if(!is(regularizedSEM,"regularizedSEM")) stop("regularizedSEM must be of class regularizedSEM")
   if(! regularizedSEM@penalty %in% c("lasso", "adaptiveLasso", "elasticNet")) stop("penalty must be of type lasso, adaptiveLasso, or elasticNet")

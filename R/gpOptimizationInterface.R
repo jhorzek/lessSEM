@@ -1274,6 +1274,7 @@ gpLsp <- function(par,
 #' #                  gamma =  mcpPen@fits$theta[15])
 #' #coef(mcpFit)
 #' #mcpPen@parameters[15,]
+#' @export
 gpMcp <- function(par,
                   fn,
                   gr = NULL,

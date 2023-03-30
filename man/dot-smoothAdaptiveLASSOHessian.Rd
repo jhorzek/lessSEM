@@ -23,3 +23,4 @@ Hessian matrix
 \description{
 smoothed version of non-differentiable adaptive LASSO Hessian
 }
+\keyword{internal}

@@ -5,7 +5,7 @@
 #' @param lavaanModel model of class lavaan
 #' @param removeDuplicates should duplicated parameters be removed?
 #' @returns returns a labeled vector with parameters from lavaan
-#' @import lavaan, stats
+#' @import lavaan
 #' @examples 
 #' library(lessSEM)
 #' 

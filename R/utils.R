@@ -128,11 +128,9 @@ simulateExampleData <- function(N = 100, # sample size
 #' 
 #' This function helps you create the pointers necessary to use the Cpp interface
 #' 
-#' @param fitFunName name of your C++ fit function 
-#' (IMPORTANT: This must be the name
+#' @param fitFunName name of your C++ fit function (IMPORTANT: This must be the name
 #' used in C++)
-#' @param gradFunName name of your C++ gradient function 
-#' (IMPORTANT: This must be the name
+#' @param gradFunName name of your C++ gradient function (IMPORTANT: This must be the name
 #' used in C++)
 #' @returns a string which can be copied in the C++ function to create the pointers.
 #' @examples 
@@ -219,7 +217,8 @@ gradientFunPtr_t ', gradFunName,'Ptr() {
       stop("Package ", p, " required to build vignettes.")
   }
   
-  currentDit <- getwd()
+  currentDir <- getwd()
+  on.exit(setwd(currentDir))
   
   setwd(dir)
   
@@ -237,6 +236,4 @@ gradientFunPtr_t ', gradFunName,'Ptr() {
     knitr::knit(input = paste0(f), 
                 output = paste0(outFile, ".Rmd"))
   }
-  
-  setwd(currentDit)
 }

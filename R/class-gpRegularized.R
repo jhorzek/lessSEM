@@ -67,7 +67,7 @@ setMethod("summary", "gpRegularized", function (object) {
 #' @param object object of class gpRegularized
 #' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
 #' @return parameter estimates
-#' @import stats
+#' @importFrom stats coef
 #' @export
 setMethod("coef", "gpRegularized", function (object, ...) {
   dotdotdot <- list(...)
@@ -120,6 +120,7 @@ setMethod("coef", "gpRegularized", function (object, ...) {
 #' 
 #' @param object object of class gpRegularized
 #' @return data frame with fit values, appended with AIC
+#' @importFrom stats AIC
 #' @export
 setMethod("AIC", "gpRegularized", function (object) {
   if(!object@penalty %in% c("lasso", "adaptiveLasso", "cappedL1", "mcp", "scad"))
@@ -137,7 +138,8 @@ setMethod("AIC", "gpRegularized", function (object) {
 #' 
 #' @param object object of class gpRegularized
 #' @return data frame with fit values, appended with BIC
-#' @import lavaan
+#' @importFrom lavaan lavInspect
+#' @importFrom stats BIC
 #' @export
 setMethod("BIC", "gpRegularized", function (object) {
   N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
@@ -159,7 +161,8 @@ setMethod("BIC", "gpRegularized", function (object) {
 #' @param y not used
 #' @param ... use regularizedOnly=FALSE to plot all parameters
 #' @return either an object of ggplot2 or of plotly
-#' @import graphics, ggplot2
+#' @import ggplot2
+#' @importFrom graphics plot
 #' @export
 setMethod("plot",
           c(x = "gpRegularized", y = "missing"), 

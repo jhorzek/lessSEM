@@ -117,6 +117,7 @@
 #' @param modifyModel list with model modifications
 #' @param startingValues either set to est, start, or labeled vector with starting values
 #' @param rawParameters raw parameters
+#' @return vector with weights
 #' @keywords internal
 .initializeWeights <- function(weights, 
                                penalty, 
@@ -320,6 +321,7 @@
 #' @param parameterLabels labels of parameteres already in the model
 #' @param parameterTable existing parameter table
 #' @return list with parameterTable and transformation function pointer
+#' @keywords internal
 .createTransformations <- function(transformations, parameterLabels, parameterTable){
   if(!is(transformations, "character")) stop("transformations must be a string.")
   
@@ -372,6 +374,7 @@
 #' @param transformations string with transformations
 #' @param parameterValues values of parameters already in the model
 #' @return list with extended parameter vector and transformation function pointer
+#' @keywords internal
 .createMultiGroupTransformations <- function(transformations, parameterValues){
   if(!is(transformations, "character")) stop("transformations must be a string.")
   
@@ -423,6 +426,7 @@
 #' 
 #' @param lavaanModel m0del of type lavaan
 #' @return nothing
+#' @keywords internal
 .checkLavaanModel <- function(lavaanModel){
   
   if(is.vector(lavaanModel)){

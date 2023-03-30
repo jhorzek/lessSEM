@@ -9,6 +9,9 @@
 \arguments{
 \item{penalty}{either a number or the name of the penalty}
 }
+\value{
+number corresponding to one of the penalties
+}
 \description{
 translates the penalty from a numeric value to the character or from
 the character to the numeric value. The numeric value is used by the C++ backend.

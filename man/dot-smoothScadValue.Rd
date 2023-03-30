@@ -19,3 +19,4 @@ penalty function value
 \description{
 smoothed version of scad penalty
 }
+\keyword{internal}

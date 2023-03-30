@@ -66,7 +66,7 @@ setMethod("summary", "regularizedSEMMixedPenalty", function (object) {
 #' @param object object of class regularizedSEMMixedPenalty
 #' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
 #' @returns parameters of the model as data.frame
-#' @import stats
+#' @importFrom stats coef
 #' @export
 setMethod("coef", "regularizedSEMMixedPenalty", function (object, ...) {
   dotdotdot <- list(...)
@@ -120,6 +120,7 @@ setMethod("coef", "regularizedSEMMixedPenalty", function (object, ...) {
 #' 
 #' @param object object of class regularizedSEMMixedPenalty
 #' @returns AIC values
+#' @importFrom stats AIC
 #' @export
 setMethod("AIC", "regularizedSEMMixedPenalty", function (object) {
   
@@ -135,6 +136,7 @@ setMethod("AIC", "regularizedSEMMixedPenalty", function (object) {
 #' 
 #' @param object object of class regularizedSEMMixedPenalty
 #' @returns BIC values
+#' @importFrom stats BIC
 #' @export
 setMethod("BIC", "regularizedSEMMixedPenalty", function (object) {
   N <- object@internalOptimization$N

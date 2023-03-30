@@ -19,3 +19,4 @@ penalty function value
 \description{
 smoothed version of capped L1 penalty
 }
+\keyword{internal}

@@ -19,3 +19,4 @@ Hessian matrix
 \description{
 ridge Hessian function
 }
+\keyword{internal}

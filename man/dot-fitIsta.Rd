@@ -11,6 +11,9 @@
 with the mixedPenalty function. Penalties can be added with the addCappedL1, addElastiNet,
 addLasso, addLsp, addMcp, and addScad functions.}
 }
+\value{
+object of class regularizedSEMMixedPenalty
+}
 \description{
 Optimizes an object with mixed penalty. See ?mixedPenalty for more details.
 }

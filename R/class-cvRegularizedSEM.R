@@ -29,6 +29,7 @@ setClass(Class = "cvRegularizedSEM",
 #' 
 #' @param object object of class cvRegularizedSEM
 #' @return No return value, just prints estimates
+#' @export
 setMethod("show", "cvRegularizedSEM", function (object) {
   bestFit <- unlist(object@parameters)
   tuningParameters <- bestFit[!names(bestFit) %in% object@parameterLabels]
@@ -42,6 +43,7 @@ setMethod("show", "cvRegularizedSEM", function (object) {
 #' 
 #' @param object object of class cvRegularizedSEM
 #' @return No return value, just prints estimates
+#' @export
 setMethod("summary", "cvRegularizedSEM", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Exact Cross Validation Results ####\n\n"))
@@ -67,7 +69,7 @@ setMethod("summary", "cvRegularizedSEM", function (object) {
 #' @param object object of class cvRegularizedSEM
 #' @param ... not used
 #' @return the parameter estimates of an cvRegularizedSEM
-#' @import stats
+#' @importFrom stats coef
 #' @export
 setMethod("coef", "cvRegularizedSEM", function (object, ...) {
   
@@ -86,7 +88,8 @@ setMethod("coef", "cvRegularizedSEM", function (object, ...) {
 #' @param x object of class cvRegularizedSEM
 #' @param y not used
 #' @param ... not used
-#' @import graphics, ggplot2
+#' @import ggplot2
+#' @importFrom graphics plot
 #' @return either an object of ggplot2 or of plotly
 #' @export
 setMethod("plot", 

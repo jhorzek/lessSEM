@@ -19,3 +19,4 @@ gradient values
 \description{
 ridge gradient function
 }
+\keyword{internal}

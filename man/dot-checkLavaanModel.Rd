@@ -15,3 +15,4 @@ nothing
 \description{
 checks model of type lavaan
 }
+\keyword{internal}
