@@ -822,6 +822,7 @@ addScad <- function(mixedPenalty,
 #' translates the penalty from a numeric value to the character or from
 #' the character to the numeric value. The numeric value is used by the C++ backend.
 #' @param penalty either a number or the name of the penalty
+#' @return number corresponding to one of the penalties
 #' @keywords internal
 .penaltyTypes <- function(penalty){
   
@@ -1099,6 +1100,7 @@ fit <- function(mixedPenalty){
 #' @param mixedPenalty object of class mixedPenalty. This object can be created
 #' with the mixedPenalty function. Penalties can be added with the addCappedL1, addElastiNet,
 #' addLasso, addLsp, addMcp, and addScad functions.
+#' @return object of class regularizedSEMMixedPenalty
 #' @keywords internal 
 .fitIsta <- function(mixedPenalty){
   
@@ -1395,6 +1397,7 @@ fit <- function(mixedPenalty){
 #' @param mixedPenalty object of class mixedPenalty. This object can be created
 #' with the mixedPenalty function. Penalties can be added with the addCappedL1, addElastiNet,
 #' addLasso, addLsp, addMcp, and addScad functions.
+#' @return object of class regularizedSEMMixedPenalty
 #' @keywords internal 
 .fitGlmnet <- function(mixedPenalty){
   

@@ -5,7 +5,6 @@
 #' @param lavaanModel model of class lavaan
 #' @param removeDuplicates should duplicated parameters be removed?
 #' @returns returns a labeled vector with parameters from lavaan
-#' @import lavaan, stats
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -197,7 +196,6 @@ lavaan2lslxLabels <- function(lavaanModel){
 #' @param lambda value for tuning parameter lambda
 #' @param alpha value for tuning parameter alpha
 #' @param theta value for tuning parameter theta
-#' @import lavaan
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -234,6 +232,7 @@ lavaan2lslxLabels <- function(lavaanModel){
 #' lessSEM2Lavaan(regularizedSEM = regularized, 
 #'                lambda = 1)
 #' @return lavaan model
+#' @export
 lessSEM2Lavaan <- function(regularizedSEM, criterion = NULL, lambda = NULL, alpha = NULL, theta = NULL){
   
   if(is.null(criterion) & is.null(lambda) & is.null(alpha) & is.null(theta))

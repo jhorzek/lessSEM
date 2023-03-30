@@ -9,6 +9,7 @@
 #' are returned
 #' @slot internalOptimization list of elements used internally
 #' @slot inputArguments list with elements passed by the user to the general
+#' @export
 setClass(Class = "regularizedSEM",
          representation = representation(
            penalty = "character",
@@ -25,6 +26,7 @@ setClass(Class = "regularizedSEM",
 
 #' show
 #' @param object object of class regularizedSEM
+#' @return No return value, just prints estimates
 #' @export
 setMethod("show", "regularizedSEM", function (object) {
   #modelName <-deparse(substitute(object)) # get the name of the object
@@ -40,6 +42,7 @@ setMethod("show", "regularizedSEM", function (object) {
 
 #' summary
 #' @param object object of class regularizedSEM
+#' @return No return value, just prints estimates
 #' @export
 setMethod("summary", "regularizedSEM", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
@@ -64,8 +67,7 @@ setMethod("summary", "regularizedSEM", function (object) {
 #' 
 #' @param object object of class regularizedSEM
 #' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
-#' @returns parameters of the model as data.frame
-#' @import stats
+#' @return parameters of the model as data.frame
 #' @export
 setMethod("coef", "regularizedSEM", function (object, ...) {
   dotdotdot <- list(...)
@@ -117,7 +119,7 @@ setMethod("coef", "regularizedSEM", function (object, ...) {
 #' returns the AIC
 #' 
 #' @param object object of class regularizedSEM
-#' @returns AIC values
+#' @return AIC values
 #' @export
 setMethod("AIC", "regularizedSEM", function (object) {
   if(object@penalty == "ridge" & !all(object@inputArguments$tuningParameters == 0))
@@ -134,7 +136,7 @@ setMethod("AIC", "regularizedSEM", function (object) {
 #' returns the BIC
 #' 
 #' @param object object of class regularizedSEM
-#' @returns BIC values
+#' @return BIC values
 #' @export
 setMethod("BIC", "regularizedSEM", function (object) {
   N <- object@internalOptimization$N
@@ -155,7 +157,7 @@ setMethod("BIC", "regularizedSEM", function (object) {
 #' @param x object of class gpRegularized
 #' @param y not used
 #' @param ... use regularizedOnly=FALSE to plot all parameters
-#' @import graphics, ggplot2
+#' @return either an object of ggplot2 or of plotly
 #' @export
 setMethod("plot", 
           c(x = "regularizedSEM", y = "missing"), 

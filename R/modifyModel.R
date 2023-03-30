@@ -9,7 +9,11 @@
 #' @param transformationList optional list used within the transformations. NOTE: This must be used as an Rcpp::List.
 #' @param transformationGradientStepSize step size used to compute the gradients of the
 #' transformations
+#' @examples
+#' modification <- modifyModel(addMeans = TRUE) # adds intercepts to a lavaan object
+#' # that was fitted without explicit intercepts
 #' @returns Object of class modifyModel
+#' @export
 modifyModel <- function(
     addMeans = FALSE,
     activeSet = NULL,

@@ -4,6 +4,7 @@
 #' @slot parameterLabels character vector with names of all parameters
 #' @slot internalOptimization list of elements used internally
 #' @slot inputArguments list with elements passed by the user to the general
+#' @keywords internal
 setClass(Class = "regularizedSEMWithCustomPenalty",
          representation = representation(
            parameters="data.frame",
@@ -16,7 +17,8 @@ setClass(Class = "regularizedSEMWithCustomPenalty",
 
 #' summary
 #' @param object object of class regularizedSEMWithCustomPenalty
-#' @export
+#' @return No return value, just prints estimates
+#' @keywords internal
 setMethod("summary", "regularizedSEMWithCustomPenalty", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Model of class regularizedSEMWithCustomPenalty ####\n\n"))
@@ -36,8 +38,7 @@ setMethod("summary", "regularizedSEMWithCustomPenalty", function (object) {
 #' @param object object of class regularizedSEMWithCustomPenalty
 #' @param ... not used
 #' @returns data.frame with all parameter estimates
-#' @import stats
-#' @export
+#' @keywords internal
 setMethod("coef", "regularizedSEMWithCustomPenalty", function (object, ...) {
   tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
   estimates <- as.matrix(object@parameters[,object@parameterLabels,drop=FALSE])
@@ -57,7 +58,7 @@ setMethod("coef", "regularizedSEMWithCustomPenalty", function (object, ...) {
 #' @param penalizedParameterLabels vector with labels of penalized parameters
 #' @param zeroThreshold penalized parameters below this threshold will be counted as zeroed
 #' @returns AIC values
-#' @export
+#' @keywords internal
 setMethod("AIC", "regularizedSEMWithCustomPenalty", function (object, penalizedParameterLabels, zeroThreshold) {
   
   fits <- object@fits
@@ -79,8 +80,7 @@ setMethod("AIC", "regularizedSEMWithCustomPenalty", function (object, penalizedP
 #' @param penalizedParameterLabels vector with labels of penalized parameters
 #' @param zeroThreshold penalized parameters below this threshold will be counted as zeroed
 #' @returns BIC values
-#' @import lavaan
-#' @export
+#' @keywords internal
 setMethod("BIC", "regularizedSEMWithCustomPenalty", function (object, penalizedParameterLabels, zeroThreshold) {
   fits <- object@fits
   parameters <- object@parameters

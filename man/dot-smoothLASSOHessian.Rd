@@ -19,3 +19,4 @@ Hessian matrix
 \description{
 smoothed version of non-differentiable LASSO Hessian
 }
+\keyword{internal}

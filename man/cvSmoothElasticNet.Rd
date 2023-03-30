@@ -46,6 +46,9 @@ validation. Set standardize=TRUE to automatically standardize the data.}
 the controlBFGS function. See ?controlBFGS
 for more details.}
 }
+\value{
+model of class cvRegularizedSEM
+}
 \description{
 Implements cross-validated  smooth elastic net regularization for structural equation models.
 The penalty function is given by:

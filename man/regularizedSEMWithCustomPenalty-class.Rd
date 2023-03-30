@@ -21,3 +21,4 @@ Class for regularized SEM using Rsolnp
 \item{\code{inputArguments}}{list with elements passed by the user to the general}
 }}
 
+\keyword{internal}

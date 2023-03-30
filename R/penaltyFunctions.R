@@ -9,7 +9,7 @@
 #' @param tuningParameters list with field lambda (tuning parameter value) 
 #' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters)
 #' @returns penalty function value
-#' @export
+#' @keywords internal
 .ridgeValue <- function(parameters, 
                   tuningParameters,
                   penaltyFunctionArguments){
@@ -23,7 +23,7 @@
 #' @param tuningParameters list with field lambda (tuning parameter value) 
 #' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters)
 #' @returns gradient values
-#' @export
+#' @keywords internal
 .ridgeGradient <- function(parameters, 
                           tuningParameters,
                           penaltyFunctionArguments){
@@ -42,7 +42,7 @@
 #' @param tuningParameters list with field lambda (tuning parameter value) 
 #' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters)
 #' @returns Hessian matrix
-#' @export
+#' @keywords internal
 .ridgeHessian <- function(parameters, 
                          tuningParameters,
                          penaltyFunctionArguments){
@@ -64,7 +64,7 @@
 #' @param tuningParameters list with field lambda (tuning parameter value)
 #' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns penalty function value
-#' @export
+#' @keywords internal
 .smoothLASSOValue <- function(parameters, 
                         tuningParameters,
                         penaltyFunctionArguments
@@ -79,7 +79,7 @@
 #' @param tuningParameters list with field lambda (tuning parameter value)
 #' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns gradient values
-#' @export
+#' @keywords internal
 .smoothLASSOGradient <- function(parameters, 
                                 tuningParameters,
                                 penaltyFunctionArguments){
@@ -98,7 +98,7 @@
 #' @param tuningParameters list with field lambda (tuning parameter value)
 #' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns Hessian matrix
-#' @export
+#' @keywords internal
 .smoothLASSOHessian <- function(parameters,
                                tuningParameters,
                                penaltyFunctionArguments){
@@ -125,7 +125,7 @@
 #' @param tuningParameters list with fields lambdas (vector with one tuning parameter value for each parameter)
 #' @param penaltyFunctionArguments list with fields regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns penalty function value
-#' @export
+#' @keywords internal
 .smoothAdaptiveLASSOValue <- function(parameters, 
                                 tuningParameters,
                                 penaltyFunctionArguments){
@@ -140,7 +140,7 @@
 #' @param tuningParameters list with fields lambdas (vector with one tuning parameter value for each parameter)
 #' @param penaltyFunctionArguments list with fields regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns gradient values
-#' @export
+#' @keywords internal
 .smoothAdaptiveLASSOGradient <- function(parameters, 
                                         tuningParameters,
                                         penaltyFunctionArguments){
@@ -159,7 +159,7 @@
 #' @param tuningParameters list with fields lambdas (vector with one tuning parameter value for each parameter)
 #' @param penaltyFunctionArguments list with fields regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns Hessian matrix
-#' @export
+#' @keywords internal
 .smoothAdaptiveLASSOHessian <- function(parameters, 
                                        tuningParameters,
                                        penaltyFunctionArguments){
@@ -185,7 +185,7 @@
 #' @param tuningParameters list with fields lambda (tuning parameter value), alpha (0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge)
 #' @param penaltyFunctionArguments list with fields regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns penalty function value
-#' @export
+#' @keywords internal
 .smoothElasticNetValue <- function(parameters, 
                              tuningParameters,
                              penaltyFunctionArguments){
@@ -210,7 +210,7 @@
 #' @param tuningParameters list with fields lambda (tuning parameter value), alpha (0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge)
 #' @param penaltyFunctionArguments list with fields regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns gradient values
-#' @export
+#' @keywords internal
 .smoothElasticNetGradient <- function(parameters, 
                                      tuningParameters,
                                      penaltyFunctionArguments){
@@ -235,7 +235,7 @@
 #' @param tuningParameters list with fields lambda (tuning parameter value), alpha (0<alpha<1. Controls the weight of ridge and lasso terms. alpha = 1 is lasso, alpha = 0 ridge)
 #' @param penaltyFunctionArguments list with fields regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns Hessian matrix
-#' @export
+#' @keywords internal
 .smoothElasticNetHessian <- function(parameters, 
                                     tuningParameters,
                                     penaltyFunctionArguments){
@@ -261,7 +261,7 @@
 #' @param tuningParameters list with field lambda (tuning parameter value)
 #' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns penalty function value
-#' @export
+#' @keywords internal
 .smoothCappedL1Value <- function(parameters, 
                              tuningParameters,
                              penaltyFunctionArguments
@@ -282,7 +282,7 @@
 #' @param tuningParameters list with field lambda (tuning parameter value)
 #' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns penalty function value
-#' @export
+#' @keywords internal
 .smoothScadValue <- function(parameters, 
                                 tuningParameters,
                                 penaltyFunctionArguments
@@ -330,7 +330,7 @@
 #' @param tuningParameters list with field lambda (tuning parameter value)
 #' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns penalty function value
-#' @export
+#' @keywords internal
 .smoothLspValue <- function(parameters, 
                            tuningParameters,
                            penaltyFunctionArguments
@@ -353,7 +353,7 @@
 #' @param tuningParameters list with field lambda (tuning parameter value)
 #' @param penaltyFunctionArguments list with field regularizedParameterLabels (labels of regularized parameters), and eps (controls the smooth approximation of non-differential penalty functions (e.g., lasso, adaptive lasso, or elastic net). Smaller values result in closer approximation, but may also cause larger issues in optimization.)
 #' @returns penalty function value
-#' @export
+#' @keywords internal
 .smoothMcpValue <- function(parameters, 
                             tuningParameters,
                             penaltyFunctionArguments

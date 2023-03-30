@@ -6,6 +6,7 @@
 #' @returns matrix with subsets
 #' @examples 
 #' createSubsets(N=100, k = 5)
+#' @export
 createSubsets <- function(N,k){
   # build subgroups
   if(k < N){

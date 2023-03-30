@@ -22,7 +22,6 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
 #' @returns model of class cvRegularizedSEM
-#' @import lavaan
 #' @keywords internal
 .cvRegularizeSmoothSEMInternal <- function(lavaanModel,
                                            k,

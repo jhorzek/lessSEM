@@ -128,11 +128,9 @@ simulateExampleData <- function(N = 100, # sample size
 #' 
 #' This function helps you create the pointers necessary to use the Cpp interface
 #' 
-#' @param fitFunName name of your C++ fit function 
-#' (IMPORTANT: This must be the name
+#' @param fitFunName name of your C++ fit function (IMPORTANT: This must be the name
 #' used in C++)
-#' @param gradFunName name of your C++ gradient function 
-#' (IMPORTANT: This must be the name
+#' @param gradFunName name of your C++ gradient function (IMPORTANT: This must be the name
 #' used in C++)
 #' @returns a string which can be copied in the C++ function to create the pointers.
 #' @examples 
@@ -173,70 +171,4 @@ gradientFunPtr_t ', gradFunName,'Ptr() {
 '
   )
   return(makePtrsSyntax)
-}
-
-
-#' .knitVignettes
-#' 
-#' Takes vignettes of format .lessmd and knits them to .Rmd files to be used
-#' as vignettes. The Reason for this two-step approach is to reduce the runtime
-#' on CRAN. The function is adapted from Stefan Kloppenborg at 
-#' https://www.kloppenborg.ca/2021/06/long-running-vignettes/
-#' 
-#' @param dir directory, where the vignettes are located.
-#' @return creates Rmd vignettes
-#' @import knitr
-.knitVignettes <- function(dir = "vignettes"){
-  
-  pkgs <- c('lavaan',
-            'Rcpp',
-            'RcppArmadillo',
-            'RcppParallel',
-            'ggplot2',
-            'tidyr',
-            'stringr',
-            'methods',
-            'numDeriv',
-            'utils',
-            'stats',
-            'graphics',
-            'knitr',
-            'plotly',
-            'rmarkdown',
-            'Rsolnp',
-            'testthat',
-            'glmnet',
-            'ncvreg',
-            'regsem',
-            'lslx',
-            'mvtnorm',
-            'Matrix',
-            'OpenMx',
-            'ctsemOMX')
-  
-  for(p in pkgs){
-    if(!requireNamespace(package = p))
-      stop("Package ", p, " required to build vignettes.")
-  }
-  
-  currentDit <- getwd()
-  
-  setwd(dir)
-  
-  files <- list.files()
-  files <- files[grepl(pattern = ".lessmd$", 
-                       x = files)]
-  
-  for(f in files){
-    cat("Knitting", f, "\n")
-    
-    # knit file to markdown
-    outFile <- gsub(pattern = ".lessmd$", 
-                    replacement = "", 
-                    x = f)
-    knitr::knit(input = paste0(f), 
-                output = paste0(outFile, ".Rmd"))
-  }
-  
-  setwd(currentDit)
 }

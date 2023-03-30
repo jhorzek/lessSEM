@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{object of class lessSEMCoef}
 }
+\value{
+No return value, just prints estimates
+}
 \description{
 show
 }

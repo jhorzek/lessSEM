@@ -13,6 +13,9 @@
 
 \item{...}{not used}
 }
+\value{
+either an object of ggplot2 or of plotly
+}
 \description{
 plots the cross-validation fits
 }

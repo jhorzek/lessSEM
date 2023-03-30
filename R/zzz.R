@@ -53,23 +53,6 @@
 #' Because **lessSEM** is fairly new, we currently recommend using **lslx** for cases
 #' that are covered by both, **lessSEM** and **lslx**.
 #' 
-#' 
-#' # Installation
-#' 
-#' If you want to install **lessSEM** from CRAN, use the following commands in R:
-#'   
-#' ```
-#' install.packages("lessSEM")
-#' ```
-#' 
-#' The newest version of the package can be installed from GitHub using the 
-#' following commands in R:
-#'   
-#' ```
-#' if(!require(devtools)) install.packages("devtools")
-#' devtools::install_github("jhorzek/lessSEM")
-#' ```
-#' 
 #' # Introduction
 #' 
 #' You will find a short introduction to regularized SEM with the **lessSEM**
@@ -430,10 +413,13 @@
 #' 
 #' @docType package
 #' @author Jannik Orzek <orzek@mpib-berlin.mpg.de>
+#' @importFrom RcppParallel RcppParallelLibs
+#' @importFrom rlang .data
 #' @import Rcpp
-#' @importFrom Rcpp sourceCpp
-#' @useDynLib lessSEM
-#' @exportPattern("^[[:alpha:]]+")
+#' @import methods
+#' @importFrom graphics plot
+#' @rawNamespace importFrom(stats,AIC,BIC,coef,logLik); import(lavaan) # NOTE: The order is relevant...
+#' @useDynLib lessSEM, .registration=TRUE
 #' @name lessSEM
 #' @keywords internal
 "_PACKAGE"

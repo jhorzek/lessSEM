@@ -19,3 +19,4 @@ BIC values
 \description{
 returns the BIC
 }
+\keyword{internal}

@@ -17,3 +17,4 @@ list with extended parameter vector and transformation function pointer
 \description{
 compiles the transformation function and adapts the parameter vector
 }
+\keyword{internal}

@@ -23,7 +23,6 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
 #' @returns model of class cvRegularizedSEM
-#' @import lavaan
 #' @keywords internal
 .cvRegularizeSEMInternal <- function(lavaanModel,
                                      k,
@@ -313,6 +312,7 @@
 #'          means = 1:5, 
 #'          standardDeviations = 1:5)
 #' @returns scaled test set
+#' @export
 cvScaler <- function(testSet, means, standardDeviations){
   if(any(names(means) != colnames(testSet))) stop("Mismatch in names of means and testSet.")
   if(any(names(standardDeviations) != colnames(testSet))) stop("Mismatch in names of standardDeviations and testSet.")

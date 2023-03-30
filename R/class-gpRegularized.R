@@ -8,6 +8,7 @@
 #' @slot internalOptimization list of elements used internally
 #' @slot inputArguments list with elements passed by the user to the general
 #' purpose optimizer
+#' @export
 setClass(Class = "gpRegularized",
          representation = representation(
            penalty = "character",
@@ -24,6 +25,7 @@ setClass(Class = "gpRegularized",
 #' show
 #' 
 #' @param object object of class gpRegularized
+#' @return No return value, just prints estimates
 #' @export
 setMethod("show", "gpRegularized", function (object) {
   #modelName <-deparse(substitute(object)) # get the name of the object
@@ -40,6 +42,7 @@ setMethod("show", "gpRegularized", function (object) {
 #' summary
 #' 
 #' @param object object of class gpRegularized
+#' @return No return value, just prints estimates
 #' @export
 setMethod("summary", "gpRegularized", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
@@ -64,8 +67,7 @@ setMethod("summary", "gpRegularized", function (object) {
 #' 
 #' @param object object of class gpRegularized
 #' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
-#' @returns parameter estimates
-#' @import stats
+#' @return parameter estimates
 #' @export
 setMethod("coef", "gpRegularized", function (object, ...) {
   dotdotdot <- list(...)
@@ -117,7 +119,7 @@ setMethod("coef", "gpRegularized", function (object, ...) {
 #' returns the AIC
 #' 
 #' @param object object of class gpRegularized
-#' @returns data frame with fit values, appended with AIC
+#' @return data frame with fit values, appended with AIC
 #' @export
 setMethod("AIC", "gpRegularized", function (object) {
   if(!object@penalty %in% c("lasso", "adaptiveLasso", "cappedL1", "mcp", "scad"))
@@ -134,8 +136,7 @@ setMethod("AIC", "gpRegularized", function (object) {
 #' returns the BIC
 #' 
 #' @param object object of class gpRegularized
-#' @returns data frame with fit values, appended with BIC
-#' @import lavaan
+#' @return data frame with fit values, appended with BIC
 #' @export
 setMethod("BIC", "gpRegularized", function (object) {
   N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
@@ -156,7 +157,7 @@ setMethod("BIC", "gpRegularized", function (object) {
 #' @param x object of class gpRegularized
 #' @param y not used
 #' @param ... use regularizedOnly=FALSE to plot all parameters
-#' @import graphics, ggplot2
+#' @return either an object of ggplot2 or of plotly
 #' @export
 setMethod("plot",
           c(x = "gpRegularized", y = "missing"), 

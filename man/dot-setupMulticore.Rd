@@ -15,3 +15,4 @@ nothing
 \description{
 setup for multi-core support
 }
+\keyword{internal}
