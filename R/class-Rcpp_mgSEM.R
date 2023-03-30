@@ -16,7 +16,7 @@ setMethod("show", "Rcpp_mgSEM", function (object) {
 #' logLik
 #' 
 #' @param object object of class Rcpp_mgSEM
-#' @import stats
+#' @importMethodsFrom stats logLik
 #' @returns log-likelihood of the model
 setMethod("logLik", "Rcpp_mgSEM", function (object) {
   if(!object$wasFit){
@@ -36,7 +36,7 @@ setMethod("logLik", "Rcpp_mgSEM", function (object) {
 #' 
 #' @param object object of class Rcpp_mgSEM
 #' @param ... not used
-#' @import stats
+#' @importMethodsFrom stats coef
 #' @returns all coefficients of the model in transformed form
 setMethod("coef", "Rcpp_mgSEM", function (object, ...) {
   return(.getParameters(object, raw = FALSE))
@@ -45,7 +45,7 @@ setMethod("coef", "Rcpp_mgSEM", function (object, ...) {
 #' AIC
 #' 
 #' @param object object of class Rcpp_mgSEM
-#' @import stats
+#' @importMethodsFrom stats AIC
 #' @returns AIC values
 setMethod("AIC", "Rcpp_mgSEM", function (object) {
   if(!object$wasFit){
@@ -59,7 +59,7 @@ setMethod("AIC", "Rcpp_mgSEM", function (object) {
 #' BIC
 #' 
 #' @param object object of class Rcpp_mgSEM
-#' @import stats
+#' @importMethodsFrom stats BIC
 #' @returns BIC values
 setMethod("BIC", "Rcpp_mgSEM", function (object) {
   if(!object$wasFit){

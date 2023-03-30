@@ -232,6 +232,7 @@ lavaan2lslxLabels <- function(lavaanModel){
 #' lessSEM2Lavaan(regularizedSEM = regularized, 
 #'                lambda = 1)
 #' @return lavaan model
+#' @export
 lessSEM2Lavaan <- function(regularizedSEM, criterion = NULL, lambda = NULL, alpha = NULL, theta = NULL){
   
   if(is.null(criterion) & is.null(lambda) & is.null(alpha) & is.null(theta))
