@@ -12,7 +12,6 @@
   if(!("knitr" %in% rownames(utils::installed.packages())))
     stop("Requires knitr.")
   
-  
   pkgs <- c('lavaan',
             'Rcpp',
             'RcppArmadillo',
