@@ -1,12 +1,12 @@
-#' .knitVignettes
-#' 
-#' Takes vignettes of format .lessmd and knits them to .Rmd files to be used
-#' as vignettes. The Reason for this two-step approach is to reduce the runtime
-#' on CRAN. The function is adapted from Stefan Kloppenborg at 
-#' https://www.kloppenborg.ca/2021/06/long-running-vignettes/
-#' 
-#' @param dir directory, where the vignettes are located.
-#' @return creates Rmd vignettes
+# .knitVignettes
+# 
+# Takes vignettes of format .lessmd and knits them to .Rmd files to be used
+# as vignettes. The Reason for this two-step approach is to reduce the runtime
+# on CRAN. The function is adapted from Stefan Kloppenborg at 
+# https://www.kloppenborg.ca/2021/06/long-running-vignettes/
+# 
+# @param dir directory, where the vignettes are located.
+# @return creates Rmd vignettes
 .knitVignettes <- function(dir = "vignettes"){
   
   if(!("knitr" %in% rownames(utils::installed.packages())))
