@@ -6,6 +6,7 @@ setClass("Rcpp_SEMCpp")
 #' show
 #' 
 #' @param object object of class Rcpp_SEMCpp
+#' @return No return value, just prints estimates
 setMethod("show", "Rcpp_SEMCpp", function (object) {
   cat("Internal C++ model representation of lessSEM\n")
   cat("Parameters:\n")
