@@ -175,7 +175,7 @@ setMethod("plot",
             
             if(nTuning > 2) 
               stop("Plotting currently only supported for up to 2 tuning parameters")
-            if(nTuning == 2 & !("plotly" %in% rownames(utils::installed.packages())))
+            if(nTuning == 2 & !requireNamespace("plotly", quietly = TRUE))
               stop("Plotting more than one tuning parameter requires the package plotly")
             
             

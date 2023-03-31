@@ -9,7 +9,7 @@
 # @return creates Rmd vignettes
 .knitVignettes <- function(dir = "vignettes"){
   
-  if(!("knitr" %in% rownames(utils::installed.packages())))
+  if(!requireNamespace("knitr", quietly = TRUE))
     stop("Requires knitr.")
   
   pkgs <- c('lavaan',
