@@ -87,10 +87,7 @@
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel, 
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvLasso(
 #'   # pass the fitted lavaan model
@@ -237,10 +234,7 @@ cvLasso <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvAdaptiveLasso(
 #'   # pass the fitted lavaan model
@@ -385,10 +379,7 @@ cvAdaptiveLasso <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvRidge(
 #'   # pass the fitted lavaan model
@@ -529,10 +520,7 @@ cvRidge <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvElasticNet(
 #'   # pass the fitted lavaan model
@@ -675,10 +663,7 @@ cvElasticNet <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvCappedL1(
 #'   # pass the fitted lavaan model
@@ -815,10 +800,7 @@ cvCappedL1 <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvLsp(
 #'   # pass the fitted lavaan model
@@ -958,10 +940,7 @@ cvLsp <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvMcp(
 #'   # pass the fitted lavaan model
@@ -1105,10 +1084,7 @@ cvMcp <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvScad(
 #'   # pass the fitted lavaan model

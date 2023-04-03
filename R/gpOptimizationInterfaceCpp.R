@@ -166,14 +166,6 @@
 #' 
 #' l1@parameters
 #' 
-#' # for comparison:
-#' #library(glmnet)
-#' #coef(glmnet(x = X,
-#' #            y = y, 
-#' #            lambda = l1@fits$lambda[2],
-#' #            intercept = TRUE,
-#' #            standardize = FALSE))[,2]
-#' #l1@parameters[2,]
 #' }
 #' @export
 gpLassoCpp <- function(par,

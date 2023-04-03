@@ -60,10 +60,7 @@
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel, 
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvSmoothLasso(
 #'   # pass the fitted lavaan model
@@ -183,10 +180,7 @@ cvSmoothLasso <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvSmoothAdaptiveLasso(
 #'   # pass the fitted lavaan model
@@ -306,10 +300,7 @@ cvSmoothAdaptiveLasso <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvRidgeBfgs(
 #'   # pass the fitted lavaan model
@@ -423,10 +414,7 @@ cvRidgeBfgs <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvSmoothElasticNet(
 #'   # pass the fitted lavaan model
