@@ -12,6 +12,17 @@ bibentry(
 
 bibentry(
   bibtype  = "Article",
+  title    = "Striving for Sparsity: On Exact and Approximate Solutions in Regularized Structural Equation Models",
+   author   = c(person(c("Jannik H."), "Orzek"),
+               person(c("Manuel"), "Arnold"),
+               person("Manuel C.", "Voelkle")),
+  journal  = "Structural Equation Modeling: A Multidisciplinary Journal",
+  year     = "2023",
+  doi      = "10.1080/10705511.2023.2189070"
+  )
+
+bibentry(
+  bibtype  = "Article",
   title    = "Regularized structural equation modeling",
   author   = c(person(c("Ross"), "Jacobucci"),
                person(c("Kevin J."), "Grimm"),
