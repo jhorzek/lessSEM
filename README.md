@@ -125,6 +125,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
                            std.lv = TRUE)
 
 # Optional: Plot the model
+# if(!require("semPlot")) install.packages("semPlot")
 # semPlot::semPaths(lavaanModel, 
 #                   what = "est",
 #                   fade = FALSE)

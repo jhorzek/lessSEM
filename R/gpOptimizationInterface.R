@@ -126,14 +126,6 @@
 #' plot(lassoPen)
 #' AIC(lassoPen)
 #' 
-#' # for comparison:
-#' #library(glmnet)
-#' #coef(glmnet(x = X,
-#' #            y = y, 
-#' #            lambda = lassoPen@fits$lambda[20],
-#' #            intercept = FALSE,
-#' #            standardize = FALSE))[,1]
-#' #lassoPen@parameters[20,]
 #' @export
 gpLasso <- function(par,
                     regularized,
@@ -1265,15 +1257,6 @@ gpLsp <- function(par,
 #' # optional: plot requires plotly package
 #' # plot(mcpPen)
 #' 
-#' # for comparison
-#' #library(ncvreg)
-#' #mcpFit <- ncvreg(X = X[,-1], 
-#' #                  y = y, 
-#' #                  penalty = "MCP",
-#' #                  lambda =  mcpPen@fits$lambda[15],
-#' #                  gamma =  mcpPen@fits$theta[15])
-#' #coef(mcpFit)
-#' #mcpPen@parameters[15,]
 #' @export
 gpMcp <- function(par,
                   fn,

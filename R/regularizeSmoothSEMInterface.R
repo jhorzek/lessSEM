@@ -47,10 +47,7 @@
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- smoothLasso(
 #'   # pass the fitted lavaan model
@@ -159,10 +156,7 @@ smoothLasso <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' # names of the regularized parameters:
 #' regularized = paste0("l", 6:15)
@@ -274,10 +268,7 @@ smoothAdaptiveLasso <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' # names of the regularized parameters:
 #' regularized = paste0("l", 6:15)
@@ -374,10 +365,7 @@ ridgeBfgs <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' # names of the regularized parameters:
 #' regularized = paste0("l", 6:15)

@@ -71,10 +71,7 @@
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel, 
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' # We can add multiple penalties as follows:
 #' 

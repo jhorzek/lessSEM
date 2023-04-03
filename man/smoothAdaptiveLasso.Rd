@@ -82,10 +82,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
                            meanstructure = TRUE,
                            std.lv = TRUE)
 
-# Optional: Plot the model
-# semPlot::semPaths(lavaanModel,
-#                   what = "est",
-#                   fade = FALSE)
+# Regularization:
 
 # names of the regularized parameters:
 regularized = paste0("l", 6:15)

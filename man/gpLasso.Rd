@@ -162,12 +162,4 @@ lassoPen <- gpLasso(
 plot(lassoPen)
 AIC(lassoPen)
 
-# for comparison:
-#library(glmnet)
-#coef(glmnet(x = X,
-#            y = y, 
-#            lambda = lassoPen@fits$lambda[20],
-#            intercept = FALSE,
-#            standardize = FALSE))[,1]
-#lassoPen@parameters[20,]
 }
