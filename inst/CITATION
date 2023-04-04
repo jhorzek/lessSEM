@@ -17,8 +17,7 @@ bibentry(
                person(c("Manuel"), "Arnold"),
                person("Manuel C.", "Voelkle")),
   journal  = "Structural Equation Modeling: A Multidisciplinary Journal",
-  year     = "2023",
-  doi      = "10.1080/10705511.2023.2189070"
+  year     = "in press"
   )
 
 bibentry(
