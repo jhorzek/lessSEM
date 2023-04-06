@@ -26,7 +26,7 @@ jobs:
       run: install.packages(c("devtools", "pkgdown"))
       shell: Rscript {0}
     - name: install lessSEM
-      run: R CMD INSTALL --preclean --no-multiarch --with-keep.source lessSEM 
+      run: R CMD INSTALL --preclean --no-multiarch --with-keep.source . 
     - name: update vignettes
       run: lessSEM:::.knitVignettes()
       shell: Rscript {0}
