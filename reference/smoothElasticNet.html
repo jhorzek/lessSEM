@@ -14,7 +14,7 @@ with the "@" operator (see examples).'><meta property="og:image" content="/logo.
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -169,10 +169,7 @@ Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408
 <span>                           meanstructure <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                           std.lv <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Optional: Plot the model</span></span>
-<span><span class="co"># semPlot::semPaths(lavaanModel,</span></span>
-<span><span class="co">#                   what = "est",</span></span>
-<span><span class="co">#                   fade = FALSE)</span></span>
+<span><span class="co"># Regularization:</span></span>
 <span></span>
 <span><span class="co"># names of the regularized parameters:</span></span>
 <span><span class="va">regularized</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span></span>
@@ -183,8 +180,8 @@ Twenty-First National Conference on Artificial Intelligence (AAAI-06), 401–408
 <span>  regularized <span class="op">=</span> <span class="va">regularized</span>,</span>
 <span>  epsilon <span class="op">=</span> <span class="fl">1e-10</span>,</span>
 <span>  tau <span class="op">=</span> <span class="fl">1e-4</span>,</span>
-<span>  lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out <span class="op">=</span> <span class="fl">50</span><span class="op">)</span>,</span>
-<span>  alphas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
+<span>  lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
+<span>  alphas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># the coefficients can be accessed with:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lsem</span><span class="op">)</span></span>

@@ -18,7 +18,7 @@ but result in a shrinkage towards zero."><meta property="og:image" content="/log
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -173,10 +173,7 @@ Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.or
 <span>                           meanstructure <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                           std.lv <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Optional: Plot the model</span></span>
-<span><span class="co"># semPlot::semPaths(lavaanModel,</span></span>
-<span><span class="co">#                   what = "est",</span></span>
-<span><span class="co">#                   fade = FALSE)</span></span>
+<span><span class="co"># Regularization:</span></span>
 <span></span>
 <span><span class="va">lsem</span> <span class="op">&lt;-</span> <span class="fu">cvRidgeBfgs</span><span class="op">(</span></span>
 <span>  <span class="co"># pass the fitted lavaan model</span></span>

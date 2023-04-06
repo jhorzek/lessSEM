@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -117,114 +117,6 @@ the next iteration?</p></dd>
 <p>Model of class regularizedSEMWithCustomPenalty</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Identical to regsem, lessSEM builds on the lavaan</span></span>
-<span><span class="co"># package for model specification. The first step</span></span>
-<span><span class="co"># therefore is to implement the model in lavaan.</span></span>
-<span></span>
-<span><span class="va">dataset</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulateExampleData.html">simulateExampleData</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">lavaanSyntax</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
-<span><span class="st">f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 +</span></span>
-<span><span class="st">     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 +</span></span>
-<span><span class="st">     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15</span></span>
-<span><span class="st">f ~~ 1*f</span></span>
-<span><span class="st">"</span></span>
-<span></span>
-<span><span class="va">lavaanModel</span> <span class="op">&lt;-</span> <span class="fu">lavaan</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/sem.html" class="external-link">sem</a></span><span class="op">(</span><span class="va">lavaanSyntax</span>,</span>
-<span>                           data <span class="op">=</span> <span class="va">dataset</span>,</span>
-<span>                           meanstructure <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                           std.lv <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Optional: Plot the model</span></span>
-<span><span class="co"># semPlot::semPaths(lavaanModel,</span></span>
-<span><span class="co">#                   what = "est",</span></span>
-<span><span class="co">#                   fade = FALSE)</span></span>
-<span></span>
-<span><span class="co">## Defining a custom penalty function is a bit more complicated than</span></span>
-<span><span class="co"># using the default ones provided in regularizeSEM (see ?lessSEM::regularizeSEM).</span></span>
-<span><span class="co"># We start with the definition of the penalty function. Make sure that the derivatives</span></span>
-<span><span class="co"># of this function are well defined (i.e., the function is smooth)!</span></span>
-<span><span class="co"># We will use the lasso penalty as an example.</span></span>
-<span></span>
-<span><span class="co"># The penalty function MUST accept three arguments; how you use them is up to you.</span></span>
-<span></span>
-<span><span class="co"># The first argument are the parameters. lessSEM will pass a vector with the current</span></span>
-<span><span class="co"># parameter values and their names to your function. The parameter labels will be</span></span>
-<span><span class="co"># exactly the same as those used by lavaan! So you can check them before with:</span></span>
-<span></span>
-<span><span class="fu">lessSEM</span><span class="fu">::</span><span class="fu"><a href="getLavaanParameters.html">getLavaanParameters</a></span><span class="op">(</span><span class="va">lavaanModel</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># The vector passed to your function will look like the vector above.</span></span>
-<span></span>
-<span><span class="co"># The second argument is called tuningParameters MUST be a data.frame with the</span></span>
-<span><span class="co"># tuning-parameters. lessSEM will automatically iterate over the rows of this object.</span></span>
-<span><span class="co"># In case of LASSO regularization there is only one tuning parameter: lambda.</span></span>
-<span><span class="co"># Therefore, we specify the tuningParameters object as:</span></span>
-<span></span>
-<span><span class="va">tuningParameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.1</span><span class="op">)</span><span class="op">)</span> <span class="co"># we will test 11 lambdas here</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">tuningParameters</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># The third argument is called penaltyFunctionArguments and we can pass anything</span></span>
-<span><span class="co"># we want here. For the lasso penalty, we need two additional things:</span></span>
-<span><span class="co"># 1) We need the smoothing-parameter epsilon, which makes sure that our</span></span>
-<span><span class="co"># penalty is differentiable</span></span>
-<span><span class="co"># 2) We need the labels of the regularized parameters, so that we can only</span></span>
-<span><span class="co"># penalize those while all others remain unpenalized.</span></span>
-<span></span>
-<span><span class="va">penaltyFunctionArguments</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  eps <span class="op">=</span> <span class="fl">1e-10</span>,</span>
-<span>  regularizedParameterLabels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Now, it is time to specify our custom penalty function:</span></span>
-<span></span>
-<span><span class="va">smoothLASSO</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span></span>
-<span>  <span class="co"># here are our three arguments:</span></span>
-<span>  <span class="va">parameters</span>,</span>
-<span>  <span class="va">tuningParameters</span>,</span>
-<span>  <span class="va">penaltyFunctionArguments</span></span>
-<span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="co"># to make it easier to see what is going on:</span></span>
-<span>  <span class="va">lambda</span> <span class="op">&lt;-</span> <span class="va">tuningParameters</span><span class="op">$</span><span class="va">lambda</span> <span class="co"># tuningParameters will be ONE ROW OF the</span></span>
-<span>  <span class="co"># tuningParameters object we created before -&gt; it will contain just</span></span>
-<span>  <span class="co"># one lambda in this case!</span></span>
-<span>  <span class="va">eps</span> <span class="op">&lt;-</span> <span class="va">penaltyFunctionArguments</span><span class="op">$</span><span class="va">eps</span></span>
-<span>  <span class="va">regularizedParameterLabels</span> <span class="op">&lt;-</span> <span class="va">penaltyFunctionArguments</span><span class="op">$</span><span class="va">regularizedParameterLabels</span></span>
-<span></span>
-<span>  <span class="va">regularizedParameters</span> <span class="op">&lt;-</span> <span class="va">parameters</span><span class="op">[</span><span class="va">regularizedParameterLabels</span><span class="op">]</span></span>
-<span></span>
-<span>  <span class="co"># now, let's define our penalty function:</span></span>
-<span>  <span class="va">penaltyLasso</span> <span class="op">&lt;-</span> <span class="va">lambda</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">regularizedParameters</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="va">eps</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">penaltyLasso</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co"># Important: This penalty function is assumed to be for a single individual only.</span></span>
-<span><span class="co"># lessSEM will multiply it with sample size N to get the penalty value of the</span></span>
-<span><span class="co"># full sample!</span></span>
-<span></span>
-<span><span class="co">#### Now we are ready to optimize! ####</span></span>
-<span><span class="va">regsemApprox</span> <span class="op">&lt;-</span> <span class="fu">lessSEM</span><span class="fu">:::</span><span class="fu">.regularizeSEMWithCustomPenaltyRsolnp</span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span>,</span>
-<span>                                               individualPenaltyFunction <span class="op">=</span> <span class="va">smoothLASSO</span>,</span>
-<span>                                               tuningParameters <span class="op">=</span> <span class="va">tuningParameters</span>,</span>
-<span>                                               penaltyFunctionArguments <span class="op">=</span> <span class="va">penaltyFunctionArguments</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># let's compare the results to an exact optimization:</span></span>
-<span></span>
-<span><span class="va">regsemExact</span> <span class="op">&lt;-</span> <span class="fu"><a href="lasso.html">lasso</a></span><span class="op">(</span></span>
-<span>  lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span>,</span>
-<span>  regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span>,</span>
-<span>  lambdas <span class="op">=</span> <span class="va">tuningParameters</span><span class="op">$</span><span class="va">lambda</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">regsemExact</span><span class="op">@</span><span class="va">parameters</span><span class="op">[</span>,<span class="va">regsemExact</span><span class="op">@</span><span class="va">parameterLabels</span><span class="op">]</span> <span class="op">-</span></span>
-<span>       <span class="va">regsemApprox</span><span class="op">@</span><span class="va">parameters</span><span class="op">[</span>,<span class="va">regsemExact</span><span class="op">@</span><span class="va">parameterLabels</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co"># Note that the parameter estimates are basically identical.</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
