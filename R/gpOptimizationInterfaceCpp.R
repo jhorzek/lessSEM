@@ -22,7 +22,7 @@
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -240,7 +240,7 @@ gpLassoCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -474,7 +474,7 @@ gpAdaptiveLassoCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -676,7 +676,7 @@ gpRidgeCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -881,7 +881,7 @@ gpElasticNetCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -1082,7 +1082,7 @@ gpCappedL1Cpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -1282,7 +1282,7 @@ gpLspCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -1490,7 +1490,7 @@ gpMcpCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
