@@ -703,6 +703,8 @@ elasticNet <- function(lavaanModel,
 #' @param thetas parameters whose absolute value is above this threshold will be penalized with
 #' a constant (theta)
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. With ista, the control argument can be used to switch to related procedures
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Model of class regularizedSEM
@@ -751,7 +753,8 @@ cappedL1 <- function(lavaanModel,
                      lambdas,
                      thetas,
                      modifyModel = lessSEM::modifyModel(),
-                     control = lessSEM::controlIsta()){
+                     method = "glmnet",
+                     control = lessSEM::controlGlmnet()){
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
@@ -760,7 +763,7 @@ cappedL1 <- function(lavaanModel,
                                            tuningParameters = expand.grid(lambda = lambdas, 
                                                                           theta = thetas,
                                                                           alpha = 1), 
-                                           method = "ista", 
+                                           method = method, 
                                            modifyModel = modifyModel, 
                                            control = control
   )

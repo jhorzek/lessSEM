@@ -29,11 +29,11 @@
   
   if(! method %in% c("ista", "glmnet")) 
     stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad")) 
+  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1")) 
     stop(
       paste0(
         "glmnet only supports the following penalty functions: ",
-        paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad"), 
+        paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1"), 
                collapse = ", ")
       )
     )
@@ -151,6 +151,16 @@
                                 controlIntern)
       }else if(is(SEM, "Rcpp_mgSEM")){
         regularizedModel <- new(glmnetScadMgSEM,
+                                weights,
+                                controlIntern)
+      }
+    }else if(penalty == "cappedL1"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetCappedL1SEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetCappedL1MgSEM,
                                 weights,
                                 controlIntern)
       }
@@ -360,14 +370,19 @@
       )
       
     }else if(penalty == "cappedL1"){
-      
+      if(method == "ista")
       result <- try(regularizedModel$optimize(rawParameters,
                                               SEM,
                                               tuningParameters$theta[it],
                                               tuningParameters$lambda[it],
                                               tuningParameters$alpha[it])
       )
-      
+      if(method == "glmnet")
+        result <- try(regularizedModel$optimize(rawParameters,
+                                                SEM,
+                                                tuningParameters$theta[it],
+                                                tuningParameters$lambda[it])
+        )
     }
     
     if(is(result, "try-error")) next
