@@ -1084,6 +1084,9 @@ mcp <- function(lavaanModel,
 #' @param thetas parameters whose absolute value is above this threshold will be penalized with
 #' a constant (theta)
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. With ista, the control argument can be used to switch to related procedures
+#' (currently gist).
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta (see ?controlIsta)
 #' @returns Model of class regularizedSEM
@@ -1133,7 +1136,8 @@ scad <- function(lavaanModel,
                  lambdas,
                  thetas,
                  modifyModel = lessSEM::modifyModel(),
-                 control = lessSEM::controlIsta()){
+                 method = "glmnet",
+                 control = lessSEM::controlGlmnet()){
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
@@ -1142,7 +1146,7 @@ scad <- function(lavaanModel,
                                            weights = regularized,
                                            tuningParameters = expand.grid(lambda = lambdas, 
                                                                           theta = thetas), 
-                                           method = "ista", 
+                                           method = method, 
                                            modifyModel = modifyModel, 
                                            control = control
   )

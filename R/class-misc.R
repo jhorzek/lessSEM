@@ -110,7 +110,13 @@ setClass("Rcpp_istaEnetSEM")
 #' @keywords internal
 setClass("Rcpp_istaEnetMgSEM")
 
+#' Wrapper for C++ module. See ?lessSEM:::glmnetScadSEM
+#' @keywords internal
+setClass("Rcpp_glmnetScadSEM")
 
+#' Wrapper for C++ module. See ?lessSEM::glmnetScadMgSEM
+#' @keywords internal
+setClass("Rcpp_glmnetScadMgSEM")
 
 #' Wrapper for C++ module. See ?lessSEM::istaMixedPenaltySEM
 #' @keywords internal

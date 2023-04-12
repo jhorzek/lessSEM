@@ -120,16 +120,16 @@ public:
 };
 
 //'@name glmnetScadSEM
- //'@title scad optimization with glmnet optimizer
- //'@description Object for scad optimization with
- //'glmnet optimizer
- //'@field new creates a new object. Requires a list with control elements
- //'@field setHessian changes the Hessian of the model. Expects a matrix
- //'@field optimize optimize the model. Expects a vector with starting values,
- //'a SEM of type SEM_Cpp, a theta and a lambda value.
- //'@returns a list with fit results
- //'
- typedef glmnetScad<SEMCpp> glmnetScadSEM;
+//'@title scad optimization with glmnet optimizer
+//'@description Object for scad optimization with
+//'glmnet optimizer
+//'@field new creates a new object. Requires a list with control elements
+//'@field setHessian changes the Hessian of the model. Expects a matrix
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta and a lambda value.
+//'@returns a list with fit results
+//'
+typedef glmnetScad<SEMCpp> glmnetScadSEM;
 RCPP_EXPOSED_CLASS_NODECL(glmnetScadSEM)
   RCPP_MODULE(glmnetScadSEM_cpp){
     using namespace Rcpp;
@@ -142,16 +142,16 @@ RCPP_EXPOSED_CLASS_NODECL(glmnetScadSEM)
   }
 
 //'@name glmnetScadMgSEM
- //'@title scad optimization with glmnet optimizer
- //'@description Object for scad optimization with
- //'glmnet optimizer
- //'@field new creates a new object. Requires (2) a list with control elements
- //'@field setHessian changes the Hessian of the model. Expects a matrix
- //'@field optimize optimize the model. Expects a vector with starting values,
- //'a SEM of type SEM_Cpp, a theta and a lambda value.
- //'@returns a list with fit results
- //'
- typedef glmnetScad<mgSEM> glmnetScadMgSEM;
+//'@title scad optimization with glmnet optimizer
+//'@description Object for scad optimization with
+//'glmnet optimizer
+//'@field new creates a new object. Requires (2) a list with control elements
+//'@field setHessian changes the Hessian of the model. Expects a matrix
+//'@field optimize optimize the model. Expects a vector with starting values,
+//'a SEM of type SEM_Cpp, a theta and a lambda value.
+//'@returns a list with fit results
+//'
+typedef glmnetScad<mgSEM> glmnetScadMgSEM;
 RCPP_EXPOSED_CLASS_NODECL(glmnetScadMgSEM)
   RCPP_MODULE(glmnetScadMgSEM_cpp){
     using namespace Rcpp;
