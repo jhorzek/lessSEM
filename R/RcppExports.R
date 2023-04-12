@@ -292,6 +292,12 @@ NULL
 #'@returns a list with fit results
 NULL
 
+#'@name glmnetScadSEM
+NULL
+
+#'@name glmnetScadMgSEM
+NULL
+
 #'@name istaLSPSEM
 #'@title lsp optimization with ista
 #'@description Object for lsp optimization with

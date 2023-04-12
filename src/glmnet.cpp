@@ -64,9 +64,9 @@ public:
                       double theta_,
                       double lambda_){
     
-    const int N = SEM_.sampleSize;
+    const double N = SEM_.sampleSize;
     
-    SEMFitFramework<sem> SEMFF(SEM_, 1/N);
+    SEMFitFramework<sem> SEMFF(SEM_, 1.0/N);
     
     lessSEM::tuningParametersScadGlmnet tp;
     
@@ -78,7 +78,7 @@ public:
     lessSEM::noSmoothPenalty<lessSEM::tuningParametersScadGlmnet> smoothPenalty_;
     
     lessSEM::controlGLMNET control_ = {
-      initialHessian,
+      initialHessian/N,
       stepSize,
       sigma,
       gamma,
@@ -109,11 +109,11 @@ public:
     
     if(!fitResults_.convergence) Rcpp::warning("Optimizer did not converge");
     Rcpp::List result = Rcpp::List::create(
-      Rcpp::Named("fit") = fitResults_.fit,
+      Rcpp::Named("fit") = N*fitResults_.fit,
       Rcpp::Named("convergence") = fitResults_.convergence,
       Rcpp::Named("rawParameters") = finalParameters,
-      Rcpp::Named("fits") = fitResults_.fits,
-      Rcpp::Named("Hessian") = fitResults_.Hessian
+      Rcpp::Named("fits") = N*fitResults_.fits,
+      Rcpp::Named("Hessian") = N*fitResults_.Hessian
     );
     return(result);
   }

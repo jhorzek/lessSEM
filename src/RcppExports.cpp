@@ -73,6 +73,8 @@ RcppExport SEXP _rcpp_module_boot_istaMcpGeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_istaMcpGeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaScadGeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_istaScadGeneralPurposeCpp_cpp();
+RcppExport SEXP _rcpp_module_boot_glmnetScadSEM_cpp();
+RcppExport SEXP _rcpp_module_boot_glmnetScadMgSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaLSPSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaLSPMgSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaMcpSEM_cpp();
@@ -108,6 +110,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_istaMcpGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcpGeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_istaScadGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaScadGeneralPurpose_cpp, 0},
     {"_rcpp_module_boot_istaScadGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaScadGeneralPurposeCpp_cpp, 0},
+    {"_rcpp_module_boot_glmnetScadSEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetScadSEM_cpp, 0},
+    {"_rcpp_module_boot_glmnetScadMgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetScadMgSEM_cpp, 0},
     {"_rcpp_module_boot_istaLSPSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaLSPSEM_cpp, 0},
     {"_rcpp_module_boot_istaLSPMgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaLSPMgSEM_cpp, 0},
     {"_rcpp_module_boot_istaMcpSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcpSEM_cpp, 0},
