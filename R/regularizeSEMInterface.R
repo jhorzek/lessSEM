@@ -906,7 +906,7 @@ lsp <- function(lavaanModel,
 #' \ifelse{html}{\deqn{p( x_j) = \begin{cases}
 #' \lambda |x_j| - x_j^2/(2\theta) & \text{if } |x_j| \leq \theta\lambda\\
 #' \theta\lambda^2/2 & \text{if } |x_j| > \lambda\theta
-#' \end{cases}} where \eqn{\theta > 0}.}{
+#' \end{cases}} where \eqn{\theta > 1}.}{
 #' Equation Omitted in Pdf Documentation.}
 #' 
 #' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
@@ -915,6 +915,9 @@ lsp <- function(lavaanModel,
 #' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
 #' \pkg{lessSEM} will then automatically switch to full information maximum likelihood
 #' as well.
+#' 
+#' In our experience, the glmnet optimizer can run in issues with the mcp penalty.
+#' Therefor, we default to using ista.
 #' 
 #' mcp regularization:
 #' 
@@ -1010,10 +1013,13 @@ mcp <- function(lavaanModel,
                 lambdas,
                 thetas,
                 modifyModel = lessSEM::modifyModel(),
-                method = "glmnet",
-                control = lessSEM::controlGlmnet()){
+                method = "ista",
+                control = lessSEM::controlIsta()){
   
-  if(any(thetas <= 0)) stop("Theta must be > 0")
+  if(any(thetas <= 0)) 
+    stop("Theta must be > 0")
+  if(any(thetas <= 1) & method == "glmnet") 
+    warning("thetas is typically > 1. Note that glmnet may run into issues with small theta.")
   result <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
                                            penalty = "mcp", 
                                            weights = regularized,

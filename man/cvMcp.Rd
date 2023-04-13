@@ -13,8 +13,8 @@ cvMcp(
   standardize = FALSE,
   returnSubsetParameters = FALSE,
   modifyModel = lessSEM::modifyModel(),
-  method = "glmnet",
-  control = lessSEM::controlGlmnet()
+  method = "ista",
+  control = lessSEM::controlIsta()
 )
 }
 \arguments{

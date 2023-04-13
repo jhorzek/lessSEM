@@ -974,10 +974,13 @@ cvMcp <- function(lavaanModel,
                   standardize = FALSE,
                   returnSubsetParameters = FALSE,
                   modifyModel = lessSEM::modifyModel(),
-                  method = "glmnet",
-                  control = lessSEM::controlGlmnet()){
+                  method = "ista",
+                  control = lessSEM::controlIsta()){
   
-  if(any(thetas <= 0)) stop("Theta must be > 0")
+  if(any(thetas <= 0)) 
+    stop("Theta must be > 0")
+  if(any(thetas <= 1) & method == "glmnet") 
+    warning("thetas is typically > 1. Note that glmnet may run into issues with small theta.")
   result <- .cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                      penalty = "mcp", 
                                      weights = regularized,

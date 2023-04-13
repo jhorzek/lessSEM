@@ -14,7 +14,7 @@ cvLsp(
   returnSubsetParameters = FALSE,
   modifyModel = lessSEM::modifyModel(),
   method = "glmnet",
-  control = lessSEM::cotrolGlmnet()
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{
