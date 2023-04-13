@@ -58,9 +58,9 @@
 #' @param standardize Standardizing your data prior to the analysis can undermine the cross-
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
-#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
-#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -777,6 +777,8 @@ cvCappedL1 <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' @returns model of class cvRegularizedSEM
@@ -829,7 +831,8 @@ cvLsp <- function(lavaanModel,
                   standardize = FALSE,
                   returnSubsetParameters = FALSE,
                   modifyModel = lessSEM::modifyModel(),
-                  control = lessSEM::controlIsta()){
+                  method = "glmnet",
+                  control = lessSEM::controlGlmnet()){
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
@@ -841,7 +844,7 @@ cvLsp <- function(lavaanModel,
                                      returnSubsetParameters = returnSubsetParameters,
                                      tuningParameters = expand.grid(lambda = lambdas, 
                                                                     theta = thetas), 
-                                     method = "ista", 
+                                     method = method, 
                                      modifyModel = modifyModel, 
                                      control = control
   )
