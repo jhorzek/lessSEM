@@ -10,7 +10,8 @@ mcp(
   lambdas,
   thetas,
   modifyModel = lessSEM::modifyModel(),
-  control = lessSEM::controlIsta()
+  method = "glmnet",
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{
@@ -26,6 +27,10 @@ getLavaanParameters(model) with your lavaan model object}
 a constant (theta)}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
+
+\item{method}{which optimizer should be used? Currently implemented are ista
+and glmnet. With ista, the control argument can be used to switch to related procedures
+(currently gist).}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta (see ?controlIsta)}

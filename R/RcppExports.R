@@ -316,6 +316,54 @@ NULL
 #'
 NULL
 
+#'@name glmnetLspSEM
+#'@title lsp optimization with glmnet optimizer
+#'@description Object for lsp optimization with
+#'glmnet optimizer
+#'@field new creates a new object. Requires a list with control elements
+#'@field setHessian changes the Hessian of the model. Expects a matrix
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta and a lambda value.
+#'@returns a list with fit results
+#'
+NULL
+
+#'@name glmnetLspMgSEM
+#'@title lsp optimization with glmnet optimizer
+#'@description Object for lsp optimization with
+#'glmnet optimizer
+#'@field new creates a new object. Requires (2) a list with control elements
+#'@field setHessian changes the Hessian of the model. Expects a matrix
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta and a lambda value.
+#'@returns a list with fit results
+#'
+NULL
+
+#'@name glmnetMcpSEM
+#'@title mcp optimization with glmnet optimizer
+#'@description Object for mcp optimization with
+#'glmnet optimizer
+#'@field new creates a new object. Requires a list with control elements
+#'@field setHessian changes the Hessian of the model. Expects a matrix
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta and a lambda value.
+#'@returns a list with fit results
+#'
+NULL
+
+#'@name glmnetMcpMgSEM
+#'@title mcp optimization with glmnet optimizer
+#'@description Object for mcp optimization with
+#'glmnet optimizer
+#'@field new creates a new object. Requires (2) a list with control elements
+#'@field setHessian changes the Hessian of the model. Expects a matrix
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta and a lambda value.
+#'@returns a list with fit results
+#'
+NULL
+
 #'@name glmnetScadSEM
 #'@title scad optimization with glmnet optimizer
 #'@description Object for scad optimization with

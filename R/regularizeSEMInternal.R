@@ -29,11 +29,11 @@
   
   if(! method %in% c("ista", "glmnet")) 
     stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1")) 
+  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1", "mcp", "lsp")) 
     stop(
       paste0(
         "glmnet only supports the following penalty functions: ",
-        paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1"), 
+        paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1", "mcp", "lsp"), 
                collapse = ", ")
       )
     )
@@ -161,6 +161,26 @@
                                 controlIntern)
       }else if(is(SEM, "Rcpp_mgSEM")){
         regularizedModel <- new(glmnetCappedL1MgSEM,
+                                weights,
+                                controlIntern)
+      }
+    }else if(penalty == "mcp"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetMcpSEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetMcpMgSEM,
+                                weights,
+                                controlIntern)
+      }
+    }else if(penalty == "lsp"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetLspSEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetLspMgSEM,
                                 weights,
                                 controlIntern)
       }
