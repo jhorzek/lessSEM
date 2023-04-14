@@ -29,7 +29,7 @@ check out the julia package
 The following penalty functions are currently implemented in
 **lessSEM**:
 
-![](man/figures/penalty_functions.png)
+![](man/figures/penaltyFunctions.png)
 
 The column “penalty” refers to the name of the function call in the
 **lessSEM** package (e.g., lasso is called with the `lasso()` function).
