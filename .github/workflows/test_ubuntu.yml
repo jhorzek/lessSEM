@@ -2,7 +2,7 @@ name: R CMD check ubuntu
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "development" ]
 
 permissions:
   contents: read
