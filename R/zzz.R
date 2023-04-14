@@ -450,6 +450,8 @@ Rcpp::loadModule("glmnetMcpSEM_cpp", TRUE)
 Rcpp::loadModule("glmnetMcpMgSEM_cpp", TRUE)
 Rcpp::loadModule("glmnetLspSEM_cpp", TRUE)
 Rcpp::loadModule("glmnetLspMgSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetMixedSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetMixedMgSEM_cpp", TRUE)
 
 Rcpp::loadModule("bfgsEnetSEM_cpp", TRUE)
 Rcpp::loadModule("bfgsEnetMgSEM_cpp", TRUE)

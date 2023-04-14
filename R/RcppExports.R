@@ -364,6 +364,30 @@ NULL
 #'
 NULL
 
+#'@name glmnetMixedSEM
+#'@title mixed optimization with glmnet optimizer
+#'@description Object for mixed optimization with
+#'glmnet optimizer
+#'@field new creates a new object. Requires a list with control elements
+#'@field setHessian changes the Hessian of the model. Expects a matrix
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta and a lambda value.
+#'@returns a list with fit results
+#'
+NULL
+
+#'@name glmnetMixedMgSEM
+#'@title mixed optimization with glmnet optimizer
+#'@description Object for mixed optimization with
+#'glmnet optimizer
+#'@field new creates a new object. Requires (2) a list with control elements
+#'@field setHessian changes the Hessian of the model. Expects a matrix
+#'@field optimize optimize the model. Expects a vector with starting values,
+#'a SEM of type SEM_Cpp, a theta and a lambda value.
+#'@returns a list with fit results
+#'
+NULL
+
 #'@name glmnetScadSEM
 #'@title scad optimization with glmnet optimizer
 #'@description Object for scad optimization with
@@ -444,28 +468,6 @@ mcpPenalty_C <- function(par, lambda_p, theta) {
     .Call(`_lessSEM_mcpPenalty_C`, par, lambda_p, theta)
 }
 
-#' @name mgSEM
-#' 
-#' @title mgSEM class
-#' 
-#' @description internal mgSEM representation
-#' 
-#' @field new Creates a new mgSEM.
-#' @field addModel add a model. Expects Rcpp::List
-#' @field addTransformation adds transforamtions to a model
-#' @field implied Computes implied means and covariance matrix
-#' @field fit Fits the model. Returns -2 log likelihood
-#' @field getParameters Returns a data frame with model parameters.
-#' @field getParameterLabels Returns a vector with unique parameter labels as used internally.
-#' @field getGradients Returns a matrix with scores.
-#' @field getScores Returns a matrix with scores. Not yet implemented
-#' @field getHessian Returns the hessian of the model. Expects the labels of the 
-#' parameters and the values of the parameters as well as a boolean indicating if 
-#' these are raw. Finally, a double (eps) controls the precision of the approximation.
-#' @field computeTransformations compute the transformations.
-#' @field setTransformationGradientStepSize change the step size of the gradient computation for the transformations
-NULL
-
 #'@name istaMixedPenaltySEM
 #'@title mixed penalty optimization with ista
 #'@description Object for elastic net optimization with
@@ -519,4 +521,26 @@ NULL
 scadPenalty_C <- function(par, lambda_p, theta) {
     .Call(`_lessSEM_scadPenalty_C`, par, lambda_p, theta)
 }
+
+#' @name mgSEM
+#' 
+#' @title mgSEM class
+#' 
+#' @description internal mgSEM representation
+#' 
+#' @field new Creates a new mgSEM.
+#' @field addModel add a model. Expects Rcpp::List
+#' @field addTransformation adds transforamtions to a model
+#' @field implied Computes implied means and covariance matrix
+#' @field fit Fits the model. Returns -2 log likelihood
+#' @field getParameters Returns a data frame with model parameters.
+#' @field getParameterLabels Returns a vector with unique parameter labels as used internally.
+#' @field getGradients Returns a matrix with scores.
+#' @field getScores Returns a matrix with scores. Not yet implemented
+#' @field getHessian Returns the hessian of the model. Expects the labels of the 
+#' parameters and the values of the parameters as well as a boolean indicating if 
+#' these are raw. Finally, a double (eps) controls the precision of the approximation.
+#' @field computeTransformations compute the transformations.
+#' @field setTransformationGradientStepSize change the step size of the gradient computation for the transformations
+NULL
 
