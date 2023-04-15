@@ -38,13 +38,15 @@ table provides an overview of the penalties you can use with each optimizer:
 
 | Penalty | Function | glmnet | ista |
 | --- | ---- | ---- | ---- |
-| ridge | addRidge | x | - |
 | lasso | addLasso | x | x |
-| elastic net | addElasticNet | x | - |
-| cappedL1 | addCappedL1 | - | x |
-| lsp | addLsp | - | x |
-| scad | addScad | - | x |
-| mcp | addMcp | - | x |
+| elastic net | addElasticNet | x* | - |
+| cappedL1 | addCappedL1 | x | x |
+| lsp | addLsp | x | x |
+| scad | addScad | x | x |
+| mcp | addMcp | x | x |
+
+By default, glmnet will be used. Note that the elastic net penalty can
+only be combined with other elastic net penalties.
 
 
 ## Getting Started
@@ -120,17 +122,16 @@ In this case, the best model has no cross-loadings, but the regressions remained
 unregularized: The lambda for the cross-loadings is large (1), while the
 lambda for the regressions is 0 (no regularization).
 
-## Using glmnet
+## Using ista
 
-The glmnet optimizer is typically considerably faster than ista. However, as mentioned
-above, not all penalty functions are currently supported. Mixed penalties for glmnet
-can be specified as follows:
+The glmnet optimizer is typically considerably faster than ista. However, sometimes
+glmnet may run into issues. In that case, it can help to switch to ista:
 
 ```{r}
 mp <- lavaanModel |>
   # Change the optimizer and the control object:
-  mixedPenalty(method = "glmnet",
-               control = controlGlmnet()) |>
+  mixedPenalty(method = "ista",
+               control = controlIsta()) |>
   addLasso(regularized = c("c2", "c3", "c4"), 
                 lambdas = seq(0,1,.1)) |>
   addLasso(regularized = c("r1", "r2", "r3"), 
@@ -160,7 +161,8 @@ getTuningParameterConfiguration(regularizedSEMMixedPenalty = fitMp,
 start_ista <- Sys.time()
 for(i in 1:5){
   mp <- lavaanModel |>
-  mixedPenalty() |>
+  mixedPenalty(method = "ista", 
+               control = controlIsta()) |>
   addLasso(regularized = c("c2", "c3", "c4"), 
                 lambdas = seq(0,1,.1)) |>
   addLasso(regularized = c("r1", "r2", "r3"), 
