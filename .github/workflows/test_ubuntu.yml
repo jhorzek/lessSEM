@@ -2,7 +2,7 @@ name: R CMD check ubuntu
 
 on:
   pull_request:
-    branches: [ "main", "development" ]
+    branches: [ "main"]
 
 permissions:
   contents: read
@@ -18,6 +18,8 @@ jobs:
     
   steps:
     - uses: actions/checkout@v3
+      with:
+       submodules: 'true'
     - name: Install devtools
       run: install.packages("devtools")
       shell: Rscript {0}
