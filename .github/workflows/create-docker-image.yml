@@ -14,7 +14,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
-    
+      with:
+       submodules: 'true'
     - name: Build Docker with Dependencies
       run: ls && docker build . --file .github/workflows/Dockerfile --tag ghcr.io/jhorzek/lesssem_dependencies:latest
     

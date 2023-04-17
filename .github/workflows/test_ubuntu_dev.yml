@@ -1,4 +1,4 @@
-name: R CMD check ubuntu
+name: R CMD check ubuntu dev
 
 on:
   pull_request:
@@ -17,6 +17,8 @@ jobs:
     password: ${{ secrets.CR_PAT }}
   steps:
     - uses: actions/checkout@v3
+      with:
+       submodules: 'true'
     - name: Install devtools
       run: install.packages("devtools")
       shell: Rscript {0}
