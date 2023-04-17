@@ -29,11 +29,11 @@
   
   if(! method %in% c("ista", "glmnet")) 
     stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) 
+  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1", "mcp", "lsp")) 
     stop(
       paste0(
         "glmnet only supports the following penalty functions: ",
-        paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet"), 
+        paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1", "mcp", "lsp"), 
                collapse = ", ")
       )
     )
@@ -68,7 +68,7 @@
   ## Setup Multi-Core ##
   
   .setupMulticore(control)
-
+  
   ### initialize model ####
   startingValues <- control$startingValues
   if(!any(startingValues == "est") & penalty == "adaptiveLasso" & !is.numeric(weights)){
@@ -134,14 +134,56 @@
       verbose = control$verbose
     )
     
-    if(is(SEM, "Rcpp_SEMCpp")){
-      regularizedModel <- new(glmnetEnetSEM, 
-                              weights, 
-                              controlIntern)
-    }else if(is(SEM, "Rcpp_mgSEM")){
-      regularizedModel <- new(glmnetEnetMgSEM, 
-                              weights, 
-                              controlIntern)
+    if(penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetEnetSEM, 
+                                weights, 
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetEnetMgSEM, 
+                                weights, 
+                                controlIntern)
+      }
+    }else if(penalty == "scad"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetScadSEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetScadMgSEM,
+                                weights,
+                                controlIntern)
+      }
+    }else if(penalty == "cappedL1"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetCappedL1SEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetCappedL1MgSEM,
+                                weights,
+                                controlIntern)
+      }
+    }else if(penalty == "mcp"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetMcpSEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetMcpMgSEM,
+                                weights,
+                                controlIntern)
+      }
+    }else if(penalty == "lsp"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetLspSEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetLspMgSEM,
+                                weights,
+                                controlIntern)
+      }
     }
     
   }else if(method == "ista"){
@@ -348,14 +390,19 @@
       )
       
     }else if(penalty == "cappedL1"){
-      
+      if(method == "ista")
       result <- try(regularizedModel$optimize(rawParameters,
                                               SEM,
                                               tuningParameters$theta[it],
                                               tuningParameters$lambda[it],
                                               tuningParameters$alpha[it])
       )
-      
+      if(method == "glmnet")
+        result <- try(regularizedModel$optimize(rawParameters,
+                                                SEM,
+                                                tuningParameters$theta[it],
+                                                tuningParameters$lambda[it])
+        )
     }
     
     if(is(result, "try-error")) next
@@ -392,12 +439,12 @@
     
     # save implied
     if(is(SEM, "Rcpp_SEMCpp")){
-    implied$means[[it]] <- SEM$impliedMeans
-    implied$covariances[[it]] <- SEM$impliedCovariance
-    
-    rownames(implied$means[[it]]) <- SEM$manifestNames
-    dimnames(implied$covariances[[it]]) <- list(SEM$manifestNames,
-                                                SEM$manifestNames)
+      implied$means[[it]] <- SEM$impliedMeans
+      implied$covariances[[it]] <- SEM$impliedCovariance
+      
+      rownames(implied$means[[it]]) <- SEM$manifestNames
+      dimnames(implied$covariances[[it]]) <- list(SEM$manifestNames,
+                                                  SEM$manifestNames)
     }else if(is(SEM, "Rcpp_mgSEM")){
       implied$means[[it]] <- NULL
       implied$covariances[[it]] <- NULL

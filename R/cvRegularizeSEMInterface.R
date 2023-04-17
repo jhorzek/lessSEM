@@ -58,9 +58,9 @@
 #' @param standardize Standardizing your data prior to the analysis can undermine the cross-
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
-#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
-#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -492,7 +492,7 @@ cvRidge <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
-#' With ista, the control argument can be used to switch to related procedures (currently gist).
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
@@ -637,11 +637,12 @@ cvElasticNet <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' for more details.
 #' @returns model of class cvRegularizedSEM
-
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -690,7 +691,8 @@ cvCappedL1 <- function(lavaanModel,
                        standardize = FALSE,
                        returnSubsetParameters = FALSE,
                        modifyModel = lessSEM::modifyModel(),
-                       control = lessSEM::controlIsta()){
+                       method = "glmnet",
+                       control = lessSEM::controlGlmnet()){
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
@@ -702,7 +704,7 @@ cvCappedL1 <- function(lavaanModel,
                                      tuningParameters = expand.grid(lambda = lambdas, 
                                                                     theta = thetas,
                                                                     alpha = 1), 
-                                     method = "ista", 
+                                     method = method, 
                                      modifyModel = modifyModel, 
                                      control = control
   )
@@ -775,6 +777,8 @@ cvCappedL1 <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' @returns model of class cvRegularizedSEM
@@ -827,7 +831,8 @@ cvLsp <- function(lavaanModel,
                   standardize = FALSE,
                   returnSubsetParameters = FALSE,
                   modifyModel = lessSEM::modifyModel(),
-                  control = lessSEM::controlIsta()){
+                  method = "glmnet",
+                  control = lessSEM::controlGlmnet()){
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
@@ -839,7 +844,7 @@ cvLsp <- function(lavaanModel,
                                      returnSubsetParameters = returnSubsetParameters,
                                      tuningParameters = expand.grid(lambda = lambdas, 
                                                                     theta = thetas), 
-                                     method = "ista", 
+                                     method = method, 
                                      modifyModel = modifyModel, 
                                      control = control
   )
@@ -915,6 +920,8 @@ cvLsp <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' @returns model of class cvRegularizedSEM
@@ -967,9 +974,13 @@ cvMcp <- function(lavaanModel,
                   standardize = FALSE,
                   returnSubsetParameters = FALSE,
                   modifyModel = lessSEM::modifyModel(),
+                  method = "ista",
                   control = lessSEM::controlIsta()){
   
-  if(any(thetas <= 0)) stop("Theta must be > 0")
+  if(any(thetas <= 0)) 
+    stop("Theta must be > 0")
+  if(any(thetas <= 1) & method == "glmnet") 
+    warning("thetas is typically > 1. Note that glmnet may run into issues with small theta.")
   result <- .cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                      penalty = "mcp", 
                                      weights = regularized,
@@ -978,7 +989,7 @@ cvMcp <- function(lavaanModel,
                                      returnSubsetParameters = returnSubsetParameters,
                                      tuningParameters = expand.grid(lambda = lambdas, 
                                                                     theta = thetas), 
-                                     method = "ista", 
+                                     method = method, 
                                      modifyModel = modifyModel, 
                                      control = control
   )
@@ -1059,6 +1070,8 @@ cvMcp <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' @returns model of class cvRegularizedSEM
@@ -1111,7 +1124,8 @@ cvScad <- function(lavaanModel,
                    standardize = FALSE,
                    returnSubsetParameters = FALSE,
                    modifyModel = lessSEM::modifyModel(),
-                   control = lessSEM::controlIsta()){
+                   method = "glmnet",
+                   control = lessSEM::controlGlmnet()){
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
@@ -1123,7 +1137,7 @@ cvScad <- function(lavaanModel,
                                      returnSubsetParameters = returnSubsetParameters,
                                      tuningParameters = expand.grid(lambda = lambdas, 
                                                                     theta = thetas), 
-                                     method = "ista", 
+                                     method = method, 
                                      modifyModel = modifyModel, 
                                      control = control
   )

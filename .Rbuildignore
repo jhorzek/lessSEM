@@ -13,3 +13,4 @@
 ^LICENSE\.md$
 ^CRAN-SUBMISSION$
 ^R/createVignettes\.R$
+^inst/include/lessOptimizers/.git$

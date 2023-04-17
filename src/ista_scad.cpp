@@ -52,7 +52,14 @@ public:
     convCritInner(static_cast<lessSEM::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
     sigma(Rcpp::as<double> (control["sigma"])),
     stepSizeInh(static_cast<lessSEM::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
-    verbose(Rcpp::as<int> (control["verbose"])){}
+    verbose(Rcpp::as<int> (control["verbose"])){
+    
+    for(auto w: weights){
+      if((w != 0.0) && (w != 1.0))
+        Rcpp::stop("All weights must be either 0 or 1");
+    }
+    
+  }
   
   Rcpp::List optimize(
       Rcpp::NumericVector startingValues_, 

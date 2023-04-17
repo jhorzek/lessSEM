@@ -13,6 +13,7 @@ cvMcp(
   standardize = FALSE,
   returnSubsetParameters = FALSE,
   modifyModel = lessSEM::modifyModel(),
+  method = "ista",
   control = lessSEM::controlIsta()
 )
 }
@@ -38,6 +39,9 @@ validation. Set standardize=TRUE to automatically standardize the data.}
 \item{returnSubsetParameters}{set to TRUE to return the parameters for each training set}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
+
+\item{method}{which optimizer should be used? Currently implemented are ista and glmnet.
+With ista, the control argument can be used to switch to related procedures.}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta function. See ?controlIsta}
