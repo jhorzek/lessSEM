@@ -2,7 +2,7 @@ name: R CMD check ubuntu
 
 on:
   pull_request:
-    branches: [ "main", "development" ]
+    branches: ["development" ]
 
 permissions:
   contents: read
@@ -15,20 +15,11 @@ jobs:
    credentials:
     username: ${{ github.actor }}
     password: ${{ secrets.CR_PAT }}
-    
   steps:
     - uses: actions/checkout@v3
     - name: Install devtools
       run: install.packages("devtools")
       shell: Rscript {0}
-    - name: build and save as artifact
-      run: devtools::build(pkg = ".", binary = TRUE)
-      shell: Rscript {0}
-    - name: upload package
-      uses: actions/upload-artifact@v3
-      with:
-        name: ubuntu_release
-        path: /__w/lessSEM/lessSEM_*.tar.gz
     - name: install package
       run: |
         devtools::install(pkg = ".")
@@ -44,9 +35,9 @@ jobs:
     - uses: actions/checkout@v2
       with: 
        repository: 'jhorzek/lessTest'
+       ref: 'development'
     - name: Extended tests
       run: |
        devtools::build(pkg = ".", binary = TRUE)
        rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning")
       shell: Rscript {0}
-      
