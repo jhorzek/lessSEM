@@ -1,0 +1,43 @@
+name: R CMD check ubuntu
+
+on:
+  pull_request:
+    branches: ["development" ]
+
+permissions:
+  contents: read
+
+jobs:
+ build:
+  runs-on: ubuntu-latest
+  container:
+   image: ghcr.io/jhorzek/lesssem_dependencies:latest
+   credentials:
+    username: ${{ github.actor }}
+    password: ${{ secrets.CR_PAT }}
+  steps:
+    - uses: actions/checkout@v3
+    - name: Install devtools
+      run: install.packages("devtools")
+      shell: Rscript {0}
+    - name: install package
+      run: |
+        devtools::install(pkg = ".")
+      shell: Rscript {0}
+    - name: Check
+      run: rcmdcheck::rcmdcheck(path = ".", args = "--no-manual", error_on = "warning")
+      shell: Rscript {0}
+    - name: lessTest
+      run: |
+       cd ..
+       mkdir lessTest
+       cd lessTest
+    - uses: actions/checkout@v2
+      with: 
+       repository: 'jhorzek/lessTest'
+       ref: 'development'
+    - name: Extended tests
+      run: |
+       devtools::build(pkg = ".", binary = TRUE)
+       rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning")
+      shell: Rscript {0}
