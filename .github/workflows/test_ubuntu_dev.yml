@@ -3,6 +3,7 @@ name: R CMD check ubuntu dev
 on:
   pull_request:
     branches: ["development" ]
+  workflow_dispatch:
 
 permissions:
   contents: read
