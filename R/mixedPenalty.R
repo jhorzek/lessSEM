@@ -954,6 +954,8 @@ fit <- function(mixedPenalty){
     SEM <- .initializeMultiGroupSEMForRegularization(lavaanModels = lavaanModel,
                                                      startingValues = startingValues,
                                                      modifyModel = modifyModel)
+    rlang::inform(c("Note", "Multi-group model. Switching initialHessian from 'lavaan' to 'compute'"))
+    control$initialHessian <- "compute"
   }
   
   N <- SEM$sampleSize
