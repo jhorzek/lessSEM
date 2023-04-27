@@ -434,14 +434,7 @@
     }
   }else{
     
-    if(is(lavaanModel, "lavaan")){
-      
-      if(!is(lavaanModel, "lavaan"))
-        stop("lavaanModel must be of class lavaan")
-      
-      if(lavaanModel@Options$estimator != "ML") 
-        stop("lavaanModel must be fit with ml estimator.")
-      
-    }
+    if(!is(lavaanModel, "lavaan"))
+      stop("lavaanModel must be of class lavaan")
   }
 }

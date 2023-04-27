@@ -47,3 +47,45 @@
   
 }
 
+#' .SEMdataWLS
+#' 
+#' internal function. Creates internal data representation
+#' @param rawData matrix with raw data set
+#' @param lavaanModel lavaan model
+#' @returns list with internal representation of data
+#' @keywords internal
+.SEMdataWLS <- function(rawData, lavaanModel){
+  
+  # unique missingness patterns -> none in case of WLS, but we will 
+  # use the same data structure
+  N <- lavInspect(lavaanModel, "nobs")
+  observedMean <- lavInspect(lavaanModel, "sampstat")$mean
+  observedCov <- lavInspect(lavaanModel, "sampstat")$cov
+  if(is.null(observedMean)) 
+    observedMean <- matrix(NA, nrow = 1, ncol = ncol(observedCov))
+  
+  uniqueMissingPatterns <- matrix(FALSE, nrow = 1, ncol = ncol(observedCov))
+  individualMissingPatternID <- rep(1, N)
+  
+  missingSubsets <- vector("list", nrow(uniqueMissingPatterns))
+  
+  # build subsets
+  mrow <- 1
+  
+  missingSubsets[[mrow]]$N <- N
+  missingSubsets[[mrow]]$observed <- sum(!uniqueMissingPatterns[mrow,])
+  missingSubsets[[mrow]]$notMissing <- which(!uniqueMissingPatterns[mrow,])-1
+  missingSubsets[[mrow]]$covariance <- observedCov
+  missingSubsets[[mrow]]$means <- observedMean
+  missingSubsets[[mrow]]$rawData <- rawData
+  missingSubsets[[mrow]]$m2LL <- NA
+  
+  dataList <- list("uniqueMissingPatterns" = uniqueMissingPatterns,
+                   "individualMissingPatternID" = individualMissingPatternID,
+                   "missingSubsets" = missingSubsets
+  )
+  
+  return(dataList)
+  
+}
+

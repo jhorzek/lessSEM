@@ -17,6 +17,17 @@ enum status {
   fitted
 };
 
+enum estimator{
+  fiml,
+  wls
+};
+
+struct WLS{
+public:
+  arma::mat weightsInverse;
+  bool meanstructure;
+};
+
 class SEMCpp{
 public: 
   //flags
@@ -26,6 +37,9 @@ public:
   bool hasTransformations = false; // true if the user defined transformations of parameters
   int functionCalls = 0;
   int gradientCalls = 0;
+  estimator estim;
+  
+  WLS WLSElements;
   
   // data
   dataset data;
@@ -96,6 +110,9 @@ public:
   void implied(); // compute implied means and covariance
   bool impliedIsPD(); // check if model implied covariance matrix is positive definite
   double fit();
+  
+  std::string getEstimator();
+  
   arma::rowvec getGradients(bool raw);
   arma::mat getScores(bool raw);
   arma::mat getHessian(Rcpp::StringVector label_,

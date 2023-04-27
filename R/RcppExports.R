@@ -2,25 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @name SEMCpp
-#' 
-#' @title SEMCpp class
-#' 
-#' @description internal SEM representation
-#' 
-#' @field new Creates a new SEMCpp.
-#' @field fill fills the SEM with the elements from an Rcpp::List
-#' @field addTransformation adds transforamtions to a model
-#' @field implied Computes implied means and covariance matrix
-#' @field fit Fits the model. Returns -2 log likelihood
-#' @field getParameters Returns a data frame with model parameters.
-#' @field getParameterLabels Returns a vector with unique parameter labels as used internally.
-#' @field getGradients Returns a matrix with scores.
-#' @field getScores Returns a matrix with scores.
-#' @field getHessian Returns the hessian of the model. Expects the labels of the 
-#' parameters and the values of the parameters as well as a boolean indicating if 
-#' these are raw. Finally, a double (eps) controls the precision of the approximation.
-#' @field computeTransformations compute the transformations.
-#' @field setTransformationGradientStepSize change the step size of the gradient computation for the transformations
 NULL
 
 #' callFitFunction

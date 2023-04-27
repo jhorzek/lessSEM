@@ -38,8 +38,8 @@ double WLS(const arma::mat& weightsInverse,
 double WLS(const arma::mat& weightsInverse,
            const arma::colvec& observedMeans,
            const arma::colvec& impliedMeans, 
-           const arma::mat& impliedCovariance,
-           const arma::mat& observedCov){
+           const arma::mat& observedCov,
+           const arma::mat& impliedCovariance){
   
   arma::colvec diff((observedCov.n_rows*(observedCov.n_cols+1))/2 + observedCov.n_rows);
   
@@ -102,11 +102,11 @@ double WLSDerivative(const arma::mat& weightsInverse,
 // @param impliedCovarianceDerivative derivative of covariance matrix wrt parameter
 // @return double indicating derivative of functions wrt individual parameter 
 double WLSDerivative(const arma::mat& weightsInverse,
-                     const arma::mat& observedCov,
                      const arma::colvec& observedMeans,
-                     const arma::colvec& impliedMeans, 
-                     const arma::mat& impliedCovariance,
+                     const arma::colvec& impliedMeans,
                      const arma::colvec& impliedMeansDerivative,
+                     const arma::mat& observedCov,
+                     const arma::mat& impliedCovariance,
                      const arma::mat& impliedCovarianceDerivative){
   
   
