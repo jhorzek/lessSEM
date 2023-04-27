@@ -21,6 +21,8 @@ internal SEM representation
 
 \item{\code{getParameters}}{Returns a data frame with model parameters.}
 
+\item{\code{getEstimator}}{returns the estimator used in the model (e.g., fiml)}
+
 \item{\code{getParameterLabels}}{Returns a vector with unique parameter labels as used internally.}
 
 \item{\code{getGradients}}{Returns a matrix with scores.}
