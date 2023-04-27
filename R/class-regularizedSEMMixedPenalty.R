@@ -11,6 +11,7 @@
 #' are returned
 #' @slot internalOptimization list of elements used internally
 #' @slot inputArguments list with elements passed by the user to the general
+#' @export
 setClass(Class = "regularizedSEMMixedPenalty",
          representation = representation(
            penalty = "character",
@@ -28,6 +29,7 @@ setClass(Class = "regularizedSEMMixedPenalty",
 
 #' show
 #' @param object object of class regularizedSEM
+#' @return No return value, just prints estimates
 #' @export
 setMethod("show", "regularizedSEMMixedPenalty", function (object) {
   #modelName <-deparse(substitute(object)) # get the name of the object
@@ -42,6 +44,7 @@ setMethod("show", "regularizedSEMMixedPenalty", function (object) {
 
 #' summary
 #' @param object object of class regularizedSEMMixedPenalty
+#' @return No return value, just prints estimates
 #' @export
 setMethod("summary", "regularizedSEMMixedPenalty", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
@@ -64,7 +67,6 @@ setMethod("summary", "regularizedSEMMixedPenalty", function (object) {
 #' @param object object of class regularizedSEMMixedPenalty
 #' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
 #' @returns parameters of the model as data.frame
-#' @import stats
 #' @export
 setMethod("coef", "regularizedSEMMixedPenalty", function (object, ...) {
   dotdotdot <- list(...)

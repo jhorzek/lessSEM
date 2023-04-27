@@ -23,7 +23,6 @@
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
 #' @returns model of class cvRegularizedSEM
-#' @import lavaan
 #' @keywords internal
 .cvRegularizeSEMInternal <- function(lavaanModel,
                                      k,
@@ -40,10 +39,10 @@
   
   if(! method %in% c("ista", "glmnet")) 
     stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) 
+  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1", "mcp", "lsp")) 
     stop(paste0(
       "glmnet only supports the following penalty functions: ",
-      paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet"), collapse = ", ")
+      paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1", "mcp", "lsp"), collapse = ", ")
     )
     )
   
@@ -313,6 +312,7 @@
 #'          means = 1:5, 
 #'          standardDeviations = 1:5)
 #' @returns scaled test set
+#' @export
 cvScaler <- function(testSet, means, standardDeviations){
   if(any(names(means) != colnames(testSet))) stop("Mismatch in names of means and testSet.")
   if(any(names(standardDeviations) != colnames(testSet))) stop("Mismatch in names of standardDeviations and testSet.")

@@ -19,3 +19,4 @@ penalty function value
 \description{
 smoothed version of mcp penalty
 }
+\keyword{internal}

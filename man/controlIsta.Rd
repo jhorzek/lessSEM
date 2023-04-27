@@ -64,3 +64,6 @@ object of class controlIsta
 \description{
 controlIsta
 }
+\examples{
+control <- controlIsta()
+}

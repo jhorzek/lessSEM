@@ -23,3 +23,4 @@ penalty function value
 \description{
 smoothed version of non-differentiable adaptive LASSO penalty
 }
+\keyword{internal}

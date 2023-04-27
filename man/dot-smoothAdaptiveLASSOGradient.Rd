@@ -23,3 +23,4 @@ gradient values
 \description{
 smoothed version of non-differentiable adaptive LASSO gradient
 }
+\keyword{internal}

@@ -53,23 +53,6 @@
 #' Because **lessSEM** is fairly new, we currently recommend using **lslx** for cases
 #' that are covered by both, **lessSEM** and **lslx**.
 #' 
-#' 
-#' # Installation
-#' 
-#' If you want to install **lessSEM** from CRAN, use the following commands in R:
-#'   
-#' ```
-#' install.packages("lessSEM")
-#' ```
-#' 
-#' The newest version of the package can be installed from GitHub using the 
-#' following commands in R:
-#'   
-#' ```
-#' if(!require(devtools)) install.packages("devtools")
-#' devtools::install_github("jhorzek/lessSEM")
-#' ```
-#' 
 #' # Introduction
 #' 
 #' You will find a short introduction to regularized SEM with the **lessSEM**
@@ -102,10 +85,7 @@
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel, 
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- lasso(
 #'   # pass the fitted lavaan model
@@ -430,10 +410,13 @@
 #' 
 #' @docType package
 #' @author Jannik Orzek <orzek@mpib-berlin.mpg.de>
+#' @importFrom RcppParallel RcppParallelLibs
+#' @importFrom rlang .data
 #' @import Rcpp
-#' @importFrom Rcpp sourceCpp
-#' @useDynLib lessSEM
-#' @exportPattern("^[[:alpha:]]+")
+#' @import methods
+#' @importFrom graphics plot
+#' @rawNamespace importFrom(stats,AIC,BIC,coef,logLik); import(lavaan) # NOTE: The order is relevant...
+#' @useDynLib lessSEM, .registration=TRUE
 #' @name lessSEM
 #' @keywords internal
 "_PACKAGE"
@@ -459,6 +442,17 @@ Rcpp::loadModule("istaMixedPenaltySEM_cpp", TRUE)
 Rcpp::loadModule("istaMixedPenaltymgSEM_cpp", TRUE)
 Rcpp::loadModule("glmnetEnetSEM_cpp", TRUE)
 Rcpp::loadModule("glmnetEnetMgSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetScadSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetScadMgSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetCappedL1SEM_cpp", TRUE)
+Rcpp::loadModule("glmnetCappedL1MgSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetMcpSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetMcpMgSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetLspSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetLspMgSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetMixedSEM_cpp", TRUE)
+Rcpp::loadModule("glmnetMixedMgSEM_cpp", TRUE)
+
 Rcpp::loadModule("bfgsEnetSEM_cpp", TRUE)
 Rcpp::loadModule("bfgsEnetMgSEM_cpp", TRUE)
 

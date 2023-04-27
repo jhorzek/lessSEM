@@ -9,6 +9,10 @@
 \arguments{
 \item{object}{object of class regularizedSEMWithCustomPenalty}
 }
+\value{
+No return value, just prints estimates
+}
 \description{
 summary
 }
+\keyword{internal}

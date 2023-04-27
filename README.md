@@ -29,7 +29,7 @@ check out the julia package
 The following penalty functions are currently implemented in
 **lessSEM**:
 
-![](man/figures/penalty_functions.png)
+![](man/figures/penaltyFunctions.png)
 
 The column “penalty” refers to the name of the function call in the
 **lessSEM** package (e.g., lasso is called with the `lasso()` function).
@@ -87,8 +87,19 @@ following commands in R:
 
 ``` r
 if(!require(devtools)) install.packages("devtools")
-devtools::install_github("jhorzek/lessSEM")
+devtools::install_github("jhorzek/lessSEM", 
+                         ref = "development")
 ```
+
+> **A short note on branches**: The lessSEM project has multiple
+> branches. The **main** branch will match the version currently
+> available from CRAN. The **development** branch will have newer
+> features not yet available from CRAN. This branch will have passed all
+> current tests of our test suite, but may not be ready for CRAN yet
+> (e.g., because not all objectives of the road map have been met).
+> **gh-pages** is used to create the [documentation
+> website](jhorzek.github.io/lessSEM/). Finally, all other branches are
+> used for ongoing development and should be considered unstable.
 
 # Introduction
 
@@ -125,6 +136,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
                            std.lv = TRUE)
 
 # Optional: Plot the model
+# if(!require("semPlot")) install.packages("semPlot")
 # semPlot::semPaths(lavaanModel, 
 #                   what = "est",
 #                   fade = FALSE)

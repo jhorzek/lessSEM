@@ -33,3 +33,7 @@ Object of class modifyModel
 \description{
 Modify the model from lavaan to fit your needs
 }
+\examples{
+modification <- modifyModel(addMeans = TRUE) # adds intercepts to a lavaan object
+# that was fitted without explicit intercepts
+}

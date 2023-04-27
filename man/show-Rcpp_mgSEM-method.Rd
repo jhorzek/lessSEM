@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{object of class Rcpp_mgSEM}
 }
+\value{
+No return value, just prints estimates
+}
 \description{
 show
 }

@@ -19,3 +19,4 @@ gradient values
 \description{
 smoothed version of non-differentiable LASSO gradient
 }
+\keyword{internal}

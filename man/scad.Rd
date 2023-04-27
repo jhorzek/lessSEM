@@ -10,7 +10,8 @@ scad(
   lambdas,
   thetas,
   modifyModel = lessSEM::modifyModel(),
-  control = lessSEM::controlIsta()
+  method = "glmnet",
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{
@@ -26,6 +27,10 @@ getLavaanParameters(model) with your lavaan model object}
 a constant (theta)}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
+
+\item{method}{which optimizer should be used? Currently implemented are ista
+and glmnet. With ista, the control argument can be used to switch to related procedures
+(currently gist).}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta (see ?controlIsta)}
@@ -76,7 +81,7 @@ Regularization Paths for Generalized Linear Models via Coordinate Descent.
 Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 \item Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 A Comparison of Optimization Methods and Software for Large-scale
-L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 \item Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012).
 An improved GLMNET for l1-regularized logistic regression.
 The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -116,10 +121,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
                            meanstructure = TRUE,
                            std.lv = TRUE)
 
-# Optional: Plot the model
-# semPlot::semPaths(lavaanModel,
-#                   what = "est",
-#                   fade = FALSE)
+# Regularization:
 
 lsem <- scad(
   # pass the fitted lavaan model

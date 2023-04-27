@@ -60,20 +60,6 @@ Because \strong{lessSEM} is fairly new, we currently recommend using \strong{lsl
 that are covered by both, \strong{lessSEM} and \strong{lslx}.
 }
 }
-\section{Installation}{
-If you want to install \strong{lessSEM} from CRAN, use the following commands in R:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{install.packages("lessSEM")
-}\if{html}{\out{</div>}}
-
-The newest version of the package can be installed from GitHub using the
-following commands in R:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{if(!require(devtools)) install.packages("devtools")
-devtools::install_github("jhorzek/lessSEM")
-}\if{html}{\out{</div>}}
-}
-
 \section{Introduction}{
 You will find a short introduction to regularized SEM with the \strong{lessSEM}
 package in \code{vignette('lessSEM', package = 'lessSEM')}. More information is also
@@ -104,10 +90,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
                            meanstructure = TRUE,
                            std.lv = TRUE)
 
-# Optional: Plot the model
-# semPlot::semPaths(lavaanModel, 
-#                   what = "est",
-#                   fade = FALSE)
+# Regularization:
 
 lsem <- lasso(
   # pass the fitted lavaan model

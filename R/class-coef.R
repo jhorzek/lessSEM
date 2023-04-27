@@ -1,6 +1,7 @@
 #' Class for the coefficients estimated by lessSEM.
 #' @slot tuningParameters tuning parameters
 #' @slot estimates parameter estimates
+#' @export
 setClass("lessSEMCoef",
          representation = representation(
            tuningParameters = "data.frame",
@@ -10,6 +11,7 @@ setClass("lessSEMCoef",
 #' show
 #' 
 #' @param object object of class lessSEMCoef
+#' @return No return value, just prints estimates
 setMethod("show", "lessSEMCoef", function (object) {
   # This function is adapted from the Matrix package. See
   # https://github.com/cran/Matrix/blob/ff84c47d2cb6bca859a841b8d1358ab33ac2a71a/R/sparseMatrix.R#L797.

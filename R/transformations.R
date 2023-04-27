@@ -8,6 +8,7 @@
 #' @returns list with parameter names and two Rcpp functions: (1) the transformation function and 
 #' (2) a function to create a pointer to the transformation function. 
 #' If starting values were defined, these are returned as well.
+#' @importFrom Rcpp sourceCpp
 #' @keywords internal
 .compileTransformations <- function(syntax,
                                     parameterLabels,

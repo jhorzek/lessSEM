@@ -33,6 +33,9 @@
 
 \item{rawParameters}{raw parameters}
 }
+\value{
+vector with weights
+}
 \description{
 initialize the adaptive lasso weights
 }

@@ -1,0 +1,3 @@
+[submodule "inst/include/lessOptimizers"]
+	path = inst/include/lessOptimizers
+	url = https://github.com/jhorzek/lessOptimizers

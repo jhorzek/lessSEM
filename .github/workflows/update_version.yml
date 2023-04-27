@@ -86,7 +86,7 @@ jobs:
            git checkout bump_version
            # Add the changes and commit
            git add DESCRIPTION
-           git commit -m "Bump version number in DESCRIPTION"
+           git commit -m "Bump version number in DESCRIPTION [skip actions]"
            git push --set-upstream origin bump_version
            # Request merge
            gh pr create -B main -H bump_version --title 'Bump version' --body 'Created by Github action'

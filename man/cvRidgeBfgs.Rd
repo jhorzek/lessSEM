@@ -92,10 +92,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
                            meanstructure = TRUE,
                            std.lv = TRUE)
 
-# Optional: Plot the model
-# semPlot::semPaths(lavaanModel,
-#                   what = "est",
-#                   fade = FALSE)
+# Regularization:
 
 lsem <- cvRidgeBfgs(
   # pass the fitted lavaan model

@@ -30,7 +30,7 @@
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -58,9 +58,9 @@
 #' @param standardize Standardizing your data prior to the analysis can undermine the cross-
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
-#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
-#' With ista, the control argument can be used to switch to related procedures (currently gist).
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -87,10 +87,7 @@
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel, 
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvLasso(
 #'   # pass the fitted lavaan model
@@ -175,7 +172,7 @@ cvLasso <- function(lavaanModel,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -237,10 +234,7 @@ cvLasso <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvAdaptiveLasso(
 #'   # pass the fitted lavaan model
@@ -328,7 +322,7 @@ cvAdaptiveLasso <- function(lavaanModel,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -385,10 +379,7 @@ cvAdaptiveLasso <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvRidge(
 #'   # pass the fitted lavaan model
@@ -470,7 +461,7 @@ cvRidge <- function(lavaanModel,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -501,7 +492,7 @@ cvRidge <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
-#' With ista, the control argument can be used to switch to related procedures (currently gist).
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
@@ -529,10 +520,7 @@ cvRidge <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvElasticNet(
 #'   # pass the fitted lavaan model
@@ -618,7 +606,7 @@ cvElasticNet <- function(lavaanModel,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -649,11 +637,12 @@ cvElasticNet <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' for more details.
 #' @returns model of class cvRegularizedSEM
-
 #' @examples 
 #' library(lessSEM)
 #' 
@@ -675,10 +664,7 @@ cvElasticNet <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvCappedL1(
 #'   # pass the fitted lavaan model
@@ -705,7 +691,8 @@ cvCappedL1 <- function(lavaanModel,
                        standardize = FALSE,
                        returnSubsetParameters = FALSE,
                        modifyModel = lessSEM::modifyModel(),
-                       control = lessSEM::controlIsta()){
+                       method = "glmnet",
+                       control = lessSEM::controlGlmnet()){
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
   result <- .cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
@@ -717,7 +704,7 @@ cvCappedL1 <- function(lavaanModel,
                                      tuningParameters = expand.grid(lambda = lambdas, 
                                                                     theta = thetas,
                                                                     alpha = 1), 
-                                     method = "ista", 
+                                     method = method, 
                                      modifyModel = modifyModel, 
                                      control = control
   )
@@ -759,7 +746,7 @@ cvCappedL1 <- function(lavaanModel,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -790,6 +777,8 @@ cvCappedL1 <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' @returns model of class cvRegularizedSEM
@@ -815,10 +804,7 @@ cvCappedL1 <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvLsp(
 #'   # pass the fitted lavaan model
@@ -845,7 +831,8 @@ cvLsp <- function(lavaanModel,
                   standardize = FALSE,
                   returnSubsetParameters = FALSE,
                   modifyModel = lessSEM::modifyModel(),
-                  control = lessSEM::controlIsta()){
+                  method = "glmnet",
+                  control = lessSEM::controlGlmnet()){
   
   if(any(thetas <= 0)) stop("Theta must be > 0")
   
@@ -857,7 +844,7 @@ cvLsp <- function(lavaanModel,
                                      returnSubsetParameters = returnSubsetParameters,
                                      tuningParameters = expand.grid(lambda = lambdas, 
                                                                     theta = thetas), 
-                                     method = "ista", 
+                                     method = method, 
                                      modifyModel = modifyModel, 
                                      control = control
   )
@@ -902,7 +889,7 @@ cvLsp <- function(lavaanModel,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -933,6 +920,8 @@ cvLsp <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' @returns model of class cvRegularizedSEM
@@ -958,10 +947,7 @@ cvLsp <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvMcp(
 #'   # pass the fitted lavaan model
@@ -988,9 +974,13 @@ cvMcp <- function(lavaanModel,
                   standardize = FALSE,
                   returnSubsetParameters = FALSE,
                   modifyModel = lessSEM::modifyModel(),
+                  method = "ista",
                   control = lessSEM::controlIsta()){
   
-  if(any(thetas <= 0)) stop("Theta must be > 0")
+  if(any(thetas <= 0)) 
+    stop("Theta must be > 0")
+  if(any(thetas <= 1) & method == "glmnet") 
+    warning("thetas is typically > 1. Note that glmnet may run into issues with small theta.")
   result <- .cvRegularizeSEMInternal(lavaanModel = lavaanModel, 
                                      penalty = "mcp", 
                                      weights = regularized,
@@ -999,7 +989,7 @@ cvMcp <- function(lavaanModel,
                                      returnSubsetParameters = returnSubsetParameters,
                                      tuningParameters = expand.grid(lambda = lambdas, 
                                                                     theta = thetas), 
-                                     method = "ista", 
+                                     method = method, 
                                      modifyModel = modifyModel, 
                                      control = control
   )
@@ -1049,7 +1039,7 @@ cvMcp <- function(lavaanModel,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -1080,6 +1070,8 @@ cvMcp <- function(lavaanModel,
 #' validation. Set standardize=TRUE to automatically standardize the data.
 #' @param returnSubsetParameters set to TRUE to return the parameters for each training set
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently implemented are ista and glmnet. 
+#' With ista, the control argument can be used to switch to related procedures.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta function. See ?controlIsta
 #' @returns model of class cvRegularizedSEM
@@ -1105,10 +1097,7 @@ cvMcp <- function(lavaanModel,
 #'                            meanstructure = TRUE,
 #'                            std.lv = TRUE)
 #' 
-#' # Optional: Plot the model
-#' # semPlot::semPaths(lavaanModel,
-#' #                   what = "est",
-#' #                   fade = FALSE)
+#' # Regularization:
 #' 
 #' lsem <- cvScad(
 #'   # pass the fitted lavaan model
@@ -1135,7 +1124,8 @@ cvScad <- function(lavaanModel,
                    standardize = FALSE,
                    returnSubsetParameters = FALSE,
                    modifyModel = lessSEM::modifyModel(),
-                   control = lessSEM::controlIsta()){
+                   method = "glmnet",
+                   control = lessSEM::controlGlmnet()){
   
   if(any(thetas <= 2)) stop("Theta must be > 2")
   
@@ -1147,7 +1137,7 @@ cvScad <- function(lavaanModel,
                                      returnSubsetParameters = returnSubsetParameters,
                                      tuningParameters = expand.grid(lambda = lambdas, 
                                                                     theta = thetas), 
-                                     method = "ista", 
+                                     method = method, 
                                      modifyModel = modifyModel, 
                                      control = control
   )

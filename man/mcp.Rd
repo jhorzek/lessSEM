@@ -10,6 +10,7 @@ mcp(
   lambdas,
   thetas,
   modifyModel = lessSEM::modifyModel(),
+  method = "ista",
   control = lessSEM::controlIsta()
 )
 }
@@ -27,6 +28,10 @@ a constant (theta)}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
+\item{method}{which optimizer should be used? Currently implemented are ista
+and glmnet. With ista, the control argument can be used to switch to related procedures
+(currently gist).}
+
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta (see ?controlIsta)}
 }
@@ -39,7 +44,7 @@ The penalty function is given by:
 \ifelse{html}{\deqn{p( x_j) = \begin{cases}
 \lambda |x_j| - x_j^2/(2\theta) & \text{if } |x_j| \leq \theta\lambda\\
 \theta\lambda^2/2 & \text{if } |x_j| > \lambda\theta
-\end{cases}} where \eqn{\theta > 0}.}{
+\end{cases}} where \eqn{\theta > 1}.}{
 Equation Omitted in Pdf Documentation.}
 }
 \details{
@@ -49,6 +54,9 @@ maximum likelihood for missing data. To use this functionality,
 fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.
 \pkg{lessSEM} will then automatically switch to full information maximum likelihood
 as well.
+
+In our experience, the glmnet optimizer can run in issues with the mcp penalty.
+Therefor, we default to using ista.
 
 mcp regularization:
 \itemize{
@@ -70,7 +78,7 @@ Regularization Paths for Generalized Linear Models via Coordinate Descent.
 Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 \item Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 A Comparison of Optimization Methods and Software for Large-scale
-L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 \item Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012).
 An improved GLMNET for l1-regularized logistic regression.
 The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -110,10 +118,7 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
                            meanstructure = TRUE,
                            std.lv = TRUE)
 
-# Optional: Plot the model
-# semPlot::semPaths(lavaanModel,
-#                   what = "est",
-#                   fade = FALSE)
+# Regularization:
 
 lsem <- mcp(
   # pass the fitted lavaan model

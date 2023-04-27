@@ -78,3 +78,6 @@ object of class controlGlmnet
 \description{
 Control the GLMNET optimizer.
 }
+\examples{
+control <- controlGlmnet()
+}

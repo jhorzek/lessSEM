@@ -11,6 +11,7 @@
 #' @slot subsetParameters optional: data.frame with parameter estimates for all
 #' combinations of the tuning parameters in all subsets
 #' @slot misc list with additional return elements
+#' @export
 setClass(Class = "cvRegularizedSEM",
          representation = representation(
            parameters="data.frame",
@@ -28,6 +29,8 @@ setClass(Class = "cvRegularizedSEM",
 #' Show method for objects of class \code{cvRegularizedSEM}.
 #' 
 #' @param object object of class cvRegularizedSEM
+#' @return No return value, just prints estimates
+#' @export
 setMethod("show", "cvRegularizedSEM", function (object) {
   bestFit <- unlist(object@parameters)
   tuningParameters <- bestFit[!names(bestFit) %in% object@parameterLabels]
@@ -40,6 +43,8 @@ setMethod("show", "cvRegularizedSEM", function (object) {
 #' summary method for objects of class \code{cvRegularizedSEM}.
 #' 
 #' @param object object of class cvRegularizedSEM
+#' @return No return value, just prints estimates
+#' @export
 setMethod("summary", "cvRegularizedSEM", function (object) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Exact Cross Validation Results ####\n\n"))
@@ -64,8 +69,7 @@ setMethod("summary", "cvRegularizedSEM", function (object) {
 #'  
 #' @param object object of class cvRegularizedSEM
 #' @param ... not used
-#' @returns the parameter estimates of an cvRegularizedSEM
-#' @import stats
+#' @return the parameter estimates of an cvRegularizedSEM
 #' @export
 setMethod("coef", "cvRegularizedSEM", function (object, ...) {
   
@@ -84,7 +88,7 @@ setMethod("coef", "cvRegularizedSEM", function (object, ...) {
 #' @param x object of class cvRegularizedSEM
 #' @param y not used
 #' @param ... not used
-#' @import graphics, ggplot2
+#' @return either an object of ggplot2 or of plotly
 #' @export
 setMethod("plot", 
           signature = c(x = "cvRegularizedSEM",
@@ -100,7 +104,7 @@ setMethod("plot",
             
             if(nTuning > 2) 
               stop("Plotting currently only supported for up to 2 tuning parameters")
-            if(nTuning == 2 & !("plotly" %in% rownames(utils::installed.packages())))
+            if(nTuning == 2 & !requireNamespace("plotly", quietly = TRUE))
               stop("Plotting more than one tuning parameter requires the package plotly")
             
             if(nTuning == 1){

@@ -76,7 +76,7 @@ Regularization Paths for Generalized Linear Models via Coordinate Descent.
 Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 \item Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 A Comparison of Optimization Methods and Software for Large-scale
-L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 \item Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012).
 An improved GLMNET for l1-regularized logistic regression.
 The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -96,7 +96,7 @@ Trends in Optimization, 1(3), 123–231.
 }
 }
 \examples{
-\dontrun{
+\donttest{
 # This example shows how to use the optimizers
 # for C++ objective functions. We will use
 # a linear regression as an example. Note that
@@ -200,13 +200,5 @@ l1 <- gpLassoCpp(par = parameters,
 
 l1@parameters
 
-# for comparison:
-#library(glmnet)
-#coef(glmnet(x = X,
-#            y = y, 
-#            lambda = l1@fits$lambda[2],
-#            intercept = TRUE,
-#            standardize = FALSE))[,2]
-#l1@parameters[2,]
 }
 }

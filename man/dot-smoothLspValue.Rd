@@ -19,3 +19,4 @@ penalty function value
 \description{
 smoothed version of lsp penalty
 }
+\keyword{internal}

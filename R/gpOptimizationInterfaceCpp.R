@@ -22,7 +22,7 @@
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -62,7 +62,7 @@
 #' @returns Object of class gpRegularized
 
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -166,14 +166,6 @@
 #' 
 #' l1@parameters
 #' 
-#' # for comparison:
-#' #library(glmnet)
-#' #coef(glmnet(x = X,
-#' #            y = y, 
-#' #            lambda = l1@fits$lambda[2],
-#' #            intercept = TRUE,
-#' #            standardize = FALSE))[,2]
-#' #l1@parameters[2,]
 #' }
 #' @export
 gpLassoCpp <- function(par,
@@ -248,7 +240,7 @@ gpLassoCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -290,7 +282,7 @@ gpLassoCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -482,7 +474,7 @@ gpAdaptiveLassoCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -517,7 +509,7 @@ gpAdaptiveLassoCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -684,7 +676,7 @@ gpRidgeCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -720,7 +712,7 @@ gpRidgeCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -889,7 +881,7 @@ gpElasticNetCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -924,7 +916,7 @@ gpElasticNetCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1090,7 +1082,7 @@ gpCappedL1Cpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -1123,7 +1115,7 @@ gpCappedL1Cpp <- function(par,
 #' the controlIsta (see ?controlIsta)
 #' @returns Object of class gpRegularized
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1290,7 +1282,7 @@ gpLspCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -1324,7 +1316,7 @@ gpLspCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
@@ -1498,7 +1490,7 @@ gpMcpCpp <- function(par,
 #' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
 #' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
 #' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classiﬁcation. Journal of Machine Learning Research, 11, 3183–3234.
+#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
 #' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
 #' An improved GLMNET for l1-regularized logistic regression. 
 #' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
@@ -1532,7 +1524,7 @@ gpMcpCpp <- function(par,
 #' @returns Object of class gpRegularized
 
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # This example shows how to use the optimizers
 #' # for C++ objective functions. We will use
 #' # a linear regression as an example. Note that
