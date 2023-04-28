@@ -42,6 +42,14 @@
     stop("control must be of class controlIsta. See ?controlIsta.")
   if(method == "glmnet" && !is(control, "controlGlmnet")) 
     stop("control must be of class controlGlmnet See ?controlGlmnet")
+
+  control$breakOuter <- .adaptBreakingForWls(lavaanModel = lavaanModel, 
+                                             currentBreaking = control$breakOuter,
+                                             selectedDefault = ifelse(method == "ista",
+                                                                      control$breakOuter == controlIsta()$breakOuter,
+                                                                      control$breakOuter == controlGlmnet()$breakOuter
+                                             ))
+  
   
   if(method == "glmnet" && is.vector(lavaanModel)){
     if(any(control$initialHessian == "lavaan")){
@@ -396,12 +404,12 @@
       
     }else if(penalty == "cappedL1"){
       if(method == "ista")
-      result <- try(regularizedModel$optimize(rawParameters,
-                                              SEM,
-                                              tuningParameters$theta[it],
-                                              tuningParameters$lambda[it],
-                                              tuningParameters$alpha[it])
-      )
+        result <- try(regularizedModel$optimize(rawParameters,
+                                                SEM,
+                                                tuningParameters$theta[it],
+                                                tuningParameters$lambda[it],
+                                                tuningParameters$alpha[it])
+        )
       if(method == "glmnet")
         result <- try(regularizedModel$optimize(rawParameters,
                                                 SEM,

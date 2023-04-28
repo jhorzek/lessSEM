@@ -117,7 +117,10 @@ public:
         }
         
         // to stay consistent with lavaan:
-        groupGradients.col(p) *= 0.5 * (SEM.data.dataSubsets.at(mp).N-1.0)/SEM.data.dataSubsets.at(mp).N;
+        // groupGradients.col(p) *= 0.5 * (SEM.data.dataSubsets.at(mp).N-1.0)/SEM.data.dataSubsets.at(mp).N;
+        
+        // We scale with N because the penalty is also scaled with N.
+        groupGradients.col(p) *= SEM.data.dataSubsets.at(mp).N;
         
         continue;
       }

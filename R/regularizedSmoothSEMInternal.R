@@ -39,6 +39,11 @@
   
   if(!is(control, "controlBFGS")) 
     stop("control must be of class controlBfgs See ?controlBfgs.")
+
+  control$breakOuter <- .adaptBreakingForWls(lavaanModel = lavaanModel, 
+                                             currentBreaking = control$breakOuter,
+                                             selectedDefault = control$breakOuter == controlBFGS()$breakOuter
+                                             )
   
   if(!is.null(modifyModel$transformations)){
     if(any(control$initialHessian == "lavaan")){

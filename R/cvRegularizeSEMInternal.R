@@ -59,8 +59,12 @@
   if(!is(lavaanModel, "lavaan"))
     stop("lavaanModel must be of class lavaan")
   
-  if(lavaanModel@Options$estimator != "ML") 
-    stop("lavaanModel must be fit with ml estimator.")
+  control$breakOuter <- .adaptBreakingForWls(lavaanModel = lavaanModel, 
+                                             currentBreaking = control$breakOuter,
+                                             selectedDefault = ifelse(method == "ista",
+                                                                      control$breakOuter == controlIsta()$breakOuter,
+                                                                      control$breakOuter == controlGlmnet()$breakOuter
+                                             ))
   
   rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(rawData, "try-error")) 
@@ -214,12 +218,15 @@
     }else{
       # If any other estimator is used, we need lavaan to set up the weight
       # matrices, etc for the WLS
-      lavaanModelTrain <- suppressWarnings(lavaan::update(object = lavaanModel, 
-                                                          data = trainSet,
-                                                          do.fit = FALSE))
-      lavaanModelTest <- suppressWarnings(lavaan::update(object = lavaanModel, 
-                                                         data = testSet,
-                                                         do.fit = FALSE))
+      lavaanModelTrain <- lavaanModelTest <- lavaanModel
+      lavaanModelTrain@Options$do.fit <- FALSE
+      lavaanModelTest@Options$do.fit <- FALSE
+      lavaanModelTrain <- suppressWarnings(.updateLavaan(lavaanModel = lavaanModel, 
+                                                          key = "data",
+                                                          value = trainSet))
+      lavaanModelTest <- suppressWarnings(.updateLavaan(lavaanModel = lavaanModel, 
+                                                         key = "data",
+                                                         value = testSet))
     }
     
     # check weights for adaptive Lasso
@@ -306,8 +313,13 @@
   # now, fit the full model
   
   tp <- tuningParameters[which.min(cvfits$cvfit)[1],]
-  if(standardize) rawData <- scale(rawData)
-  modifyModel$dataSet <- rawData
+  if(tolower(lavaanModel@Options$estimator) %in% c("ml", "fiml","mlm", "mlmv", "mlmvs", "mlf", "mlr"))
+  {
+    if(standardize) rawData <- scale(rawData)
+    modifyModel$dataSet <- rawData
+  }else{
+    modifyModel$dataSet <- NULL
+  }
   regularizedSEM_full <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
                                                 penalty = penalty, 
                                                 weights = weights_s, 

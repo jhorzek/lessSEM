@@ -177,8 +177,35 @@ controlBFGS <- function(
     warning("Your selected number of cores (", control$nCores,
             ") is larger than the number of cores detected by RcppParallel (",
             RcppParallel::defaultNumThreads(), "). You may consider using fewer cores."
-            )
+    )
   
   RcppParallel::setThreadOptions(numThreads = control$nCores)
   
+}
+
+
+#' .adaptBreakingForWls
+#' 
+#' wls needs smaller breaking points than ml
+#' @param lavaanModel single model or vector of models
+#' @param currentBreaking current breaking condition value
+#' @param selectedDefault was default breaking condition selected?
+#' @return updated breaking
+.adaptBreakingForWls <- function(lavaanModel, currentBreaking, selectedDefault){
+  
+  if(is.vector(lavaanModel)){
+    for(i in 1:length(lavaanModel)){
+      currentBreaking <- min(currentBreaking, 
+                             .adaptBreakingForWls(lavaanModel = lavaanModel[[i]], 
+                                                  currentBreaking = currentBreaking,
+                                                  selectedDefault = selectedDefault))
+    }
+    return(currentBreaking)
+  }
+  
+  if(selectedDefault && (tolower(lavaanModel@Options$estimator) %in% c("uls","wls", "dwls", "gls"))){
+    return(1e-11)
+  }else{
+    return(currentBreaking)
+  }
 }

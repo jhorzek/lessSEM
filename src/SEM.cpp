@@ -378,7 +378,10 @@ double SEMCpp::fit(){
       
       // to stay consistent with lavaan, we have to use the following
       // scaling:
-      currentSubset.objectiveValue *=  0.5 * (currentSubset.N-1.0)/currentSubset.N;
+      //currentSubset.objectiveValue *=  0.5 * (currentSubset.N-1.0)/currentSubset.N;
+      
+      // We scale with N because the penalty is also scaled with N.
+      currentSubset.objectiveValue *=  currentSubset.N;
       
       objectiveValue += currentSubset.objectiveValue;
       

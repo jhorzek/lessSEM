@@ -14,9 +14,9 @@
 \item{raw}{controls if the internal transformations of lessSEM is used.}
 }
 \value{
--2log-Likelihood
+objective value of the fitting function
 }
 \description{
-internal function which returns the -2 log Likelihood of an object of class Rcpp_SEMCpp. This function can be used in optimizers
+internal function which returns the objective value of the fitting function of an object of class Rcpp_SEMCpp. This function can be used in optimizers
 }
 \keyword{internal}

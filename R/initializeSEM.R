@@ -61,7 +61,10 @@
         if(round(mySEM$objectiveValue - (-2*lavaan::logLik(lavaanModel)), 4) !=0) 
           stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
       }else if(mySEM$getEstimator() == "wls"){
-        if(round(mySEM$objectiveValue - (lavaan::fitMeasures(lavaanModel, "fmin")), 4) !=0)
+        # to stay consistent with lavaan, we have to use the following
+        # scaling:
+        lessSEMObjective <- 0.5 * (mySEM$sampleSize-1)/(mySEM$sampleSize^2)* mySEM$objectiveValue
+        if(round(lessSEMObjective - (lavaan::fitMeasures(lavaanModel, "fmin")), 4) !=0)
           stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
         
       }
@@ -325,7 +328,7 @@
   # if no mean structure: add 
   if(!meanstructure && addMeans) {
     
-    if(!lavaanModel@Options$meanstructure)
+    if((!lavaanModel@Options$meanstructure) & (SEMList$estimator == "wls"))
       stop("Cannot post-hoc add a meanstructure to a lavaan model fitted with WLS. Please add the meanstructure to the lavaan model using meanstructure = TRUE.")
     
     parameterTable <- .addMeanStructure(parameterTable = parameterTable, 

@@ -167,14 +167,14 @@
     
     parameterEstimates[i, names(parameters)] <- .getParameters(SEM, raw = FALSE)[names(parameters)]
     
-    fits$objectiveValue[it] <- SEM$objectiveValue
-    fits$regObjectiveValue[it] <- fits$objectiveValue[it] + sampleSize*individualPenaltyFunction(result$pars, 
+    fits$objectiveValue[i] <- SEM$objectiveValue
+    fits$regObjectiveValue[i] <- fits$objectiveValue[i] + sampleSize*individualPenaltyFunction(result$pars, 
                                                                                                  currentTuningParameters, 
                                                                                                  penaltyFunctionArguments)
     
     if(usesLikelihood){
-      fits$m2LL[it] <- fits$objectiveValue[it]
-      fits$regM2LL[it] <- fits$regObjectiveValue[it]
+      fits$m2LL[i] <- fits$objectiveValue[i]
+      fits$regM2LL[i] <- fits$regObjectiveValue[i]
     }
     
     #result$value[length(result$value)]

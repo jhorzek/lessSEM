@@ -17,11 +17,13 @@ internal mgSEM representation
 
 \item{\code{implied}}{Computes implied means and covariance matrix}
 
-\item{\code{fit}}{Fits the model. Returns -2 log likelihood}
+\item{\code{fit}}{Fits the model. Returns objective value of the fitting function}
 
 \item{\code{getParameters}}{Returns a data frame with model parameters.}
 
 \item{\code{getParameterLabels}}{Returns a vector with unique parameter labels as used internally.}
+
+\item{\code{getEstimator}}{Returns a vector with names of the estimators used in the submodels.}
 
 \item{\code{getGradients}}{Returns a matrix with scores.}
 

@@ -33,13 +33,13 @@ Imports:
     utils,
     stats,
     graphics,
-    rlang
+    rlang,
+    mvtnorm
 Suggests:
     knitr,
     plotly,
     rmarkdown,
-    Rsolnp,
-    mvtnorm
+    Rsolnp
 LinkingTo:
     Rcpp,
     RcppArmadillo,

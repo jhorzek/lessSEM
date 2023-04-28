@@ -436,5 +436,7 @@
     
     if(!is(lavaanModel, "lavaan"))
       stop("lavaanModel must be of class lavaan")
+    if(lavaanModel@Options$categorical)
+      stop("Categorical data is currently not supported.")
   }
 }
