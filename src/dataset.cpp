@@ -28,7 +28,7 @@ void dataset::addSubset(unsigned int N_,
   newSubset.covariance = covariance_;
   newSubset.means = means_;
   newSubset.rawData = rawData_;
-  newSubset.m2LL = 0.0;
+  newSubset.objectiveValue = 0.0;
   
   dataSubsets.push_back(newSubset);
 

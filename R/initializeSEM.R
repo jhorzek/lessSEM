@@ -58,10 +58,10 @@
     if(whichPars == "est" && SEMObj$checkFit && lavaanModel@Options$do.fit){
       # check model fit
       if(mySEM$getEstimator() == "fiml"){
-        if(round(mySEM$m2LL - (-2*lavaan::logLik(lavaanModel)), 4) !=0) 
+        if(round(mySEM$objectiveValue - (-2*lavaan::logLik(lavaanModel)), 4) !=0) 
           stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
       }else if(mySEM$getEstimator() == "wls"){
-        if(round(mySEM$m2LL - (lavaan::fitMeasures(lavaanModel, "fmin")), 4) !=0)
+        if(round(mySEM$objectiveValue - (lavaan::fitMeasures(lavaanModel, "fmin")), 4) !=0)
           stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
         
       }
@@ -200,7 +200,7 @@
   
   if(tolower(lavaanModel@Options$estimator) %in% c("ml", "fiml","mlm", "mlmv", "mlmvs", "mlf", "mlr")){
     SEMList$estimator <- "fiml"
-  }else if(tolower(lavaanModel@Options$estimator) %in% c("wls")){
+  }else if(tolower(lavaanModel@Options$estimator) %in% c("uls","wls", "dwls", "gls")){
     SEMList$estimator <- "wls"
     SEMList$WLSMeanstructure <- lavaanModel@Options$meanstructure
   }else{

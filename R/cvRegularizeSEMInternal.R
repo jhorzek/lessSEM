@@ -104,10 +104,10 @@
   
   if(penalty == "adaptiveLasso") 
     rlang::inform(c("Note",paste0("Automatic cross-validation for adaptiveLasso requested. ", 
-                      "Note that using weights which are based on the full sample ",
-                      "may undermine cross-validation. If the default is used (weights = NULL), ",
-                      "weights for each subset will be computed using the inverse of the absolute MLE. ",
-                      "Alternatively, pass a matrix as weights argument with weights for each subset.")
+                                  "Note that using weights which are based on the full sample ",
+                                  "may undermine cross-validation. If the default is used (weights = NULL), ",
+                                  "weights for each subset will be computed using the inverse of the absolute MLE. ",
+                                  "Alternatively, pass a matrix as weights argument with weights for each subset.")
     ))
   
   cvfits <- data.frame(
@@ -166,6 +166,10 @@
     testSet <- rawData[subsets[,s],,drop = FALSE]
     
     if(standardize){
+      
+      if(!tolower(lavaanModel@Options$estimator) %in% c("ml", "fiml","mlm", "mlmv", "mlmvs", "mlf", "mlr"))
+        stop("Automatic standardization is currently only implemented for maximum likelihood estimation.")
+      
       if(sum(subsets[,s]) < 2 || sum(!subsets[,s]) < 2){
         warning("Subsets too small for standardization Skipping standardization.")
       }else{
@@ -183,7 +187,40 @@
       }
     }
     
-    modifyModel$dataSet <- trainSet
+    # We update the lavaan models to set up our regularized model
+    if(tolower(lavaanModel@Options$estimator) %in% c("ml", "fiml","mlm", "mlmv", "mlmvs", "mlf", "mlr")){
+      
+      # Note: lavaan will throw an error if N < p and missing != "ml", which we don't really care about
+      # in case of ml-estimation because N does not have to be larger than p. In fact,
+      # we can even use N = 1.
+      # See e.g., p. 334 in 
+      # Voelkle, M. C., Oud, J. H. L., von Oertzen, T., & Lindenberger, U. (2012).
+      # Maximum Likelihood Dynamic Factor Modeling for Arbitrary N and T Using SEM. 
+      # Structural Equation Modeling: A Multidisciplinary Journal, 19(3), 329–350. 
+      # https://doi.org/10.1080/10705511.2012.687656
+      
+      lavaanModelTrain <- lavaanModel
+      lavaanModelTest <- lavaanModel
+      
+      # replace data
+      lavaanModelTrain@Data@X[[1]] <- as.matrix(trainSet)
+      lavaanModelTrain@Options$do.fit <- FALSE # set to FALSE because otherwise lessSEM will
+      # try to compare the fit of the model using only the train set to the fit of the
+      # lavaanModelTrain, which was not fitted.
+      
+      lavaanModelTest@Data@X[[1]] <- as.matrix(testSet)
+      lavaanModelTest@Options$do.fit <- FALSE
+      
+    }else{
+      # If any other estimator is used, we need lavaan to set up the weight
+      # matrices, etc for the WLS
+      lavaanModelTrain <- suppressWarnings(lavaan::update(object = lavaanModel, 
+                                                          data = trainSet,
+                                                          do.fit = FALSE))
+      lavaanModelTest <- suppressWarnings(lavaan::update(object = lavaanModel, 
+                                                         data = testSet,
+                                                         do.fit = FALSE))
+    }
     
     # check weights for adaptive Lasso
     ## option one: user provided weights
@@ -212,7 +249,7 @@
       weights_s <- weights
     }
     
-    regularizedSEM_s <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
+    regularizedSEM_s <- .regularizeSEMInternal(lavaanModel = lavaanModelTrain, 
                                                penalty = penalty, 
                                                weights = weights_s, 
                                                tuningParameters = tuningParameters, 
@@ -242,12 +279,11 @@
     # to compute the out of sample fit, we also need a SEM with all individuals 
     # if the test set
     SEM_s <- .SEMFromLavaan(
-      lavaanModel = lavaanModel,
+      lavaanModel = lavaanModelTest,
       whichPars = "start",
       fit = FALSE, 
       addMeans = modifyModel$addMeans,
       activeSet = modifyModel$activeSet, 
-      dataSet = testSet,
       transformations = modifyModel$transformations,
       transformationList = modifyModel$transformationList
     )

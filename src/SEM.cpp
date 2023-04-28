@@ -21,7 +21,7 @@
 //' @field fill fills the SEM with the elements from an Rcpp::List
 //' @field addTransformation adds transforamtions to a model
 //' @field implied Computes implied means and covariance matrix
-//' @field fit Fits the model. Returns -2 log likelihood
+//' @field fit Fits the model. Returns objective value of the fitting function
 //' @field getParameters Returns a data frame with model parameters.
 //' @field getEstimator returns the estimator used in the model (e.g., fiml)
 //' @field getParameterLabels Returns a vector with unique parameter labels as used internally.
@@ -252,7 +252,7 @@ void SEMCpp::setParameters(Rcpp::StringVector label_,
   }
   
   // reset all fit elements
-  m2LL = 0.0;
+  objectiveValue = 0.0;
   if(parameterTable.AChanged | parameterTable.SChanged)  impliedCovariance.fill(arma::datum::nan);
   if(parameterTable.mChanged) impliedMeans.fill(arma::datum::nan);
   return;
@@ -308,7 +308,7 @@ double SEMCpp::fit(){
   }
   currentStatus = fitted;
   
-  m2LL = 0.0;
+  objectiveValue = 0.0;
   wasFit = true;
   functionCalls++;
   
@@ -335,17 +335,17 @@ double SEMCpp::fit(){
       
       if(currentSubset.N == 1){
         
-        currentSubset.m2LL = m2LLMultiVariateNormal(
+        currentSubset.objectiveValue = m2LLMultiVariateNormal(
           currentSubset.rawData(currentSubset.notMissing), 
           subsetImpliedMeans.at(s),
           subsetImpliedCovariance.at(s),
           subsetImpliedCovarianceInverse.at(s),
           logDetImplied);
-        m2LL += currentSubset.m2LL;
+        objectiveValue += currentSubset.objectiveValue;
         
       }else if(currentSubset.N > 1){
         
-        currentSubset.m2LL = m2LLGroupMultiVariateNormal(
+        currentSubset.objectiveValue = m2LLGroupMultiVariateNormal(
           currentSubset.N, 
           currentSubset.means,
           subsetImpliedMeans.at(s), 
@@ -353,7 +353,7 @@ double SEMCpp::fit(){
           subsetImpliedCovariance.at(s),
           subsetImpliedCovarianceInverse.at(s),
           logDetImplied);
-        m2LL += currentSubset.m2LL;
+        objectiveValue += currentSubset.objectiveValue;
         
       }else{
         Rcpp::stop("Unknown N in data subset");
@@ -361,13 +361,13 @@ double SEMCpp::fit(){
     }else if (estim == wls){
       
       if(!WLSElements.meanstructure){
-        currentSubset.m2LL = WLS(
+        currentSubset.objectiveValue = WLS(
           WLSElements.weightsInverse,
           currentSubset.covariance,
           subsetImpliedCovariance.at(s));
         
       }else{
-        currentSubset.m2LL = WLS(
+        currentSubset.objectiveValue = WLS(
           WLSElements.weightsInverse,
           currentSubset.means,
           subsetImpliedMeans.at(s), 
@@ -378,16 +378,16 @@ double SEMCpp::fit(){
       
       // to stay consistent with lavaan, we have to use the following
       // scaling:
-      currentSubset.m2LL *=  0.5 * (currentSubset.N-1.0)/currentSubset.N;
+      currentSubset.objectiveValue *=  0.5 * (currentSubset.N-1.0)/currentSubset.N;
       
-      m2LL += currentSubset.m2LL;
+      objectiveValue += currentSubset.objectiveValue;
       
     }else{
       Rcpp::stop("Unknown estimator");
     }
   }
   
-  return(m2LL);
+  return(objectiveValue);
 }
 
 arma::mat SEMCpp::getScores(bool raw){
@@ -490,7 +490,7 @@ RCPP_MODULE(SEM_cpp){
   .field_readonly( "m", &SEMCpp::Mvector, "Vector with means of observed and latent variables")
   .field_readonly( "impliedCovariance", &SEMCpp::impliedCovariance, "implied covariance matrix")
   .field_readonly( "impliedMeans", &SEMCpp::impliedMeans, "implied means vector")
-  .field_readonly( "m2LL", &SEMCpp::m2LL, "minus 2 log-likelihood")
+  .field_readonly( "objectiveValue", &SEMCpp::objectiveValue, "minus 2 log-likelihood")
   .field_readonly( "rawData", &SEMCpp::rawData, "raw data set")
   .field_readonly( "manifestNames", &SEMCpp::manifestNames, "names of manifest variables")
   .field_readonly( "wasFit", &SEMCpp::wasFit, "names of manifest variables")
@@ -500,7 +500,7 @@ RCPP_MODULE(SEM_cpp){
   // methods
   .method( "fill", &SEMCpp::fill, "Fill all elements of the SEM. Expects and Rcpp::List")
   .method( "implied", &SEMCpp::implied, "Computes implied means and covariance matrix")
-  .method( "fit", &SEMCpp::fit, "Fits the model. Returns -2 log likelihood")
+  .method( "fit", &SEMCpp::fit, "Fits the model. Returns objective value of the fitting function")
   .method( "setParameters", &SEMCpp::setParameters, "Set the parameters of a model.")
   .method( "getEstimator", &SEMCpp::getEstimator, "returns the used estimator as string.")
   .method( "getParameters", &SEMCpp::getParameters, "Returns a data frame with model parameters.")

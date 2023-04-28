@@ -26,7 +26,7 @@
       missingSubsets[[mrow]]$covariance <- ((length(individuals)-1)/length(individuals))*stats::cov(rawData[individuals,!uniqueMissingPatterns[mrow,]])
       missingSubsets[[mrow]]$means <- apply(rawData[individuals,!uniqueMissingPatterns[mrow,]], 2, mean)
       missingSubsets[[mrow]]$rawData <- rawData[individuals,,drop=FALSE]
-      missingSubsets[[mrow]]$m2LL <- NA
+      missingSubsets[[mrow]]$objectiveValue <- NA
     }else{
       missingSubsets[[mrow]]$N <- length(individuals)
       missingSubsets[[mrow]]$observed <- sum(!uniqueMissingPatterns[mrow,])
@@ -34,7 +34,7 @@
       missingSubsets[[mrow]]$covariance <- matrix(NA, nrow = sum(!uniqueMissingPatterns[mrow,]), ncol = sum(!uniqueMissingPatterns[mrow,]))
       missingSubsets[[mrow]]$means <-  matrix(NA, nrow = sum(!uniqueMissingPatterns[mrow,]), ncol = 1)
       missingSubsets[[mrow]]$rawData <- rawData[individuals,,drop=FALSE]
-      missingSubsets[[mrow]]$m2LL <- NA
+      missingSubsets[[mrow]]$objectiveValue <- NA
     }
   }
   
@@ -78,7 +78,7 @@
   missingSubsets[[mrow]]$covariance <- observedCov
   missingSubsets[[mrow]]$means <- observedMean
   missingSubsets[[mrow]]$rawData <- rawData
-  missingSubsets[[mrow]]$m2LL <- NA
+  missingSubsets[[mrow]]$objectiveValue <- NA
   
   dataList <- list("uniqueMissingPatterns" = uniqueMissingPatterns,
                    "individualMissingPatternID" = individualMissingPatternID,

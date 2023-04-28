@@ -11,7 +11,7 @@
 #' @field fill fills the SEM with the elements from an Rcpp::List
 #' @field addTransformation adds transforamtions to a model
 #' @field implied Computes implied means and covariance matrix
-#' @field fit Fits the model. Returns -2 log likelihood
+#' @field fit Fits the model. Returns objective value of the fitting function
 #' @field getParameters Returns a data frame with model parameters.
 #' @field getEstimator returns the estimator used in the model (e.g., fiml)
 #' @field getParameterLabels Returns a vector with unique parameter labels as used internally.
@@ -533,9 +533,10 @@ scadPenalty_C <- function(par, lambda_p, theta) {
 #' @field addModel add a model. Expects Rcpp::List
 #' @field addTransformation adds transforamtions to a model
 #' @field implied Computes implied means and covariance matrix
-#' @field fit Fits the model. Returns -2 log likelihood
+#' @field fit Fits the model. Returns objective value of the fitting function
 #' @field getParameters Returns a data frame with model parameters.
 #' @field getParameterLabels Returns a vector with unique parameter labels as used internally.
+#' @field getEstimator Returns a vector with names of the estimators used in the submodels.
 #' @field getGradients Returns a matrix with scores.
 #' @field getScores Returns a matrix with scores. Not yet implemented
 #' @field getHessian Returns the hessian of the model. Expects the labels of the 

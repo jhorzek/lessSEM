@@ -65,7 +65,7 @@ public:
   arma::mat impliedCovarianceFull;
   arma::mat IminusAInverse; // this element is used repeatedly, so we
   // define it once and reuse it.
-  double m2LL; // minus 2 log-Likelihood
+  double objectiveValue; // minus 2 log-Likelihood
   
   // in case of missing data, we have to compute
   // means and covariances for each subset. These are going

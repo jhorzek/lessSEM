@@ -79,6 +79,9 @@
                                                      modifyModel = modifyModel)
   }
   
+  # check if we have a likelihood objective function:
+  usesLikelihood <- all(SEM$getEstimator() == "fiml")
+  
   N <- SEM$sampleSize
   
   # get parameters in raw form
@@ -134,6 +137,8 @@
   
   fits <- data.frame(
     tuningParameters,
+    "objectiveValue" = NA,
+    "regObjectiveValue" = NA,
     "m2LL" = NA,
     "regM2LL"= NA,
     "nonZeroParameters" = NA,
@@ -209,7 +214,11 @@
     rawParameters <- result$rawParameters
     fits$nonZeroParameters[it] <- length(rawParameters) - 
       sum(abs(rawParameters[weights[names(rawParameters)] != 0]) <= tau)
-    fits$regM2LL[it] <- result$fit
+    
+    fits$regObjectiveValue[it] <- result$fit
+    if(usesLikelihood)
+      fits$regM2LL[it] <- fits$regObjectiveValue[it]
+    
     fits$convergence[it] <- result$convergence
     
     # get unregularized fit:
@@ -217,7 +226,10 @@
                           names(rawParameters), 
                           values = rawParameters, 
                           raw = TRUE)
-    fits$m2LL[it] <- SEM$fit()
+    fits$objectiveValue[it] <- SEM$fit()
+    if(usesLikelihood)
+      fits$m2LL[it] <- fits$objectiveValue[it]
+    
     # transform internal parameter representation to "natural" form
     transformedParameters <- .getParameters(SEM,
                                             raw = FALSE)

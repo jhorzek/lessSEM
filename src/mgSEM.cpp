@@ -114,9 +114,10 @@ arma::mat mgParameters::getTransformationGradients(){
 //' @field addModel add a model. Expects Rcpp::List
 //' @field addTransformation adds transforamtions to a model
 //' @field implied Computes implied means and covariance matrix
-//' @field fit Fits the model. Returns -2 log likelihood
+//' @field fit Fits the model. Returns objective value of the fitting function
 //' @field getParameters Returns a data frame with model parameters.
 //' @field getParameterLabels Returns a vector with unique parameter labels as used internally.
+//' @field getEstimator Returns a vector with names of the estimators used in the submodels.
 //' @field getGradients Returns a matrix with scores.
 //' @field getScores Returns a matrix with scores. Not yet implemented
 //' @field getHessian Returns the hessian of the model. Expects the labels of the 
@@ -282,13 +283,25 @@ bool mgSEM::impliedIsPD(){
 
 double mgSEM::fit(){
   
-  m2LL = 0.0;
+  objectiveValue = 0.0;
   // compute fit for each model
   for(unsigned int m = 0; m < models.size(); m++){
-    m2LL += models.at(m).fit();
+    objectiveValue += models.at(m).fit();
   }
   
-  return(m2LL);
+  return(objectiveValue);
+}
+
+std::vector<std::string> mgSEM::getEstimator(){
+  
+  std::vector<std::string> estimators;
+  
+  // check objective for each model
+  for(unsigned int m = 0; m < models.size(); m++){
+    estimators.push_back(models.at(m).getEstimator());
+  }
+  
+  return(estimators);
 }
 
 arma::rowvec mgSEM::getGradients(bool raw){
@@ -345,12 +358,13 @@ RCPP_MODULE(mgSEM_cpp){
     .constructor("Creates a new SEMCpp.")
   // fields
   .field_readonly("sampleSize", &mgSEM::sampleSize, "Sum of all N")
-  .field_readonly("m2LL", &mgSEM::m2LL, "-2 log-Likelihood")
+  .field_readonly("objectiveValue", &mgSEM::objectiveValue, "objective value of the fitting function")
   // methods
   .method( "addModel", &mgSEM::addModel, "Adds a model. Expects and Rcpp::List")
   .method( "implied", &mgSEM::implied, "Computes implied means and covariance matrix")
-  .method( "fit", &mgSEM::fit, "Fits the model. Returns -2 log likelihood")
+  .method( "fit", &mgSEM::fit, "Fits the model. Returns the objective value of the fitting function")
   .method( "setParameters", &mgSEM::setParameters, "Set the parameters of a model.")
+  .method( "getEstimator", &mgSEM::getEstimator, "Returns a vector with names of the estimators used in the submodels.")
   .method( "getParameters", &mgSEM::getParameters, "Returns a vector with raw model parameters.")
   .method( "getSubmodelParameters", &mgSEM::getSubmodelParameters, "Returns a list with parameters for each model.")
   .method( "getParameterLabels", &mgSEM::getParameterLabels, "Returns a vector with unique parameter labels as used internally.")

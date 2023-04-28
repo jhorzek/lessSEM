@@ -45,7 +45,7 @@
                           values = startingValues, 
                           raw = FALSE)
     SEM <- try(.fit(SEM))
-    if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
+    if(is(SEM, "try-error") || !is.finite(SEM$objectiveValue)) 
       stop("Infeasible starting values.")
     
   }else{
@@ -96,7 +96,7 @@
                           values = startingValues, 
                           raw = TRUE)
     SEM <- try(.fit(SEM))
-    if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
+    if(is(SEM, "try-error") || !is.finite(SEM$objectiveValue)) 
       stop("Infeasible starting values.")
     
   }else{

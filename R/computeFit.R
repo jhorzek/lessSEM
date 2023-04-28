@@ -12,18 +12,18 @@
 
 #' .fitFunction
 #' 
-#' internal function which returns the -2 log Likelihood of an object of class Rcpp_SEMCpp. This function can be used in optimizers
+#' internal function which returns the objective value of the fitting function of an object of class Rcpp_SEMCpp. This function can be used in optimizers
 #' 
 #' @param par labeled vector with parameter values
 #' @param SEM model of class Rcpp_SEMCpp. 
 #' @param raw controls if the internal transformations of lessSEM is used.
-#' @returns -2log-Likelihood
+#' @returns objective value of the fitting function
 #' @keywords internal
 .fitFunction <- function(par, SEM, raw){
   SEM <- .setParameters(SEM = SEM, names(par), values = par, raw = raw)
   tryFit <- try(SEM$fit(), silent = TRUE)
-  if(is(tryFit, "try-error") || is.na(SEM$m2LL) || any(eigen(SEM$S, only.values = TRUE)$values < 0)) {return(9999999999999)}
-  return(SEM$m2LL)
+  if(is(tryFit, "try-error") || is.na(SEM$objectiveValue) || any(eigen(SEM$S, only.values = TRUE)$values < 0)) {return(9999999999999)}
+  return(SEM$objectiveValue)
 }
 
 #' .gradientFunction
@@ -41,7 +41,7 @@
   
   SEM <- .setParameters(SEM = SEM, names(par), values = par, raw = raw)
   tryFit <- try(SEM$fit(), silent = TRUE)
-  if(any(class(tryFit) == "try-error") || is.na(SEM$m2LL)) {return(failureReturns)}
+  if(any(class(tryFit) == "try-error") || is.na(SEM$objectiveValue)) {return(failureReturns)}
   tryGradients <- try(.getGradients(SEM = SEM, raw = raw), silent = TRUE)
   if(any(class(tryGradients) == "try-error") || anyNA(tryGradients)) {return(failureReturns)}
   return(tryGradients)
