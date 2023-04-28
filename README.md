@@ -60,7 +60,8 @@ implemented in the three packages:
 |-------------------------------|-----------------|---------------------|-----------------|
 | Model specification           | based on lavaan | similar to lavaan   | based on lavaan |
 | Maximum likelihood estimation | Yes             | Yes                 | Yes             |
-| Least squares estimation      | No              | Yes                 | No              |
+| Least squares estimation      | No              | Yes                 | Yes             |
+| Categorical variables         | No              | Yes                 | No              |
 | Confidence Intervals          | No              | Yes                 | No              |
 | Missing Data                  | FIML            | Auxiliary Variables | FIML            |
 | Multi-group models            | No              | Yes                 | Yes             |
@@ -115,6 +116,7 @@ cross-lagged panel model) in the package
 
 ``` r
 library(lessSEM)
+#> Warning: package 'lavaan' was built under R version 4.2.3
 library(lavaan)
 
 # Identical to regsem, lessSEM builds on the lavaan
