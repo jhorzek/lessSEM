@@ -60,7 +60,8 @@ setMethod("fitIndices", "regularizedSEM", function(object) {
       # Note: lavaan uses df*N instead of df*(N-1)!
       N <- nrow(dataset)
       
-      fits$rmsea <- sqrt(lambda / (fits$df * N))
+      fits$rmsea <- 0
+      fits$rmsea[lambda >= 0] <- sqrt(lambda[lambda>=0] / (fits$df[lambda>=0] * N))
     }
   }
   
