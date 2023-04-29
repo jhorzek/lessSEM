@@ -13,7 +13,8 @@
   tau,
   method = "bfgs",
   modifyModel,
-  control
+  control,
+  notes = NULL
 )
 }
 \arguments{
@@ -36,6 +37,9 @@ model.}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlBFGS function. See ?controlBFGS for more details.}
+
+\item{notes}{option to pass a notes to function. All notes of the current
+function will be added}
 }
 \value{
 regularizedSEM

@@ -22,7 +22,8 @@ setClass(Class = "cvRegularizedSEM",
            cvfitsDetails="data.frame", 
            subsets = "matrix",
            subsetParameters = "data.frame",
-           misc = "list"
+           misc = "list",
+           notes = "character"
          )
 )
 

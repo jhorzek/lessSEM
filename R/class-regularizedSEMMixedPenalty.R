@@ -23,7 +23,8 @@ setClass(Class = "regularizedSEMMixedPenalty",
            regularized = "character",
            transformations = "data.frame",
            internalOptimization="list", 
-           inputArguments="list"
+           inputArguments="list",
+           notes = "character"
          )
 )
 

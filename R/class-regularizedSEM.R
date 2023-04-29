@@ -20,7 +20,8 @@ setClass(Class = "regularizedSEM",
            regularized = "character",
            transformations = "data.frame",
            internalOptimization="list", 
-           inputArguments="list"
+           inputArguments="list",
+           notes = "character"
          )
 )
 

@@ -16,6 +16,9 @@
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
+#' @param notes option to pass a notes to function. All notes of the current
+#' function will be added
+#' @return regularized SEM 
 #' @keywords internal
 .regularizeSEMInternal <- function(lavaanModel,
                                    penalty,
@@ -23,7 +26,16 @@
                                    tuningParameters,
                                    method, 
                                    modifyModel,
-                                   control){
+                                   control,
+                                   notes = NULL){
+  
+  if(is.null(notes)){
+    printNotes <- TRUE
+    notes <- c("Notes:")
+  }else{
+    # notes already exists and we only append the new ones
+    printNotes <- FALSE
+  }
   
   inputArguments <- as.list(environment())
   
@@ -42,7 +54,7 @@
     stop("control must be of class controlIsta. See ?controlIsta.")
   if(method == "glmnet" && !is(control, "controlGlmnet")) 
     stop("control must be of class controlGlmnet See ?controlGlmnet")
-
+  
   control$breakOuter <- .adaptBreakingForWls(lavaanModel = lavaanModel, 
                                              currentBreaking = control$breakOuter,
                                              selectedDefault = ifelse(method == "ista",
@@ -53,16 +65,19 @@
   
   if(method == "glmnet" && is.vector(lavaanModel)){
     if(any(control$initialHessian == "lavaan")){
-      rlang::inform(c("Note","You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
   }
   if(!is.null(modifyModel$transformations)){
-    rlang::inform(c("Note","Your model has transformations:"))
-    cat(" - If you transform variances",
-        "the variance estimates returned by lessSEM may not be the true variances",
-        "but transformations thereof. Check model@transformations to find the actual variance",
-        "estimates for your regularized variances\n")
+    
+    notes <- c(notes,
+               paste("Your model has transformations. If you transform variances",
+                     "the variance estimates returned by lessSEM may not be the true variances",
+                     "but transformations thereof. Check model@transformations to find the actual variance",
+                     "estimates for your regularized variances")
+    )
     if(method == "glmnet"){
       if(any(control$initialHessian == "lavaan")){
         cat(" - Switching initialHessian from 'lavaan' to 'compute'.\n")
@@ -121,11 +136,16 @@
   
   #### glmnet requires an initial Hessian ####
   if(method == "glmnet"){
-    control$initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
-                                                     rawParameters = rawParameters, 
-                                                     lavaanModel = lavaanModel, 
-                                                     SEM = SEM,
-                                                     addMeans = modifyModel$addMeans)
+    initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
+                                             rawParameters = rawParameters, 
+                                             lavaanModel = lavaanModel, 
+                                             SEM = SEM,
+                                             addMeans = modifyModel$addMeans,
+                                             notes = notes)
+    notes <- c(notes,
+               initialHessian$notes
+    )
+    control$initialHessian <- initialHessian$initialHessian
   }
   
   #### prepare regularized model object ####
@@ -283,9 +303,12 @@
   if(!is.null(tuningParameters$nLambdas)){
     # for lasso type penalties, the maximal lambda value can be determined
     # automatically
-    rlang::inform(c("Note",paste0(
-      "Automatically selecting the maximal lambda value. ",
-      " This may fail if a model with all regularized parameters set to zero is not identified."))
+    notes <- c(
+      notes,
+      paste0(
+        "Automatically selecting the maximal lambda value.",
+        " This may fail if a model with all regularized parameters set to zero is not identified."
+      )
     )
     
     maxLambda <- .getMaxLambda_C(regularizedModel = regularizedModel,
@@ -513,14 +536,16 @@
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = SEM$functionCalls,
     "gradientCalls" = SEM$gradientCalls,
-    "N" = SEM$sampleSize
+    "N" = SEM$sampleSize,
+    "estimator"= SEM$getEstimator()
   )
   if(is(SEM, "Rcpp_mgSEM")) internalOptimization <- list(
     "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = NA,
     "gradientCalls" = NA,
-    "N" = SEM$sampleSize
+    "N" = SEM$sampleSize,
+    "estimator"= SEM$getEstimator()
   )
   
   results <- new("regularizedSEM",
@@ -532,7 +557,17 @@
                  regularized = names(weights)[weights!=0],
                  transformations = transformations,
                  internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
+                 inputArguments = inputArguments,
+                 notes = notes)
+  
+  notes <- unique(notes)
+  
+  if(printNotes & (length(notes) > 1)){
+    cat("\n")
+    rlang::inform(
+      notes
+    )
+  }
   
   return(results)
   

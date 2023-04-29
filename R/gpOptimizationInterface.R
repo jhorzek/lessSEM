@@ -360,6 +360,7 @@ gpAdaptiveLasso <- function(par,
   if(is.null(weights)){
     weights <- 1/abs(par)
     weights[!names(weights) %in% regularized] <- 0
+    cat("\n")
     rlang::inform(c("Note","Building weights based on par as weights = 1/abs(par)."))
   }
   

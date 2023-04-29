@@ -213,9 +213,19 @@
 #' @param lavaanModel lavaan model object
 #' @param SEM internal SEM representation
 #' @param addMeans should a mean structure be added to the model?
-#' @return Hessian matrix
+#' @param notes option to pass a notes to function. All notes of the current
+#' function will be added
+#' @return Hessian matrix and notes
 #' @keywords internal
-.computeInitialHessian <- function(initialHessian, rawParameters, lavaanModel, SEM, addMeans){
+.computeInitialHessian <- function(initialHessian, rawParameters, lavaanModel, SEM, addMeans, notes = NULL){
+  
+  if(is.null(notes)){
+    printNotes <- TRUE
+    notes <- c("Notes:")
+  }else{
+    # notes already exists and we only append the new ones
+    printNotes <- FALSE
+  }
   
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
     
@@ -230,29 +240,33 @@
     if(any(eigen(initialHessian)$values < 0))
       stop("Provided initial Hessian is not positive definite.")
     
-    return(initialHessian)
+    return(list(initialHessian = initialHessian, notes = notes))
   }
   
   if(any(initialHessian == "lavaan")){
     
     lavaanParameters <- getLavaanParameters(lavaanModel) 
     if((!lavaanModel@Options$meanstructure) && addMeans){
-      rlang::inform(c("Note","Your lavaan model has no mean structure. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "Your lavaan model has no mean structure. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
     }else if(!lavaanModel@Options$do.fit){
-      rlang::inform(c("Note","Your lavaan model was not optimized. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "Your lavaan model was not optimized. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
       
     }else if(any(!names(lavaanParameters) %in% names(rawParameters)) |
              any(!names(rawParameters) %in% names(lavaanParameters))
     ){
-      rlang::inform(c("Note","Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
     }else{
       lavaanVcov <- suppressWarnings(try(lavaan::vcov(lavaanModel),
                                          silent = TRUE))
       if(is(lavaanVcov, "try-error")){
-        rlang::inform(c("Note","Could not extract initial Hessian from lavaan. Switching to initialHessian = 'compute'."))
+        notes <- c(notes,
+                   "Could not extract initial Hessian from lavaan. Switching to initialHessian = 'compute'.")
         initialHessian <- "compute"
         
       }else{
@@ -270,7 +284,7 @@
           initialHessian = initialHessian +  diagMat
         }
         
-        return(initialHessian)
+        return(list(initialHessian = initialHessian, notes = notes))
       }
     }
     
@@ -309,8 +323,17 @@
     diagMat = diag(-1.1*min(min(eigenValues),-2), nrow(initialHessian), ncol(initialHessian))
     initialHessian = initialHessian +  diagMat
   }
+  notes <- unique(notes)
+  if(printNotes & length(notes) > 1){
+    cat("\n")
+    rlang::inform(notes)
+  }
   
-  return(initialHessian)
+  return(
+    list(
+      initialHessian = initialHessian,
+      notes = notes)
+  )
 }
 
 #' .createTransformations

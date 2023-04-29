@@ -192,7 +192,8 @@
                  fits = fits,
                  parameterLabels = names(parameters),
                  internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
+                 inputArguments = inputArguments,
+                 notes = c("Notes:"))
   
   return(results)
   
