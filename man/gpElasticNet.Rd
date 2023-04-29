@@ -36,11 +36,11 @@ between 0 and 1. 0 = ridge, 1 = lasso.}
 \item{...}{additional arguments passed to fn and gr}
 
 \item{method}{which optimizer should be used? Currently implemented are ista
-and glmnet. With ista, the control argument can be used to switch to related procedures
-(currently gist).}
+and glmnet.}
 
 \item{control}{used to control the optimizer. This element is generated with
-the lessSEM::controlIsta() and controlGlmnet() functions.}
+the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+for more details.}
 }
 \value{
 Object of class gpRegularized

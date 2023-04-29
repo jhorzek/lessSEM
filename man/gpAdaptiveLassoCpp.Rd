@@ -45,8 +45,7 @@ lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda fo
 \item{additionalArguments}{list with additional arguments passed to fn and gr}
 
 \item{method}{which optimizer should be used? Currently implemented are ista
-and glmnet. With ista, the control argument can be used to switch to related procedures
-(currently gist).}
+and glmnet.}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
