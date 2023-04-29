@@ -11,6 +11,7 @@
 #' are returned
 #' @slot internalOptimization list of elements used internally
 #' @slot inputArguments list with elements passed by the user to the general
+#' @slot notes internal notes that have come up when fitting the model
 #' @export
 setClass(Class = "regularizedSEMMixedPenalty",
          representation = representation(
