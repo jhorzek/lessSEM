@@ -124,9 +124,7 @@
                                            SEM = SEM,
                                            addMeans = modifyModel$addMeans,
                                            notes = notes)
-  notes <- c(notes,
-             initialHessian$notes
-  )
+  notes <- initialHessian$notes
   control$initialHessian <- initialHessian$initialHessian
   
   #### prepare regularized model object ####
