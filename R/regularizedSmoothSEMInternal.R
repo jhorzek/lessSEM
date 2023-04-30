@@ -299,6 +299,7 @@
   }
   
   internalOptimization <- list(
+    "isMultiGroup" = is(SEM, "Rcpp_mgSEM"),
     "HessiansOfDifferentiablePart" = Hessians,
     "N" = SEM$sampleSize,
     "estimator"= SEM$getEstimator()

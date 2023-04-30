@@ -32,14 +32,38 @@ setClass(Class = "regularizedSEM",
 #' @export
 setMethod("show", "regularizedSEM", function (object) {
   #modelName <-deparse(substitute(object)) # get the name of the object
-  cat(paste0("#### Model of class regularizedSEM with ",object@penalty, " penalty ####\n\n"))
-  cat("regularized parameters: ")
-  cat(paste0(object@regularized, collapse = ", "))
-  cat("\n\n")
-  cat(paste0("- Use coef(object) to get the parameter estimates of the model. With coef(object, criterion = 'BIC') parameters estimates at the lowest BIC can be extracted.\n\n"))
-  cat(paste0("- Use plot(object) to plot the parameter estimates of the model.\n\n"))
-  cat(paste0("- Information criteria can be computed with AIC(object) or BIC(object).\n\n"))
-  cat("################################################\n")
+  isMultiGroup <- object@internalOptimization$isMultiGroup
+  method <- object@inputArguments$method
+  penalty <- object@penalty
+  estimator <- object@internalOptimization$estimator
+  
+  basics <- c()
+  
+  if(!isMultiGroup){
+    basics <- c(basics, "Model of class regularizedSEM")
+    basics <- c(basics, paste0("Estimator: ", estimator))
+  }else{
+    basics <- c(basics, "Multi-group model of class regularizedSEM")
+    basics <- c(basics, paste0("Estimators in sub-groups: ", paste0(estimator, collapse = ", ")))
+  }
+  basics <- c(basics, paste0("Penalty: ", penalty))
+  basics <- c(basics, paste0("Method: ", method))
+  
+  basics <- c(basics, paste0("Regularized parameters: ", 
+                             paste0(object@regularized, collapse = ", "))
+              )
+  
+  nextSteps <- c("Next steps:")
+  nextSteps <- c(nextSteps,
+                 c(
+                   "Use coef(object) to get the parameter estimates of the model. With coef(object, criterion = 'BIC') parameters estimates at the lowest BIC can be extracted.",
+                   "Use plot(object) to plot the parameter estimates of the model.",
+                   "Use fitIndices(object) to get the fit indices."
+                 )
+  )
+  
+  rlang::inform(basics)
+  rlang::inform(nextSteps)
 })
 
 #' summary
@@ -47,20 +71,7 @@ setMethod("show", "regularizedSEM", function (object) {
 #' @return No return value, just prints estimates
 #' @export
 setMethod("summary", "regularizedSEM", function (object) {
-  modelName <-deparse(substitute(object)) # get the name of the object
-  cat(paste0("#### Model of class regularizedSEM with ",object@inputArguments$penalty, " penalty ####\n\n"))
-  cat("regularized parameters: ")
-  cat(paste0(object@regularized, collapse = ", "))
-  cat("\n\n")
-  cat(paste0("- Use coef(", modelName, 
-             ") to get the parameter estimates of the model. With coef(", 
-             modelName, ", criterion = 'BIC') parameters estimates at the lowest BIC can be extracted.\n\n"))
-  cat(paste0("- Use plot(", modelName, 
-             ") to plot the parameter estimates of the model.\n\n"))
-  cat(paste0("- Information criteria can be computed with AIC(", modelName, 
-             ") or BIC(", modelName, 
-             ").\n\n"))
-  cat("################################################\n")
+  show(object)
 })
 
 #' coef
@@ -68,7 +79,7 @@ setMethod("summary", "regularizedSEM", function (object) {
 #' Returns the parameter estimates of a regularizedSEM
 #' 
 #' @param object object of class regularizedSEM
-#' @param ... criterion can be one of: "AIC", "BIC". If set to NULL, all parameters will be returned
+#' @param ... criterion can be one of the ones returned by fitIndices. If set to NULL, all parameters will be returned
 #' @return parameters of the model as data.frame
 #' @export
 setMethod("coef", "regularizedSEM", function (object, ...) {
@@ -82,31 +93,20 @@ setMethod("coef", "regularizedSEM", function (object, ...) {
   tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
   estimates <- as.matrix(object@parameters[,object@parameterLabels,drop=FALSE])
   
-  if(!is.null(criterion) && criterion %in% c("AIC", "BIC")){
-    if(length(unique(object@fits$nonZeroParameters)) == 1) 
-      stop("Selection by criterion currently only supported for sparsity inducing penalties. Either none of your parameters was zeroed or the penalty used does not induce sparsity.")
-    if(criterion == "AIC"){
-      AICs <- AIC(object)
-      bestAIC <- which(AICs$AIC == min(AICs$AIC))[1]
-      
-      coefs <- new("lessSEMCoef")
-      coefs@tuningParameters <- tuningParameters[bestAIC,,drop = FALSE]
-      coefs@estimates <- estimates[bestAIC,,drop = FALSE]
-      
-      return(coefs) 
-    }
+  if(!is.null(criterion)){
     
-    if(criterion == "BIC"){
-      BICs <- BIC(object)
-      bestBIC <- which(BICs$BIC == min(BICs$BIC))[1]
-      
-      coefs <- new("lessSEMCoef")
-      coefs@tuningParameters <- tuningParameters[bestBIC,,drop = FALSE]
-      coefs@estimates <- estimates[bestBIC,,drop = FALSE]
-      
-      return(coefs)
-    }
+    fits <- fitIndices(object)
     
+    if(!criterion %in% colnames(fits))
+      stop("Could not find", criterion, "in fitIndices(object).")
+    
+    bestFit <- which(fits[,criterion] == min(fits[,criterion]))[1]
+    
+    coefs <- new("lessSEMCoef")
+    coefs@tuningParameters <- tuningParameters[bestFit,,drop = FALSE]
+    coefs@estimates <- estimates[bestFit,,drop = FALSE]
+    
+    return(coefs) 
   }
   
   coefs <- new("lessSEMCoef")

@@ -73,8 +73,6 @@ mp <- lavaanModel |>
            lambdas = seq(0,1,.1)) |>
   addLasso(regularized = c("r1", "r2", "r3"), 
            lambdas = seq(0,1,.2)) 
-#> Note: 
-#> • Mixed penalties is a very new feature. Please note that there may still be bugs in the procedure. Use carefully!
 ```
 Note that we can use the pipe-operator to add multiple penalties. They
 don't have to be the same; the following would also work:
@@ -87,8 +85,6 @@ mp <- lavaanModel |>
   addScad(regularized = c("r1", "r2", "r3"), 
           lambdas = seq(0,1,.2),
           thetas = 3.7) 
-#> Note: 
-#> • Mixed penalties is a very new feature. Please note that there may still be bugs in the procedure. Use carefully!
 ```
 
 To fit the model, we use the `fit`- function:
@@ -193,8 +189,6 @@ mp <- lavaanModel |>
                 lambdas = seq(0,1,.1)) |>
   addLasso(regularized = c("r1", "r2", "r3"), 
                 lambdas = seq(0,1,.2)) 
-#> Note: 
-#> • Mixed penalties is a very new feature. Please note that there may still be bugs in the procedure. Use carefully!
 ```
 To fit the model, we use the `fit`- function:
 
@@ -267,8 +261,8 @@ getTuningParameterConfiguration(regularizedSEMMixedPenalty = fitMp,
 
 
 Here is a short run-time comparison of ista and glmnet with the lasso-regularized 
-model from above: Five repetitions using ista took 40.479 seconds,
-while glmnet took 1.751 seconds. That is, if you 
+model from above: Five repetitions using ista took 34.811 seconds,
+while glmnet took 1.405 seconds. That is, if you 
 can use glmnet with your model, we recommend that you do.
 
 ## Bibliography

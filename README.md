@@ -49,7 +49,7 @@ used to regularize basic SEM. In fact, as outlined above, **lessSEM** is
 heavily inspired by [**regsem**](https://github.com/Rjacobucci/regsem)
 and [**lslx**](https://github.com/psyphh/lslx). However, the packages
 differ in their targets: The objective of **lessSEM** is not to replace
-the more major packages
+the more mature packages
 [**regsem**](https://github.com/Rjacobucci/regsem) and
 [**lslx**](https://github.com/psyphh/lslx). Instead, our objective is to
 provide method developers with a flexible framework for regularized SEM.
@@ -70,9 +70,6 @@ implemented in the three packages:
 | Equality constraints          | Yes             | No                  | Yes             |
 | Parameter transformations     | diff_lasso      | No                  | Yes             |
 | Definition variables          | No              | No                  | Yes             |
-
-Because **lessSEM** is fairly new, we currently recommend using **lslx**
-for cases that are covered by both, **lessSEM** and **lslx**.
 
 # Installation
 

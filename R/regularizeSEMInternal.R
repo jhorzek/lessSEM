@@ -530,6 +530,7 @@
   }
   
   if(is(SEM, "Rcpp_SEMCpp")) internalOptimization <- list(
+    "isMultiGroup" = FALSE,
     "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = SEM$functionCalls,
@@ -538,6 +539,7 @@
     "estimator"= SEM$getEstimator()
   )
   if(is(SEM, "Rcpp_mgSEM")) internalOptimization <- list(
+    "isMultiGroup" = TRUE,
     "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = NA,
@@ -545,6 +547,10 @@
     "N" = SEM$sampleSize,
     "estimator"= SEM$getEstimator()
   )
+  
+  if(any(internalOptimization$estimator == "wls")){
+    notes <- c(notes, "WLS (and variants) is a very new feature and not yet thoroughly tested. Please be wary of bugs!")
+  }
   
   results <- new("regularizedSEM",
                  penalty = penalty,
