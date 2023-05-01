@@ -54,8 +54,7 @@
 #' lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.
 #' @param additionalArguments list with additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -197,7 +196,8 @@ gpLassoCpp <- function(par,
                                    curve = curve)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
-                                   alpha = 1)
+                                   alpha = 1,
+                                   theta = 0)
   }
   
   result <- .gpOptimizationInternal(par = par,
@@ -274,8 +274,7 @@ gpLassoCpp <- function(par,
 #' @param weights labeled vector with adaptive lasso weights. NULL will use 1/abs(par)
 #' @param additionalArguments list with additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -430,7 +429,8 @@ gpAdaptiveLassoCpp <- function(par,
                                    curve = curve)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
-                                   alpha = 1)
+                                   alpha = 1,
+                                   theta = 0)
   }
   
   result <- .gpOptimizationInternal(par = par,
@@ -502,8 +502,7 @@ gpAdaptiveLassoCpp <- function(par,
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param additionalArguments list with additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -632,7 +631,8 @@ gpRidgeCpp <- function(par,
   
   
   tuningParameters <- data.frame(lambda = lambdas,
-                                 alpha = 0)
+                                 alpha = 0,
+                                 theta = 0)
   
   result <- .gpOptimizationInternal(par = par,
                                             fn = fn,
@@ -706,10 +706,10 @@ gpRidgeCpp <- function(par,
 #' between 0 and 1. 0 = ridge, 1 = lasso.
 #' @param additionalArguments list with additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
-#' the lessSEM::controlIsta() and controlGlmnet() functions.
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @returns Object of class gpRegularized
 
 #' @examples
@@ -837,7 +837,8 @@ gpElasticNetCpp <- function(par,
   }
   
   tuningParameters <- expand.grid(lambda = lambdas,
-                                  alpha = alphas)
+                                  alpha = alphas,
+                                  theta = 0)
   
   
   result <- .gpOptimizationInternal(par = par,
@@ -912,8 +913,11 @@ gpElasticNetCpp <- function(par,
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas parameters whose absolute value is above this threshold will be penalized with
 #' a constant (theta)
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @returns Object of class gpRegularized
 
 #' @examples 
@@ -1029,7 +1033,8 @@ gpCappedL1Cpp <- function(par,
                        regularized,
                        lambdas,
                        thetas,
-                       control = lessSEM::controlIsta()){
+                       method = "glmnet",
+                       control = lessSEM::controlGlmnet()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -1050,7 +1055,7 @@ gpCappedL1Cpp <- function(par,
                                             tuningParameters = expand.grid(lambda = lambdas, 
                                                                            theta = thetas,
                                                                            alpha = 1), 
-                                            method = "ista",
+                                            method = method,
                                             control = control
   )
   
@@ -1112,8 +1117,11 @@ gpCappedL1Cpp <- function(par,
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas numeric vector: values for the tuning parameter theta
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @returns Object of class gpRegularized
 #' @examples
 #' \donttest{
@@ -1229,7 +1237,8 @@ gpLspCpp <- function(par,
                   regularized,
                   lambdas,
                   thetas,
-                  control = lessSEM::controlIsta()){
+                  method = "glmnet",
+                  control = lessSEM::controlGlmnet()){
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
   }
@@ -1247,8 +1256,9 @@ gpLspCpp <- function(par,
                                             penalty = "lsp", 
                                             weights = regularized,
                                             tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas), 
-                                            method = "ista",
+                                                                           theta = thetas,
+                                                                           alpha = 1), 
+                                            method = method,
                                             control = control
   )
   
@@ -1312,8 +1322,11 @@ gpLspCpp <- function(par,
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas numeric vector: values for the tuning parameter theta
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @returns Object of class gpRegularized
 
 #' @examples 
@@ -1430,7 +1443,8 @@ gpMcpCpp <- function(par,
                   regularized,
                   lambdas,
                   thetas,
-                  control = lessSEM::controlIsta()){
+                  method = "glmnet",
+                  control = lessSEM::controlGlmnet()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -1449,8 +1463,9 @@ gpMcpCpp <- function(par,
                                             penalty = "mcp", 
                                             weights = regularized,
                                             tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas), 
-                                            method = "ista",
+                                                                           theta = thetas,
+                                                                           alpha = 1), 
+                                            method = method,
                                             control = control
   )
   
@@ -1520,8 +1535,11 @@ gpMcpCpp <- function(par,
 #' getLavaanParameters(model) with your lavaan model object
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas numeric vector: values for the tuning parameter theta
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @returns Object of class gpRegularized
 
 #' @examples 
@@ -1638,7 +1656,8 @@ gpScadCpp <- function(par,
                    regularized,
                    lambdas,
                    thetas,
-                   control = lessSEM::controlIsta()){
+                   method = "glmnet",                      
+                   control = lessSEM::controlGlmnet()){
   
   if(!is(fn, "externalptr") | !is(gr, "externalptr")){
     stop("fn and gr must be pointers to C++ functions.")
@@ -1657,8 +1676,9 @@ gpScadCpp <- function(par,
                                             penalty = "scad", 
                                             weights = regularized,
                                             tuningParameters = expand.grid(lambda = lambdas, 
-                                                                           theta = thetas), 
-                                            method = "ista",
+                                                                           theta = thetas,
+                                                                           alpha = 1), 
+                                            method = method,
                                             control = control
   )
   

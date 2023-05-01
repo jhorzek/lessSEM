@@ -61,7 +61,6 @@
         if(round(mySEM$objectiveValue - (-2*lavaan::logLik(lavaanModel)), 4) !=0) 
           stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
       }else if(mySEM$getEstimator() == "wls"){
-        rlang::warn(c("Using WLS", "WLS (and variants) is a very new feature and not yet thoroughly tested. Please be wary of bugs!"))
         # to stay consistent with lavaan, we have to use the following
         # scaling:
         lessSEMObjective <- 0.5 * (mySEM$sampleSize-1)/(mySEM$sampleSize^2)* mySEM$objectiveValue

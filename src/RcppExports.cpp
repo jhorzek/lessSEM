@@ -61,20 +61,14 @@ RcppExport SEXP _rcpp_module_boot_glmnetEnetSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetEnetMgSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnetSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnetMgSEM_cpp();
-RcppExport SEXP _rcpp_module_boot_istaCappedL1GeneralPurpose_cpp();
-RcppExport SEXP _rcpp_module_boot_istaCappedL1GeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetEnetGeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurpose_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetEnetGeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaEnetGeneralPurposeCpp_cpp();
-RcppExport SEXP _rcpp_module_boot_istaLspGeneralPurpose_cpp();
-RcppExport SEXP _rcpp_module_boot_istaLspGeneralPurposeCpp_cpp();
-RcppExport SEXP _rcpp_module_boot_istaMcpGeneralPurpose_cpp();
-RcppExport SEXP _rcpp_module_boot_istaMcpGeneralPurposeCpp_cpp();
-RcppExport SEXP _rcpp_module_boot_istaScadGeneralPurpose_cpp();
-RcppExport SEXP _rcpp_module_boot_istaScadGeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetCappedL1SEM_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetCappedL1MgSEM_cpp();
+RcppExport SEXP _rcpp_module_boot_glmnetMixedPenaltyGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_glmnetMixedPenaltyGeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetLspSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetLspMgSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetMcpSEM_cpp();
@@ -83,6 +77,8 @@ RcppExport SEXP _rcpp_module_boot_glmnetMixedSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetMixedMgSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetScadSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_glmnetScadMgSEM_cpp();
+RcppExport SEXP _rcpp_module_boot_istaMixedPenaltyGeneralPurpose_cpp();
+RcppExport SEXP _rcpp_module_boot_istaMixedPenaltyGeneralPurposeCpp_cpp();
 RcppExport SEXP _rcpp_module_boot_istaLSPSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaLSPMgSEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaMcpSEM_cpp();
@@ -106,20 +102,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_glmnetEnetMgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnetMgSEM_cpp, 0},
     {"_rcpp_module_boot_istaEnetSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetSEM_cpp, 0},
     {"_rcpp_module_boot_istaEnetMgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetMgSEM_cpp, 0},
-    {"_rcpp_module_boot_istaCappedL1GeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaCappedL1GeneralPurpose_cpp, 0},
-    {"_rcpp_module_boot_istaCappedL1GeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaCappedL1GeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnetGeneralPurpose_cpp, 0},
     {"_rcpp_module_boot_istaEnetGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetGeneralPurpose_cpp, 0},
     {"_rcpp_module_boot_glmnetEnetGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetEnetGeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_istaEnetGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaEnetGeneralPurposeCpp_cpp, 0},
-    {"_rcpp_module_boot_istaLspGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaLspGeneralPurpose_cpp, 0},
-    {"_rcpp_module_boot_istaLspGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaLspGeneralPurposeCpp_cpp, 0},
-    {"_rcpp_module_boot_istaMcpGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcpGeneralPurpose_cpp, 0},
-    {"_rcpp_module_boot_istaMcpGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcpGeneralPurposeCpp_cpp, 0},
-    {"_rcpp_module_boot_istaScadGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaScadGeneralPurpose_cpp, 0},
-    {"_rcpp_module_boot_istaScadGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaScadGeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_glmnetCappedL1SEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetCappedL1SEM_cpp, 0},
     {"_rcpp_module_boot_glmnetCappedL1MgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetCappedL1MgSEM_cpp, 0},
+    {"_rcpp_module_boot_glmnetMixedPenaltyGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetMixedPenaltyGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_glmnetMixedPenaltyGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetMixedPenaltyGeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_glmnetLspSEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetLspSEM_cpp, 0},
     {"_rcpp_module_boot_glmnetLspMgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetLspMgSEM_cpp, 0},
     {"_rcpp_module_boot_glmnetMcpSEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetMcpSEM_cpp, 0},
@@ -128,6 +118,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_glmnetMixedMgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetMixedMgSEM_cpp, 0},
     {"_rcpp_module_boot_glmnetScadSEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetScadSEM_cpp, 0},
     {"_rcpp_module_boot_glmnetScadMgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_glmnetScadMgSEM_cpp, 0},
+    {"_rcpp_module_boot_istaMixedPenaltyGeneralPurpose_cpp", (DL_FUNC) &_rcpp_module_boot_istaMixedPenaltyGeneralPurpose_cpp, 0},
+    {"_rcpp_module_boot_istaMixedPenaltyGeneralPurposeCpp_cpp", (DL_FUNC) &_rcpp_module_boot_istaMixedPenaltyGeneralPurposeCpp_cpp, 0},
     {"_rcpp_module_boot_istaLSPSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaLSPSEM_cpp, 0},
     {"_rcpp_module_boot_istaLSPMgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaLSPMgSEM_cpp, 0},
     {"_rcpp_module_boot_istaMcpSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaMcpSEM_cpp, 0},

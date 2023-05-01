@@ -63,8 +63,7 @@
 #' lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -124,7 +123,11 @@
 #'   N = N
 #' )
 #' plot(lassoPen)
-#' AIC(lassoPen)
+#' 
+#' # You can access the fit results as follows:
+#' lassoPen@fits
+#' # Note that we won't compute any fit measures automatically, as
+#' # we cannot be sure how the AIC, BIC, etc are defined for your objective function 
 #' 
 #' @export
 gpLasso <- function(par,
@@ -165,7 +168,8 @@ gpLasso <- function(par,
                                    curve = curve)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
-                                   alpha = 1)
+                                   alpha = 1,
+                                   theta = 0)
   }
   
   result <- .gpOptimizationInternal(par = par,
@@ -249,8 +253,7 @@ gpLasso <- function(par,
 #' lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda for more information.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -317,7 +320,10 @@ gpLasso <- function(par,
 #'   N = N
 #' )
 #' plot(adaptiveLassoPen)
-#' AIC(adaptiveLassoPen)
+#' # You can access the fit results as follows:
+#' adaptiveLassoPen@fits
+#' # Note that we won't compute any fit measures automatically, as
+#' # we cannot be sure how the AIC, BIC, etc are defined for your objective function 
 #' 
 #' # for comparison:
 #' # library(glmnet)
@@ -382,7 +388,8 @@ gpAdaptiveLasso <- function(par,
                                    curve = curve)
   }else{
     tuningParameters <- data.frame(lambda = lambdas,
-                                   alpha = 1)
+                                   alpha = 1,
+                                   theta = 0)
   }
   
   result <- .gpOptimizationInternal(par = par,
@@ -458,8 +465,7 @@ gpAdaptiveLasso <- function(par,
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -562,7 +568,8 @@ gpRidge <- function(par,
   
   
   tuningParameters <- data.frame(lambda = lambdas,
-                                 alpha = 0)
+                                 alpha = 0,
+                                 theta = 0)
   
   result <- .gpOptimizationInternal(par = par,
                                     fn = fn,
@@ -641,12 +648,11 @@ gpRidge <- function(par,
 #' @param regularized vector with names of parameters which are to be regularized.
 #' @param ... additional arguments passed to fn and gr
 #' @param method which optimizer should be used? Currently implemented are ista
-#' and glmnet. With ista, the control argument can be used to switch to related procedures
-#' (currently gist).
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
-#' the lessSEM::controlIsta() and controlGlmnet() functions.
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @returns Object of class gpRegularized
-
 #' @examples
 #' # This example shows how to use the optimizers
 #' # for other objective functions. We will use
@@ -750,7 +756,8 @@ gpElasticNet <- function(par,
   rm("...")
   
   tuningParameters <- expand.grid(lambda = lambdas,
-                                  alpha = alphas)
+                                  alpha = alphas,
+                                  theta = 0)
   
   
   result <- .gpOptimizationInternal(par = par,
@@ -828,8 +835,11 @@ gpElasticNet <- function(par,
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas parameters whose absolute value is above this threshold will be penalized with
 #' a constant (theta)
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @returns Object of class gpRegularized
 
 #' @examples 
@@ -926,7 +936,8 @@ gpCappedL1 <- function(par,
                        regularized,
                        lambdas,
                        thetas,
-                       control = lessSEM::controlIsta()){
+                       method = "glmnet", 
+                       control = lessSEM::controlGlmnet()){
   
   removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
@@ -954,7 +965,7 @@ gpCappedL1 <- function(par,
                                     tuningParameters = expand.grid(lambda = lambdas, 
                                                                    theta = thetas,
                                                                    alpha = 1), 
-                                    method = "ista",
+                                    method = method,
                                     control = control
   )
   
@@ -1017,8 +1028,11 @@ gpCappedL1 <- function(par,
 #' @param regularized vector with names of parameters which are to be regularized.
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas numeric vector: values for the tuning parameter theta
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @returns Object of class gpRegularized
 #' @examples 
 #' library(lessSEM)
@@ -1100,7 +1114,8 @@ gpLsp <- function(par,
                   regularized,
                   lambdas,
                   thetas,
-                  control = lessSEM::controlIsta()){
+                  method = "glmnet", 
+                  control = lessSEM::controlGlmnet()){
   removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
   additionalArguments <- removeDotDotDot$additionalArguments
@@ -1125,8 +1140,9 @@ gpLsp <- function(par,
                                     penalty = "lsp", 
                                     weights = regularized,
                                     tuningParameters = expand.grid(lambda = lambdas, 
-                                                                   theta = thetas), 
-                                    method = "ista",
+                                                                   theta = thetas,
+                                                                   alpha = 1), 
+                                    method = method,
                                     control = control
   )
   
@@ -1193,8 +1209,11 @@ gpLsp <- function(par,
 #' @param regularized vector with names of parameters which are to be regularized.
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas numeric vector: values for the tuning parameter theta
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @returns Object of class gpRegularized
 
 #' @examples 
@@ -1266,7 +1285,8 @@ gpMcp <- function(par,
                   regularized,
                   lambdas,
                   thetas,
-                  control = lessSEM::controlIsta()){
+                  method = "glmnet", 
+                  control = lessSEM::controlGlmnet()){
   
   removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
@@ -1292,8 +1312,9 @@ gpMcp <- function(par,
                                     penalty = "mcp", 
                                     weights = regularized,
                                     tuningParameters = expand.grid(lambda = lambdas, 
-                                                                   theta = thetas), 
-                                    method = "ista",
+                                                                   theta = thetas,
+                                                                   alpha = 1), 
+                                    method = method,
                                     control = control
   )
   
@@ -1366,8 +1387,11 @@ gpMcp <- function(par,
 #' @param regularized vector with names of parameters which are to be regularized.
 #' @param lambdas numeric vector: values for the tuning parameter lambda
 #' @param thetas numeric vector: values for the tuning parameter theta
+#' @param method which optimizer should be used? Currently implemented are ista
+#' and glmnet. 
 #' @param control used to control the optimizer. This element is generated with 
-#' the controlIsta (see ?controlIsta)
+#' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+#' for more details.
 #' @returns Object of class gpRegularized
 
 #' @examples 
@@ -1448,7 +1472,8 @@ gpScad <- function(par,
                    regularized,
                    lambdas,
                    thetas,
-                   control = lessSEM::controlIsta()){
+                   method = "glmnet", 
+                   control = lessSEM::controlGlmnet()){
   
   removeDotDotDot <- .noDotDotDot(fn, fnName = "fn", ... = ...)
   fn <- removeDotDotDot[[1]]
@@ -1474,8 +1499,9 @@ gpScad <- function(par,
                                     penalty = "scad", 
                                     weights = regularized,
                                     tuningParameters = expand.grid(lambda = lambdas, 
-                                                                   theta = thetas), 
-                                    method = "ista",
+                                                                   theta = thetas,
+                                                                   alpha = 1), 
+                                    method = method,
                                     control = control
   )
   

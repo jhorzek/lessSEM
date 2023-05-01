@@ -50,8 +50,7 @@ lambda values will be more concentrated close to 0. See ?lessSEM::curveLambda fo
 \item{...}{additional arguments passed to fn and gr}
 
 \item{method}{which optimizer should be used? Currently implemented are ista
-and glmnet. With ista, the control argument can be used to switch to related procedures
-(currently gist).}
+and glmnet.}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
@@ -170,7 +169,10 @@ adaptiveLassoPen <- gpAdaptiveLasso(
   N = N
 )
 plot(adaptiveLassoPen)
-AIC(adaptiveLassoPen)
+# You can access the fit results as follows:
+adaptiveLassoPen@fits
+# Note that we won't compute any fit measures automatically, as
+# we cannot be sure how the AIC, BIC, etc are defined for your objective function 
 
 # for comparison:
 # library(glmnet)
