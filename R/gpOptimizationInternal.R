@@ -328,17 +328,10 @@
     
   }
   
-  notes <- c(notes,
-             paste0("The fit will be called m2LL (minus 2 log-likelihood) and regM2LL",
-                    "(regularized minus 2 log-likelihood). Please note that computing ",
-                    "AIC, BIC, etc based on these measures is only valid if your fitting ",
-                    "function is actually a -2 log Likelihood.")
-  )
-  
   fits <- data.frame(
     tuningParameters,
-    "m2LL" = NA,
-    "regM2LL"= NA,
+    "objectiveValue" = NA,
+    "regObjectiveValue"= NA,
     "nonZeroParameters" = NA,
     "convergence" = NA
   )
@@ -415,9 +408,9 @@
     
     fits$nonZeroParameters[it] <- length(rawParameters) - 
       sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
-    fits$regM2LL[it] <- result$fit
+    fits$regObjectiveValue[it] <- result$fit
     fits$convergence[it] <- result$convergence
-    if(!isCpp) fits$m2LL[it] <- fn(rawParameters, parameterLabels, additionalArguments)
+    if(!isCpp) fits$objectiveValue[it] <- fn(rawParameters, parameterLabels, additionalArguments)
     
     if(method == "glmnet" && control$saveHessian) 
       Hessians$Hessian[[it]] <- result$Hessian

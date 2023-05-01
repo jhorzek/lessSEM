@@ -123,7 +123,11 @@
 #'   N = N
 #' )
 #' plot(lassoPen)
-#' AIC(lassoPen)
+#' 
+#' # You can access the fit results as follows:
+#' lassoPen@fits
+#' # Note that we won't compute any fit measures automatically, as
+#' # we cannot be sure how the AIC, BIC, etc are defined for your objective function 
 #' 
 #' @export
 gpLasso <- function(par,
@@ -316,7 +320,10 @@ gpLasso <- function(par,
 #'   N = N
 #' )
 #' plot(adaptiveLassoPen)
-#' AIC(adaptiveLassoPen)
+#' # You can access the fit results as follows:
+#' adaptiveLassoPen@fits
+#' # Note that we won't compute any fit measures automatically, as
+#' # we cannot be sure how the AIC, BIC, etc are defined for your objective function 
 #' 
 #' # for comparison:
 #' # library(glmnet)
@@ -646,7 +653,6 @@ gpRidge <- function(par,
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
 #' @returns Object of class gpRegularized
-
 #' @examples
 #' # This example shows how to use the optimizers
 #' # for other objective functions. We will use

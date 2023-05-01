@@ -159,6 +159,10 @@ lassoPen <- gpLasso(
   N = N
 )
 plot(lassoPen)
-AIC(lassoPen)
+
+# You can access the fit results as follows:
+lassoPen@fits
+# Note that we won't compute any fit measures automatically, as
+# we cannot be sure how the AIC, BIC, etc are defined for your objective function 
 
 }
