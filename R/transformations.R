@@ -50,10 +50,15 @@
     )
   }
   
-  notes <- c(notes,
-             paste0("Compiling the transformation function with armadillo version ",
-                    paste0(  RcppArmadillo::armadillo_version(single = FALSE), collapse = "."),
-                    ". This may take a few seconds."))
+  # We always print the following note:
+  cat("\n")
+  rlang::inform(
+    c("Compilation Note:",
+      paste0("Compiling the transformation function with armadillo version ",
+             paste0(  RcppArmadillo::armadillo_version(single = FALSE), collapse = "."),
+             ". This may take a few seconds.")
+    )
+  )
   
   Rcpp::sourceCpp(code = armaFunction)
   
