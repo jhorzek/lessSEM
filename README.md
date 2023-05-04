@@ -49,7 +49,7 @@ used to regularize basic SEM. In fact, as outlined above, **lessSEM** is
 heavily inspired by [**regsem**](https://github.com/Rjacobucci/regsem)
 and [**lslx**](https://github.com/psyphh/lslx). However, the packages
 differ in their targets: The objective of **lessSEM** is not to replace
-the more major packages
+the more mature packages
 [**regsem**](https://github.com/Rjacobucci/regsem) and
 [**lslx**](https://github.com/psyphh/lslx). Instead, our objective is to
 provide method developers with a flexible framework for regularized SEM.
@@ -60,7 +60,8 @@ implemented in the three packages:
 |-------------------------------|-----------------|---------------------|-----------------|
 | Model specification           | based on lavaan | similar to lavaan   | based on lavaan |
 | Maximum likelihood estimation | Yes             | Yes                 | Yes             |
-| Least squares estimation      | No              | Yes                 | No              |
+| Least squares estimation      | No              | Yes                 | Yes             |
+| Categorical variables         | No              | Yes                 | No              |
 | Confidence Intervals          | No              | Yes                 | No              |
 | Missing Data                  | FIML            | Auxiliary Variables | FIML            |
 | Multi-group models            | No              | Yes                 | Yes             |
@@ -69,9 +70,6 @@ implemented in the three packages:
 | Equality constraints          | Yes             | No                  | Yes             |
 | Parameter transformations     | diff_lasso      | No                  | Yes             |
 | Definition variables          | No              | No                  | Yes             |
-
-Because **lessSEM** is fairly new, we currently recommend using **lslx**
-for cases that are covered by both, **lessSEM** and **lslx**.
 
 # Installation
 
@@ -115,6 +113,7 @@ cross-lagged panel model) in the package
 
 ``` r
 library(lessSEM)
+#> Warning: package 'lavaan' was built under R version 4.2.3
 library(lavaan)
 
 # Identical to regsem, lessSEM builds on the lavaan

@@ -4,6 +4,7 @@
 #' @slot parameterLabels character vector with names of all parameters
 #' @slot internalOptimization list of elements used internally
 #' @slot inputArguments list with elements passed by the user to the general
+#' @slot notes internal notes that have come up when fitting the model
 #' @keywords internal
 setClass(Class = "regularizedSEMWithCustomPenalty",
          representation = representation(
@@ -11,7 +12,8 @@ setClass(Class = "regularizedSEMWithCustomPenalty",
            fits="data.frame", 
            parameterLabels = "character",
            internalOptimization = "list",
-           inputArguments="list"
+           inputArguments="list",
+           notes = "character"
          )
 )
 

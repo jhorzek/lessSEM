@@ -9,7 +9,8 @@
   rawParameters,
   lavaanModel,
   SEM,
-  addMeans
+  addMeans,
+  notes = NULL
 )
 }
 \arguments{
@@ -32,9 +33,12 @@ the transformation of the variances), but works quite well in practice.}
 \item{SEM}{internal SEM representation}
 
 \item{addMeans}{should a mean structure be added to the model?}
+
+\item{notes}{option to pass a notes to function. All notes of the current
+function will be added}
 }
 \value{
-Hessian matrix
+Hessian matrix and notes
 }
 \description{
 computes the initial Hessian used in the optimization. Because we use the parameter

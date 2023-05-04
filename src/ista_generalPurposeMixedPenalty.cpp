@@ -4,23 +4,16 @@
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
-//'@name istaLspGeneralPurpose
-//'@title lsp optimization with ista
-//'@description Object for lsp optimization with
-//'ista optimizer
-//'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
-//'@field optimize optimize the model. Expects a vector with starting values,
-//'an R function to compute the fit, an R function to compute the gradients, a
-//'list with elements the fit and gradient function require, a theta and a lambda value (alpha must be 1).
-//'@returns a list with fit results
-class istaLspGeneralPurpose{
+class istaMixedPenaltyGeneralPurpose{
   public:
     
-    
-    // settings
-  const Rcpp::NumericVector weights;
+    Rcpp::NumericVector startingValues;
   
+  std::vector<lessSEM::penaltyType> pType;
+  arma::rowvec lambda;
+  arma::rowvec theta;
+  arma::rowvec alpha;
+  const arma::rowvec weights;
   // control optimizer
   const double L0;
   const double eta;
@@ -33,11 +26,13 @@ class istaLspGeneralPurpose{
   const lessSEM::stepSizeInheritance stepSizeInh;
   const int verbose; 
   
+  
   // constructor
-  istaLspGeneralPurpose(
-    const Rcpp::NumericVector weights_,
+  istaMixedPenaltyGeneralPurpose(
+    const arma::rowvec weights_,
+    const std::vector<std::string> pType_str,
     Rcpp::List control
-  ):
+  ): 
     weights(weights_),
   L0(Rcpp::as<double> (control["L0"])),
   eta(Rcpp::as<double> (control["eta"])),
@@ -48,33 +43,42 @@ class istaLspGeneralPurpose{
   convCritInner(static_cast<lessSEM::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
   sigma(Rcpp::as<double> (control["sigma"])),
   stepSizeInh(static_cast<lessSEM::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
-  verbose(Rcpp::as<int> (control["verbose"])){}
+  verbose(Rcpp::as<int> (control["verbose"])){
+    
+    pType = lessSEM::stringPenaltyToPenaltyType(pType_str);
+    
+  }
   
   Rcpp::List optimize(
-    Rcpp::NumericVector startingValues_, 
-    Rcpp::Function fitFunction,
-    Rcpp::Function gradientFunction,
-    Rcpp::List userSuppliedElements,
-    double theta_,
-    double lambda_){
+      Rcpp::NumericVector startingValues_, 
+      Rcpp::Function fitFunction,
+      Rcpp::Function gradientFunction,
+      Rcpp::List userSuppliedElements,
+    arma::rowvec lambda_, 
+    arma::rowvec theta_,
+    arma::rowvec alpha_){
     
-    generalPurposeFitFramework gpFF(fitFunction, gradientFunction, userSuppliedElements);
+    generalPurposeFitFramework gpFF(fitFunction, 
+                                    gradientFunction, 
+                                    userSuppliedElements);
     
     int sampleSize = 1;
     
-    lessSEM::tuningParametersLSP tp;
-    tp.theta = theta_;
+    lessSEM::tuningParametersMixedPenalty tp;
+    tp.pt = pType;
     tp.lambda = lambda_;
+    tp.theta = theta_;
+    tp.alpha = alpha_;
     tp.weights = weights;
     
-    // we won't need the smooth penalty; but we need to specify some tuning 
-    // parameters for the function call
-    lessSEM::tuningParametersLSP smoothTp;
+    lessSEM::tuningParametersEnet smoothTp;
+    smoothTp.alpha = 0.0;
     smoothTp.lambda = 0.0;
+    smoothTp.weights = weights;
     
-    lessSEM::proximalOperatorLSP proximalOperatorLSP_;
-    lessSEM::penaltyLSP penalty_;
-    lessSEM::noSmoothPenalty<lessSEM::tuningParametersLSP> smoothPenalty_;
+    lessSEM::proximalOperatorMixedPenalty proximalOperatorMixedPenalty_;
+    lessSEM::penaltyMixedPenalty penalty_;
+    lessSEM::penaltyRidge smoothPenalty_;
     
     lessSEM::control controlIsta = {
       L0,
@@ -93,7 +97,7 @@ class istaLspGeneralPurpose{
     lessSEM::fitResults fitResults_ = lessSEM::ista(
       gpFF,
       startingValues_,
-      proximalOperatorLSP_,
+      proximalOperatorMixedPenalty_,
       penalty_,
       smoothPenalty_,
       tp,
@@ -118,23 +122,16 @@ class istaLspGeneralPurpose{
   }
 };
 
-//'@name istaLspGeneralPurposeCpp
-//'@title lsp optimization with ista
-//'@description Object for lsp optimization with
-//'ista optimizer
-//'@field new creates a new object. Requires (1) a vector with weights for each
-//'parameter and (2) a list with control elements
-//'@field optimize optimize the model. Expects a vector with starting values,
-//'a SEXP function pointer to compute the fit, a SEXP function pointer to compute the gradients, a
-//'list with elements the fit and gradient function require, a theta and a lambda value (alpha must be 1).
-//'@returns a list with fit results
-class istaLspGeneralPurposeCpp{
+class istaMixedPenaltyGeneralPurposeCpp{
 public:
   
+  Rcpp::NumericVector startingValues;
   
-  // settings
-  const Rcpp::NumericVector weights;
-  
+  std::vector<lessSEM::penaltyType> pType;
+  arma::rowvec lambda;
+  arma::rowvec theta;
+  arma::rowvec alpha;
+  const arma::rowvec weights;
   // control optimizer
   const double L0;
   const double eta;
@@ -147,11 +144,13 @@ public:
   const lessSEM::stepSizeInheritance stepSizeInh;
   const int verbose; 
   
+  
   // constructor
-  istaLspGeneralPurposeCpp(
-    const Rcpp::NumericVector weights_,
+  istaMixedPenaltyGeneralPurposeCpp(
+    const arma::rowvec weights_,
+    const std::vector<std::string> pType_str,
     Rcpp::List control
-  ):
+  ): 
     weights(weights_),
     L0(Rcpp::as<double> (control["L0"])),
     eta(Rcpp::as<double> (control["eta"])),
@@ -162,33 +161,43 @@ public:
     convCritInner(static_cast<lessSEM::convCritInnerIsta>(Rcpp::as<int> (control["convCritInner"]))),
     sigma(Rcpp::as<double> (control["sigma"])),
     stepSizeInh(static_cast<lessSEM::stepSizeInheritance>(Rcpp::as<int> (control["stepSizeInheritance"]))),
-    verbose(Rcpp::as<int> (control["verbose"])){}
+    verbose(Rcpp::as<int> (control["verbose"])){
+    
+    pType = lessSEM::stringPenaltyToPenaltyType(pType_str);
+    
+  }
   
   Rcpp::List optimize(
       Rcpp::NumericVector startingValues_, 
       SEXP fitFunction,
       SEXP gradientFunction,
       Rcpp::List userSuppliedElements,
-      double theta_,
-      double lambda_){
+      arma::rowvec lambda_, 
+      arma::rowvec theta_,
+      arma::rowvec alpha_){
     
-    generalPurposeFitFrameworkCpp gpFF(startingValues_, fitFunction, gradientFunction, userSuppliedElements);
+    generalPurposeFitFrameworkCpp gpFF(startingValues_, 
+                                       fitFunction, 
+                                       gradientFunction, 
+                                       userSuppliedElements);
     
     int sampleSize = 1;
     
-    lessSEM::tuningParametersLSP tp;
-    tp.theta = theta_;
+    lessSEM::tuningParametersMixedPenalty tp;
+    tp.pt = pType;
     tp.lambda = lambda_;
+    tp.theta = theta_;
+    tp.alpha = alpha_;
     tp.weights = weights;
     
-    // we won't need the smooth penalty; but we need to specify some tuning 
-    // parameters for the function call
-    lessSEM::tuningParametersLSP smoothTp;
+    lessSEM::tuningParametersEnet smoothTp;
+    smoothTp.alpha = 0.0;
     smoothTp.lambda = 0.0;
+    smoothTp.weights = weights;
     
-    lessSEM::proximalOperatorLSP proximalOperatorLSP_;
-    lessSEM::penaltyLSP penalty_;
-    lessSEM::noSmoothPenalty<lessSEM::tuningParametersLSP> smoothPenalty_;
+    lessSEM::proximalOperatorMixedPenalty proximalOperatorMixedPenalty_;
+    lessSEM::penaltyMixedPenalty penalty_;
+    lessSEM::penaltyRidge smoothPenalty_;
     
     lessSEM::control controlIsta = {
       L0,
@@ -207,7 +216,7 @@ public:
     lessSEM::fitResults fitResults_ = lessSEM::ista(
       gpFF,
       startingValues_,
-      proximalOperatorLSP_,
+      proximalOperatorMixedPenalty_,
       penalty_,
       smoothPenalty_,
       tp,
@@ -232,22 +241,37 @@ public:
   }
 };
 
-RCPP_EXPOSED_CLASS(istaLspGeneralPurpose)
-RCPP_MODULE(istaLspGeneralPurpose_cpp){
-  using namespace Rcpp;
-  Rcpp::class_<istaLspGeneralPurpose>( "istaLspGeneralPurpose" )
-  .constructor<Rcpp::NumericVector,Rcpp::List>("Creates a new istaLspGeneralPurpose.")
-  // methods
-  .method( "optimize", &istaLspGeneralPurpose::optimize, "Optimizes the model. Expects fitFunction, gradientFunction, userSuppliedElements, labeled vector with starting values, theta, and lambda")
-  ;
-}
-
-RCPP_EXPOSED_CLASS(istaLspGeneralPurposeCpp)
-  RCPP_MODULE(istaLspGeneralPurposeCpp_cpp){
+//'@name istaMixedPenaltyGeneralPurpose
+//'@title mixed penalty optimization with ista
+//'@description Object for elastic net optimization with
+//'ista optimizer
+//'@field new creates a new object. 
+//'@field optimize optimize the model. 
+//'@returns a list with fit results
+RCPP_EXPOSED_CLASS_NODECL(istaMixedPenaltyGeneralPurpose)
+  RCPP_MODULE(istaMixedPenaltyGeneralPurpose_cpp){
     using namespace Rcpp;
-    Rcpp::class_<istaLspGeneralPurposeCpp>( "istaLspGeneralPurposeCpp" )
-      .constructor<Rcpp::NumericVector,Rcpp::List>("Creates a new istaLspGeneralPurposeCpp.")
+    Rcpp::class_<istaMixedPenaltyGeneralPurpose>( "istaMixedPenaltyGeneralPurpose" )
+      .constructor<arma::rowvec,std::vector<std::string>,Rcpp::List>("Creates a new istaMixedPenaltyGeneralPurpose.")
     // methods
-    .method( "optimize", &istaLspGeneralPurposeCpp::optimize, "Optimizes the model. Expects fitFunction, gradientFunction, userSuppliedElements, labeled vector with starting values, theta, and lambda")
+    .method( "optimize", &istaMixedPenaltyGeneralPurpose::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
     ;
   }
+
+//'@name istaMixedPenaltyGeneralPurposeCpp
+//'@title mixed penalty optimization with ista
+//'@description Object for elastic net optimization with
+//'ista optimizer
+//'@field new creates a new object. Requires (1) a vector with weights for each
+//'parameter, (2) a vector indicating which penalty is used, and (3) a list with control elements
+//'@field optimize optimize the model. 
+//'@returns a list with fit results
+RCPP_EXPOSED_CLASS_NODECL(istaMixedPenaltyGeneralPurposeCpp)
+RCPP_MODULE(istaMixedPenaltyGeneralPurposeCpp_cpp){
+  using namespace Rcpp;
+  Rcpp::class_<istaMixedPenaltyGeneralPurposeCpp>( "istaMixedPenaltyGeneralPurposeCpp" )
+  .constructor<arma::rowvec,std::vector<std::string>,Rcpp::List>("Creates a new istaMixedPenaltyGeneralPurposeCpp.")
+  // methods
+  .method( "optimize", &istaMixedPenaltyGeneralPurposeCpp::optimize, "Optimizes the model. Expects SEM, labeled vector with starting values, theta, lambda, and alpha")
+  ;
+}

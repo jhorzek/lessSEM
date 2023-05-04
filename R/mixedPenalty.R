@@ -116,9 +116,12 @@ mixedPenalty <- function(lavaanModel,
                          modifyModel = lessSEM::modifyModel(),
                          method = "glmnet", 
                          control = lessSEM::controlGlmnet()){
+  notes <- c("Notes:")
   
-  rlang::inform(c("Note: ", paste0("Mixed penalties is a very new feature. Please note that there may still ",
-                  "be bugs in the procedure. Use carefully!")))
+  notes <- c(
+    notes,
+    paste0("Mixed penalties is a very new feature. Please note that there may still ",
+                  "be bugs in the procedure. Use carefully!"))
   
   mixedPenalty <- list(
     lavaanModel = lavaanModel,
@@ -796,7 +799,8 @@ addElasticNet <- function(mixedPenalty,
     stop("mixedPenalty must be of class mixedPenalty. ",
          "These models can be created with the regularize() function.")
   if(!mixedPenalty$method == "glmnet"){
-    rlang::inform(c("Note","Mixed penalty with addElasticNet is only supported for method = 'glmnet'. Switching optimizer to glmnet"))
+    notes <- c(notes,
+               "Mixed penalty with addElasticNet is only supported for method = 'glmnet'. Switching optimizer to glmnet")
     mixedPenalty$method = "glmnet"
     mixedPenalty$control = controlGlmnet()
   }
@@ -927,6 +931,8 @@ fit <- function(mixedPenalty){
 #' @keywords internal 
 .fitMix <- function(mixedPenalty){
   
+  notes <- c("Notes:")
+  
   lavaanModel = mixedPenalty$lavaanModel
   method = mixedPenalty$method
   modifyModel = mixedPenalty$modifyModel
@@ -954,9 +960,14 @@ fit <- function(mixedPenalty){
     SEM <- .initializeMultiGroupSEMForRegularization(lavaanModels = lavaanModel,
                                                      startingValues = startingValues,
                                                      modifyModel = modifyModel)
-    rlang::inform(c("Note", "Multi-group model. Switching initialHessian from 'lavaan' to 'compute'"))
+    notes <- c(notes,
+    "Multi-group model. Switching initialHessian from 'lavaan' to 'compute'"
+    )
     control$initialHessian <- "compute"
   }
+  
+  # check if we have a likelihood objective function:
+  usesLikelihood <- all(SEM$getEstimator() == "fiml")
   
   N <- SEM$sampleSize
   
@@ -1048,11 +1059,14 @@ fit <- function(mixedPenalty){
   
   if(method == "glmnet"){
     #### glmnet requires an initial Hessian ####
-    control$initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
-                                                     rawParameters = rawParameters, 
-                                                     lavaanModel = lavaanModel, 
-                                                     SEM = SEM,
-                                                     addMeans = modifyModel$addMeans)
+    initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
+                                            rawParameters = rawParameters, 
+                                            lavaanModel = lavaanModel, 
+                                            SEM = SEM,
+                                            addMeans = modifyModel$addMeans,
+                                            notes = notes)
+    notes <- initialHessian$notes
+    control$initialHessian <- initialHessian$initialHessian
     
     #### prepare regularized model object ####
     controlIntern <- list(
@@ -1086,6 +1100,8 @@ fit <- function(mixedPenalty){
   
   fits <- data.frame(
     "tuningParameterConfiguration" = 1:nrow(tpGrid),
+    "objectiveValue" = NA,
+    "regObjectiveValue" = NA,
     "m2LL" = NA,
     "regM2LL"= NA,
     "nonZeroParameters" = NA,
@@ -1155,7 +1171,11 @@ fit <- function(mixedPenalty){
     rawParameters <- result$rawParameters
     fits$nonZeroParameters[it] <- length(rawParameters) - 
       sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
-    fits$regM2LL[it] <- result$fit
+    
+    fits$regObjectiveValue[it] <- result$fit
+    if(usesLikelihood)
+      fits$regM2LL[it] <- fits$regObjectiveValue[it]
+    
     fits$convergence[it] <- result$convergence
     
     # get unregularized fit:
@@ -1163,7 +1183,11 @@ fit <- function(mixedPenalty){
                           names(rawParameters), 
                           values = rawParameters, 
                           raw = TRUE)
-    fits$m2LL[it] <- SEM$fit()
+    
+    fits$objectiveValue[it] <- SEM$fit()
+    if(usesLikelihood)
+      fits$m2LL[it] <- fits$objectiveValue[it]
+    
     # transform internal parameter representation to "natural" form
     transformedParameters <- .getParameters(SEM,
                                             raw = FALSE)
@@ -1234,7 +1258,13 @@ fit <- function(mixedPenalty){
     "N" = SEM$sampleSize
   )
   
-  
+  notes <- unique(notes)
+  if(length(notes) > 1){
+    cat("\n")
+    rlang::inform(
+      notes
+    )
+  }
   
   results <- new("regularizedSEMMixedPenalty",
                  penalty =  sapply(penaltyType, .penaltyTypes),
@@ -1253,7 +1283,8 @@ fit <- function(mixedPenalty){
                  regularized = names(weights)[weights!=0],
                  transformations = transformations,
                  internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
+                 inputArguments = inputArguments,
+                 notes = notes)
   
   return(results)
   
@@ -1269,6 +1300,8 @@ fit <- function(mixedPenalty){
 #' @return object of class regularizedSEMMixedPenalty
 #' @keywords internal 
 .fitElasticNetMix <- function(mixedPenalty){
+  
+  notes <- c("Notes:")
   
   lavaanModel = mixedPenalty$lavaanModel
   method = mixedPenalty$method
@@ -1348,11 +1381,14 @@ fit <- function(mixedPenalty){
   }
   
   #### glmnet requires an initial Hessian ####
-  control$initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
-                                                   rawParameters = rawParameters, 
-                                                   lavaanModel = lavaanModel, 
-                                                   SEM = SEM,
-                                                   addMeans = modifyModel$addMeans)
+  initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
+                                          rawParameters = rawParameters, 
+                                          lavaanModel = lavaanModel, 
+                                          SEM = SEM,
+                                          addMeans = modifyModel$addMeans,
+                                          notes = notes)
+  notes <- initialHessian$notes
+  control$initialHessian <- initialHessian$initialHessian
   
   #### prepare regularized model object ####
   controlIntern <- list(
@@ -1544,7 +1580,13 @@ fit <- function(mixedPenalty){
     "N" = SEM$sampleSize
   )
   
-  
+  notes <- unique(notes)
+  if(length(notes) > 1){
+    cat("\n")
+    rlang::inform(
+      notes
+    )
+  }
   
   results <- new("regularizedSEMMixedPenalty",
                  penalty =  penaltyType,
@@ -1561,7 +1603,8 @@ fit <- function(mixedPenalty){
                  regularized = names(weights)[weights!=0],
                  transformations = transformations,
                  internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
+                 inputArguments = inputArguments,
+                 notes = notes)
   
   return(results)
   

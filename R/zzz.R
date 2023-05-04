@@ -458,16 +458,12 @@ Rcpp::loadModule("bfgsEnetMgSEM_cpp", TRUE)
 
 # General Purpose
 Rcpp::loadModule("glmnetEnetGeneralPurpose_cpp", TRUE)
+Rcpp::loadModule("glmnetMixedPenaltyGeneralPurpose_cpp", TRUE)
 Rcpp::loadModule("istaEnetGeneralPurpose_cpp", TRUE)
-Rcpp::loadModule("istaLspGeneralPurpose_cpp", TRUE)
-Rcpp::loadModule("istaMcpGeneralPurpose_cpp", TRUE)
-Rcpp::loadModule("istaScadGeneralPurpose_cpp", TRUE)
-Rcpp::loadModule("istaCappedL1GeneralPurpose_cpp", TRUE)
+Rcpp::loadModule("istaMixedPenaltyGeneralPurpose_cpp", TRUE)
 
 # general Purpose with Cpp
 Rcpp::loadModule("glmnetEnetGeneralPurposeCpp_cpp", TRUE)
+Rcpp::loadModule("glmnetMixedPenaltyGeneralPurposeCpp_cpp", TRUE)
 Rcpp::loadModule("istaEnetGeneralPurposeCpp_cpp", TRUE)
-Rcpp::loadModule("istaLspGeneralPurposeCpp_cpp", TRUE)
-Rcpp::loadModule("istaMcpGeneralPurposeCpp_cpp", TRUE)
-Rcpp::loadModule("istaScadGeneralPurposeCpp_cpp", TRUE)
-Rcpp::loadModule("istaCappedL1GeneralPurposeCpp_cpp", TRUE)
+Rcpp::loadModule("istaMixedPenaltyGeneralPurposeCpp_cpp", TRUE)

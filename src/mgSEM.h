@@ -60,7 +60,7 @@ public:
   std::vector<SEMCpp> models;
   int sampleSize = 0;
   
-  double m2LL;
+  double objectiveValue;
   
   mgParameters parameters;
   arma::rowvec gradients;
@@ -95,6 +95,8 @@ public:
   void implied();
   bool impliedIsPD();
   double fit();
+  
+  std::vector<std::string> getEstimator();
   
   arma::rowvec getGradients(bool raw);
   

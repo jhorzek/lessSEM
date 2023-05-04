@@ -16,6 +16,9 @@
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
+#' @param notes option to pass a notes to function. All notes of the current
+#' function will be added
+#' @return regularized SEM 
 #' @keywords internal
 .regularizeSEMInternal <- function(lavaanModel,
                                    penalty,
@@ -23,7 +26,16 @@
                                    tuningParameters,
                                    method, 
                                    modifyModel,
-                                   control){
+                                   control,
+                                   notes = NULL){
+  
+  if(is.null(notes)){
+    printNotes <- TRUE
+    notes <- c("Notes:")
+  }else{
+    # notes already exists and we only append the new ones
+    printNotes <- FALSE
+  }
   
   inputArguments <- as.list(environment())
   
@@ -43,18 +55,29 @@
   if(method == "glmnet" && !is(control, "controlGlmnet")) 
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
+  control$breakOuter <- .adaptBreakingForWls(lavaanModel = lavaanModel, 
+                                             currentBreaking = control$breakOuter,
+                                             selectedDefault = ifelse(method == "ista",
+                                                                      control$breakOuter == controlIsta()$breakOuter,
+                                                                      control$breakOuter == controlGlmnet()$breakOuter
+                                             ))
+  
+  
   if(method == "glmnet" && is.vector(lavaanModel)){
     if(any(control$initialHessian == "lavaan")){
-      rlang::inform(c("Note","You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
   }
   if(!is.null(modifyModel$transformations)){
-    rlang::inform(c("Note","Your model has transformations:"))
-    cat(" - If you transform variances",
-        "the variance estimates returned by lessSEM may not be the true variances",
-        "but transformations thereof. Check model@transformations to find the actual variance",
-        "estimates for your regularized variances\n")
+    
+    notes <- c(notes,
+               paste("Your model has transformations. If you transform variances",
+                     "the variance estimates returned by lessSEM may not be the true variances",
+                     "but transformations thereof. Check model@transformations to find the actual variance",
+                     "estimates for your regularized variances")
+    )
     if(method == "glmnet"){
       if(any(control$initialHessian == "lavaan")){
         cat(" - Switching initialHessian from 'lavaan' to 'compute'.\n")
@@ -91,6 +114,9 @@
                                                      modifyModel = modifyModel)
   }
   
+  # check if we have a likelihood objective function:
+  usesLikelihood <- all(SEM$getEstimator() == "fiml")
+  
   N <- SEM$sampleSize
   
   # get parameters in raw form
@@ -110,11 +136,14 @@
   
   #### glmnet requires an initial Hessian ####
   if(method == "glmnet"){
-    control$initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
-                                                     rawParameters = rawParameters, 
-                                                     lavaanModel = lavaanModel, 
-                                                     SEM = SEM,
-                                                     addMeans = modifyModel$addMeans)
+    initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
+                                             rawParameters = rawParameters, 
+                                             lavaanModel = lavaanModel, 
+                                             SEM = SEM,
+                                             addMeans = modifyModel$addMeans,
+                                             notes = notes)
+    notes <- initialHessian$notes
+    control$initialHessian <- initialHessian$initialHessian
   }
   
   #### prepare regularized model object ####
@@ -272,9 +301,12 @@
   if(!is.null(tuningParameters$nLambdas)){
     # for lasso type penalties, the maximal lambda value can be determined
     # automatically
-    rlang::inform(c("Note",paste0(
-      "Automatically selecting the maximal lambda value. ",
-      " This may fail if a model with all regularized parameters set to zero is not identified."))
+    notes <- c(
+      notes,
+      paste0(
+        "Automatically selecting the maximal lambda value.",
+        " This may fail if a model with all regularized parameters set to zero is not identified."
+      )
     )
     
     maxLambda <- .getMaxLambda_C(regularizedModel = regularizedModel,
@@ -304,6 +336,8 @@
   
   fits <- data.frame(
     tuningParameters,
+    "objectiveValue" = NA,
+    "regObjectiveValue" = NA,
     "m2LL" = NA,
     "regM2LL"= NA,
     "nonZeroParameters" = NA,
@@ -391,12 +425,12 @@
       
     }else if(penalty == "cappedL1"){
       if(method == "ista")
-      result <- try(regularizedModel$optimize(rawParameters,
-                                              SEM,
-                                              tuningParameters$theta[it],
-                                              tuningParameters$lambda[it],
-                                              tuningParameters$alpha[it])
-      )
+        result <- try(regularizedModel$optimize(rawParameters,
+                                                SEM,
+                                                tuningParameters$theta[it],
+                                                tuningParameters$lambda[it],
+                                                tuningParameters$alpha[it])
+        )
       if(method == "glmnet")
         result <- try(regularizedModel$optimize(rawParameters,
                                                 SEM,
@@ -410,7 +444,11 @@
     rawParameters <- result$rawParameters
     fits$nonZeroParameters[it] <- length(rawParameters) - 
       sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
-    fits$regM2LL[it] <- result$fit
+    
+    fits$regObjectiveValue[it] <- result$fit
+    if(usesLikelihood)
+      fits$regM2LL[it] <- fits$regObjectiveValue[it]
+    
     fits$convergence[it] <- result$convergence
     
     # get unregularized fit:
@@ -418,7 +456,11 @@
                           names(rawParameters), 
                           values = rawParameters, 
                           raw = TRUE)
-    fits$m2LL[it] <- SEM$fit()
+    
+    fits$objectiveValue[it] <- SEM$fit()
+    if(usesLikelihood)
+      fits$m2LL[it] <- fits$objectiveValue[it]
+    
     # transform internal parameter representation to "natural" form
     transformedParameters <- .getParameters(SEM,
                                             raw = FALSE)
@@ -488,19 +530,27 @@
   }
   
   if(is(SEM, "Rcpp_SEMCpp")) internalOptimization <- list(
+    "isMultiGroup" = FALSE,
     "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = SEM$functionCalls,
     "gradientCalls" = SEM$gradientCalls,
-    "N" = SEM$sampleSize
+    "N" = SEM$sampleSize,
+    "estimator"= SEM$getEstimator()
   )
   if(is(SEM, "Rcpp_mgSEM")) internalOptimization <- list(
+    "isMultiGroup" = TRUE,
     "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = NA,
     "gradientCalls" = NA,
-    "N" = SEM$sampleSize
+    "N" = SEM$sampleSize,
+    "estimator"= SEM$getEstimator()
   )
+  
+  if(any(internalOptimization$estimator == "wls")){
+    notes <- c(notes, "WLS (and variants) is a very new feature and not yet thoroughly tested. Please be wary of bugs!")
+  }
   
   results <- new("regularizedSEM",
                  penalty = penalty,
@@ -511,7 +561,17 @@
                  regularized = names(weights)[weights!=0],
                  transformations = transformations,
                  internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
+                 inputArguments = inputArguments,
+                 notes = notes)
+  
+  notes <- unique(notes)
+  
+  if(printNotes & (length(notes) > 1)){
+    cat("\n")
+    rlang::inform(
+      notes
+    )
+  }
   
   return(results)
   

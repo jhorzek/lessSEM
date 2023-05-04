@@ -35,6 +35,8 @@
                                            method = "bfgs",
                                            control){
   
+  notes <- c("Notes:")
+  
   inputArguments <- as.list(environment())
   
   if(!penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) 
@@ -50,8 +52,15 @@
   if(!is(lavaanModel, "lavaan"))
     stop("lavaanModel must be of class lavaan")
   
-  if(lavaanModel@Options$estimator != "ML") 
-    stop("lavaanModel must be fit with ml estimator.")
+  if(standardize & (!tolower(lavaanModel@Options$estimator) %in% c("ml", "fiml","mlm", "mlmv", "mlmvs", "mlf", "mlr")))
+    stop("Automatic standardization is currently only implemented for maximum likelihood estimation.")
+  
+  control$breakOuter <- .adaptBreakingForWls(lavaanModel = lavaanModel, 
+                                             currentBreaking = control$breakOuter,
+                                             selectedDefault = ifelse(method == "ista",
+                                                                      control$breakOuter == controlIsta()$breakOuter,
+                                                                      control$breakOuter == controlGlmnet()$breakOuter
+                                             ))
   
   rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(rawData, "try-error")) 
@@ -80,12 +89,14 @@
   }
   
   if(penalty == "adaptiveLasso") 
-    rlang::inform(c("Note",paste0("Automatic cross-validation for adaptiveLasso requested. ", 
-                   "Note that using weights which are based on the full sample ",
-                   "may undermine cross-validation. If the default is used (weights = NULL), ",
-                   "weights for each subset will be computed using the inverse of the absolute MLE. ",
-                   "Alternatively, pass a matrix as weights argument with weights for each subset.")
-    ))
+    notes <- c(
+      notes,
+      paste0("Automatic cross-validation for adaptiveLasso requested. ", 
+             "Note that using weights which are based on the full sample ",
+             "may undermine cross-validation. If the default is used (weights = NULL), ",
+             "weights for each subset will be computed using the inverse of the absolute MLE. ",
+             "Alternatively, pass a matrix as weights argument with weights for each subset.")
+    )
   
   cvfits <- data.frame(
     tuningParameters,
@@ -148,7 +159,10 @@
       }else{
         # It is important to not scale the data prior to the splitting
         # Otherwise the data sets are not truly independent!
-        rlang::inform(c("Note","Standardizing data sets ..."))
+        notes <- c(
+          notes, 
+          "Using automatic standardizing for cross-validation data sets"
+        )
         trainSet <- scale(trainSet, center = TRUE, scale = TRUE)
         
         means <- attr(trainSet, "scaled:center")
@@ -199,6 +213,9 @@
                                                      method = method,
                                                      control = control_s
     )
+    notes <- c(notes,
+               regularizedSEM_s@notes
+    )
     
     if(penalty == "adaptiveLasso"){
       
@@ -230,7 +247,7 @@
       transformations = modifyModel$transformations,
       transformationList = modifyModel$transformationList,
       transformationGradientStepSize = modifyModel$transformationGradientStepSize
-      )
+    )
     
     
     for(p in 1:nrow(regularizedSEM_s@parameters)){
@@ -263,6 +280,13 @@
                                                       control = control
   )
   
+  notes <- unique(notes)
+  
+  if(length(notes) > 1){
+    cat("\n")
+    rlang::inform(notes)
+  }
+  
   return(
     new("cvRegularizedSEM",
         parameters=regularizedSEM_full@parameters,
@@ -272,6 +296,7 @@
         cvfitsDetails = cvfitsDetails, 
         subsets = subsets,
         subsetParameters = subsetParameters,
-        misc = misc)
+        misc = misc,
+        notes = notes)
   )
 }

@@ -29,7 +29,7 @@ public:
                if(!SEM.impliedIsPD()){
                  return(arma::datum::nan);
                }
-               return(scaleFit * SEM.m2LL);
+               return(scaleFit * SEM.objectiveValue);
              }
   
   arma::rowvec gradients(arma::rowvec parameterValues,

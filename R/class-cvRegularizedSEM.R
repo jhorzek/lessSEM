@@ -11,6 +11,7 @@
 #' @slot subsetParameters optional: data.frame with parameter estimates for all
 #' combinations of the tuning parameters in all subsets
 #' @slot misc list with additional return elements
+#' @slot notes internal notes that have come up when fitting the model
 #' @export
 setClass(Class = "cvRegularizedSEM",
          representation = representation(
@@ -22,7 +23,8 @@ setClass(Class = "cvRegularizedSEM",
            cvfitsDetails="data.frame", 
            subsets = "matrix",
            subsetParameters = "data.frame",
-           misc = "list"
+           misc = "list",
+           notes = "character"
          )
 )
 

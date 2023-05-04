@@ -92,31 +92,68 @@ public:
     for(std::size_t p = begin; p < end; p++){
       // compute the gradient for a specific parameter p:
       
-      if(SEM.data.dataSubsets.at(mp).N == 1){
+      if(SEM.estim == wls){
         
-        groupGradients.col(p) = m2LLMultiVariateNormalDerivative(
-          SEM.derivElements.uniqueLocations.at(p),
-          SEM.data.dataSubsets.at(mp).rawData(SEM.data.dataSubsets.at(mp).notMissing),
-          SEM.subsetImpliedMeans.at(mp),
-          SEM.impliedMeansDerivatives.at(p).rows(SEM.data.dataSubsets.at(mp).notMissing),
-          SEM.subsetImpliedCovariance.at(mp),
-          SEM.subsetImpliedCovarianceInverse.at(mp),
-          SEM.impliedCovarianceDerivatives.at(p).submat(SEM.data.dataSubsets.at(mp).notMissing,
-                                              SEM.data.dataSubsets.at(mp).notMissing));
-      }else{
+        if(!SEM.WLSElements.meanstructure){
+          groupGradients.col(p) = WLSDerivative(
+            SEM.WLSElements.weightsInverse,
+            SEM.data.dataSubsets.at(mp).covariance,
+            SEM.subsetImpliedCovariance.at(mp),
+            SEM.impliedCovarianceDerivatives.at(p).submat(SEM.data.dataSubsets.at(mp).notMissing,
+                                                SEM.data.dataSubsets.at(mp).notMissing));
+          
+        }else{
+          groupGradients.col(p) = WLSDerivative(
+            SEM.WLSElements.weightsInverse,
+            SEM.data.dataSubsets.at(mp).means,
+            SEM.subsetImpliedMeans.at(mp), 
+            SEM.impliedMeansDerivatives.at(p).rows(SEM.data.dataSubsets.at(mp).notMissing),
+            
+            SEM.data.dataSubsets.at(mp).covariance,
+            SEM.subsetImpliedCovariance.at(mp),
+            SEM.impliedCovarianceDerivatives.at(p).submat(SEM.data.dataSubsets.at(mp).notMissing,
+                                                SEM.data.dataSubsets.at(mp).notMissing));
+          
+        }
         
-        groupGradients.col(p) = m2LLGroupMultiVariateNormalDerivative(
-          SEM.derivElements.uniqueLocations.at(p),
-          SEM.data.dataSubsets.at(mp).N,
-          SEM.data.dataSubsets.at(mp).means,
-          SEM.subsetImpliedMeans.at(mp),
-          SEM.impliedMeansDerivatives.at(p).rows(SEM.data.dataSubsets.at(mp).notMissing),
-          SEM.data.dataSubsets.at(mp).covariance,
-          SEM.subsetImpliedCovariance.at(mp),
-          SEM.subsetImpliedCovarianceInverse.at(mp),
-          SEM.impliedCovarianceDerivatives.at(p).submat(SEM.data.dataSubsets.at(mp).notMissing,
-                                              SEM.data.dataSubsets.at(mp).notMissing));
+        // to stay consistent with lavaan:
+        // groupGradients.col(p) *= 0.5 * (SEM.data.dataSubsets.at(mp).N-1.0)/SEM.data.dataSubsets.at(mp).N;
+        
+        // We scale with N because the penalty is also scaled with N.
+        groupGradients.col(p) *= SEM.data.dataSubsets.at(mp).N;
+        
+        continue;
       }
+      
+      if(SEM.estim == fiml){
+        if(SEM.data.dataSubsets.at(mp).N == 1){
+          
+          groupGradients.col(p) = m2LLMultiVariateNormalDerivative(
+            SEM.derivElements.uniqueLocations.at(p),
+            SEM.data.dataSubsets.at(mp).rawData(SEM.data.dataSubsets.at(mp).notMissing),
+            SEM.subsetImpliedMeans.at(mp),
+            SEM.impliedMeansDerivatives.at(p).rows(SEM.data.dataSubsets.at(mp).notMissing),
+            SEM.subsetImpliedCovariance.at(mp),
+            SEM.subsetImpliedCovarianceInverse.at(mp),
+            SEM.impliedCovarianceDerivatives.at(p).submat(SEM.data.dataSubsets.at(mp).notMissing,
+                                                SEM.data.dataSubsets.at(mp).notMissing));
+        }else{
+          
+          groupGradients.col(p) = m2LLGroupMultiVariateNormalDerivative(
+            SEM.derivElements.uniqueLocations.at(p),
+            SEM.data.dataSubsets.at(mp).N,
+            SEM.data.dataSubsets.at(mp).means,
+            SEM.subsetImpliedMeans.at(mp),
+            SEM.impliedMeansDerivatives.at(p).rows(SEM.data.dataSubsets.at(mp).notMissing),
+            SEM.data.dataSubsets.at(mp).covariance,
+            SEM.subsetImpliedCovariance.at(mp),
+            SEM.subsetImpliedCovarianceInverse.at(mp),
+            SEM.impliedCovarianceDerivatives.at(p).submat(SEM.data.dataSubsets.at(mp).notMissing,
+                                                SEM.data.dataSubsets.at(mp).notMissing));
+        }
+        continue;
+      }
+      Rcpp::stop("Unknown estimator");
     }  
   };
 };

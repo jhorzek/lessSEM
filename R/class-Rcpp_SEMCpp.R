@@ -12,7 +12,7 @@ setMethod("show", "Rcpp_SEMCpp", function (object) {
   cat("Parameters:\n")
   print(.getParameters(object))
   cat("\n")
-  cat(paste0("-2 log-Likelihood: ", object$m2LL))
+  cat(paste0("Objective value: ", object$objectiveValue))
 })
 
 #' logLik
@@ -20,6 +20,10 @@ setMethod("show", "Rcpp_SEMCpp", function (object) {
 #' @param object object of class Rcpp_SEMCpp
 #' @returns log-likelihood of the model
 setMethod("logLik", "Rcpp_SEMCpp", function (object) {
+  
+  if(object$getEstimator() != "fiml")
+    stop("Likelihood can only be computed for fiml objective.")
+  
   if(!object$wasFit){
     object$fit()
   }
@@ -27,7 +31,7 @@ setMethod("logLik", "Rcpp_SEMCpp", function (object) {
   numberOfParameters <- length(.getParameters(object))
   
   ll <- new("logLikelihood",
-            logLik = -.5*object$m2LL,
+            logLik = -.5*object$objectiveValue,
             nParameters = numberOfParameters,
             N = N)
   return(ll)
