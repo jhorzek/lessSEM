@@ -95,8 +95,7 @@ setMethod("coef", "cvRegularizedSEM", function (object, ...) {
 setMethod("plot", 
           signature = c(x = "cvRegularizedSEM",
                         y = "missing"), 
-          definition = function (x, y, ...) 
-          {
+          definition = function (x, y, ...){
             
             fits <- x@cvfits
             tuningParameters <- fits[,colnames(fits)!= "cvfit",drop=FALSE]
@@ -139,3 +138,30 @@ setMethod("plot",
               
             }
           })
+
+
+#' fitIndices
+#' 
+#' @param object object of class cvRegularizedSEM
+#' @return returns a data.frame with fit indices
+#' @export
+setMethod("fitIndices", "cvRegularizedSEM", function(object) {
+  # In case of cross-validated models, we do not compute any fit measures
+  # but just return the cv-fit
+  return(object@cvfits)
+})
+
+#' estimates
+#' 
+#' @param object object of class cvRegularizedSEM
+#' @param criterion not used
+#' @return returns a matrix with estimates
+#' @export
+setMethod("estimates", "cvRegularizedSEM", function(object, criterion = NULL) {
+  if(!is.null(criterion))
+    warning(paste0(
+      "Not using criterion ", criterion, ". The returned estimates will be ",
+      "selected using cross-validation."))
+  return(coef(object)@estimates)
+  
+})

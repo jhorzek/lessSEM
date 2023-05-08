@@ -103,12 +103,16 @@
 #' 
 #' # the coefficients can be accessed with:
 #' coef(lsem)
+#' # if you are only interested in the estimates and not the tuning parameters, use
+#' coef(lsem)@estimates
+#' # or
+#' estimates(lsem)
 #' 
 #' # elements of lsem can be accessed with the @ operator:
 #' lsem@parameters
 #' 
 #' # The best parameters can also be extracted with:
-#' coef(lsem)
+#' estimates(lsem)
 #' @export
 cvLasso <- function(lavaanModel,
                     regularized,
@@ -248,12 +252,16 @@ cvLasso <- function(lavaanModel,
 #' 
 #' # the coefficients can be accessed with:
 #' coef(lsem)
+#' # if you are only interested in the estimates and not the tuning parameters, use
+#' coef(lsem)@estimates
+#' # or
+#' estimates(lsem)
 #' 
 #' # elements of lsem can be accessed with the @ operator:
 #' lsem@parameters
 #' 
 #' # The best parameters can also be extracted with:
-#' coef(lsem)
+#' estimates(lsem)
 #' @export
 cvAdaptiveLasso <- function(lavaanModel,
                             regularized,
@@ -393,6 +401,10 @@ cvAdaptiveLasso <- function(lavaanModel,
 #' 
 #' # the coefficients can be accessed with:
 #' coef(lsem)
+#' # if you are only interested in the estimates and not the tuning parameters, use
+#' coef(lsem)@estimates
+#' # or
+#' estimates(lsem)
 #' 
 #' # elements of lsem can be accessed with the @ operator:
 #' lsem@parameters
@@ -532,6 +544,10 @@ cvRidge <- function(lavaanModel,
 #' 
 #' # the coefficients can be accessed with:
 #' coef(lsem)
+#' # if you are only interested in the estimates and not the tuning parameters, use
+#' coef(lsem)@estimates
+#' # or
+#' estimates(lsem)
 #' 
 #' # elements of lsem can be accessed with the @ operator:
 #' lsem@parameters
@@ -676,6 +692,10 @@ cvElasticNet <- function(lavaanModel,
 #' 
 #' # the coefficients can be accessed with:
 #' coef(lsem)
+#' # if you are only interested in the estimates and not the tuning parameters, use
+#' coef(lsem)@estimates
+#' # or
+#' estimates(lsem)
 #' 
 #' # elements of lsem can be accessed with the @ operator:
 #' lsem@parameters
@@ -816,6 +836,10 @@ cvCappedL1 <- function(lavaanModel,
 #' 
 #' # the coefficients can be accessed with:
 #' coef(lsem)
+#' # if you are only interested in the estimates and not the tuning parameters, use
+#' coef(lsem)@estimates
+#' # or
+#' estimates(lsem)
 #' 
 #' # elements of lsem can be accessed with the @ operator:
 #' lsem@parameters
@@ -959,6 +983,10 @@ cvLsp <- function(lavaanModel,
 #' 
 #' # the coefficients can be accessed with:
 #' coef(lsem)
+#' # if you are only interested in the estimates and not the tuning parameters, use
+#' coef(lsem)@estimates
+#' # or
+#' estimates(lsem)
 #' 
 #' # elements of lsem can be accessed with the @ operator:
 #' lsem@parameters
@@ -1109,6 +1137,10 @@ cvMcp <- function(lavaanModel,
 #' 
 #' # the coefficients can be accessed with:
 #' coef(lsem)
+#' # if you are only interested in the estimates and not the tuning parameters, use
+#' coef(lsem)@estimates
+#' # or
+#' estimates(lsem)
 #' 
 #' # elements of lsem can be accessed with the @ operator:
 #' lsem@parameters
