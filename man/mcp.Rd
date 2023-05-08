@@ -131,8 +131,21 @@ lsem <- mcp(
 # the coefficients can be accessed with:
 coef(lsem)
 
+# if you are only interested in the estimates and not the tuning parameters, use
+coef(lsem)@estimates
+# or
+estimates(lsem)
+
 # elements of lsem can be accessed with the @ operator:
 lsem@parameters[1,]
+
+# fit Measures:
+fitIndices(lsem)
+
+# The best parameters can also be extracted with:
+coef(lsem, criterion = "AIC")
+# or
+estimates(lsem, criterion = "AIC")
 
 # optional: plotting the paths requires installation of plotly
 # plot(lsem)
