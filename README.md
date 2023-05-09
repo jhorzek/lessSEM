@@ -33,13 +33,15 @@ The following penalty functions are currently implemented in
 
 The column “penalty” refers to the name of the function call in the
 **lessSEM** package (e.g., lasso is called with the `lasso()` function).
-Smooth functions are called with `smoothLasso`, `smoothAdaptiveLasso`,
-and `smoothElasticNet`. These are only implemented for the comparison of
-exact and approximate optimization and should not be used. They will be
-marked as deprecated soon. The best model can be selected with the AIC
-or BIC. If you want to use cross-validation, use `cvLasso`,
-`cvAdaptiveLasso`, etc. instead (see, e.g., `?lessSEM::cvLasso`). The
-smooth versions are called `cvSmoothLasso`, etc.
+Smooth approximations are called with `smoothLasso`,
+`smoothAdaptiveLasso`, and `smoothElasticNet`. These are only
+implemented for the comparison of exact and approximate optimization and
+should not be used. They will be marked as deprecated soon.
+
+The best model can be selected with the AIC or BIC. If you want to use
+cross-validation, use `cvLasso`, `cvAdaptiveLasso`, etc. instead (see,
+e.g., `?lessSEM::cvLasso`). The smooth versions are called
+`cvSmoothLasso`, etc.
 
 ## [**regsem**](https://github.com/Rjacobucci/regsem), [**lslx**](https://github.com/psyphh/lslx), and **lessSEM**
 
