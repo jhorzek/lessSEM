@@ -7,7 +7,7 @@
 controlBFGS(
   startingValues = "est",
   initialHessian = ifelse(all(startingValues == "est"), "lavaan", "compute"),
-  saveHessian = FALSE,
+  saveDetails = FALSE,
   stepSize = 0.9,
   sigma = 1e-05,
   gamma = 0,
@@ -33,7 +33,9 @@ The default is "lavaan" which extracts the Hessian from the lavaanModel. This He
 will typically deviate from that of the internal SEM represenation of lessSEM (due to
 the transformation of the variances), but works quite well in practice.}
 
-\item{saveHessian}{should the Hessian be saved for later use? Note: This may take a lot of memory!}
+\item{saveDetails}{when set to TRUE, additional details about the individual
+models are save. Currently, this are the Hessian and the implied means and covariances.
+Note: This may take a lot of memory!}
 
 \item{stepSize}{Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)}
 

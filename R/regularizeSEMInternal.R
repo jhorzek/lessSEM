@@ -371,7 +371,7 @@
     transformations <- data.frame()
   }
   
-  if(method == "glmnet" && control$saveHessian){
+  if(method == "glmnet" && control$saveDetails){
     Hessians <- list(
       "lambda" = tuningParameters$lambda,
       "alpha" = tuningParameters$alpha,
@@ -476,11 +476,11 @@
                       names(transformationsAre)] <- transformationsAre
     }
     
-    if(method == "glmnet" && control$saveHessian) 
+    if(method == "glmnet" && control$saveDetails) 
       Hessians$Hessian[[it]] <- result$Hessian
     
     # save implied
-    if(is(SEM, "Rcpp_SEMCpp")){
+    if(is(SEM, "Rcpp_SEMCpp") & control$saveDetails){
       implied$means[[it]] <- SEM$impliedMeans
       implied$covariances[[it]] <- SEM$impliedCovariance
       
@@ -518,7 +518,7 @@
     }else{
       
       if(method == "glmnet"){
-        if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
+        if(control$saveDetails) Hessians$Hessian[[it]] <- result$Hessian
         
         # set Hessian for next iteration
         regularizedModel$setHessian(result$Hessian)
