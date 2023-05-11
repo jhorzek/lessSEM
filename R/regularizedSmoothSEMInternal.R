@@ -193,7 +193,7 @@
     transformations <- data.frame()
   }
   
-  if(control$saveHessian){
+  if(control$saveDetails){
     Hessians <- list(
       "lambda" = tuningParameters$lambda,
       "alpha" = tuningParameters$alpha,
@@ -266,7 +266,7 @@
                       names(transformationsAre)] <- transformationsAre
     }
     
-    if(control$saveHessian) 
+    if(control$saveDetails) 
       Hessians$Hessian[[it]] <- result$Hessian
     
     # set initial values for next iteration
@@ -289,7 +289,7 @@
     }else{
       
       
-      if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
+      if(control$saveDetails) Hessians$Hessian[[it]] <- result$Hessian
       
       # set Hessian for next iteration
       regularizedModel$setHessian(result$Hessian)

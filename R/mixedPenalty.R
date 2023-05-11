@@ -1204,7 +1204,7 @@ fit <- function(mixedPenalty){
     }
     
     # save implied
-    if(is(SEM, "Rcpp_SEMCpp")){
+    if(is(SEM, "Rcpp_SEMCpp") & control$saveDetails){
       implied$means[[it]] <- SEM$impliedMeans
       implied$covariances[[it]] <- SEM$impliedCovariance
       
@@ -1454,7 +1454,7 @@ fit <- function(mixedPenalty){
     transformations <- data.frame()
   }
   
-  if(control$saveHessian){
+  if(control$saveDetails){
     Hessians <- list(
       "lambda" = lambda,
       "alpha" = alpha,
@@ -1526,7 +1526,7 @@ fit <- function(mixedPenalty){
     }
     
     # save implied
-    if(is(SEM, "Rcpp_SEMCpp")){
+    if(is(SEM, "Rcpp_SEMCpp") & control$saveDetails){
       implied$means[[it]] <- SEM$impliedMeans
       implied$covariances[[it]] <- SEM$impliedCovariance
       
@@ -1556,7 +1556,7 @@ fit <- function(mixedPenalty){
       
     }else{
       
-      if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
+      if(control$saveDetails) Hessians$Hessian[[it]] <- result$Hessian
       
       # set Hessian for next iteration
       regularizedModel$setHessian(result$Hessian)

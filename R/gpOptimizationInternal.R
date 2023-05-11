@@ -345,7 +345,7 @@
     parameterEstimates
   )
   
-  if(method == "glmnet" && control$saveHessian){
+  if(method == "glmnet" && control$saveDetails){
     Hessians <- list(
       "lambda" = tuningParameters$lambda,
       "alpha" = tuningParameters$alpha,
@@ -412,14 +412,14 @@
     fits$convergence[it] <- result$convergence
     if(!isCpp) fits$objectiveValue[it] <- fn(rawParameters, parameterLabels, additionalArguments)
     
-    if(method == "glmnet" && control$saveHessian) 
+    if(method == "glmnet" && control$saveDetails) 
       Hessians$Hessian[[it]] <- result$Hessian
     
     # set initial values for next iteration
     
     
     if(method == "glmnet"){
-      if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
+      if(control$saveDetails) Hessians$Hessian[[it]] <- result$Hessian
       
       # set Hessian for next iteration
       regularizedModel$setHessian(result$Hessian)
