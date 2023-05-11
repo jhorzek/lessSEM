@@ -11,8 +11,9 @@ setGeneric("fitIndices", function(object) {
 #'
 #' @param object a model fitted with lessSEM
 #' @param criterion fitIndice used to select the parameters
+#' @param transformations boolean: Should transformations be returned?
 #' @return returns a matrix with estimates
 #' @export
-setGeneric("estimates", function(object, criterion = NULL) {
+setGeneric("estimates", function(object, criterion = NULL, transformations = FALSE) {
   standardGeneric("estimates")
 })

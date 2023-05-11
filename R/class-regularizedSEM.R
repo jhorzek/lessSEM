@@ -51,7 +51,7 @@ setMethod("show", "regularizedSEM", function (object) {
   
   basics <- c(basics, paste0("Regularized parameters: ", 
                              paste0(object@regularized, collapse = ", "))
-              )
+  )
   
   nextSteps <- c("Next steps:")
   nextSteps <- c(nextSteps,
@@ -90,8 +90,18 @@ setMethod("coef", "regularizedSEM", function (object, ...) {
     criterion <- NULL
   }
   
-  tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
-  estimates <- as.matrix(object@parameters[,object@parameterLabels,drop=FALSE])
+  tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,
+                                        drop=FALSE] 
+  estimates <- as.matrix(object@parameters[,object@parameterLabels,
+                                           drop=FALSE])
+  
+  if(ncol(object@transformations) != 0){
+    transformations <- as.matrix(object@transformations[,
+                                                        !colnames(object@transformations) %in% colnames(tuningParameters), 
+                                                        drop = FALSE])
+  }else{
+    transformations <- matrix(nrow = 0, ncol = 0)
+  }
   
   if(!is.null(criterion)){
     
@@ -105,6 +115,11 @@ setMethod("coef", "regularizedSEM", function (object, ...) {
     coefs <- new("lessSEMCoef")
     coefs@tuningParameters <- tuningParameters[bestFit,,drop = FALSE]
     coefs@estimates <- estimates[bestFit,,drop = FALSE]
+    if(ncol(object@transformations) != 0){
+      coefs@transformations <- transformations[bestFit,,drop = FALSE]
+    }else{
+      coefs@transformations <- transformations
+    }
     
     return(coefs) 
   }
@@ -112,6 +127,7 @@ setMethod("coef", "regularizedSEM", function (object, ...) {
   coefs <- new("lessSEMCoef")
   coefs@tuningParameters <- tuningParameters
   coefs@estimates <- estimates
+  coefs@transformations <- transformations
   
   return(coefs)
 })
@@ -241,9 +257,16 @@ setMethod("plot",
 #' 
 #' @param object object of class regularizedSEM
 #' @param criterion fit index (e.g., AIC) used to select the parameters
+#' @param transformations boolean: Should transformations be returned?
 #' @return returns a matrix with estimates
 #' @export
-setMethod("estimates", "regularizedSEM", function(object, criterion = NULL) {
+setMethod("estimates", "regularizedSEM", function(object, criterion = NULL, transformations = FALSE) {
+  
+  if(transformations)
+    return(cbind(
+      coef(object, criterion = criterion)@estimates,
+      coef(object, criterion = criterion)@transformations)
+    )
   
   return(coef(object, criterion = criterion)@estimates)
   

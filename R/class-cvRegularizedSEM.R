@@ -78,9 +78,18 @@ setMethod("coef", "cvRegularizedSEM", function (object, ...) {
   tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
   estimates <- as.matrix(object@parameters[,object@parameterLabels,drop=FALSE])
   
+  if(ncol(object@transformations) != 0){
+    transformations <- as.matrix(object@transformations[,
+                                                        !colnames(object@transformations) %in% colnames(tuningParameters), 
+                                                        drop = FALSE])
+  }else{
+    transformations <- matrix(nrow = 0, ncol = 0)
+  }
+  
   coefs <- new("lessSEMCoef")
   coefs@tuningParameters <- tuningParameters
   coefs@estimates <- estimates
+  coefs@transformations <- transformations
   
   return(coefs)
 })
@@ -155,13 +164,21 @@ setMethod("fitIndices", "cvRegularizedSEM", function(object) {
 #' 
 #' @param object object of class cvRegularizedSEM
 #' @param criterion not used
+#' @param transformations boolean: Should transformations be returned?
 #' @return returns a matrix with estimates
 #' @export
-setMethod("estimates", "cvRegularizedSEM", function(object, criterion = NULL) {
+setMethod("estimates", "cvRegularizedSEM", function(object, criterion = NULL, transformations = FALSE) {
   if(!is.null(criterion))
     warning(paste0(
       "Not using criterion ", criterion, ". The returned estimates will be ",
       "selected using cross-validation."))
+  
+  if(transformations)
+    return(cbind(
+      coef(object)@estimates,
+      coef(object)@transformations)
+    )
+  
   return(coef(object)@estimates)
   
 })

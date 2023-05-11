@@ -4,12 +4,14 @@
 \alias{estimates}
 \title{S4 method to exract the estimates of an object}
 \usage{
-estimates(object, criterion = NULL)
+estimates(object, criterion = NULL, transformations = FALSE)
 }
 \arguments{
 \item{object}{a model fitted with lessSEM}
 
 \item{criterion}{fitIndice used to select the parameters}
+
+\item{transformations}{boolean: Should transformations be returned?}
 }
 \value{
 returns a matrix with estimates
