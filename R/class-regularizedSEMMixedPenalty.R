@@ -82,6 +82,14 @@ setMethod("coef", "regularizedSEMMixedPenalty", function (object, ...) {
   tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
   estimates <- as.matrix(object@parameters[,object@parameterLabels,drop=FALSE])
   
+  if(ncol(object@transformations) != 0){
+    transformations <- as.matrix(object@transformations[,
+                                                        !colnames(object@transformations) %in% colnames(tuningParameters), 
+                                                        drop = FALSE])
+  }else{
+    transformations <- matrix(nrow = 0, ncol = 0)
+  }
+  
   if(!is.null(criterion)){
     
     fits <- fitIndices(object)

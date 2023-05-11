@@ -13,5 +13,7 @@ Class for the coefficients estimated by lessSEM.
 \item{\code{tuningParameters}}{tuning parameters}
 
 \item{\code{estimates}}{parameter estimates}
+
+\item{\code{transformations}}{transformations of parameters}
 }}
 
