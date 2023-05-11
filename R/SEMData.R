@@ -15,24 +15,28 @@
   missingSubsets <- vector("list", nrow(uniqueMissingPatterns))
   
   for(mrow in 1:nrow(uniqueMissingPatterns)){
-    individuals <- which(apply(isMissing, 1, function(x) sum(abs(x-uniqueMissingPatterns[mrow,]))) == 0)
+    
+    pattern <- uniqueMissingPatterns[mrow, ]
+    
+    individuals <- logicalMatch(isMissing, pattern)
+    
     individualMissingPatternID[individuals] <- mrow
     
     # build subsets
     if(length(individuals) > 1){
       missingSubsets[[mrow]]$N <- length(individuals)
-      missingSubsets[[mrow]]$observed <- sum(!uniqueMissingPatterns[mrow,])
-      missingSubsets[[mrow]]$notMissing <- which(!uniqueMissingPatterns[mrow,])-1
-      missingSubsets[[mrow]]$covariance <- ((length(individuals)-1)/length(individuals))*stats::cov(rawData[individuals,!uniqueMissingPatterns[mrow,]])
-      missingSubsets[[mrow]]$means <- apply(rawData[individuals,!uniqueMissingPatterns[mrow,]], 2, mean)
+      missingSubsets[[mrow]]$observed <- sum(!pattern)
+      missingSubsets[[mrow]]$notMissing <- which(!pattern)-1
+      missingSubsets[[mrow]]$covariance <- ((length(individuals)-1)/length(individuals))*stats::cov(rawData[individuals,!pattern])
+      missingSubsets[[mrow]]$means <- apply(rawData[individuals,!pattern], 2, mean)
       missingSubsets[[mrow]]$rawData <- rawData[individuals,,drop=FALSE]
       missingSubsets[[mrow]]$objectiveValue <- NA
     }else{
       missingSubsets[[mrow]]$N <- length(individuals)
-      missingSubsets[[mrow]]$observed <- sum(!uniqueMissingPatterns[mrow,])
-      missingSubsets[[mrow]]$notMissing <- which(!uniqueMissingPatterns[mrow,])-1
-      missingSubsets[[mrow]]$covariance <- matrix(NA, nrow = sum(!uniqueMissingPatterns[mrow,]), ncol = sum(!uniqueMissingPatterns[mrow,]))
-      missingSubsets[[mrow]]$means <-  matrix(NA, nrow = sum(!uniqueMissingPatterns[mrow,]), ncol = 1)
+      missingSubsets[[mrow]]$observed <- sum(!pattern)
+      missingSubsets[[mrow]]$notMissing <- which(!pattern)-1
+      missingSubsets[[mrow]]$covariance <- matrix(NA, nrow = sum(!pattern), ncol = sum(!pattern))
+      missingSubsets[[mrow]]$means <-  matrix(NA, nrow = sum(!pattern), ncol = 1)
       missingSubsets[[mrow]]$rawData <- rawData[individuals,,drop=FALSE]
       missingSubsets[[mrow]]$objectiveValue <- NA
     }
