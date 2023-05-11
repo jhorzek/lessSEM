@@ -82,29 +82,25 @@ setMethod("coef", "regularizedSEMMixedPenalty", function (object, ...) {
   tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
   estimates <- as.matrix(object@parameters[,object@parameterLabels,drop=FALSE])
   
-  if(!is.null(criterion) && criterion %in% c("AIC", "BIC")){
+  if(!is.null(criterion)){
+    
+    fits <- fitIndices(object)
+    
+    if(!criterion %in% colnames(fits))
+      stop("Could not find", criterion, "in fitIndices(object).")
+    
     if(length(unique(object@fits$nonZeroParameters)) == 1) 
       stop("Selection by criterion currently only supported for sparsity inducing penalties. Either none of your parameters was zeroed or the penalty used does not induce sparsity.")
-    if(criterion == "AIC"){
-      AICs <- AIC(object)
-      bestAIC <- which(AICs$AIC == min(AICs$AIC))[1]
-      
-      coefs <- new("lessSEMCoef")
-      coefs@tuningParameters <- tuningParameters[bestAIC,,drop = FALSE]
-      coefs@estimates <- estimates[bestAIC,,drop = FALSE]
-      
-      return(coefs) 
-    }
     
-    if(criterion == "BIC"){
-      BICs <- BIC(object)
-      bestBIC <- which(BICs$BIC == min(BICs$BIC))[1]
-      
-      coefs <- new("lessSEMCoef")
-      coefs@tuningParameters <- tuningParameters[bestBIC,,drop = FALSE]
-      coefs@estimates <- estimates[bestBIC,,drop = FALSE]
-      
-      return(coefs)
+    bestFit <- which(fits[,criterion] == min(fits[,criterion]))[1]
+    
+    coefs <- new("lessSEMCoef")
+    coefs@tuningParameters <- tuningParameters[bestFit,,drop = FALSE]
+    coefs@estimates <- estimates[bestFit,,drop = FALSE]
+    if(ncol(object@transformations) != 0){
+      coefs@transformations <- transformations[bestFit,,drop = FALSE]
+    }else{
+      coefs@transformations <- transformations
     }
     
   }
@@ -112,6 +108,7 @@ setMethod("coef", "regularizedSEMMixedPenalty", function (object, ...) {
   coefs <- new("lessSEMCoef")
   coefs@tuningParameters <- tuningParameters
   coefs@estimates <- estimates
+  coefs@transformations <- transformations
   
   return(coefs)
 })
@@ -290,9 +287,16 @@ setMethod("fitIndices", "regularizedSEMMixedPenalty", function(object) {
 #' 
 #' @param object object of class regularizedSEMMixedPenalty
 #' @param criterion fit index (e.g., AIC) used to select the parameters
+#' @param transformations boolean: Should transformations be returned?
 #' @return returns a matrix with estimates
 #' @export
-setMethod("estimates", "regularizedSEMMixedPenalty", function(object, criterion = NULL) {
+setMethod("estimates", "regularizedSEMMixedPenalty", function(object, criterion = NULL, transformations = FALSE) {
+  
+  if(transformations)
+    return(cbind(
+      coef(object, criterion = criterion)@estimates,
+      coef(object, criterion = criterion)@transformations)
+    )
   
   return(coef(object, criterion = criterion)@estimates)
   

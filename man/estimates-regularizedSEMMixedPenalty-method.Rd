@@ -4,12 +4,14 @@
 \alias{estimates,regularizedSEMMixedPenalty-method}
 \title{estimates}
 \usage{
-\S4method{estimates}{regularizedSEMMixedPenalty}(object, criterion = NULL)
+\S4method{estimates}{regularizedSEMMixedPenalty}(object, criterion = NULL, transformations = FALSE)
 }
 \arguments{
 \item{object}{object of class regularizedSEMMixedPenalty}
 
 \item{criterion}{fit index (e.g., AIC) used to select the parameters}
+
+\item{transformations}{boolean: Should transformations be returned?}
 }
 \value{
 returns a matrix with estimates

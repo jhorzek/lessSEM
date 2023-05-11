@@ -4,12 +4,14 @@
 \alias{estimates,regularizedSEM-method}
 \title{estimates}
 \usage{
-\S4method{estimates}{regularizedSEM}(object, criterion = NULL)
+\S4method{estimates}{regularizedSEM}(object, criterion = NULL, transformations = FALSE)
 }
 \arguments{
 \item{object}{object of class regularizedSEM}
 
 \item{criterion}{fit index (e.g., AIC) used to select the parameters}
+
+\item{transformations}{boolean: Should transformations be returned?}
 }
 \value{
 returns a matrix with estimates

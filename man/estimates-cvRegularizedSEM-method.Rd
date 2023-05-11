@@ -4,12 +4,14 @@
 \alias{estimates,cvRegularizedSEM-method}
 \title{estimates}
 \usage{
-\S4method{estimates}{cvRegularizedSEM}(object, criterion = NULL)
+\S4method{estimates}{cvRegularizedSEM}(object, criterion = NULL, transformations = FALSE)
 }
 \arguments{
 \item{object}{object of class cvRegularizedSEM}
 
 \item{criterion}{not used}
+
+\item{transformations}{boolean: Should transformations be returned?}
 }
 \value{
 returns a matrix with estimates
