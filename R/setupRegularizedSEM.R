@@ -300,8 +300,9 @@
     
     # Adapted from Optim.jl
     # see https://github.com/JuliaNLSolvers/Optim.jl/blob/f43e6084aacf2dabb2b142952acd3fbb0e268439/src/multivariate/solvers/first_order/bfgs.jl#L104
+    SEM$fit()
     
-    gr <- lessSEM:::.getGradients(SEM = SEM, raw = TRUE)
+    gr <- .getGradients(SEM = SEM, raw = TRUE)
     
     initialHessian <- max(abs(gr)) * diag(length(gr)) * stepSize
     
