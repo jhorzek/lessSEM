@@ -213,11 +213,12 @@
 #' @param lavaanModel lavaan model object
 #' @param SEM internal SEM representation
 #' @param addMeans should a mean structure be added to the model?
+#' @param stepSize initial step size
 #' @param notes option to pass a notes to function. All notes of the current
 #' function will be added
 #' @return Hessian matrix and notes
 #' @keywords internal
-.computeInitialHessian <- function(initialHessian, rawParameters, lavaanModel, SEM, addMeans, notes = NULL){
+.computeInitialHessian <- function(initialHessian, rawParameters, lavaanModel, SEM, addMeans, stepSize, notes = NULL){
   
   if(is.null(notes)){
     printNotes <- TRUE
@@ -295,18 +296,14 @@
     
     initialHessian <- .getHessian(SEM = SEM, raw = TRUE)
     
-  }else if(any(initialHessian == "scoreBased")){
+  }else if(any(initialHessian == "gradNorm")){
     
-    scores <- .getScores(SEM = SEM, raw = TRUE)
-    FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
-    rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
-    for(score in 1:nrow(scores)){
-      FisherInformation <- FisherInformation + t(-.5*scores[score,, drop = FALSE]) %*%(-.5*scores[score,, drop = FALSE]) # we are using the -2 log-Likelihood
-    }
+    # Adapted from Optim.jl
+    # see https://github.com/JuliaNLSolvers/Optim.jl/blob/f43e6084aacf2dabb2b142952acd3fbb0e268439/src/multivariate/solvers/first_order/bfgs.jl#L104
     
-    initialHessian <- -2*(-FisherInformation) # negative log-likelihood
-    # make symmetric; just in case...
-    initialHessian <- .5*(initialHessian + t(initialHessian))
+    gr <- lessSEM:::.getGradients(SEM = SEM, raw = TRUE)
+    
+    initialHessian <- max(abs(gr)) * diag(length(gr)) * stepSize
     
   }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
     initialHessian <- diag(initialHessian,length(rawParameters))

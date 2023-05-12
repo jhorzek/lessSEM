@@ -1064,6 +1064,7 @@ fit <- function(mixedPenalty){
                                             lavaanModel = lavaanModel, 
                                             SEM = SEM,
                                             addMeans = modifyModel$addMeans,
+                                            stepSize = control$stepSize,
                                             notes = notes)
     notes <- initialHessian$notes
     control$initialHessian <- initialHessian$initialHessian
@@ -1386,6 +1387,7 @@ fit <- function(mixedPenalty){
                                           lavaanModel = lavaanModel, 
                                           SEM = SEM,
                                           addMeans = modifyModel$addMeans,
+                                          stepSize = control$stepSize,
                                           notes = notes)
   notes <- initialHessian$notes
   control$initialHessian <- initialHessian$initialHessian
