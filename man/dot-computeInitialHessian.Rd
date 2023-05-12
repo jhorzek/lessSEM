@@ -10,6 +10,7 @@
   lavaanModel,
   SEM,
   addMeans,
+  stepSize,
   notes = NULL
 )
 }
@@ -33,6 +34,8 @@ the transformation of the variances), but works quite well in practice.}
 \item{SEM}{internal SEM representation}
 
 \item{addMeans}{should a mean structure be added to the model?}
+
+\item{stepSize}{initial step size}
 
 \item{notes}{option to pass a notes to function. All notes of the current
 function will be added}
