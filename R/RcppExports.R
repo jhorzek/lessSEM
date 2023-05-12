@@ -469,6 +469,18 @@ scadPenalty_C <- function(par, lambda_p, theta) {
     .Call(`_lessSEM_scadPenalty_C`, par, lambda_p, theta)
 }
 
+#' logicalMatch
+#' 
+#' Returns the rows for which all elements of a boolean matrix X are equal
+#' to the elements in boolean vector x
+#' 
+#' @param X matrix with booleans
+#' @param x vector of booleans
+#' @return numerical vector with indices of matching rows
+logicalMatch <- function(X, x) {
+    .Call(`_lessSEM_logicalMatch`, X, x)
+}
+
 #' @name mgSEM
 #' 
 #' @title mgSEM class

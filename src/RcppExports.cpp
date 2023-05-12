@@ -51,6 +51,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// logicalMatch
+Rcpp::NumericVector logicalMatch(const Rcpp::LogicalMatrix X, Rcpp::LogicalVector x);
+RcppExport SEXP _lessSEM_logicalMatch(SEXP XSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::LogicalMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(logicalMatch(X, x));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 RcppExport SEXP _rcpp_module_boot_SEM_cpp();
 RcppExport SEXP _rcpp_module_boot_istaCappedL1SEM_cpp();
@@ -93,6 +105,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_lessSEM_callFitFunction", (DL_FUNC) &_lessSEM_callFitFunction, 3},
     {"_lessSEM_mcpPenalty_C", (DL_FUNC) &_lessSEM_mcpPenalty_C, 3},
     {"_lessSEM_scadPenalty_C", (DL_FUNC) &_lessSEM_scadPenalty_C, 3},
+    {"_lessSEM_logicalMatch", (DL_FUNC) &_lessSEM_logicalMatch, 2},
     {"_rcpp_module_boot_SEM_cpp", (DL_FUNC) &_rcpp_module_boot_SEM_cpp, 0},
     {"_rcpp_module_boot_istaCappedL1SEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaCappedL1SEM_cpp, 0},
     {"_rcpp_module_boot_istaCappedL1mgSEM_cpp", (DL_FUNC) &_rcpp_module_boot_istaCappedL1mgSEM_cpp, 0},
