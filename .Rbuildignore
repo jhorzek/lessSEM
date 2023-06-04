@@ -14,3 +14,4 @@
 ^CRAN-SUBMISSION$
 ^R/createVignettes\.R$
 ^inst/include/lessOptimizers/.git$
+^CMakeLists.txt$
