@@ -15,3 +15,5 @@
 ^R/createVignettes\.R$
 ^inst/include/lessOptimizers/.git$
 ^CMakeLists.txt$
+^lessOptimizersConfig.cmake$
+^vcpkg.json$
