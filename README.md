@@ -67,7 +67,7 @@ implemented in the three packages:
 | Confidence Intervals          | No              | Yes                 | No              |
 | Missing Data                  | FIML            | Auxiliary Variables | FIML            |
 | Multi-group models            | No              | Yes                 | Yes             |
-| Stability selection           | Yes             | No                  | No              |
+| Stability selection           | Yes             | No                  | Yes             |
 | Mixed penalties               | No              | No                  | Yes             |
 | Equality constraints          | Yes             | No                  | Yes             |
 | Parameter transformations     | diff_lasso      | No                  | Yes             |
