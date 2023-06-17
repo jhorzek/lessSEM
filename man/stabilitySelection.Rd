@@ -25,6 +25,9 @@ work quite well and is also the default in regsem}
 
 \item{threshold}{percentage of models, where the parameter should be contained in order
 to be in the final model}
+
+\item{maxTries}{fitting models in a subset may fail. maxTries sets the maximal
+number of subsets to try.}
 }
 \value{
 estimates for each subsample and aggregated percentages for each parameter
@@ -43,6 +46,16 @@ are often removed and which remain in the model most of the time. To get
 a final selection, a threshold t can be defined: If a parameter is in the model
 t\% of the time, it is retained.
 }
+\section{References}{
+\itemize{
+\item Li, X., & Jacobucci, R. (2021). Regularized structural equation modeling with
+stability selection. Psychological Methods, 27(4), 497–518. https://doi.org/10.1037/met0000389
+\item Meinshausen, N., & Bühlmann, P. (2010). Stability selection. Journal of the
+Royal Statistical Society: Series B (Statistical Methodology), 72(4), 417–473.
+https://doi.org/10.1111/j.1467-9868.2010.00740.x
+}
+}
+
 \examples{
 library(lessSEM)
 

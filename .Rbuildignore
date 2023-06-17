@@ -13,7 +13,7 @@
 ^LICENSE\.md$
 ^CRAN-SUBMISSION$
 ^R/createVignettes\.R$
-^inst/include/lessOptimizers/.git$
+^inst/include/lesspar/.git$
 ^CMakeLists.txt$
 ^lessOptimizersConfig.cmake$
 ^vcpkg.json$

@@ -10,10 +10,18 @@ Class for stability selection
 \section{Slots}{
 
 \describe{
-\item{\code{tuningParameters}}{tuning parameters}
+\item{\code{regularized}}{names of regularized parameters}
 
-\item{\code{estimates}}{parameter estimates}
+\item{\code{tuningParameters}}{data.frame with tuning parameter values}
 
-\item{\code{transformations}}{transformations of parameters}
+\item{\code{stabilityPaths}}{matrix with percentage of parameters being non-zero
+averaged over all subsets for each setting of the tuning parameters}
+
+\item{\code{percentSelected}}{percentage with which a parameter was selected over all
+tuning parameter settings}
+
+\item{\code{selectedParameters}}{final selected parameters}
+
+\item{\code{settings}}{internal}
 }}
 

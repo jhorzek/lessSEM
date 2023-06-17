@@ -31,6 +31,8 @@
 #' work quite well and is also the default in regsem
 #' @param threshold percentage of models, where the parameter should be contained in order
 #' to be in the final model
+#' @param maxTries fitting models in a subset may fail. maxTries sets the maximal
+#' number of subsets to try.
 #' @return estimates for each subsample and aggregated percentages for each parameter
 #' @examples
 #' library(lessSEM)
@@ -115,7 +117,7 @@ stabilitySelection <- function(modelSpecification,
                                                c("subsample", parLabels)))
   it <- 0
   sucessful <- 0
-  pb <- txtProgressBar(min = 0, max = numberOfSubsamples, style = 3)
+  pb <- utils::txtProgressBar(min = 0, max = numberOfSubsamples, style = 3)
   
   
   while(it < maxTries){
@@ -132,7 +134,7 @@ stabilitySelection <- function(modelSpecification,
     
     # fit
     invisible(
-      capture.output(
+      utils::capture.output(
         fitIt <- try(eval(modelSpecificationIt), 
                      silent = TRUE)
       )
@@ -142,8 +144,8 @@ stabilitySelection <- function(modelSpecification,
       next
     
     sucessful <- sucessful + 1
-    setTxtProgressBar(pb = pb, 
-                      value = sucessful)
+    utils::setTxtProgressBar(pb = pb, 
+                             value = sucessful)
     
     parameterEstimates <- rbind(
       parameterEstimates,

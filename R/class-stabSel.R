@@ -1,7 +1,12 @@
 #' Class for stability selection
-#' @slot tuningParameters tuning parameters
-#' @slot estimates parameter estimates
-#' @slot transformations transformations of parameters
+#' @slot regularized names of regularized parameters
+#' @slot tuningParameters data.frame with tuning parameter values
+#' @slot stabilityPaths matrix with percentage of parameters being non-zero
+#' averaged over all subsets for each setting of the tuning parameters
+#' @slot percentSelected percentage with which a parameter was selected over all
+#' tuning parameter settings
+#' @slot selectedParameters final selected parameters
+#' @slot settings internal
 #' @export
 setClass("stabSel",
          representation = representation(
