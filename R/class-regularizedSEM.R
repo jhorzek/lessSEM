@@ -42,9 +42,10 @@ setMethod("show", "regularizedSEM", function (object) {
 
 #' summary
 #' @param object object of class regularizedSEM
+#' @param ... not used
 #' @return No return value, just prints estimates
 #' @export
-setMethod("summary", "regularizedSEM", function (object) {
+setMethod("summary", "regularizedSEM", function (object, ...) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Model of class regularizedSEM with ",object@inputArguments$penalty, " penalty ####\n\n"))
   cat("regularized parameters: ")
@@ -119,14 +120,16 @@ setMethod("coef", "regularizedSEM", function (object, ...) {
 #' returns the AIC
 #' 
 #' @param object object of class regularizedSEM
+#' @param ... not used
+#' @param k multiplier for number of parameters
 #' @return AIC values
 #' @export
-setMethod("AIC", "regularizedSEM", function (object) {
+setMethod("AIC", "regularizedSEM", function (object, ..., k = 2) {
   if(object@penalty == "ridge" & !all(object@inputArguments$tuningParameters == 0))
     stop("AIC not supported for this penalty.")
   
   fits <- object@fits
-  fits$AIC <- fits$m2LL + 2*fits$nonZeroParameters
+  fits$AIC <- fits$m2LL + k*fits$nonZeroParameters
   
   return(fits)
 })
@@ -136,9 +139,10 @@ setMethod("AIC", "regularizedSEM", function (object) {
 #' returns the BIC
 #' 
 #' @param object object of class regularizedSEM
+#' @param ... not used
 #' @return BIC values
 #' @export
-setMethod("BIC", "regularizedSEM", function (object) {
+setMethod("BIC", "regularizedSEM", function (object, ...) {
   N <- object@internalOptimization$N
   fits <- object@fits
   

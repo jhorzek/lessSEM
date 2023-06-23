@@ -4,10 +4,14 @@
 \alias{AIC,Rcpp_SEMCpp-method}
 \title{AIC}
 \usage{
-\S4method{AIC}{Rcpp_SEMCpp}(object)
+\S4method{AIC}{Rcpp_SEMCpp}(object, ..., k = 2)
 }
 \arguments{
 \item{object}{object of class Rcpp_SEMCpp}
+
+\item{...}{not used}
+
+\item{k}{multiplier for number of parameters}
 }
 \value{
 AIC values

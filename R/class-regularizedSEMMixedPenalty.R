@@ -44,9 +44,10 @@ setMethod("show", "regularizedSEMMixedPenalty", function (object) {
 
 #' summary
 #' @param object object of class regularizedSEMMixedPenalty
+#' @param ... not used
 #' @return No return value, just prints estimates
 #' @export
-setMethod("summary", "regularizedSEMMixedPenalty", function (object) {
+setMethod("summary", "regularizedSEMMixedPenalty", function (object, ...) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Model of class regularizedSEMMixedPenalty with mixed penalty penalty ####\n\n"))
   cat("regularized parameters: ")
@@ -119,12 +120,14 @@ setMethod("coef", "regularizedSEMMixedPenalty", function (object, ...) {
 #' returns the AIC
 #' 
 #' @param object object of class regularizedSEMMixedPenalty
+#' @param ... not used
+#' @param k multiplier for number of parameters
 #' @returns AIC values
 #' @export
-setMethod("AIC", "regularizedSEMMixedPenalty", function (object) {
+setMethod("AIC", "regularizedSEMMixedPenalty", function (object, ..., k = 2) {
   
   fits <- object@fits
-  fits$AIC <- fits$m2LL + 2*fits$nonZeroParameters
+  fits$AIC <- fits$m2LL + k*fits$nonZeroParameters
   
   return(fits)
 })
@@ -134,9 +137,10 @@ setMethod("AIC", "regularizedSEMMixedPenalty", function (object) {
 #' returns the BIC
 #' 
 #' @param object object of class regularizedSEMMixedPenalty
+#' @param ... not used
 #' @returns BIC values
 #' @export
-setMethod("BIC", "regularizedSEMMixedPenalty", function (object) {
+setMethod("BIC", "regularizedSEMMixedPenalty", function (object, ...) {
   N <- object@internalOptimization$N
   fits <- object@fits
   

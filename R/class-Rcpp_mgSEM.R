@@ -18,8 +18,9 @@ setMethod("show", "Rcpp_mgSEM", function (object) {
 #' logLik
 #' 
 #' @param object object of class Rcpp_mgSEM
+#' @param ... not used
 #' @returns log-likelihood of the model
-setMethod("logLik", "Rcpp_mgSEM", function (object) {
+setMethod("logLik", "Rcpp_mgSEM", function (object, ...) {
   if(!object$wasFit){
     object$fit()
   }
@@ -45,21 +46,24 @@ setMethod("coef", "Rcpp_mgSEM", function (object, ...) {
 #' AIC
 #' 
 #' @param object object of class Rcpp_mgSEM
+#' @param ... not used
+#' @param k multiplier for number of parameters
 #' @returns AIC values
-setMethod("AIC", "Rcpp_mgSEM", function (object) {
+setMethod("AIC", "Rcpp_mgSEM", function (object, ..., k = 2) {
   if(!object$wasFit){
     object$fit()
   }
   ll <- logLik(object)
-  AICis <- -2*ll@logLik + 2*ll@nParameters
+  AICis <- -2*ll@logLik + k*ll@nParameters
   return(AICis)
 })
 
 #' BIC
 #' 
 #' @param object object of class Rcpp_mgSEM
+#' @param ... not used
 #' @returns BIC values
-setMethod("BIC", "Rcpp_mgSEM", function (object) {
+setMethod("BIC", "Rcpp_mgSEM", function (object, ...) {
   if(!object$wasFit){
     object$fit()
   }

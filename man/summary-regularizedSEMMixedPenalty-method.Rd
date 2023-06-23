@@ -4,10 +4,12 @@
 \alias{summary,regularizedSEMMixedPenalty-method}
 \title{summary}
 \usage{
-\S4method{summary}{regularizedSEMMixedPenalty}(object)
+\S4method{summary}{regularizedSEMMixedPenalty}(object, ...)
 }
 \arguments{
 \item{object}{object of class regularizedSEMMixedPenalty}
+
+\item{...}{not used}
 }
 \value{
 No return value, just prints estimates

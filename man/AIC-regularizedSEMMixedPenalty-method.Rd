@@ -4,10 +4,14 @@
 \alias{AIC,regularizedSEMMixedPenalty-method}
 \title{AIC}
 \usage{
-\S4method{AIC}{regularizedSEMMixedPenalty}(object)
+\S4method{AIC}{regularizedSEMMixedPenalty}(object, ..., k = 2)
 }
 \arguments{
 \item{object}{object of class regularizedSEMMixedPenalty}
+
+\item{...}{not used}
+
+\item{k}{multiplier for number of parameters}
 }
 \value{
 AIC values

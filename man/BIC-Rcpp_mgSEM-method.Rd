@@ -4,10 +4,12 @@
 \alias{BIC,Rcpp_mgSEM-method}
 \title{BIC}
 \usage{
-\S4method{BIC}{Rcpp_mgSEM}(object)
+\S4method{BIC}{Rcpp_mgSEM}(object, ...)
 }
 \arguments{
 \item{object}{object of class Rcpp_mgSEM}
+
+\item{...}{not used}
 }
 \value{
 BIC values

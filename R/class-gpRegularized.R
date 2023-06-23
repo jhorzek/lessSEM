@@ -42,9 +42,10 @@ setMethod("show", "gpRegularized", function (object) {
 #' summary
 #' 
 #' @param object object of class gpRegularized
+#' @param ... not used
 #' @return No return value, just prints estimates
 #' @export
-setMethod("summary", "gpRegularized", function (object) {
+setMethod("summary", "gpRegularized", function (object, ...) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Model of class gpRegularized with ",object@inputArguments$penalty, " penalty ####\n\n"))
   cat("regularized parameters: ")
@@ -119,14 +120,16 @@ setMethod("coef", "gpRegularized", function (object, ...) {
 #' returns the AIC
 #' 
 #' @param object object of class gpRegularized
+#' @param ... not used
+#' @param k multiplier for number of parameters
 #' @return data frame with fit values, appended with AIC
 #' @export
-setMethod("AIC", "gpRegularized", function (object) {
+setMethod("AIC", "gpRegularized", function (object, ..., k = 2) {
   if(!object@penalty %in% c("lasso", "adaptiveLasso", "cappedL1", "mcp", "scad"))
     stop("AIC not supported for this penalty.")
   
   fits <- object@fits
-  fits$AIC <- fits$m2LL + 2*fits$nonZeroParameters
+  fits$AIC <- fits$m2LL + k*fits$nonZeroParameters
   
   return(fits)
 })
@@ -136,9 +139,10 @@ setMethod("AIC", "gpRegularized", function (object) {
 #' returns the BIC
 #' 
 #' @param object object of class gpRegularized
+#' @param ... not used
 #' @return data frame with fit values, appended with BIC
 #' @export
-setMethod("BIC", "gpRegularized", function (object) {
+setMethod("BIC", "gpRegularized", function (object, ...) {
   N <- nrow(lavaan::lavInspect(object@inputArguments$lavaanModel, "data"))
   fits <- object@fits
   
