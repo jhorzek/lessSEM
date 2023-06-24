@@ -6,17 +6,17 @@
 \usage{
 mixedPenalty(
   lavaanModel,
-  method = "ista",
   modifyModel = lessSEM::modifyModel(),
-  control = lessSEM::controlIsta()
+  method = "glmnet",
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{
 \item{lavaanModel}{model of class lavaan}
 
-\item{method}{which optimizer should be used? Only ista is supported.}
-
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
+
+\item{method}{which optimizer should be used? Currently supported are "glmnet" and "ista".}
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
@@ -39,17 +39,18 @@ as well. Models are fitted with the glmnet or ista optimizer. Note that the
 optimizers differ in which penalties they support. The following table provides
 an overview:\tabular{llll}{
    Penalty \tab Function \tab glmnet \tab ista \cr
-   ridge \tab addRidge \tab x \tab - \cr
    lasso \tab addLasso \tab x \tab x \cr
-   elastic net \tab addElasticNet \tab x \tab - \cr
-   cappedL1 \tab addCappedL1 \tab - \tab x \cr
-   lsp \tab addLsp \tab - \tab x \cr
-   scad \tab addScad \tab - \tab x \cr
-   mcp \tab addMcp \tab - \tab x \cr
+   elastic net \tab addElasticNet \tab x* \tab - \cr
+   cappedL1 \tab addCappedL1 \tab x \tab x \cr
+   lsp \tab addLsp \tab x \tab x \cr
+   scad \tab addScad \tab x \tab x \cr
+   mcp \tab addMcp \tab x \tab x \cr
 }
 
 
-By default, ista will be used.
+By default, glmnet will be used. Note that the elastic net penalty can
+only be combined with other elastic net penalties.
+
 Check vignette(topic = "Mixed-Penalties", package = "lessSEM") for more details.
 
 Regularized SEM

@@ -1,14 +1,11 @@
 Package: lessSEM
 Type: Package
 Title: Non-Smooth Regularization for Structural Equation Models
-Version: 1.4.16
+Version: 1.5.0
 Authors@R: c(person(given   = "Jannik H.", family = "Orzek",
                     role    = c("aut", "cre", "cph"),
                     email   = "orzek@mpib-berlin.mpg.de",
-                    comment = c(ORCID = "0000-0002-3123-2248")),
-             person(given = "Yves", family = "Rosseel", 
-                    role  = "cph",
-                    comment = "The Hessian function implementation is adapted from lavaan"))
+                    comment = c(ORCID = "0000-0002-3123-2248")))
 Maintainer: Jannik H. Orzek <orzek@mpib-berlin.mpg.de>
 Description: Provides regularized structural equation modeling 
   (regularized SEM) with non-smooth penalty functions (e.g., lasso) building 
@@ -33,13 +30,13 @@ Imports:
     utils,
     stats,
     graphics,
-    rlang
+    rlang,
+    mvtnorm
 Suggests:
     knitr,
     plotly,
     rmarkdown,
-    Rsolnp,
-    mvtnorm
+    Rsolnp
 LinkingTo:
     Rcpp,
     RcppArmadillo,

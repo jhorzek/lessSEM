@@ -65,11 +65,14 @@
                           values = startingValues, 
                           raw = FALSE)
     SEM <- try(.fit(SEM))
-    if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) stop("Infeasible starting values.")
+    if(is(SEM, "try-error") || !is.finite(SEM$objectiveValue)) stop("Infeasible starting values.")
     
   }else{
     stop("Invalid startingValues passed to regularizeSEMWithCustomPenaltyRsolnp.")
   }
+  
+  # check if we have a likelihood objective function:
+  usesLikelihood <- all(SEM$getEstimator() == "fiml")
   
   # get parameters
   parameters <- .getParameters(SEM, raw = TRUE)
@@ -90,7 +93,7 @@
       return(99999999999999999)
     }
     SEM <- try(.fit(SEM), silent = TRUE)
-    if(is(SEM, "try-error") || !is.finite(SEM$m2LL)){
+    if(is(SEM, "try-error") || !is.finite(SEM$objectiveValue)){
       return(99999999999999999)
     }
     
@@ -110,10 +113,12 @@
     }
     
     # division by N to be closer to the implementation in regsem
-    return((SEM$m2LL + penalty)/sampleSize)
+    return((SEM$objectiveValue + penalty)/sampleSize)
   }
   
   fits <- data.frame(
+    "objectiveValue" = NA,
+    "regObjectiveValue" = NA,
     "m2LL" = rep(NA,nrow(tuningParameters)),
     "regM2LL"= rep(NA,nrow(tuningParameters)),
     "convergence" = rep(NA,nrow(tuningParameters))
@@ -161,10 +166,17 @@
     SEM <- try(.fit(SEM), silent = TRUE)
     
     parameterEstimates[i, names(parameters)] <- .getParameters(SEM, raw = FALSE)[names(parameters)]
-    fits$m2LL[i] <- SEM$m2LL
-    fits$regM2LL[i] <- SEM$m2LL + sampleSize*individualPenaltyFunction(result$pars, 
-                                                                       currentTuningParameters, 
-                                                                       penaltyFunctionArguments)
+    
+    fits$objectiveValue[i] <- SEM$objectiveValue
+    fits$regObjectiveValue[i] <- fits$objectiveValue[i] + sampleSize*individualPenaltyFunction(result$pars, 
+                                                                                                 currentTuningParameters, 
+                                                                                                 penaltyFunctionArguments)
+    
+    if(usesLikelihood){
+      fits$m2LL[i] <- fits$objectiveValue[i]
+      fits$regM2LL[i] <- fits$regObjectiveValue[i]
+    }
+    
     #result$value[length(result$value)]
     fits$convergence[i] <- result$convergence == 0
     
@@ -180,7 +192,8 @@
                  fits = fits,
                  parameterLabels = names(parameters),
                  internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
+                 inputArguments = inputArguments,
+                 notes = c("Notes:"))
   
   return(results)
   

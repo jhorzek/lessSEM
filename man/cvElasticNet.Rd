@@ -39,7 +39,7 @@ validation. Set standardize=TRUE to automatically standardize the data.}
 \item{returnSubsetParameters}{set to TRUE to return the parameters for each training set}
 
 \item{method}{which optimizer should be used? Currently implemented are ista and glmnet.
-With ista, the control argument can be used to switch to related procedures (currently gist).}
+With ista, the control argument can be used to switch to related procedures.}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
@@ -139,6 +139,10 @@ lsem <- cvElasticNet(
 
 # the coefficients can be accessed with:
 coef(lsem)
+# if you are only interested in the estimates and not the tuning parameters, use
+coef(lsem)@estimates
+# or
+estimates(lsem)
 
 # elements of lsem can be accessed with the @ operator:
 lsem@parameters

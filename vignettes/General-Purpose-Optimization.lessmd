@@ -30,8 +30,8 @@ runtimes <- data.frame(
 That is, you can use all optimizers and penalty functions implemented in **lessSEM**
 for your own models. To this end, you must define a fitting function; i.e.,
 a function which takes in the parameters and returns a single value - the unregularized
-fit. **lessSEM** then uses this fitting function and adds the penalty terms. The 
-combined fitting function is then optimized. Currently, there are three ways to 
+fit. **lessSEM** uses this fitting function and adds the penalty terms. The 
+combined fitting function is then optimized. Currently, there are four ways to 
 use the optimizers in **lessSEM**
 
 1. You can use the R interface. This interface is very similar to that of optim (see e.g., `?lessSEM::gpLasso`). 
@@ -39,13 +39,16 @@ use the optimizers in **lessSEM**
 involved (see e.g., `?lessSEM::gpLassoCpp`).
 3. You can include the header files of **lessSEM** in your package to directly interface
 to the underlying C++ functions. This is the most complicated approach.
+4. The optimizers are implemented in the separate C++ header only library
+[lesstimate](https://jhorzek.github.io/lesstimate/) that can be used as a submodule
+in R packages.
 
-In general, the approaches get faster as you transition from 1 to 3. You will
+In general, the approaches get faster as you transition from 1 to 4. You will
 see the largest performance gains when implementing a gradient function and not just
 a fitting function, however. As a rule of thumb: Use approach 1 if you intend to
 run your model a few times, don't want to create a new package and your model
 runs fairly fast. Use approach 2 if you want to increase the speed a bit, while
-keeping the changes necessary to your files manageable. Use approach 3 if you 
+keeping the changes necessary to your files manageable. Use approach 3 or 4 if you 
 create a new package, have some experience with **RcppArmadillo** and want to get the best performance. 
 
 In the following, we will demonstrate all three approaches using a linear regression model
@@ -228,7 +231,7 @@ Runtime in seconds with gradients:
 print(runtimes$Rgrad)
 ```
 
-Now, that's quite a difference!
+That's quite a speedup!
 
 Note that you can also pass a C++ function to gpLasso similar to the approach above:
 
@@ -613,13 +616,16 @@ for(i in 1:5){
 ```{r,echo=FALSE}
 print(runtimes$Cpt)
 ```
-So, we have reduced our run time even more!
+So, we have reduced our runtime even more!
 
-## The third approach: Including the header files
+## The third and fourth approach: Including the header files
 
-This is, by far, the most difficult approach which is why we have created a 
+This approach requires a more elaborate setup which is why we have created a 
 whole package to demonstrate it. You will find more information in the vignette
 `The-optimizer-interface` and in the [lessLM](https://github.com/jhorzek/lessLM) package.
+If you just want the optimizers and don't want to depend on the **lessSEM** package,
+we recommend that you copy the [lesstimate](https://jhorzek.github.io/lesstimate/)
+C++ library in your packages inst/include folder. 
 
 ```{r, include=FALSE}
 funCpp <- '

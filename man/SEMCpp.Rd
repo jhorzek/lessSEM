@@ -17,9 +17,11 @@ internal SEM representation
 
 \item{\code{implied}}{Computes implied means and covariance matrix}
 
-\item{\code{fit}}{Fits the model. Returns -2 log likelihood}
+\item{\code{fit}}{Fits the model. Returns objective value of the fitting function}
 
 \item{\code{getParameters}}{Returns a data frame with model parameters.}
+
+\item{\code{getEstimator}}{returns the estimator used in the model (e.g., fiml)}
 
 \item{\code{getParameterLabels}}{Returns a vector with unique parameter labels as used internally.}
 

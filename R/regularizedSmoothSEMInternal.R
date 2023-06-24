@@ -16,6 +16,8 @@
 #' @param method optimizer used. Currently only "bfgs" is supported.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlBFGS function. See ?controlBFGS for more details.
+#' @param notes option to pass a notes to function. All notes of the current
+#' function will be added
 #' @returns regularizedSEM
 #' @keywords internal
 .regularizeSmoothSEMInternal <- function(lavaanModel,
@@ -26,7 +28,16 @@
                                          tau,
                                          method = "bfgs", 
                                          modifyModel,
-                                         control){
+                                         control,
+                                         notes = NULL){
+  
+  if(is.null(notes)){
+    printNotes <- TRUE
+    notes <- c("Notes:")
+  }else{
+    # notes already exists and we only append the new ones
+    printNotes <- FALSE
+  }
   
   inputArguments <- as.list(environment())
   
@@ -40,15 +51,22 @@
   if(!is(control, "controlBFGS")) 
     stop("control must be of class controlBfgs See ?controlBfgs.")
   
+  control$breakOuter <- .adaptBreakingForWls(lavaanModel = lavaanModel, 
+                                             currentBreaking = control$breakOuter,
+                                             selectedDefault = control$breakOuter == controlBFGS()$breakOuter
+  )
+  
   if(!is.null(modifyModel$transformations)){
     if(any(control$initialHessian == "lavaan")){
-      rlang::inform(c("Note","Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "Your model has transformations. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
   }
   if(is.vector(lavaanModel)){
     if(any(control$initialHessian == "lavaan")){
-      rlang::inform(c("Note","You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
   }
@@ -60,7 +78,7 @@
   .setupMulticore(control)
   
   ## check starting values ##
-
+  
   startingValues <- control$startingValues
   if(!any(startingValues == "est") & penalty == "adaptiveLasso" & !is.numeric(weights)){
     createAdaptiveLassoWeights <- TRUE
@@ -78,6 +96,9 @@
                                                      startingValues = startingValues,
                                                      modifyModel = modifyModel)
   }
+  
+  # check if we have a likelihood objective function:
+  usesLikelihood <- all(SEM$getEstimator() == "fiml")
   
   N <- SEM$sampleSize
   
@@ -97,11 +118,15 @@
                                 rawParameters = rawParameters)
   
   #### glmnet requires an initial Hessian ####
-  control$initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
-                                                   rawParameters = rawParameters, 
-                                                   lavaanModel = lavaanModel, 
-                                                   SEM = SEM,
-                                                   addMeans = modifyModel$addMeans)
+  initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
+                                           rawParameters = rawParameters, 
+                                           lavaanModel = lavaanModel, 
+                                           SEM = SEM,
+                                           addMeans = modifyModel$addMeans,
+                                           stepSize = control$stepSize,
+                                           notes = notes)
+  notes <- initialHessian$notes
+  control$initialHessian <- initialHessian$initialHessian
   
   #### prepare regularized model object ####
   
@@ -134,6 +159,8 @@
   
   fits <- data.frame(
     tuningParameters,
+    "objectiveValue" = NA,
+    "regObjectiveValue" = NA,
     "m2LL" = NA,
     "regM2LL"= NA,
     "nonZeroParameters" = NA,
@@ -167,7 +194,7 @@
     transformations <- data.frame()
   }
   
-  if(control$saveHessian){
+  if(control$saveDetails){
     Hessians <- list(
       "lambda" = tuningParameters$lambda,
       "alpha" = tuningParameters$alpha,
@@ -209,7 +236,11 @@
     rawParameters <- result$rawParameters
     fits$nonZeroParameters[it] <- length(rawParameters) - 
       sum(abs(rawParameters[weights[names(rawParameters)] != 0]) <= tau)
-    fits$regM2LL[it] <- result$fit
+    
+    fits$regObjectiveValue[it] <- result$fit
+    if(usesLikelihood)
+      fits$regM2LL[it] <- fits$regObjectiveValue[it]
+    
     fits$convergence[it] <- result$convergence
     
     # get unregularized fit:
@@ -217,7 +248,10 @@
                           names(rawParameters), 
                           values = rawParameters, 
                           raw = TRUE)
-    fits$m2LL[it] <- SEM$fit()
+    fits$objectiveValue[it] <- SEM$fit()
+    if(usesLikelihood)
+      fits$m2LL[it] <- fits$objectiveValue[it]
+    
     # transform internal parameter representation to "natural" form
     transformedParameters <- .getParameters(SEM,
                                             raw = FALSE)
@@ -233,17 +267,17 @@
                       names(transformationsAre)] <- transformationsAre
     }
     
-    if(control$saveHessian) 
+    if(control$saveDetails) 
       Hessians$Hessian[[it]] <- result$Hessian
     
     # set initial values for next iteration
     if(is(SEM, "try-Error")){
       # reset
       stop(paste0("Fit for ",
-                     paste0(names(tuningParameters),
-                            tuningParameters[it,], 
-                            sep = " = "),
-                     " resulted in Error!"))
+                  paste0(names(tuningParameters),
+                         tuningParameters[it,], 
+                         sep = " = "),
+                  " resulted in Error!"))
       
       SEM <- .SEMFromLavaan(lavaanModel = lavaanModel,
                             whichPars = startingValues,
@@ -256,7 +290,7 @@
     }else{
       
       
-      if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
+      if(control$saveDetails) Hessians$Hessian[[it]] <- result$Hessian
       
       # set Hessian for next iteration
       regularizedModel$setHessian(result$Hessian)
@@ -266,9 +300,13 @@
   }
   
   internalOptimization <- list(
+    "isMultiGroup" = is(SEM, "Rcpp_mgSEM"),
     "HessiansOfDifferentiablePart" = Hessians,
-    "N" = SEM$sampleSize
+    "N" = SEM$sampleSize,
+    "estimator"= SEM$getEstimator()
   )
+  
+  notes <- unique(notes)
   
   results <- new("regularizedSEM",
                  penalty = penalty,
@@ -279,7 +317,15 @@
                  regularized = names(weights)[weights!=0],
                  transformations = transformations,
                  internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
+                 inputArguments = inputArguments,
+                 notes = notes)
+  
+  if(printNotes & length(notes) > 1){
+    cat("\n")
+    rlang::inform(
+      notes
+    )
+  }
   
   return(results)
   

@@ -12,7 +12,7 @@ setMethod("show", "Rcpp_mgSEM", function (object) {
   cat("Parameters:\n")
   print(.getParameters(object))
   cat("\n")
-  cat(paste0("-2 log-Likelihood: ", object$m2LL))
+  cat(paste0("Objective value: ", object$objectiveValue))
 })
 
 #' logLik
@@ -23,11 +23,16 @@ setMethod("logLik", "Rcpp_mgSEM", function (object) {
   if(!object$wasFit){
     object$fit()
   }
+  
+  if(!all(object$getEstimator() == "fiml")){
+    stop("logLik only implemented for maximum likelihood estimation.")
+  }
+  
   N <- object$sampleSize
   numberOfParameters <- length(.getParameters(object))
   
   ll <- new("logLikelihood",
-            logLik = -.5*object$m2LL,
+            logLik = -.5*object$objectiveValue,
             nParameters = numberOfParameters,
             N = N)
   return(ll)

@@ -1,0 +1,176 @@
+---
+title: "Estimator-Settings"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Missing-Data-Estimators-and-Friends}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+**lavaan** is an extremely versatile package for structural equation modeling.
+It covers a wide range of different estimation procedures beyond the basic 
+maximum likelihood estimation with listwise deletion of missings. **lessSEM**
+tries to cover some of these procedures out of the box. That is, when 
+provided with a **lavaan** model, **lessSEM** will check the estimator, missing
+data procedure, etc. and try to match it.
+
+> **lessSEM** may not yet provide all procedures implemented in **lavaan**. If
+you run into cases where **lessSEM** does not match the **lavaan** model correctly, 
+please let us know at [GitHub](https://github.com/jhorzek/lessSEM/issues).
+
+## Maximum Likelihood Estimation
+
+By default, **lavaan** will use maximum likelihood estimation with listwise deletion
+of missing data. If you pass such a "default" model to **lessSEM**, the same
+procedures will be used as well:
+
+
+
+
+```r
+library(lessSEM)
+
+dataset <- simulateExampleData()
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           std.lv = TRUE)
+
+lsem <- lasso(
+  lavaanModel = lavaanModel,
+  regularized = paste0("l", 6:15),
+  nLambdas = 50)
+```
+
+You can also use `meanstructure = TRUE` and **lessSEM** will automatically add a meanstructure
+as well.
+
+### Missing data
+
+Missing data is a very common problem in real data analysis. Different procedures have
+been developed to address with issue, with full-information-maximum-likelihood being
+among the most famous ones. In lavaan, you can use this procedure by setting 
+`missing = "ml"`:
+
+
+
+
+```r
+library(lessSEM)
+
+dataset <- simulateExampleData(percentMissing = 20)
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           std.lv = TRUE, 
+                           # note: we change the missing procedure
+                           missing = "ml")
+
+lsem <- lasso(
+  lavaanModel = lavaanModel,
+  regularized = paste0("l", 6:15),
+  nLambdas = 50)
+```
+
+## Weighted Least Squares
+
+> **Warning** WLS is under development and not fully supported at the moment.
+
+Weighted least squares estimation is an alternative to maximum likelihood
+estimation that is prominent in case of non-normal data. Again, **lavaan**
+covers a wide range of different weighted least squares estimators that 
+can be selected with the `estimator = x` option. These estimators differ in
+their weight matrix. **lessSEM** extracts the weights automatically from 
+**lavaan**. The following weighted least squares variants are supported: 
+`estimator = "wls"`, `estimator = "dwls"`, `estimator = "gls"`, and 
+`estimator = "uls"`. 
+
+Again, **lessSEM** will try to copy the procedure used in **lavaan** automatically:
+
+
+
+
+```r
+library(lessSEM)
+
+# Note: WLS needs much larger sample sizes
+dataset <- simulateExampleData(N = 1000)
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           std.lv = TRUE,
+                           estimator = "wls")
+
+lsem <- lasso(
+  lavaanModel = lavaanModel,
+  regularized = paste0("l", 6:15),
+  nLambdas = 50)
+```
+
+Changing the estimator just requires replacing `estimator = "wls"` with any
+of the other weighted least squares variants mentioned above:
+
+
+
+```r
+library(lessSEM)
+
+# Note: WLS needs much larger sample sizes
+dataset <- simulateExampleData(N = 1000)
+
+lavaanSyntax <- "
+f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
+     l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
+     l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
+f ~~ 1*f
+"
+
+lavaanModel <- lavaan::sem(lavaanSyntax,
+                           data = dataset,
+                           std.lv = TRUE,
+                           estimator = "uls")
+
+lsem <- lasso(
+  lavaanModel = lavaanModel,
+  regularized = paste0("l", 6:15),
+  nLambdas = 50)
+```
+
+Currently, the only procedure to select final parameters that is supported
+by **lessSEM** out of the box is cross-validation. AIC or BIC are not supported.
+
+### Ordered data
+
+**lavaan** supports ordered data. This is not yet implemented in **lessSEM**.
+Check **lslx** for an implementation of regularized SEM with categorical data
+(Huang, 2020).
+
+
+# Bibliography
+
+- Huang, P.-H. (2020). Penalized Least Squares for Structural Equation Modeling with Ordinal Responses. Multivariate Behavioral Research, 1–19. https://doi.org/10.1080/00273171.2020.1820309
+- Rosseel, Y. (2012). lavaan: An R package for structural equation modeling. Journal of Statistical Software, 48(2), 1–36. https://doi.org/10.18637/jss.v048.i02
+

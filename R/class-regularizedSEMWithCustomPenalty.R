@@ -4,6 +4,7 @@
 #' @slot parameterLabels character vector with names of all parameters
 #' @slot internalOptimization list of elements used internally
 #' @slot inputArguments list with elements passed by the user to the general
+#' @slot notes internal notes that have come up when fitting the model
 #' @keywords internal
 setClass(Class = "regularizedSEMWithCustomPenalty",
          representation = representation(
@@ -11,7 +12,8 @@ setClass(Class = "regularizedSEMWithCustomPenalty",
            fits="data.frame", 
            parameterLabels = "character",
            internalOptimization = "list",
-           inputArguments="list"
+           inputArguments="list",
+           notes = "character"
          )
 )
 
@@ -43,9 +45,18 @@ setMethod("coef", "regularizedSEMWithCustomPenalty", function (object, ...) {
   tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
   estimates <- as.matrix(object@parameters[,object@parameterLabels,drop=FALSE])
 
+  if(ncol(object@transformations) != 0){
+    transformations <- as.matrix(object@transformations[,
+                                                        !colnames(object@transformations) %in% colnames(tuningParameters), 
+                                                        drop = FALSE])
+  }else{
+    transformations <- matrix(nrow = 0, ncol = 0)
+  }
+  
   coefs <- new("lessSEMCoef")
   coefs@tuningParameters <- tuningParameters
   coefs@estimates <- estimates
+  coefs@transformations <- transformations
   
   return(coefs)
 })

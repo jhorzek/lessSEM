@@ -37,14 +37,10 @@
   
   inputArguments <- as.list(environment())
   
+  notes <- c("Notes:")
+  
   if(! method %in% c("ista", "glmnet")) 
     stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) 
-    stop(paste0(
-      "glmnet only supports the following penalty functions: ",
-      paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet"), collapse = ", ")
-    )
-    )
   
   if(method == "ista" && !is(control, "controlIsta")) 
     stop("control must be of class controlIsta. See ?controlIsta.")
@@ -52,7 +48,8 @@
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
   if(method == "glmnet" && any(control$initialHessian == "lavaan")) {
-    rlang::inform(c("Note","Changing initialHessian from 'lavaan' to 'compute'"))
+    notes <- c(notes,
+               "Changing initialHessian from 'lavaan' to 'compute'")
     control$initialHessian <- "compute"
   }
   
@@ -212,17 +209,33 @@
     )
     
     if(isCpp){
-      
-      regularizedModel <- new(glmnetEnetGeneralPurposeCpp, 
-                              weights, 
-                              controlIntern)
+      if(penalty %in% c("lasso", "elasticNet", "adaptiveLasso", "ridge")){
+        regularizedModel <- new(glmnetEnetGeneralPurposeCpp, 
+                                weights, 
+                                controlIntern)
+      }else{
+        penaltyType <- rep("none", length(weights))
+        penaltyType[weights != 0] <- penalty
+        regularizedModel <- new(glmnetMixedPenaltyGeneralPurposeCpp, 
+                                weights, 
+                                penaltyType,
+                                controlIntern)
+      }
       
     }else{
       
-      regularizedModel <- new(glmnetEnetGeneralPurpose, 
-                              weights, 
-                              controlIntern)
-      
+      if(penalty %in% c("lasso", "elasticNet", "adaptiveLasso", "ridge")){
+        regularizedModel <- new(glmnetEnetGeneralPurpose, 
+                                weights, 
+                                controlIntern)
+      }else{
+        penaltyType <- rep("none", length(weights))
+        penaltyType[weights != 0] <- penalty
+        regularizedModel <- new(glmnetMixedPenaltyGeneralPurpose, 
+                                weights, 
+                                penaltyType,
+                                controlIntern)
+      }
     }
     
   }else if(method == "ista"){
@@ -253,70 +266,26 @@
       }
       
       
-    }else if(penalty == "cappedL1"){
-      
-      if(isCpp){
-        regularizedModel <- new(istaCappedL1GeneralPurposeCpp, 
-                                weights, 
-                                controlIntern)
-      }else{
-        regularizedModel <- new(istaCappedL1GeneralPurpose, 
-                                weights, 
-                                controlIntern)
-      }
-      
-    }else if(penalty == "lsp"){
-      
-      if(isCpp){
-        
-        regularizedModel <- new(istaLspGeneralPurposeCpp, 
-                                weights, 
-                                controlIntern)
-        
-      }else{
-        
-        regularizedModel <- new(istaLspGeneralPurpose, 
-                                weights, 
-                                controlIntern)
-        
-      }
-      
-    }else if(penalty  == "scad"){
-      
-      if(isCpp){
-        
-        regularizedModel <- new(istaScadGeneralPurposeCpp, 
-                                weights, 
-                                controlIntern)
-        
-      }else{
-        
-        regularizedModel <- new(istaScadGeneralPurpose, 
-                                weights, 
-                                controlIntern)
-        
-      }
-      
-    }else if(penalty == "mcp"){
-      
-      if(isCpp){
-        
-        regularizedModel <- new(istaMcpGeneralPurposeCpp, 
-                                weights, 
-                                controlIntern)
-        
-      }else{
-        
-        regularizedModel <- new(istaMcpGeneralPurpose, 
-                                weights, 
-                                controlIntern)
-        
-      }
-      
     }else{
-      stop("Unknow penalty selected.")
+      
+      
+      if(isCpp){
+        penaltyType <- rep("none", length(weights))
+        penaltyType[weights != 0] <- penalty
+        regularizedModel <- new(istaMixedPenaltyGeneralPurposeCpp, 
+                                weights, 
+                                penaltyType,
+                                controlIntern)
+      }else{
+        penaltyType <- rep("none", length(weights))
+        penaltyType[weights != 0] <- penalty
+        regularizedModel <- new(istaMixedPenaltyGeneralPurpose, 
+                                weights, 
+                                penaltyType,
+                                controlIntern)
+      }
+      
     }
-    
   }
   
   #### define tuning parameters and prepare fit results ####
@@ -324,10 +293,11 @@
   if(!is.null(tuningParameters$nLambdas)){
     # for lasso type penalties, the maximal lambda value can be determined
     # automatically
-    rlang::inform(c("Note",paste0(
-      "Automatically selecting the maximal lambda value. ",
-      " \033[35mThis may fail if a model with all regularized parameters set to zero is not identified.\033[39m")
-    ))
+    notes <- c(notes,
+               paste0(
+                 "Automatically selecting the maximal lambda value. ",
+                 "This may fail if a model with all regularized parameters set to zero is not identified.")
+    )
     
     maxLambda <- .gpGetMaxLambda(regularizedModel,
                                  par,
@@ -341,14 +311,16 @@
         lambda = rev(curveLambda(maxLambda = maxLambda, 
                                  lambdasAutoCurve = tuningParameters$curve, 
                                  tuningParameters$nLambdas)),
-        alpha = 1
+        alpha = 1,
+        theta = 0
       )
     }else{
       tuningParameters <- data.frame(
         lambda = curveLambda(maxLambda = maxLambda, 
                              lambdasAutoCurve = tuningParameters$curve, 
                              tuningParameters$nLambdas),
-        alpha = 1
+        alpha = 1,
+        theta = 0
       )
     }
     
@@ -358,8 +330,8 @@
   
   fits <- data.frame(
     tuningParameters,
-    "m2LL" = NA,
-    "regM2LL"= NA,
+    "objectiveValue" = NA,
+    "regObjectiveValue"= NA,
     "nonZeroParameters" = NA,
     "convergence" = NA
   )
@@ -373,10 +345,11 @@
     parameterEstimates
   )
   
-  if(method == "glmnet" && control$saveHessian){
+  if(method == "glmnet" && control$saveDetails){
     Hessians <- list(
       "lambda" = tuningParameters$lambda,
       "alpha" = tuningParameters$alpha,
+      "theta" = tuningParameters$theta,
       "Hessian" = lapply(1:nrow(tuningParameters), 
                          matrix, 
                          data= NA, 
@@ -415,25 +388,15 @@
                                               tuningParameters$alpha[it])
       )
       
-    }else if(penalty %in% c("lsp", "scad", "mcp")){
+    }else{
       
       result <- try(regularizedModel$optimize( par,
                                                fn,
                                                gr,
                                                additionalArguments,
-                                               tuningParameters$theta[it],
-                                               tuningParameters$lambda[it])
-      )
-      
-    }else if(penalty == "cappedL1"){
-      
-      result <- try(regularizedModel$optimize( par,
-                                               fn,
-                                               gr,
-                                               additionalArguments,
-                                               tuningParameters$theta[it],
-                                               tuningParameters$lambda[it],
-                                               tuningParameters$alpha[it])
+                                               rep(tuningParameters$lambda[it], length(par)),
+                                               rep(tuningParameters$theta[it], length(par)),
+                                               rep(tuningParameters$alpha[it], length(par)))
       )
       
     }
@@ -445,18 +408,18 @@
     
     fits$nonZeroParameters[it] <- length(rawParameters) - 
       sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
-    fits$regM2LL[it] <- result$fit
+    fits$regObjectiveValue[it] <- result$fit
     fits$convergence[it] <- result$convergence
-    if(!isCpp) fits$m2LL[it] <- fn(rawParameters, parameterLabels, additionalArguments)
+    if(!isCpp) fits$objectiveValue[it] <- fn(rawParameters, parameterLabels, additionalArguments)
     
-    if(method == "glmnet" && control$saveHessian) 
+    if(method == "glmnet" && control$saveDetails) 
       Hessians$Hessian[[it]] <- result$Hessian
     
     # set initial values for next iteration
     
     
     if(method == "glmnet"){
-      if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
+      if(control$saveDetails) Hessians$Hessian[[it]] <- result$Hessian
       
       # set Hessian for next iteration
       regularizedModel$setHessian(result$Hessian)
@@ -469,6 +432,12 @@
   internalOptimization <- list(
     "HessiansOfDifferentiablePart" = Hessians
   )
+  
+  notes <- unique(notes)
+  if(length(notes) > 1){
+    cat("\n")
+    rlang::inform(notes)
+  }
   
   results <- new("gpRegularized",
                  penalty = penalty,

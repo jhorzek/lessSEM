@@ -27,19 +27,21 @@ different parameters have, for instance, been proposed in multi-group models
 
 > Important: You cannot impose two penalties on the same parameter!
 
-Not all penalty combinations are currently supported by all optimizers. The following
-table provides an overview of the penalties you can use with each optimizer:
+Models are fitted with the glmnet or ista optimizer. Note that the 
+optimizers differ in which penalties they support. The following table provides
+an overview:
 
 | Penalty | Function | glmnet | ista |
 | --- | ---- | ---- | ---- |
-| ridge | addRidge | x | - |
 | lasso | addLasso | x | x |
-| elastic net | addElasticNet | x | - |
-| cappedL1 | addCappedL1 | - | x |
-| lsp | addLsp | - | x |
-| scad | addScad | - | x |
-| mcp | addMcp | - | x |
+| elastic net | addElasticNet | x* | - |
+| cappedL1 | addCappedL1 | x | x |
+| lsp | addLsp | x | x |
+| scad | addScad | x | x |
+| mcp | addMcp | x | x |
 
+By default, glmnet will be used. Note that the elastic net penalty can
+only be combined with other elastic net penalties.
 
 ## Getting Started
 
@@ -71,9 +73,6 @@ mp <- lavaanModel |>
            lambdas = seq(0,1,.1)) |>
   addLasso(regularized = c("r1", "r2", "r3"), 
            lambdas = seq(0,1,.2)) 
-#> Note
-#> • Mixed penalties is a very new feature. Please note that there may still 
-#> • be bugs in the procedure. Use carefully!
 ```
 Note that we can use the pipe-operator to add multiple penalties. They
 don't have to be the same; the following would also work:
@@ -86,9 +85,6 @@ mp <- lavaanModel |>
   addScad(regularized = c("r1", "r2", "r3"), 
           lambdas = seq(0,1,.2),
           thetas = 3.7) 
-#> Note
-#> • Mixed penalties is a very new feature. Please note that there may still 
-#> • be bugs in the procedure. Use carefully!
 ```
 
 To fit the model, we use the `fit`- function:
@@ -103,54 +99,39 @@ at the `penalty` statement in the resulting object:
 
 ```r
 fitMp@penalty
-#>    ind60=~x2    ind60=~x3           c2           c3           c4    dem60=~y2 
-#>       "none"       "none"      "lasso"      "lasso"      "lasso"       "none" 
-#>    dem60=~y3    dem60=~y4    dem65=~y6    dem65=~y7            c           r1 
-#>       "none"       "none"       "none"       "none"       "none"       "scad" 
-#>           r2           r3       x1~~x1       x2~~x2       x3~~x3       y2~~y2 
-#>       "scad"       "scad"       "none"       "none"       "none"       "none" 
-#>       y3~~y3       y4~~y4       y1~~y1       y5~~y5       y6~~y6       y7~~y7 
-#>       "none"       "none"       "none"       "none"       "none"       "none" 
-#>       y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65 
-#>       "none"       "none"       "none"       "none"
+#>    ind60=~x2    ind60=~x3           c2           c3           c4    dem60=~y2    dem60=~y3    dem60=~y4    dem65=~y6 
+#>       "none"       "none"      "lasso"      "lasso"      "lasso"       "none"       "none"       "none"       "none" 
+#>    dem65=~y7            c           r1           r2           r3       x1~~x1       x2~~x2       x3~~x3       y2~~y2 
+#>       "none"       "none"       "scad"       "scad"       "scad"       "none"       "none"       "none"       "none" 
+#>       y3~~y3       y4~~y4       y1~~y1       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 
+#>       "none"       "none"       "none"       "none"       "none"       "none"       "none"       "none"       "none" 
+#> dem65~~dem65 
+#>       "none"
 ```
-
 
 We can access the best parameters according to the BIC with:
 
 
 ```r
 coef(fitMp, criterion = "BIC")
-#>                                                                                 
-#>                        Tuning ||--||  Estimates                                 
-#>  ---------------------------- ||--|| ---------- ---------- ---------- ----------
-#>  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2         c3
-#>  ============================ ||--|| ========== ========== ========== ==========
-#>                       11.0000 ||--||     2.1818     1.8188          .          .
-#>                                                                                         
-#>                                                                                         
-#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
-#>          c4  dem60=~y2  dem60=~y3  dem60=~y4  dem65=~y6  dem65=~y7          c         r1
-#>  ========== ========== ========== ========== ========== ========== ========== ==========
-#>           .     1.3541     1.0441     1.2997     1.2586     1.2825     1.3099     1.4740
-#>                                                                                         
-#>                                                                                         
-#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
-#>          r2         r3     x1~~x1     x2~~x2     x3~~x3     y2~~y2     y3~~y3     y4~~y4
-#>  ========== ========== ========== ========== ========== ========== ========== ==========
-#>      0.4532     0.8643     0.0818     0.1184     0.4672     6.4892     5.3396     2.8861
-#>                                                                                  
-#>                                                                                  
-#>  ---------- ---------- ---------- ---------- ---------- ------------ ------------
-#>      y1~~y1     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60 dem60~~dem60
-#>  ========== ========== ========== ========== ========== ============ ============
-#>      1.9420     2.3904     4.3421     3.5090     2.9392       0.4482       3.8710
-#>              
-#>              
-#>  ------------
-#>  dem65~~dem65
-#>  ============
-#>        0.1159
+#>                                                                                                                             
+#>                        Tuning ||--||  Estimates                                                                             
+#>  ---------------------------- ||--|| ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2         c3         c4  dem60=~y2  dem60=~y3  dem60=~y4
+#>  ============================ ||--|| ========== ========== ========== ========== ========== ========== ========== ==========
+#>                       11.0000 ||--||     2.1817     1.8188          .          .          .     1.3540     1.0440     1.2995
+#>                                                                                                                          
+#>                                                                                                                          
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>   dem65=~y6  dem65=~y7          c         r1         r2         r3     x1~~x1     x2~~x2     x3~~x3     y2~~y2     y3~~y3
+#>  ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ==========
+#>      1.2585     1.2825     1.3098     1.4738     0.4533     0.8644     0.0818     0.1184     0.4673     6.4896     5.3399
+#>                                                                                                          
+#>                                                                                                          
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ------------ ------------ ------------
+#>      y4~~y4     y1~~y1     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
+#>  ========== ========== ========== ========== ========== ========== ============ ============ ============
+#>      2.8871     1.9419     2.3901     4.3428     3.5096     2.9403       0.4482       3.8717       0.1149
 ```
 The `tuningParameterConfiguration` refers to the rows in the lambda, theta, and alpha
 matrices that resulted in the best fit:
@@ -159,60 +140,56 @@ matrices that resulted in the best fit:
 ```r
 getTuningParameterConfiguration(regularizedSEMMixedPenalty = fitMp, 
                                 tuningParameterConfiguration = 11)
-#>                 parameter penalty lambda theta alpha
-#> ind60=~x2       ind60=~x2    none      0   0.0     0
-#> ind60=~x3       ind60=~x3    none      0   0.0     0
-#> c2                     c2   lasso      1   0.0     0
-#> c3                     c3   lasso      1   0.0     0
-#> c4                     c4   lasso      1   0.0     0
-#> dem60=~y2       dem60=~y2    none      0   0.0     0
-#> dem60=~y3       dem60=~y3    none      0   0.0     0
-#> dem60=~y4       dem60=~y4    none      0   0.0     0
-#> dem65=~y6       dem65=~y6    none      0   0.0     0
-#> dem65=~y7       dem65=~y7    none      0   0.0     0
-#> c                       c    none      0   0.0     0
-#> r1                     r1    scad      0   3.7     0
-#> r2                     r2    scad      0   3.7     0
-#> r3                     r3    scad      0   3.7     0
-#> x1~~x1             x1~~x1    none      0   0.0     0
-#> x2~~x2             x2~~x2    none      0   0.0     0
-#> x3~~x3             x3~~x3    none      0   0.0     0
-#> y2~~y2             y2~~y2    none      0   0.0     0
-#> y3~~y3             y3~~y3    none      0   0.0     0
-#> y4~~y4             y4~~y4    none      0   0.0     0
-#> y1~~y1             y1~~y1    none      0   0.0     0
-#> y5~~y5             y5~~y5    none      0   0.0     0
-#> y6~~y6             y6~~y6    none      0   0.0     0
-#> y7~~y7             y7~~y7    none      0   0.0     0
-#> y8~~y8             y8~~y8    none      0   0.0     0
-#> ind60~~ind60 ind60~~ind60    none      0   0.0     0
-#> dem60~~dem60 dem60~~dem60    none      0   0.0     0
-#> dem65~~dem65 dem65~~dem65    none      0   0.0     0
+#>                 parameter penalty lambda alpha
+#> ind60=~x2       ind60=~x2    none      0     0
+#> ind60=~x3       ind60=~x3    none      0     0
+#> c2                     c2   lasso      1     1
+#> c3                     c3   lasso      1     1
+#> c4                     c4   lasso      1     1
+#> dem60=~y2       dem60=~y2    none      0     0
+#> dem60=~y3       dem60=~y3    none      0     0
+#> dem60=~y4       dem60=~y4    none      0     0
+#> dem65=~y6       dem65=~y6    none      0     0
+#> dem65=~y7       dem65=~y7    none      0     0
+#> c                       c    none      0     0
+#> r1                     r1    scad      0     0
+#> r2                     r2    scad      0     0
+#> r3                     r3    scad      0     0
+#> x1~~x1             x1~~x1    none      0     0
+#> x2~~x2             x2~~x2    none      0     0
+#> x3~~x3             x3~~x3    none      0     0
+#> y2~~y2             y2~~y2    none      0     0
+#> y3~~y3             y3~~y3    none      0     0
+#> y4~~y4             y4~~y4    none      0     0
+#> y1~~y1             y1~~y1    none      0     0
+#> y5~~y5             y5~~y5    none      0     0
+#> y6~~y6             y6~~y6    none      0     0
+#> y7~~y7             y7~~y7    none      0     0
+#> y8~~y8             y8~~y8    none      0     0
+#> ind60~~ind60 ind60~~ind60    none      0     0
+#> dem60~~dem60 dem60~~dem60    none      0     0
+#> dem65~~dem65 dem65~~dem65    none      0     0
 ```
 
 In this case, the best model has no cross-loadings, but the regressions remained
 unregularized: The lambda for the cross-loadings is large (1), while the
 lambda for the regressions is 0 (no regularization).
 
-## Using glmnet
+## Using ista
 
-The glmnet optimizer is typically considerably faster than ista. However, as mentioned
-above, not all penalty functions are currently supported. Mixed penalties for glmnet
-can be specified as follows:
+The glmnet optimizer is typically considerably faster than ista. However, sometimes
+glmnet may run into issues. In that case, it can help to switch to ista:
 
 
 ```r
 mp <- lavaanModel |>
   # Change the optimizer and the control object:
-  mixedPenalty(method = "glmnet",
-               control = controlGlmnet()) |>
+  mixedPenalty(method = "ista",
+               control = controlIsta()) |>
   addLasso(regularized = c("c2", "c3", "c4"), 
                 lambdas = seq(0,1,.1)) |>
   addLasso(regularized = c("r1", "r2", "r3"), 
                 lambdas = seq(0,1,.2)) 
-#> Note
-#> • Mixed penalties is a very new feature. Please note that there may still 
-#> • be bugs in the procedure. Use carefully!
 ```
 To fit the model, we use the `fit`- function:
 
@@ -224,36 +201,24 @@ fitMp <- fit(mp)
 
 ```r
 coef(fitMp, criterion = "BIC")
-#>                                                                                 
-#>                        Tuning ||--||  Estimates                                 
-#>  ---------------------------- ||--|| ---------- ---------- ---------- ----------
-#>  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2         c3
-#>  ============================ ||--|| ========== ========== ========== ==========
-#>                       11.0000 ||--||     2.1817     1.8188          .          .
-#>                                                                                         
-#>                                                                                         
-#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
-#>          c4  dem60=~y2  dem60=~y3  dem60=~y4  dem65=~y6  dem65=~y7          c         r1
-#>  ========== ========== ========== ========== ========== ========== ========== ==========
-#>           .     1.3540     1.0440     1.2995     1.2585     1.2825     1.3098     1.4738
-#>                                                                                         
-#>                                                                                         
-#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
-#>          r2         r3     x1~~x1     x2~~x2     x3~~x3     y2~~y2     y3~~y3     y4~~y4
-#>  ========== ========== ========== ========== ========== ========== ========== ==========
-#>      0.4532     0.8644     0.0818     0.1184     0.4673     6.4896     5.3399     2.8871
-#>                                                                                  
-#>                                                                                  
-#>  ---------- ---------- ---------- ---------- ---------- ------------ ------------
-#>      y1~~y1     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60 dem60~~dem60
-#>  ========== ========== ========== ========== ========== ============ ============
-#>      1.9419     2.3901     4.3429     3.5095     2.9402       0.4481       3.8717
-#>              
-#>              
-#>  ------------
-#>  dem65~~dem65
-#>  ============
-#>        0.1149
+#>                                                                                                                             
+#>                        Tuning ||--||  Estimates                                                                             
+#>  ---------------------------- ||--|| ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2         c3         c4  dem60=~y2  dem60=~y3  dem60=~y4
+#>  ============================ ||--|| ========== ========== ========== ========== ========== ========== ========== ==========
+#>                       11.0000 ||--||     2.1818     1.8188          .          .          .     1.3541     1.0441     1.2997
+#>                                                                                                                          
+#>                                                                                                                          
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>   dem65=~y6  dem65=~y7          c         r1         r2         r3     x1~~x1     x2~~x2     x3~~x3     y2~~y2     y3~~y3
+#>  ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ==========
+#>      1.2586     1.2825     1.3099     1.4740     0.4532     0.8643     0.0818     0.1184     0.4672     6.4892     5.3396
+#>                                                                                                          
+#>                                                                                                          
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ------------ ------------ ------------
+#>      y4~~y4     y1~~y1     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65
+#>  ========== ========== ========== ========== ========== ========== ============ ============ ============
+#>      2.8861     1.9420     2.3904     4.3421     3.5090     2.9392       0.4482       3.8710       0.1159
 ```
 The `tuningParameterConfiguration` refers to the rows in the lambda, theta, and alpha
 matrices that resulted in the best fit:
@@ -262,43 +227,43 @@ matrices that resulted in the best fit:
 ```r
 getTuningParameterConfiguration(regularizedSEMMixedPenalty = fitMp, 
                                 tuningParameterConfiguration = 11)
-#>                 parameter    penalty lambda alpha
-#> ind60=~x2       ind60=~x2       none      0     0
-#> ind60=~x3       ind60=~x3       none      0     0
-#> c2                     c2 elasticNet      1     1
-#> c3                     c3 elasticNet      1     1
-#> c4                     c4 elasticNet      1     1
-#> dem60=~y2       dem60=~y2       none      0     0
-#> dem60=~y3       dem60=~y3       none      0     0
-#> dem60=~y4       dem60=~y4       none      0     0
-#> dem65=~y6       dem65=~y6       none      0     0
-#> dem65=~y7       dem65=~y7       none      0     0
-#> c                       c       none      0     0
-#> r1                     r1 elasticNet      0     1
-#> r2                     r2 elasticNet      0     1
-#> r3                     r3 elasticNet      0     1
-#> x1~~x1             x1~~x1       none      0     0
-#> x2~~x2             x2~~x2       none      0     0
-#> x3~~x3             x3~~x3       none      0     0
-#> y2~~y2             y2~~y2       none      0     0
-#> y3~~y3             y3~~y3       none      0     0
-#> y4~~y4             y4~~y4       none      0     0
-#> y1~~y1             y1~~y1       none      0     0
-#> y5~~y5             y5~~y5       none      0     0
-#> y6~~y6             y6~~y6       none      0     0
-#> y7~~y7             y7~~y7       none      0     0
-#> y8~~y8             y8~~y8       none      0     0
-#> ind60~~ind60 ind60~~ind60       none      0     0
-#> dem60~~dem60 dem60~~dem60       none      0     0
-#> dem65~~dem65 dem65~~dem65       none      0     0
+#>                 parameter penalty lambda theta alpha
+#> ind60=~x2       ind60=~x2    none      0     0     0
+#> ind60=~x3       ind60=~x3    none      0     0     0
+#> c2                     c2   lasso      1     0     1
+#> c3                     c3   lasso      1     0     1
+#> c4                     c4   lasso      1     0     1
+#> dem60=~y2       dem60=~y2    none      0     0     0
+#> dem60=~y3       dem60=~y3    none      0     0     0
+#> dem60=~y4       dem60=~y4    none      0     0     0
+#> dem65=~y6       dem65=~y6    none      0     0     0
+#> dem65=~y7       dem65=~y7    none      0     0     0
+#> c                       c    none      0     0     0
+#> r1                     r1   lasso      0     0     1
+#> r2                     r2   lasso      0     0     1
+#> r3                     r3   lasso      0     0     1
+#> x1~~x1             x1~~x1    none      0     0     0
+#> x2~~x2             x2~~x2    none      0     0     0
+#> x3~~x3             x3~~x3    none      0     0     0
+#> y2~~y2             y2~~y2    none      0     0     0
+#> y3~~y3             y3~~y3    none      0     0     0
+#> y4~~y4             y4~~y4    none      0     0     0
+#> y1~~y1             y1~~y1    none      0     0     0
+#> y5~~y5             y5~~y5    none      0     0     0
+#> y6~~y6             y6~~y6    none      0     0     0
+#> y7~~y7             y7~~y7    none      0     0     0
+#> y8~~y8             y8~~y8    none      0     0     0
+#> ind60~~ind60 ind60~~ind60    none      0     0     0
+#> dem60~~dem60 dem60~~dem60    none      0     0     0
+#> dem65~~dem65 dem65~~dem65    none      0     0     0
 ```
 
 
 
 
 Here is a short run-time comparison of ista and glmnet with the lasso-regularized 
-model from above: Five repetitions using ista took 42.11 seconds,
-while glmnet took 1.51 seconds. That is, if you 
+model from above: Five repetitions using ista took 43.788 seconds,
+while glmnet took 1.733 seconds. That is, if you 
 can use glmnet with your model, we recommend that you do.
 
 ## Bibliography

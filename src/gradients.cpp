@@ -1,6 +1,7 @@
 #include <RcppArmadillo.h>
 #include "SEM.h"
 #include "multivariateNormal.h"
+#include "WLS.h"
 #include "scores.h"
 #include "gradients.h"
 #include "impliedDerivatives.h"

@@ -30,5 +30,7 @@ tuning parameters and the sum of the cross-validation fits}
 combinations of the tuning parameters in all subsets}
 
 \item{\code{misc}}{list with additional return elements}
+
+\item{\code{notes}}{internal notes that have come up when fitting the model}
 }}
 

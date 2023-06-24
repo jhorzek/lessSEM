@@ -1,0 +1,3 @@
+[submodule "inst/include/lesstimate"]
+	path = inst/include/lesstimate
+	url = https://github.com/jhorzek/lesstimate.git

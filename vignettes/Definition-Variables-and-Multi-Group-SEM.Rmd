@@ -23,11 +23,10 @@ Setting up such models with lavaan is explained [here](https://lavaan.ugent.be/t
 Unfortunately, **lessSEM** does not support the same syntax at the moment. "Throwing"
 a multi-group SEM into **lessSEM** will just result in errors. Instead,
 **lessSEM** follows a slightly different approach: You can pass multiple **lavaan**
-models at once which are then combined into a multi-group model. 
+models at once that are then combined into a multi-group model. 
 
 In the following, we will look at a two-group model to better understand how multi-group
 models are implemented in **lessSEM**. 
-
 
 ## First Step: Setting up a Multi-Group Model
 
@@ -38,7 +37,7 @@ separate models for each of the groups in **lavaan**:
 library(lavaan)
 
 # For simplicity, we will use a subset of the Holzinger Swineford data set 
-# which is also used at https://lavaan.ugent.be/tutorial/groups.html
+# that is also used at https://lavaan.ugent.be/tutorial/groups.html
 # to demonstrate multi-group SEM
 
 # To use mutli-group SEM in lessSEM, we have to set up a separate model
@@ -93,7 +92,7 @@ library(lessSEM)
 
 # We will just estimate the parameters using the BFGS optimizer without any 
 # regularization.
-# Note that we pass the two models as a vector. This is very important: lessSEM
+# Note that we pass the two models as a vector. lessSEM
 # will then set up the multi-group model
 fit <- bfgs(lavaanModel = c(fit_Pasteur, fit_Grant_White))
 ```
@@ -101,31 +100,25 @@ Let's have a look at the parameters:
 
 ```r
 coef(fit)
-#>                                                                               
-#>   Tuning         ||--||  Estimates                                            
-#>  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------
-#>   lambda   alpha ||--|| l1_Pasteur l2_Pasteur l3_Pasteur         v1         v2
-#>  ======= ======= ||--|| ========== ========== ========== ========== ==========
-#>   0.0000  0.0000 ||--||     0.7240     0.5610     0.8824     0.8449     1.0711
-#>                                                                           
-#>                                                                           
-#>  ---------- ---------- ---------- ---------- -------------- --------------
-#>          v3         m1         m2         m3 l1_Grant_White l2_Grant_White
-#>  ========== ========== ========== ========== ============== ==============
-#>      0.6108     4.9212     6.0770     2.2281         0.7088         0.5536
-#>                
-#>                
-#>  --------------
-#>  l3_Grant_White
-#>  ==============
-#>          0.7360
+#>                                                                                                                           
+#>   Tuning         ||--||  Estimates                                                                                        
+#>  ------- ------- ||--|| ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>   lambda   alpha ||--|| l1_Pasteur l2_Pasteur l3_Pasteur         v1         v2         v3         m1         m2         m3
+#>  ======= ======= ||--|| ========== ========== ========== ========== ========== ========== ========== ========== ==========
+#>   0.0000  0.0000 ||--||     0.7240     0.5610     0.8824     0.8449     1.0711     0.6108     4.9212     6.0770     2.2281
+#>                                              
+#>                                              
+#>  -------------- -------------- --------------
+#>  l1_Grant_White l2_Grant_White l3_Grant_White
+#>  ============== ============== ==============
+#>          0.7088         0.5536         0.7360
 ```
 That's curious! There are group-specific parameters, but **only** for the parameters
-where we provided group-specific names! This is very important: 
+where we provided group-specific names!
 
 > **Important**: If you set up a multi-group model with **lessSEM**, **lessSEM** 
 will assume that all parameters with the same names should also have the same values. 
-This includes parameters which you may have estimated, but for whom the names were 
+This includes parameters that you may have estimated, but for whom the names were 
 provided by **lavaan** (e.g., variances). 
 
 ### Different Models with Shared Parameter Labels
@@ -133,7 +126,7 @@ provided by **lavaan** (e.g., variances).
 All parameters that have the same labels in multiple models will
 be constrained to equality across models! If you are not careful, this can result 
 in very annoying mistakes.
-To demonstrate this, we will use two very different models which may share some
+To demonstrate this, we will use two very different models that may share some
 parameter names.
 
 
@@ -199,60 +192,42 @@ that we wanted these parameters to have exactly the same value in both models.
 
 ```r
 coef(fit)
-#>                                                                               
-#>   Tuning         ||--||  Estimates                                            
-#>  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------
-#>   lambda   alpha ||--||  ind60=~x2  ind60=~x3          a          b          c
-#>  ======= ======= ||--|| ========== ========== ========== ========== ==========
-#>   0.0000  0.0000 ||--||     1.8164     1.5582     1.1879     1.1706     1.2511
-#>                                                                                 
-#>                                                                                 
-#>  ----------- ----------- ----------- ---------- ---------- ---------- ----------
-#>  dem60~ind60 dem65~ind60 dem65~dem60     y1~~y5     y2~~y4     y2~~y6     y3~~y7
-#>  =========== =========== =========== ========== ========== ========== ==========
-#>       1.4062      0.4696      0.8755     0.5389     1.4270     2.2120     0.7425
-#>                                                                                         
-#>                                                                                         
-#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
-#>      y4~~y8     y6~~y8     x1~~x1     x2~~x2     x3~~x3     y1~~y1     y2~~y2     y3~~y3
-#>  ========== ========== ========== ========== ========== ========== ========== ==========
-#>      0.3718     1.3734     0.0000     1.3895     1.2086     1.8544     7.5981     4.9592
-#>                                                                                  
-#>                                                                                  
-#>  ---------- ---------- ---------- ---------- ---------- ------------ ------------
-#>      y4~~y4     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60 dem60~~dem60
-#>  ========== ========== ========== ========== ========== ============ ============
-#>      3.2006     2.2664     4.9911     3.6046     3.3135       0.5305       3.8021
-#>                                                                                
-#>                                                                                
-#>  ------------ ---------- ---------- ---------- ---------- ---------- ----------
-#>  dem65~~dem65       x1~1       x2~1       x3~1       y1~1       y2~1       y3~1
-#>  ============ ========== ========== ========== ========== ========== ==========
-#>        0.2003     5.0409     5.8482     2.5445     5.4463     4.2330     6.5420
-#>                                                                              
-#>                                                                              
-#>  ---------- ---------- ---------- ---------- ---------- ---------- ----------
-#>        y4~1       y5~1       y6~1       y7~1       y8~1 visual=~x2 visual=~x3
-#>  ========== ========== ========== ========== ========== ========== ==========
-#>      4.4295     5.1139     2.9502     6.1703     4.0150     0.2791     0.4461
-#>                                                                                
-#>                                                                                
-#>  ----------- ----------- ---------- ---------- ---------- ---------- ----------
-#>  textual=~x5 textual=~x6  speed=~x8  speed=~x9     x4~~x4     x5~~x5     x6~~x6
-#>  =========== =========== ========== ========== ========== ========== ==========
-#>       1.1126      0.9221     1.1746     1.0056     0.3681     0.4434     0.3610
-#>                                                                               
-#>                                                                               
-#>  ---------- ---------- ---------- -------------- ---------------- ------------
-#>      x7~~x7     x8~~x8     x9~~x9 visual~~visual textual~~textual speed~~speed
-#>  ========== ========== ========== ============== ================ ============
-#>      0.7750     0.4590     0.6025         1.3695           0.9839       0.4084
-#>                                                                               
-#>                                                                               
-#>  --------------- ------------- -------------- ---------- ---------- ----------
-#>  visual~~textual visual~~speed textual~~speed       x4~1       x5~1       x6~1
-#>  =============== ============= ============== ========== ========== ==========
-#>           0.4666        0.2615         0.1746     3.0967     4.3804     2.2186
+#>                                                                                                                   
+#>   Tuning         ||--||  Estimates                                                                                
+#>  ------- ------- ||--|| ---------- ---------- ---------- ---------- ---------- ----------- ----------- -----------
+#>   lambda   alpha ||--||  ind60=~x2  ind60=~x3          a          b          c dem60~ind60 dem65~ind60 dem65~dem60
+#>  ======= ======= ||--|| ========== ========== ========== ========== ========== =========== =========== ===========
+#>   0.0000  0.0000 ||--||     1.8164     1.5582     1.1879     1.1706     1.2511      1.4062      0.4696      0.8755
+#>                                                                                                                          
+#>                                                                                                                          
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>      y1~~y5     y2~~y4     y2~~y6     y3~~y7     y4~~y8     y6~~y8     x1~~x1     x2~~x2     x3~~x3     y1~~y1     y2~~y2
+#>  ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ==========
+#>      0.5389     1.4270     2.2120     0.7425     0.3718     1.3734     0.0000     1.3895     1.2086     1.8544     7.5981
+#>                                                                                                                     
+#>                                                                                                                     
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ------------ ------------ ------------ ----------
+#>      y3~~y3     y4~~y4     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65       x1~1
+#>  ========== ========== ========== ========== ========== ========== ============ ============ ============ ==========
+#>      4.9592     3.2006     2.2664     4.9911     3.6046     3.3135       0.5305       3.8021       0.2003     5.0409
+#>                                                                                                                          
+#>                                                                                                                          
+#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>        x2~1       x3~1       y1~1       y2~1       y3~1       y4~1       y5~1       y6~1       y7~1       y8~1 visual=~x2
+#>  ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ==========
+#>      5.8482     2.5445     5.4463     4.2330     6.5420     4.4295     5.1139     2.9502     6.1703     4.0150     0.2791
+#>                                                                                                                            
+#>                                                                                                                            
+#>  ---------- ----------- ----------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>  visual=~x3 textual=~x5 textual=~x6  speed=~x8  speed=~x9     x4~~x4     x5~~x5     x6~~x6     x7~~x7     x8~~x8     x9~~x9
+#>  ========== =========== =========== ========== ========== ========== ========== ========== ========== ========== ==========
+#>      0.4461      1.1126      0.9221     1.1746     1.0056     0.3681     0.4434     0.3610     0.7750     0.4590     0.6025
+#>                                                                                                                            
+#>                                                                                                                            
+#>  -------------- ---------------- ------------ --------------- ------------- -------------- ---------- ---------- ----------
+#>  visual~~visual textual~~textual speed~~speed visual~~textual visual~~speed textual~~speed       x4~1       x5~1       x6~1
+#>  ============== ================ ============ =============== ============= ============== ========== ========== ==========
+#>          1.3695           0.9839       0.4084          0.4666        0.2615         0.1746     3.0967     4.3804     2.2186
 #>                                  
 #>                                  
 #>  ---------- ---------- ----------
@@ -279,24 +254,18 @@ The coefficients can be extracted as usual:
 
 ```r
 coef(fit, criterion = "AIC")
-#>                                                                               
-#>   Tuning         ||--||  Estimates                                            
-#>  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------
-#>   lambda   alpha ||--|| l1_Pasteur l2_Pasteur l3_Pasteur         v1         v2
-#>  ======= ======= ||--|| ========== ========== ========== ========== ==========
-#>   0.0000  1.0000 ||--||     0.7241     0.5611     0.8822     0.8447     1.0710
-#>                                                                           
-#>                                                                           
-#>  ---------- ---------- ---------- ---------- -------------- --------------
-#>          v3         m1         m2         m3 l1_Grant_White l2_Grant_White
-#>  ========== ========== ========== ========== ============== ==============
-#>      0.6110     4.9211     6.0768     2.2279         0.7089         0.5537
-#>                
-#>                
-#>  --------------
-#>  l3_Grant_White
-#>  ==============
-#>          0.7358
+#>                                                                                                                           
+#>   Tuning         ||--||  Estimates                                                                                        
+#>  ------- ------- ||--|| ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>   lambda   alpha ||--|| l1_Pasteur l2_Pasteur l3_Pasteur         v1         v2         v3         m1         m2         m3
+#>  ======= ======= ||--|| ========== ========== ========== ========== ========== ========== ========== ========== ==========
+#>   0.0000  1.0000 ||--||     0.7239     0.5609     0.8826     0.8450     1.0712     0.6107     4.9212     6.0769     2.2280
+#>                                              
+#>                                              
+#>  -------------- -------------- --------------
+#>  l1_Grant_White l2_Grant_White l3_Grant_White
+#>  ============== ============== ==============
+#>          0.7087         0.5536         0.7361
 ```
 
 ### Regularizing Differences Between Parameters using **lessSEM**
@@ -378,7 +347,7 @@ currently not supported by **lessSEM**.
 Automatic cross-validation for multi-group models with, for instance, `cvLasso`
 is *not* yet implemented. This is because it can be difficult to decide how to
 split up the data set in each submodel. If you want to use cross-validation,
-you will unfortunately have to set up the procedure manually.
+you will (unfortunately) have to set up the procedure manually.
 
 ## Definition Variables
 

@@ -196,7 +196,7 @@ mySEM <- lessSEM:::.fit(SEM = mySEM)
 The -2-log-likelihood can be accessed with:
 
 ```{r}
-mySEM$m2LL
+mySEM$objectiveValue
 ```
 
 ## Computing the gradients

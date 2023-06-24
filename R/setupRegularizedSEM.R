@@ -45,7 +45,7 @@
                           values = startingValues, 
                           raw = FALSE)
     SEM <- try(.fit(SEM))
-    if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
+    if(is(SEM, "try-error") || !is.finite(SEM$objectiveValue)) 
       stop("Infeasible starting values.")
     
   }else{
@@ -96,7 +96,7 @@
                           values = startingValues, 
                           raw = TRUE)
     SEM <- try(.fit(SEM))
-    if(is(SEM, "try-error") || !is.finite(SEM$m2LL)) 
+    if(is(SEM, "try-error") || !is.finite(SEM$objectiveValue)) 
       stop("Infeasible starting values.")
     
   }else{
@@ -213,9 +213,20 @@
 #' @param lavaanModel lavaan model object
 #' @param SEM internal SEM representation
 #' @param addMeans should a mean structure be added to the model?
-#' @return Hessian matrix
+#' @param stepSize initial step size
+#' @param notes option to pass a notes to function. All notes of the current
+#' function will be added
+#' @return Hessian matrix and notes
 #' @keywords internal
-.computeInitialHessian <- function(initialHessian, rawParameters, lavaanModel, SEM, addMeans){
+.computeInitialHessian <- function(initialHessian, rawParameters, lavaanModel, SEM, addMeans, stepSize, notes = NULL){
+  
+  if(is.null(notes)){
+    printNotes <- TRUE
+    notes <- c("Notes:")
+  }else{
+    # notes already exists and we only append the new ones
+    printNotes <- FALSE
+  }
   
   if(is.matrix(initialHessian) && nrow(initialHessian) == length(rawParameters) && ncol(initialHessian) == length(rawParameters)){
     
@@ -230,29 +241,33 @@
     if(any(eigen(initialHessian)$values < 0))
       stop("Provided initial Hessian is not positive definite.")
     
-    return(initialHessian)
+    return(list(initialHessian = initialHessian, notes = notes))
   }
   
   if(any(initialHessian == "lavaan")){
     
     lavaanParameters <- getLavaanParameters(lavaanModel) 
     if((!lavaanModel@Options$meanstructure) && addMeans){
-      rlang::inform(c("Note","Your lavaan model has no mean structure. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "Your lavaan model has no mean structure. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
     }else if(!lavaanModel@Options$do.fit){
-      rlang::inform(c("Note","Your lavaan model was not optimized. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "Your lavaan model was not optimized. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
       
     }else if(any(!names(lavaanParameters) %in% names(rawParameters)) |
              any(!names(rawParameters) %in% names(lavaanParameters))
     ){
-      rlang::inform(c("Note","Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "Your model seems to have transformations. Switching initialHessian from 'lavaan' to 'compute'.")
       initialHessian <- "compute"
     }else{
       lavaanVcov <- suppressWarnings(try(lavaan::vcov(lavaanModel),
                                          silent = TRUE))
       if(is(lavaanVcov, "try-error")){
-        rlang::inform(c("Note","Could not extract initial Hessian from lavaan. Switching to initialHessian = 'compute'."))
+        notes <- c(notes,
+                   "Could not extract initial Hessian from lavaan. Switching to initialHessian = 'compute'.")
         initialHessian <- "compute"
         
       }else{
@@ -270,7 +285,7 @@
           initialHessian = initialHessian +  diagMat
         }
         
-        return(initialHessian)
+        return(list(initialHessian = initialHessian, notes = notes))
       }
     }
     
@@ -281,18 +296,15 @@
     
     initialHessian <- .getHessian(SEM = SEM, raw = TRUE)
     
-  }else if(any(initialHessian == "scoreBased")){
+  }else if(any(initialHessian == "gradNorm")){
     
-    scores <- .getScores(SEM = SEM, raw = TRUE)
-    FisherInformation <- matrix(0, nrow = ncol(scores), ncol = ncol(scores))
-    rownames(FisherInformation) <- colnames(FisherInformation) <- colnames(scores)
-    for(score in 1:nrow(scores)){
-      FisherInformation <- FisherInformation + t(-.5*scores[score,, drop = FALSE]) %*%(-.5*scores[score,, drop = FALSE]) # we are using the -2 log-Likelihood
-    }
+    # Adapted from Optim.jl
+    # see https://github.com/JuliaNLSolvers/Optim.jl/blob/f43e6084aacf2dabb2b142952acd3fbb0e268439/src/multivariate/solvers/first_order/bfgs.jl#L104
+    SEM$fit()
     
-    initialHessian <- -2*(-FisherInformation) # negative log-likelihood
-    # make symmetric; just in case...
-    initialHessian <- .5*(initialHessian + t(initialHessian))
+    gr <- .getGradients(SEM = SEM, raw = TRUE)
+    
+    initialHessian <- max(abs(gr)) * diag(length(gr)) * stepSize
     
   }else if(length(initialHessian) == 1 && is.numeric(initialHessian)){
     initialHessian <- diag(initialHessian,length(rawParameters))
@@ -309,8 +321,17 @@
     diagMat = diag(-1.1*min(min(eigenValues),-2), nrow(initialHessian), ncol(initialHessian))
     initialHessian = initialHessian +  diagMat
   }
+  notes <- unique(notes)
+  if(printNotes & length(notes) > 1){
+    cat("\n")
+    rlang::inform(notes)
+  }
   
-  return(initialHessian)
+  return(
+    list(
+      initialHessian = initialHessian,
+      notes = notes)
+  )
 }
 
 #' .createTransformations
@@ -434,14 +455,29 @@
     }
   }else{
     
-    if(is(lavaanModel, "lavaan")){
-      
-      if(!is(lavaanModel, "lavaan"))
-        stop("lavaanModel must be of class lavaan")
-      
-      if(lavaanModel@Options$estimator != "ML") 
-        stop("lavaanModel must be fit with ml estimator.")
-      
-    }
+    if(!is(lavaanModel, "lavaan"))
+      stop("lavaanModel must be of class lavaan")
+    if(lavaanModel@Options$categorical)
+      stop("Categorical data is currently not supported.")
+    if(lavaanModel@Options$missing %in% c("two.stage", "robust.two.stage"))
+      stop(paste0("Missing = ", lavaanModel@Options$missing, " is currently not supported."))
+    if(lavaanModel@Options$missing %in% c("fiml", "direct"))
+      stop(paste0("Missing = ", lavaanModel@Options$missing, " was selected. Please change to missing = 'ml'."))
+    if(lavaanModel@Options$missing %in% c("ml.x"))
+      warning(paste0("Missing = ", lavaanModel@Options$missing, " was selected. We did not test this option yet; please check if it worked as expected."))
+    if(lavaanModel@Options$effect.coding != "")
+      stop(paste0("effect.coding = ", lavaanModel@Options$effect.coding, " is currently not supported."))
+    if(lavaanModel@Options$ceq.simple)
+      stop(paste0("ceq.simple = ", lavaanModel@Options$ceq.simple, " is currently not supported."))
+    if(!is.null(lavaanModel@Options$group.label))
+      stop("Lavaans multi-group models are currently not supported. See https://jhorzek.github.io/lessSEM/articles/Definition-Variables-and-Multi-Group-SEM.html for specifying multi-group models in lessSEM")
+    if(!lavaanModel@Options$estimator %in% c("ML", "GLS", "WLS", "ULS", "MLM", "MLV", "MLMVS", "MLF", "MLR", "WLSM", "DWLS", "ULSMV"))
+      stop(paste0("estimator = ", lavaanModel@Options$estimator, " is currently not supported."))
+    if(lavaanModel@Options$likelihood %in% c("wishart"))
+      stop(paste0("likelihood = ", lavaanModel@Options$likelihood, " is currently not supported."))
+    if(lavaanModel@Options$bounds != "none")
+      warning(paste0("bounds = ", lavaanModel@Options$bounds, " is currently not supported."))
+    if(length(unlist(lavaanModel@Options$optim.bounds)) != 0)
+      warning("optim.bounds is currently not supported.")
   }
 }

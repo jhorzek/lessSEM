@@ -350,3 +350,32 @@ lessSEM2Lavaan <- function(regularizedSEM, criterion = NULL, lambda = NULL, alph
                                                      do.fit= FALSE))
   return(updatedLavaanModel)
 }
+
+#' .updateLavaan
+#' 
+#' updates a lavaan model. lavaan has an update function that does exactly that,
+#' but it seems to not work with testthat. This is an attempt to hack around the
+#' issue...
+#' 
+#' @param lavaanModel fitted lavaan model
+#' @param key label of the element that should be updated
+#' @param value new value for the updated element
+#' @return lavaan model 
+.updateLavaan <- function(lavaanModel, key, value){
+  
+  callArgs <- names(lavaanModel@call)[names(lavaanModel@call) != ""]
+  reconstructCall <- list(
+    model = parTable(lavaanModel),
+    data = lavInspect(lavaanModel, "data")
+  )
+  for(i in callArgs){
+    if(i %in% names(lavaanModel@Options))
+      reconstructCall <- c(reconstructCall,
+                           lavaanModel@Options[i])
+  }
+  
+  reconstructCall[[key]] <- value
+  
+  return(do.call("sem", reconstructCall))
+  
+}
