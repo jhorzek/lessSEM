@@ -4,10 +4,14 @@
 \alias{AIC,gpRegularized-method}
 \title{AIC}
 \usage{
-\S4method{AIC}{gpRegularized}(object)
+\S4method{AIC}{gpRegularized}(object, ..., k = 2)
 }
 \arguments{
 \item{object}{object of class gpRegularized}
+
+\item{...}{not used}
+
+\item{k}{multiplier for number of parameters}
 }
 \value{
 data frame with fit values, appended with AIC

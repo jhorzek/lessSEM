@@ -4,10 +4,12 @@
 \alias{summary,regularizedSEM-method}
 \title{summary}
 \usage{
-\S4method{summary}{regularizedSEM}(object)
+\S4method{summary}{regularizedSEM}(object, ...)
 }
 \arguments{
 \item{object}{object of class regularizedSEM}
+
+\item{...}{not used}
 }
 \value{
 No return value, just prints estimates

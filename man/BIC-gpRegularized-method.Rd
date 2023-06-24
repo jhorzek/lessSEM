@@ -4,10 +4,12 @@
 \alias{BIC,gpRegularized-method}
 \title{BIC}
 \usage{
-\S4method{BIC}{gpRegularized}(object)
+\S4method{BIC}{gpRegularized}(object, ...)
 }
 \arguments{
 \item{object}{object of class gpRegularized}
+
+\item{...}{not used}
 }
 \value{
 data frame with fit values, appended with BIC
