@@ -6,6 +6,7 @@
 \usage{
 controlIsta(
   startingValues = "est",
+  saveDetails = FALSE,
   L0 = 0.1,
   eta = 2,
   accelerate = TRUE,
@@ -23,6 +24,10 @@ controlIsta(
 \item{startingValues}{option to provide initial starting values. Only used for the first lambda. Three options are supported. Setting to "est" will use the estimates
 from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
 values can be passed to the function which will then be used as starting values.}
+
+\item{saveDetails}{when set to TRUE, additional details about the individual
+models are save. Currently, this are the implied means and covariances.
+Note: This may take a lot of memory!}
 
 \item{L0}{L0 controls the step size used in the first iteration}
 

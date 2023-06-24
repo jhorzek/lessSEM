@@ -20,3 +20,6 @@ CRAN-SUBMISSION
 cran-comments.md
 !.gitignore
 /doc/
+*.log
+*.synctex.gz
+*.aux

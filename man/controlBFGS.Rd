@@ -7,7 +7,7 @@
 controlBFGS(
   startingValues = "est",
   initialHessian = ifelse(all(startingValues == "est"), "lavaan", "compute"),
-  saveHessian = FALSE,
+  saveDetails = FALSE,
   stepSize = 0.9,
   sigma = 1e-05,
   gamma = 0,
@@ -27,13 +27,17 @@ from the lavaan model object. Setting to "start" will use the starting values of
 values can be passed to the function which will then be used as starting values.}
 
 \item{initialHessian}{option to provide an initial Hessian to the optimizer. Must have row and column names corresponding to the parameter labels. use getLavaanParameters(lavaanModel) to
-see those labels. If set to "scoreBased", the outer product of the scores will be used as an approximation (see https://en.wikipedia.org/wiki/Berndt\%E2\%80\%93Hall\%E2\%80\%93Hall\%E2\%80\%93Hausman_algorithm).
-If set to "compute", the initial hessian will be computed. If set to a single value, a diagonal matrix with the single value along the diagonal will be used.
+see those labels. If set to "gradNorm", the maximum of the gradients at the starting
+values times the stepSize will be used. This is adapted from Optim.jl
+https://github.com/JuliaNLSolvers/Optim.jl/blob/f43e6084aacf2dabb2b142952acd3fbb0e268439/src/multivariate/solvers/first_order/bfgs.jl#L104
+If set to a single value, a diagonal matrix with the single value along the diagonal will be used.
 The default is "lavaan" which extracts the Hessian from the lavaanModel. This Hessian
 will typically deviate from that of the internal SEM represenation of lessSEM (due to
 the transformation of the variances), but works quite well in practice.}
 
-\item{saveHessian}{should the Hessian be saved for later use? Note: This may take a lot of memory!}
+\item{saveDetails}{when set to TRUE, additional details about the individual
+models are save. Currently, this are the Hessian and the implied means and covariances.
+Note: This may take a lot of memory!}
 
 \item{stepSize}{Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)}
 

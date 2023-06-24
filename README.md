@@ -29,17 +29,19 @@ check out the julia package
 The following penalty functions are currently implemented in
 **lessSEM**:
 
-![](man/figures/penalty_functions.png)
+![](man/figures/penaltyFunctions.png)
 
 The column “penalty” refers to the name of the function call in the
 **lessSEM** package (e.g., lasso is called with the `lasso()` function).
-Smooth functions are called with `smoothLasso`, `smoothAdaptiveLasso`,
-and `smoothElasticNet`. These are only implemented for the comparison of
-exact and approximate optimization and should not be used. They will be
-marked as deprecated soon. The best model can be selected with the AIC
-or BIC. If you want to use cross-validation, use `cvLasso`,
-`cvAdaptiveLasso`, etc. instead (see, e.g., `?lessSEM::cvLasso`). The
-smooth versions are called `cvSmoothLasso`, etc.
+Smooth approximations are called with `smoothLasso`,
+`smoothAdaptiveLasso`, and `smoothElasticNet`. These are only
+implemented for the comparison of exact and approximate optimization and
+should not be used. They will be marked as deprecated soon.
+
+The best model can be selected with the AIC or BIC. If you want to use
+cross-validation, use `cvLasso`, `cvAdaptiveLasso`, etc. instead (see,
+e.g., `?lessSEM::cvLasso`). The smooth versions are called
+`cvSmoothLasso`, etc.
 
 ## [**regsem**](https://github.com/Rjacobucci/regsem), [**lslx**](https://github.com/psyphh/lslx), and **lessSEM**
 
@@ -49,7 +51,7 @@ used to regularize basic SEM. In fact, as outlined above, **lessSEM** is
 heavily inspired by [**regsem**](https://github.com/Rjacobucci/regsem)
 and [**lslx**](https://github.com/psyphh/lslx). However, the packages
 differ in their targets: The objective of **lessSEM** is not to replace
-the more major packages
+the more mature packages
 [**regsem**](https://github.com/Rjacobucci/regsem) and
 [**lslx**](https://github.com/psyphh/lslx). Instead, our objective is to
 provide method developers with a flexible framework for regularized SEM.
@@ -60,18 +62,16 @@ implemented in the three packages:
 |-------------------------------|-----------------|---------------------|-----------------|
 | Model specification           | based on lavaan | similar to lavaan   | based on lavaan |
 | Maximum likelihood estimation | Yes             | Yes                 | Yes             |
-| Least squares estimation      | No              | Yes                 | No              |
+| Least squares estimation      | No              | Yes                 | Yes             |
+| Categorical variables         | No              | Yes                 | No              |
 | Confidence Intervals          | No              | Yes                 | No              |
 | Missing Data                  | FIML            | Auxiliary Variables | FIML            |
 | Multi-group models            | No              | Yes                 | Yes             |
-| Stability selection           | Yes             | No                  | No              |
+| Stability selection           | Yes             | No                  | Yes             |
 | Mixed penalties               | No              | No                  | Yes             |
 | Equality constraints          | Yes             | No                  | Yes             |
 | Parameter transformations     | diff_lasso      | No                  | Yes             |
 | Definition variables          | No              | No                  | Yes             |
-
-Because **lessSEM** is fairly new, we currently recommend using **lslx**
-for cases that are covered by both, **lessSEM** and **lslx**.
 
 # Installation
 
@@ -115,6 +115,7 @@ cross-lagged panel model) in the package
 
 ``` r
 library(lessSEM)
+#> Warning: package 'lavaan' was built under R version 4.2.3
 library(lavaan)
 
 # Identical to regsem, lessSEM builds on the lavaan

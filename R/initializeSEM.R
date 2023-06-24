@@ -57,8 +57,17 @@
     
     if(whichPars == "est" && SEMObj$checkFit && lavaanModel@Options$do.fit){
       # check model fit
-      if(round(mySEM$m2LL - (-2*lavaan::logLik(lavaanModel)), 4) !=0) 
-        stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+      if(mySEM$getEstimator() == "fiml"){
+        if(round(mySEM$objectiveValue - (-2*lavaan::logLik(lavaanModel)), 4) !=0) 
+          stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+      }else if(mySEM$getEstimator() == "wls"){
+        # to stay consistent with lavaan, we have to use the following
+        # scaling:
+        lessSEMObjective <- 0.5 * (mySEM$sampleSize-1)/(mySEM$sampleSize^2)* mySEM$objectiveValue
+        if(round(lessSEMObjective - (lavaan::fitMeasures(lavaanModel, "fmin")), 4) !=0)
+          stop("Error translating lavaan to internal model representation: Different fit in SEMCpp and lavaan")
+        
+      }
     }
   }
   
@@ -171,6 +180,9 @@
   if(!is(lavaanModel, "lavaan")) stop("lavaanModel must be of class lavaan.")
   
   SEMList <- list(
+    estimator = NULL,
+    WLSWeightsInverse = NULL,
+    WLSMeanstructure = NULL,
     matrices = list("A" = NULL,
                     "S" = NULL,
                     "F" = NULL,
@@ -189,7 +201,16 @@
     subsets = list()
   )
   
-  rawDataList <- .getRawData(lavaanModel = lavaanModel, dataSet = dataSet)
+  if(tolower(lavaanModel@Options$estimator) %in% c("ml", "fiml","mlm", "mlmv", "mlmvs", "mlf", "mlr")){
+    SEMList$estimator <- "fiml"
+  }else if(tolower(lavaanModel@Options$estimator) %in% c("uls","wls", "dwls", "gls")){
+    SEMList$estimator <- "wls"
+    SEMList$WLSMeanstructure <- lavaanModel@Options$meanstructure
+  }else{
+    stop("Currenlty only models estimated with maximum likelihood (estimator = 'ml') or WLS (estimator = 'WLS') are supported.")
+  }
+  
+  rawDataList <- .getRawData(lavaanModel = lavaanModel, dataSet = dataSet, estimator = SEMList$estimator)
   rawData <- rawDataList$rawData
   checkFit <- rawDataList$checkFit
   
@@ -227,7 +248,14 @@
     
   }
   
-  internalData <- .SEMdata(rawData)
+  if(SEMList$estimator == "fiml"){
+    internalData <- .SEMdata(rawData)
+  }else if(SEMList$estimator == "wls"){
+    internalData <- .SEMdataWLS(rawData, lavaanModel)
+    SEMList$WLSWeightsInverse <- lavInspect(object = lavaanModel, what = "wls.v")
+  }else{
+    stop("Unknown estimator")
+  }
   
   # translate to RAM notation
   
@@ -299,6 +327,10 @@
   
   # if no mean structure: add 
   if(!meanstructure && addMeans) {
+    
+    if((!lavaanModel@Options$meanstructure) & (SEMList$estimator == "wls"))
+      stop("Cannot post-hoc add a meanstructure to a lavaan model fitted with WLS. Please add the meanstructure to the lavaan model using meanstructure = TRUE.")
+    
     parameterTable <- .addMeanStructure(parameterTable = parameterTable, 
                                         manifestNames = manifestNames, 
                                         MvectorElements = MvectorElements)
@@ -373,22 +405,34 @@
 #' the structure of the lavaan data
 #' @param lavaanModel model fitted with lavaan
 #' @param dataSet user supplied data set
+#' @param estimator which estimator is used?
 #' @return raw data
 #' @keywords internal
-.getRawData <- function(lavaanModel, dataSet){
+.getRawData <- function(lavaanModel, dataSet, estimator){
+  
+  if(!is.null(dataSet) && (estimator != "fiml")){
+    stop("Providing a different data set is currently only supported for full information maximum likelihood estimation.")
+  }
+  
   if(is.null(dataSet)){
+    
     rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
-    if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+    if(is(rawData, "try-error")) 
+      stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
     checkFit <- TRUE
+    
   }else{
+    
     lavaanData <- try(lavaan::lavInspect(lavaanModel, "data"))
     # make sure that the sorting of rawData is correct:
     rawData <- dataSet[,colnames(lavaanData),drop = FALSE]
     if(any(!colnames(lavaanData) %in% colnames(rawData))) 
       stop("Not all variables are in rawData.")
     checkFit <- FALSE
+    
   }
   return(list(rawData = rawData, checkFit = checkFit))
+  
 }
 
 

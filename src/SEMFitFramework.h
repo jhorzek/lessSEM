@@ -8,8 +8,10 @@ class SEMFitFramework: public lessSEM::model{
 public:
   
   sem& SEM;
+  const double scaleFit; // option to up - or downscale the fit function values
   
-  SEMFitFramework(sem& SEM_): SEM(SEM_){}
+  SEMFitFramework(sem& SEM_,
+                  double scaleFit_ = 1.0): SEM(SEM_), scaleFit(scaleFit_){}
   
   double fit(arma::rowvec parameterValues,
              Rcpp::StringVector parameterLabels) override{
@@ -27,7 +29,7 @@ public:
                if(!SEM.impliedIsPD()){
                  return(arma::datum::nan);
                }
-               return(SEM.m2LL);
+               return(scaleFit * SEM.objectiveValue);
              }
   
   arma::rowvec gradients(arma::rowvec parameterValues,
@@ -52,7 +54,7 @@ public:
                              return(gradients);
                            }
                            
-                           return(gradients); 
+                           return(scaleFit * gradients); 
                            
                          }
   

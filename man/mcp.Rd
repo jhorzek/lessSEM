@@ -10,6 +10,7 @@ mcp(
   lambdas,
   thetas,
   modifyModel = lessSEM::modifyModel(),
+  method = "ista",
   control = lessSEM::controlIsta()
 )
 }
@@ -27,6 +28,10 @@ a constant (theta)}
 
 \item{modifyModel}{used to modify the lavaanModel. See ?modifyModel.}
 
+\item{method}{which optimizer should be used? Currently implemented are ista
+and glmnet. With ista, the control argument can be used to switch to related procedures
+(currently gist).}
+
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta (see ?controlIsta)}
 }
@@ -39,7 +44,7 @@ The penalty function is given by:
 \ifelse{html}{\deqn{p( x_j) = \begin{cases}
 \lambda |x_j| - x_j^2/(2\theta) & \text{if } |x_j| \leq \theta\lambda\\
 \theta\lambda^2/2 & \text{if } |x_j| > \lambda\theta
-\end{cases}} where \eqn{\theta > 0}.}{
+\end{cases}} where \eqn{\theta > 1}.}{
 Equation Omitted in Pdf Documentation.}
 }
 \details{
@@ -49,6 +54,9 @@ maximum likelihood for missing data. To use this functionality,
 fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.
 \pkg{lessSEM} will then automatically switch to full information maximum likelihood
 as well.
+
+In our experience, the glmnet optimizer can run in issues with the mcp penalty.
+Therefor, we default to using ista.
 
 mcp regularization:
 \itemize{
@@ -123,8 +131,21 @@ lsem <- mcp(
 # the coefficients can be accessed with:
 coef(lsem)
 
+# if you are only interested in the estimates and not the tuning parameters, use
+coef(lsem)@estimates
+# or
+estimates(lsem)
+
 # elements of lsem can be accessed with the @ operator:
 lsem@parameters[1,]
+
+# fit Measures:
+fitIndices(lsem)
+
+# The best parameters can also be extracted with:
+coef(lsem, criterion = "AIC")
+# or
+estimates(lsem, criterion = "AIC")
 
 # optional: plotting the paths requires installation of plotly
 # plot(lsem)

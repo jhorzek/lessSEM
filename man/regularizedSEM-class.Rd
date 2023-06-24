@@ -28,5 +28,7 @@ are returned}
 \item{\code{internalOptimization}}{list of elements used internally}
 
 \item{\code{inputArguments}}{list with elements passed by the user to the general}
+
+\item{\code{notes}}{internal notes that have come up when fitting the model}
 }}
 

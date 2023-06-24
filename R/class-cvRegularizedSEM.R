@@ -11,6 +11,7 @@
 #' @slot subsetParameters optional: data.frame with parameter estimates for all
 #' combinations of the tuning parameters in all subsets
 #' @slot misc list with additional return elements
+#' @slot notes internal notes that have come up when fitting the model
 #' @export
 setClass(Class = "cvRegularizedSEM",
          representation = representation(
@@ -22,7 +23,8 @@ setClass(Class = "cvRegularizedSEM",
            cvfitsDetails="data.frame", 
            subsets = "matrix",
            subsetParameters = "data.frame",
-           misc = "list"
+           misc = "list",
+           notes = "character"
          )
 )
 
@@ -77,9 +79,18 @@ setMethod("coef", "cvRegularizedSEM", function (object, ...) {
   tuningParameters <- object@parameters[, !colnames(object@parameters) %in% object@parameterLabels,drop=FALSE] 
   estimates <- as.matrix(object@parameters[,object@parameterLabels,drop=FALSE])
   
+  if(ncol(object@transformations) != 0){
+    transformations <- as.matrix(object@transformations[,
+                                                        !colnames(object@transformations) %in% colnames(tuningParameters), 
+                                                        drop = FALSE])
+  }else{
+    transformations <- matrix(nrow = 0, ncol = 0)
+  }
+  
   coefs <- new("lessSEMCoef")
   coefs@tuningParameters <- tuningParameters
   coefs@estimates <- estimates
+  coefs@transformations <- transformations
   
   return(coefs)
 })
@@ -94,8 +105,7 @@ setMethod("coef", "cvRegularizedSEM", function (object, ...) {
 setMethod("plot", 
           signature = c(x = "cvRegularizedSEM",
                         y = "missing"), 
-          definition = function (x, y, ...) 
-          {
+          definition = function (x, y, ...){
             
             fits <- x@cvfits
             tuningParameters <- fits[,colnames(fits)!= "cvfit",drop=FALSE]
@@ -138,3 +148,38 @@ setMethod("plot",
               
             }
           })
+
+
+#' fitIndices
+#' 
+#' @param object object of class cvRegularizedSEM
+#' @return returns a data.frame with fit indices
+#' @export
+setMethod("fitIndices", "cvRegularizedSEM", function(object) {
+  # In case of cross-validated models, we do not compute any fit measures
+  # but just return the cv-fit
+  return(object@cvfits)
+})
+
+#' estimates
+#' 
+#' @param object object of class cvRegularizedSEM
+#' @param criterion not used
+#' @param transformations boolean: Should transformations be returned?
+#' @return returns a matrix with estimates
+#' @export
+setMethod("estimates", "cvRegularizedSEM", function(object, criterion = NULL, transformations = FALSE) {
+  if(!is.null(criterion))
+    warning(paste0(
+      "Not using criterion ", criterion, ". The returned estimates will be ",
+      "selected using cross-validation."))
+  
+  if(transformations)
+    return(cbind(
+      coef(object)@estimates,
+      coef(object)@transformations)
+    )
+  
+  return(coef(object)@estimates)
+  
+})

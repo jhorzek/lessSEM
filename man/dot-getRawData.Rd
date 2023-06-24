@@ -4,12 +4,14 @@
 \alias{.getRawData}
 \title{.getRawData}
 \usage{
-.getRawData(lavaanModel, dataSet)
+.getRawData(lavaanModel, dataSet, estimator)
 }
 \arguments{
 \item{lavaanModel}{model fitted with lavaan}
 
 \item{dataSet}{user supplied data set}
+
+\item{estimator}{which estimator is used?}
 }
 \value{
 raw data

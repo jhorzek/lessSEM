@@ -136,6 +136,10 @@ plot(lsem)
 
 # the coefficients can be accessed with:
 coef(lsem)
+# if you are only interested in the estimates and not the tuning parameters, use
+coef(lsem)@estimates
+# or
+estimates(lsem)
 
 # elements of lsem can be accessed with the @ operator:
 lsem@parameters

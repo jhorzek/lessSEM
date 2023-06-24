@@ -14,15 +14,16 @@
 #' 
 #' | Penalty | Function | glmnet | ista |
 #' | --- | ---- | ---- | ---- |
-#' | ridge | addRidge | x | - |
 #' | lasso | addLasso | x | x |
-#' | elastic net | addElasticNet | x | - |
-#' | cappedL1 | addCappedL1 | - | x |
-#' | lsp | addLsp | - | x |
-#' | scad | addScad | - | x |
-#' | mcp | addMcp | - | x |
+#' | elastic net | addElasticNet | x* | - |
+#' | cappedL1 | addCappedL1 | x | x |
+#' | lsp | addLsp | x | x |
+#' | scad | addScad | x | x |
+#' | mcp | addMcp | x | x |
 #' 
-#' By default, ista will be used. 
+#' By default, glmnet will be used. Note that the elastic net penalty can
+#' only be combined with other elastic net penalties.
+#' 
 #' Check vignette(topic = "Mixed-Penalties", package = "lessSEM") for more details.
 #' 
 #' Regularized SEM
@@ -44,8 +45,8 @@
 #' Trends in Optimization, 1(3), 123–231.
 #'  
 #' @param lavaanModel model of class lavaan 
-#' @param method which optimizer should be used? Only ista is supported.
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
+#' @param method which optimizer should be used? Currently supported are "glmnet" and "ista".
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
 #' for more details.
@@ -112,12 +113,15 @@
 #' @md
 #' @export
 mixedPenalty <- function(lavaanModel,
-                         method = "ista", 
                          modifyModel = lessSEM::modifyModel(),
-                         control = lessSEM::controlIsta()){
+                         method = "glmnet", 
+                         control = lessSEM::controlGlmnet()){
+  notes <- c("Notes:")
   
-  rlang::inform(c("Note","Mixed penalties is a very new feature. Please note that there may still ",
-             "be bugs in the procedure. Use carefully!"))
+  notes <- c(
+    notes,
+    paste0("Mixed penalties is a very new feature. Please note that there may still ",
+                  "be bugs in the procedure. Use carefully!"))
   
   mixedPenalty <- list(
     lavaanModel = lavaanModel,
@@ -338,18 +342,9 @@ addLasso <- function(mixedPenalty,
   if((length(weights) != 1) && (length(weights) != length(regularized)))
     stop("Weights argument must be of length 1 or of length(regularized).")
   
-  if(mixedPenalty$method == "glmnet")
-    return(
-      addElasticNet(mixedPenalty = mixedPenalty, 
-                    regularized = regularized, 
-                    alphas = 1, 
-                    lambdas = lambdas, 
-                    weights = weights)
-    )
-  
   tps <- expand.grid(lambda = lambdas,
                      theta = 0,
-                     alpha = 0)
+                     alpha = 1)
   
   mixedPenalty$penalties <- c(
     mixedPenalty$penalties,
@@ -360,121 +355,6 @@ addLasso <- function(mixedPenalty,
   )
   
   return(mixedPenalty)
-}
-
-
-#' addRidge
-#' 
-#' 
-#' Implements ridge regularization for structural equation models.
-#' The penalty function is given by:
-#' \deqn{p( x_j) = \lambda x_j^2}
-#' Note that ridge regularization will not set any of the parameters to zero
-#' but result in a shrinkage towards zero. 
-#' 
-#' Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
-#' most standard SEM are supported. \pkg{lessSEM} also provides full information
-#' maximum likelihood for missing data. To use this functionality,
-#' fit your \pkg{lavaan} model with the argument `sem(..., missing = 'ml')`. 
-#' \pkg{lessSEM} will then automatically switch to full information maximum likelihood
-#' as well.
-#' 
-#' Ridge regularization:
-#' 
-#' * Hoerl, A. E., & Kennard, R. W. (1970). Ridge Regression: Biased Estimation 
-#' for Nonorthogonal Problems. Technometrics, 12(1), 55–67. 
-#' https://doi.org/10.1080/00401706.1970.10488634
-#' 
-#' Regularized SEM
-#' 
-#' * Huang, P.-H., Chen, H., & Weng, L.-J. (2017). A Penalized Likelihood Method for Structural Equation Modeling. Psychometrika, 82(2), 329–354. https://doi.org/10.1007/s11336-017-9566-9
-#' * Jacobucci, R., Grimm, K. J., & McArdle, J. J. (2016). Regularized Structural Equation Modeling. Structural 
-#' Equation Modeling: A Multidisciplinary Journal, 23(4), 555–566. https://doi.org/10.1080/10705511.2016.1154793
-#' 
-#' For more details on GLMNET, see:
-#' 
-#' * Friedman, J., Hastie, T., & Tibshirani, R. (2010). 
-#' Regularization Paths for Generalized Linear Models via Coordinate Descent. 
-#' Journal of Statistical Software, 33(1), 1–20. https://doi.org/10.18637/jss.v033.i01
-#' * Yuan, G.-X., Chang, K.-W., Hsieh, C.-J., & Lin, C.-J. (2010).
-#' A Comparison of Optimization Methods and Software for Large-scale 
-#' L1-regularized Linear Classification. Journal of Machine Learning Research, 11, 3183–3234.
-#' * Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). 
-#' An improved GLMNET for l1-regularized logistic regression. 
-#' The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421
-#' 
-#' For more details on ISTA, see:
-#' 
-#' * Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding 
-#' Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
-#' 183–202. https://doi.org/10.1137/080716542
-#' * Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013). 
-#' A General Iterative Shrinkage and Thresholding Algorithm for Non-convex 
-#' Regularized Optimization Problems. Proceedings of the 30th International 
-#' Conference on Machine Learning, 28(2)(2), 37–45.
-#' * Parikh, N., & Boyd, S. (2013). Proximal Algorithms. Foundations and 
-#' Trends in Optimization, 1(3), 123–231.
-#'  
-#' @param mixedPenalty model of class mixedPenalty created with the mixedPenalty function (see ?mixedPenalty) 
-#' @param regularized vector with names of parameters which are to be regularized.
-#' If you are unsure what these parameters are called, use 
-#' getLavaanParameters(model) with your lavaan model object
-#' @param lambdas numeric vector: values for the tuning parameter lambda
-#' @param weights can be used to give different weights to the different parameters
-#' @returns Model of class mixedPenalty. Use the fit() - function to fit the model
-#' @examples 
-#' library(lessSEM)
-#' 
-#' # Identical to regsem, lessSEM builds on the lavaan
-#' # package for model specification. The first step
-#' # therefore is to implement the model in lavaan.
-#' 
-#' dataset <- simulateExampleData()
-#' 
-#' lavaanSyntax <- "
-#' f =~ l1*y1 + l2*y2 + l3*y3 + l4*y4 + l5*y5 + 
-#'      l6*y6 + l7*y7 + l8*y8 + l9*y9 + l10*y10 + 
-#'      l11*y11 + l12*y12 + l13*y13 + l14*y14 + l15*y15
-#' f ~~ 1*f
-#' "
-#' 
-#' lavaanModel <- lavaan::sem(lavaanSyntax,
-#'                            data = dataset,
-#'                            meanstructure = TRUE,
-#'                            std.lv = TRUE)
-#' 
-#' # We can add mixed penalties as follows:
-#' 
-#' regularized <- lavaanModel |>
-#'   # create template for regularized model with mixed penalty:
-#'   mixedPenalty() |>
-#'   # add penalty on loadings l6 - l10:
-#'   addRidge(regularized = paste0("l", 11:15), 
-#'           lambdas = seq(0,1,.1)) |>
-#'   # fit the model:
-#'   fit()
-#' @export
-addRidge <- function(mixedPenalty,
-                     regularized,
-                     weights = 1,
-                     lambdas){
-  
-  if(!is(mixedPenalty, "mixedPenalty"))
-    stop("mixedPenalty must be of class mixedPenalty. ",
-         "These models can be created with the regularize() function.")
-  
-  if((length(weights) != 1) && (length(weights) != length(regularized)))
-    stop("Weights argument must be of length 1 or of length(regularized).")
-  
-  ## ridge is currently only implemented for glmnet:
-  
-  return(
-    addElasticNet(mixedPenalty = mixedPenalty, 
-                  regularized = regularized, 
-                  alphas = 0, 
-                  lambdas = lambdas, 
-                  weights = weights)
-  )
 }
 
 #' addLsp
@@ -814,76 +694,6 @@ addScad <- function(mixedPenalty,
   return(mixedPenalty)
 }
 
-#' .penaltyTypes
-#' 
-#' translates the penalty from a numeric value to the character or from
-#' the character to the numeric value. The numeric value is used by the C++ backend.
-#' @param penalty either a number or the name of the penalty
-#' @return number corresponding to one of the penalties
-#' @keywords internal
-.penaltyTypes <- function(penalty){
-  
-  if(is.character(penalty)){
-    
-    if(penalty == "none"){
-      return(0)
-    }
-    
-    if(penalty == "cappedL1"){
-      return(1)
-    }
-    
-    if(penalty == "lasso"){
-      return(2)
-    }
-    
-    if(penalty == "lsp"){
-      return(3)
-    }
-    
-    if(penalty == "mcp"){
-      return(4)
-    }
-    
-    if(penalty == "scad"){
-      return(5)
-    }
-    
-    stop("Unknown penalty.")
-  }
-  
-  if(is.numeric(penalty)){
-    
-    if(penalty == 0){
-      return("none")
-    }
-    
-    if(penalty == 1){
-      return("cappedL1")
-    }
-    
-    if(penalty == 2){
-      return("lasso")
-    }
-    
-    if(penalty == 3){
-      return("lsp")
-    }
-    
-    if(penalty == 4){
-      return("mcp")
-    }
-    
-    if(penalty == 5){
-      return("scad")
-    }
-    
-    stop("Unknown penalty.")
-  }
-  
-  stop("Unknown penalty.")
-}
-
 
 #' addElasticNet
 #' 
@@ -989,7 +799,8 @@ addElasticNet <- function(mixedPenalty,
     stop("mixedPenalty must be of class mixedPenalty. ",
          "These models can be created with the regularize() function.")
   if(!mixedPenalty$method == "glmnet"){
-    rlang::inform(c("Note","Mixed penalty with addElasticNet is only supported for method = 'glmnet'. Switching optimizer to glmnet"))
+    notes <- c(notes,
+               "Mixed penalty with addElasticNet is only supported for method = 'glmnet'. Switching optimizer to glmnet")
     mixedPenalty$method = "glmnet"
     mixedPenalty$control = controlGlmnet()
   }
@@ -1059,10 +870,11 @@ fit <- function(mixedPenalty){
   
   .checkPenalties(mixedPenalty)
   
-  if(mixedPenalty$method == "ista")
-    return(.fitIsta(mixedPenalty))
-  if(mixedPenalty$method == "glmnet")
-    return(.fitGlmnet(mixedPenalty))
+  if(.useElasticNet(mixedPenalty))
+    return(.fitElasticNetMix(mixedPenalty))
+  
+  return(.fitMix(mixedPenalty))
+  
   stop("Unknown method used.")
 }
 
@@ -1081,16 +893,34 @@ fit <- function(mixedPenalty){
   if(length(mixedPenalty$penalties) == 0)
     stop("Penaties are missing")
   
-  for(i in 1:length(mixedPenalty$penalties)){
-    if(mixedPenalty$penalties[[i]]$penaltyType == "elasticNet" && mixedPenalty$method == "ista")
-      stop("Ista currently does not support elasticNet type penalties.")
-    if(mixedPenalty$penalties[[i]]$penaltyType != "elasticNet" && mixedPenalty$method == "glmnet")
-      stop("Glmnet currently only supports elasticNet type penalties.")
-  }
-  
 }
 
-#' .fitIsta
+#' .useElasticNet
+#' 
+#' Internal function checking if elastic net is used
+#' @param mixedPenalty object of class mixedPenalty. This object can be created
+#' with the mixedPenalty function. Penalties can be added with the addCappedL1,
+#' addLasso, addLsp, addMcp, and addScad functions.
+#' @return TRUE if elastic net, FALSE otherwise
+.useElasticNet <- function(mixedPenalty){
+  hasElasticNet <- FALSE
+  hasNonElasticNet <- FALSE
+  for(i in 1:length(mixedPenalty$penalties)){
+    if(mixedPenalty$penalties[[i]]$penaltyType == "elasticNet")
+      hasElasticNet <- TRUE
+    if(mixedPenalty$penalties[[i]]$penaltyType != "elasticNet")
+      hasNonElasticNet <- TRUE
+  }
+  
+  if(hasElasticNet && mixedPenalty$method == "ista")
+    stop("Ista currently does not support elasticNet type penalties.")
+  if(hasElasticNet && hasNonElasticNet)
+    stop("lessSEM cannot mix penalties of type elastic net and other penalties.")
+  
+  return(hasElasticNet)
+}
+
+#' .fitMix
 #' 
 #' Optimizes an object with mixed penalty. See ?mixedPenalty for more details.
 #' 
@@ -1099,7 +929,9 @@ fit <- function(mixedPenalty){
 #' addLasso, addLsp, addMcp, and addScad functions.
 #' @return object of class regularizedSEMMixedPenalty
 #' @keywords internal 
-.fitIsta <- function(mixedPenalty){
+.fitMix <- function(mixedPenalty){
+  
+  notes <- c("Notes:")
   
   lavaanModel = mixedPenalty$lavaanModel
   method = mixedPenalty$method
@@ -1108,11 +940,11 @@ fit <- function(mixedPenalty){
   
   inputArguments <- as.list(environment())
   
-  if(! method %in% c("ista")) 
-    stop("Currently ony methods = 'ista' is supported")
-  
   if(method == "ista" && !is(control, "controlIsta")) 
     stop("control must be of class controlIsta. See ?controlIsta.")
+  
+  if(method == "glmnet" && !is(control, "controlGlmnet")) 
+    stop("control must be of class controlGlmnet See ?controlGlmnet")
   
   .checkLavaanModel(lavaanModel = lavaanModel)
   
@@ -1128,7 +960,14 @@ fit <- function(mixedPenalty){
     SEM <- .initializeMultiGroupSEMForRegularization(lavaanModels = lavaanModel,
                                                      startingValues = startingValues,
                                                      modifyModel = modifyModel)
+    notes <- c(notes,
+    "Multi-group model. Switching initialHessian from 'lavaan' to 'compute'"
+    )
+    control$initialHessian <- "compute"
   }
+  
+  # check if we have a likelihood objective function:
+  usesLikelihood <- all(SEM$getEstimator() == "fiml")
   
   N <- SEM$sampleSize
   
@@ -1189,38 +1028,81 @@ fit <- function(mixedPenalty){
   }
   
   #### prepare regularized model object ####
-  controlIntern <- list(
-    L0 = control$L0,
-    eta = control$eta,
-    accelerate = control$accelerate,
-    maxIterOut = control$maxIterOut,
-    maxIterIn = control$maxIterIn,
-    breakOuter = control$breakOuter,
-    convCritInner = control$convCritInner,
-    sigma = control$sigma,
-    stepSizeInheritance = control$stepSizeInheritance,
-    verbose = control$verbose
-  )
-  
-  
-  
-  if(is(SEM, "Rcpp_SEMCpp")){
-    regularizedModel <- new(istaMixedPenaltySEM, 
-                            weights, 
-                            penaltyType,
-                            controlIntern)
-  }else if(is(SEM, "Rcpp_mgSEM")){
-    regularizedModel <- new(istaMixedPenaltymgSEM, 
-                            weights, 
-                            penaltyType,
-                            controlIntern)
+  if(method == "ista"){
+    controlIntern <- list(
+      L0 = control$L0,
+      eta = control$eta,
+      accelerate = control$accelerate,
+      maxIterOut = control$maxIterOut,
+      maxIterIn = control$maxIterIn,
+      breakOuter = control$breakOuter,
+      convCritInner = control$convCritInner,
+      sigma = control$sigma,
+      stepSizeInheritance = control$stepSizeInheritance,
+      verbose = control$verbose
+    )
+    
+    
+    
+    if(is(SEM, "Rcpp_SEMCpp")){
+      regularizedModel <- new(istaMixedPenaltySEM, 
+                              weights, 
+                              penaltyType,
+                              controlIntern)
+    }else if(is(SEM, "Rcpp_mgSEM")){
+      regularizedModel <- new(istaMixedPenaltymgSEM, 
+                              weights, 
+                              penaltyType,
+                              controlIntern)
+    }
   }
   
+  if(method == "glmnet"){
+    #### glmnet requires an initial Hessian ####
+    initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
+                                            rawParameters = rawParameters, 
+                                            lavaanModel = lavaanModel, 
+                                            SEM = SEM,
+                                            addMeans = modifyModel$addMeans,
+                                            stepSize = control$stepSize,
+                                            notes = notes)
+    notes <- initialHessian$notes
+    control$initialHessian <- initialHessian$initialHessian
+    
+    #### prepare regularized model object ####
+    controlIntern <- list(
+      initialHessian = control$initialHessian,
+      stepSize = control$stepSize,
+      sigma = control$sigma,
+      gamma = control$gamma,
+      maxIterOut = control$maxIterOut,
+      maxIterIn = control$maxIterIn,
+      maxIterLine = control$maxIterLine,
+      breakOuter = N*control$breakOuter,
+      breakInner = N*control$breakInner,
+      convergenceCriterion = control$convergenceCriterion, 
+      verbose = control$verbose
+    )
+    
+    if(is(SEM, "Rcpp_SEMCpp")){
+      regularizedModel <- new(glmnetMixedSEM, 
+                              weights, 
+                              penaltyType,
+                              controlIntern)
+    }else if(is(SEM, "Rcpp_mgSEM")){
+      regularizedModel <- new(glmnetMixedMgSEM, 
+                              weights, 
+                              penaltyType,
+                              controlIntern)
+    }
+  }
   
   #### define tuning parameters and prepare fit results ####
   
   fits <- data.frame(
     "tuningParameterConfiguration" = 1:nrow(tpGrid),
+    "objectiveValue" = NA,
+    "regObjectiveValue" = NA,
     "m2LL" = NA,
     "regM2LL"= NA,
     "nonZeroParameters" = NA,
@@ -1290,7 +1172,11 @@ fit <- function(mixedPenalty){
     rawParameters <- result$rawParameters
     fits$nonZeroParameters[it] <- length(rawParameters) - 
       sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
-    fits$regM2LL[it] <- result$fit
+    
+    fits$regObjectiveValue[it] <- result$fit
+    if(usesLikelihood)
+      fits$regM2LL[it] <- fits$regObjectiveValue[it]
+    
     fits$convergence[it] <- result$convergence
     
     # get unregularized fit:
@@ -1298,7 +1184,11 @@ fit <- function(mixedPenalty){
                           names(rawParameters), 
                           values = rawParameters, 
                           raw = TRUE)
-    fits$m2LL[it] <- SEM$fit()
+    
+    fits$objectiveValue[it] <- SEM$fit()
+    if(usesLikelihood)
+      fits$m2LL[it] <- fits$objectiveValue[it]
+    
     # transform internal parameter representation to "natural" form
     transformedParameters <- .getParameters(SEM,
                                             raw = FALSE)
@@ -1315,7 +1205,7 @@ fit <- function(mixedPenalty){
     }
     
     # save implied
-    if(is(SEM, "Rcpp_SEMCpp")){
+    if(is(SEM, "Rcpp_SEMCpp") & control$saveDetails){
       implied$means[[it]] <- SEM$impliedMeans
       implied$covariances[[it]] <- SEM$impliedCovariance
       
@@ -1343,6 +1233,13 @@ fit <- function(mixedPenalty){
                                                          modifyModel = modifyModel)
       }
       
+    }else{
+      
+      if(method == "glmnet"){
+        # set Hessian for next iteration
+        regularizedModel$setHessian(result$Hessian)
+      }
+      
     }
     
   }
@@ -1362,7 +1259,13 @@ fit <- function(mixedPenalty){
     "N" = SEM$sampleSize
   )
   
-  
+  notes <- unique(notes)
+  if(length(notes) > 1){
+    cat("\n")
+    rlang::inform(
+      notes
+    )
+  }
   
   results <- new("regularizedSEMMixedPenalty",
                  penalty =  sapply(penaltyType, .penaltyTypes),
@@ -1381,13 +1284,14 @@ fit <- function(mixedPenalty){
                  regularized = names(weights)[weights!=0],
                  transformations = transformations,
                  internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
+                 inputArguments = inputArguments,
+                 notes = notes)
   
   return(results)
   
 }
 
-#' .fitGlmnet
+#' .fitElasticNetMix
 #' 
 #' Optimizes an object with mixed penalty. See ?mixedPenalty for more details.
 #' 
@@ -1396,7 +1300,9 @@ fit <- function(mixedPenalty){
 #' addLasso, addLsp, addMcp, and addScad functions.
 #' @return object of class regularizedSEMMixedPenalty
 #' @keywords internal 
-.fitGlmnet <- function(mixedPenalty){
+.fitElasticNetMix <- function(mixedPenalty){
+  
+  notes <- c("Notes:")
   
   lavaanModel = mixedPenalty$lavaanModel
   method = mixedPenalty$method
@@ -1476,11 +1382,15 @@ fit <- function(mixedPenalty){
   }
   
   #### glmnet requires an initial Hessian ####
-  control$initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
-                                                   rawParameters = rawParameters, 
-                                                   lavaanModel = lavaanModel, 
-                                                   SEM = SEM,
-                                                   addMeans = modifyModel$addMeans)
+  initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
+                                          rawParameters = rawParameters, 
+                                          lavaanModel = lavaanModel, 
+                                          SEM = SEM,
+                                          addMeans = modifyModel$addMeans,
+                                          stepSize = control$stepSize,
+                                          notes = notes)
+  notes <- initialHessian$notes
+  control$initialHessian <- initialHessian$initialHessian
   
   #### prepare regularized model object ####
   controlIntern <- list(
@@ -1546,7 +1456,7 @@ fit <- function(mixedPenalty){
     transformations <- data.frame()
   }
   
-  if(control$saveHessian){
+  if(control$saveDetails){
     Hessians <- list(
       "lambda" = lambda,
       "alpha" = alpha,
@@ -1618,7 +1528,7 @@ fit <- function(mixedPenalty){
     }
     
     # save implied
-    if(is(SEM, "Rcpp_SEMCpp")){
+    if(is(SEM, "Rcpp_SEMCpp") & control$saveDetails){
       implied$means[[it]] <- SEM$impliedMeans
       implied$covariances[[it]] <- SEM$impliedCovariance
       
@@ -1648,7 +1558,7 @@ fit <- function(mixedPenalty){
       
     }else{
       
-      if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
+      if(control$saveDetails) Hessians$Hessian[[it]] <- result$Hessian
       
       # set Hessian for next iteration
       regularizedModel$setHessian(result$Hessian)
@@ -1672,7 +1582,13 @@ fit <- function(mixedPenalty){
     "N" = SEM$sampleSize
   )
   
-  
+  notes <- unique(notes)
+  if(length(notes) > 1){
+    cat("\n")
+    rlang::inform(
+      notes
+    )
+  }
   
   results <- new("regularizedSEMMixedPenalty",
                  penalty =  penaltyType,
@@ -1689,8 +1605,79 @@ fit <- function(mixedPenalty){
                  regularized = names(weights)[weights!=0],
                  transformations = transformations,
                  internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
+                 inputArguments = inputArguments,
+                 notes = notes)
   
   return(results)
   
+}
+
+#' .penaltyTypes
+#' 
+#' translates the penalty from a numeric value to the character or from
+#' the character to the numeric value. The numeric value is used by the C++ backend.
+#' @param penalty either a number or the name of the penalty
+#' @return number corresponding to one of the penalties
+#' @keywords internal
+.penaltyTypes <- function(penalty){
+  
+  if(is.character(penalty)){
+    
+    if(penalty == "none"){
+      return(0)
+    }
+    
+    if(penalty == "cappedL1"){
+      return(1)
+    }
+    
+    if(penalty == "lasso"){
+      return(2)
+    }
+    
+    if(penalty == "lsp"){
+      return(3)
+    }
+    
+    if(penalty == "mcp"){
+      return(4)
+    }
+    
+    if(penalty == "scad"){
+      return(5)
+    }
+    
+    stop("Unknown penalty.")
+  }
+  
+  if(is.numeric(penalty)){
+    
+    if(penalty == 0){
+      return("none")
+    }
+    
+    if(penalty == 1){
+      return("cappedL1")
+    }
+    
+    if(penalty == 2){
+      return("lasso")
+    }
+    
+    if(penalty == 3){
+      return("lsp")
+    }
+    
+    if(penalty == 4){
+      return("mcp")
+    }
+    
+    if(penalty == 5){
+      return("scad")
+    }
+    
+    stop("Unknown penalty.")
+  }
+  
+  stop("Unknown penalty.")
 }

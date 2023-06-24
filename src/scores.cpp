@@ -2,6 +2,7 @@
 #include "SEM.h"
 #include "scores.h"
 #include "multivariateNormal.h"
+#include "WLS.h"
 #include "gradients.h"
 
 // [[Rcpp :: depends ( RcppArmadillo )]]

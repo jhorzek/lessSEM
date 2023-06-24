@@ -91,6 +91,7 @@ setMethod("coef", "gpRegularized", function (object, ...) {
       coefs <- new("lessSEMCoef")
       coefs@tuningParameters <- tuningParameters[bestAIC,,drop = FALSE]
       coefs@estimates <- estimates[bestAIC,,drop = FALSE]
+      coefs@transformations <- matrix(nrow = 0, ncol = 0)
       
       return(coefs) 
     }
@@ -102,6 +103,7 @@ setMethod("coef", "gpRegularized", function (object, ...) {
       coefs <- new("lessSEMCoef")
       coefs@tuningParameters <- tuningParameters[bestBIC,,drop = FALSE]
       coefs@estimates <- estimates[bestBIC,,drop = FALSE]
+      coefs@transformations <- matrix(nrow = 0, ncol = 0)
       
       return(coefs)
     }
@@ -111,6 +113,7 @@ setMethod("coef", "gpRegularized", function (object, ...) {
   coefs <- new("lessSEMCoef")
   coefs@tuningParameters <- tuningParameters
   coefs@estimates <- estimates
+  coefs@transformations <- matrix(nrow = 0, ncol = 0)
   
   return(coefs)
 })

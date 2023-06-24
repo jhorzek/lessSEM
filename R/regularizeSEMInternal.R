@@ -16,6 +16,9 @@
 #' @param modifyModel used to modify the lavaanModel. See ?modifyModel.
 #' @param control used to control the optimizer. This element is generated with 
 #' the controlIsta() and controlGlmnet() functions.
+#' @param notes option to pass a notes to function. All notes of the current
+#' function will be added
+#' @return regularized SEM 
 #' @keywords internal
 .regularizeSEMInternal <- function(lavaanModel,
                                    penalty,
@@ -23,17 +26,26 @@
                                    tuningParameters,
                                    method, 
                                    modifyModel,
-                                   control){
+                                   control,
+                                   notes = NULL){
+  
+  if(is.null(notes)){
+    printNotes <- TRUE
+    notes <- c("Notes:")
+  }else{
+    # notes already exists and we only append the new ones
+    printNotes <- FALSE
+  }
   
   inputArguments <- as.list(environment())
   
   if(! method %in% c("ista", "glmnet")) 
     stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) 
+  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1", "mcp", "lsp")) 
     stop(
       paste0(
         "glmnet only supports the following penalty functions: ",
-        paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet"), 
+        paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1", "mcp", "lsp"), 
                collapse = ", ")
       )
     )
@@ -43,18 +55,29 @@
   if(method == "glmnet" && !is(control, "controlGlmnet")) 
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
+  control$breakOuter <- .adaptBreakingForWls(lavaanModel = lavaanModel, 
+                                             currentBreaking = control$breakOuter,
+                                             selectedDefault = ifelse(method == "ista",
+                                                                      control$breakOuter == controlIsta()$breakOuter,
+                                                                      control$breakOuter == controlGlmnet()$breakOuter
+                                             ))
+  
+  
   if(method == "glmnet" && is.vector(lavaanModel)){
     if(any(control$initialHessian == "lavaan")){
-      rlang::inform(c("Note","You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'."))
+      notes <- c(notes,
+                 "You specified a multi-group model. Switching initialHessian from 'lavaan' to 'compute'.")
       control$initialHessian <- "compute"
     }
   }
   if(!is.null(modifyModel$transformations)){
-    rlang::inform(c("Note","Your model has transformations:"))
-    cat(" - If you transform variances",
-        "the variance estimates returned by lessSEM may not be the true variances",
-        "but transformations thereof. Check model@transformations to find the actual variance",
-        "estimates for your regularized variances\n")
+    
+    notes <- c(notes,
+               paste("Your model has transformations. If you transform variances",
+                     "the variance estimates returned by lessSEM may not be the true variances",
+                     "but transformations thereof. Check model@transformations to find the actual variance",
+                     "estimates for your regularized variances")
+    )
     if(method == "glmnet"){
       if(any(control$initialHessian == "lavaan")){
         cat(" - Switching initialHessian from 'lavaan' to 'compute'.\n")
@@ -68,7 +91,7 @@
   ## Setup Multi-Core ##
   
   .setupMulticore(control)
-
+  
   ### initialize model ####
   startingValues <- control$startingValues
   if(!any(startingValues == "est") & penalty == "adaptiveLasso" & !is.numeric(weights)){
@@ -91,6 +114,9 @@
                                                      modifyModel = modifyModel)
   }
   
+  # check if we have a likelihood objective function:
+  usesLikelihood <- all(SEM$getEstimator() == "fiml")
+  
   N <- SEM$sampleSize
   
   # get parameters in raw form
@@ -110,11 +136,15 @@
   
   #### glmnet requires an initial Hessian ####
   if(method == "glmnet"){
-    control$initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
-                                                     rawParameters = rawParameters, 
-                                                     lavaanModel = lavaanModel, 
-                                                     SEM = SEM,
-                                                     addMeans = modifyModel$addMeans)
+    initialHessian <- .computeInitialHessian(initialHessian = control$initialHessian, 
+                                             rawParameters = rawParameters, 
+                                             lavaanModel = lavaanModel, 
+                                             SEM = SEM,
+                                             addMeans = modifyModel$addMeans,
+                                             stepSize = control$stepSize,
+                                             notes = notes)
+    notes <- initialHessian$notes
+    control$initialHessian <- initialHessian$initialHessian
   }
   
   #### prepare regularized model object ####
@@ -134,14 +164,56 @@
       verbose = control$verbose
     )
     
-    if(is(SEM, "Rcpp_SEMCpp")){
-      regularizedModel <- new(glmnetEnetSEM, 
-                              weights, 
-                              controlIntern)
-    }else if(is(SEM, "Rcpp_mgSEM")){
-      regularizedModel <- new(glmnetEnetMgSEM, 
-                              weights, 
-                              controlIntern)
+    if(penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetEnetSEM, 
+                                weights, 
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetEnetMgSEM, 
+                                weights, 
+                                controlIntern)
+      }
+    }else if(penalty == "scad"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetScadSEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetScadMgSEM,
+                                weights,
+                                controlIntern)
+      }
+    }else if(penalty == "cappedL1"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetCappedL1SEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetCappedL1MgSEM,
+                                weights,
+                                controlIntern)
+      }
+    }else if(penalty == "mcp"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetMcpSEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetMcpMgSEM,
+                                weights,
+                                controlIntern)
+      }
+    }else if(penalty == "lsp"){
+      if(is(SEM, "Rcpp_SEMCpp")){
+        regularizedModel <- new(glmnetLspSEM,
+                                weights,
+                                controlIntern)
+      }else if(is(SEM, "Rcpp_mgSEM")){
+        regularizedModel <- new(glmnetLspMgSEM,
+                                weights,
+                                controlIntern)
+      }
     }
     
   }else if(method == "ista"){
@@ -230,9 +302,12 @@
   if(!is.null(tuningParameters$nLambdas)){
     # for lasso type penalties, the maximal lambda value can be determined
     # automatically
-    rlang::inform(c("Note",paste0(
-      "Automatically selecting the maximal lambda value. ",
-      " This may fail if a model with all regularized parameters set to zero is not identified."))
+    notes <- c(
+      notes,
+      paste0(
+        "Automatically selecting the maximal lambda value.",
+        " This may fail if a model with all regularized parameters set to zero is not identified."
+      )
     )
     
     maxLambda <- .getMaxLambda_C(regularizedModel = regularizedModel,
@@ -262,6 +337,8 @@
   
   fits <- data.frame(
     tuningParameters,
+    "objectiveValue" = NA,
+    "regObjectiveValue" = NA,
     "m2LL" = NA,
     "regM2LL"= NA,
     "nonZeroParameters" = NA,
@@ -295,7 +372,7 @@
     transformations <- data.frame()
   }
   
-  if(method == "glmnet" && control$saveHessian){
+  if(method == "glmnet" && control$saveDetails){
     Hessians <- list(
       "lambda" = tuningParameters$lambda,
       "alpha" = tuningParameters$alpha,
@@ -348,14 +425,19 @@
       )
       
     }else if(penalty == "cappedL1"){
-      
-      result <- try(regularizedModel$optimize(rawParameters,
-                                              SEM,
-                                              tuningParameters$theta[it],
-                                              tuningParameters$lambda[it],
-                                              tuningParameters$alpha[it])
-      )
-      
+      if(method == "ista")
+        result <- try(regularizedModel$optimize(rawParameters,
+                                                SEM,
+                                                tuningParameters$theta[it],
+                                                tuningParameters$lambda[it],
+                                                tuningParameters$alpha[it])
+        )
+      if(method == "glmnet")
+        result <- try(regularizedModel$optimize(rawParameters,
+                                                SEM,
+                                                tuningParameters$theta[it],
+                                                tuningParameters$lambda[it])
+        )
     }
     
     if(is(result, "try-error")) next
@@ -363,7 +445,11 @@
     rawParameters <- result$rawParameters
     fits$nonZeroParameters[it] <- length(rawParameters) - 
       sum(rawParameters[weights[names(rawParameters)] != 0] == 0)
-    fits$regM2LL[it] <- result$fit
+    
+    fits$regObjectiveValue[it] <- result$fit
+    if(usesLikelihood)
+      fits$regM2LL[it] <- fits$regObjectiveValue[it]
+    
     fits$convergence[it] <- result$convergence
     
     # get unregularized fit:
@@ -371,7 +457,11 @@
                           names(rawParameters), 
                           values = rawParameters, 
                           raw = TRUE)
-    fits$m2LL[it] <- SEM$fit()
+    
+    fits$objectiveValue[it] <- SEM$fit()
+    if(usesLikelihood)
+      fits$m2LL[it] <- fits$objectiveValue[it]
+    
     # transform internal parameter representation to "natural" form
     transformedParameters <- .getParameters(SEM,
                                             raw = FALSE)
@@ -387,17 +477,17 @@
                       names(transformationsAre)] <- transformationsAre
     }
     
-    if(method == "glmnet" && control$saveHessian) 
+    if(method == "glmnet" && control$saveDetails) 
       Hessians$Hessian[[it]] <- result$Hessian
     
     # save implied
-    if(is(SEM, "Rcpp_SEMCpp")){
-    implied$means[[it]] <- SEM$impliedMeans
-    implied$covariances[[it]] <- SEM$impliedCovariance
-    
-    rownames(implied$means[[it]]) <- SEM$manifestNames
-    dimnames(implied$covariances[[it]]) <- list(SEM$manifestNames,
-                                                SEM$manifestNames)
+    if(is(SEM, "Rcpp_SEMCpp") & control$saveDetails){
+      implied$means[[it]] <- SEM$impliedMeans
+      implied$covariances[[it]] <- SEM$impliedCovariance
+      
+      rownames(implied$means[[it]]) <- SEM$manifestNames
+      dimnames(implied$covariances[[it]]) <- list(SEM$manifestNames,
+                                                  SEM$manifestNames)
     }else if(is(SEM, "Rcpp_mgSEM")){
       implied$means[[it]] <- NULL
       implied$covariances[[it]] <- NULL
@@ -429,7 +519,7 @@
     }else{
       
       if(method == "glmnet"){
-        if(control$saveHessian) Hessians$Hessian[[it]] <- result$Hessian
+        if(control$saveDetails) Hessians$Hessian[[it]] <- result$Hessian
         
         # set Hessian for next iteration
         regularizedModel$setHessian(result$Hessian)
@@ -441,19 +531,27 @@
   }
   
   if(is(SEM, "Rcpp_SEMCpp")) internalOptimization <- list(
+    "isMultiGroup" = FALSE,
     "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = SEM$functionCalls,
     "gradientCalls" = SEM$gradientCalls,
-    "N" = SEM$sampleSize
+    "N" = SEM$sampleSize,
+    "estimator"= SEM$getEstimator()
   )
   if(is(SEM, "Rcpp_mgSEM")) internalOptimization <- list(
+    "isMultiGroup" = TRUE,
     "implied" = implied,
     "HessiansOfDifferentiablePart" = Hessians,
     "functionCalls" = NA,
     "gradientCalls" = NA,
-    "N" = SEM$sampleSize
+    "N" = SEM$sampleSize,
+    "estimator"= SEM$getEstimator()
   )
+  
+  if(any(internalOptimization$estimator == "wls")){
+    notes <- c(notes, "WLS (and variants) is a very new feature and not yet thoroughly tested. Please be wary of bugs!")
+  }
   
   results <- new("regularizedSEM",
                  penalty = penalty,
@@ -464,7 +562,17 @@
                  regularized = names(weights)[weights!=0],
                  transformations = transformations,
                  internalOptimization = internalOptimization,
-                 inputArguments = inputArguments)
+                 inputArguments = inputArguments,
+                 notes = notes)
+  
+  notes <- unique(notes)
+  
+  if(printNotes & (length(notes) > 1)){
+    cat("\n")
+    rlang::inform(
+      notes
+    )
+  }
   
   return(results)
   

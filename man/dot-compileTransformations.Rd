@@ -4,7 +4,7 @@
 \alias{.compileTransformations}
 \title{.compileTransformations}
 \usage{
-.compileTransformations(syntax, parameterLabels, compile = TRUE)
+.compileTransformations(syntax, parameterLabels, compile = TRUE, notes = NULL)
 }
 \arguments{
 \item{syntax}{string with user defined transformations}
@@ -12,6 +12,9 @@
 \item{parameterLabels}{names of parameters in the model}
 
 \item{compile}{if set to FALSE, the function will not be compiled -> for visual inspection}
+
+\item{notes}{option to pass a notes to function. All notes of the current
+function will be added}
 }
 \value{
 list with parameter names and two Rcpp functions: (1) the transformation function and

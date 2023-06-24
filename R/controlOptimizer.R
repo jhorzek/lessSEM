@@ -3,6 +3,9 @@
 #' @param startingValues option to provide initial starting values. Only used for the first lambda. Three options are supported. Setting to "est" will use the estimates
 #' from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
 #' values can be passed to the function which will then be used as starting values.
+#' @param saveDetails when set to TRUE, additional details about the individual
+#' models are save. Currently, this are the implied means and covariances.
+#'  Note: This may take a lot of memory!
 #' @param L0 L0 controls the step size used in the first iteration
 #' @param eta eta controls by how much the step size changes in the
 #' inner iterations with (eta^i)*L, where i is the inner iteration
@@ -32,6 +35,7 @@
 #' @export
 controlIsta <- function(
     startingValues = "est",
+    saveDetails = FALSE,
     L0 = .1,
     eta = 2,
     accelerate = TRUE,
@@ -61,15 +65,17 @@ controlIsta <- function(
 #' @param initialHessian option to provide an initial Hessian to the optimizer. 
 #' Must have row and column names corresponding to the parameter labels. use 
 #' getLavaanParameters(lavaanModel) to 
-#' see those labels. If set to "scoreBased", the outer product of the scores 
-#' will be used as an approximation 
-#' (see https://en.wikipedia.org/wiki/Berndt%E2%80%93Hall%E2%80%93Hall%E2%80%93Hausman_algorithm).
+#' see those labels. If set to "gradNorm", the maximum of the gradients at the starting
+#' values times the stepSize will be used. This is adapted from Optim.jl
+#' https://github.com/JuliaNLSolvers/Optim.jl/blob/f43e6084aacf2dabb2b142952acd3fbb0e268439/src/multivariate/solvers/first_order/bfgs.jl#L104
 #' If set to "compute", the initial hessian will be computed. If set to a single 
 #' value, a diagonal matrix with the single value along the diagonal will be used.
 #' The default is "lavaan" which extracts the Hessian from the lavaanModel. This Hessian
 #' will typically deviate from that of the internal SEM represenation of lessSEM (due to
 #' the transformation of the variances), but works quite well in practice.
-#' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
+#' @param saveDetails when set to TRUE, additional details about the individual
+#' models are save. Currently, this are the Hessian and the implied means and covariances.
+#'  Note: This may take a lot of memory!
 #' @param stepSize Initial stepSize of the outer iteration 
 #' (theta_{k+1} = theta_k + stepSize * Stepdirection)
 #' @param sigma only relevant when lineSearch = 'GLMNET'. Controls the sigma 
@@ -96,7 +102,7 @@ controlIsta <- function(
 controlGlmnet <- function(
     startingValues = "est",
     initialHessian = ifelse(all(startingValues=="est"),"lavaan","compute"),
-    saveHessian = FALSE,
+    saveDetails = FALSE,
     stepSize = .9,
     sigma = 1e-5,
     gamma = 0,
@@ -122,12 +128,16 @@ controlGlmnet <- function(
 #' from the lavaan model object. Setting to "start" will use the starting values of the lavaan model. Finally, a labeled vector with parameter
 #' values can be passed to the function which will then be used as starting values.
 #' @param initialHessian option to provide an initial Hessian to the optimizer. Must have row and column names corresponding to the parameter labels. use getLavaanParameters(lavaanModel) to 
-#' see those labels. If set to "scoreBased", the outer product of the scores will be used as an approximation (see https://en.wikipedia.org/wiki/Berndt%E2%80%93Hall%E2%80%93Hall%E2%80%93Hausman_algorithm).
-#' If set to "compute", the initial hessian will be computed. If set to a single value, a diagonal matrix with the single value along the diagonal will be used.
+#' see those labels. If set to "gradNorm", the maximum of the gradients at the starting
+#' values times the stepSize will be used. This is adapted from Optim.jl
+#' https://github.com/JuliaNLSolvers/Optim.jl/blob/f43e6084aacf2dabb2b142952acd3fbb0e268439/src/multivariate/solvers/first_order/bfgs.jl#L104
+#' If set to a single value, a diagonal matrix with the single value along the diagonal will be used.
 #' The default is "lavaan" which extracts the Hessian from the lavaanModel. This Hessian
 #' will typically deviate from that of the internal SEM represenation of lessSEM (due to
 #' the transformation of the variances), but works quite well in practice.
-#' @param saveHessian should the Hessian be saved for later use? Note: This may take a lot of memory!
+#' @param saveDetails when set to TRUE, additional details about the individual
+#' models are save. Currently, this are the Hessian and the implied means and covariances.
+#'  Note: This may take a lot of memory!
 #' @param stepSize Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)
 #' @param sigma only relevant when lineSearch = 'GLMNET'. Controls the sigma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.
 #' @param gamma Controls the gamma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421. Defaults to 0.
@@ -148,7 +158,7 @@ controlGlmnet <- function(
 controlBFGS <- function(
     startingValues = "est",
     initialHessian = ifelse(all(startingValues=="est"),"lavaan","compute"),
-    saveHessian = FALSE,
+    saveDetails = FALSE,
     stepSize = .9,
     sigma = 1e-5,
     gamma = 0,
@@ -177,8 +187,35 @@ controlBFGS <- function(
     warning("Your selected number of cores (", control$nCores,
             ") is larger than the number of cores detected by RcppParallel (",
             RcppParallel::defaultNumThreads(), "). You may consider using fewer cores."
-            )
+    )
   
   RcppParallel::setThreadOptions(numThreads = control$nCores)
   
+}
+
+
+#' .adaptBreakingForWls
+#' 
+#' wls needs smaller breaking points than ml
+#' @param lavaanModel single model or vector of models
+#' @param currentBreaking current breaking condition value
+#' @param selectedDefault was default breaking condition selected?
+#' @return updated breaking
+.adaptBreakingForWls <- function(lavaanModel, currentBreaking, selectedDefault){
+  
+  if(is.vector(lavaanModel)){
+    for(i in 1:length(lavaanModel)){
+      currentBreaking <- min(currentBreaking, 
+                             .adaptBreakingForWls(lavaanModel = lavaanModel[[i]], 
+                                                  currentBreaking = currentBreaking,
+                                                  selectedDefault = selectedDefault))
+    }
+    return(currentBreaking)
+  }
+  
+  if(selectedDefault && (tolower(lavaanModel@Options$estimator) %in% c("uls","wls", "dwls", "gls"))){
+    return(1e-11)
+  }else{
+    return(currentBreaking)
+  }
 }

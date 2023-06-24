@@ -37,12 +37,14 @@
   
   inputArguments <- as.list(environment())
   
+  notes <- c("Notes:")
+  
   if(! method %in% c("ista", "glmnet")) 
     stop("Currently ony methods = 'ista' and methods = 'glmnet' are supported")
-  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet")) 
+  if(method == "glmnet" & !penalty %in% c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1", "mcp", "lsp")) 
     stop(paste0(
       "glmnet only supports the following penalty functions: ",
-      paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet"), collapse = ", ")
+      paste0(c("ridge", "lasso", "adaptiveLasso", "elasticNet", "scad", "cappedL1", "mcp", "lsp"), collapse = ", ")
     )
     )
   
@@ -52,15 +54,19 @@
     stop("control must be of class controlGlmnet See ?controlGlmnet")
   
   if(method == "glmnet" && any(control$initialHessian == "lavaan")){
-    rlang::inform(c("Note","Switching initialHessian from 'lavaan' to 'compute'."))
+    notes <- c(notes, "Switching initialHessian from 'lavaan' to 'compute'.")
     control$initialHessian <- "compute"
   }
   
   if(!is(lavaanModel, "lavaan"))
     stop("lavaanModel must be of class lavaan")
   
-  if(lavaanModel@Options$estimator != "ML") 
-    stop("lavaanModel must be fit with ml estimator.")
+  control$breakOuter <- .adaptBreakingForWls(lavaanModel = lavaanModel, 
+                                             currentBreaking = control$breakOuter,
+                                             selectedDefault = ifelse(method == "ista",
+                                                                      control$breakOuter == controlIsta()$breakOuter,
+                                                                      control$breakOuter == controlGlmnet()$breakOuter
+                                             ))
   
   rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
   if(is(rawData, "try-error")) 
@@ -79,7 +85,7 @@
                            transformationList = modifyModel$transformationList,
                            transformationGradientStepSize = modifyModel$transformationGradientStepSize)
   
-  
+  misc$estimator <- tmpSEM$getEstimator()
   parameterLabels <- names(.getParameters(SEM = tmpSEM, 
                                           raw = TRUE, 
                                           transformations = FALSE))
@@ -103,12 +109,13 @@
   }
   
   if(penalty == "adaptiveLasso") 
-    rlang::inform(c("Note",paste0("Automatic cross-validation for adaptiveLasso requested. ", 
+    notes <- c(notes, 
+               paste0("Automatic cross-validation for adaptiveLasso requested. ", 
                       "Note that using weights which are based on the full sample ",
                       "may undermine cross-validation. If the default is used (weights = NULL), ",
                       "weights for each subset will be computed using the inverse of the absolute MLE. ",
                       "Alternatively, pass a matrix as weights argument with weights for each subset.")
-    ))
+               )
   
   cvfits <- data.frame(
     tuningParameters,
@@ -166,12 +173,18 @@
     testSet <- rawData[subsets[,s],,drop = FALSE]
     
     if(standardize){
+      
+      if(!tolower(lavaanModel@Options$estimator) %in% c("ml", "fiml","mlm", "mlmv", "mlmvs", "mlf", "mlr"))
+        stop("Automatic standardization is currently only implemented for maximum likelihood estimation.")
+      
       if(sum(subsets[,s]) < 2 || sum(!subsets[,s]) < 2){
         warning("Subsets too small for standardization Skipping standardization.")
       }else{
         # It is important to not scale the data prior to the splitting
         # Otherwise the data sets are not truly independent!
-        rlang::inform(c("Note","Standardizing data sets ..."))
+        notes <- c(notes, 
+                   "Using automatic standardization for cross-validation data sets."
+                   )
         trainSet <- scale(trainSet, center = TRUE, scale = TRUE)
         
         means <- attr(trainSet, "scaled:center")
@@ -183,7 +196,43 @@
       }
     }
     
-    modifyModel$dataSet <- trainSet
+    # We update the lavaan models to set up our regularized model
+    if(tolower(lavaanModel@Options$estimator) %in% c("ml", "fiml","mlm", "mlmv", "mlmvs", "mlf", "mlr")){
+      
+      # Note: lavaan will throw an error if N < p and missing != "ml", which we don't really care about
+      # in case of ml-estimation because N does not have to be larger than p. In fact,
+      # we can even use N = 1.
+      # See e.g., p. 334 in 
+      # Voelkle, M. C., Oud, J. H. L., von Oertzen, T., & Lindenberger, U. (2012).
+      # Maximum Likelihood Dynamic Factor Modeling for Arbitrary N and T Using SEM. 
+      # Structural Equation Modeling: A Multidisciplinary Journal, 19(3), 329–350. 
+      # https://doi.org/10.1080/10705511.2012.687656
+      
+      lavaanModelTrain <- lavaanModel
+      lavaanModelTest <- lavaanModel
+      
+      # replace data
+      lavaanModelTrain@Data@X[[1]] <- as.matrix(trainSet)
+      lavaanModelTrain@Options$do.fit <- FALSE # set to FALSE because otherwise lessSEM will
+      # try to compare the fit of the model using only the train set to the fit of the
+      # lavaanModelTrain, which was not fitted.
+      
+      lavaanModelTest@Data@X[[1]] <- as.matrix(testSet)
+      lavaanModelTest@Options$do.fit <- FALSE
+      
+    }else{
+      # If any other estimator is used, we need lavaan to set up the weight
+      # matrices, etc for the WLS
+      lavaanModelTrain <- lavaanModelTest <- lavaanModel
+      lavaanModelTrain@Options$do.fit <- FALSE
+      lavaanModelTest@Options$do.fit <- FALSE
+      lavaanModelTrain <- suppressWarnings(.updateLavaan(lavaanModel = lavaanModel, 
+                                                          key = "data",
+                                                          value = trainSet))
+      lavaanModelTest <- suppressWarnings(.updateLavaan(lavaanModel = lavaanModel, 
+                                                         key = "data",
+                                                         value = testSet))
+    }
     
     # check weights for adaptive Lasso
     ## option one: user provided weights
@@ -212,7 +261,7 @@
       weights_s <- weights
     }
     
-    regularizedSEM_s <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
+    regularizedSEM_s <- .regularizeSEMInternal(lavaanModel = lavaanModelTrain, 
                                                penalty = penalty, 
                                                weights = weights_s, 
                                                tuningParameters = tuningParameters, 
@@ -220,6 +269,10 @@
                                                modifyModel = modifyModel,
                                                control = control_s
     )
+    
+    notes <- c(notes,
+               regularizedSEM_s@notes
+               )
     
     if(penalty == "adaptiveLasso"){
       
@@ -242,12 +295,11 @@
     # to compute the out of sample fit, we also need a SEM with all individuals 
     # if the test set
     SEM_s <- .SEMFromLavaan(
-      lavaanModel = lavaanModel,
+      lavaanModel = lavaanModelTest,
       whichPars = "start",
       fit = FALSE, 
       addMeans = modifyModel$addMeans,
       activeSet = modifyModel$activeSet, 
-      dataSet = testSet,
       transformations = modifyModel$transformations,
       transformationList = modifyModel$transformationList
     )
@@ -270,8 +322,13 @@
   # now, fit the full model
   
   tp <- tuningParameters[which.min(cvfits$cvfit)[1],]
-  if(standardize) rawData <- scale(rawData)
-  modifyModel$dataSet <- rawData
+  if(tolower(lavaanModel@Options$estimator) %in% c("ml", "fiml","mlm", "mlmv", "mlmvs", "mlf", "mlr"))
+  {
+    if(standardize) rawData <- scale(rawData)
+    modifyModel$dataSet <- rawData
+  }else{
+    modifyModel$dataSet <- NULL
+  }
   regularizedSEM_full <- .regularizeSEMInternal(lavaanModel = lavaanModel, 
                                                 penalty = penalty, 
                                                 weights = weights_s, 
@@ -280,6 +337,13 @@
                                                 modifyModel = modifyModel,
                                                 control = control
   )
+  
+  notes <- unique(notes)
+  
+  if(length(notes) > 1){
+    cat("\n")
+    rlang::inform(notes)
+  }
   
   return(
     new("cvRegularizedSEM",
@@ -291,7 +355,8 @@
         cvfitsDetails = cvfitsDetails, 
         subsets = subsets,
         subsetParameters = subsetParameters,
-        misc = misc)
+        misc = misc,
+        notes = notes)
   )
 }
 

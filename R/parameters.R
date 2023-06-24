@@ -55,6 +55,13 @@
       # now replace the raw elements:
       param[names(values)] <- values
       
+      # remove transformations
+      if(any(parameterTable$isTransformation)){
+        param <- param[names(param) %in%
+                         names(parameterTable$parmeters)[!parameterTable$isTransformation]
+        ]
+      }
+      
       return(param)
     }
     

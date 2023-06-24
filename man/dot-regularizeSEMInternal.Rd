@@ -11,7 +11,8 @@
   tuningParameters,
   method,
   modifyModel,
-  control
+  control,
+  notes = NULL
 )
 }
 \arguments{
@@ -32,6 +33,12 @@ and glmnet. With ista, the control argument can be used to switch to related pro
 
 \item{control}{used to control the optimizer. This element is generated with
 the controlIsta() and controlGlmnet() functions.}
+
+\item{notes}{option to pass a notes to function. All notes of the current
+function will be added}
+}
+\value{
+regularized SEM
 }
 \description{
 Internal function: This function computes the regularized models

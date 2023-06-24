@@ -16,7 +16,7 @@ public:
   arma::colvec means;
   // data (with missings) is required for N == 1
   arma::mat rawData;
-  double m2LL; // minus 2 log-Likelihood for this subset
+  double objectiveValue; // minus 2 log-Likelihood for this subset
   
   // constructor
   subset(){};

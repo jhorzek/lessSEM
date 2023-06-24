@@ -12,7 +12,8 @@ gpCappedL1Cpp(
   regularized,
   lambdas,
   thetas,
-  control = lessSEM::controlIsta()
+  method = "glmnet",
+  control = lessSEM::controlGlmnet()
 )
 }
 \arguments{
@@ -36,8 +37,12 @@ getLavaanParameters(model) with your lavaan model object}
 \item{thetas}{parameters whose absolute value is above this threshold will be penalized with
 a constant (theta)}
 
+\item{method}{which optimizer should be used? Currently implemented are ista
+and glmnet.}
+
 \item{control}{used to control the optimizer. This element is generated with
-the controlIsta (see ?controlIsta)}
+the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+for more details.}
 }
 \value{
 Object of class gpRegularized
