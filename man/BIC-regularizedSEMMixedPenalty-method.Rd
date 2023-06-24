@@ -4,10 +4,12 @@
 \alias{BIC,regularizedSEMMixedPenalty-method}
 \title{BIC}
 \usage{
-\S4method{BIC}{regularizedSEMMixedPenalty}(object)
+\S4method{BIC}{regularizedSEMMixedPenalty}(object, ...)
 }
 \arguments{
 \item{object}{object of class regularizedSEMMixedPenalty}
+
+\item{...}{not used}
 }
 \value{
 BIC values

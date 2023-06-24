@@ -4,10 +4,12 @@
 \alias{BIC,regularizedSEM-method}
 \title{BIC}
 \usage{
-\S4method{BIC}{regularizedSEM}(object)
+\S4method{BIC}{regularizedSEM}(object, ...)
 }
 \arguments{
 \item{object}{object of class regularizedSEM}
+
+\item{...}{not used}
 }
 \value{
 BIC values

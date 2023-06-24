@@ -45,9 +45,10 @@ setMethod("show", "cvRegularizedSEM", function (object) {
 #' summary method for objects of class \code{cvRegularizedSEM}.
 #' 
 #' @param object object of class cvRegularizedSEM
+#' @param ... not used
 #' @return No return value, just prints estimates
 #' @export
-setMethod("summary", "cvRegularizedSEM", function (object) {
+setMethod("summary", "cvRegularizedSEM", function (object, ...) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Exact Cross Validation Results ####\n\n"))
   cat("regularized parameters: ")

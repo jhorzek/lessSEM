@@ -4,10 +4,12 @@
 \alias{summary,cvRegularizedSEM-method}
 \title{summary method for objects of class \code{cvRegularizedSEM}.}
 \usage{
-\S4method{summary}{cvRegularizedSEM}(object)
+\S4method{summary}{cvRegularizedSEM}(object, ...)
 }
 \arguments{
 \item{object}{object of class cvRegularizedSEM}
+
+\item{...}{not used}
 }
 \value{
 No return value, just prints estimates

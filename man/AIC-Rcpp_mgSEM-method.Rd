@@ -4,10 +4,14 @@
 \alias{AIC,Rcpp_mgSEM-method}
 \title{AIC}
 \usage{
-\S4method{AIC}{Rcpp_mgSEM}(object)
+\S4method{AIC}{Rcpp_mgSEM}(object, ..., k = 2)
 }
 \arguments{
 \item{object}{object of class Rcpp_mgSEM}
+
+\item{...}{not used}
+
+\item{k}{multiplier for number of parameters}
 }
 \value{
 AIC values

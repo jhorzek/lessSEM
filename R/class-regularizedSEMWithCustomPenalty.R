@@ -19,9 +19,10 @@ setClass(Class = "regularizedSEMWithCustomPenalty",
 
 #' summary
 #' @param object object of class regularizedSEMWithCustomPenalty
+#' @param ... not used
 #' @return No return value, just prints estimates
 #' @keywords internal
-setMethod("summary", "regularizedSEMWithCustomPenalty", function (object) {
+setMethod("summary", "regularizedSEMWithCustomPenalty", function (object, ...) {
   modelName <-deparse(substitute(object)) # get the name of the object
   cat(paste0("#### Model of class regularizedSEMWithCustomPenalty ####\n\n"))
   cat(paste0("- Use coef(", modelName, 
@@ -63,21 +64,32 @@ setMethod("coef", "regularizedSEMWithCustomPenalty", function (object, ...) {
 
 #' AIC
 #' 
-#' returns the AIC
+#' returns the AIC. Expects penalizedParameterLabels and zeroThreshold
 #' 
 #' @param object object of class regularizedSEMWithCustomPenalty
-#' @param penalizedParameterLabels vector with labels of penalized parameters
-#' @param zeroThreshold penalized parameters below this threshold will be counted as zeroed
+#' @param ... Expects penalizedParameterLabels and zeroThreshold. 
+#' penalizedParameterLabels: vector with labels of penalized parameters.
+#' zeroThreshold: penalized parameters below this threshold will be counted as zeroed.
+#' @param k multiplier for number of parameters
 #' @returns AIC values
 #' @keywords internal
-setMethod("AIC", "regularizedSEMWithCustomPenalty", function (object, penalizedParameterLabels, zeroThreshold) {
+setMethod("AIC", "regularizedSEMWithCustomPenalty", function (object, ..., k) {
+  
+  dots <- list(...)
+  if(!"penalizedParameterLabels" %in% names(dots))
+    stop("Expected penalizedParameterLabels")
+  if(!"zeroThreshold" %in% names(dots))
+    stop("Expected zeroThreshold")
+  
+  penalizedParameterLabels <- dots$penalizedParameterLabels
+  zeroThreshold <- dots$zeroThreshold
   
   fits <- object@fits
   parameters <- object@parameters
   
   fits$AIC <- rep(NA, length(fits$m2LL))
   
-  fits$AIC <- fits$m2LL + 2*apply(parameters, 1, function(x) length(x) - sum(abs(x[penalizedParameterLabels]) < zeroThreshold))
+  fits$AIC <- fits$m2LL + k*apply(parameters, 1, function(x) length(x) - sum(abs(x[penalizedParameterLabels]) < zeroThreshold))
   fits$nonZeroParameters <- apply(parameters, 1, function(x) length(x) - sum(abs(x[penalizedParameterLabels]) < zeroThreshold))
   return(fits)
   
@@ -88,11 +100,21 @@ setMethod("AIC", "regularizedSEMWithCustomPenalty", function (object, penalizedP
 #' returns the BIC
 #' 
 #' @param object object of class regularizedSEMWithCustomPenalty
-#' @param penalizedParameterLabels vector with labels of penalized parameters
-#' @param zeroThreshold penalized parameters below this threshold will be counted as zeroed
+#' @param ... Expects penalizedParameterLabels and zeroThreshold. 
+#' penalizedParameterLabels: vector with labels of penalized parameters.
+#' zeroThreshold: penalized parameters below this threshold will be counted as zeroed.
 #' @returns BIC values
 #' @keywords internal
-setMethod("BIC", "regularizedSEMWithCustomPenalty", function (object, penalizedParameterLabels, zeroThreshold) {
+setMethod("BIC", "regularizedSEMWithCustomPenalty", function (object, ...) {
+  dots <- list(...)
+  if(!"penalizedParameterLabels" %in% names(dots))
+    stop("Expected penalizedParameterLabels")
+  if(!"zeroThreshold" %in% names(dots))
+    stop("Expected zeroThreshold")
+  
+  penalizedParameterLabels <- dots$penalizedParameterLabels
+  zeroThreshold <- dots$zeroThreshold
+  
   fits <- object@fits
   parameters <- object@parameters
   

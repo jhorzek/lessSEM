@@ -4,10 +4,12 @@
 \alias{summary,gpRegularized-method}
 \title{summary}
 \usage{
-\S4method{summary}{gpRegularized}(object)
+\S4method{summary}{gpRegularized}(object, ...)
 }
 \arguments{
 \item{object}{object of class gpRegularized}
+
+\item{...}{not used}
 }
 \value{
 No return value, just prints estimates
