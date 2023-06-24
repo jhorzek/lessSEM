@@ -28,3 +28,4 @@ jobs:
           needs: check
       - uses: r-lib/actions/setup-pandoc@v1
       - uses: r-lib/actions/check-r-package@v2
+  
