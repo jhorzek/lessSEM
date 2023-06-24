@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Definition-Variables-and-Multi-Group-SEM.html">Definition-Variables-and-Multi-Group-SEM</a>
+    <a class="dropdown-item" href="../articles/Estimator-Settings.html">Estimator-Settings</a>
     <a class="dropdown-item" href="../articles/General-Purpose-Optimization.html">General-Purpose-Optimization</a>
     <a class="dropdown-item" href="../articles/Mixed-Penalties.html">Mixed Penalties</a>
     <a class="dropdown-item" href="../articles/Parameter-transformations.html">Parameter-transformations</a>
@@ -60,6 +61,9 @@
     <a class="dropdown-item" href="../articles/The-optimizer-interface.html">The-optimizer-interface</a>
     <a class="dropdown-item" href="../articles/log-likelihood-gradients.html">log-likelihood-gradients</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -95,9 +99,8 @@
     
     
 <p>To allow for more flexible model estimation, <strong>lessSEM</strong>
-offers parameter transformations. This is an experimental feature
-inspired by OpenMx (Neale et al., 2016; Pritikin et al., 2015; Hunter
-2018). Please be careful when using it. However, parameter
+offers parameter transformations. This is a feature inspired by OpenMx
+(Neale et al., 2016; Pritikin et al., 2015; Hunter 2018). Parameter
 transformations can be very powerful and simplify implementing some
 specific forms of regularization.</p>
 <div class="section level2">
@@ -304,12 +307,18 @@ best model using information criteria:</p>
 <span><span class="co">#&gt;      y3~~y3     y4~~y4     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ============</span></span>
 <span><span class="co">#&gt;      5.0175     3.4074     2.2857     4.8977     3.5510     3.4511       0.4480</span></span>
-<span><span class="co">#&gt;                                                            </span></span>
-<span><span class="co">#&gt;                                                            </span></span>
-<span><span class="co">#&gt;  ------------ ------------ ---------- ---------- ----------</span></span>
-<span><span class="co">#&gt;  dem60~~dem60 dem65~~dem65   delta_a2   delta_b2   delta_c2</span></span>
-<span><span class="co">#&gt;  ============ ============ ========== ========== ==========</span></span>
-<span><span class="co">#&gt;        3.9408       0.2034          .          .          .</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                                              </span></span>
+<span><span class="co">#&gt;                                                             ||--||  Transform</span></span>
+<span><span class="co">#&gt;  ------------ ------------ ---------- ---------- ---------- ||--|| ----------</span></span>
+<span><span class="co">#&gt;  dem60~~dem60 dem65~~dem65   delta_a2   delta_b2   delta_c2 ||--||         a2</span></span>
+<span><span class="co">#&gt;  ============ ============ ========== ========== ========== ||--|| ==========</span></span>
+<span><span class="co">#&gt;        3.9408       0.2034          .          .          . ||--||     1.2110</span></span>
+<span><span class="co">#&gt;                       </span></span>
+<span><span class="co">#&gt;                       </span></span>
+<span><span class="co">#&gt;  ---------- ----------</span></span>
+<span><span class="co">#&gt;          b2         c2</span></span>
+<span><span class="co">#&gt;  ========== ==========</span></span>
+<span><span class="co">#&gt;      1.1679     1.2340</span></span></code></pre></div>
 <p>Note that all differences have been zeroed – that is, a model with
 full measurement invariance did fit best.</p>
 <p>We can also access the transformed parameters:</p>
@@ -634,12 +643,24 @@ each effect (a1-a9) is estimated separately.</p>
 <span><span class="co">#&gt;     y2_t9~1    y3_t9~1   y1_t10~1   y2_t10~1   y3_t10~1     delta2     delta3</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
 <span><span class="co">#&gt;     -0.0579    -0.0407     0.0132    -0.0118    -0.0042          .          .</span></span>
-<span><span class="co">#&gt;                                                                   </span></span>
-<span><span class="co">#&gt;                                                                   </span></span>
-<span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ----------</span></span>
-<span><span class="co">#&gt;      delta4     delta5     delta6     delta7     delta8     delta9</span></span>
-<span><span class="co">#&gt;  ========== ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;     -0.2807          .          .          .          .          .</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                                          </span></span>
+<span><span class="co">#&gt;                                                                    ||--||</span></span>
+<span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ||--||</span></span>
+<span><span class="co">#&gt;      delta4     delta5     delta6     delta7     delta8     delta9 ||--||</span></span>
+<span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ||--||</span></span>
+<span><span class="co">#&gt;     -0.2807          .          .          .          .          . ||--||</span></span>
+<span><span class="co">#&gt;                                                                              </span></span>
+<span><span class="co">#&gt;   Transform                                                                  </span></span>
+<span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
+<span><span class="co">#&gt;          a2         a3         a4         a5         a6         a7         a8</span></span>
+<span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
+<span><span class="co">#&gt;      0.4665     0.4665     0.1859     0.1859     0.1859     0.1859     0.1859</span></span>
+<span><span class="co">#&gt;            </span></span>
+<span><span class="co">#&gt;            </span></span>
+<span><span class="co">#&gt;  ----------</span></span>
+<span><span class="co">#&gt;          a9</span></span>
+<span><span class="co">#&gt;  ==========</span></span>
+<span><span class="co">#&gt;      0.1859</span></span></code></pre></div>
 <p>The true autoregressive effects are given by</p>
 <pre><code><span><span class="co">#&gt; [1] 0.6 0.6 0.6 0.2 0.2 0.2 0.2 0.2 0.2</span></span></code></pre>
 <p>while the estimates are</p>
@@ -784,11 +805,10 @@ parameters.</p>
 required parameters from the parameter vector (e.g.,
 <code>double a1 = parameterValues["a1"];</code>). Next, all of these
 parameters are directly available for use in your transformations. This
-is why we can simply write <code>a2 = a1 + delta_a2;</code>.
-<strong>lessSEM</strong> also added the semicolons required by C++.
-Finally, the transformed parameters are returned. To pass our function
-to <strong>lessSEM</strong>, we also create a pointer to our function,
-but this is beyond the scope here.</p>
+is why we can simply write <code>a2 = a1 + delta_a2;</code>. Finally,
+the transformed parameters are returned. To pass our function to
+<strong>lessSEM</strong>, we also create a pointer to our function, but
+this is beyond the scope here.</p>
 <p>At this point you may be wondering where all the more complicated
 transformations are that we promised above. Importantly, you can use any
 of the functions implemented in <strong>Rcpp</strong> or
@@ -955,7 +975,13 @@ our model in a continuous time SEM:</p>
 <span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;       mvar2      mvar3     mMean1     mMean2     mMean3        ctA        ctV</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;      0.7504     0.5775    -0.0267     0.0054    -0.0276    -0.5228     0.7899</span></span></code></pre></div>
+<span><span class="co">#&gt;      0.7504     0.5775    -0.0267     0.0054    -0.0276    -0.5228     0.7899</span></span>
+<span><span class="co">#&gt;                              </span></span>
+<span><span class="co">#&gt;  ||--||  Transform           </span></span>
+<span><span class="co">#&gt;  ||--|| ---------- ----------</span></span>
+<span><span class="co">#&gt;  ||--||          a          v</span></span>
+<span><span class="co">#&gt;  ||--|| ========== ==========</span></span>
+<span><span class="co">#&gt;  ||--||     0.5928     0.3870</span></span></code></pre></div>
 <p>For comparison, we will run the same model with
 <strong>ctsem</strong>:</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">

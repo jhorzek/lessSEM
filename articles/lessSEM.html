@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Definition-Variables-and-Multi-Group-SEM.html">Definition-Variables-and-Multi-Group-SEM</a>
+    <a class="dropdown-item" href="../articles/Estimator-Settings.html">Estimator-Settings</a>
     <a class="dropdown-item" href="../articles/General-Purpose-Optimization.html">General-Purpose-Optimization</a>
     <a class="dropdown-item" href="../articles/Mixed-Penalties.html">Mixed Penalties</a>
     <a class="dropdown-item" href="../articles/Parameter-transformations.html">Parameter-transformations</a>
@@ -60,6 +61,9 @@
     <a class="dropdown-item" href="../articles/The-optimizer-interface.html">The-optimizer-interface</a>
     <a class="dropdown-item" href="../articles/log-likelihood-gradients.html">log-likelihood-gradients</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -97,16 +101,18 @@
 <div class="section level3">
 <h3 id="regularized-structural-equation-modeling">Regularized Structural Equation Modeling<a class="anchor" aria-label="anchor" href="#regularized-structural-equation-modeling"></a>
 </h3>
-<p>Regularized structural equation modeling (REGSEM) has been proposed
-by Jacobucci et al. (2016) and Huang et al. (2017). The objective is to
+<p>Regularized structural equation modeling has been proposed by
+Jacobucci et al. (2016) and Huang et al. (2017). The objective is to
 reduce overfitting in small samples and to allow for more flexibility.
-The general idea is to regularize some parameters towards zero. To this
-end, a penalty function <span class="math inline">\(p(\pmb\theta)\)</span> is added to the vanilla
-objective function. In lessSEM, this objective function is given by the
-full information maximum likelihood function <span class="math inline">\(F_{\text{ML}}(\pmb\theta)\)</span>. The new
+The general idea is to push some parameters towards zero. To this end, a
+penalty function <span class="math inline">\(p(\pmb\theta)\)</span> is
+added to the vanilla objective function. In lessSEM, this objective
+function is given by the full information maximum likelihood function
+<span class="math inline">\(F_{\text{ML}}(\pmb\theta)\)</span>. The new
 objective function is defined as:</p>
 <p><span class="math display">\[F_{\text{REGSEM},\lambda}(\pmb\theta) =
 F_{\text{ML}}(\pmb\theta)+ \lambda N p(\pmb\theta)\]</span></p>
+<p>Think of this function as a tug-of-war:</p>
 <ul>
 <li>
 <span class="math inline">\(F_{\text{ML}}(\pmb\theta)\)</span> wants
@@ -129,33 +135,38 @@ with results returned by <strong>regsem</strong> and
 <strong>lessSEM</strong>, we have implemented the following
 functions:</p>
 <p><span class="math display">\[
-\begin{array}{l|ll}
-\text{penalty} &amp; \text{function} &amp; \text{reference}\\
-\hline
-\text{ridge} &amp; p( x_j) = \lambda x_j^2 &amp; \text{(Hoerl &amp;
-Kennard, 1970)}\\
-\text{lasso} &amp; p( x_j) = \lambda| x_j| &amp; \text{(Tibshirani,
-1996)}\\
-\text{adaptiveLasso} &amp; p( x_j) = \frac{1}{w_j}\lambda| x_j| &amp;
-\text{(Zou, 2006)}\\
-\text{elasticNet} &amp; p( x_j) = \alpha\lambda|x_j| + (1-\alpha)\lambda
-x_j^2 &amp; \text{(Zou &amp; Hastie, 2005)}\\
-\text{cappedL1} &amp; p( x_j) = \lambda \min(| x_j|, \theta); \theta
-&gt; 0 &amp; \text{(Zhang, 2010)}\\
-\text{lsp} &amp; p( x_j) = \lambda \log(1 + |x_j|\theta); \theta &gt; 0
-&amp; \text{(Candès et al., 2008)} \\
-\text{scad} &amp; p( x_j) = \begin{cases}
-\lambda |x_j| &amp; \text{if } |x_j| \leq \lambda\\
-\frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)} &amp;
-\text{if } \lambda &lt; |x_j| \leq \lambda\theta \\
-(\theta + 1) \lambda^2/2 &amp; \text{if } |x_j| \geq \theta\lambda\\
-\end{cases}; \theta &gt; 2 &amp; \text{(Fan &amp; Li, 2001)} \\
-\text{mcp} &amp; p( x_j) =
-\begin{cases}
-\lambda |x_j| - x_j^2/(2\theta) &amp; \text{if } |x_j| \leq
+\begin{array}{l|llll}
+    \text{penalty} &amp; \text{function} &amp; \text{optimizer} &amp;
+\text{reference}\\
+    \hline
+    \text{ridge} &amp; p( x_j) = \lambda x_j^2 &amp; \text{glmnet, ista}
+&amp; \text{(Hoerl \&amp; Kennard, 1970)}\\
+    \text{lasso} &amp; p( x_j) = \lambda| x_j| &amp; \text{glmnet, ista}
+&amp; \text{(Tibshirani, 1996)}\\
+    \text{adaptiveLasso} &amp; p( x_j) = \frac{1}{w_j}\lambda| x_j|
+&amp; \text{glmnet, ista} &amp; \text{(Zou, 2006)}\\
+    \text{elasticNet} &amp; p( x_j) = \alpha\lambda| x_j| +
+(1-\alpha)\lambda x_j^2 &amp; \text{glmnet, ista} &amp; \text{(Zou
+\&amp; Hastie, 2005)}\\
+    \text{cappedL1} &amp; p( x_j) = \lambda \min(| x_j|, \theta); \theta
+&gt; 0 &amp;\text{glmnet, ista}&amp; \text{(Zhang, 2010)}\\
+    \text{lsp} &amp; p( x_j) = \lambda \log(1 + |x_j|/\theta); \theta
+&gt; 0 &amp;\text{glmnet, ista}&amp; \text{(Candès et al., 2008)} \\
+    \text{scad} &amp; p( x_j) = \begin{cases}
+        \lambda |x_j| &amp; \text{if } |x_j| \leq \lambda\\
+        \frac{-x_j^2 + 2\theta\lambda |x_j| - \lambda^2}{2(\theta -1)}
+&amp; \text{if } \lambda &lt; |x_j| \leq \lambda\theta \\
+        (\theta + 1) \lambda^2/2 &amp; \text{if } |x_j| \geq
 \theta\lambda\\
-\theta\lambda^2/2 &amp; \text{if } |x_j| &gt; \lambda\theta
-\end{cases}; \theta &gt; 0 &amp; \text{(Zhang, 2010)}
+    \end{cases}; \theta &gt; 2 &amp;\text{glmnet, ista}&amp; \text{(Fan
+\&amp; Li, 2001)} \\
+    \text{mcp} &amp; p( x_j) =
+    \begin{cases}
+        \lambda |x_j| - x_j^2/(2\theta) &amp; \text{if } |x_j| \leq
+\theta\lambda\\
+        \theta\lambda^2/2 &amp; \text{if } |x_j| &gt; \lambda\theta
+    \end{cases}; \theta &gt; 0 &amp;\text{glmnet, ista}&amp;
+\text{(Zhang, 2010)}
 \end{array}
 \]</span></p>
 </div>
@@ -164,9 +175,9 @@ x_j^2 &amp; \text{(Zou &amp; Hastie, 2005)}\\
 </h3>
 <p>The objectives of <strong>lessSEM</strong> are to provide …</p>
 <ol style="list-style-type: decimal">
-<li>a flexible framework for regularizing SEM and</li>
-<li>optimizers for other SEM packages which can be used with an
-interface similar to <code>optim</code>.</li>
+<li>a flexible framework for regularizing SEM.</li>
+<li>optimizers for other packages that can handle non-differentiable
+penalty functions.</li>
 </ol>
 </div>
 <div class="section level3">
@@ -218,7 +229,7 @@ l5-l7. In <strong>lessSEM</strong>, we always use the parameter labels
 to specify which parameters should be regularized!</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">regularized</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l5"</span>, <span class="st">"l6"</span>, <span class="st">"l7"</span><span class="op">)</span></span>
-<span><span class="co"># tip: we can use paste to make this easier:</span></span>
+<span><span class="co"># tip: we can use paste0 to make this easier:</span></span>
 <span><span class="va">regularized</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="fl">5</span><span class="op">:</span><span class="fl">7</span><span class="op">)</span></span></code></pre></div>
 <p>Finally, we set up the regularized model. To this end, we must first
 decide which penalty function we want to use. If we want to shrink
@@ -231,6 +242,7 @@ instance, let’s have a look at the lasso penalty:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitLasso</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lasso.html">lasso</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span>, </span>
 <span>                  regularized <span class="op">=</span> <span class="va">regularized</span>,</span>
+<span>                  <span class="co"># please use much larger nLambdas in practice (e.g., 100)!</span></span>
 <span>                  nLambdas <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 <p>Plot the paths to see what is going on:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -247,10 +259,11 @@ parameters to zero. This is currently not supported for any of the other
 penalties.</p>
 <p>The plots returned by <strong>lessSEM</strong> are either
 <strong>ggplot2</strong> elements (in case of a single tuning
-parameter), or created with plotly (in case of 2 tuning parameters). You
-can change a plot post-hoc:</p>
+parameter), or created with <strong>plotly</strong> (in case of 2 tuning
+parameters). You can change a plot post-hoc:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fitLasso</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fitLasso</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="lessSEMFigures/lessSEM-unnamed-chunk-7-1.png" alt=""><p class="caption">plot of chunk unnamed-chunk-7</p>
 </div>
@@ -288,10 +301,25 @@ estimates:</p>
 <span><span class="co">#&gt;      1.5312</span></span>
 <span><span class="co">#&gt;      1.5282</span></span>
 <span><span class="co">#&gt;      1.5255</span></span></code></pre></div>
+<p>If you are only interested in the estimates, use</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/estimates.html">estimates</a></span><span class="op">(</span><span class="va">fitLasso</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             l2        l3        l4          l5         l6           l7</span></span>
+<span><span class="co">#&gt; [1,] 0.7522904 0.7536140 0.5742228  0.00000000 0.00000000  0.000000000</span></span>
+<span><span class="co">#&gt; [2,] 0.7476862 0.7480112 0.5720039 -0.01042497 0.00000000  0.000000000</span></span>
+<span><span class="co">#&gt; [3,] 0.7398991 0.7395932 0.5688300 -0.02660810 0.00000000 -0.008974807</span></span>
+<span><span class="co">#&gt; [4,] 0.7301019 0.7331646 0.5677000 -0.04181445 0.00000000 -0.047849804</span></span>
+<span><span class="co">#&gt; [5,] 0.7239003 0.7318701 0.5688230 -0.05624391 0.01658325 -0.089365627</span></span>
+<span><span class="co">#&gt;         y1~~y1   y2~~y2   y3~~y3   y4~~y4    y5~~y5    y6~~y6   y7~~y7</span></span>
+<span><span class="co">#&gt; [1,] 0.8812416 1.147737 1.927350 1.080353 0.5710041 0.9628056 1.531997</span></span>
+<span><span class="co">#&gt; [2,] 0.8741617 1.152318 1.933141 1.081837 0.5704936 0.9628058 1.532015</span></span>
+<span><span class="co">#&gt; [3,] 0.8630783 1.160213 1.941722 1.083766 0.5696926 0.9628057 1.531243</span></span>
+<span><span class="co">#&gt; [4,] 0.8528254 1.170580 1.948163 1.084065 0.5689390 0.9628055 1.528245</span></span>
+<span><span class="co">#&gt; [5,] 0.8491201 1.177878 1.949609 1.082966 0.5684702 0.9625805 1.525473</span></span></code></pre></div>
 <p>Now, let’s assume you also want to try out the scad penalty. In this
 case, all you have to do is to replace the <code><a href="../reference/lasso.html">lasso()</a></code> function
 with the <code><a href="../reference/scad.html">scad()</a></code> function:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitScad</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scad.html">scad</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span>, </span>
 <span>                regularized <span class="op">=</span> <span class="va">regularized</span>,</span>
 <span>                lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,length.out <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
@@ -300,11 +328,11 @@ with the <code><a href="../reference/scad.html">scad()</a></code> function:</p>
 Gong et al. (2013). We can plot the results again, however this requires
 the <strong>plotly</strong> package and is currently not supported in
 Rmarkdown.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fitScad</span><span class="op">)</span></span></code></pre></div>
 <p>The parameter estimates can again be accessed with the
 <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> function:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fitScad</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                                                               </span></span>
 <span><span class="co">#&gt;   Tuning         ||--||  Estimates                                            </span></span>
@@ -312,26 +340,26 @@ Rmarkdown.</p>
 <span><span class="co">#&gt;   lambda   theta ||--||         l2         l3         l4         l5         l6</span></span>
 <span><span class="co">#&gt;  ======= ======= ||--|| ========== ========== ========== ========== ==========</span></span>
 <span><span class="co">#&gt;   0.0000  2.1000 ||--||     0.7240     0.7320     0.5689    -0.0562     0.0166</span></span>
-<span><span class="co">#&gt;   0.3333  2.1000 ||--||     0.7520     0.7533     0.5741          .          .</span></span>
-<span><span class="co">#&gt;   0.6667  2.1000 ||--||     0.7522     0.7535     0.5742          .          .</span></span>
-<span><span class="co">#&gt;   1.0000  2.1000 ||--||     0.7523     0.7536     0.5742          .          .</span></span>
-<span><span class="co">#&gt;   0.0000  5.0000 ||--||     0.7244     0.7326     0.5690    -0.0561     0.0167</span></span>
-<span><span class="co">#&gt;   0.3333  5.0000 ||--||     0.7520     0.7533     0.5741          .          .</span></span>
+<span><span class="co">#&gt;   0.3333  2.1000 ||--||     0.7523     0.7535     0.5742          .          .</span></span>
+<span><span class="co">#&gt;   0.6667  2.1000 ||--||     0.7522     0.7536     0.5742          .          .</span></span>
+<span><span class="co">#&gt;   1.0000  2.1000 ||--||     0.7522     0.7536     0.5742          .          .</span></span>
+<span><span class="co">#&gt;   0.0000  5.0000 ||--||     0.7242     0.7323     0.5690    -0.0562     0.0166</span></span>
+<span><span class="co">#&gt;   0.3333  5.0000 ||--||     0.7522     0.7535     0.5740          .          .</span></span>
 <span><span class="co">#&gt;   0.6667  5.0000 ||--||     0.7522     0.7535     0.5742          .          .</span></span>
-<span><span class="co">#&gt;   1.0000  5.0000 ||--||     0.7523     0.7536     0.5742          .          .</span></span>
+<span><span class="co">#&gt;   1.0000  5.0000 ||--||     0.7522     0.7535     0.5742          .          .</span></span>
 <span><span class="co">#&gt;                                                                              </span></span>
 <span><span class="co">#&gt;                                                                              </span></span>
 <span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;          l7     y1~~y1     y2~~y2     y3~~y3     y4~~y4     y5~~y5     y6~~y6</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
 <span><span class="co">#&gt;     -0.0894     0.8492     1.1778     1.9495     1.0829     0.5684     0.9626</span></span>
-<span><span class="co">#&gt;           .     0.8808     1.1480     1.9277     1.0804     0.5710     0.9628</span></span>
 <span><span class="co">#&gt;           .     0.8812     1.1478     1.9274     1.0804     0.5710     0.9628</span></span>
 <span><span class="co">#&gt;           .     0.8812     1.1478     1.9274     1.0804     0.5710     0.9628</span></span>
-<span><span class="co">#&gt;     -0.0894     0.8499     1.1774     1.9489     1.0828     0.5685     0.9626</span></span>
-<span><span class="co">#&gt;           .     0.8808     1.1480     1.9277     1.0804     0.5710     0.9628</span></span>
 <span><span class="co">#&gt;           .     0.8812     1.1478     1.9274     1.0804     0.5710     0.9628</span></span>
-<span><span class="co">#&gt;           .     0.8812     1.1478     1.9274     1.0804     0.5710     0.9628</span></span>
+<span><span class="co">#&gt;     -0.0894     0.8495     1.1776     1.9493     1.0829     0.5684     0.9626</span></span>
+<span><span class="co">#&gt;           .     0.8811     1.1479     1.9275     1.0805     0.5711     0.9628</span></span>
+<span><span class="co">#&gt;           .     0.8811     1.1479     1.9274     1.0804     0.5710     0.9628</span></span>
+<span><span class="co">#&gt;           .     0.8811     1.1478     1.9275     1.0804     0.5710     0.9628</span></span>
 <span><span class="co">#&gt;            </span></span>
 <span><span class="co">#&gt;            </span></span>
 <span><span class="co">#&gt;  ----------</span></span>
@@ -350,19 +378,24 @@ Rmarkdown.</p>
 <h4 id="selecting-a-model">Selecting a model<a class="anchor" aria-label="anchor" href="#selecting-a-model"></a>
 </h4>
 <p>To select a model and report the final parameter estimates, you can
-use the AIC or BIC (other information criteria are also possible, but
-currently not implemented). There are two ways to use these information
+use the AIC or BIC. There are two ways to use these information
 criteria.</p>
 <p>First, you can compute them and select the model yourself:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">AICs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC</a></span><span class="op">(</span><span class="va">fitLasso</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">AICs</span><span class="op">)</span></span>
-<span><span class="co">#&gt;       lambda alpha     m2LL  regM2LL nonZeroParameters convergence      AIC</span></span>
-<span><span class="co">#&gt; 1 0.10340887     1 1071.078 1071.078                10        TRUE 1091.078</span></span>
-<span><span class="co">#&gt; 2 0.07755666     1 1071.033 1071.074                11        TRUE 1093.033</span></span>
-<span><span class="co">#&gt; 3 0.05170444     1 1070.956 1071.048                12        TRUE 1094.956</span></span>
-<span><span class="co">#&gt; 4 0.02585222     1 1070.851 1070.967                12        TRUE 1094.851</span></span>
-<span><span class="co">#&gt; 5 0.00000000     1 1070.810 1070.810                13        TRUE 1096.810</span></span>
+<span><span class="co">#&gt;       lambda alpha objectiveValue regObjectiveValue     m2LL  regM2LL</span></span>
+<span><span class="co">#&gt; 1 0.10340887     1       1071.078          1071.078 1071.078 1071.078</span></span>
+<span><span class="co">#&gt; 2 0.07755666     1       1071.033          1071.074 1071.033 1071.074</span></span>
+<span><span class="co">#&gt; 3 0.05170444     1       1070.956          1071.048 1070.956 1071.048</span></span>
+<span><span class="co">#&gt; 4 0.02585222     1       1070.851          1070.967 1070.851 1070.967</span></span>
+<span><span class="co">#&gt; 5 0.00000000     1       1070.810          1070.810 1070.810 1070.810</span></span>
+<span><span class="co">#&gt;   nonZeroParameters convergence      AIC</span></span>
+<span><span class="co">#&gt; 1                10        TRUE 1091.078</span></span>
+<span><span class="co">#&gt; 2                11        TRUE 1093.033</span></span>
+<span><span class="co">#&gt; 3                12        TRUE 1094.956</span></span>
+<span><span class="co">#&gt; 4                12        TRUE 1094.851</span></span>
+<span><span class="co">#&gt; 5                13        TRUE 1096.810</span></span>
 <span></span>
 <span><span class="va">fitLasso</span><span class="op">@</span><span class="va">parameters</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="va">AICs</span><span class="op">$</span><span class="va">AIC</span><span class="op">)</span>,<span class="op">]</span></span>
 <span><span class="co">#&gt;      lambda alpha        l2       l3        l4 l5 l6 l7    y1~~y1   y2~~y2</span></span>
@@ -370,7 +403,7 @@ criteria.</p>
 <span><span class="co">#&gt;    y3~~y3   y4~~y4    y5~~y5    y6~~y6   y7~~y7</span></span>
 <span><span class="co">#&gt; 1 1.92735 1.080353 0.5710041 0.9628056 1.531997</span></span></code></pre></div>
 <p>An easier way is to use the <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> function again:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fitLasso</span>, criterion <span class="op">=</span> <span class="st">"AIC"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                                                               </span></span>
 <span><span class="co">#&gt;   Tuning         ||--||  Estimates                                            </span></span>
@@ -390,6 +423,13 @@ criteria.</p>
 <span><span class="co">#&gt;      y7~~y7</span></span>
 <span><span class="co">#&gt;  ==========</span></span>
 <span><span class="co">#&gt;      1.5320</span></span></code></pre></div>
+<p>Alternatively, you can extract just the estimates with:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/estimates.html">estimates</a></span><span class="op">(</span><span class="va">fitLasso</span>, criterion <span class="op">=</span> <span class="st">"AIC"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             l2       l3        l4 l5 l6 l7    y1~~y1   y2~~y2  y3~~y3   y4~~y4</span></span>
+<span><span class="co">#&gt; [1,] 0.7522904 0.753614 0.5742228  0  0  0 0.8812416 1.147737 1.92735 1.080353</span></span>
+<span><span class="co">#&gt;         y5~~y5    y6~~y6   y7~~y7</span></span>
+<span><span class="co">#&gt; [1,] 0.5710041 0.9628056 1.531997</span></span></code></pre></div>
 <div class="section level5">
 <h5 id="cross-validation">Cross-Validation<a class="anchor" aria-label="anchor" href="#cross-validation"></a>
 </h5>
@@ -398,33 +438,33 @@ cross-validation. In <strong>lessSEM</strong>, there is a dedicated
 cross-validation function for each of the penalties discussed above.
 Let’s look at the <code><a href="../reference/lsp.html">lsp()</a></code> penalty this time. Now, for your
 non-cross-validated lsp, you would use</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitLsp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsp.html">lsp</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span>, </span>
 <span>              regularized <span class="op">=</span> <span class="va">regularized</span>,</span>
 <span>              lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.1</span><span class="op">)</span>,</span>
 <span>              thetas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">.1</span>,<span class="fl">2</span>,length.out <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>To use a cross-validated version of the lsp, simply use the
 <code>cv</code> prefix. The function is called <code><a href="../reference/cvLsp.html">cvLsp()</a></code>:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitCvLsp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvLsp.html">cvLsp</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span>, </span>
 <span>                  regularized <span class="op">=</span> <span class="va">regularized</span>,</span>
 <span>                  lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.1</span><span class="op">)</span>,</span>
 <span>                  thetas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">.1</span>,<span class="fl">2</span>,length.out <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The best model can now be accessed with</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fitCvLsp</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                                                               </span></span>
 <span><span class="co">#&gt;   Tuning         ||--||  Estimates                                            </span></span>
 <span><span class="co">#&gt;  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;   lambda   theta ||--||         l2         l3         l4         l5         l6</span></span>
 <span><span class="co">#&gt;  ======= ======= ||--|| ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;   1.0000  0.1000 ||--||     0.7520     0.7533     0.5741          .          .</span></span>
+<span><span class="co">#&gt;   1.0000  0.1000 ||--||     0.7523     0.7536     0.5742          .          .</span></span>
 <span><span class="co">#&gt;                                                                              </span></span>
 <span><span class="co">#&gt;                                                                              </span></span>
 <span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;          l7     y1~~y1     y2~~y2     y3~~y3     y4~~y4     y5~~y5     y6~~y6</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;           .     0.8808     1.1480     1.9277     1.0804     0.5710     0.9628</span></span>
+<span><span class="co">#&gt;           .     0.8813     1.1477     1.9273     1.0804     0.5710     0.9628</span></span>
 <span><span class="co">#&gt;            </span></span>
 <span><span class="co">#&gt;            </span></span>
 <span><span class="co">#&gt;  ----------</span></span>
@@ -437,13 +477,11 @@ non-cross-validated lsp, you would use</p>
 <h4 id="missing-data">Missing Data<a class="anchor" aria-label="anchor" href="#missing-data"></a>
 </h4>
 <p>Most psychological data sets will have missing data. In
-<strong>lessSEM</strong>, we follow the example of
-<strong>regsem</strong> and use the full information maximum likelihood
-function to account for this missingness. Identical to
-<strong>regsem</strong>, <strong>lessSEM</strong> expects that you
-already use the full information maximum likelihood method in
-<strong>lavaan</strong>.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<strong>lessSEM</strong>, we use the full information maximum likelihood
+function to account for this missingness. <strong>lessSEM</strong>
+expects that you already use the full information maximum likelihood
+method in <strong>lavaan</strong>.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># let's simulate data for a simple </span></span>
 <span><span class="co"># cfa with 7 observed variables</span></span>
 <span><span class="co"># and 10 % missing data</span></span>
@@ -483,7 +521,7 @@ the full information maximum likelihood function.</p>
 <p>Next, pass this model to any of the penalty functions in
 <strong>lessSEM</strong>. <strong>lessSEM</strong> will automatically
 switch to the full information maximum likelihood function as well:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitLasso</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lasso.html">lasso</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span>, </span>
 <span>                  regularized <span class="op">=</span> <span class="va">regularized</span>,</span>
 <span>                  nLambdas <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
@@ -491,15 +529,15 @@ switch to the full information maximum likelihood function as well:</p>
 information maximum likelihood, we can compare the 2log-likelihood of
 <strong>lavaan</strong> and <strong>lessSEM</strong> when no penalty is
 used (<span class="math inline">\(\lambda = 0\)</span>):</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitLasso</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lasso.html">lasso</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span>, </span>
 <span>                  regularized <span class="op">=</span> <span class="va">regularized</span>,</span>
 <span>                  lambdas <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitLasso</span><span class="op">@</span><span class="va">fits</span><span class="op">$</span><span class="va">m2LL</span></span>
 <span><span class="co">#&gt; [1] 2034.104</span></span></code></pre></div>
 <p>Compare this to:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">lavaanModel</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 'log Lik.' 2034.104 (df=20)</span></span></code></pre></div>
 </div>
@@ -509,12 +547,12 @@ used (<span class="math inline">\(\lambda = 0\)</span>):</p>
 </h3>
 <p>By default, <strong>lessSEM</strong> will only use one computer core.
 However, if a model has many parameters, parallel computations can be
-considerably faster. Multi-Core support is therefore provided using the
+faster. Multi-Core support is therefore provided using the
 <strong>RcppParallel</strong> package (Allaire et. al, 2023). To make
 use of multiple cores, the number of cores must be specified in the
 <code>control</code> argument (see below). Before doing that, it makes
 sense to check how many cores the computer has:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rcppcore.github.io/RcppParallel/" class="external-link">RcppParallel</a></span><span class="op">)</span></span>
 <span><span class="co"># Print the number of threads (we call them cores for simplicity, but technically they are threads)</span></span>
 <span><span class="fu">RcppParallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RcppParallel/man/setThreadOptions.html" class="external-link">defaultNumThreads</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -522,7 +560,7 @@ sense to check how many cores the computer has:</p>
 <p>Note that using all cores can block the computer because there are no
 resources left for other tasks than R. To use 2 cores, we can set
 <code>nCores = 2</code> as follows:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitLasso</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lasso.html">lasso</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span>, </span>
 <span>                  regularized <span class="op">=</span> <span class="va">regularized</span>,</span>
 <span>                  nLambdas <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -536,17 +574,14 @@ package) will not automatically allow for multi-core execution.</p>
 <h3 id="changing-the-optimizer">Changing the optimizer<a class="anchor" aria-label="anchor" href="#changing-the-optimizer"></a>
 </h3>
 <p><strong>lessSEM</strong> comes with two specialized optimization
-procedures for elastic-net-type penalties: ista and glmnet. Currently,
-the default is glmnet for all elastic net variants (ridge, lasso,
-adaptive lasso, elastic net) and ista for all other penalties. Ista does
-not require the computation of a Hessian matrix. However, this comes at
-a price: ista optimization tends to call the fit and gradient function a
-lot more than glment. If you are using an elastic-net-type penalty
-(ridge, lasso, adaptive lasso, or elastic net), we recommend that you
+procedures: ista and glmnet. Currently, the default is glmnet for all
+penalties. Ista does not require the computation of a Hessian matrix.
+However, this comes at a price: ista optimization tends to call the fit
+and gradient function a lot more than glment. We recommend that you
 first test the glmnet optimizer and then switch to ista if glmnet
 results in errors due to the Hessian matrix. Switching to ista is done
 as follows:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitLasso</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lasso.html">lasso</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanModel</span>, </span>
 <span>                  regularized <span class="op">=</span> <span class="va">regularized</span>,</span>
 <span>                  nLambdas <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -562,7 +597,7 @@ is explained in detail in the vignette Parameter-transformations (see
 <code><a href="../articles/Parameter-transformations.html">vignette("Parameter-transformations", package = "lessSEM")</a></code>).
 To provide a short example, let’s have a look at the political democracy
 data set:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># example from ?lavaan::sem</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span>
 <span><span class="va">modelSyntax</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
@@ -588,7 +623,7 @@ data set:</p>
 <p>Note that in the model estimated above, loadings on the latent
 variables are constrained to equality over time. We could also relax
 this assumption by allowing for time point specific loadings:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span>
 <span><span class="va">modelSyntax</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
 <span><span class="st">  # latent variable definitions</span></span>
@@ -615,7 +650,7 @@ some parameters for which equality over time holds, while others violate
 the assumption. Here, transformations can be used to regularize
 differences between parameters. To this end, we define the
 transformations:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">transformations</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
 <span><span class="st">// IMPORTANT: Our transformations always have to start with the follwing line:</span></span>
 <span><span class="st">parameters: a1, a2, b1, b2, c1, c2, delta_a2, delta_b2, delta_c2</span></span>
@@ -635,7 +670,7 @@ transformations:</p>
 <span><span class="st">"</span></span></code></pre></div>
 <p>Next, we have to pass the <code>transformations</code> variable to
 the penalty function:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lassoFit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lasso.html">lasso</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="va">lavaanFit</span>, </span>
 <span>                  regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"delta_a2"</span>, <span class="st">"delta_b2"</span>, <span class="st">"delta_c2"</span><span class="op">)</span>,<span class="co"># we want to regularize </span></span>
 <span>                  <span class="co"># the differences between the parameters</span></span>
@@ -645,7 +680,7 @@ the penalty function:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>To check if measurement invariance can be assumed, we can select the
 best model using information criteria:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lassoFit</span>, criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                                                               </span></span>
 <span><span class="co">#&gt;   Tuning         ||--||  Estimates                                            </span></span>
@@ -671,12 +706,18 @@ best model using information criteria:</p>
 <span><span class="co">#&gt;      y3~~y3     y4~~y4     y5~~y5     y6~~y6     y7~~y7     y8~~y8 ind60~~ind60</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ============</span></span>
 <span><span class="co">#&gt;      5.0175     3.4074     2.2857     4.8977     3.5510     3.4511       0.4480</span></span>
-<span><span class="co">#&gt;                                                            </span></span>
-<span><span class="co">#&gt;                                                            </span></span>
-<span><span class="co">#&gt;  ------------ ------------ ---------- ---------- ----------</span></span>
-<span><span class="co">#&gt;  dem60~~dem60 dem65~~dem65   delta_a2   delta_b2   delta_c2</span></span>
-<span><span class="co">#&gt;  ============ ============ ========== ========== ==========</span></span>
-<span><span class="co">#&gt;        3.9408       0.2034          .          .          .</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                                              </span></span>
+<span><span class="co">#&gt;                                                             ||--||  Transform</span></span>
+<span><span class="co">#&gt;  ------------ ------------ ---------- ---------- ---------- ||--|| ----------</span></span>
+<span><span class="co">#&gt;  dem60~~dem60 dem65~~dem65   delta_a2   delta_b2   delta_c2 ||--||         a2</span></span>
+<span><span class="co">#&gt;  ============ ============ ========== ========== ========== ||--|| ==========</span></span>
+<span><span class="co">#&gt;        3.9408       0.2034          .          .          . ||--||     1.2110</span></span>
+<span><span class="co">#&gt;                       </span></span>
+<span><span class="co">#&gt;                       </span></span>
+<span><span class="co">#&gt;  ---------- ----------</span></span>
+<span><span class="co">#&gt;          b2         c2</span></span>
+<span><span class="co">#&gt;  ========== ==========</span></span>
+<span><span class="co">#&gt;      1.1679     1.2340</span></span></code></pre></div>
 <p>More details are provided in
 <code><a href="../articles/Parameter-transformations.html">vignette("Parameter-transformations", package = "lessSEM")</a></code>.</p>
 </div>
@@ -692,11 +733,11 @@ features.</p>
 <p><strong>lessSEM</strong> supports exporting specific models to
 <strong>lavaan</strong>. This can be very useful when plotting the final
 model.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lavaanModel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lessSEM2Lavaan.html">lessSEM2Lavaan</a></span><span class="op">(</span>regularizedSEM <span class="op">=</span> <span class="va">rsem</span>, </span>
 <span>                              criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span></code></pre></div>
 <p>The result can be plotted with, for instance, <a href="https://github.com/SachaEpskamp/semPlot" class="external-link"><strong>semPlot</strong></a>:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SachaEpskamp/semPlot" class="external-link">semPlot</a></span><span class="op">)</span></span>
 <span><span class="fu">semPaths</span><span class="op">(</span><span class="va">lavaanModel</span>,</span>
 <span>         what <span class="op">=</span> <span class="st">"est"</span>,</span>
@@ -727,7 +768,7 @@ introduction can be found in
 regression parameters of the Political Democracy data set with different
 penalties. The following script is adapted from
 <code><a href="https://rdrr.io/pkg/lavaan/man/sem.html" class="external-link">?lavaan::sem</a></code>.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
 <span><span class="st">  # latent variable definitions</span></span>
 <span><span class="st">     ind60 =~ x1 + x2 + x3 + c2*y2 + c3*y3 + c4*y4</span></span>
@@ -752,7 +793,7 @@ penalties. The following script is adapted from
 <span>           lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.2</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/fit.html">fit</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The best model according to the BIC can be extracted with:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fitMp</span>, criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
@@ -768,179 +809,6 @@ the <strong>lessSEM</strong> optimizers in your own package, have a look
 at the vignettes <code><a href="../articles/General-Purpose-Optimization.html">vignette('General-Purpose-Optimization')</a></code>
 and <code><a href="../articles/The-optimizer-interface.html">vignette('The-optimizer-interface')</a></code> and at the <a href="https://github.com/jhorzek/lessLM" class="external-link"><strong>lessLM</strong></a>
 package.</p>
-</div>
-<div class="section level2">
-<h2 id="table-of-the-most-relevant-functions">Table of the most relevant functions<a class="anchor" aria-label="anchor" href="#table-of-the-most-relevant-functions"></a>
-</h2>
-<p>Fitting <em>regularized SEM</em>:</p>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr class="header">
-<th>function name</th>
-<th>what it does</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>ridge</td>
-<td>ridge regularization of SEM</td>
-</tr>
-<tr class="even">
-<td>cvRidge</td>
-<td>cross-validated ridge regularization of SEM</td>
-</tr>
-<tr class="odd">
-<td>lasso</td>
-<td>lasso regularization of SEM</td>
-</tr>
-<tr class="even">
-<td>cvLasso</td>
-<td>cross-validated lasso regularization of SEM</td>
-</tr>
-<tr class="odd">
-<td>adaptiveLasso</td>
-<td>adaptive lasso regularization of SEM</td>
-</tr>
-<tr class="even">
-<td>cvAdaptiveLasso</td>
-<td>cross-validated adaptive lasso regularization of SEM</td>
-</tr>
-<tr class="odd">
-<td>elasticNet</td>
-<td>elastic net regularization of SEM</td>
-</tr>
-<tr class="even">
-<td>cvElasticNet</td>
-<td>cross-validated elastic net regularization of SEM</td>
-</tr>
-<tr class="odd">
-<td>cappedL1</td>
-<td>cappedL1 regularization of SEM</td>
-</tr>
-<tr class="even">
-<td>cvCappedL1</td>
-<td>cross-validated cappedL1 regularization of SEM</td>
-</tr>
-<tr class="odd">
-<td>lsp</td>
-<td>lsp regularization of SEM</td>
-</tr>
-<tr class="even">
-<td>cvLsp</td>
-<td>cross-validated lsp regularization of SEM</td>
-</tr>
-<tr class="odd">
-<td>mcp</td>
-<td>mcp regularization of SEM</td>
-</tr>
-<tr class="even">
-<td>cvMcp</td>
-<td>cross-validated mcp regularization of SEM</td>
-</tr>
-<tr class="odd">
-<td>scad</td>
-<td>scad regularization of SEM</td>
-</tr>
-<tr class="even">
-<td>cvScad</td>
-<td>cross-validated scad regularization of SEM</td>
-</tr>
-</tbody>
-</table>
-<p>Using the optimizers in <strong>lessSEM</strong> for <em>general
-purpose optimization</em>:</p>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr class="header">
-<th>function name</th>
-<th>what it does</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>gpRidge</td>
-<td>ridge regularization for general purpose optimization</td>
-</tr>
-<tr class="even">
-<td>gpLasso</td>
-<td>lasso regularization for general purpose optimization</td>
-</tr>
-<tr class="odd">
-<td>gpAdaptiveLasso</td>
-<td>adaptive lasso regularization for general purpose optimization</td>
-</tr>
-<tr class="even">
-<td>gpElasticNet</td>
-<td>elastic net regularization for general purpose optimization</td>
-</tr>
-<tr class="odd">
-<td>gpCappedL1</td>
-<td>cappedL1 regularization for general purpose optimization</td>
-</tr>
-<tr class="even">
-<td>gpLsp</td>
-<td>lsp regularization for general purpose optimization</td>
-</tr>
-<tr class="odd">
-<td>gpMcp</td>
-<td>mcp regularization for general purpose optimization</td>
-</tr>
-<tr class="even">
-<td>gpScad</td>
-<td>scad regularization for general purpose optimization</td>
-</tr>
-</tbody>
-</table>
-<p>Using the optimizers in <strong>lessSEM</strong> for <em>general
-purpose optimization with C++ functions</em>:</p>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr class="header">
-<th>function name</th>
-<th>what it does</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>gpRidgeCpp</td>
-<td>ridge regularization for general purpose optimization</td>
-</tr>
-<tr class="even">
-<td>gpLassoCpp</td>
-<td>lasso regularization for general purpose optimization</td>
-</tr>
-<tr class="odd">
-<td>gpAdaptiveLassoCpp</td>
-<td>adaptive lasso regularization for general purpose optimization</td>
-</tr>
-<tr class="even">
-<td>gpElasticNetCpp</td>
-<td>elastic net regularization for general purpose optimization</td>
-</tr>
-<tr class="odd">
-<td>gpCappedL1Cpp</td>
-<td>cappedL1 regularization for general purpose optimization</td>
-</tr>
-<tr class="even">
-<td>gpLspCpp</td>
-<td>lsp regularization for general purpose optimization</td>
-</tr>
-<tr class="odd">
-<td>gpMcpCpp</td>
-<td>mcp regularization for general purpose optimization</td>
-</tr>
-<tr class="even">
-<td>gpScadCpp</td>
-<td>scad regularization for general purpose optimization</td>
-</tr>
-</tbody>
-</table>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -1067,7 +935,7 @@ and Trends in Optimization, 1(3), 123–231.</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="important-notes">Important Notes<a class="anchor" aria-label="anchor" href="#important-notes"></a>
+<h2 id="license-note">LICENSE NOTE<a class="anchor" aria-label="anchor" href="#license-note"></a>
 </h2>
 <p>THE SOFTWARE IS PROVIDED ‘AS IS’, WITHOUT WARRANTY OF ANY KIND,
 EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF

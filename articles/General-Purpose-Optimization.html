@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Definition-Variables-and-Multi-Group-SEM.html">Definition-Variables-and-Multi-Group-SEM</a>
+    <a class="dropdown-item" href="../articles/Estimator-Settings.html">Estimator-Settings</a>
     <a class="dropdown-item" href="../articles/General-Purpose-Optimization.html">General-Purpose-Optimization</a>
     <a class="dropdown-item" href="../articles/Mixed-Penalties.html">Mixed Penalties</a>
     <a class="dropdown-item" href="../articles/Parameter-transformations.html">Parameter-transformations</a>
@@ -60,6 +61,9 @@
     <a class="dropdown-item" href="../articles/The-optimizer-interface.html">The-optimizer-interface</a>
     <a class="dropdown-item" href="../articles/log-likelihood-gradients.html">log-likelihood-gradients</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -99,9 +103,9 @@ general purpose optimization. That is, you can use all optimizers and
 penalty functions implemented in <strong>lessSEM</strong> for your own
 models. To this end, you must define a fitting function; i.e., a
 function which takes in the parameters and returns a single value - the
-unregularized fit. <strong>lessSEM</strong> then uses this fitting
-function and adds the penalty terms. The combined fitting function is
-then optimized. Currently, there are three ways to use the optimizers in
+unregularized fit. <strong>lessSEM</strong> uses this fitting function
+and adds the penalty terms. The combined fitting function is then
+optimized. Currently, there are four ways to use the optimizers in
 <strong>lessSEM</strong></p>
 <ol style="list-style-type: decimal">
 <li>You can use the R interface. This interface is very similar to that
@@ -112,16 +116,19 @@ which is a bit more involved (see e.g.,
 <li>You can include the header files of <strong>lessSEM</strong> in your
 package to directly interface to the underlying C++ functions. This is
 the most complicated approach.</li>
+<li>The optimizers are implemented in the separate C++ header only
+library <a href="https://jhorzek.github.io/lesstimate/" class="external-link">lesstimate</a>
+that can be used as a submodule in R packages.</li>
 </ol>
-<p>In general, the approaches get faster as you transition from 1 to 3.
+<p>In general, the approaches get faster as you transition from 1 to 4.
 You will see the largest performance gains when implementing a gradient
 function and not just a fitting function, however. As a rule of thumb:
 Use approach 1 if you intend to run your model a few times, don’t want
 to create a new package and your model runs fairly fast. Use approach 2
 if you want to increase the speed a bit, while keeping the changes
-necessary to your files manageable. Use approach 3 if you create a new
-package, have some experience with <strong>RcppArmadillo</strong> and
-want to get the best performance.</p>
+necessary to your files manageable. Use approach 3 or 4 if you create a
+new package, have some experience with <strong>RcppArmadillo</strong>
+and want to get the best performance.</p>
 <p>In the following, we will demonstrate all three approaches using a
 linear regression model as an example.</p>
 <div class="section level2">
@@ -208,13 +215,13 @@ intercept:</p>
 <span>              N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">l1</span><span class="op">@</span><span class="va">parameters</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt;        lambda alpha         b0        b1        b2        b3       b4</span></span>
-<span><span class="co">#&gt; 1 0.000000000     1 0.02738472 1.0129194 0.9991454 0.9705725 1.027626</span></span>
-<span><span class="co">#&gt; 2 0.005263158     1 0.02935305 1.0043738 0.9908933 0.9626258 1.025138</span></span>
-<span><span class="co">#&gt; 3 0.010526316     1 0.02995106 0.9967095 0.9846669 0.9552793 1.021892</span></span>
-<span><span class="co">#&gt; 4 0.015789474     1 0.03010651 0.9897340 0.9789419 0.9481495 1.018673</span></span>
-<span><span class="co">#&gt; 5 0.021052632     1 0.03029749 0.9827290 0.9732058 0.9409863 1.015363</span></span>
-<span><span class="co">#&gt; 6 0.026315789     1 0.03112509 0.9753348 0.9670620 0.9338614 1.011553</span></span>
+<pre><code><span><span class="co">#&gt;        lambda alpha theta         b0        b1        b2        b3       b4</span></span>
+<span><span class="co">#&gt; 1 0.000000000     1     0 0.02738472 1.0129194 0.9991454 0.9705725 1.027626</span></span>
+<span><span class="co">#&gt; 2 0.005263158     1     0 0.02935305 1.0043738 0.9908933 0.9626258 1.025138</span></span>
+<span><span class="co">#&gt; 3 0.010526316     1     0 0.02995106 0.9967095 0.9846669 0.9552793 1.021892</span></span>
+<span><span class="co">#&gt; 4 0.015789474     1     0 0.03010651 0.9897340 0.9789419 0.9481495 1.018673</span></span>
+<span><span class="co">#&gt; 5 0.021052632     1     0 0.03029749 0.9827290 0.9732058 0.9409863 1.015363</span></span>
+<span><span class="co">#&gt; 6 0.026315789     1     0 0.03112509 0.9753348 0.9670620 0.9338614 1.011553</span></span>
 <span><span class="co">#&gt;           b5           b6          b7          b8           b9         b10</span></span>
 <span><span class="co">#&gt; 1 0.01403601 -0.007460964 0.018589924 0.021930771 -0.009900077 0.027401044</span></span>
 <span><span class="co">#&gt; 2 0.00336578  0.000000000 0.014341067 0.015434757 -0.007939455 0.022297544</span></span>
@@ -245,13 +252,13 @@ gradients, this can result in faster estimation:</p>
 <span>              N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">l1</span><span class="op">@</span><span class="va">parameters</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt;        lambda alpha         b0        b1        b2        b3       b4</span></span>
-<span><span class="co">#&gt; 1 0.000000000     1 0.02738485 1.0129200 0.9991452 0.9705725 1.027626</span></span>
-<span><span class="co">#&gt; 2 0.005263158     1 0.02935325 1.0043732 0.9908928 0.9626258 1.025139</span></span>
-<span><span class="co">#&gt; 3 0.010526316     1 0.02995023 0.9967094 0.9846669 0.9552792 1.021892</span></span>
-<span><span class="co">#&gt; 4 0.015789474     1 0.03010649 0.9897330 0.9789426 0.9481493 1.018672</span></span>
-<span><span class="co">#&gt; 5 0.021052632     1 0.03029729 0.9827286 0.9732062 0.9409869 1.015362</span></span>
-<span><span class="co">#&gt; 6 0.026315789     1 0.03112481 0.9753368 0.9670620 0.9338616 1.011553</span></span>
+<pre><code><span><span class="co">#&gt;        lambda alpha theta         b0        b1        b2        b3       b4</span></span>
+<span><span class="co">#&gt; 1 0.000000000     1     0 0.02738485 1.0129200 0.9991452 0.9705725 1.027626</span></span>
+<span><span class="co">#&gt; 2 0.005263158     1     0 0.02935325 1.0043732 0.9908928 0.9626258 1.025139</span></span>
+<span><span class="co">#&gt; 3 0.010526316     1     0 0.02995023 0.9967094 0.9846669 0.9552792 1.021892</span></span>
+<span><span class="co">#&gt; 4 0.015789474     1     0 0.03010649 0.9897330 0.9789426 0.9481493 1.018672</span></span>
+<span><span class="co">#&gt; 5 0.021052632     1     0 0.03029729 0.9827286 0.9732062 0.9409869 1.015362</span></span>
+<span><span class="co">#&gt; 6 0.026315789     1     0 0.03112481 0.9753368 0.9670620 0.9338616 1.011553</span></span>
 <span><span class="co">#&gt;            b5           b6           b7          b8           b9         b10</span></span>
 <span><span class="co">#&gt; 1 0.014034994 -0.007460252 0.0185901898 0.021930702 -0.009900699 0.027400748</span></span>
 <span><span class="co">#&gt; 2 0.003364951  0.000000000 0.0143418480 0.015434447 -0.007939640 0.022297136</span></span>
@@ -261,10 +268,10 @@ gradients, this can result in faster estimation:</p>
 <span><span class="co">#&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003303777</span></span></code></pre>
 <p>Here is a short comparison of running both models 5 times each:</p>
 <p>Runtime in seconds without gradients:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.6037703 0.3058622 0.3036039 0.3049006 0.3056138</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.2885706 0.2875221 0.2872190 0.2867477 0.2862458</span></span></code></pre>
 <p>Runtime in seconds with gradients:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.03234649 0.03216124 0.03372192 0.03513479 0.03526354</span></span></code></pre>
-<p>Now, that’s quite a difference!</p>
+<pre><code><span><span class="co">#&gt; [1] 0.02857327 0.02859902 0.03665018 0.02846217 0.02880359</span></span></code></pre>
+<p>That’s quite a speedup!</p>
 <p>Note that you can also pass a C++ function to gpLasso similar to the
 approach above:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -319,13 +326,13 @@ approach above:</p>
 <span>              N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">l1</span><span class="op">@</span><span class="va">parameters</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt;        lambda alpha         b0        b1        b2        b3       b4</span></span>
-<span><span class="co">#&gt; 1 0.000000000     1 0.02738540 1.0129199 0.9991451 0.9705723 1.027625</span></span>
-<span><span class="co">#&gt; 2 0.005263158     1 0.02935207 1.0043733 0.9908930 0.9626262 1.025139</span></span>
-<span><span class="co">#&gt; 3 0.010526316     1 0.02994985 0.9967091 0.9846669 0.9552794 1.021892</span></span>
-<span><span class="co">#&gt; 4 0.015789474     1 0.03010681 0.9897326 0.9789426 0.9481493 1.018672</span></span>
-<span><span class="co">#&gt; 5 0.021052632     1 0.03029735 0.9827286 0.9732060 0.9409868 1.015363</span></span>
-<span><span class="co">#&gt; 6 0.026315789     1 0.03112467 0.9753370 0.9670622 0.9338616 1.011553</span></span>
+<pre><code><span><span class="co">#&gt;        lambda alpha theta         b0        b1        b2        b3       b4</span></span>
+<span><span class="co">#&gt; 1 0.000000000     1     0 0.02738540 1.0129199 0.9991451 0.9705723 1.027625</span></span>
+<span><span class="co">#&gt; 2 0.005263158     1     0 0.02935207 1.0043733 0.9908930 0.9626262 1.025139</span></span>
+<span><span class="co">#&gt; 3 0.010526316     1     0 0.02994985 0.9967091 0.9846669 0.9552794 1.021892</span></span>
+<span><span class="co">#&gt; 4 0.015789474     1     0 0.03010681 0.9897326 0.9789426 0.9481493 1.018672</span></span>
+<span><span class="co">#&gt; 5 0.021052632     1     0 0.03029735 0.9827286 0.9732060 0.9409868 1.015363</span></span>
+<span><span class="co">#&gt; 6 0.026315789     1     0 0.03112467 0.9753370 0.9670622 0.9338616 1.011553</span></span>
 <span><span class="co">#&gt;            b5           b6           b7          b8           b9         b10</span></span>
 <span><span class="co">#&gt; 1 0.014036116 -0.007460446 0.0185897976 0.021930567 -0.009900272 0.027401106</span></span>
 <span><span class="co">#&gt; 2 0.003365951  0.000000000 0.0143415907 0.015435060 -0.007939728 0.022297282</span></span>
@@ -334,7 +341,7 @@ approach above:</p>
 <span><span class="co">#&gt; 5 0.000000000  0.000000000 0.0001769795 0.002036461  0.000000000 0.007970247</span></span>
 <span><span class="co">#&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003304510</span></span></code></pre>
 <p>The runtime in seconds with C++ is:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.02495646 0.02550793 0.02535081 0.03695083 0.02476811</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.02260971 0.02183867 0.02164459 0.02135563 0.02139807</span></span></code></pre>
 <p>Which is even lower than what we had before!</p>
 </div>
 <div class="section level2">
@@ -608,13 +615,13 @@ end, use the <code>gpLassoCpp</code> function:</p>
 <span>                 additionalArguments <span class="op">=</span> <span class="va">data</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">l1</span><span class="op">@</span><span class="va">parameters</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt;        lambda alpha         b0        b1        b2        b3       b4</span></span>
-<span><span class="co">#&gt; 1 0.000000000     1 0.02738485 1.0129187 0.9991454 0.9705724 1.027625</span></span>
-<span><span class="co">#&gt; 2 0.005263158     1 0.02935277 1.0043736 0.9908928 0.9626259 1.025139</span></span>
-<span><span class="co">#&gt; 3 0.010526316     1 0.02995028 0.9967094 0.9846668 0.9552792 1.021892</span></span>
-<span><span class="co">#&gt; 4 0.015789474     1 0.03010669 0.9897329 0.9789425 0.9481493 1.018672</span></span>
-<span><span class="co">#&gt; 5 0.021052632     1 0.03029739 0.9827288 0.9732059 0.9409868 1.015363</span></span>
-<span><span class="co">#&gt; 6 0.026315789     1 0.03112461 0.9753368 0.9670620 0.9338617 1.011553</span></span>
+<pre><code><span><span class="co">#&gt;        lambda alpha theta         b0        b1        b2        b3       b4</span></span>
+<span><span class="co">#&gt; 1 0.000000000     1     0 0.02738485 1.0129187 0.9991454 0.9705724 1.027625</span></span>
+<span><span class="co">#&gt; 2 0.005263158     1     0 0.02935277 1.0043736 0.9908928 0.9626259 1.025139</span></span>
+<span><span class="co">#&gt; 3 0.010526316     1     0 0.02995028 0.9967094 0.9846668 0.9552792 1.021892</span></span>
+<span><span class="co">#&gt; 4 0.015789474     1     0 0.03010669 0.9897329 0.9789425 0.9481493 1.018672</span></span>
+<span><span class="co">#&gt; 5 0.021052632     1     0 0.03029739 0.9827288 0.9732059 0.9409868 1.015363</span></span>
+<span><span class="co">#&gt; 6 0.026315789     1     0 0.03112461 0.9753368 0.9670620 0.9338617 1.011553</span></span>
 <span><span class="co">#&gt;            b5           b6           b7          b8           b9         b10</span></span>
 <span><span class="co">#&gt; 1 0.014035790 -0.007461053 0.0185898207 0.021930913 -0.009900171 0.027401116</span></span>
 <span><span class="co">#&gt; 2 0.003365848  0.000000000 0.0143413336 0.015434662 -0.007939397 0.022297378</span></span>
@@ -623,17 +630,20 @@ end, use the <code>gpLassoCpp</code> function:</p>
 <span><span class="co">#&gt; 5 0.000000000  0.000000000 0.0001773114 0.002036028  0.000000000 0.007969742</span></span>
 <span><span class="co">#&gt; 6 0.000000000  0.000000000 0.0000000000 0.000000000  0.000000000 0.003303730</span></span></code></pre>
 <p>Benchmarking this approach results in:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.01990008 0.01975060 0.01965523 0.01966500 0.01950693</span></span></code></pre>
-<p>So, we have reduced our run time even more!</p>
+<pre><code><span><span class="co">#&gt; [1] 0.02456999 0.01660466 0.01654053 0.01644373 0.01654649</span></span></code></pre>
+<p>So, we have reduced our runtime even more!</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="the-third-approach-including-the-header-files">The third approach: Including the header files<a class="anchor" aria-label="anchor" href="#the-third-approach-including-the-header-files"></a>
+<h2 id="the-third-and-fourth-approach-including-the-header-files">The third and fourth approach: Including the header files<a class="anchor" aria-label="anchor" href="#the-third-and-fourth-approach-including-the-header-files"></a>
 </h2>
-<p>This is, by far, the most difficult approach which is why we have
+<p>This approach requires a more elaborate setup which is why we have
 created a whole package to demonstrate it. You will find more
 information in the vignette <code>The-optimizer-interface</code> and in
-the <a href="https://github.com/jhorzek/lessLM" class="external-link">lessLM</a> package.</p>
+the <a href="https://github.com/jhorzek/lessLM" class="external-link">lessLM</a> package. If
+you just want the optimizers and don’t want to depend on the
+<strong>lessSEM</strong> package, we recommend that you copy the <a href="https://jhorzek.github.io/lesstimate/" class="external-link">lesstimate</a> C++ library
+in your packages inst/include folder.</p>
 <p>It will come to the same parameter estimates:</p>
 <pre><code><span><span class="co">#&gt;              b0        b1        b2        b3       b4          b5           b6</span></span>
 <span><span class="co">#&gt; [1,] 0.02734701 1.0129361 0.9991629 0.9705501 1.027728 0.013993181 -0.007491533</span></span>
@@ -650,7 +660,7 @@ the <a href="https://github.com/jhorzek/lessLM" class="external-link">lessLM</a>
 <span><span class="co">#&gt; [5,] 0.0001374354 0.002100692  0.000000000 0.008033475</span></span>
 <span><span class="co">#&gt; [6,] 0.0000000000 0.000000000  0.000000000 0.003352431</span></span></code></pre>
 <p>And the run times are even lower:</p>
-<pre><code><span><span class="co">#&gt; [1] 0.003119230 0.001685619 0.001624823 0.001537800 0.001433134</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.002784252 0.001460552 0.001648903 0.001519680 0.001519203</span></span></code></pre>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

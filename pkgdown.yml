@@ -3,6 +3,7 @@ pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   Definition-Variables-and-Multi-Group-SEM: Definition-Variables-and-Multi-Group-SEM.html
+  Estimator-Settings: Estimator-Settings.html
   General-Purpose-Optimization: General-Purpose-Optimization.html
   Mixed-Penalties: Mixed-Penalties.html
   Parameter-transformations: Parameter-transformations.html
@@ -11,5 +12,5 @@ articles:
   The-optimizer-interface: The-optimizer-interface.html
   lessSEM: lessSEM.html
   log-likelihood-gradients: log-likelihood-gradients.html
-last_built: 2023-04-06T12:44Z
+last_built: 2023-06-24T15:06Z
 

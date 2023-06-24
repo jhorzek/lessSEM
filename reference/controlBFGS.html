@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Definition-Variables-and-Multi-Group-SEM.html">Definition-Variables-and-Multi-Group-SEM</a>
+    <a class="dropdown-item" href="../articles/Estimator-Settings.html">Estimator-Settings</a>
     <a class="dropdown-item" href="../articles/General-Purpose-Optimization.html">General-Purpose-Optimization</a>
     <a class="dropdown-item" href="../articles/Mixed-Penalties.html">Mixed Penalties</a>
     <a class="dropdown-item" href="../articles/Parameter-transformations.html">Parameter-transformations</a>
@@ -36,6 +37,9 @@
     <a class="dropdown-item" href="../articles/The-optimizer-interface.html">The-optimizer-interface</a>
     <a class="dropdown-item" href="../articles/log-likelihood-gradients.html">log-likelihood-gradients</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -67,7 +71,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">controlBFGS</span><span class="op">(</span></span>
 <span>  startingValues <span class="op">=</span> <span class="st">"est"</span>,</span>
 <span>  initialHessian <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">startingValues</span> <span class="op">==</span> <span class="st">"est"</span><span class="op">)</span>, <span class="st">"lavaan"</span>, <span class="st">"compute"</span><span class="op">)</span>,</span>
-<span>  saveHessian <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  saveDetails <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  stepSize <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  sigma <span class="op">=</span> <span class="fl">1e-05</span>,</span>
 <span>  gamma <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -92,15 +96,19 @@ values can be passed to the function which will then be used as starting values.
 
 <dt>initialHessian</dt>
 <dd><p>option to provide an initial Hessian to the optimizer. Must have row and column names corresponding to the parameter labels. use getLavaanParameters(lavaanModel) to
-see those labels. If set to "scoreBased", the outer product of the scores will be used as an approximation (see https://en.wikipedia.org/wiki/Berndt%E2%80%93Hall%E2%80%93Hall%E2%80%93Hausman_algorithm).
-If set to "compute", the initial hessian will be computed. If set to a single value, a diagonal matrix with the single value along the diagonal will be used.
+see those labels. If set to "gradNorm", the maximum of the gradients at the starting
+values times the stepSize will be used. This is adapted from Optim.jl
+https://github.com/JuliaNLSolvers/Optim.jl/blob/f43e6084aacf2dabb2b142952acd3fbb0e268439/src/multivariate/solvers/first_order/bfgs.jl#L104
+If set to a single value, a diagonal matrix with the single value along the diagonal will be used.
 The default is "lavaan" which extracts the Hessian from the lavaanModel. This Hessian
 will typically deviate from that of the internal SEM represenation of lessSEM (due to
 the transformation of the variances), but works quite well in practice.</p></dd>
 
 
-<dt>saveHessian</dt>
-<dd><p>should the Hessian be saved for later use? Note: This may take a lot of memory!</p></dd>
+<dt>saveDetails</dt>
+<dd><p>when set to TRUE, additional details about the individual
+models are save. Currently, this are the Hessian and the implied means and covariances.
+Note: This may take a lot of memory!</p></dd>
 
 
 <dt>stepSize</dt>

@@ -28,7 +28,7 @@ where \(\theta &amp;gt; 2\)."><meta property="og:image" content="/logo.svg"><!--
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,7 @@ where \(\theta &amp;gt; 2\)."><meta property="og:image" content="/logo.svg"><!--
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Definition-Variables-and-Multi-Group-SEM.html">Definition-Variables-and-Multi-Group-SEM</a>
+    <a class="dropdown-item" href="../articles/Estimator-Settings.html">Estimator-Settings</a>
     <a class="dropdown-item" href="../articles/General-Purpose-Optimization.html">General-Purpose-Optimization</a>
     <a class="dropdown-item" href="../articles/Mixed-Penalties.html">Mixed Penalties</a>
     <a class="dropdown-item" href="../articles/Parameter-transformations.html">Parameter-transformations</a>
@@ -54,6 +55,9 @@ where \(\theta &amp;gt; 2\)."><meta property="og:image" content="/logo.svg"><!--
     <a class="dropdown-item" href="../articles/The-optimizer-interface.html">The-optimizer-interface</a>
     <a class="dropdown-item" href="../articles/log-likelihood-gradients.html">log-likelihood-gradients</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -99,7 +103,8 @@ where \(\theta &gt; 2\).</p>
 <span>  <span class="va">regularized</span>,</span>
 <span>  <span class="va">lambdas</span>,</span>
 <span>  <span class="va">thetas</span>,</span>
-<span>  control <span class="op">=</span> <span class="fu">lessSEM</span><span class="fu">::</span><span class="fu"><a href="controlIsta.html">controlIsta</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  method <span class="op">=</span> <span class="st">"glmnet"</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu">lessSEM</span><span class="fu">::</span><span class="fu"><a href="controlGlmnet.html">controlGlmnet</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -136,9 +141,15 @@ If set to NULL, numDeriv will be used to approximate the gradients</p></dd>
 <dd><p>numeric vector: values for the tuning parameter theta</p></dd>
 
 
+<dt>method</dt>
+<dd><p>which optimizer should be used? Currently implemented are ista
+and glmnet.</p></dd>
+
+
 <dt>control</dt>
 <dd><p>used to control the optimizer. This element is generated with
-the controlIsta (see ?controlIsta)</p></dd>
+the controlIsta and controlGlmnet functions. See ?controlIsta and ?controlGlmnet
+for more details.</p></dd>
 
 </dl></div>
     <div class="section level2">

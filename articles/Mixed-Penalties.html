@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Definition-Variables-and-Multi-Group-SEM.html">Definition-Variables-and-Multi-Group-SEM</a>
+    <a class="dropdown-item" href="../articles/Estimator-Settings.html">Estimator-Settings</a>
     <a class="dropdown-item" href="../articles/General-Purpose-Optimization.html">General-Purpose-Optimization</a>
     <a class="dropdown-item" href="../articles/Mixed-Penalties.html">Mixed Penalties</a>
     <a class="dropdown-item" href="../articles/Parameter-transformations.html">Parameter-transformations</a>
@@ -60,6 +61,9 @@
     <a class="dropdown-item" href="../articles/The-optimizer-interface.html">The-optimizer-interface</a>
     <a class="dropdown-item" href="../articles/log-likelihood-gradients.html">log-likelihood-gradients</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -112,9 +116,9 @@ multi-group models (Geminiani et al., 2021).</p>
 <blockquote>
 <p>Important: You cannot impose two penalties on the same parameter!</p>
 </blockquote>
-<p>Not all penalty combinations are currently supported by all
-optimizers. The following table provides an overview of the penalties
-you can use with each optimizer:</p>
+<p>Models are fitted with the glmnet or ista optimizer. Note that the
+optimizers differ in which penalties they support. The following table
+provides an overview:</p>
 <table class="table">
 <thead><tr class="header">
 <th>Penalty</th>
@@ -124,49 +128,45 @@ you can use with each optimizer:</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>ridge</td>
-<td>addRidge</td>
-<td>x</td>
-<td>-</td>
-</tr>
-<tr class="even">
 <td>lasso</td>
 <td>addLasso</td>
 <td>x</td>
 <td>x</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>elastic net</td>
 <td>addElasticNet</td>
-<td>x</td>
+<td>x*</td>
 <td>-</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>cappedL1</td>
 <td>addCappedL1</td>
-<td>-</td>
 <td>x</td>
-</tr>
-<tr class="odd">
-<td>lsp</td>
-<td>addLsp</td>
-<td>-</td>
 <td>x</td>
 </tr>
 <tr class="even">
-<td>scad</td>
-<td>addScad</td>
-<td>-</td>
+<td>lsp</td>
+<td>addLsp</td>
+<td>x</td>
 <td>x</td>
 </tr>
 <tr class="odd">
+<td>scad</td>
+<td>addScad</td>
+<td>x</td>
+<td>x</td>
+</tr>
+<tr class="even">
 <td>mcp</td>
 <td>addMcp</td>
-<td>-</td>
+<td>x</td>
 <td>x</td>
 </tr>
 </tbody>
 </table>
+<p>By default, glmnet will be used. Note that the elastic net penalty
+can only be combined with other elastic net penalties.</p>
 <div class="section level2">
 <h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
@@ -196,10 +196,7 @@ regressions:</p>
 <span>  <span class="fu"><a href="../reference/addLasso.html">addLasso</a></span><span class="op">(</span>regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c2"</span>, <span class="st">"c3"</span>, <span class="st">"c4"</span><span class="op">)</span>, </span>
 <span>           lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/addLasso.html">addLasso</a></span><span class="op">(</span>regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"r1"</span>, <span class="st">"r2"</span>, <span class="st">"r3"</span><span class="op">)</span>, </span>
-<span>           lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.2</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; Note</span></span>
-<span><span class="co">#&gt; • Mixed penalties is a very new feature. Please note that there may still </span></span>
-<span><span class="co">#&gt; • be bugs in the procedure. Use carefully!</span></span></code></pre></div>
+<span>           lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.2</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
 <p>Note that we can use the pipe-operator to add multiple penalties.
 They don’t have to be the same; the following would also work:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -209,10 +206,7 @@ They don’t have to be the same; the following would also work:</p>
 <span>           lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/addScad.html">addScad</a></span><span class="op">(</span>regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"r1"</span>, <span class="st">"r2"</span>, <span class="st">"r3"</span><span class="op">)</span>, </span>
 <span>          lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.2</span><span class="op">)</span>,</span>
-<span>          thetas <span class="op">=</span> <span class="fl">3.7</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; Note</span></span>
-<span><span class="co">#&gt; • Mixed penalties is a very new feature. Please note that there may still </span></span>
-<span><span class="co">#&gt; • be bugs in the procedure. Use carefully!</span></span></code></pre></div>
+<span>          thetas <span class="op">=</span> <span class="fl">3.7</span><span class="op">)</span> </span></code></pre></div>
 <p>To fit the model, we use the <code>fit</code>- function:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fitMp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit.html">fit</a></span><span class="op">(</span><span class="va">mp</span><span class="op">)</span></span></code></pre></div>
@@ -233,6 +227,95 @@ object:</p>
 <span><span class="co">#&gt;       "none"       "none"       "none"       "none"</span></span></code></pre></div>
 <p>We can access the best parameters according to the BIC with:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fitMp</span>, criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                                                                      </span></span>
+<span><span class="co">#&gt;                        Tuning ||--||  Estimates                      </span></span>
+<span><span class="co">#&gt;  ---------------------------- ||--|| ---------- ---------- ----------</span></span>
+<span><span class="co">#&gt;  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2</span></span>
+<span><span class="co">#&gt;  ============================ ||--|| ========== ========== ==========</span></span>
+<span><span class="co">#&gt;                       11.0000 ||--||     2.1817     1.8188          .</span></span>
+<span><span class="co">#&gt;                                                                              </span></span>
+<span><span class="co">#&gt;                                                                              </span></span>
+<span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
+<span><span class="co">#&gt;          c3         c4  dem60=~y2  dem60=~y3  dem60=~y4  dem65=~y6  dem65=~y7</span></span>
+<span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
+<span><span class="co">#&gt;           .          .     1.3540     1.0440     1.2995     1.2585     1.2825</span></span>
+<span><span class="co">#&gt;                                                                              </span></span>
+<span><span class="co">#&gt;                                                                              </span></span>
+<span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
+<span><span class="co">#&gt;           c         r1         r2         r3     x1~~x1     x2~~x2     x3~~x3</span></span>
+<span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
+<span><span class="co">#&gt;      1.3098     1.4738     0.4533     0.8644     0.0818     0.1184     0.4673</span></span>
+<span><span class="co">#&gt;                                                                              </span></span>
+<span><span class="co">#&gt;                                                                              </span></span>
+<span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
+<span><span class="co">#&gt;      y2~~y2     y3~~y3     y4~~y4     y1~~y1     y5~~y5     y6~~y6     y7~~y7</span></span>
+<span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
+<span><span class="co">#&gt;      6.4896     5.3399     2.8871     1.9419     2.3901     4.3428     3.5096</span></span>
+<span><span class="co">#&gt;                                                   </span></span>
+<span><span class="co">#&gt;                                                   </span></span>
+<span><span class="co">#&gt;  ---------- ------------ ------------ ------------</span></span>
+<span><span class="co">#&gt;      y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65</span></span>
+<span><span class="co">#&gt;  ========== ============ ============ ============</span></span>
+<span><span class="co">#&gt;      2.9403       0.4482       3.8717       0.1149</span></span></code></pre></div>
+<p>The <code>tuningParameterConfiguration</code> refers to the rows in
+the lambda, theta, and alpha matrices that resulted in the best fit:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/getTuningParameterConfiguration.html">getTuningParameterConfiguration</a></span><span class="op">(</span>regularizedSEMMixedPenalty <span class="op">=</span> <span class="va">fitMp</span>, </span>
+<span>                                tuningParameterConfiguration <span class="op">=</span> <span class="fl">11</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                 parameter penalty lambda alpha</span></span>
+<span><span class="co">#&gt; ind60=~x2       ind60=~x2    none      0     0</span></span>
+<span><span class="co">#&gt; ind60=~x3       ind60=~x3    none      0     0</span></span>
+<span><span class="co">#&gt; c2                     c2   lasso      1     1</span></span>
+<span><span class="co">#&gt; c3                     c3   lasso      1     1</span></span>
+<span><span class="co">#&gt; c4                     c4   lasso      1     1</span></span>
+<span><span class="co">#&gt; dem60=~y2       dem60=~y2    none      0     0</span></span>
+<span><span class="co">#&gt; dem60=~y3       dem60=~y3    none      0     0</span></span>
+<span><span class="co">#&gt; dem60=~y4       dem60=~y4    none      0     0</span></span>
+<span><span class="co">#&gt; dem65=~y6       dem65=~y6    none      0     0</span></span>
+<span><span class="co">#&gt; dem65=~y7       dem65=~y7    none      0     0</span></span>
+<span><span class="co">#&gt; c                       c    none      0     0</span></span>
+<span><span class="co">#&gt; r1                     r1    scad      0     0</span></span>
+<span><span class="co">#&gt; r2                     r2    scad      0     0</span></span>
+<span><span class="co">#&gt; r3                     r3    scad      0     0</span></span>
+<span><span class="co">#&gt; x1~~x1             x1~~x1    none      0     0</span></span>
+<span><span class="co">#&gt; x2~~x2             x2~~x2    none      0     0</span></span>
+<span><span class="co">#&gt; x3~~x3             x3~~x3    none      0     0</span></span>
+<span><span class="co">#&gt; y2~~y2             y2~~y2    none      0     0</span></span>
+<span><span class="co">#&gt; y3~~y3             y3~~y3    none      0     0</span></span>
+<span><span class="co">#&gt; y4~~y4             y4~~y4    none      0     0</span></span>
+<span><span class="co">#&gt; y1~~y1             y1~~y1    none      0     0</span></span>
+<span><span class="co">#&gt; y5~~y5             y5~~y5    none      0     0</span></span>
+<span><span class="co">#&gt; y6~~y6             y6~~y6    none      0     0</span></span>
+<span><span class="co">#&gt; y7~~y7             y7~~y7    none      0     0</span></span>
+<span><span class="co">#&gt; y8~~y8             y8~~y8    none      0     0</span></span>
+<span><span class="co">#&gt; ind60~~ind60 ind60~~ind60    none      0     0</span></span>
+<span><span class="co">#&gt; dem60~~dem60 dem60~~dem60    none      0     0</span></span>
+<span><span class="co">#&gt; dem65~~dem65 dem65~~dem65    none      0     0</span></span></code></pre></div>
+<p>In this case, the best model has no cross-loadings, but the
+regressions remained unregularized: The lambda for the cross-loadings is
+large (1), while the lambda for the regressions is 0 (no
+regularization).</p>
+</div>
+<div class="section level2">
+<h2 id="using-ista">Using ista<a class="anchor" aria-label="anchor" href="#using-ista"></a>
+</h2>
+<p>The glmnet optimizer is typically considerably faster than ista.
+However, sometimes glmnet may run into issues. In that case, it can help
+to switch to ista:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mp</span> <span class="op">&lt;-</span> <span class="va">lavaanModel</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Change the optimizer and the control object:</span></span>
+<span>  <span class="fu"><a href="../reference/mixedPenalty.html">mixedPenalty</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"ista"</span>,</span>
+<span>               control <span class="op">=</span> <span class="fu"><a href="../reference/controlIsta.html">controlIsta</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/addLasso.html">addLasso</a></span><span class="op">(</span>regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c2"</span>, <span class="st">"c3"</span>, <span class="st">"c4"</span><span class="op">)</span>, </span>
+<span>                lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/addLasso.html">addLasso</a></span><span class="op">(</span>regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"r1"</span>, <span class="st">"r2"</span>, <span class="st">"r3"</span><span class="op">)</span>, </span>
+<span>                lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.2</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
+<p>To fit the model, we use the <code>fit</code>- function:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fitMp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit.html">fit</a></span><span class="op">(</span><span class="va">mp</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fitMp</span>, criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                                                      </span></span>
 <span><span class="co">#&gt;                        Tuning ||--||  Estimates                      </span></span>
@@ -266,133 +349,41 @@ object:</p>
 <span><span class="co">#&gt;      2.9392       0.4482       3.8710       0.1159</span></span></code></pre></div>
 <p>The <code>tuningParameterConfiguration</code> refers to the rows in
 the lambda, theta, and alpha matrices that resulted in the best fit:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/getTuningParameterConfiguration.html">getTuningParameterConfiguration</a></span><span class="op">(</span>regularizedSEMMixedPenalty <span class="op">=</span> <span class="va">fitMp</span>, </span>
-<span>                                tuningParameterConfiguration <span class="op">=</span> <span class="fl">11</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                 parameter penalty lambda theta alpha</span></span>
-<span><span class="co">#&gt; ind60=~x2       ind60=~x2    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; ind60=~x3       ind60=~x3    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; c2                     c2   lasso      1   0.0     0</span></span>
-<span><span class="co">#&gt; c3                     c3   lasso      1   0.0     0</span></span>
-<span><span class="co">#&gt; c4                     c4   lasso      1   0.0     0</span></span>
-<span><span class="co">#&gt; dem60=~y2       dem60=~y2    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; dem60=~y3       dem60=~y3    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; dem60=~y4       dem60=~y4    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; dem65=~y6       dem65=~y6    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; dem65=~y7       dem65=~y7    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; c                       c    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; r1                     r1    scad      0   3.7     0</span></span>
-<span><span class="co">#&gt; r2                     r2    scad      0   3.7     0</span></span>
-<span><span class="co">#&gt; r3                     r3    scad      0   3.7     0</span></span>
-<span><span class="co">#&gt; x1~~x1             x1~~x1    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; x2~~x2             x2~~x2    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; x3~~x3             x3~~x3    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; y2~~y2             y2~~y2    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; y3~~y3             y3~~y3    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; y4~~y4             y4~~y4    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; y1~~y1             y1~~y1    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; y5~~y5             y5~~y5    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; y6~~y6             y6~~y6    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; y7~~y7             y7~~y7    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; y8~~y8             y8~~y8    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; ind60~~ind60 ind60~~ind60    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; dem60~~dem60 dem60~~dem60    none      0   0.0     0</span></span>
-<span><span class="co">#&gt; dem65~~dem65 dem65~~dem65    none      0   0.0     0</span></span></code></pre></div>
-<p>In this case, the best model has no cross-loadings, but the
-regressions remained unregularized: The lambda for the cross-loadings is
-large (1), while the lambda for the regressions is 0 (no
-regularization).</p>
-</div>
-<div class="section level2">
-<h2 id="using-glmnet">Using glmnet<a class="anchor" aria-label="anchor" href="#using-glmnet"></a>
-</h2>
-<p>The glmnet optimizer is typically considerably faster than ista.
-However, as mentioned above, not all penalty functions are currently
-supported. Mixed penalties for glmnet can be specified as follows:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mp</span> <span class="op">&lt;-</span> <span class="va">lavaanModel</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Change the optimizer and the control object:</span></span>
-<span>  <span class="fu"><a href="../reference/mixedPenalty.html">mixedPenalty</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"glmnet"</span>,</span>
-<span>               control <span class="op">=</span> <span class="fu"><a href="../reference/controlGlmnet.html">controlGlmnet</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/addLasso.html">addLasso</a></span><span class="op">(</span>regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"c2"</span>, <span class="st">"c3"</span>, <span class="st">"c4"</span><span class="op">)</span>, </span>
-<span>                lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/addLasso.html">addLasso</a></span><span class="op">(</span>regularized <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"r1"</span>, <span class="st">"r2"</span>, <span class="st">"r3"</span><span class="op">)</span>, </span>
-<span>                lambdas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">.2</span><span class="op">)</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; Note</span></span>
-<span><span class="co">#&gt; • Mixed penalties is a very new feature. Please note that there may still </span></span>
-<span><span class="co">#&gt; • be bugs in the procedure. Use carefully!</span></span></code></pre></div>
-<p>To fit the model, we use the <code>fit</code>- function:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fitMp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit.html">fit</a></span><span class="op">(</span><span class="va">mp</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fitMp</span>, criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                                                                      </span></span>
-<span><span class="co">#&gt;                        Tuning ||--||  Estimates                      </span></span>
-<span><span class="co">#&gt;  ---------------------------- ||--|| ---------- ---------- ----------</span></span>
-<span><span class="co">#&gt;  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2</span></span>
-<span><span class="co">#&gt;  ============================ ||--|| ========== ========== ==========</span></span>
-<span><span class="co">#&gt;                       11.0000 ||--||     2.1817     1.8188          .</span></span>
-<span><span class="co">#&gt;                                                                              </span></span>
-<span><span class="co">#&gt;                                                                              </span></span>
-<span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
-<span><span class="co">#&gt;          c3         c4  dem60=~y2  dem60=~y3  dem60=~y4  dem65=~y6  dem65=~y7</span></span>
-<span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;           .          .     1.3540     1.0440     1.2995     1.2585     1.2825</span></span>
-<span><span class="co">#&gt;                                                                              </span></span>
-<span><span class="co">#&gt;                                                                              </span></span>
-<span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
-<span><span class="co">#&gt;           c         r1         r2         r3     x1~~x1     x2~~x2     x3~~x3</span></span>
-<span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;      1.3098     1.4738     0.4532     0.8644     0.0818     0.1184     0.4673</span></span>
-<span><span class="co">#&gt;                                                                              </span></span>
-<span><span class="co">#&gt;                                                                              </span></span>
-<span><span class="co">#&gt;  ---------- ---------- ---------- ---------- ---------- ---------- ----------</span></span>
-<span><span class="co">#&gt;      y2~~y2     y3~~y3     y4~~y4     y1~~y1     y5~~y5     y6~~y6     y7~~y7</span></span>
-<span><span class="co">#&gt;  ========== ========== ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;      6.4896     5.3399     2.8871     1.9419     2.3901     4.3429     3.5095</span></span>
-<span><span class="co">#&gt;                                                   </span></span>
-<span><span class="co">#&gt;                                                   </span></span>
-<span><span class="co">#&gt;  ---------- ------------ ------------ ------------</span></span>
-<span><span class="co">#&gt;      y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65</span></span>
-<span><span class="co">#&gt;  ========== ============ ============ ============</span></span>
-<span><span class="co">#&gt;      2.9402       0.4481       3.8717       0.1149</span></span></code></pre></div>
-<p>The <code>tuningParameterConfiguration</code> refers to the rows in
-the lambda, theta, and alpha matrices that resulted in the best fit:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/getTuningParameterConfiguration.html">getTuningParameterConfiguration</a></span><span class="op">(</span>regularizedSEMMixedPenalty <span class="op">=</span> <span class="va">fitMp</span>, </span>
 <span>                                tuningParameterConfiguration <span class="op">=</span> <span class="fl">11</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                 parameter    penalty lambda alpha</span></span>
-<span><span class="co">#&gt; ind60=~x2       ind60=~x2       none      0     0</span></span>
-<span><span class="co">#&gt; ind60=~x3       ind60=~x3       none      0     0</span></span>
-<span><span class="co">#&gt; c2                     c2 elasticNet      1     1</span></span>
-<span><span class="co">#&gt; c3                     c3 elasticNet      1     1</span></span>
-<span><span class="co">#&gt; c4                     c4 elasticNet      1     1</span></span>
-<span><span class="co">#&gt; dem60=~y2       dem60=~y2       none      0     0</span></span>
-<span><span class="co">#&gt; dem60=~y3       dem60=~y3       none      0     0</span></span>
-<span><span class="co">#&gt; dem60=~y4       dem60=~y4       none      0     0</span></span>
-<span><span class="co">#&gt; dem65=~y6       dem65=~y6       none      0     0</span></span>
-<span><span class="co">#&gt; dem65=~y7       dem65=~y7       none      0     0</span></span>
-<span><span class="co">#&gt; c                       c       none      0     0</span></span>
-<span><span class="co">#&gt; r1                     r1 elasticNet      0     1</span></span>
-<span><span class="co">#&gt; r2                     r2 elasticNet      0     1</span></span>
-<span><span class="co">#&gt; r3                     r3 elasticNet      0     1</span></span>
-<span><span class="co">#&gt; x1~~x1             x1~~x1       none      0     0</span></span>
-<span><span class="co">#&gt; x2~~x2             x2~~x2       none      0     0</span></span>
-<span><span class="co">#&gt; x3~~x3             x3~~x3       none      0     0</span></span>
-<span><span class="co">#&gt; y2~~y2             y2~~y2       none      0     0</span></span>
-<span><span class="co">#&gt; y3~~y3             y3~~y3       none      0     0</span></span>
-<span><span class="co">#&gt; y4~~y4             y4~~y4       none      0     0</span></span>
-<span><span class="co">#&gt; y1~~y1             y1~~y1       none      0     0</span></span>
-<span><span class="co">#&gt; y5~~y5             y5~~y5       none      0     0</span></span>
-<span><span class="co">#&gt; y6~~y6             y6~~y6       none      0     0</span></span>
-<span><span class="co">#&gt; y7~~y7             y7~~y7       none      0     0</span></span>
-<span><span class="co">#&gt; y8~~y8             y8~~y8       none      0     0</span></span>
-<span><span class="co">#&gt; ind60~~ind60 ind60~~ind60       none      0     0</span></span>
-<span><span class="co">#&gt; dem60~~dem60 dem60~~dem60       none      0     0</span></span>
-<span><span class="co">#&gt; dem65~~dem65 dem65~~dem65       none      0     0</span></span></code></pre></div>
+<span><span class="co">#&gt;                 parameter penalty lambda theta alpha</span></span>
+<span><span class="co">#&gt; ind60=~x2       ind60=~x2    none      0     0     0</span></span>
+<span><span class="co">#&gt; ind60=~x3       ind60=~x3    none      0     0     0</span></span>
+<span><span class="co">#&gt; c2                     c2   lasso      1     0     1</span></span>
+<span><span class="co">#&gt; c3                     c3   lasso      1     0     1</span></span>
+<span><span class="co">#&gt; c4                     c4   lasso      1     0     1</span></span>
+<span><span class="co">#&gt; dem60=~y2       dem60=~y2    none      0     0     0</span></span>
+<span><span class="co">#&gt; dem60=~y3       dem60=~y3    none      0     0     0</span></span>
+<span><span class="co">#&gt; dem60=~y4       dem60=~y4    none      0     0     0</span></span>
+<span><span class="co">#&gt; dem65=~y6       dem65=~y6    none      0     0     0</span></span>
+<span><span class="co">#&gt; dem65=~y7       dem65=~y7    none      0     0     0</span></span>
+<span><span class="co">#&gt; c                       c    none      0     0     0</span></span>
+<span><span class="co">#&gt; r1                     r1   lasso      0     0     1</span></span>
+<span><span class="co">#&gt; r2                     r2   lasso      0     0     1</span></span>
+<span><span class="co">#&gt; r3                     r3   lasso      0     0     1</span></span>
+<span><span class="co">#&gt; x1~~x1             x1~~x1    none      0     0     0</span></span>
+<span><span class="co">#&gt; x2~~x2             x2~~x2    none      0     0     0</span></span>
+<span><span class="co">#&gt; x3~~x3             x3~~x3    none      0     0     0</span></span>
+<span><span class="co">#&gt; y2~~y2             y2~~y2    none      0     0     0</span></span>
+<span><span class="co">#&gt; y3~~y3             y3~~y3    none      0     0     0</span></span>
+<span><span class="co">#&gt; y4~~y4             y4~~y4    none      0     0     0</span></span>
+<span><span class="co">#&gt; y1~~y1             y1~~y1    none      0     0     0</span></span>
+<span><span class="co">#&gt; y5~~y5             y5~~y5    none      0     0     0</span></span>
+<span><span class="co">#&gt; y6~~y6             y6~~y6    none      0     0     0</span></span>
+<span><span class="co">#&gt; y7~~y7             y7~~y7    none      0     0     0</span></span>
+<span><span class="co">#&gt; y8~~y8             y8~~y8    none      0     0     0</span></span>
+<span><span class="co">#&gt; ind60~~ind60 ind60~~ind60    none      0     0     0</span></span>
+<span><span class="co">#&gt; dem60~~dem60 dem60~~dem60    none      0     0     0</span></span>
+<span><span class="co">#&gt; dem65~~dem65 dem65~~dem65    none      0     0     0</span></span></code></pre></div>
 <p>Here is a short run-time comparison of ista and glmnet with the
 lasso-regularized model from above: Five repetitions using ista took
-17.408 seconds, while glmnet took 1.145 seconds. That is, if you can use
+18.097 seconds, while glmnet took 1.081 seconds. That is, if you can use
 glmnet with your model, we recommend that you do.</p>
 </div>
 <div class="section level2">

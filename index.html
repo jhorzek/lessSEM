@@ -41,7 +41,7 @@
     
     <a class="navbar-brand me-2" href="index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,6 +60,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="articles/Definition-Variables-and-Multi-Group-SEM.html">Definition-Variables-and-Multi-Group-SEM</a>
+    <a class="dropdown-item" href="articles/Estimator-Settings.html">Estimator-Settings</a>
     <a class="dropdown-item" href="articles/General-Purpose-Optimization.html">General-Purpose-Optimization</a>
     <a class="dropdown-item" href="articles/Mixed-Penalties.html">Mixed Penalties</a>
     <a class="dropdown-item" href="articles/Parameter-transformations.html">Parameter-transformations</a>
@@ -68,6 +69,9 @@
     <a class="dropdown-item" href="articles/The-optimizer-interface.html">The-optimizer-interface</a>
     <a class="dropdown-item" href="articles/log-likelihood-gradients.html">log-likelihood-gradients</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -96,19 +100,19 @@
 <p><strong>lessSEM</strong> (<strong>l</strong>essSEM <strong>es</strong>timates <strong>s</strong>parse <strong>SEM</strong>) is an R package for regularized structural equation modeling (regularized SEM) with non-smooth penalty functions (e.g., lasso) building on <a href="https://github.com/yrosseel/lavaan" class="external-link"><strong>lavaan</strong></a>. <strong>lessSEM</strong> is heavily inspired by the <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> package and the <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a> packages that have similar functionality. <strong>If you use lessSEM, please also cite <a href="https://github.com/Rjacobucci/regsem" class="external-link">regsem</a> and and <a href="https://github.com/psyphh/lslx" class="external-link">lslx</a>!</strong></p>
 <p>The objectives of <strong>lessSEM</strong> are to provide …</p>
 <ol style="list-style-type: decimal">
-<li>a flexible framework for regularizing SEM and</li>
-<li>optimizers for other SEM packages which can be used with an interface similar to <code>optim</code>.</li>
+<li>a flexible framework for regularizing SEM.</li>
+<li>optimizers for other packages that can handle non-differentiable penalty functions.</li>
 </ol>
-<p><strong>Important</strong>: Please also check out the implementations of regularized SEM in the more mature R packages <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> and <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>. Finally, you may want to check out the julia package <a href="https://github.com/StructuralEquationModels/StructuralEquationModels.jl" class="external-link"><strong>StructuralEquationModels.jl</strong></a>.</p>
 <p>The following penalty functions are currently implemented in <strong>lessSEM</strong>:</p>
-<p><img src="reference/figures/penalty_functions.png"></p>
-<p>The column “penalty” refers to the name of the function call in the <strong>lessSEM</strong> package (e.g., lasso is called with the <code><a href="reference/lasso.html">lasso()</a></code> function). Smooth functions are called with <code>smoothLasso</code>, <code>smoothAdaptiveLasso</code>, and <code>smoothElasticNet</code>. These are only implemented for the comparison of exact and approximate optimization and should not be used. They will be marked as deprecated soon. The best model can be selected with the AIC or BIC. If you want to use cross-validation, use <code>cvLasso</code>, <code>cvAdaptiveLasso</code>, etc. instead (see, e.g., <code><a href="reference/cvLasso.html">?lessSEM::cvLasso</a></code>). The smooth versions are called <code>cvSmoothLasso</code>, etc.</p>
+<p><img src="reference/figures/penaltyFunctions.png"></p>
+<p>The column “penalty” refers to the name of the function call in the <strong>lessSEM</strong> package (e.g., lasso is called with the <code><a href="reference/lasso.html">lasso()</a></code> function).</p>
+<p>The best model can be selected with the AIC or BIC. If you want to use cross-validation, use <code>cvLasso</code>, <code>cvAdaptiveLasso</code>, etc. instead (see, e.g., <code><a href="reference/cvLasso.html">?lessSEM::cvLasso</a></code>).</p>
 <div class="section level2">
 <h2 id="regsem-lslx-and-lesssem">
 <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a>, <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>, and <strong>lessSEM</strong>
 <a class="anchor" aria-label="anchor" href="#regsem-lslx-and-lesssem"></a>
 </h2>
-<p>The packages <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a>, <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>, and <strong>lessSEM</strong> can all be used to regularize basic SEM. In fact, as outlined above, <strong>lessSEM</strong> is heavily inspired by <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> and <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>. However, the packages differ in their targets: The objective of <strong>lessSEM</strong> is not to replace the more major packages <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> and <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>. Instead, our objective is to provide method developers with a flexible framework for regularized SEM. The following shows an incomplete comparison of some features implemented in the three packages:</p>
+<p>The packages <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a>, <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>, and <strong>lessSEM</strong> can all be used to regularize basic SEM. In fact, as outlined above, <strong>lessSEM</strong> is heavily inspired by <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> and <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>. However, the packages differ in their targets: The objective of <strong>lessSEM</strong> is not to replace the more mature packages <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> and <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a>. Instead, our objective is to provide method developers with a flexible framework for regularized SEM. The following shows an incomplete comparison of some features implemented in the three packages:</p>
 <table class="table">
 <colgroup>
 <col width="36%">
@@ -139,51 +143,57 @@
 <td>Least squares estimation</td>
 <td>No</td>
 <td>Yes</td>
-<td>No</td>
+<td>Dev.</td>
 </tr>
 <tr class="even">
+<td>Categorical variables</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="odd">
 <td>Confidence Intervals</td>
 <td>No</td>
 <td>Yes</td>
 <td>No</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Missing Data</td>
 <td>FIML</td>
 <td>Auxiliary Variables</td>
 <td>FIML</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Multi-group models</td>
 <td>No</td>
 <td>Yes</td>
 <td>Yes</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Stability selection</td>
 <td>Yes</td>
 <td>No</td>
-<td>No</td>
+<td>Dev.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Mixed penalties</td>
 <td>No</td>
 <td>No</td>
 <td>Yes</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Equality constraints</td>
 <td>Yes</td>
 <td>No</td>
 <td>Yes</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Parameter transformations</td>
 <td>diff_lasso</td>
 <td>No</td>
 <td>Yes</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Definition variables</td>
 <td>No</td>
 <td>No</td>
@@ -191,7 +201,9 @@
 </tr>
 </tbody>
 </table>
-<p>Because <strong>lessSEM</strong> is fairly new, we currently recommend using <strong>lslx</strong> for cases that are covered by both, <strong>lessSEM</strong> and <strong>lslx</strong>.</p>
+<blockquote>
+<p><strong>Warning</strong> Dev. refers to features that are supported, but still under development and may have bugs. Use with caution!</p>
+</blockquote>
 </div>
 </div>
 <div class="section level1">
@@ -203,12 +215,16 @@
 <p>The newest version of the package can be installed from GitHub using the following commands in R:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"jhorzek/lessSEM"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"jhorzek/lessSEM"</span>, </span>
+<span>                         ref <span class="op">=</span> <span class="st">"development"</span><span class="op">)</span></span></code></pre></div>
+<blockquote>
+<p><strong>Note</strong> The lessSEM project has multiple branches. The <strong>main</strong> branch will match the version currently available from CRAN. The <strong>development</strong> branch will have newer features not yet available from CRAN. This branch will have passed all current tests of our test suite, but may not be ready for CRAN yet (e.g., because not all objectives of the road map have been met). <strong>gh-pages</strong> is used to create the <a href="jhorzek.github.io/lessSEM/">documentation website</a>. Finally, all other branches are used for ongoing development and should be considered unstable.</p>
+</blockquote>
 </div>
 <div class="section level1">
 <h1 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h1>
-<p>You will find a short introduction to regularized SEM with the <strong>lessSEM</strong> package in <code><a href="articles/lessSEM.html">vignette('lessSEM', package = 'lessSEM')</a></code>. More information is also provided in the documentation of the individual functions (e.g., see <code><a href="reference/scad.html">?lessSEM::scad</a></code>). Finally, you will find templates for a selection of models which can be used with <strong>lessSEM</strong> (e.g., the cross-lagged panel model) in the package <a href="https://github.com/jhorzek/lessTemplates" class="external-link"><strong>lessTemplates</strong></a>.</p>
+<p>Please visit the <a href="https://jhorzek.github.io/lessSEM/" class="external-link">lessSEM website</a> for the latest documentation. You will also find a short introduction to regularized SEM in <code><a href="articles/lessSEM.html">vignette('lessSEM', package = 'lessSEM')</a></code>and the documentation of the individual functions (e.g., see <code><a href="reference/scad.html">?lessSEM::scad</a></code>). Finally, you will find templates for a selection of models that can be used with <strong>lessSEM</strong> (e.g., the cross-lagged panel model) in the package <a href="https://github.com/jhorzek/lessTemplates" class="external-link"><strong>lessTemplates</strong></a>.</p>
 </div>
 <div class="section level1">
 <h1 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
@@ -259,9 +275,12 @@
 <span><span class="co"># use the coef-function to show the estimates</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lsem</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># The best parameters can be extracted with:</span></span>
+<span><span class="co"># the best parameters can be extracted with:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lsem</span>, criterion <span class="op">=</span> <span class="st">"AIC"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lsem</span>, criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># if you just want the estimates, use estimates():</span></span>
+<span><span class="fu"><a href="reference/estimates.html">estimates</a></span><span class="op">(</span><span class="va">lsem</span>, criterion <span class="op">=</span> <span class="st">"AIC"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># elements of lsem can be accessed with the @ operator:</span></span>
 <span><span class="va">lsem</span><span class="op">@</span><span class="va">parameters</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span></span>
@@ -280,8 +299,8 @@
 <span><span class="co"># get best model according to cross-validation:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">cv</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">#### Advanced ###</span></span>
-<span><span class="co"># Switching the optimizer # </span></span>
+<span><span class="co">#### Advanced ####</span></span>
+<span><span class="co"># Switching the optimizer:</span></span>
 <span><span class="co"># Use the "method" argument to switch the optimizer. The control argument</span></span>
 <span><span class="co"># must also be changed to the corresponding function:</span></span>
 <span><span class="va">lsemIsta</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/lasso.html">lasso</a></span><span class="op">(</span></span>
@@ -299,7 +318,7 @@
 <div class="section level1">
 <h1 id="transformations">Transformations<a class="anchor" aria-label="anchor" href="#transformations"></a>
 </h1>
-<p><strong>lessSEM</strong> allows for parameter transformations which could, for instance, be used to test measurement invariance in longitudinal models (e.g., Liang, 2018; Bauer et al., 2020). A thorough introduction is provided in <code><a href="articles/Parameter-transformations.html">vignette('Parameter-transformations', package = 'lessSEM')</a></code>. As an example, we will test measurement invariance in the <code>PoliticalDemocracy</code> data set.</p>
+<p><strong>lessSEM</strong> allows for parameter transformations that could, for instance, be used to test measurement invariance in longitudinal models (e.g., Liang, 2018; Bauer et al., 2020). A thorough introduction is provided in <code><a href="articles/Parameter-transformations.html">vignette('Parameter-transformations', package = 'lessSEM')</a></code>. As an example, we will test measurement invariance in the <code>PoliticalDemocracy</code> data set.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span>
@@ -419,11 +438,12 @@
 <li>(variants of) iterative shrinkage and thresholding (e.g., Beck &amp; Teboulle, 2009; Gong et al., 2013; Parikh &amp; Boyd, 2013); optimization of cappedL1, lsp, scad, and mcp is based on Gong et al. (2013)</li>
 <li>glmnet (Friedman et al., 2010; Yuan et al., 2012; Huang, 2020)</li>
 </ul>
-<p>These optimizers are implemented based on the <a href="https://github.com/jhorzek/regCtsem" class="external-link"><strong>regCtsem</strong></a> package. Most importantly, <strong>all optimizers in lessSEM are available for other packages.</strong> There are three ways to implement them which are documented in <code><a href="articles/General-Purpose-Optimization.html">vignette("General-Purpose-Optimization", package = "lessSEM")</a></code>. In short, these are:</p>
+<p>These optimizers are implemented based on the <a href="https://github.com/jhorzek/regCtsem" class="external-link"><strong>regCtsem</strong></a> package. Most importantly, <strong>all optimizers in lessSEM are available for other packages.</strong> There are four ways to implement them which are documented in <code><a href="articles/General-Purpose-Optimization.html">vignette("General-Purpose-Optimization", package = "lessSEM")</a></code>. In short, these are:</p>
 <ol style="list-style-type: decimal">
 <li>using the R interface: All general purpose implementations of the functions are called with prefix “gp” (<code>gpLasso</code>, <code>gpScad</code>, …). More information and examples can be found in the documentation of these functions (e.g., <code><a href="reference/gpLasso.html">?lessSEM::gpLasso</a></code>, <code><a href="reference/gpAdaptiveLasso.html">?lessSEM::gpAdaptiveLasso</a></code>, <code><a href="reference/gpElasticNet.html">?lessSEM::gpElasticNet</a></code>). The interface is similar to the optim optimizers in R.</li>
 <li>using Rcpp, we can pass C++ function pointers to the general purpose optimizers <code>gpLassoCpp</code>, <code>gpScadCpp</code>, … (e.g., <code><a href="reference/gpLassoCpp.html">?lessSEM::gpLassoCpp</a></code>)</li>
 <li>All optimizers are implemented as C++ header-only files in <strong>lessSEM</strong>. Thus, they can be accessed from other packages using C++. The interface is similar to that of the <a href="https://ensmallen.org/" class="external-link"><strong>ensmallen</strong></a> library. We have implemented a simple example for elastic net regularization of linear regressions in the <a href="https://github.com/jhorzek/lessLM" class="external-link"><strong>lessLM</strong></a> package. You can also find more details on the general design of the optimizer interface in <code><a href="articles/The-optimizer-interface.html">vignette("The-optimizer-interface", package = "lessSEM")</a></code>.</li>
+<li>The optimizers are implemented in the separate C++ header only library <a href="https://jhorzek.github.io/lesstimate/" class="external-link">lesstimate</a> that can be used as a submodule in R packages.</li>
 </ol>
 </div>
 <div class="section level1">
@@ -518,7 +538,7 @@
 </div>
 </div>
 <div class="section level1">
-<h1 id="important-notes">Important Notes<a class="anchor" aria-label="anchor" href="#important-notes"></a>
+<h1 id="license-note">LICENSE NOTE<a class="anchor" aria-label="anchor" href="#license-note"></a>
 </h1>
 <p>THE SOFTWARE IS PROVIDED ‘AS IS’, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
 </div>
@@ -526,6 +546,7 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=lessSEM" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/jhorzek/lessSEM/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/jhorzek/lessSEM/issues" class="external-link">Report a bug</a></li>
 </ul>
@@ -551,7 +572,6 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Jannik H. Orzek <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0002-3123-2248" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
 

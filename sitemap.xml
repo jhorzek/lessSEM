@@ -10,6 +10,9 @@
     <loc>/articles/Definition-Variables-and-Multi-Group-SEM.html</loc>
   </url>
   <url>
+    <loc>/articles/Estimator-Settings.html</loc>
+  </url>
+  <url>
     <loc>/articles/General-Purpose-Optimization.html</loc>
   </url>
   <url>
@@ -41,6 +44,9 @@
   </url>
   <url>
     <loc>/index.html</loc>
+  </url>
+  <url>
+    <loc>/news/index.html</loc>
   </url>
   <url>
     <loc>/reference/AIC-Rcpp_SEMCpp-method.html</loc>
@@ -88,6 +94,12 @@
     <loc>/reference/Rcpp_bfgsEnetSEM-class.html</loc>
   </url>
   <url>
+    <loc>/reference/Rcpp_glmnetCappedL1MgSEM-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/Rcpp_glmnetCappedL1SEM-class.html</loc>
+  </url>
+  <url>
     <loc>/reference/Rcpp_glmnetEnetGeneralPurpose-class.html</loc>
   </url>
   <url>
@@ -98,6 +110,24 @@
   </url>
   <url>
     <loc>/reference/Rcpp_glmnetEnetSEM-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/Rcpp_glmnetLspMgSEM-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/Rcpp_glmnetLspSEM-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/Rcpp_glmnetMcpMgSEM-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/Rcpp_glmnetMcpSEM-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/Rcpp_glmnetScadMgSEM-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/Rcpp_glmnetScadSEM-class.html</loc>
   </url>
   <url>
     <loc>/reference/Rcpp_istaCappedL1GeneralPurpose-class.html</loc>
@@ -188,9 +218,6 @@
   </url>
   <url>
     <loc>/reference/addMcp.html</loc>
-  </url>
-  <url>
-    <loc>/reference/addRidge.html</loc>
   </url>
   <url>
     <loc>/reference/addScad.html</loc>
@@ -298,6 +325,12 @@
     <loc>/reference/dot-SEMdata.html</loc>
   </url>
   <url>
+    <loc>/reference/dot-SEMdataWLS.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-adaptBreakingForWls.html</loc>
+  </url>
+  <url>
     <loc>/reference/dot-addMeanStructure.html</loc>
   </url>
   <url>
@@ -346,13 +379,13 @@
     <loc>/reference/dot-fit.html</loc>
   </url>
   <url>
+    <loc>/reference/dot-fitElasticNetMix.html</loc>
+  </url>
+  <url>
     <loc>/reference/dot-fitFunction.html</loc>
   </url>
   <url>
-    <loc>/reference/dot-fitGlmnet.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dot-fitIsta.html</loc>
+    <loc>/reference/dot-fitMix.html</loc>
   </url>
   <url>
     <loc>/reference/dot-getGradients.html</loc>
@@ -490,16 +523,52 @@
     <loc>/reference/dot-standardErrors.html</loc>
   </url>
   <url>
+    <loc>/reference/dot-updateLavaan.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-useElasticNet.html</loc>
+  </url>
+  <url>
     <loc>/reference/elasticNet.html</loc>
   </url>
   <url>
+    <loc>/reference/estimates-cvRegularizedSEM-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/estimates-regularizedSEM-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/estimates-regularizedSEMMixedPenalty-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/estimates.html</loc>
+  </url>
+  <url>
     <loc>/reference/fit.html</loc>
+  </url>
+  <url>
+    <loc>/reference/fitIndices-cvRegularizedSEM-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/fitIndices-regularizedSEM-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/fitIndices-regularizedSEMMixedPenalty-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/fitIndices.html</loc>
   </url>
   <url>
     <loc>/reference/getLavaanParameters.html</loc>
   </url>
   <url>
     <loc>/reference/getTuningParameterConfiguration.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetCappedL1MgSEM.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetCappedL1SEM.html</loc>
   </url>
   <url>
     <loc>/reference/glmnetEnetGeneralPurpose.html</loc>
@@ -512,6 +581,36 @@
   </url>
   <url>
     <loc>/reference/glmnetEnetSEM.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetLspMgSEM.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetLspSEM.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetMcpMgSEM.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetMcpSEM.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetMixedMgSEM.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetMixedPenaltyGeneralPurpose.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetMixedPenaltyGeneralPurposeCpp.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetMixedSEM.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetScadMgSEM.html</loc>
+  </url>
+  <url>
+    <loc>/reference/glmnetScadSEM.html</loc>
   </url>
   <url>
     <loc>/reference/gpAdaptiveLasso.html</loc>
@@ -568,12 +667,6 @@
     <loc>/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/istaCappedL1GeneralPurpose.html</loc>
-  </url>
-  <url>
-    <loc>/reference/istaCappedL1GeneralPurposeCpp.html</loc>
-  </url>
-  <url>
     <loc>/reference/istaCappedL1SEM.html</loc>
   </url>
   <url>
@@ -598,34 +691,22 @@
     <loc>/reference/istaLSPSEM.html</loc>
   </url>
   <url>
-    <loc>/reference/istaLspGeneralPurpose.html</loc>
-  </url>
-  <url>
-    <loc>/reference/istaLspGeneralPurposeCpp.html</loc>
-  </url>
-  <url>
-    <loc>/reference/istaMcpGeneralPurpose.html</loc>
-  </url>
-  <url>
-    <loc>/reference/istaMcpGeneralPurposeCpp.html</loc>
-  </url>
-  <url>
     <loc>/reference/istaMcpMgSEM.html</loc>
   </url>
   <url>
     <loc>/reference/istaMcpSEM.html</loc>
   </url>
   <url>
+    <loc>/reference/istaMixedPenaltyGeneralPurpose.html</loc>
+  </url>
+  <url>
+    <loc>/reference/istaMixedPenaltyGeneralPurposeCpp.html</loc>
+  </url>
+  <url>
     <loc>/reference/istaMixedPenaltySEM.html</loc>
   </url>
   <url>
     <loc>/reference/istaMixedPenaltymgSEM.html</loc>
-  </url>
-  <url>
-    <loc>/reference/istaScadGeneralPurpose.html</loc>
-  </url>
-  <url>
-    <loc>/reference/istaScadGeneralPurposeCpp.html</loc>
   </url>
   <url>
     <loc>/reference/istaScadMgSEM.html</loc>
@@ -656,6 +737,9 @@
   </url>
   <url>
     <loc>/reference/logLikelihood-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/logicalMatch.html</loc>
   </url>
   <url>
     <loc>/reference/lsp.html</loc>
@@ -689,6 +773,9 @@
   </url>
   <url>
     <loc>/reference/plot-regularizedSEM-missing-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot-stabSel-missing-method.html</loc>
   </url>
   <url>
     <loc>/reference/regsem2LavaanParameters.html</loc>
@@ -739,6 +826,9 @@
     <loc>/reference/show-regularizedSEMMixedPenalty-method.html</loc>
   </url>
   <url>
+    <loc>/reference/show-stabSel-method.html</loc>
+  </url>
+  <url>
     <loc>/reference/simulateExampleData.html</loc>
   </url>
   <url>
@@ -749,6 +839,12 @@
   </url>
   <url>
     <loc>/reference/smoothLasso.html</loc>
+  </url>
+  <url>
+    <loc>/reference/stabSel-class.html</loc>
+  </url>
+  <url>
+    <loc>/reference/stabilitySelection.html</loc>
   </url>
   <url>
     <loc>/reference/summary-cvRegularizedSEM-method.html</loc>

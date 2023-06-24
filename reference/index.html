@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Definition-Variables-and-Multi-Group-SEM.html">Definition-Variables-and-Multi-Group-SEM</a>
+    <a class="dropdown-item" href="../articles/Estimator-Settings.html">Estimator-Settings</a>
     <a class="dropdown-item" href="../articles/General-Purpose-Optimization.html">General-Purpose-Optimization</a>
     <a class="dropdown-item" href="../articles/Mixed-Penalties.html">Mixed Penalties</a>
     <a class="dropdown-item" href="../articles/Parameter-transformations.html">Parameter-transformations</a>
@@ -36,6 +37,9 @@
     <a class="dropdown-item" href="../articles/The-optimizer-interface.html">The-optimizer-interface</a>
     <a class="dropdown-item" href="../articles/log-likelihood-gradients.html">log-likelihood-gradients</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -152,11 +156,6 @@
           <code><a href="addMcp.html">addMcp()</a></code> 
         </dt>
         <dd>addMcp</dd>
-      </dl><dl><dt>
-          
-          <code><a href="addRidge.html">addRidge()</a></code> 
-        </dt>
-        <dd>addRidge</dd>
       </dl><dl><dt>
           
           <code><a href="addScad.html">addScad()</a></code> 
@@ -319,9 +318,24 @@
         <dd>cvSmoothLasso</dd>
       </dl><dl><dt>
           
+          <code><a href="dot-adaptBreakingForWls.html">.adaptBreakingForWls()</a></code> 
+        </dt>
+        <dd>.adaptBreakingForWls</dd>
+      </dl><dl><dt>
+          
           <code><a href="dot-checkPenalties.html">.checkPenalties()</a></code> 
         </dt>
         <dd>.checkPenalties</dd>
+      </dl><dl><dt>
+          
+          <code><a href="dot-updateLavaan.html">.updateLavaan()</a></code> 
+        </dt>
+        <dd>.updateLavaan</dd>
+      </dl><dl><dt>
+          
+          <code><a href="dot-useElasticNet.html">.useElasticNet()</a></code> 
+        </dt>
+        <dd>.useElasticNet</dd>
       </dl><dl><dt>
           
           <code><a href="elasticNet.html">elasticNet()</a></code> 
@@ -329,9 +343,49 @@
         <dd>elasticNet</dd>
       </dl><dl><dt>
           
+          <code><a href="estimates-cvRegularizedSEM-method.html">estimates(<i>&lt;cvRegularizedSEM&gt;</i>)</a></code> 
+        </dt>
+        <dd>estimates</dd>
+      </dl><dl><dt>
+          
+          <code><a href="estimates-regularizedSEM-method.html">estimates(<i>&lt;regularizedSEM&gt;</i>)</a></code> 
+        </dt>
+        <dd>estimates</dd>
+      </dl><dl><dt>
+          
+          <code><a href="estimates-regularizedSEMMixedPenalty-method.html">estimates(<i>&lt;regularizedSEMMixedPenalty&gt;</i>)</a></code> 
+        </dt>
+        <dd>estimates</dd>
+      </dl><dl><dt>
+          
+          <code><a href="estimates.html">estimates()</a></code> 
+        </dt>
+        <dd>S4 method to exract the estimates of an object</dd>
+      </dl><dl><dt>
+          
           <code><a href="fit.html">fit()</a></code> 
         </dt>
         <dd>fit</dd>
+      </dl><dl><dt>
+          
+          <code><a href="fitIndices-cvRegularizedSEM-method.html">fitIndices(<i>&lt;cvRegularizedSEM&gt;</i>)</a></code> 
+        </dt>
+        <dd>fitIndices</dd>
+      </dl><dl><dt>
+          
+          <code><a href="fitIndices-regularizedSEM-method.html">fitIndices(<i>&lt;regularizedSEM&gt;</i>)</a></code> 
+        </dt>
+        <dd>fitIndices</dd>
+      </dl><dl><dt>
+          
+          <code><a href="fitIndices-regularizedSEMMixedPenalty-method.html">fitIndices(<i>&lt;regularizedSEMMixedPenalty&gt;</i>)</a></code> 
+        </dt>
+        <dd>fitIndices</dd>
+      </dl><dl><dt>
+          
+          <code><a href="fitIndices.html">fitIndices()</a></code> 
+        </dt>
+        <dd>S4 method to compute fit indices (e.g., AIC, BIC, ...)</dd>
       </dl><dl><dt>
           
           <code><a href="getLavaanParameters.html">getLavaanParameters()</a></code> 
@@ -342,6 +396,16 @@
           <code><a href="getTuningParameterConfiguration.html">getTuningParameterConfiguration()</a></code> 
         </dt>
         <dd>getTuningParameterConfiguration</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetCappedL1MgSEM.html">glmnetCappedL1MgSEM</a></code> 
+        </dt>
+        <dd>CappedL1 optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetCappedL1SEM.html">glmnetCappedL1SEM</a></code> 
+        </dt>
+        <dd>CappedL1 optimization with glmnet optimizer</dd>
       </dl><dl><dt>
           
           <code><a href="glmnetEnetGeneralPurpose.html">glmnetEnetGeneralPurpose</a></code> 
@@ -362,6 +426,56 @@
           <code><a href="glmnetEnetSEM.html">glmnetEnetSEM</a></code> 
         </dt>
         <dd>elastic net optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetLspMgSEM.html">glmnetLspMgSEM</a></code> 
+        </dt>
+        <dd>lsp optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetLspSEM.html">glmnetLspSEM</a></code> 
+        </dt>
+        <dd>lsp optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetMcpMgSEM.html">glmnetMcpMgSEM</a></code> 
+        </dt>
+        <dd>mcp optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetMcpSEM.html">glmnetMcpSEM</a></code> 
+        </dt>
+        <dd>mcp optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetMixedMgSEM.html">glmnetMixedMgSEM</a></code> 
+        </dt>
+        <dd>mixed optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetMixedPenaltyGeneralPurpose.html">glmnetMixedPenaltyGeneralPurpose</a></code> 
+        </dt>
+        <dd>mixed optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetMixedPenaltyGeneralPurposeCpp.html">glmnetMixedPenaltyGeneralPurposeCpp</a></code> 
+        </dt>
+        <dd>mixed optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetMixedSEM.html">glmnetMixedSEM</a></code> 
+        </dt>
+        <dd>mixed optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetScadMgSEM.html">glmnetScadMgSEM</a></code> 
+        </dt>
+        <dd>scad optimization with glmnet optimizer</dd>
+      </dl><dl><dt>
+          
+          <code><a href="glmnetScadSEM.html">glmnetScadSEM</a></code> 
+        </dt>
+        <dd>scad optimization with glmnet optimizer</dd>
       </dl><dl><dt>
           
           <code><a href="gpAdaptiveLasso.html">gpAdaptiveLasso()</a></code> 
@@ -449,16 +563,6 @@
         <dd>gpScadCpp</dd>
       </dl><dl><dt>
           
-          <code><a href="istaCappedL1GeneralPurpose.html">istaCappedL1GeneralPurpose</a></code> 
-        </dt>
-        <dd>cappedL1 optimization with ista</dd>
-      </dl><dl><dt>
-          
-          <code><a href="istaCappedL1GeneralPurposeCpp.html">istaCappedL1GeneralPurposeCpp</a></code> 
-        </dt>
-        <dd>cappedL1 optimization with ista</dd>
-      </dl><dl><dt>
-          
           <code><a href="istaCappedL1SEM.html">istaCappedL1SEM</a></code> 
         </dt>
         <dd>cappedL1 optimization with ista</dd>
@@ -499,26 +603,6 @@
         <dd>lsp optimization with ista</dd>
       </dl><dl><dt>
           
-          <code><a href="istaLspGeneralPurpose.html">istaLspGeneralPurpose</a></code> 
-        </dt>
-        <dd>lsp optimization with ista</dd>
-      </dl><dl><dt>
-          
-          <code><a href="istaLspGeneralPurposeCpp.html">istaLspGeneralPurposeCpp</a></code> 
-        </dt>
-        <dd>lsp optimization with ista</dd>
-      </dl><dl><dt>
-          
-          <code><a href="istaMcpGeneralPurpose.html">istaMcpGeneralPurpose</a></code> 
-        </dt>
-        <dd>mcp optimization with ista</dd>
-      </dl><dl><dt>
-          
-          <code><a href="istaMcpGeneralPurposeCpp.html">istaMcpGeneralPurposeCpp</a></code> 
-        </dt>
-        <dd>mcp optimization with ista</dd>
-      </dl><dl><dt>
-          
           <code><a href="istaMcpMgSEM.html">istaMcpMgSEM</a></code> 
         </dt>
         <dd>mcp optimization with ista</dd>
@@ -529,6 +613,16 @@
         <dd>mcp optimization with ista</dd>
       </dl><dl><dt>
           
+          <code><a href="istaMixedPenaltyGeneralPurpose.html">istaMixedPenaltyGeneralPurpose</a></code> 
+        </dt>
+        <dd>mixed penalty optimization with ista</dd>
+      </dl><dl><dt>
+          
+          <code><a href="istaMixedPenaltyGeneralPurposeCpp.html">istaMixedPenaltyGeneralPurposeCpp</a></code> 
+        </dt>
+        <dd>mixed penalty optimization with ista</dd>
+      </dl><dl><dt>
+          
           <code><a href="istaMixedPenaltySEM.html">istaMixedPenaltySEM</a></code> 
         </dt>
         <dd>mixed penalty optimization with ista</dd>
@@ -537,16 +631,6 @@
           <code><a href="istaMixedPenaltymgSEM.html">istaMixedPenaltymgSEM</a></code> 
         </dt>
         <dd>mixed penalty optimization with ista</dd>
-      </dl><dl><dt>
-          
-          <code><a href="istaScadGeneralPurpose.html">istaScadGeneralPurpose</a></code> 
-        </dt>
-        <dd>scad optimization with ista</dd>
-      </dl><dl><dt>
-          
-          <code><a href="istaScadGeneralPurposeCpp.html">istaScadGeneralPurposeCpp</a></code> 
-        </dt>
-        <dd>scad optimization with ista</dd>
       </dl><dl><dt>
           
           <code><a href="istaScadMgSEM.html">istaScadMgSEM</a></code> 
@@ -593,6 +677,11 @@
         </dt>
         <dd>Class for log-likelihood of regularized SEM. Note: we define a custom logLik -
 Function because the generic one is using df = number of parameters which might be confusing.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="logicalMatch.html">logicalMatch()</a></code> 
+        </dt>
+        <dd>logicalMatch</dd>
       </dl><dl><dt>
           
           <code><a href="lsp.html">lsp()</a></code> 
@@ -648,6 +737,11 @@ Function because the generic one is using df = number of parameters which might 
           <code><a href="plot-regularizedSEM-missing-method.html">plot(<i>&lt;regularizedSEM&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> 
         </dt>
         <dd>plots the regularized and unregularized parameters for all levels of lambda</dd>
+      </dl><dl><dt>
+          
+          <code><a href="plot-stabSel-missing-method.html">plot(<i>&lt;stabSel&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> 
+        </dt>
+        <dd>plots the regularized and unregularized parameters for all levels of the tuning parameters</dd>
       </dl><dl><dt>
           
           <code><a href="regsem2LavaanParameters.html">regsem2LavaanParameters()</a></code> 
@@ -725,6 +819,11 @@ Function because the generic one is using df = number of parameters which might 
         <dd>show</dd>
       </dl><dl><dt>
           
+          <code><a href="show-stabSel-method.html">show(<i>&lt;stabSel&gt;</i>)</a></code> 
+        </dt>
+        <dd>show</dd>
+      </dl><dl><dt>
+          
           <code><a href="simulateExampleData.html">simulateExampleData()</a></code> 
         </dt>
         <dd>simulateExampleData</dd>
@@ -743,6 +842,16 @@ Function because the generic one is using df = number of parameters which might 
           <code><a href="smoothLasso.html">smoothLasso()</a></code> 
         </dt>
         <dd>smoothLasso</dd>
+      </dl><dl><dt>
+          
+          <code><a href="stabSel-class.html">stabSel-class</a></code> 
+        </dt>
+        <dd>Class for stability selection</dd>
+      </dl><dl><dt>
+          
+          <code><a href="stabilitySelection.html">stabilitySelection()</a></code> 
+        </dt>
+        <dd>stabilitySelection</dd>
       </dl><dl><dt>
           
           <code><a href="summary-cvRegularizedSEM-method.html">summary(<i>&lt;cvRegularizedSEM&gt;</i>)</a></code> 

@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Definition-Variables-and-Multi-Group-SEM.html">Definition-Variables-and-Multi-Group-SEM</a>
+    <a class="dropdown-item" href="../articles/Estimator-Settings.html">Estimator-Settings</a>
     <a class="dropdown-item" href="../articles/General-Purpose-Optimization.html">General-Purpose-Optimization</a>
     <a class="dropdown-item" href="../articles/Mixed-Penalties.html">Mixed Penalties</a>
     <a class="dropdown-item" href="../articles/Parameter-transformations.html">Parameter-transformations</a>
@@ -60,6 +61,9 @@
     <a class="dropdown-item" href="../articles/The-optimizer-interface.html">The-optimizer-interface</a>
     <a class="dropdown-item" href="../articles/log-likelihood-gradients.html">log-likelihood-gradients</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -107,7 +111,7 @@ Unfortunately, <strong>lessSEM</strong> does not support the same syntax
 at the moment. “Throwing” a multi-group SEM into
 <strong>lessSEM</strong> will just result in errors. Instead,
 <strong>lessSEM</strong> follows a slightly different approach: You can
-pass multiple <strong>lavaan</strong> models at once which are then
+pass multiple <strong>lavaan</strong> models at once that are then
 combined into a multi-group model.</p>
 <p>In the following, we will look at a two-group model to better
 understand how multi-group models are implemented in
@@ -122,7 +126,7 @@ have to fit separate models for each of the groups in
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># For simplicity, we will use a subset of the Holzinger Swineford data set </span></span>
-<span><span class="co"># which is also used at https://lavaan.ugent.be/tutorial/groups.html</span></span>
+<span><span class="co"># that is also used at https://lavaan.ugent.be/tutorial/groups.html</span></span>
 <span><span class="co"># to demonstrate multi-group SEM</span></span>
 <span></span>
 <span><span class="co"># To use mutli-group SEM in lessSEM, we have to set up a separate model</span></span>
@@ -175,7 +179,7 @@ have to fit separate models for each of the groups in
 <span></span>
 <span><span class="co"># We will just estimate the parameters using the BFGS optimizer without any </span></span>
 <span><span class="co"># regularization.</span></span>
-<span><span class="co"># Note that we pass the two models as a vector. This is very important: lessSEM</span></span>
+<span><span class="co"># Note that we pass the two models as a vector. lessSEM</span></span>
 <span><span class="co"># will then set up the multi-group model</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bfgs.html">bfgs</a></span><span class="op">(</span>lavaanModel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">fit_Pasteur</span>, <span class="va">fit_Grant_White</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Let’s have a look at the parameters:</p>
@@ -201,12 +205,12 @@ have to fit separate models for each of the groups in
 <span><span class="co">#&gt;          0.7360</span></span></code></pre></div>
 <p>That’s curious! There are group-specific parameters, but
 <strong>only</strong> for the parameters where we provided
-group-specific names! This is very important:</p>
+group-specific names!</p>
 <blockquote>
 <p><strong>Important</strong>: If you set up a multi-group model with
 <strong>lessSEM</strong>, <strong>lessSEM</strong> will assume that all
 parameters with the same names should also have the same values. This
-includes parameters which you may have estimated, but for whom the names
+includes parameters that you may have estimated, but for whom the names
 were provided by <strong>lavaan</strong> (e.g., variances).</p>
 </blockquote>
 <div class="section level3">
@@ -215,7 +219,7 @@ were provided by <strong>lavaan</strong> (e.g., variances).</p>
 <p>All parameters that have the same labels in multiple models will be
 constrained to equality across models! If you are not careful, this can
 result in very annoying mistakes. To demonstrate this, we will use two
-very different models which may share some parameter names.</p>
+very different models that may share some parameter names.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Model from ?lavaan::sem</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
@@ -360,19 +364,19 @@ instance), the <code>lasso</code>-function:</p>
 <span><span class="co">#&gt;  ------- ------- ||--|| ---------- ---------- ---------- ---------- ----------</span></span>
 <span><span class="co">#&gt;   lambda   alpha ||--|| l1_Pasteur l2_Pasteur l3_Pasteur         v1         v2</span></span>
 <span><span class="co">#&gt;  ======= ======= ||--|| ========== ========== ========== ========== ==========</span></span>
-<span><span class="co">#&gt;   0.0000  1.0000 ||--||     0.7241     0.5611     0.8822     0.8447     1.0710</span></span>
+<span><span class="co">#&gt;   0.0000  1.0000 ||--||     0.7239     0.5609     0.8826     0.8450     1.0712</span></span>
 <span><span class="co">#&gt;                                                                           </span></span>
 <span><span class="co">#&gt;                                                                           </span></span>
 <span><span class="co">#&gt;  ---------- ---------- ---------- ---------- -------------- --------------</span></span>
 <span><span class="co">#&gt;          v3         m1         m2         m3 l1_Grant_White l2_Grant_White</span></span>
 <span><span class="co">#&gt;  ========== ========== ========== ========== ============== ==============</span></span>
-<span><span class="co">#&gt;      0.6110     4.9211     6.0768     2.2279         0.7089         0.5537</span></span>
+<span><span class="co">#&gt;      0.6107     4.9212     6.0769     2.2280         0.7087         0.5536</span></span>
 <span><span class="co">#&gt;                </span></span>
 <span><span class="co">#&gt;                </span></span>
 <span><span class="co">#&gt;  --------------</span></span>
 <span><span class="co">#&gt;  l3_Grant_White</span></span>
 <span><span class="co">#&gt;  ==============</span></span>
-<span><span class="co">#&gt;          0.7358</span></span></code></pre></div>
+<span><span class="co">#&gt;          0.7361</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="regularizing-differences-between-parameters-using-lesssem">Regularizing Differences Between Parameters using
 <strong>lessSEM</strong><a class="anchor" aria-label="anchor" href="#regularizing-differences-between-parameters-using-lesssem"></a>
@@ -452,7 +456,7 @@ supported by <strong>lessSEM</strong>.</p>
 <p>Automatic cross-validation for multi-group models with, for instance,
 <code>cvLasso</code> is <em>not</em> yet implemented. This is because it
 can be difficult to decide how to split up the data set in each
-submodel. If you want to use cross-validation, you will unfortunately
+submodel. If you want to use cross-validation, you will (unfortunately)
 have to set up the procedure manually.</p>
 </div>
 <div class="section level2">

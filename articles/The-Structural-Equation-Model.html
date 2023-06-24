@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.16</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Definition-Variables-and-Multi-Group-SEM.html">Definition-Variables-and-Multi-Group-SEM</a>
+    <a class="dropdown-item" href="../articles/Estimator-Settings.html">Estimator-Settings</a>
     <a class="dropdown-item" href="../articles/General-Purpose-Optimization.html">General-Purpose-Optimization</a>
     <a class="dropdown-item" href="../articles/Mixed-Penalties.html">Mixed Penalties</a>
     <a class="dropdown-item" href="../articles/Parameter-transformations.html">Parameter-transformations</a>
@@ -60,6 +61,9 @@
     <a class="dropdown-item" href="../articles/The-optimizer-interface.html">The-optimizer-interface</a>
     <a class="dropdown-item" href="../articles/log-likelihood-gradients.html">log-likelihood-gradients</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -161,7 +165,7 @@ three colons as shown above to access this function!</p>
 <span><span class="co">#&gt;         y6~1         y7~1         y8~1 </span></span>
 <span><span class="co">#&gt;    2.9780741    6.1962639    4.0433897 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; -2 log-Likelihood: 3097.6361581071</span></span></code></pre></div>
+<span><span class="co">#&gt; Objective value: 3097.6361581071</span></span></code></pre></div>
 <p>The <code>lessSEM:::.SEMFromLavaan</code> function comes with some
 additional arguments to fine tune the initialization of the model.</p>
 <ol style="list-style-type: decimal">
@@ -399,7 +403,7 @@ the raw parameters instead would look as follows:</p>
 <code class="sourceCode R"><span><span class="va">mySEM</span> <span class="op">&lt;-</span> <span class="fu">lessSEM</span><span class="fu">:::</span><span class="fu"><a href="../reference/dot-fit.html">.fit</a></span><span class="op">(</span>SEM <span class="op">=</span> <span class="va">mySEM</span><span class="op">)</span></span></code></pre></div>
 <p>The -2-log-likelihood can be accessed with:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mySEM</span><span class="op">$</span><span class="va">m2LL</span></span>
+<code class="sourceCode R"><span><span class="va">mySEM</span><span class="op">$</span><span class="va">objectiveValue</span></span>
 <span><span class="co">#&gt; [1] 3100.741</span></span></code></pre></div>
 </div>
 <div class="section level2">
