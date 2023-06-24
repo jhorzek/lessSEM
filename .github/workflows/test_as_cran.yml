@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         r-version: ['release', 'devel']
-        os: ['windows-latest']
+        os: ['windows-latest', 'macOS-latest']
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,6 +26,5 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
-      - run:
-          choco install pandoc
+      - uses: r-lib/actions/setup-pandoc@v1
       - uses: r-lib/actions/check-r-package@v2
