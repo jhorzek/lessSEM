@@ -4,10 +4,14 @@
 \alias{AIC,regularizedSEM-method}
 \title{AIC}
 \usage{
-\S4method{AIC}{regularizedSEM}(object)
+\S4method{AIC}{regularizedSEM}(object, ..., k = 2)
 }
 \arguments{
 \item{object}{object of class regularizedSEM}
+
+\item{...}{not used}
+
+\item{k}{multiplier for number of parameters}
 }
 \value{
 AIC values

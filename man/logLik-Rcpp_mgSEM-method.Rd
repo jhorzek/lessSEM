@@ -4,10 +4,12 @@
 \alias{logLik,Rcpp_mgSEM-method}
 \title{logLik}
 \usage{
-\S4method{logLik}{Rcpp_mgSEM}(object)
+\S4method{logLik}{Rcpp_mgSEM}(object, ...)
 }
 \arguments{
 \item{object}{object of class Rcpp_mgSEM}
+
+\item{...}{not used}
 }
 \value{
 log-likelihood of the model

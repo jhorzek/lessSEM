@@ -91,7 +91,6 @@ simulateExampleData <- function(N = 100, # sample size
     
     return(ret)
     
-    
   }
   
   

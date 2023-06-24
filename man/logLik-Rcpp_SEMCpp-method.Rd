@@ -4,10 +4,12 @@
 \alias{logLik,Rcpp_SEMCpp-method}
 \title{logLik}
 \usage{
-\S4method{logLik}{Rcpp_SEMCpp}(object)
+\S4method{logLik}{Rcpp_SEMCpp}(object, ...)
 }
 \arguments{
 \item{object}{object of class Rcpp_SEMCpp}
+
+\item{...}{not used}
 }
 \value{
 log-likelihood of the model
