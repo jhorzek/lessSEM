@@ -90,6 +90,8 @@ lsem <- lasso(
 
 ## Weighted Least Squares
 
+> **Warning** WLS is under development and not fully supported at the moment.
+
 Weighted least squares estimation is an alternative to maximum likelihood
 estimation that is prominent in case of non-normal data. Again, **lavaan**
 covers a wide range of different weighted least squares estimators that 
@@ -156,6 +158,9 @@ lsem <- lasso(
   regularized = paste0("l", 6:15),
   nLambdas = 50)
 ```
+
+Currently, the only procedure to select final parameters that is supported
+by **lessSEM** out of the box is cross-validation. AIC or BIC are not supported.
 
 ### Ordered data
 

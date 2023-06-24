@@ -17,10 +17,9 @@ library(lessSEM)
 ```
 
 To allow for more flexible model estimation, **lessSEM** offers parameter 
-transformations. This is an experimental feature inspired by OpenMx (Neale et al., 2016;
-Pritikin et al., 2015; Hunter 2018). Please be careful when using it. 
-However, parameter transformations can be very powerful and simplify implementing
-some specific forms of regularization. 
+transformations. This is a feature inspired by OpenMx (Neale et al., 2016;
+Pritikin et al., 2015; Hunter 2018). Parameter transformations can be very 
+powerful and simplify implementing some specific forms of regularization. 
 
 ## Motivation
 
@@ -584,10 +583,9 @@ cat(transformationFunction$armaFunction)
 Most importantly, note that the first step here is to extract the required
 parameters from the parameter vector (e.g., `double a1 = parameterValues["a1"];`).
 Next, all of these parameters are directly available for use in your transformations.
-This is why we can simply write `a2 = a1 + delta_a2;`. **lessSEM** also added
-the semicolons required by C++.  Finally, the transformed parameters are returned.
-To pass our function to **lessSEM**, we also create a pointer to our function, 
-but this is beyond the scope here.
+This is why we can simply write `a2 = a1 + delta_a2;`. Finally, the transformed 
+parameters are returned. To pass our function to **lessSEM**, we also create a 
+pointer to our function, but this is beyond the scope here.
 
 At this point you may be wondering where all the more complicated transformations
 are that we promised above. Importantly, you can use any of the functions implemented 

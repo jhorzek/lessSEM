@@ -33,8 +33,9 @@ different parameters have, for instance, been proposed in multi-group models
 
 > Important: You cannot impose two penalties on the same parameter!
 
-Not all penalty combinations are currently supported by all optimizers. The following
-table provides an overview of the penalties you can use with each optimizer:
+Models are fitted with the glmnet or ista optimizer. Note that the 
+optimizers differ in which penalties they support. The following table provides
+an overview:
 
 | Penalty | Function | glmnet | ista |
 | --- | ---- | ---- | ---- |
@@ -47,7 +48,6 @@ table provides an overview of the penalties you can use with each optimizer:
 
 By default, glmnet will be used. Note that the elastic net penalty can
 only be combined with other elastic net penalties.
-
 
 ## Getting Started
 
@@ -103,7 +103,6 @@ at the `penalty` statement in the resulting object:
 ```{r}
 fitMp@penalty
 ```
-
 
 We can access the best parameters according to the BIC with:
 

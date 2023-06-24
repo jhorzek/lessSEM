@@ -33,11 +33,10 @@ Setting up such models with lavaan is explained [here](https://lavaan.ugent.be/t
 Unfortunately, **lessSEM** does not support the same syntax at the moment. "Throwing"
 a multi-group SEM into **lessSEM** will just result in errors. Instead,
 **lessSEM** follows a slightly different approach: You can pass multiple **lavaan**
-models at once which are then combined into a multi-group model. 
+models at once that are then combined into a multi-group model. 
 
 In the following, we will look at a two-group model to better understand how multi-group
 models are implemented in **lessSEM**. 
-
 
 ## First Step: Setting up a Multi-Group Model
 
@@ -47,7 +46,7 @@ separate models for each of the groups in **lavaan**:
 library(lavaan)
 
 # For simplicity, we will use a subset of the Holzinger Swineford data set 
-# which is also used at https://lavaan.ugent.be/tutorial/groups.html
+# that is also used at https://lavaan.ugent.be/tutorial/groups.html
 # to demonstrate multi-group SEM
 
 # To use mutli-group SEM in lessSEM, we have to set up a separate model
@@ -100,7 +99,7 @@ library(lessSEM)
 
 # We will just estimate the parameters using the BFGS optimizer without any 
 # regularization.
-# Note that we pass the two models as a vector. This is very important: lessSEM
+# Note that we pass the two models as a vector. lessSEM
 # will then set up the multi-group model
 fit <- bfgs(lavaanModel = c(fit_Pasteur, fit_Grant_White))
 ```
@@ -109,7 +108,7 @@ library(lessSEM)
 
 # We will just estimate the parameters using the BFGS optimizer without any 
 # regularization.
-# Note that we pass the two models as a vector. This is very important: lessSEM
+# Note that we pass the two models as a vector. lessSEM
 # will then set up the multi-group model
 fit <- bfgs(lavaanModel = c(fit_Pasteur, fit_Grant_White))
 ```
@@ -118,11 +117,11 @@ Let's have a look at the parameters:
 coef(fit)
 ```
 That's curious! There are group-specific parameters, but **only** for the parameters
-where we provided group-specific names! This is very important: 
+where we provided group-specific names!
 
 > **Important**: If you set up a multi-group model with **lessSEM**, **lessSEM** 
 will assume that all parameters with the same names should also have the same values. 
-This includes parameters which you may have estimated, but for whom the names were 
+This includes parameters that you may have estimated, but for whom the names were 
 provided by **lavaan** (e.g., variances). 
 
 ### Different Models with Shared Parameter Labels
@@ -130,7 +129,7 @@ provided by **lavaan** (e.g., variances).
 All parameters that have the same labels in multiple models will
 be constrained to equality across models! If you are not careful, this can result 
 in very annoying mistakes.
-To demonstrate this, we will use two very different models which may share some
+To demonstrate this, we will use two very different models that may share some
 parameter names.
 
 ```{r,include=FALSE}
@@ -310,7 +309,7 @@ currently not supported by **lessSEM**.
 Automatic cross-validation for multi-group models with, for instance, `cvLasso`
 is *not* yet implemented. This is because it can be difficult to decide how to
 split up the data set in each submodel. If you want to use cross-validation,
-you will unfortunately have to set up the procedure manually.
+you will (unfortunately) have to set up the procedure manually.
 
 ## Definition Variables
 

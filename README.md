@@ -15,16 +15,9 @@ have similar functionality. **If you use lessSEM, please also cite
 
 The objectives of **lessSEM** are to provide …
 
-1.  a flexible framework for regularizing SEM and
-2.  optimizers for other SEM packages which can be used with an
-    interface similar to `optim`.
-
-**Important**: Please also check out the implementations of regularized
-SEM in the more mature R packages
-[**regsem**](https://github.com/Rjacobucci/regsem) and
-[**lslx**](https://github.com/psyphh/lslx). Finally, you may want to
-check out the julia package
-[**StructuralEquationModels.jl**](https://github.com/StructuralEquationModels/StructuralEquationModels.jl).
+1.  a flexible framework for regularizing SEM.
+2.  optimizers for other packages that can handle non-differentiable
+    penalty functions.
 
 The following penalty functions are currently implemented in
 **lessSEM**:
@@ -33,15 +26,10 @@ The following penalty functions are currently implemented in
 
 The column “penalty” refers to the name of the function call in the
 **lessSEM** package (e.g., lasso is called with the `lasso()` function).
-Smooth approximations are called with `smoothLasso`,
-`smoothAdaptiveLasso`, and `smoothElasticNet`. These are only
-implemented for the comparison of exact and approximate optimization and
-should not be used. They will be marked as deprecated soon.
 
 The best model can be selected with the AIC or BIC. If you want to use
 cross-validation, use `cvLasso`, `cvAdaptiveLasso`, etc. instead (see,
-e.g., `?lessSEM::cvLasso`). The smooth versions are called
-`cvSmoothLasso`, etc.
+e.g., `?lessSEM::cvLasso`).
 
 ## [**regsem**](https://github.com/Rjacobucci/regsem), [**lslx**](https://github.com/psyphh/lslx), and **lessSEM**
 
@@ -62,16 +50,19 @@ implemented in the three packages:
 |-------------------------------|-----------------|---------------------|-----------------|
 | Model specification           | based on lavaan | similar to lavaan   | based on lavaan |
 | Maximum likelihood estimation | Yes             | Yes                 | Yes             |
-| Least squares estimation      | No              | Yes                 | Yes             |
+| Least squares estimation      | No              | Yes                 | Dev.            |
 | Categorical variables         | No              | Yes                 | No              |
 | Confidence Intervals          | No              | Yes                 | No              |
 | Missing Data                  | FIML            | Auxiliary Variables | FIML            |
 | Multi-group models            | No              | Yes                 | Yes             |
-| Stability selection           | Yes             | No                  | Yes             |
+| Stability selection           | Yes             | No                  | Dev.            |
 | Mixed penalties               | No              | No                  | Yes             |
 | Equality constraints          | Yes             | No                  | Yes             |
 | Parameter transformations     | diff_lasso      | No                  | Yes             |
 | Definition variables          | No              | No                  | Yes             |
+
+> **Warning** Dev. refers to features that are supported, but still
+> under development and may have bugs. Use with caution!
 
 # Installation
 
@@ -91,31 +82,30 @@ devtools::install_github("jhorzek/lessSEM",
                          ref = "development")
 ```
 
-> **A short note on branches**: The lessSEM project has multiple
-> branches. The **main** branch will match the version currently
-> available from CRAN. The **development** branch will have newer
-> features not yet available from CRAN. This branch will have passed all
-> current tests of our test suite, but may not be ready for CRAN yet
-> (e.g., because not all objectives of the road map have been met).
-> **gh-pages** is used to create the [documentation
-> website](jhorzek.github.io/lessSEM/). Finally, all other branches are
-> used for ongoing development and should be considered unstable.
+> **Note** The lessSEM project has multiple branches. The **main**
+> branch will match the version currently available from CRAN. The
+> **development** branch will have newer features not yet available from
+> CRAN. This branch will have passed all current tests of our test
+> suite, but may not be ready for CRAN yet (e.g., because not all
+> objectives of the road map have been met). **gh-pages** is used to
+> create the [documentation website](jhorzek.github.io/lessSEM/).
+> Finally, all other branches are used for ongoing development and
+> should be considered unstable.
 
 # Introduction
 
-You will find a short introduction to regularized SEM with the
-**lessSEM** package in `vignette('lessSEM', package = 'lessSEM')`. More
-information is also provided in the documentation of the individual
-functions (e.g., see `?lessSEM::scad`). Finally, you will find templates
-for a selection of models which can be used with **lessSEM** (e.g., the
-cross-lagged panel model) in the package
-[**lessTemplates**](https://github.com/jhorzek/lessTemplates).
+Please visit the [lessSEM website](https://jhorzek.github.io/lessSEM/)
+for the latest documentation. You will also find a short introduction to
+regularized SEM in `vignette('lessSEM', package = 'lessSEM')`and the
+documentation of the individual functions (e.g., see `?lessSEM::scad`).
+Finally, you will find templates for a selection of models that can be
+used with **lessSEM** (e.g., the cross-lagged panel model) in the
+package [**lessTemplates**](https://github.com/jhorzek/lessTemplates).
 
 # Example
 
 ``` r
 library(lessSEM)
-#> Warning: package 'lavaan' was built under R version 4.2.3
 library(lavaan)
 
 # Identical to regsem, lessSEM builds on the lavaan
@@ -160,9 +150,12 @@ plot(lsem)
 # use the coef-function to show the estimates
 coef(lsem)
 
-# The best parameters can be extracted with:
+# the best parameters can be extracted with:
 coef(lsem, criterion = "AIC")
 coef(lsem, criterion = "BIC")
+
+# if you just want the estimates, use estimates():
+estimates(lsem, criterion = "AIC")
 
 # elements of lsem can be accessed with the @ operator:
 lsem@parameters[1,]
@@ -181,8 +174,8 @@ cv <- cvLasso(lavaanModel = lavaanModel,
 # get best model according to cross-validation:
 coef(cv)
 
-#### Advanced ###
-# Switching the optimizer # 
+#### Advanced ####
+# Switching the optimizer:
 # Use the "method" argument to switch the optimizer. The control argument
 # must also be changed to the corresponding function:
 lsemIsta <- lasso(
@@ -200,7 +193,7 @@ lsemIsta@parameters - lsem@parameters
 
 # Transformations
 
-**lessSEM** allows for parameter transformations which could, for
+**lessSEM** allows for parameter transformations that could, for
 instance, be used to test measurement invariance in longitudinal models
 (e.g., Liang, 2018; Bauer et al., 2020). A thorough introduction is
 provided in
@@ -357,7 +350,7 @@ Currently, **lessSEM** has the following optimizers:
 These optimizers are implemented based on the
 [**regCtsem**](https://github.com/jhorzek/regCtsem) package. Most
 importantly, **all optimizers in lessSEM are available for other
-packages.** There are three ways to implement them which are documented
+packages.** There are four ways to implement them which are documented
 in `vignette("General-Purpose-Optimization", package = "lessSEM")`. In
 short, these are:
 
@@ -379,6 +372,9 @@ short, these are:
     package. You can also find more details on the general design of the
     optimizer interface in
     `vignette("The-optimizer-interface", package = "lessSEM")`.
+4.  The optimizers are implemented in the separate C++ header only
+    library [lesstimate](https://jhorzek.github.io/lesstimate/) that can
+    be used as a submodule in R packages.
 
 # References
 
@@ -486,7 +482,7 @@ short, these are:
   Multidisciplinary Journal, 27(1), 43–55.
   <https://doi.org/10.1080/10705511.2019.1642754>
 
-# Important Notes
+# LICENSE NOTE
 
 THE SOFTWARE IS PROVIDED ‘AS IS’, WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
