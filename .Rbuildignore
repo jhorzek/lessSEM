@@ -15,5 +15,5 @@
 ^R/createVignettes\.R$
 ^inst/include/lesstimate/.git$
 ^CMakeLists.txt$
-^lessOptimizersConfig.cmake$
+^lesstimateConfig.cmake$
 ^vcpkg.json$
