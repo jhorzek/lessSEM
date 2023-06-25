@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# lessSEM <img src="man/figures/logo.svg" align="right" height="139" />
+# lessSEM <img src="man/figures/lessSEM.svg" align="right" height="139" />
 
 **lessSEM** (**l**essSEM **es**timates **s**parse **SEM**) is an R
 package for regularized structural equation modeling (regularized SEM)
