@@ -80,6 +80,11 @@ class istaMixedPenaltyGeneralPurpose{
     lessSEM::penaltyMixedPenalty penalty_;
     lessSEM::penaltyRidge smoothPenalty_;
     
+    initializeMixedProximalOperators(proximalOperatorMixedPenalty_,
+                                     pType);
+    initializeMixedPenalties(penalty_, 
+                             pType);
+    
     lessSEM::control controlIsta = {
       L0,
       eta,

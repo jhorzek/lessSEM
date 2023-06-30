@@ -82,6 +82,9 @@
       lessSEM::penaltyMixedGlmnet penalty_;
       lessSEM::noSmoothPenalty<lessSEM::tuningParametersMixedGlmnet> smoothPenalty_;
       
+      initializeMixedPenaltiesGlmnet(penalty_,
+                                     pType);
+      
       lessSEM::controlGLMNET control_ = {
         initialHessian/N,
         stepSize,
