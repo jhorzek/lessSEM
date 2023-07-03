@@ -121,11 +121,21 @@
   
   ## initialize C++ model
   
-  mySEM <- new(mgSEM)
-  
-  for(m in SEMs){
-    mySEM$addModel(m)
-  }
+  mySEM <- new(mgSEM, length(lavaanModels))
+  mySEM$addModels(SEMs)
+  # if(length(lavaanModels) > 10){
+  #   cat("Thats a lot of models... Setup may take some time as all R objects are copied to C++. Will print progress:\n")
+  #   it <- 0
+  #   pb <- utils::txtProgressBar(min = it, max = length(lavaanModels), style = 3)
+  # }
+  # 
+  # for(m in SEMs){
+  #   if(length(lavaanModels) > 10){
+  #     it <- it + 1
+  #     utils::setTxtProgressBar(pb, it)
+  #   }
+  #   mySEM$addModel(m)
+  # }
   
   # extract parameters
   parameters <- .getParameters(SEM = mySEM, raw = TRUE)

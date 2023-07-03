@@ -9,7 +9,7 @@ inline int findStringInVector(std::string what, std::vector<std::string> where, 
     }
   }
   if(throwError){
-    Rcpp::stop("Could not find parameter.");
+    Rcpp::stop("Could not find the label " + what);
   }else{
     return -1;
   }
@@ -24,7 +24,7 @@ inline int findStringInVector(std::string what, Rcpp::StringVector where, bool t
     }
   }
   if(throwError){
-    Rcpp::stop("Could not find parameter.");
+    Rcpp::stop("Could not find the label " + what);
   }else{
     return -1;
   }

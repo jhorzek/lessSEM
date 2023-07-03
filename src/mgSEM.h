@@ -5,6 +5,7 @@
 #include "SEM.h"
 #include "hessian.h"
 #include "findStringInVector.h"
+#include <memory>
 
 // [[Rcpp :: depends ( RcppArmadillo )]]
 
@@ -57,7 +58,8 @@ public:
 
 class mgSEM{
 public:
-  std::vector<SEMCpp> models;
+  
+  std::vector<std::unique_ptr<SEMCpp>> models;
   int sampleSize = 0;
   
   double objectiveValue;
@@ -70,7 +72,14 @@ public:
   Rcpp::NumericVector parameterValues;
   std::vector<int> locatedInModel;
   
+  mgSEM(){};
+  mgSEM(int nModels){
+    models.reserve(nModels);
+  }
+  
   void addModel(Rcpp::List SEMList);
+  
+  void addModels(const Rcpp::List& SEMList);
   
   void addTransformation(Rcpp::NumericVector extendedParameters,
                          std::vector<bool> isTransformation_,
