@@ -292,6 +292,12 @@ setMethod("fitIndices", "regularizedSEM", function(object) {
     
     if(!multiGroup){
       dataset <- lavInspect(object@inputArguments$lavaanModel, "data")
+      # remove empty rows:
+      if(any(apply(dataset,1,function(x) all(is.na(x))))){
+        warning("Your data set has rows where all observations are missing. lessSEM will",
+                "remove those rows, but it is recommended to do so before fitting the models.")
+        dataset <- dataset[!apply(dataset,1,function(x) all(is.na(x))),,drop = FALSE]
+      }
       sampstats <- lavInspect(object@inputArguments$lavaanModel, "sampstat")
       N <- nrow(dataset)
     }
@@ -314,9 +320,9 @@ setMethod("fitIndices", "regularizedSEM", function(object) {
         satPar <- nrow(sampstats$cov)*(ncol(sampstats$cov)+1)/2 + length(sampstats$mean)
       }
       
-      saturatedFit <- -2*sum(apply(dataset, 1, function(x) mvtnorm::dmvnorm(x = x[!is.na(x)], 
-                                                                            mean = sampstats$mean[!is.na(x)], 
-                                                                            sigma = sampstats$cov[!is.na(x), !is.na(x)], 
+      saturatedFit <- -2*sum(apply(dataset, 1, function(x) mvtnorm::dmvnorm(x = x[!is.na(x), drop = FALSE], 
+                                                                            mean = sampstats$mean[!is.na(x), drop = FALSE], 
+                                                                            sigma = sampstats$cov[!is.na(x), !is.na(x), drop = FALSE], 
                                                                             log = TRUE))
       )
       

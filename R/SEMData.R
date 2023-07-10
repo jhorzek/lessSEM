@@ -27,8 +27,8 @@
       missingSubsets[[mrow]]$N <- length(individuals)
       missingSubsets[[mrow]]$observed <- sum(!pattern)
       missingSubsets[[mrow]]$notMissing <- which(!pattern)-1
-      missingSubsets[[mrow]]$covariance <- ((length(individuals)-1)/length(individuals))*stats::cov(rawData[individuals,!pattern])
-      missingSubsets[[mrow]]$means <- apply(rawData[individuals,!pattern], 2, mean)
+      missingSubsets[[mrow]]$covariance <- ((length(individuals)-1)/length(individuals))*stats::cov(rawData[individuals,!pattern,drop = FALSE])
+      missingSubsets[[mrow]]$means <- apply(rawData[individuals,!pattern,drop = FALSE], 2, mean)
       missingSubsets[[mrow]]$rawData <- rawData[individuals,,drop=FALSE]
       missingSubsets[[mrow]]$objectiveValue <- NA
     }else{

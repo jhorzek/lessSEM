@@ -429,6 +429,13 @@
     rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
     if(is(rawData, "try-error")) 
       stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+    
+    # remove empty rows:
+    if(any(apply(rawData, 1, function(x) all(is.na(x))))){
+        warning("Your data set has rows where all observations are missing. lessSEM will",
+                "remove those rows, but it is recommended to do so before fitting the models.")
+        rawData <- rawData[!apply(rawData, 1, function(x) all(is.na(x))),,drop = FALSE]
+    }
     checkFit <- TRUE
     
   }else{
