@@ -1,3 +1,7 @@
+# lessSEM 1.5.2
+
+* Fixed bug in extreme cases of missing data
+
 # lessSEM 1.5.0
 
 * Added a `NEWS.md` file to track changes to the package.
