@@ -197,6 +197,19 @@ lsemIsta <- lasso(
 lsemIsta@parameters - lsem@parameters
 ```
 
+If you want to regularize all loadings, regressions, variances, or covariances, you
+can also use one of the helper functions to extract the respective parameter labels
+from **lavaan** and then pass these to **lessSEM**:
+
+```{r}
+loadings(lavaanModel)
+regressions(lavaanModel)
+variances(lavaanModel)
+covariances(lavaanModel)
+```
+
+
+
 # Transformations
 
 **lessSEM** allows for parameter transformations that could, for instance, be used to test
