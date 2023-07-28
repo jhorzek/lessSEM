@@ -319,8 +319,8 @@ By regularizing $\Delta a_t$, we can enforce stationarity.
 
 A drawback of the approach outlined above is that the first autoregressive effect
 is treated differently from the rest: After all, why should $a_1$ serve as baseline and not 
-$a_2$ or $a_5$? We will take a slightly different approach, again building on the
-idea of Fisher et al. (2022). A similar approach has also been proposed by Bai et al. (2020).
+$a_2$ or $a_5$? We will take a slightly different approach that is basically identical
+to the fused lasso proposed by Tibshirani et al. (2005).
 Let's define the autoregressive effect as
 
 $$a_t = a_{t-1} + \Delta a_t$$
@@ -1078,7 +1078,6 @@ solutions.
 ## Bibliography
 
 * Arnold, M., Cancér, P. F., Estrada, E., & Voelkle, M. C. (in submission). Score-Guided Recursive Partitioning of Continuous-Time Structural Equation Models.
-* Bai, P., Safikhani, A., & Michailidis, G. (2020). Multiple Change Points Detection in Low Rank and Sparse High Dimensional Vector Autoregressive Models. IEEE Transactions on Signal Processing, 68, 3074–3089. https://doi.org/10.1109/TSP.2020.2993145
 * Belzak, W. C. M., & Bauer, D. J. (2020). Improving the assessment of measurement invariance: Using regularization to select anchor items and identify differential item functioning. Psychological Methods, 25(6), 673–690. https://doi.org/10.1037/met0000253
 * Driver, C. C., Oud, J. H. L., & Voelkle, M. C. (2017). Continuous time structural equation modelling with R package ctsem. Journal of Statistical Software, 77(5), 1–36. https://doi.org/10.18637/jss.v077.i05
 * Fisher, Z. F., Kim, Y., Fredrickson, B. L., & Pipiras, V. (2022). Penalized Estimation and Forecasting of Multiple Subject Intensive Longitudinal Data. Psychometrika, 87(2), 1–29. https://doi.org/10.1007/s11336-021-09825-7
@@ -1094,6 +1093,7 @@ solutions.
 * Orzek, J. H., & Voelkle, M. C. (under review). Regularized continuous time structural equation models: A network perspective.
 * Pritikin, J. N., Hunter, M. D., & Boker, S. M. (2015). Modular open-source software for Item Factor
   Analysis. Educational and Psychological Measurement, 75(3), 458-474
+* Tibshirani, R., Saunders, M., Rosset, S., Zhu, J., & Knight, K. (2005). Sparsity and smoothness via the fused lasso. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 67(1), 91–108. https://doi.org/10.1111/j.1467-9868.2005.00490.x
 * Voelkle, M. C., Oud, J. H. L., Davidov, E., & Schmidt, P. (2012). An sem approach to continuous time modeling of panel data: Relating authoritarianism and anomia. Psychological Methods, 17(2), 176–192. https://doi.org/10.1037/a0027543
 
 

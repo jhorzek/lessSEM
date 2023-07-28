@@ -192,7 +192,9 @@ can use glmnet with your model, we recommend that you do.
 
 ## Bibliography
 
-- Geminiani, E., Marra, G., & Moustaki, I. (2021). Single- and multiple-group penalized factor analysis: A trust-region algorithm approach with integrated automatic multiple tuning parameter selection. Psychometrika, 86(1), 65–95. https://doi.org/10.1007/s11336-021-09751-8
+- Geminiani, E., Marra, G., & Moustaki, I. (2021). Single- and multiple-group penalized factor analysis: 
+A trust-region algorithm approach with integrated automatic multiple tuning parameter selection. 
+Psychometrika, 86(1), 65–95. https://doi.org/10.1007/s11336-021-09751-8
 
 
 
