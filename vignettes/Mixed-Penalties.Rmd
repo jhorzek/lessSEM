@@ -99,14 +99,10 @@ at the `penalty` statement in the resulting object:
 
 ```r
 fitMp@penalty
-#>    ind60=~x2    ind60=~x3           c2           c3           c4    dem60=~y2    dem60=~y3    dem60=~y4    dem65=~y6 
-#>       "none"       "none"      "lasso"      "lasso"      "lasso"       "none"       "none"       "none"       "none" 
-#>    dem65=~y7            c           r1           r2           r3       x1~~x1       x2~~x2       x3~~x3       y2~~y2 
-#>       "none"       "none"       "scad"       "scad"       "scad"       "none"       "none"       "none"       "none" 
-#>       y3~~y3       y4~~y4       y1~~y1       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 
-#>       "none"       "none"       "none"       "none"       "none"       "none"       "none"       "none"       "none" 
-#> dem65~~dem65 
-#>       "none"
+#>    ind60=~x2    ind60=~x3           c2           c3           c4    dem60=~y2    dem60=~y3    dem60=~y4    dem65=~y6    dem65=~y7            c           r1           r2           r3       x1~~x1       x2~~x2       x3~~x3       y2~~y2       y3~~y3 
+#>       "none"       "none"      "lasso"      "lasso"      "lasso"       "none"       "none"       "none"       "none"       "none"       "none"       "scad"       "scad"       "scad"       "none"       "none"       "none"       "none"       "none" 
+#>       y4~~y4       y1~~y1       y5~~y5       y6~~y6       y7~~y7       y8~~y8 ind60~~ind60 dem60~~dem60 dem65~~dem65 
+#>       "none"       "none"       "none"       "none"       "none"       "none"       "none"       "none"       "none"
 ```
 
 We can access the best parameters according to the BIC with:
@@ -114,18 +110,12 @@ We can access the best parameters according to the BIC with:
 
 ```r
 coef(fitMp, criterion = "BIC")
-#>                                                                                                                             
-#>                        Tuning ||--||  Estimates                                                                             
-#>  ---------------------------- ||--|| ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
-#>  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2         c3         c4  dem60=~y2  dem60=~y3  dem60=~y4
-#>  ============================ ||--|| ========== ========== ========== ========== ========== ========== ========== ==========
-#>                       11.0000 ||--||     2.1817     1.8188          .          .          .     1.3540     1.0440     1.2995
-#>                                                                                                                          
-#>                                                                                                                          
-#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
-#>   dem65=~y6  dem65=~y7          c         r1         r2         r3     x1~~x1     x2~~x2     x3~~x3     y2~~y2     y3~~y3
-#>  ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ==========
-#>      1.2585     1.2825     1.3098     1.4738     0.4533     0.8644     0.0818     0.1184     0.4673     6.4896     5.3399
+#>                                                                                                                                                                                                                                                      
+#>                        Tuning ||--||  Estimates                                                                                                                                                                                                      
+#>  ---------------------------- ||--|| ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2         c3         c4  dem60=~y2  dem60=~y3  dem60=~y4  dem65=~y6  dem65=~y7          c         r1         r2         r3     x1~~x1     x2~~x2     x3~~x3     y2~~y2     y3~~y3
+#>  ============================ ||--|| ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ==========
+#>                       11.0000 ||--||     2.1817     1.8188          .          .          .     1.3540     1.0440     1.2995     1.2585     1.2825     1.3098     1.4738     0.4533     0.8644     0.0818     0.1184     0.4673     6.4896     5.3399
 #>                                                                                                          
 #>                                                                                                          
 #>  ---------- ---------- ---------- ---------- ---------- ---------- ------------ ------------ ------------
@@ -201,18 +191,12 @@ fitMp <- fit(mp)
 
 ```r
 coef(fitMp, criterion = "BIC")
-#>                                                                                                                             
-#>                        Tuning ||--||  Estimates                                                                             
-#>  ---------------------------- ||--|| ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
-#>  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2         c3         c4  dem60=~y2  dem60=~y3  dem60=~y4
-#>  ============================ ||--|| ========== ========== ========== ========== ========== ========== ========== ==========
-#>                       11.0000 ||--||     2.1818     1.8188          .          .          .     1.3541     1.0441     1.2997
-#>                                                                                                                          
-#>                                                                                                                          
-#>  ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
-#>   dem65=~y6  dem65=~y7          c         r1         r2         r3     x1~~x1     x2~~x2     x3~~x3     y2~~y2     y3~~y3
-#>  ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ==========
-#>      1.2586     1.2825     1.3099     1.4740     0.4532     0.8643     0.0818     0.1184     0.4672     6.4892     5.3396
+#>                                                                                                                                                                                                                                                      
+#>                        Tuning ||--||  Estimates                                                                                                                                                                                                      
+#>  ---------------------------- ||--|| ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------
+#>  tuningParameterConfiguration ||--||  ind60=~x2  ind60=~x3         c2         c3         c4  dem60=~y2  dem60=~y3  dem60=~y4  dem65=~y6  dem65=~y7          c         r1         r2         r3     x1~~x1     x2~~x2     x3~~x3     y2~~y2     y3~~y3
+#>  ============================ ||--|| ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ========== ==========
+#>                       11.0000 ||--||     2.1818     1.8188          .          .          .     1.3541     1.0441     1.2997     1.2586     1.2825     1.3099     1.4740     0.4532     0.8643     0.0818     0.1184     0.4672     6.4892     5.3396
 #>                                                                                                          
 #>                                                                                                          
 #>  ---------- ---------- ---------- ---------- ---------- ---------- ------------ ------------ ------------
@@ -262,13 +246,15 @@ getTuningParameterConfiguration(regularizedSEMMixedPenalty = fitMp,
 
 
 Here is a short run-time comparison of ista and glmnet with the lasso-regularized 
-model from above: Five repetitions using ista took 43.788 seconds,
-while glmnet took 1.733 seconds. That is, if you 
+model from above: Five repetitions using ista took 24.818 seconds,
+while glmnet took 1.045 seconds. That is, if you 
 can use glmnet with your model, we recommend that you do.
 
 ## Bibliography
 
-- Geminiani, E., Marra, G., & Moustaki, I. (2021). Single- and multiple-group penalized factor analysis: A trust-region algorithm approach with integrated automatic multiple tuning parameter selection. Psychometrika, 86(1), 65–95. https://doi.org/10.1007/s11336-021-09751-8
+- Geminiani, E., Marra, G., & Moustaki, I. (2021). Single- and multiple-group penalized factor analysis: 
+A trust-region algorithm approach with integrated automatic multiple tuning parameter selection. 
+Psychometrika, 86(1), 65–95. https://doi.org/10.1007/s11336-021-09751-8
 
 
 

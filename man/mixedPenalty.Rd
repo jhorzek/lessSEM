@@ -29,8 +29,16 @@ Model of class regularizedSEM
 Provides possibility to impose different penalties on different parameters.
 }
 \details{
-Builds the basis for adding different penalty functions for different parameters
-in the model. Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
+The \code{mixedPenalty} function allows you to add multiple penalties to a single model.
+For instance, you may want to regularize both loadings and regressions in a SEM.
+In this case, using the same penalty (e.g., lasso) for both types of penalties may
+actually not be what you want to use because the penalty function is sensitive to
+the scales of the parameters. Instead, you may want to use two separate lasso
+penalties for loadings and regressions. Similarly, separate penalties for
+different parameters have, for instance, been proposed in multi-group models
+(Geminiani et al., 2021).
+
+Identical to \pkg{regsem}, models are specified using \pkg{lavaan}. Currently,
 most standard SEM are supported. \pkg{lessSEM} also provides full information
 maximum likelihood for missing data. To use this functionality,
 fit your \pkg{lavaan} model with the argument \code{sem(..., missing = 'ml')}.
@@ -65,6 +73,9 @@ For more details on ISTA, see:
 \item Beck, A., & Teboulle, M. (2009). A Fast Iterative Shrinkage-Thresholding
 Algorithm for Linear Inverse Problems. SIAM Journal on Imaging Sciences, 2(1),
 183–202. https://doi.org/10.1137/080716542
+\item Geminiani, E., Marra, G., & Moustaki, I. (2021). Single- and multiple-group penalized factor analysis:
+A trust-region algorithm approach with integrated automatic multiple tuning parameter selection.
+Psychometrika, 86(1), 65–95. https://doi.org/10.1007/s11336-021-09751-8
 \item Gong, P., Zhang, C., Lu, Z., Huang, J., & Ye, J. (2013).
 A General Iterative Shrinkage and Thresholding Algorithm for Non-convex
 Regularized Optimization Problems. Proceedings of the 30th International
@@ -96,7 +107,10 @@ lavaanModel <- lavaan::sem(lavaanSyntax,
 
 # Regularization:
 
-# We can add multiple penalties as follows:
+# In this example, we want to regularize the loadings l6-l10 
+# independently of the loadings l11-15. This could, for instance,
+# reflect that the items y6-y10 and y11-y15 may belong to different
+# subscales. 
 
 regularized <- lavaanModel |>
   # create template for regularized model with mixed penalty:

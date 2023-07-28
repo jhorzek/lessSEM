@@ -265,7 +265,7 @@
     }else{
       lavaanVcov <- suppressWarnings(try(lavaan::vcov(lavaanModel),
                                          silent = TRUE))
-      if(is(lavaanVcov, "try-error")){
+      if(is(lavaanVcov, "try-error") | is.null(lavaanVcov)){
         notes <- c(notes,
                    "Could not extract initial Hessian from lavaan. Switching to initialHessian = 'compute'.")
         initialHessian <- "compute"
