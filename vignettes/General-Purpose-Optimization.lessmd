@@ -631,8 +631,8 @@ C++ library in your packages inst/include folder.
 funCpp <- '
 // [[Rcpp::depends(RcppArmadillo,lessSEM)]]
 
-// NOTE: lesstimate needs C++17
-// [[Rcpp::plugins(cpp17)]]
+// NOTE: lesstimate needs C++14
+// [[Rcpp::plugins(cpp14)]]
 
 
 #include <RcppArmadillo.h>
