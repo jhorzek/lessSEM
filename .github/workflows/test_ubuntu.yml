@@ -70,7 +70,7 @@ jobs:
           install.packages("ctsemOMX") # not available from apt install
         shell: Rscript {0}
       - name: Install lessSEM
-        run: devtools::build(pkg = ".", binary = TRUE)
+        run: devtools::install(pkg = ".")
         shell: Rscript {0}
       - name: Check
         run: rcmdcheck::rcmdcheck(path = ".", args = "--no-manual", error_on = "warning")
