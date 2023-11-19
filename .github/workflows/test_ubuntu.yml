@@ -61,7 +61,7 @@ jobs:
           sudo apt install --no-install-recommends r-cran-lslx
           sudo apt install --no-install-recommends r-cran-matrix
           sudo apt install --no-install-recommends r-cran-openmx
-          sudo apt install --no-install-recommends r-cran-ctsemomx
+          sudo apt install --no-install-recommends r-cran-rstan
       - name: Check
         run: rcmdcheck::rcmdcheck(path = ".", args = "--no-manual", error_on = "warning")
         shell: Rscript {0}
@@ -76,6 +76,7 @@ jobs:
           ref: 'development'
       - name: Extended tests
         run: |
+          install.packages("ctsemOMX") # not available from apt install
           devtools::build(pkg = ".", binary = TRUE)
           rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning")
         shell: Rscript {0}
