@@ -69,6 +69,9 @@ jobs:
           .libPaths(Sys.getenv("R_LIBS_USER"))  # add to the path
           install.packages("ctsemOMX") # not available from apt install
         shell: Rscript {0}
+      - name: Install lessSEM
+        run: devtools::build(pkg = ".", binary = TRUE)
+        shell: Rscript {0}
       - name: Check
         run: rcmdcheck::rcmdcheck(path = ".", args = "--no-manual", error_on = "warning")
         shell: Rscript {0}
