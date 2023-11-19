@@ -4,9 +4,9 @@ Title: Non-Smooth Regularization for Structural Equation Models
 Version: 1.5.3
 Authors@R: c(person(given   = "Jannik H.", family = "Orzek",
                     role    = c("aut", "cre", "cph"),
-                    email   = "orzek@mpib-berlin.mpg.de",
+                    email   = "jannik.orzek@mailbox.org",
                     comment = c(ORCID = "0000-0002-3123-2248")))
-Maintainer: Jannik H. Orzek <orzek@mpib-berlin.mpg.de>
+Maintainer: Jannik H. Orzek <jannik.orzek@mailbox.org>
 Description: Provides regularized structural equation modeling 
   (regularized SEM) with non-smooth penalty functions (e.g., lasso) building 
   on 'lavaan'. The package is heavily inspired by the 

@@ -508,7 +508,7 @@ RCPP_MODULE(SEM_cpp){
   .method( "getEstimator", &SEMCpp::getEstimator, "returns the used estimator as string.")
   .method( "getParameters", &SEMCpp::getParameters, "Returns a data frame with model parameters.")
   .method( "getParameterLabels", &SEMCpp::getParameterLabels, "Returns a vector with unique parameter labels as used internally.")
-  .method( "getGradients", &SEMCpp::getGradients, "Returns a matrix with scores.")
+  .method( "getGradients", &SEMCpp::getGradients, "Returns a vector with gradients.")
   .method( "getScores", &SEMCpp::getScores, "Returns a matrix with scores.")
   .method( "getHessian", &SEMCpp::getHessian, "Returns the hessian of the model. Expects the labels of the parameters and the values of the parameters as well as a boolean indicating if these are raw. Finally, a double (eps) controls the precision of the approximation.")
   .method( "addTransformation", &SEMCpp::addTransformation, "Add a transformation function. Expects parameterLabels and pointer to function.")

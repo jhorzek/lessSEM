@@ -3,6 +3,12 @@
 
 # lessSEM <img src="man/figures/lessSEM.svg" align="right" height="139" />
 
+<!-- badges: start -->
+
+[![Total
+Downloads](https://cranlogs.r-pkg.org/badges/grand-total/lessSEM)](https://cranlogs.r-pkg.org/badges/grand-total/lessSEM)
+<!-- badges: end -->
+
 **lessSEM** (**l**essSEM **es**timates **s**parse **SEM**) is an R
 package for regularized structural equation modeling (regularized SEM)
 with non-smooth penalty functions (e.g., lasso) building on
