@@ -64,6 +64,9 @@ jobs:
           sudo apt install --no-install-recommends r-cran-rstan
       - name: Install dependencies not from apt
         run: |
+          # specify library location (copied from teichert at https://stackoverflow.com/questions/32540919/library-is-not-writable)
+          dir.create(Sys.getenv("R_LIBS_USER"), recursive = TRUE)  # create personal library
+          .libPaths(Sys.getenv("R_LIBS_USER"))  # add to the path
           install.packages("ctsemOMX") # not available from apt install
         shell: Rscript {0}
       - name: Check
