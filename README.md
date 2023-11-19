@@ -94,7 +94,7 @@ devtools::install_github("jhorzek/lessSEM",
 > CRAN. This branch will have passed all current tests of our test
 > suite, but may not be ready for CRAN yet (e.g., because not all
 > objectives of the road map have been met). **gh-pages** is used to
-> create the [documentation website](jhorzek.github.io/lessSEM/).
+> create the [documentation website](https://jhorzek.github.io/lessSEM/).
 > Finally, all other branches are used for ongoing development and
 > should be considered unstable.
 
