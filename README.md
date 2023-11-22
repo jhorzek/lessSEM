@@ -73,14 +73,19 @@ in R:
 install.packages("lessSEM")
 ```
 
-The newest version of the package can be installed from GitHub using the
-following commands in R:
+The newest version of the package can be installed from GitHub. However,
+because the project uses submodules, `devtools::install_github` does not
+download the entire R package. To download the development version, the
+following command needs to be run in git:
 
-``` r
-if(!require(devtools)) install.packages("devtools")
-devtools::install_github("jhorzek/lessSEM", 
-                         ref = "development")
-```
+    git clone --branch development --recurse-submodules https://github.com/jhorzek/lessSEM.git
+
+Navigate to the folder to which git copied the project and install the
+package with the lessSEM.Rproj file.
+
+If you want to download the main branch, use
+
+    git clone --recurse-submodules https://github.com/jhorzek/lessSEM.git
 
 > **Note** The lessSEM project has multiple branches. The **main**
 > branch will match the version currently available from CRAN. The
@@ -88,9 +93,10 @@ devtools::install_github("jhorzek/lessSEM",
 > CRAN. This branch will have passed all current tests of our test
 > suite, but may not be ready for CRAN yet (e.g., because not all
 > objectives of the road map have been met). **gh-pages** is used to
-> create the [documentation website](https://jhorzek.github.io/lessSEM/).
-> Finally, all other branches are used for ongoing development and
-> should be considered unstable.
+> create the [documentation
+> website](https://jhorzek.github.io/lessSEM/). Finally, all other
+> branches are used for ongoing development and should be considered
+> unstable.
 
 # Introduction
 
