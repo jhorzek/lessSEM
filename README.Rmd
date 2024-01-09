@@ -16,6 +16,10 @@ set.seed(123)
 
 # lessSEM <img src="man/figures/lessSEM.svg" align="right" height="139" />
 
+<!-- badges: start -->
+[![Total Downloads](https://cranlogs.r-pkg.org/badges/grand-total/lessSEM)](https://cranlogs.r-pkg.org/badges/grand-total/lessSEM)
+<!-- badges: end -->
+
 **lessSEM** (**l**essSEM **es**timates **s**parse **SEM**) is an R package for 
 regularized structural equation modeling (regularized SEM) with non-smooth 
 penalty functions (e.g., lasso) building on [**lavaan**](https://github.com/yrosseel/lavaan). 
@@ -204,6 +208,19 @@ lsemIsta <- lasso(
 # Note: The results are basically identical:
 lsemIsta@parameters - lsem@parameters
 ```
+
+If you want to regularize all loadings, regressions, variances, or covariances, you
+can also use one of the helper functions to extract the respective parameter labels
+from **lavaan** and then pass these to **lessSEM**:
+
+```{r}
+loadings(lavaanModel)
+regressions(lavaanModel)
+variances(lavaanModel)
+covariances(lavaanModel)
+```
+
+
 
 # Transformations
 

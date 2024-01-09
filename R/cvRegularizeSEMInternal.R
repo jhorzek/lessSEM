@@ -68,7 +68,7 @@
                                                                       control$breakOuter == controlGlmnet()$breakOuter
                                              ))
   
-  rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
+  rawData <- try(.getRawData(lavaanModel, NULL, "fiml")$rawData)
   if(is(rawData, "try-error")) 
     stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
   N <- nrow(rawData)
@@ -91,7 +91,7 @@
                                           transformations = FALSE))
   
   # check if the data was standardized:
-  if(all(apply(rawData, 2, function(x) abs(mean(x)) <= 1e-5))) 
+  if(all(apply(rawData, 2, function(x) abs(mean(x, na.rm = TRUE)) <= 1e-5))) 
     warning(paste0("It seems that you standardized your data before fitting your lavaan model. ",
                    "Note that this can undermine the results of the cross-validation due to dependencies between ",
                    "the subsets. Consider re-fitting your model with unstandardized data and use standardize = TRUE ",

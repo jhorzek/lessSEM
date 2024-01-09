@@ -129,17 +129,18 @@ void mgSEM::addModel(Rcpp::List SEMList){
   if(parameters.hasTransformations){
     Rcpp::stop("It seems like transformations were already added to the model. You cannot add further models.");
   }
-  SEMCpp newModel;
-  newModel.fill(SEMList);
-  if(newModel.hasTransformations){
-    Rcpp::stop("There should be not transformations in the sub-models.");
+  std::unique_ptr<SEMCpp> newModel = std::make_unique<SEMCpp>();
+  //SEMCpp newModel;
+  newModel->fill(SEMList);
+  if(newModel->hasTransformations){
+    Rcpp::stop("There should be no transformations in the sub-models.");
   }
-  models.push_back(newModel);
-  sampleSize += newModel.sampleSize;
-  
-  Rcpp::DataFrame newParameters = newModel.getParameters();
+  Rcpp::DataFrame newParameters = newModel->getParameters();
   Rcpp::StringVector newLabels = newParameters["label"];
   Rcpp::NumericVector newValues = newParameters["rawValue"];
+  sampleSize += newModel->sampleSize;
+  
+  models.push_back(std::move(newModel));
   
   std::string parameterLabel;
   
@@ -169,11 +170,14 @@ void mgSEM::addModel(Rcpp::List SEMList){
   
   for(unsigned int m = 0; m < models.size(); m++){
     // initialize as empty vector:
-    Rcpp::IntegerVector currentInteger = {};
-    parameters.parameterLocationInModelRcpp.at(m) = currentInteger;
-    parameters.parameterLocationInVectorRcpp.at(m) = currentInteger;
+    std::vector<int> currentInteger;
+    currentInteger.reserve(parameters.uniqueLabels.size());
     
-    Rcpp::StringVector currentLabels = models.at(m).getParameterLabels();
+    
+    Rcpp::IntegerVector locationInModel;
+    Rcpp::IntegerVector locationInVector;
+    
+    Rcpp::StringVector currentLabels = models.at(m)->getParameterLabels();
     
     // now, let's fill the vectors:
     for(unsigned int p = 0; p < parameters.uniqueLabels.size(); p++){
@@ -181,10 +185,13 @@ void mgSEM::addModel(Rcpp::List SEMList){
       // to the indices
       int locatedInVector = findStringInVector(parameters.uniqueLabels.at(p), currentLabels, false);
       if(locatedInVector != -1){
-        parameters.parameterLocationInModelRcpp.at(m).push_back(locatedInVector);
-        parameters.parameterLocationInVectorRcpp.at(m).push_back(p);
+        locationInModel.push_back(locatedInVector);
+        locationInVector.push_back(p);
       }
     }
+    
+    parameters.parameterLocationInModelRcpp.at(m) = Rcpp::as<Rcpp::IntegerVector>(locationInModel);
+    parameters.parameterLocationInVectorRcpp.at(m) = Rcpp::as<Rcpp::IntegerVector>(locationInVector);
     // also replace the uvecs for Rcpp:
     parameters.parameterLocationInModelUvec.at(m) = Rcpp::as<arma::uvec>(parameters.parameterLocationInModelRcpp.at(m));
     parameters.parameterLocationInVectorUvec.at(m) = Rcpp::as<arma::uvec>(parameters.parameterLocationInVectorRcpp.at(m));
@@ -198,6 +205,101 @@ void mgSEM::addModel(Rcpp::List SEMList){
   parameters.uniqueHessian.fill(arma::fill::zeros);
   
 }// end addModel
+
+// addModels
+// adds models to a mgSEM
+// SEMList list with models
+void mgSEM::addModels(const Rcpp::List& SEMList){
+  
+  if(parameters.hasTransformations){
+    Rcpp::stop("It seems like transformations were already added to the model. You cannot add further models.");
+  }
+  
+  std::vector<std::string>& uniqueLabels = parameters.uniqueLabels;
+  Rcpp::StringVector& uniqueLabelsRcpp = parameters.uniqueLabelsRcpp;
+  arma::vec& uniqueValues = parameters.uniqueValues;
+  
+  uniqueLabels = {};
+  uniqueLabelsRcpp = {};
+  uniqueValues.resize(0);
+
+  for(Rcpp::List model: SEMList){
+    std::unique_ptr<SEMCpp> newModel = std::make_unique<SEMCpp>();
+    //SEMCpp newModel;
+    newModel->fill(model);
+    if(newModel->hasTransformations){
+      Rcpp::stop("There should be no transformations in the sub-models.");
+    }
+    
+    Rcpp::DataFrame newParameters = newModel->getParameters();
+    Rcpp::StringVector newLabels = newParameters["label"];
+    Rcpp::NumericVector newValues = newParameters["rawValue"];
+    sampleSize += newModel->sampleSize;
+    
+    models.push_back(std::move(newModel));
+
+    // add parameters that are not yet in the parameter vector:
+    std::string parameterLabel;
+    
+    for(unsigned int i = 0; i < newLabels.length(); i++){
+    
+    parameterLabel = Rcpp::as< std::string >(newLabels.at(i));
+    
+    if(findStringInVector(parameterLabel, uniqueLabels, false) == -1){
+      // not yet in the parameter vector
+      uniqueValues.resize(parameters.uniqueValues.size()+1);
+      uniqueValues(parameters.uniqueValues.size()-1) = newValues.at(i);
+      
+      uniqueLabelsRcpp.push_back(newLabels.at(i));
+      uniqueLabels.push_back(Rcpp::as<std::string>(newLabels.at(i)));
+    }
+    } // end for
+
+  }
+  
+  // next, we update the indices for Rcpp and armadillo vectors
+  parameters.parameterLocationInModelRcpp.resize(models.size());
+  parameters.parameterLocationInVectorRcpp.resize(models.size());
+  parameters.parameterLocationInModelUvec.resize(models.size());
+  parameters.parameterLocationInVectorUvec.resize(models.size());
+  
+  for(unsigned int m = 0; m < models.size(); m++){
+    // initialize as empty vector:
+    std::vector<int> currentInteger;
+    currentInteger.reserve(parameters.uniqueLabels.size());
+    
+    
+    Rcpp::IntegerVector locationInModel;
+    Rcpp::IntegerVector locationInVector;
+    
+    Rcpp::StringVector currentLabels = models.at(m)->getParameterLabels();
+    
+    // now, let's fill the vectors:
+    for(unsigned int p = 0; p < parameters.uniqueLabels.size(); p++){
+      // check if this parameter is in the current model; if so, add its position 
+      // to the indices
+      int locatedInVector = findStringInVector(parameters.uniqueLabels.at(p), currentLabels, false);
+      if(locatedInVector != -1){
+        locationInModel.push_back(locatedInVector);
+        locationInVector.push_back(p);
+      }
+    }
+        
+    parameters.parameterLocationInModelRcpp.at(m) = Rcpp::as<Rcpp::IntegerVector>(locationInModel);
+    parameters.parameterLocationInVectorRcpp.at(m) = Rcpp::as<Rcpp::IntegerVector>(locationInVector);
+    // also replace the uvecs for Rcpp:
+    parameters.parameterLocationInModelUvec.at(m) = Rcpp::as<arma::uvec>(parameters.parameterLocationInModelRcpp.at(m));
+    parameters.parameterLocationInVectorUvec.at(m) = Rcpp::as<arma::uvec>(parameters.parameterLocationInVectorRcpp.at(m));
+  }
+  
+  // update length of gradients vector
+  parameters.uniqueGradients.set_size(parameters.uniqueLabels.size());
+  parameters.uniqueGradients.fill(arma::fill::zeros);
+  
+  parameters.uniqueHessian.set_size(parameters.uniqueLabels.size(), parameters.uniqueLabels.size());
+  parameters.uniqueHessian.fill(arma::fill::zeros);
+  
+}
 
 void mgSEM::addTransformation(Rcpp::NumericVector extendedParameters,
                               std::vector<bool> isTransformation_,
@@ -234,7 +336,7 @@ void mgSEM::setParameters(Rcpp::StringVector label_,
   
   // update the parameters in the models
   for(unsigned int m = 0; m < models.size(); m++){
-    models.at(m).setParameters(parameters.uniqueLabelsRcpp[parameters.parameterLocationInVectorRcpp.at(m)],
+    models.at(m)->setParameters(parameters.uniqueLabelsRcpp[parameters.parameterLocationInVectorRcpp.at(m)],
               parameters.uniqueValues.elem(parameters.parameterLocationInVectorUvec.at(m)),
               true
     );
@@ -256,7 +358,7 @@ Rcpp::List mgSEM::getParameters(){
 Rcpp::List mgSEM::getSubmodelParameters(){
   Rcpp::List paramList;
   for(unsigned int m = 0; m < models.size(); m++){
-    paramList.push_back(models.at(m).getParameters());
+    paramList.push_back(models.at(m)->getParameters());
   }
   return(paramList);
 }
@@ -269,14 +371,14 @@ Rcpp::StringVector mgSEM::getParameterLabels(){
 void mgSEM::implied(){
   // compute implied means and covariance for each model
   for(unsigned int m = 0; m < models.size(); m++){
-    models.at(m).implied();
+    models.at(m)->implied();
   }
 }
 
 bool mgSEM::impliedIsPD(){
   bool isPd = true;
   for(unsigned int m = 0; m < models.size(); m++){
-    isPd = isPd && models.at(m).impliedIsPD();
+    isPd = isPd && models.at(m)->impliedIsPD();
   }
   return(isPd);
 }
@@ -286,7 +388,7 @@ double mgSEM::fit(){
   objectiveValue = 0.0;
   // compute fit for each model
   for(unsigned int m = 0; m < models.size(); m++){
-    objectiveValue += models.at(m).fit();
+    objectiveValue += models.at(m)->fit();
   }
   
   return(objectiveValue);
@@ -298,7 +400,7 @@ std::vector<std::string> mgSEM::getEstimator(){
   
   // check objective for each model
   for(unsigned int m = 0; m < models.size(); m++){
-    estimators.push_back(models.at(m).getEstimator());
+    estimators.push_back(models.at(m)->getEstimator());
   }
   
   return(estimators);
@@ -312,7 +414,7 @@ arma::rowvec mgSEM::getGradients(bool raw){
   
   // compute gradients for each model
   for(unsigned int m = 0; m < models.size(); m++){
-    modelGradients = models.at(m).getGradients(true);
+    modelGradients = models.at(m)->getGradients(true);
     // add the models gradients to the existing gradients:
     parameters.uniqueGradients.elem(parameters.parameterLocationInVectorUvec.at(m)) += 
       modelGradients.elem(parameters.parameterLocationInModelUvec.at(m));
@@ -356,11 +458,13 @@ RCPP_MODULE(mgSEM_cpp){
   using namespace Rcpp;
   Rcpp::class_<mgSEM>( "mgSEM" )
     .constructor("Creates a new SEMCpp.")
+    .constructor<int>("Creates a new SEMCpp for n models.")
   // fields
   .field_readonly("sampleSize", &mgSEM::sampleSize, "Sum of all N")
   .field_readonly("objectiveValue", &mgSEM::objectiveValue, "objective value of the fitting function")
   // methods
-  .method( "addModel", &mgSEM::addModel, "Adds a model. Expects and Rcpp::List")
+  .method( "addModel", &mgSEM::addModel, "Adds a model. Expects an Rcpp::List")
+  .method( "addModels", &mgSEM::addModels, "Adds models. Expects an Rcpp::List")
   .method( "implied", &mgSEM::implied, "Computes implied means and covariance matrix")
   .method( "fit", &mgSEM::fit, "Fits the model. Returns the objective value of the fitting function")
   .method( "setParameters", &mgSEM::setParameters, "Set the parameters of a model.")

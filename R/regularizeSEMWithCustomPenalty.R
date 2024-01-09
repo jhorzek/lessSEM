@@ -36,7 +36,7 @@
   
   if(lavaanModel@Options$estimator != "ML") stop("lavaanModel must be fit with ml estimator.")
   
-  rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
+  rawData <- try(.getRawData(lavaanModel, NULL, "fiml")$rawData)
   if(is(rawData, "try-error")) stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
   
   sampleSize <- nrow(rawData)

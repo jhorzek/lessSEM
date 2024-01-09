@@ -121,11 +121,21 @@
   
   ## initialize C++ model
   
-  mySEM <- new(mgSEM)
-  
-  for(m in SEMs){
-    mySEM$addModel(m)
-  }
+  mySEM <- new(mgSEM, length(lavaanModels))
+  mySEM$addModels(SEMs)
+  # if(length(lavaanModels) > 10){
+  #   cat("Thats a lot of models... Setup may take some time as all R objects are copied to C++. Will print progress:\n")
+  #   it <- 0
+  #   pb <- utils::txtProgressBar(min = it, max = length(lavaanModels), style = 3)
+  # }
+  # 
+  # for(m in SEMs){
+  #   if(length(lavaanModels) > 10){
+  #     it <- it + 1
+  #     utils::setTxtProgressBar(pb, it)
+  #   }
+  #   mySEM$addModel(m)
+  # }
   
   # extract parameters
   parameters <- .getParameters(SEM = mySEM, raw = TRUE)
@@ -419,6 +429,7 @@
     rawData <- try(lavaan::lavInspect(lavaanModel, "data"))
     if(is(rawData, "try-error")) 
       stop("Error while extracting raw data from lavaanModel. Please fit the model using the raw data set, not the covariance matrix.")
+
     checkFit <- TRUE
     
   }else{
@@ -431,6 +442,14 @@
     checkFit <- FALSE
     
   }
+
+  # remove empty rows:
+  if(any(apply(rawData, 1, function(x) all(is.na(x))))){
+      warning("Your data set has rows where all observations are missing. lessSEM will ",
+              "remove those rows, but it is recommended to do so before fitting the models.")
+      rawData <- rawData[!apply(rawData, 1, function(x) all(is.na(x))),,drop = FALSE]
+  }
+
   return(list(rawData = rawData, checkFit = checkFit))
   
 }

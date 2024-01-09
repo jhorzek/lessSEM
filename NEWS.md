@@ -1,3 +1,9 @@
+# lessSEM 1.5.2
+
+* Fixed bug in extreme cases of missing data
+* added functions to easily extract the names of loadings, regressions, variances,
+and covariances from a lavaan model.
+
 # lessSEM 1.5.0
 
 * Added a `NEWS.md` file to track changes to the package.
