@@ -271,6 +271,9 @@
     <loc>/reference/controlIsta.html</loc>
   </url>
   <url>
+    <loc>/reference/covariances.html</loc>
+  </url>
+  <url>
     <loc>/reference/createSubsets.html</loc>
   </url>
   <url>
@@ -422,6 +425,9 @@
   </url>
   <url>
     <loc>/reference/dot-initializeWeights.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dot-labelLavaanParameters.html</loc>
   </url>
   <url>
     <loc>/reference/dot-lavaan2regsemLabels.html</loc>
@@ -730,6 +736,9 @@
     <loc>/reference/lessSEMCoef-class.html</loc>
   </url>
   <url>
+    <loc>/reference/loadings.html</loc>
+  </url>
+  <url>
     <loc>/reference/logLik-Rcpp_SEMCpp-method.html</loc>
   </url>
   <url>
@@ -776,6 +785,9 @@
   </url>
   <url>
     <loc>/reference/plot-stabSel-missing-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/regressions.html</loc>
   </url>
   <url>
     <loc>/reference/regsem2LavaanParameters.html</loc>
@@ -860,5 +872,8 @@
   </url>
   <url>
     <loc>/reference/summary-regularizedSEMWithCustomPenalty-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/variances.html</loc>
   </url>
 </urlset>

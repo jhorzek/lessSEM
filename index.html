@@ -18,8 +18,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="apple-touch-icon-76x76.png">
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Non-Smooth Regularization for Structural Equation Models">
 <meta property="og:description" content="Provides regularized structural equation modeling 
@@ -41,7 +41,7 @@
     
     <a class="navbar-brand me-2" href="index.html">lessSEM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,9 +94,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.svg" class="logo" alt=""><h1 id="lesssem-">lessSEM <a class="anchor" aria-label="anchor" href="#lesssem-"></a>
+<img src="logo.svg" class="logo" alt=""><h1 id="lesssem-">lessSEM <img src="reference/figures/lessSEM.svg" align="right" height="139"><a class="anchor" aria-label="anchor" href="#lesssem-"></a>
 </h1>
 </div>
+<!-- badges: start -->
+
 <p><strong>lessSEM</strong> (<strong>l</strong>essSEM <strong>es</strong>timates <strong>s</strong>parse <strong>SEM</strong>) is an R package for regularized structural equation modeling (regularized SEM) with non-smooth penalty functions (e.g., lasso) building on <a href="https://github.com/yrosseel/lavaan" class="external-link"><strong>lavaan</strong></a>. <strong>lessSEM</strong> is heavily inspired by the <a href="https://github.com/Rjacobucci/regsem" class="external-link"><strong>regsem</strong></a> package and the <a href="https://github.com/psyphh/lslx" class="external-link"><strong>lslx</strong></a> packages that have similar functionality. <strong>If you use lessSEM, please also cite <a href="https://github.com/Rjacobucci/regsem" class="external-link">regsem</a> and and <a href="https://github.com/psyphh/lslx" class="external-link">lslx</a>!</strong></p>
 <p>The objectives of <strong>lessSEM</strong> are to provide …</p>
 <ol style="list-style-type: decimal">
@@ -212,13 +214,13 @@
 <p>If you want to install <strong>lessSEM</strong> from CRAN, use the following commands in R:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"lessSEM"</span><span class="op">)</span></span></code></pre></div>
-<p>The newest version of the package can be installed from GitHub using the following commands in R:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"jhorzek/lessSEM"</span>, </span>
-<span>                         ref <span class="op">=</span> <span class="st">"development"</span><span class="op">)</span></span></code></pre></div>
+<p>The newest version of the package can be installed from GitHub. However, because the project uses submodules, <code><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">devtools::install_github</a></code> does not download the entire R package. To download the development version, the following command needs to be run in git:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>git clone <span class="sc">--</span>branch development <span class="sc">--</span>recurse<span class="sc">-</span>submodules https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>jhorzek<span class="sc">/</span>lessSEM.git</span></code></pre></div>
+<p>Navigate to the folder to which git copied the project and install the package with the lessSEM.Rproj file.</p>
+<p>If you want to download the main branch, use</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>git clone <span class="sc">--</span>recurse<span class="sc">-</span>submodules https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>jhorzek<span class="sc">/</span>lessSEM.git</span></code></pre></div>
 <blockquote>
-<p><strong>Note</strong> The lessSEM project has multiple branches. The <strong>main</strong> branch will match the version currently available from CRAN. The <strong>development</strong> branch will have newer features not yet available from CRAN. This branch will have passed all current tests of our test suite, but may not be ready for CRAN yet (e.g., because not all objectives of the road map have been met). <strong>gh-pages</strong> is used to create the <a href="jhorzek.github.io/lessSEM/">documentation website</a>. Finally, all other branches are used for ongoing development and should be considered unstable.</p>
+<p><strong>Note</strong> The lessSEM project has multiple branches. The <strong>main</strong> branch will match the version currently available from CRAN. The <strong>development</strong> branch will have newer features not yet available from CRAN. This branch will have passed all current tests of our test suite, but may not be ready for CRAN yet (e.g., because not all objectives of the road map have been met). <strong>gh-pages</strong> is used to create the <a href="https://jhorzek.github.io/lessSEM/" class="external-link">documentation website</a>. Finally, all other branches are used for ongoing development and should be considered unstable.</p>
 </blockquote>
 </div>
 <div class="section level1">
@@ -229,7 +231,7 @@
 <div class="section level1">
 <h1 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h1>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span>
 <span></span>
@@ -314,12 +316,25 @@
 <span></span>
 <span><span class="co"># Note: The results are basically identical:</span></span>
 <span><span class="va">lsemIsta</span><span class="op">@</span><span class="va">parameters</span> <span class="op">-</span> <span class="va">lsem</span><span class="op">@</span><span class="va">parameters</span></span></code></pre></div>
+<p>If you want to regularize all loadings, regressions, variances, or covariances, you can also use one of the helper functions to extract the respective parameter labels from <strong>lavaan</strong> and then pass these to <strong>lessSEM</strong>:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/loadings.html">loadings</a></span><span class="op">(</span><span class="va">lavaanModel</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "l1"  "l2"  "l3"  "l4"  "l5"  "l6"  "l7"  "l8"  "l9"  "l10" "l11" "l12"</span></span>
+<span><span class="co">#&gt; [13] "l13" "l14" "l15"</span></span>
+<span><span class="fu"><a href="reference/regressions.html">regressions</a></span><span class="op">(</span><span class="va">lavaanModel</span><span class="op">)</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
+<span><span class="fu"><a href="reference/variances.html">variances</a></span><span class="op">(</span><span class="va">lavaanModel</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "y1~~y1"   "y2~~y2"   "y3~~y3"   "y4~~y4"   "y5~~y5"   "y6~~y6"  </span></span>
+<span><span class="co">#&gt;  [7] "y7~~y7"   "y8~~y8"   "y9~~y9"   "y10~~y10" "y11~~y11" "y12~~y12"</span></span>
+<span><span class="co">#&gt; [13] "y13~~y13" "y14~~y14" "y15~~y15"</span></span>
+<span><span class="fu"><a href="reference/covariances.html">covariances</a></span><span class="op">(</span><span class="va">lavaanModel</span><span class="op">)</span></span>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 </div>
 <div class="section level1">
 <h1 id="transformations">Transformations<a class="anchor" aria-label="anchor" href="#transformations"></a>
 </h1>
 <p><strong>lessSEM</strong> allows for parameter transformations that could, for instance, be used to test measurement invariance in longitudinal models (e.g., Liang, 2018; Bauer et al., 2020). A thorough introduction is provided in <code><a href="articles/Parameter-transformations.html">vignette('Parameter-transformations', package = 'lessSEM')</a></code>. As an example, we will test measurement invariance in the <code>PoliticalDemocracy</code> data set.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jhorzek/lessSEM" class="external-link">lessSEM</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lavaan.ugent.be" class="external-link">lavaan</a></span><span class="op">)</span></span>
 <span><span class="co"># we will use the PoliticalDemocracy from lavaan (see ?lavaan::sem)</span></span>
@@ -367,7 +382,7 @@
 <span>                  modifyModel <span class="op">=</span> <span class="fu"><a href="reference/modifyModel.html">modifyModel</a></span><span class="op">(</span>transformations <span class="op">=</span> <span class="va">transformations</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Finally, we can extract the best parameters:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">lassoFit</span>, criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span></code></pre></div>
 <p>As all differences (<code>delta_a2</code>, <code>delta_b2</code>, and <code>delta_c2</code>) have been zeroed, we can assume measurement invariance.</p>
 </div>
@@ -380,11 +395,11 @@
 <a class="anchor" aria-label="anchor" href="#from-lesssem-to-lavaan"></a>
 </h2>
 <p><strong>lessSEM</strong> supports exporting specific models to <strong>lavaan</strong>. This can be very useful when plotting the final model.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lavaanModel</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/lessSEM2Lavaan.html">lessSEM2Lavaan</a></span><span class="op">(</span>regularizedSEM <span class="op">=</span> <span class="va">lsem</span>, </span>
 <span>                              criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span></code></pre></div>
 <p>The result can be plotted with, for instance, <a href="https://github.com/SachaEpskamp/semPlot" class="external-link"><strong>semPlot</strong></a>:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SachaEpskamp/semPlot" class="external-link">semPlot</a></span><span class="op">)</span></span>
 <span><span class="fu">semPaths</span><span class="op">(</span><span class="va">lavaanModel</span>,</span>
 <span>         what <span class="op">=</span> <span class="st">"est"</span>,</span>
@@ -400,7 +415,7 @@
 </h2>
 <p><strong>lessSEM</strong> allows for defining different penalties for different parts of the model. This feature is new and very experimental. Please keep that in mind when using the procedure. A detailed introduction can be found in <code><a href="articles/Mixed-Penalties.html">vignette(topic = "Mixed-Penalties", package = "lessSEM")</a></code>.</p>
 <p>To provide a short example, we will regularize the loadings and the regression parameters of the Political Democracy data set with different penalties. The following script is adapted from <code><a href="https://rdrr.io/pkg/lavaan/man/sem.html" class="external-link">?lavaan::sem</a></code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="st">' </span></span>
 <span><span class="st">  # latent variable definitions</span></span>
 <span><span class="st">     ind60 =~ x1 + x2 + x3 + c2*y2 + c3*y3 + c4*y4</span></span>
@@ -426,7 +441,7 @@
 <span>          thetas <span class="op">=</span> <span class="fl">3.7</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/fit.html">fit</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The best model according to the BIC can be extracted with:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fitMp</span>, criterion <span class="op">=</span> <span class="st">"BIC"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
@@ -575,7 +590,12 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://cranlogs.r-pkg.org/badges/grand-total/lessSEM" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/lessSEM" alt="Total Downloads"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
