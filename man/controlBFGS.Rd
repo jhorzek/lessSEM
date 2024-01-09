@@ -39,7 +39,7 @@ the transformation of the variances), but works quite well in practice.}
 models are save. Currently, this are the Hessian and the implied means and covariances.
 Note: This may take a lot of memory!}
 
-\item{stepSize}{Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)}
+\item{stepSize}{Initial stepSize of the outer iteration (theta_next = theta_previous + stepSize * Stepdirection)}
 
 \item{sigma}{only relevant when lineSearch = 'GLMNET'. Controls the sigma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.}
 

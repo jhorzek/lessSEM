@@ -45,7 +45,7 @@ models are save. Currently, this are the Hessian and the implied means and covar
 Note: This may take a lot of memory!}
 
 \item{stepSize}{Initial stepSize of the outer iteration
-(theta_{k+1} = theta_k + stepSize * Stepdirection)}
+(theta_next = theta_previous + stepSize * Stepdirection)}
 
 \item{sigma}{only relevant when lineSearch = 'GLMNET'. Controls the sigma
 parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET
