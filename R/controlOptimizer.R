@@ -77,7 +77,7 @@ controlIsta <- function(
 #' models are save. Currently, this are the Hessian and the implied means and covariances.
 #'  Note: This may take a lot of memory!
 #' @param stepSize Initial stepSize of the outer iteration 
-#' (theta_{k+1} = theta_k + stepSize * Stepdirection)
+#' (theta_next = theta_previous + stepSize * Stepdirection)
 #' @param sigma only relevant when lineSearch = 'GLMNET'. Controls the sigma 
 #' parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET 
 #' for l1-regularized logistic regression. The Journal of Machine Learning Research, 
@@ -138,7 +138,7 @@ controlGlmnet <- function(
 #' @param saveDetails when set to TRUE, additional details about the individual
 #' models are save. Currently, this are the Hessian and the implied means and covariances.
 #'  Note: This may take a lot of memory!
-#' @param stepSize Initial stepSize of the outer iteration (theta_{k+1} = theta_k + stepSize * Stepdirection)
+#' @param stepSize Initial stepSize of the outer iteration (theta_next = theta_previous + stepSize * Stepdirection)
 #' @param sigma only relevant when lineSearch = 'GLMNET'. Controls the sigma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421.
 #' @param gamma Controls the gamma parameter in Yuan, G.-X., Ho, C.-H., & Lin, C.-J. (2012). An improved GLMNET for l1-regularized logistic regression. The Journal of Machine Learning Research, 13, 1999–2030. https://doi.org/10.1145/2020408.2020421. Defaults to 0.
 #' @param maxIterOut Maximal number of outer iterations
