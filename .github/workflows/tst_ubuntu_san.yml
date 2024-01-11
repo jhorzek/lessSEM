@@ -23,6 +23,8 @@ jobs:
         with:
           submodules: 'true'
       - uses: r-lib/actions/setup-pandoc@v1
+      - name: install
+        run: RD CMD check .
       - name: install dependencies
         run: |
           install.packages(c("Rcpp", "RcppArmadillo", "RcppParallel", "ggplot2", "tidyr", "stringr", "numDeriv", "rlang", "mvtnorm", "knitr", "plotly", "rmarkdown", "Rsolnp", "lavaan", "devtools", "testthat", "rcmdcheck", "glmnet"))
