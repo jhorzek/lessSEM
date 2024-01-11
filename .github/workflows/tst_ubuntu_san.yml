@@ -15,10 +15,12 @@ jobs:
       image: rocker/r-devel-san:latest
 
     steps:
-      - name: install sudo and git
+      - name: install sudo, git, etc
         run: |
           apt update && apt install -y sudo
           sudo apt install -y git
+          sudo apt install -y libssl-dev
+          sudo apt install -y libxml2-dev
       - uses: actions/checkout@v3
         with:
           submodules: 'true'
