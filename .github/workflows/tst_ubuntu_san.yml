@@ -1,0 +1,51 @@
+name: Check with Sanitizer
+
+on:
+  pull_request:
+    branches: ["main", "development"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-as-cran:
+    runs-on: ubuntu-latest
+    container: 
+      image: rocker/r-devel-san:latest
+
+    steps:
+      - name: install sudo and git
+        run: |
+          apt update && apt install -y sudo
+          sudo apt install -y git
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+      - uses: r-lib/actions/setup-pandoc@v1
+      - name: install dependencies
+        run: |
+          sudo apt install -y r-cran-rcpp
+          sudo apt install -y r-cran-rcpparmadillo
+          sudo apt install -y r-cran-rcppparallel
+          sudo apt install -y r-cran-ggplot2
+          sudo apt install -y r-cran-tidyr
+          sudo apt install -y r-cran-stringr
+          sudo apt install -y r-cran-numderiv
+          sudo apt install -y r-cran-rlang
+          sudo apt install -y r-cran-mvtnorm
+          sudo apt install -y r-cran-knitr
+          sudo apt install -y r-cran-plotly
+          sudo apt install -y r-cran-rmarkdown
+          sudo apt install -y r-cran-rsolnp
+          sudo apt install -y r-cran-lavaan
+          sudo apt install -y r-cran-devtools
+          sudo apt install -y r-cran-testthat
+          sudo apt install -y r-cran-rcmdcheck
+          sudo apt install -y r-cran-glmnet
+      - name: Run checks with extend compiler flags
+        run: |
+          withr::with_makevars(
+            c("PKG_CXXFLAGS" = "-Wall -pedantic -fdiagnostics-color=always -fsanitize=address"),
+            devtools::check())
+
