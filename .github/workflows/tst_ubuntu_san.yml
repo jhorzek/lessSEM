@@ -25,25 +25,8 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v1
       - name: install dependencies
         run: |
-          sudo apt install -y r-cran-rcpp
-          sudo apt install -y r-cran-rcpparmadillo
-          sudo apt install -y r-cran-rcppparallel
-          sudo apt install -y r-cran-ggplot2
-          sudo apt install -y r-cran-tidyr
-          sudo apt install -y r-cran-stringr
-          sudo apt install -y r-cran-numderiv
-          sudo apt install -y r-cran-rlang
-          sudo apt install -y r-cran-mvtnorm
-          sudo apt install -y r-cran-knitr
-          sudo apt install -y r-cran-plotly
-          sudo apt install -y r-cran-rmarkdown
-          sudo apt install -y r-cran-rsolnp
-          sudo apt install -y r-cran-lavaan
-          sudo apt install -y r-cran-devtools
-          sudo apt install -y r-cran-testthat
-          sudo apt install -y r-cran-rcmdcheck
-          sudo apt install -y r-cran-glmnet
-          sudo apt install -y r-cran-withr
+          install.packages(c("Rcpp", "RcppArmadillo", "RcppParallel", "ggplot2", "tidyr", "stringr", "numDeriv", "rlang", "mvtnorm", "knitr", "plotly", "rmarkdown", "Rsolnp", "lavaan", "devtools", "testthat", "rcmdcheck", "glmnet"))
+        shell: RDscript {0}
       #- name: Run checks with extend compiler flags
       #  run: |
       #    withr::with_makevars(c("PKG_CXXFLAGS" = "$(SHLIB_OPENMP_CXXFLAGS) -I../inst/include/ -Wall -pedantic -fdiagnostics-color=always -fsanitize=address"),
