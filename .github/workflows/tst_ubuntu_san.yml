@@ -23,8 +23,6 @@ jobs:
         with:
           submodules: 'true'
       - uses: r-lib/actions/setup-pandoc@v1
-      - name: install
-        run: RD CMD check .
       - name: install dependencies
         run: |
           install.packages(c("Rcpp", "RcppArmadillo", "RcppParallel", "ggplot2", "tidyr", "stringr", "numDeriv", "rlang", "mvtnorm", "knitr", "plotly", "rmarkdown", "Rsolnp", "lavaan", "devtools", "testthat", "rcmdcheck", "glmnet"))
@@ -34,6 +32,6 @@ jobs:
       #    withr::with_makevars(c("PKG_CXXFLAGS" = "$(SHLIB_OPENMP_CXXFLAGS) -I../inst/include/ -Wall -pedantic -fdiagnostics-color=always -fsanitize=address"),
       #                         devtools::check())
       #  shell: Rscript {0}
-      - name: install
-        run: RD CMD INSTALL .
-      
+      - name: Check package
+        run: RD CMD build . && RD CMD check $(ls -t . | head -n1)
+
