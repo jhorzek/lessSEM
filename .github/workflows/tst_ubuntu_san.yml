@@ -43,9 +43,8 @@ jobs:
           sudo apt install -y r-cran-testthat
           sudo apt install -y r-cran-rcmdcheck
           sudo apt install -y r-cran-glmnet
+          sudo apt install -y r-cran-withr
       - name: Run checks with extend compiler flags
         run: |
-          withr::with_makevars(
-            c("PKG_CXXFLAGS" = "-Wall -pedantic -fdiagnostics-color=always -fsanitize=address"),
-            devtools::check())
-
+          withr::with_makevars(c("PKG_CXXFLAGS" = "-Wall -pedantic -fdiagnostics-color=always -fsanitize=address"),
+                               devtools::check())
