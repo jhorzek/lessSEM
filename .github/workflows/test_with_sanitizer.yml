@@ -1,0 +1,32 @@
+name: Check with Sanitizer
+
+on:
+  pull_request:
+    branches: ["main", "development"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-as-cran:
+    runs-on: ubuntu-latest
+    container: 
+      image: wch1/r-debug:latest
+
+    steps:
+      - name: install sudo, git, etc
+        run: |
+          apt update && apt install -y sudo
+          sudo apt install -y git
+          sudo apt install -y libssl-dev
+          sudo apt install -y libxml2-dev
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+      - uses: r-lib/actions/setup-pandoc@v1
+      - name: install dependencies
+        run: Rsan -e 'install.packages(c("Rcpp", "RcppArmadillo", "RcppParallel", "ggplot2", "tidyr", "stringr", "numDeriv", "rlang", "mvtnorm", "knitr", "plotly", "rmarkdown", "Rsolnp", "lavaan", "devtools", "testthat", "rcmdcheck", "glmnet"))'
+      - name: Check package
+        run: Rsan -e 'rcmdcheck::rcmdcheck(".")'
+
