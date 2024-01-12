@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'true'
-      - uses: r-lib/actions/setup-pandoc@v1
+      - uses: r-lib/actions/setup-pandoc@v2
       - name: install dependencies
         run: Rsan -e 'install.packages(c("Rcpp", "RcppArmadillo", "RcppParallel", "ggplot2", "tidyr", "stringr", "numDeriv", "rlang", "mvtnorm", "knitr", "plotly", "rmarkdown", "Rsolnp", "lavaan", "devtools", "testthat", "rcmdcheck", "glmnet"))'
       - name: Check package
