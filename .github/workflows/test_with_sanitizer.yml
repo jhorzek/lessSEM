@@ -26,7 +26,7 @@ jobs:
           submodules: 'true'
       - uses: r-lib/actions/setup-pandoc@v2
       - name: install dependencies
-        run: Rsan -e 'install.packages(c("Rcpp", "RcppArmadillo", "RcppParallel", "ggplot2", "tidyr", "stringr", "numDeriv", "rlang", "mvtnorm", "knitr", "plotly", "rmarkdown", "Rsolnp", "lavaan", "devtools", "testthat", "rcmdcheck", "glmnet"))'
+        run: RDsan -e 'install.packages(c("Rcpp", "RcppArmadillo", "RcppParallel", "ggplot2", "tidyr", "stringr", "numDeriv", "rlang", "mvtnorm", "knitr", "plotly", "rmarkdown", "Rsolnp", "lavaan", "devtools", "testthat", "rcmdcheck", "glmnet"))'
       - name: Check package
-        run: Rsan -e 'rcmdcheck::rcmdcheck(".")'
+        run: RDsan -e 'rcmdcheck::check_details(rcmdcheck::rcmdcheck("."))'
 
