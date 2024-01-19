@@ -1,7 +1,7 @@
 Package: lessSEM
 Type: Package
 Title: Non-Smooth Regularization for Structural Equation Models
-Version: 1.5.4
+Version: 1.5.5
 Authors@R: c(person(given   = "Jannik H.", family = "Orzek",
                     role    = c("aut", "cre", "cph"),
                     email   = "jannik.orzek@mailbox.org",
