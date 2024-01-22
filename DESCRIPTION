@@ -43,5 +43,5 @@ LinkingTo:
     RcppParallel
 VignetteBuilder: knitr
 SystemRequirements: GNU make, C++17
-URL: https://github.com/jhorzek/lessSEM
+URL: https://github.com/jhorzek/lessSEM, https://jhorzek.github.io/lessSEM/
 BugReports: https://github.com/jhorzek/lessSEM/issues
