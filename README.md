@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# lessSEM <img src="man/figures/lessSEM.svg" align="right" height="139" />
+# lessSEM
 
 <!-- badges: start -->
 

@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 set.seed(123)
 ```
 
-# lessSEM <img src="man/figures/lessSEM.svg" align="right" height="139" />
+# lessSEM
 
 <!-- badges: start -->
 [![Total Downloads](https://cranlogs.r-pkg.org/badges/grand-total/lessSEM)](https://cranlogs.r-pkg.org/badges/grand-total/lessSEM)
