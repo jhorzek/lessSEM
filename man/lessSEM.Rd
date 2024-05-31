@@ -2,8 +2,8 @@
 % Please edit documentation in R/zzz.R
 \docType{package}
 \name{lessSEM}
-\alias{lessSEM}
 \alias{lessSEM-package}
+\alias{lessSEM}
 \title{lessSEM}
 \description{
 \strong{Please see the vignettes and the readme on \href{https://jhorzek.github.io/lessSEM/}{GitHub}
@@ -428,6 +428,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Useful links:
 \itemize{
   \item \url{https://github.com/jhorzek/lessSEM}
+  \item \url{https://jhorzek.github.io/lessSEM/}
   \item Report bugs at \url{https://github.com/jhorzek/lessSEM/issues}
 }
 

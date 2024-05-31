@@ -178,7 +178,8 @@ setMethod("BIC", "regularizedSEM", function (object, ...) {
 #' 
 #' @param x object of class gpRegularized
 #' @param y not used
-#' @param ... use regularizedOnly=FALSE to plot all parameters
+#' @param ... use regularizedOnly = FALSE to plot all parameters and addLabels = FALSE
+#' to remove labels to the lines
 #' @return either an object of ggplot2 or of plotly
 #' @export
 setMethod("plot", 
@@ -188,6 +189,11 @@ setMethod("plot",
               regularizedOnly <- list(...)$regularizedOnly
             }else{
               regularizedOnly <- TRUE
+            }
+            if("addLabels" %in% names(list(...))){
+              addLabels <- list(...)$addLabels
+            }else{
+              addLabels <- TRUE
             }
             parameters <- x@parameters
             tuningParameters <- x@parameters[,!colnames(x@parameters)%in%x@parameterLabels,drop=FALSE]
@@ -220,17 +226,23 @@ setMethod("plot",
             }
             
             if(nTuning == 1){
-              
-              return(
-                ggplot2::ggplot(data = parametersLong,
-                                mapping = ggplot2::aes(
-                                  x = .data[[colnames(tuningParameters)]], 
-                                  y = .data[["value"]],
-                                  group = .data[["name"]])) +
-                  ggplot2::geom_line(colour = "#008080")+
-                  ggplot2::ggtitle("Regularized Parameters")
-              )
-              
+              plt <- ggplot2::ggplot(data = parametersLong,
+                                     mapping = ggplot2::aes(
+                                       x = .data[[colnames(tuningParameters)]], 
+                                       y = .data[["value"]],
+                                       group = .data[["name"]])) +
+                ggplot2::geom_line(colour = "#008080") +
+                ggplot2::ggtitle("Regularized Parameters") +
+                ggplot2::theme_bw()
+              if(addLabels){
+                plt <- plt +
+                  ggrepel::geom_label_repel(data = plt$data[plt$data[[colnames(tuningParameters)]] ==
+                                                       min(plt$data[[colnames(tuningParameters)]]), ],
+                                     ggplot2::aes(x = .data[[colnames(tuningParameters)]],
+                                                  y = .data[["value"]],
+                                                  label = .data[["name"]]))
+              }
+              return(plt)
             }else{
               parametersLong$name <- paste0(parametersLong$name, 
                                             "_", 
