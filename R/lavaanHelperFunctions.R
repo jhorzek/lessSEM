@@ -268,8 +268,11 @@ lessSEM2Lavaan <- function(regularizedSEM, criterion = NULL, lambda = NULL, alph
   
   # extract coefficients and remove tuning parameters:
   whichRow <- regularizedSEM@fits$lambda == lambda
+  if (!is.null(alpha)) {
+    whichRow <- whichRow & (regularizedSEM@fits$alpha == alpha)
+  }
   if(!is.null(theta)){
-    whichRow <- whichRow & regularizedSEM@fits$theta == theta
+    whichRow <- whichRow & (regularizedSEM@fits$theta == theta)
   }
   
   if(sum(whichRow) != 1) 
