@@ -254,7 +254,7 @@ lessSEM2Lavaan <- function(regularizedSEM, criterion = NULL, lambda = NULL, alph
   }
   
   if("alpha" %in% colnames(regularizedSEM@fits) &
-     is.null(theta)){
+     is.null(alpha)){
     if(length(unique(regularizedSEM@fits$alpha)) != 1)
       stop("Your model uses tuning parameter alpha, but no alpha value was specified")
   }
