@@ -30,44 +30,43 @@ jobs:
          # install two helper packages we need
          sudo apt install --no-install-recommends software-properties-common dirmngr
          # add the signing key (by Michael Rutter) for these repos
-         # To verify key, run gpg --show-keys /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
+         # To verify key, run gpg --show-keys /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc 
          # Fingerprint: E298A3A825C0D65DFD57CBB651716619E084DAB9
          wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
-         # add the R 4.0 repo from CRAN -- adjust 'focal' to 'groovy' or 'bionic' as needed
+         # add the repo from CRAN -- lsb_release adjusts to 'noble' or 'jammy' or ... as needed
          sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+         # install R itself
+         sudo apt install --no-install-recommends r-base
       - name: install compiled packages
         run: |
-          sudo add-apt-repository ppa:c2d4u.team/c2d4u4.0+
-          sudo apt install --no-install-recommends r-cran-rcpp
-          sudo apt install --no-install-recommends r-cran-rcpparmadillo
-          sudo apt install --no-install-recommends r-cran-rcppparallel
-          sudo apt install --no-install-recommends r-cran-ggplot2
-          sudo apt install --no-install-recommends r-cran-tidyr
-          sudo apt install --no-install-recommends r-cran-stringr
-          sudo apt install --no-install-recommends r-cran-numderiv
-          sudo apt install --no-install-recommends r-cran-rlang
-          sudo apt install --no-install-recommends r-cran-mvtnorm
-          sudo apt install --no-install-recommends r-cran-knitr
-          sudo apt install --no-install-recommends r-cran-plotly
-          sudo apt install --no-install-recommends r-cran-rmarkdown
-          sudo apt install --no-install-recommends r-cran-rsolnp
-          sudo apt install --no-install-recommends r-cran-lavaan
-          sudo apt install --no-install-recommends r-cran-devtools
-          sudo apt install --no-install-recommends r-cran-testthat
-          sudo apt install --no-install-recommends r-cran-rcmdcheck
-          sudo apt install --no-install-recommends r-cran-glmnet
-          sudo apt install --no-install-recommends r-cran-ncvreg
-          sudo apt install --no-install-recommends r-cran-regsem
-          sudo apt install --no-install-recommends r-cran-lslx
-          sudo apt install --no-install-recommends r-cran-matrix
-          sudo apt install --no-install-recommends r-cran-openmx
-          sudo apt install --no-install-recommends r-cran-rstan
-      - name: Install dependencies not from apt
-        run: |
-          # specify library location (copied from teichert at https://stackoverflow.com/questions/32540919/library-is-not-writable)
-          dir.create(Sys.getenv("R_LIBS_USER"), recursive = TRUE)  # create personal library
-          .libPaths(Sys.getenv("R_LIBS_USER"))  # add to the path
-          install.packages("ctsemOMX") # not available from apt install
+          install.packages(c("lavaan",
+            "Rcpp",
+            "RcppArmadillo",
+            "RcppParallel",
+            "ggplot2",
+            "ggrepel",
+            "tidyr",
+            "stringr",
+            "numDeriv",
+            "utils",
+            "stats",
+            "graphics",
+            "rlang",
+            "mvtnor",
+            "knitr",
+            "plotly",
+            "rmarkdown",
+            "Rsolnp",
+            "knitr",
+            "plotly",
+            "testthat",
+            "glmnet",
+            "ncvreg",
+            "regsem",
+            "lslx",
+            "Matrix",
+            "OpenMx",
+            "ctsemOMX"))
         shell: Rscript {0}
       - name: Install lessSEM
         run: devtools::install(pkg = ".")
