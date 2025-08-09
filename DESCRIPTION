@@ -14,7 +14,7 @@ Description: Provides regularized structural equation modeling
   ['lslx'](<https://github.com/psyphh/lslx>) packages.
 License: GPL (>= 2)
 Encoding: UTF-8
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Depends: 
  lavaan,
