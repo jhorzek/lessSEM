@@ -1,4 +1,4 @@
-name: R CMD check ubuntu
+name: R CMD check extended
 
 on:
   pull_request:
@@ -26,7 +26,9 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
       - name: install compiled packages
         run: |
-          install.packages(c("lavaan",
+          install.packages(c(
+            "devtools",
+            "lavaan",
             "Rcpp",
             "RcppArmadillo",
             "RcppParallel",
