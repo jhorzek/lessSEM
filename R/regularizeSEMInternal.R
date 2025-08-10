@@ -550,7 +550,10 @@
   )
   
   if(any(internalOptimization$estimator == "wls")){
-    notes <- c(notes, "WLS (and variants) is a very new feature and not yet thoroughly tested. Please be wary of bugs!")
+    
+    notes <- c(notes, 
+               paste0("WLS (and variants) is a very new feature and not yet thoroughly tested. ",
+                      "Please consider using lslx instead and be wary of bugs!"))
   }
   
   results <- new("regularizedSEM",

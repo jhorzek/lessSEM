@@ -11,7 +11,8 @@
 
 \item{y}{not used}
 
-\item{...}{use regularizedOnly=FALSE to plot all parameters}
+\item{...}{use regularizedOnly = FALSE to plot all parameters and addLabels = FALSE
+to remove labels to the lines}
 }
 \value{
 either an object of ggplot2 or of plotly

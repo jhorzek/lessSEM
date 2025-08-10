@@ -2,8 +2,8 @@
 % Please edit documentation in R/zzz.R
 \docType{package}
 \name{lessSEM}
-\alias{lessSEM}
 \alias{lessSEM-package}
+\alias{lessSEM}
 \title{lessSEM}
 \description{
 \strong{Please see the vignettes and the readme on \href{https://jhorzek.github.io/lessSEM/}{GitHub}
@@ -331,7 +331,7 @@ details on the general design of the optimizer interface in \code{vignette("The-
 \itemize{
 \item \href{https://github.com/yrosseel/lavaan}{lavaan} Rosseel, Y. (2012). lavaan: An R Package for Structural Equation Modeling. Journal of Statistical Software, 48(2), 1-36. https://doi.org/10.18637/jss.v048.i02
 \item \href{https://github.com/Rjacobucci/regsem}{regsem}: Jacobucci, R. (2017). regsem:
-Regularized Structural Equation Modeling. ArXiv:1703.08489 \link{Stat}. https://arxiv.org/abs/1703.08489
+Regularized Structural Equation Modeling. ArXiv:1703.08489. https://arxiv.org/abs/1703.08489
 \item \href{https://github.com/psyphh/lslx}{lslx}: Huang, P.-H. (2020). lslx:
 Semi-confirmatory structural equation modeling via penalized likelihood. Journal
 of Statistical Software, 93(7). https://doi.org/10.18637/jss.v093.i07
@@ -428,6 +428,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Useful links:
 \itemize{
   \item \url{https://github.com/jhorzek/lessSEM}
+  \item \url{https://jhorzek.github.io/lessSEM/}
   \item Report bugs at \url{https://github.com/jhorzek/lessSEM/issues}
 }
 
