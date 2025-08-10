@@ -71,7 +71,7 @@ jobs:
       - uses: actions/checkout@v2
         with: 
           repository: 'jhorzek/lessTest'
-          ref: 'development'
+          ref: 'main'
       - name: Extended tests
         run: |
           devtools::build(pkg = ".", binary = TRUE)
